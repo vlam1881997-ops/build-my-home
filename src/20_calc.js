@@ -17,6 +17,38 @@ BMH.financeSummary = (finance=BMH.state.project.finance) => {
   return {first,post,peak,dti,remainder,available,schedule};
 };
 BMH.planArea = () => BMH.state.project.plan.rooms.reduce((s,r)=>s+r.w*r.h,0);
+
+BMH.rangeAverage = value => {
+  const nums=String(value||'').replaceAll('.','').match(/\d+(?:,\d+)?/g)?.map(x=>Number(x.replace(',','.'))).filter(Number.isFinite)||[];
+  if(!nums.length)return 0;
+  return nums.length>1?(nums[0]+nums[1])/2:nums[0];
+};
+BMH.performancePlan = () => {
+  const p=BMH.state.project, perf=p.performance||{}, site=p.site, profile=BMH.regionProfile(site), build=BMH.buildableEnvelope(site), household=BMH.householdNeeds();
+  const roofArea=Math.max(18,build.targetPlate*.88), usableSolarArea=roofArea*.56;
+  const solarFactors={'TP. Hồ Chí Minh':1450,'Đà Nẵng':1500,'Hà Nội':1250,'Đồng Nai':1500,'Tây Ninh':1550,'Cần Thơ':1480};
+  const solarFactor=solarFactors[site.province]||1420, orient=BMH.orientationAnalysis(site), orientMul=.84+(orient.score/100)*.16;
+  const solarCapacity=Math.max(0,Math.round((usableSolarArea/5.5)*10)/10), solarYield=Math.round(solarCapacity*solarFactor*orientMul);
+  const floorArea=Math.max(BMH.planArea(),build.gfa*.88), heatRisk=BMH.riskValue(profile.heat), rooms=p.plan.rooms.filter(r=>['living','bed','kitchen'].includes(r.type));
+  const env=rooms.map(r=>BMH.roomEnvironment?BMH.roomEnvironment(r):null).filter(Boolean), avgHeat=env.length?env.reduce((a,x)=>a+x.heatExposure,0)/env.length:55, avgVent=env.length?env.reduce((a,x)=>a+x.ventilation,0)/env.length:70;
+  const modeMul={economy:.94,balanced:1,comfort:1.10}[perf.mode]||1;
+  const baseDemand=Math.round((floorArea*(42+heatRisk*9)+household.people*360)*modeMul);
+  const passiveReduction=BMH.clamp((perf.coolRoof?.07:0)+(perf.smartShading?.045:0)+(avgVent>=75?.035:avgVent>=60?.018:0)+(orient.score>=80?.025:0),0,.18);
+  const demandAfterPassive=Math.round(baseDemand*(1-passiveReduction));
+  const selfUse=perf.solarEnabled?Math.min(demandAfterPassive,Math.round(solarYield*.76)):0, gridDemand=Math.max(0,demandAfterPassive-selfUse);
+  const electricityRate=3200, baselineElectricCost=baseDemand*electricityRate, annualElectricCost=gridDemand*electricityRate;
+  const rainfall=BMH.rangeAverage(profile.rainfall), rainCollected=Math.round((rainfall/1000)*roofArea*.80*10)/10, rainDemand=Math.round(household.people*.045*365*10)/10;
+  const rainReuse=perf.rainwaterEnabled?Math.min(rainCollected,rainDemand):0, waterRate=12000, annualWaterSavings=Math.round(rainReuse*waterRate);
+  const tankSize=Math.max(2,Math.min(8,Math.round((roofArea*.045)*2)/2));
+  const solarCapex=perf.solarEnabled?Math.round(solarCapacity*13500000):0, rainCapex=perf.rainwaterEnabled?Math.round(tankSize*5200000):0, coolRoofCapex=perf.coolRoof?Math.round(roofArea*185000):0, shadingCapex=perf.smartShading?Math.round(Math.max(10,site.width*site.floors*1.6)*620000):0;
+  const upgradeCost=solarCapex+rainCapex+coolRoofCapex+shadingCapex, annualEnergySavings=Math.max(0,baselineElectricCost-annualElectricCost), annualSavings=annualEnergySavings+annualWaterSavings;
+  const payback=annualSavings>0?upgradeCost/annualSavings:null;
+  const comfortScore=BMH.clamp(Math.round(58+orient.score*.16+avgVent*.13+(perf.coolRoof?6:0)+(perf.smartShading?5:0)-Math.max(0,avgHeat-65)*.10),50,97);
+  const waterScore=BMH.clamp(Math.round(58+(perf.rainwaterEnabled?18:0)+(BMH.riskValue(profile.flood)>=2?8:4)+(rainReuse>rainDemand*.55?10:4)),50,96);
+  const energyScore=BMH.clamp(Math.round(54+passiveReduction*120+(perf.solarEnabled?18:0)+(selfUse/Math.max(1,demandAfterPassive))*20),50,98);
+  const tenYearOps=Math.round(annualElectricCost*10), tenYearSavings=Math.round(annualSavings*10), solarCoverage=Math.round(selfUse/Math.max(1,demandAfterPassive)*100);
+  return {roofArea,usableSolarArea,solarFactor,solarCapacity,solarYield,floorArea,baseDemand,passiveReduction,demandAfterPassive,selfUse,gridDemand,electricityRate,baselineElectricCost,annualElectricCost,rainfall,rainCollected,rainDemand,rainReuse,waterRate,annualWaterSavings,tankSize,solarCapex,rainCapex,coolRoofCapex,shadingCapex,upgradeCost,annualEnergySavings,annualSavings,payback,comfortScore,waterScore,energyScore,tenYearOps,tenYearSavings,solarCoverage,avgHeat:Math.round(avgHeat),avgVent:Math.round(avgVent),mode:perf.mode||'balanced'};
+};
 BMH.materialPremium = (choices=BMH.state.project.materials.choices) => Object.entries(choices).reduce((s,[cat,id])=>s+(BMH.MATERIALS[cat]?.find(x=>x.id===id)?.premium||0),0);
 BMH.estimate = () => {
   const p=BMH.state.project, area=Math.max(BMH.planArea(),p.site.width*p.site.depth*Math.min(1,p.site.floors*.72));
@@ -26,8 +58,10 @@ BMH.estimate = () => {
   const transport=Math.round((shell+finish)*adapt.roadPct);
   const climatePackage=BMH.climatePackageMultiplier?BMH.climatePackageMultiplier(p.materials.climatePackage):1;
   const climatePrep=Math.round((shell+finish)*adapt.climatePct*climatePackage);
-  const prep=Math.round(area*280000); const subtotal=shell+finish+transport+climatePrep+prep; const contingency=Math.round(subtotal*.10); const total=subtotal+contingency;
-  return {area,shell,finish,transport,climatePrep,climatePackage,adaptation:adapt,prep,contingency,total,budget:BMH.financeSummary().available,gap:BMH.financeSummary().available-total};
+  const performance=BMH.performancePlan?BMH.performancePlan():{upgradeCost:0};
+  const performanceUpgrade=Math.round(performance.upgradeCost||0);
+  const prep=Math.round(area*280000); const subtotal=shell+finish+transport+climatePrep+performanceUpgrade+prep; const contingency=Math.round(subtotal*.10); const total=subtotal+contingency;
+  return {area,shell,finish,transport,climatePrep,climatePackage,performanceUpgrade,performance,adaptation:adapt,prep,contingency,total,budget:BMH.financeSummary().available,gap:BMH.financeSummary().available-total};
 };
 BMH.kua = (birth,gender='Nam') => {
   let y=String(Math.round(Number(birth)||0)); if(y.length!==4) return null; let sum=[...y].reduce((s,d)=>s+Number(d),0); while(sum>9)sum=[...String(sum)].reduce((s,d)=>s+Number(d),0);
@@ -81,6 +115,7 @@ BMH.designReview = () => {
   const materialScore=BMH.materialClimateScore?BMH.materialClimateScore(p.site,p.materials.tier):({economy:72,standard:84,premium:93}[p.materials.tier]||82);
   const fengScore=BMH.kua(p.household.ownerBirth,p.household.ownerGender)?78:70;
   const durability=BMH.clamp(materialScore+(p.site.soil.includes('cứng')?3:p.site.soil.includes('trũng')?-6:0),55,96);
-  const overall=Math.round(budgetScore*.17+functionScore*.23+climateScore*.18+materialScore*.14+fengScore*.08+durability*.14+feasibility.score*.06);
-  return {overall,budget:budgetScore,function:functionScore,climate:climateScore,material:materialScore,feng:fengScore,durability,daylight,ventilation,circulation,orientation:orientation.score,siteFit:feasibility.score,issues};
+  const perf=BMH.performancePlan?BMH.performancePlan():{energyScore:75,comfortScore:75};
+  const overall=Math.round(budgetScore*.15+functionScore*.20+climateScore*.16+materialScore*.12+fengScore*.07+durability*.12+feasibility.score*.06+perf.energyScore*.07+perf.comfortScore*.05);
+  return {overall,budget:budgetScore,function:functionScore,climate:climateScore,material:materialScore,feng:fengScore,durability,energy:perf.energyScore,comfort:perf.comfortScore,daylight,ventilation,circulation,orientation:orientation.score,siteFit:feasibility.score,issues};
 };
