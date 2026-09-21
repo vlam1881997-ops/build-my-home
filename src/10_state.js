@@ -1,6 +1,6 @@
 BMH.defaultState = () => ({
   version: BMH.VERSION,
-  ui: {step:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', location:{drawingLot:false}, planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',showFurniture:true,showDimensions:true,showFeng:true,showBelow:false,showStructure:true,showEnvironment:true,showCirculation:true,showSectionLine:true,showClimate:true,showEnvelope:true}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
+  ui: {step:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', location:{drawingLot:false}, planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',layout:'wide',textSize:'large',showFurniture:true,showDimensions:true,showFeng:true,showBelow:false,showStructure:true,showEnvironment:true,showCirculation:true,showSectionLine:true,showClimate:true,showEnvelope:true}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
   access: {paid:false, source:'none', paidAt:null},
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại',
@@ -117,6 +117,8 @@ BMH.normalizeState = () => {
   if(!ui.selected || !BMH.state.project.plan.rooms.some(x=>x.id===ui.selected))ui.selected=BMH.state.project.plan.rooms[0]?.id||null;
   if(!['select','door','window'].includes(ui.tool))ui.tool='select';
   if(!['plan','elevation','section'].includes(ui.view))ui.view='plan';
+  if(!['wide','compact'].includes(ui.layout))ui.layout='wide';
+  if(!['normal','large'].includes(ui.textSize))ui.textSize='large';
   if(typeof ui.showBelow!=='boolean')ui.showBelow=false;
   if(typeof ui.showStructure!=='boolean')ui.showStructure=true;
   if(typeof ui.showEnvironment!=='boolean')ui.showEnvironment=true;

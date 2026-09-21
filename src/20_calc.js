@@ -69,13 +69,51 @@ BMH.kua = (birth,gender='Nam') => {
   const east=[1,3,4,9], dirs=east.includes(k)?['Đông Nam','Đông','Nam','Bắc']:['Tây Nam','Tây','Tây Bắc','Đông Bắc'];
   return {number:k,group:east.includes(k)?'Đông tứ mệnh':'Tây tứ mệnh',dirs};
 };
+BMH.fengProfile = () => {
+  const h=BMH.state.project.household||{}, labels=['Sinh Khí','Thiên Y','Diên Niên','Phục Vị'];
+  const owner=BMH.kua(h.ownerBirth,h.ownerGender);
+  const partner=(h.partnerEnabled===false||!Number(h.partnerBirth))?null:BMH.kua(h.partnerBirth,h.partnerGender||'Nữ');
+  const directions=['Bắc','Đông Bắc','Đông','Đông Nam','Nam','Tây Nam','Tây','Tây Bắc'];
+  const ownerWeight=new Map((owner?.dirs||[]).map((d,i)=>[d,4-i]));
+  const partnerWeight=new Map((partner?.dirs||[]).map((d,i)=>[d,4-i]));
+  const rows=directions.map(dir=>({dir,owner:ownerWeight.get(dir)||0,partner:partnerWeight.get(dir)||0})).map(r=>({...r,score:r.owner+r.partner}));
+  const overlap=rows.filter(r=>r.owner&&r.partner).sort((a,b)=>b.score-a.score||b.owner-a.owner||b.partner-a.partner);
+  const blended=rows.filter(r=>r.score>0).sort((a,b)=>b.score-a.score||b.owner-a.owner||b.partner-a.partner);
+  const ranked=(partner?(overlap.length?overlap:blended):blended).slice(0,4);
+  const mode=!partner?'owner-only':overlap.length?'consensus':'balanced';
+  const title=mode==='owner-only'?'Theo gia chủ':mode==='consensus'?'Điểm giao nhau của gia chủ + người đồng hành':'Kết hợp gia chủ + người đồng hành';
+  const note=mode==='owner-only'?'Đang dùng cung mệnh của gia chủ vì chưa có người đồng hành hợp lệ.'
+    :mode==='consensus'?'Các hướng dưới đây cùng thuận cho cả gia chủ và người đồng hành.'
+    :'Hai người không trùng toàn bộ hướng tốt, nên hệ thống xếp hạng cân bằng để tham khảo.';
+  return {owner,partner,dirs:ranked.map(r=>r.dir),rows:ranked,labels,title,note,mode};
+};
+
+BMH.fengDirectionScore = (dir, feng=BMH.fengProfile()) => {
+  if(!feng?.owner)return 50;
+  const ownerGood=!!feng.owner?.dirs?.includes(dir), partnerGood=!!feng.partner?.dirs?.includes(dir);
+  if(!feng.partner)return ownerGood?100:35;
+  if(ownerGood&&partnerGood)return 100;
+  if(ownerGood||partnerGood)return 62;
+  return 28;
+};
+BMH.directionDecisionMatrix = () => {
+  const site=BMH.state.project.site, feng=BMH.fengProfile();
+  return BMH.DIRECTIONS.map(([dir,angle])=>{
+    const climate=BMH.orientationAnalysis({...site,frontDirection:dir}).score;
+    const fengScore=BMH.fengDirectionScore(dir,feng);
+    const total=BMH.clamp(Math.round(climate*.72+fengScore*.28),35,98);
+    const tag=fengScore>=95?'Hợp cả hai':fengScore>=60?'Hợp một người':fengScore<=30?'Không phải hướng tốt chung':'Tham khảo';
+    return {dir,angle,climate,feng:fengScore,total,tag};
+  }).sort((a,b)=>b.total-a.total);
+};
 BMH.householdAdvice = () => {
   const h=BMH.state.project.household, out=[];
   if(h.relatives.some(r=>r.mobility!=='Bình thường')) out.push('Ưu tiên phòng ngủ người lớn tuổi ở tầng trệt, gần WC và lối ra vào, hạn chế bậc cấp.');
   else if(h.relatives.length) out.push('Nên dành lối đi ngắn, chống trượt và WC thuận tiện cho ba mẹ/người thân.');
-  const own=BMH.kua(h.ownerBirth,h.ownerGender); const childCount=h.children.length;
+const feng=BMH.fengProfile(), own=feng?.owner; const childCount=h.children.length;
   if(childCount) out.push(`${childCount} con: bố trí khu học tập có ánh sáng tự nhiên; hướng bàn/giường phong thủy chỉ dùng như tham khảo sau công năng.`);
   if(own) out.push(`Gia chủ thuộc ${own.group}; các hướng tham khảo: ${own.dirs.join(', ')}.`);
+  if(feng?.partner) out.push(`${feng.title}: ${feng.dirs.join(', ')}.`);
   return out;
 };
 
@@ -113,7 +151,7 @@ BMH.designReview = () => {
   const orientation=BMH.orientationAnalysis?BMH.orientationAnalysis(p.site):{score:75};
   const climateScore=BMH.clamp(Math.round((92-climatePenalty)*.44+daylight*.18+ventilation*.20+orientation.score*.18),52,96);
   const materialScore=BMH.materialClimateScore?BMH.materialClimateScore(p.site,p.materials.tier):({economy:72,standard:84,premium:93}[p.materials.tier]||82);
-  const fengScore=BMH.kua(p.household.ownerBirth,p.household.ownerGender)?78:70;
+  const fengProfile=BMH.fengProfile?BMH.fengProfile():null, front=p.site.frontDirection; const fengScore=fengProfile?BMH.clamp(Math.round(BMH.fengDirectionScore(front,fengProfile)*.75+75*.25),45,96):70;
   const durability=BMH.clamp(materialScore+(p.site.soil.includes('cứng')?3:p.site.soil.includes('trũng')?-6:0),55,96);
   const perf=BMH.performancePlan?BMH.performancePlan():{energyScore:75,comfortScore:75};
   const overall=Math.round(budgetScore*.15+functionScore*.20+climateScore*.16+materialScore*.12+fengScore*.07+durability*.12+feasibility.score*.06+perf.energyScore*.07+perf.comfortScore*.05);

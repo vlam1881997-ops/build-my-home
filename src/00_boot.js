@@ -1,5 +1,5 @@
 const BMH = {
-  VERSION: '4.1.0',
+  VERSION: '4.4.0',
   STORAGE_KEY: 'bmh-v342-stable',
   LEGACY_STORAGE_KEYS: ['bmh-v23-visual'],
   DEV: ['localhost','127.0.0.1',''].includes(location.hostname),
@@ -15,6 +15,7 @@ const BMH = {
   liveWeather: null,
   liveWeatherKey: '',
   drag: null,
+  lastPlacementReview: null,
   planHistory: {undo:[], redo:[]},
   toastTimer: null,
 };

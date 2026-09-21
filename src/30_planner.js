@@ -125,6 +125,55 @@ BMH.roomEnvironment = room => {
   const ventilation=BMH.clamp(Math.round(34+distinct.length*18+(opposite?16:0)+(openings.some(o=>o.kind==='door')?5:0)+windCapture*.12),28,98);
   return {externalSides:ext,windows:windows.length,totalWidth,daylight,ventilation,crossVent:opposite||distinct.length>=2,heatExposure,windCapture,westWidth};
 };
+BMH.roomSector = room => {
+  if(!room)return 'Trung tâm';
+  const site=BMH.state.project.site,cx=(Number(site.width)||5)/2,cy=(Number(site.depth)||20)/2,p=BMH.roomCenter?BMH.roomCenter(room):{x:room.x+room.w/2,y:room.y+room.h/2};
+  const dx=p.x-cx,dy=p.y-cy,dist=Math.hypot(dx/Math.max(1,cx),dy/Math.max(1,cy));
+  if(dist<.16)return 'Trung tâm';
+  const front=BMH.directionAngle(site.frontDirection||'Nam')*Math.PI/180, back=front+Math.PI, right=front+Math.PI/2;
+  const east=dx*Math.sin(right)+dy*Math.sin(back), north=dx*Math.cos(right)+dy*Math.cos(back);
+  const ang=(Math.atan2(east,north)*180/Math.PI+360)%360;
+  return BMH.DIRECTIONS.reduce((best,d)=>BMH.angleDiff(ang,d[1])<BMH.angleDiff(ang,best[1])?d:best,BMH.DIRECTIONS[0])[0];
+};
+BMH.roomPlacementReview = room => {
+  if(!room)return null;
+  const p=BMH.state.project,site=p.site,env=BMH.roomEnvironment(room),ext=env.externalSides||[],feng=BMH.fengProfile?BMH.fengProfile():null,sector=BMH.roomSector(room),envelope=BMH.buildableEnvelope(site),notes=[];
+  let score=66;
+  const insideEnvelope=room.x>=envelope.side-.01&&room.x+room.w<=site.width-envelope.side+.01&&room.y>=envelope.front-.01&&room.y+room.h<=site.depth-envelope.rear+.01;
+  if(insideEnvelope){score+=7;notes.push('Nằm trong khung xây dựng mục tiêu.');}else{score-=12;notes.push('Đang vượt khung xây dựng mục tiêu/ khoảng lùi sơ bộ.');}
+  if(['living','bed','kitchen'].includes(room.type)){
+    if(env.daylight>=72){score+=7;notes.push('Ánh sáng tự nhiên tốt.');}else if(env.daylight<55){score-=10;notes.push('Ánh sáng tự nhiên còn yếu.');}
+    if(env.ventilation>=70){score+=7;notes.push('Thông gió tự nhiên khá tốt.');}else if(env.ventilation<55){score-=9;notes.push('Thông gió tự nhiên chưa tốt.');}
+    if(env.heatExposure>=76){score-=9;notes.push('Vị trí có tải nắng/nóng cao, nên tăng che nắng.');}else if(env.heatExposure<=48)score+=4;
+    if(ext.length)score+=3;else{score-=6;notes.push('Không gian thiếu mặt tường ngoài trực tiếp.');}
+  }
+  if(room.type==='living'){
+    if(room.y<=site.depth*.38){score+=6;notes.push('Phòng khách gần vùng tiếp cận phía trước, thuận luồng vào nhà.');}else{score-=4;notes.push('Phòng khách nằm khá sâu so với vùng tiếp cận phía trước.');}
+  }
+  if(room.type==='garage'){
+    if(room.y<=site.depth*.32){score+=9;notes.push('Gara gần mặt tiếp cận, thuận xe ra vào.');}else{score-=12;notes.push('Gara nằm sâu, đường xe ra vào có thể bất tiện.');}
+  }
+  if(room.type==='bath'){
+    if(ext.length){score+=5;notes.push('WC có mặt thoáng ngoài hỗ trợ thoát ẩm.');}else{score-=5;notes.push('WC thiếu mặt thoáng trực tiếp; cần quạt hút/ống thông gió.');}
+    if(room.floor>0){const below=p.plan.rooms.filter(r=>r.floor===room.floor-1&&r.type==='bath');const best=below.length?Math.max(...below.map(b=>BMH.rectOverlapArea(room,b))):0;if(best>=room.w*room.h*.35){score+=8;notes.push('Khu ướt phối hợp tốt với tầng dưới.');}else if(below.length){score-=8;notes.push('Khu ướt lệch tầng dưới, đường ống đứng sẽ dài hơn.');}}
+  }
+  if(room.type==='stairs'&&room.floor>0){const below=p.plan.rooms.find(r=>r.floor===room.floor-1&&r.type==='stairs');if(below){const overlap=BMH.rectOverlapArea(room,below);if(overlap>=room.w*room.h*.45){score+=9;notes.push('Cầu thang đang thẳng trục với tầng dưới.');}else{score-=12;notes.push('Cầu thang lệch trục tầng dưới.');}}}
+  if(room.type==='bed'&&/ông bà|ba|mẹ|người thân/i.test(room.name||'')){
+    if(room.floor===0){score+=8;notes.push('Phòng người lớn tuổi ở tầng trệt, thuận tiếp cận.');}else{score-=14;notes.push('Phòng người lớn tuổi nên ưu tiên tầng trệt nếu điều kiện cho phép.');}
+  }
+  if(['living','bed'].includes(room.type)&&sector!=='Trung tâm'&&feng?.dirs?.length){
+    if(feng.dirs.includes(sector)){score+=6;notes.push(`Vùng ${sector} nằm trong nhóm hướng phong thủy tham khảo của gia đình.`);}else{score-=3;notes.push(`Vùng ${sector} không nằm trong nhóm hướng ưu tiên chung; chỉ nên xem như lớp tham khảo.`);}
+  }
+  score=BMH.clamp(Math.round(score),25,98);
+  const code=score>=74?'good':score>=57?'mid':'bad',status=code==='good'?'HỢP':code==='mid'?'CÂN NHẮC':'KHÔNG HỢP';
+  return {roomId:room.id,name:room.name,type:room.type,score,code,status,sector,daylight:env.daylight,ventilation:env.ventilation,heat:env.heatExposure,notes:notes.slice(0,5)};
+};
+BMH.roomDragGripSvg = r => {
+  const w=Math.min(.92,Math.max(.48,r.w*.30)),h=.30,x=r.x+.10,y=r.y+.10;
+  if(r.w<.78||r.h<.62)return `<circle class="room-grab-dot" data-room-id="${r.id}" cx="${r.x+r.w-.15}" cy="${r.y+.15}" r=".09"/>`;
+  return `<g class="room-grab-hint" data-room-id="${r.id}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx=".10"/><text x="${x+w/2}" y="${y+.205}">↕ KÉO</text></g>`;
+};
+
 BMH.environmentOverlaySvg = floor => BMH.floorRooms(floor).map(r=>{const a=BMH.roomEnvironment(r),score=Math.round((a.daylight+a.ventilation)/2),cls=score>=78?'good':score>=60?'mid':'low',x=r.x+r.w/2,y=r.y+r.h-.26;return `<g class="env-badge ${cls}"><rect x="${x-.52}" y="${y-.16}" width="1.04" height=".30" rx=".12"/><text x="${x}" y="${y+.035}">☀ ${a.daylight} · ≋ ${a.ventilation}</text></g>`}).join('');
 
 BMH.climateOverlaySvg = floor => {
@@ -304,9 +353,9 @@ BMH.wallPlacementSvg = rooms => rooms.map(r=>`<g class="wall-place-room">${[['no
 BMH.planSvg = ({interactive=true, floor=BMH.state.ui.planner.floor}={}) => {
   const p=BMH.state.project, ui=BMH.state.ui.planner, rooms=BMH.floorRooms(floor), W=p.site.width,H=p.site.depth;
   const usedH=Math.max(6,...rooms.map(r=>r.y+r.h)), Hview=Math.min(H,Math.max(usedH+1,10)), m=2.55, major=1, minor=.2, zoom=BMH.clamp(ui.zoom||1,.75,2.5);
-  const kua=BMH.kua(p.household.ownerBirth,p.household.ownerGender), good=kua?.dirs?.[0];
+  const fengProfile=BMH.fengProfile?BMH.fengProfile():null, good=fengProfile?.dirs?.[0];
   const feng=ui.showFeng&&good?(()=>{const pos={'Bắc':[W*.2,0,W*.6,Hview*.22],'Nam':[W*.2,Hview*.78,W*.6,Hview*.22],'Đông':[W*.78,Hview*.2,W*.22,Hview*.6],'Tây':[0,Hview*.2,W*.22,Hview*.6],'Đông Nam':[W*.58,Hview*.58,W*.42,Hview*.42],'Đông Bắc':[W*.58,0,W*.42,Hview*.42],'Tây Nam':[0,Hview*.58,W*.42,Hview*.42],'Tây Bắc':[0,0,W*.42,Hview*.42]}[good];return pos?`<g class="feng-zone"><rect x="${pos[0]}" y="${pos[1]}" width="${pos[2]}" height="${pos[3]}"/><text x="${pos[0]+.16}" y="${pos[1]+.34}">Hướng tốt tham khảo · ${good}</text></g>`:''})():'';
-  const roomMarkup=rooms.map(r=>`<g class="room room-${r.type} ${ui.selected===r.id?'selected':''}" data-room-id="${r.id}"><rect class="room-interior" x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}"/>${ui.showFurniture?BMH.furnitureSvg(r):''}<g class="room-label"><text class="room-name" x="${r.x+r.w/2}" y="${r.y+r.h/2-.05}">${BMH.esc(r.name).toUpperCase()}</text><text class="room-area" x="${r.x+r.w/2}" y="${r.y+r.h/2+.22}">${BMH.num(r.w*r.h)} m² · ${BMH.num(r.w)}×${BMH.num(r.h)}m</text></g>${interactive&&ui.selected===r.id&&ui.tool==='select'?`<rect class="selection-outline" x="${r.x+.04}" y="${r.y+.04}" width="${Math.max(.01,r.w-.08)}" height="${Math.max(.01,r.h-.08)}"/>${BMH.edgeHandlesSvg(r)}<circle class="resize-handle" data-resize-id="${r.id}" cx="${r.x+r.w}" cy="${r.y+r.h}" r=".18"/>`:''}</g>`).join('');
+  const roomMarkup=rooms.map(r=>{const review=BMH.roomPlacementReview(r),selected=ui.selected===r.id;return `<g class="room room-${r.type} placement-${review?.code||'mid'} ${selected?'selected':''}" data-room-id="${r.id}"><rect class="room-interior" x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}"/>${ui.showFurniture?BMH.furnitureSvg(r):''}<g class="room-label"><text class="room-name" x="${r.x+r.w/2}" y="${r.y+r.h/2-.07}">${BMH.esc(r.name).toUpperCase()}</text><text class="room-area" x="${r.x+r.w/2}" y="${r.y+r.h/2+.25}">${BMH.num(r.w*r.h)} m² · ${BMH.num(r.w)}×${BMH.num(r.h)}m</text></g>${interactive&&ui.tool==='select'?BMH.roomDragGripSvg(r):''}${interactive&&selected&&ui.tool==='select'?`<rect class="selection-outline" x="${r.x+.04}" y="${r.y+.04}" width="${Math.max(.01,r.w-.08)}" height="${Math.max(.01,r.h-.08)}"/>${BMH.edgeHandlesSvg(r)}<circle class="resize-handle" data-resize-id="${r.id}" cx="${r.x+r.w}" cy="${r.y+r.h}" r=".20"/>`:''}</g>`}).join('');
   const below=ui.showBelow?BMH.belowFloorSvg(floor):'';
   const structure=ui.showStructure?BMH.structureSvg(floor):'';
   const environment=ui.showEnvironment?BMH.environmentOverlaySvg(floor):'';
