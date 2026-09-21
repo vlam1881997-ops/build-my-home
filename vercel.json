@@ -4,5 +4,10 @@
   "buildCommand": "npm run build:vercel",
   "outputDirectory": "public",
   "cleanUrls": false,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "functions": {
+    "api/review.js": {
+      "maxDuration": 60
+    }
+  }
 }

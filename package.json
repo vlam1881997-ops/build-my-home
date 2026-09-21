@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-full",
-  "version": "1.2.1",
+  "version": "1.7.0",
   "private": true,
-  "description": "Web tương tác 10 bước cùng bộ đặc tả và domain core",
+  "description": "Build My Home Product Suite v1.7: official 10-step UI, global project store, floor planner, finance/material logic, AI-ready 3D, mobile resilience",
   "engines": {
     "node": ">=22"
   },

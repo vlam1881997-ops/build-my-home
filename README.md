@@ -1,6 +1,6 @@
-# Build My Home FULL v1.2.1 — bộ tính chung và hồ sơ nhất quán
+# Build My Home FULL v1.7.0 — Product Suite
 
-Bản nâng cấp từ FULL v1.1. Giao diện 10 bước nay dùng **bộ tính chung thật** từ `domain-kit/src/home.mjs`; `dist/core.js` được sinh từ nguồn đó, không phải hai bộ tính riêng như v1.1.
+Bản hợp nhất một lần các hạng mục V1.3 → V1.7 trên nền bộ tính chung: **Official UI 10 bước + Project Store + floor planner/khối lượng + tài chính/vật liệu + AI-ready 3D + Mobile Resilience**. `dist/core.js` vẫn được sinh từ `domain-kit/src/home.mjs`; UI và các file xuất dùng cùng một snapshot tính toán.
 
 ## Chạy ngay
 
@@ -11,6 +11,23 @@ npm start
 ```
 
 Mở http://localhost:8080. Không cần npm install cho bản đã đóng gói. Chỉ server cục bộ mới có route AI. Dữ liệu dự án vẫn lưu trên trình duyệt, chưa có tài khoản hoặc đồng bộ đám mây.
+
+
+## Product Suite v1.7 — 5 nhóm nâng cấp đã ghép vào một bản
+
+| Roadmap | Đã triển khai trong bản này | Giới hạn minh bạch |
+|---|---|---|
+| **V1.3 Official UI** | Làm lại 10 màn theo art direction đã chốt: hero, sidebar/stepper, luồng A/B/C, tài chính, vị trí, đất/phong thủy, bản vẽ, vật liệu, 3D/AI, dự toán, giám sát, bàn giao; thêm CSS responsive riêng `product-suite.css` | Chưa phải pixel-perfect 100% trên mọi trình duyệt; cần QA trực tiếp trên link production |
+| **V1.4 Core Data & Logic** | Thêm `BMHStore` version 17, lưu full project + revision + snapshot id vào `localStorage`; tiếp tục tương thích `bmh-v12`; mọi thay đổi phòng/tài chính/vật liệu đi qua cùng snapshot engine | Chưa có tài khoản/cloud sync; dữ liệu vẫn theo trình duyệt/thiết bị |
+| **V1.5 Bản vẽ & mô hình nhà** | Thêm room templates, thêm/giảm tầng, kéo phòng, resize trực tiếp bằng handle, sửa tọa độ/kích thước, tường/cửa, khối lượng live, SVG/OBJ đồng bộ | Mặt bằng vẫn dùng hình chữ nhật theo tim tường; chưa BIM/IFC, tường cong, mái/phần kết cấu chi tiết |
+| **V1.6 Tài chính & vật liệu** | Kịch bản ngân hàng minh họa, DTI, lịch vay/giải ngân, cashflow; catalog vật liệu 3 mức; nguồn giá/ngày/vùng/URL; chi phí vòng đời 10 năm | Lãi suất/catalog mặc định là **minh họa**, không phải giá/lãi hiện hành; nguồn giá thật phải do người dùng nhập hoặc tích hợp provider sau |
+| **V1.7 AI + 3D** | 3D khối theo cùng geometry, day/night UI, OBJ, mobile fallback; rule-based review có evidenceIds; thêm Vercel Function `/api/review` tùy chọn nếu cấu hình AI server-side | AI cloud chưa hoạt động nếu chưa cấu hình biến môi trường; 3D chưa photoreal/walkthrough và không xác nhận an toàn kỹ thuật |
+
+### File mới quan trọng
+- `dist/product-suite.js`: 5 nhóm nâng cấp sản phẩm và Project Store.
+- `dist/product-suite.css`: lớp UI chính thức desktop/mobile.
+- `api/review.js`: endpoint AI tùy chọn trên Vercel, không lộ API key ra trình duyệt.
+- `PRODUCT_V17_QA.md`: checklist QA sản phẩm sau deploy.
 
 ## Sáu nhóm nâng cấp đã thực hiện
 
@@ -77,7 +94,7 @@ npm test
 - `dist/scene3d.js`: hình học khối, camera phối cảnh Canvas, OBJ.
 - `scripts/serve.cjs`, `ai-provider.cjs`: server local và kết nối AI.
 
-61 test tự động + 11 kiểm tra giao diện trong DOM giả lập đã đạt trước bàn giao. Kiểm tra HTTP và ZIP ở `RELEASE_VALIDATION.json`. **Chưa có QA trình duyệt thật**: tải Chromium bị timeout. Không diễn giải kiểm thử Canvas giả lập thành kiểm tra hình ảnh/chuột/chạm trên thiết bị thực.
+65 test tự động + 11 kiểm tra giao diện trong DOM giả lập đã đạt cho Product Suite v1.7. Kiểm tra HTTP và ZIP ở `RELEASE_VALIDATION.json`. **Chưa có QA trình duyệt thật**: tải Chromium bị timeout. Không diễn giải kiểm thử Canvas giả lập thành kiểm tra hình ảnh/chuột/chạm trên thiết bị thực.
 
 ## Dữ liệu v1.1 và lưu phương án
 
@@ -93,9 +110,12 @@ Tài liệu trong `domain-kit/docs/` và `docs/WEB_V1_GUIDE.md` là đặc tả/
 
 ## Vercel
 
-Repository đã có `vercel.json` để deploy đúng thư mục `dist/`. Khi import vào Vercel, giữ Root Directory ở gốc repository và dùng Framework Preset `Other`. Chi tiết xem `VERCEL_DEPLOY.md`.
+Repository dùng `npm run build:vercel` để tạo `public/` từ `dist/`; Vercel publish `public/`. Khi import vào Vercel, giữ Root Directory ở gốc repository và dùng Framework Preset `Other`. Chi tiết xem `VERCEL_DEPLOY.md`.
 
 
 ## Vercel hotfix 1.2.1
 
 Vercel dùng `npm run build:vercel` để tạo thư mục `public/` từ toàn bộ `dist/`, tránh trường hợp HTML lên được nhưng `app.js`, `styles.css` và manifest bị 404.
+
+### Mobile resilience (giữ nguyên trong Product Suite v1.7)
+Bản v1.3 bổ sung tối ưu trình duyệt điện thoại/in-app: bảng vuốt ngang, safe-area, camera upload, autosave khi đổi tab/reload, 3D fallback 3 giây và xuất Excel/iOS share. Khi test trên iPhone, PDF được lưu bằng thao tác In → Chia sẻ → Lưu vào Tệp; Excel/CSV/ZIP ưu tiên Web Share nếu Safari hỗ trợ.

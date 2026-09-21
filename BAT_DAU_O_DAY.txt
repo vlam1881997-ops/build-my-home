@@ -1,11 +1,11 @@
-BUILD MY HOME FULL v1.2
+BUILD MY HOME FULL v1.7.0 — PRODUCT SUITE
 
 1. Giải nén và mở thư mục bằng Visual Studio Code.
-2. Mở dist/index.html để dùng ngay; hoặc chạy npm start (Node.js 22+), mở http://localhost:8080.
-3. Bước 5: cửa/tường/khối lượng; bước 2: dòng tiền; bước 6: giá có nguồn; bước 7: 3D & AI; bước 10: ZIP hồ sơ.
-4. AI thật cần .env với OPENAI_API_KEY và OPENAI_MODEL; chạy server local. GitHub Pages chỉ phục vụ web tĩnh.
-5. GitHub: tải toàn bộ nội dung dự án lên repository; Settings > Pages > GitHub Actions.
-6. Đọc README.md về số liệu minh họa, giới hạn khối lượng và kết quả kiểm thử.
+2. Test local: npm test ; npm start ; mở http://localhost:8080.
+3. Deploy Vercel: push toàn bộ repo lên main. Build Command: npm run build:vercel. Output Directory: public. Install Command: để mặc định/npm install, KHÔNG để ./.
+4. V1.7 gồm: Official UI 10 bước + Project Store + floor planner/resize + tài chính/vật liệu + AI-ready 3D + mobile resilience.
+5. AI cloud tùy chọn: thêm OPENAI_API_KEY và OPENAI_MODEL trong Vercel Environment Variables. Không đưa key vào app.js/.env commit.
+6. Sau deploy kiểm tra /app.js, /styles.css, /product-suite.js, /product-suite.css, /manifest.webmanifest đều HTTP 200.
+7. Đọc README.md, PRODUCT_V17_QA.md và MOBILE_QA.md trước khi gọi bản này là production-ready.
 
-ĐÃ nối UI với bộ tính chung trong domain-kit. Sau khi sửa domain: npm run build rồi npm test.
-Sao lưu JSON dự án trước khi đổi máy/đổi địa chỉ web. Không đưa .env lên GitHub.
+DỮ LIỆU MẶC ĐỊNH VỀ LÃI SUẤT, VẬT LIỆU, KHÍ HẬU LÀ KỊCH BẢN/THAM KHẢO, KHÔNG PHẢI BÁO GIÁ HAY DỮ LIỆU LIVE.

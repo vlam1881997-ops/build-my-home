@@ -14,3 +14,15 @@ test('ZIP store contains UTF8 content and central directory',async()=>{const {ru
 test('3D orbit, zoom and floor selection produce finite vertices',()=>{const {ctx,run}=appContext();let points=0;const context2d=new Proxy({},{get:(obj,key)=>obj[key]??((...args)=>{for(const n of args)if(typeof n==='number')assert.ok(Number.isFinite(n));if(key==='lineTo')points++;}),set:(obj,key,value)=>{obj[key]=value;return true;}});const handlers={};ctx.testCanvas={clientWidth:700,getContext:()=>context2d,addEventListener:(k,v)=>handlers[k]=v,removeEventListener(){},setPointerCapture(){}};ctx.floorSelect={value:'all'};run('BMHScene.mount(testCanvas,snapshot(),floorSelect)');assert.ok(points>0);ctx.testCanvas.onpointerdown({clientX:0,clientY:0,pointerId:1});ctx.testCanvas.onpointermove({clientX:80,clientY:20});handlers.wheel({deltaY:100,preventDefault(){}});ctx.floorSelect.value='1';ctx.floorSelect.onchange();assert.ok(run('BMHScene.mesh(snapshot(),1).every(o=>o.floor===1)'));});
 test('AI notice becomes stale after design change',()=>{const {run}=appContext();run("aiResult={snapshotId:snapshot().id,insights:[{text:'Test',evidenceIds:['budget']}]};state.rooms[0].h=3");assert.ok(run('aiMarkup(snapshot()).includes("Nhận xét cũ")'));});
 test('source labels are escaped in reports',()=>{const {run}=appContext();run("state.prices[0].source='<img src=x onerror=alert(1)>'");assert.ok(run('reportBody(snapshot()).includes("&lt;img")'));assert.equal(run('reportBody(snapshot()).includes("<img src=x")'),false);});
+test('mobile resilience bundle contains responsive tables, camera input and 3D fallback',()=>{
+ const index=fs.readFileSync(path.join(root,'dist','index.html'),'utf8');
+ const css=fs.readFileSync(path.join(root,'dist','styles.css'),'utf8');
+ const mobile=fs.readFileSync(path.join(root,'dist','mobile-resilience.js'),'utf8');
+ assert.match(index,/id="cameraUpload"[^>]*capture="environment"/);
+ assert.match(index,/mobile-resilience\.js/);
+ assert.match(css,/-webkit-overflow-scrolling:touch/);
+ assert.match(css,/safe-area-inset-bottom/);
+ assert.match(mobile,/bmh-v13-saved-at/);
+ assert.match(mobile,/elapsed>3000/);
+ assert.match(mobile,/application\/vnd\.ms-excel/);
+});

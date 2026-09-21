@@ -24,3 +24,25 @@ Không thêm thông tin nhà thầu giả, QR thu tiền hoặc đánh giá chuy
 - Sao chép toàn bộ `dist/` sang `public/` trước khi Vercel publish.
 - Đổi `outputDirectory` sang `public` để tránh trường hợp chỉ `index.html` được phục vụ nhưng `app.js`, `styles.css` và `manifest.webmanifest` bị 404.
 - Xác minh 61/61 test pass và kiểm tra đủ toàn bộ entrypoint static.
+
+## v1.3.0 — Mobile resilience
+- Tối ưu bảng nhiều cột cho thao tác vuốt ngang trên màn hình dọc, có vùng cuộn có thể focus.
+- Thêm nút chụp ảnh trực tiếp bằng camera ở Bước 5 bên cạnh chọn ảnh/PDF từ thư viện.
+- Tăng độ bền lưu dữ liệu: lưu sau nhập liệu, khi ẩn tab, pagehide/beforeunload và hiển thị thời điểm lưu.
+- Thêm chế độ 3D nhẹ: tự dùng ảnh phối cảnh tĩnh khi WebGL không ổn định, thiết bị di động cấu hình thấp hoặc thời gian dựng vượt 3 giây; vẫn có nút thử 3D.
+- Tăng độ tương thích tải tệp iOS: tải bằng anchor gắn DOM và dùng Web Share cho CSV/Excel/ZIP khi khả dụng.
+- Thêm xuất Excel tương thích (.xls XML) ở Bước 8 và Bước 10; PDF vẫn dùng luồng in/lưu PDF của trình duyệt.
+- Bổ sung safe-area, kích thước nút chạm, cỡ chữ input 16px để tránh Safari tự zoom.
+- Nâng cache service worker lên v13-mobile để tránh giữ asset cũ.
+
+
+## v1.7.0 — Product Suite (hợp nhất V1.3 → V1.7)
+- Rebuild lớp UI 10 bước bằng `product-suite.css/js`, bám bộ PNG chốt: hero, flow cards, stepper, tài chính/DTI, vị trí, đất/phong thủy, bản vẽ, vật liệu, 3D/AI, dự toán, giám sát, bàn giao.
+- Thêm Project Store v17 trên localStorage với full state, revision, snapshot id và tương thích state v1.2/v1.3.
+- Nâng floor planner: room templates, thêm/giảm tầng, kéo + resize bằng handle, live takeoff tường/sơn/cửa/diện tích; giữ SVG/OBJ/snapshot đồng bộ.
+- Nâng tài chính: selector kịch bản ngân hàng **minh họa**, DTI, cashflow, lịch trả nợ/giải ngân dùng cùng engine. Không tuyên bố lãi suất hiện hành.
+- Nâng vật liệu: catalog UX ba mức, thay đổi mức hoàn thiện làm dự toán DEMO cập nhật; bảng nguồn giá có source/date/region/URL vẫn là nguồn quyết định cho báo giá thật.
+- Nâng 3D/AI: day/night UI, local evidence-based review, cloud AI qua `/api/review` khi Vercel có `OPENAI_API_KEY`/`OPENAI_MODEL`, không đưa key vào frontend.
+- Giữ Mobile Resilience: horizontal tables, camera input, autosave lifecycle, iOS file flows, 3D fallback, safe-area.
+- Nâng service-worker cache lên `bmh-interface-v17-product-suite`; Vercel output bắt buộc có product-suite assets.
+- 65/65 automated tests PASS; HTTP static smoke test `/`, `/app.js`, `/styles.css`, `/product-suite.js`, `/product-suite.css`, `/manifest.webmanifest` trả 200 trên local server.
