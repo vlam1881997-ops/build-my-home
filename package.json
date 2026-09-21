@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "3.4.1",
+  "version": "3.4.2",
   "private": true,
-  "description": "Build My Home Official V3.4.1 — white-screen boot hotfix, lazy Leaflet loading, cache reset",
+  "description": "Build My Home Official V3.4.2 — Step 4 repair, resilient render guard, household and feng-shui upgrade",
   "engines": {
     "node": ">=22"
   },

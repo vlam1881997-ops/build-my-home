@@ -4,7 +4,7 @@ BMH.defaultState = () => ({
   access: {paid:false, source:'none', paidAt:null},
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại',
-    site:{country:'Việt Nam',province:'Bình Dương',district:'Thủ Dầu Một',address:'',lat:11.160,lng:106.650,width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng'},
+    site:{country:'Việt Nam',province:'Bình Dương',district:'Thủ Dầu Một',address:'',lat:11.160,lng:106.650,width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật'},
     finance:{cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12},
     household:{ownerBirth:1988,ownerGender:'Nam',partnerEnabled:true,partnerBirth:1990,partnerGender:'Nữ',children:[{id:'c1',name:'Con 1',birth:2012,room:'Riêng'}],relatives:[{id:'p1',name:'Ba',birth:1962,mobility:'Hạn chế nhẹ'},{id:'p2',name:'Mẹ',birth:1964,mobility:'Bình thường'}]},
     plan:{rooms:[
@@ -31,19 +31,59 @@ BMH.defaultState = () => ({
 });
 
 BMH.mergeState = (base, incoming) => {
-  if(!incoming || typeof incoming!=='object') return base;
+  const isPlain=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
+  if(!isPlain(incoming)) return structuredClone(base);
   const out=structuredClone(base);
-  const merge=(a,b)=>{for(const [k,v] of Object.entries(b||{})){if(v && typeof v==='object' && !Array.isArray(v) && a[k] && typeof a[k]==='object' && !Array.isArray(a[k])) merge(a[k],v); else a[k]=v;}return a;};
+  const merge=(a,b)=>{
+    if(!isPlain(a)||!isPlain(b))return a;
+    for(const [k,v] of Object.entries(b)){
+      if(!(k in a))continue;
+      const current=a[k];
+      if(Array.isArray(current)){if(Array.isArray(v))a[k]=v;continue;}
+      if(isPlain(current)){if(isPlain(v))merge(current,v);continue;}
+      if(v===null||typeof v==='object'||typeof v==='undefined')continue;
+      a[k]=v;
+    }
+    return a;
+  };
   return merge(out,incoming);
 };
 BMH.loadState = () => {
-  const base=BMH.defaultState();
-  try { const raw=localStorage.getItem(BMH.STORAGE_KEY); if(raw) return BMH.mergeState(base,JSON.parse(raw)); } catch(e){}
+  const base=BMH.defaultState(), keys=[BMH.STORAGE_KEY,...(BMH.LEGACY_STORAGE_KEYS||[])];
+  for(const key of keys){
+    try{
+      const raw=localStorage.getItem(key);if(!raw)continue;
+      const parsed=JSON.parse(raw);const merged=BMH.mergeState(base,parsed);
+      if(key!==BMH.STORAGE_KEY){try{localStorage.setItem(BMH.STORAGE_KEY,JSON.stringify(merged));}catch(_){}}
+      return merged;
+    }catch(e){try{localStorage.removeItem(key);}catch(_){}}
+  }
   return base;
 };
 BMH.state = BMH.loadState();
 BMH.normalizeState = () => {
+  const base=BMH.defaultState();
+  if(!BMH.state||typeof BMH.state!=='object')BMH.state=base;
+  if(!BMH.state.ui||typeof BMH.state.ui!=='object')BMH.state.ui=structuredClone(base.ui);
+  if(!BMH.state.ui.planner||typeof BMH.state.ui.planner!=='object')BMH.state.ui.planner=structuredClone(base.ui.planner);
+  if(!BMH.state.project||typeof BMH.state.project!=='object')BMH.state.project=structuredClone(base.project);
+  if(!BMH.state.project.site||typeof BMH.state.project.site!=='object')BMH.state.project.site=structuredClone(base.project.site);
+  if(!BMH.state.project.finance||typeof BMH.state.project.finance!=='object')BMH.state.project.finance=structuredClone(base.project.finance);
+  if(!BMH.state.project.household||typeof BMH.state.project.household!=='object')BMH.state.project.household=structuredClone(base.project.household);
+  if(!BMH.state.project.plan||typeof BMH.state.project.plan!=='object')BMH.state.project.plan=structuredClone(base.project.plan);
+  if(!Array.isArray(BMH.state.project.plan.rooms))BMH.state.project.plan.rooms=structuredClone(base.project.plan.rooms);
+  if(!Array.isArray(BMH.state.project.plan.openings))BMH.state.project.plan.openings=structuredClone(base.project.plan.openings);
+  if(!BMH.state.project.materials||typeof BMH.state.project.materials!=='object')BMH.state.project.materials=structuredClone(base.project.materials);
+  if(!BMH.state.access||typeof BMH.state.access!=='object')BMH.state.access=structuredClone(base.access);
   const s=BMH.state.project.site, r=BMH.REGIONS[s.province]||BMH.REGIONS['Bình Dương'];
+  const h=BMH.state.project.household||{};
+  if(!Array.isArray(h.children))h.children=[];
+  if(!Array.isArray(h.relatives))h.relatives=[];
+  h.ownerBirth=Number(h.ownerBirth)||1988; h.partnerBirth=Number(h.partnerBirth)||1990;
+  h.ownerGender=['Nam','Nữ'].includes(h.ownerGender)?h.ownerGender:'Nam';
+  h.partnerGender=['Nam','Nữ'].includes(h.partnerGender)?h.partnerGender:'Nữ';
+  if(typeof h.partnerEnabled!=='boolean')h.partnerEnabled=true;
+  if(!s.shape)s.shape='Hình chữ nhật';
   const valid=(r.districts||[]).some(d=>d[0]===s.district);
   if(!valid){const pt=BMH.regionPoint(s.province,r.defaultDistrict);Object.assign(s,{district:pt.district,lat:pt.lat,lng:pt.lng});}
   const ui=BMH.state.ui.planner;

@@ -1,6 +1,6 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..'),pub=path.join(root,'dist');
 const read=f=>fs.readFileSync(path.join(pub,f),'utf8');
-test('public runtime has one local JS bundle',()=>{const h=read('index.html');const local=[...h.matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]).filter(x=>!/^https?:/.test(x));assert.deepEqual(local,['app.js']);});
+test('public runtime is self-contained and keeps one debug JS bundle',()=>{const h=read('index.html');const local=[...h.matchAll(/<script src=\"([^\"]+)\"/g)].map(m=>m[1]).filter(x=>!/^https?:/.test(x));assert.deepEqual(local,[]);assert.match(h,/id=\"bmh-inline-app\"/);assert.equal(fs.existsSync(path.join(pub,'app.js')),true);});
 test('public runtime has one local CSS bundle',()=>{const h=read('index.html');const local=[...h.matchAll(/<link rel="stylesheet" href="([^"]+)"/g)].map(m=>m[1]).filter(x=>!/^https?:/.test(x));assert.deepEqual(local,['styles.css']);});
 test('legacy patch files are absent',()=>{for(const f of ['v2.js','v21.js','design-polish.js','product-suite.js','mobile-resilience.js','upgrade.js','core.js','v2.css','v21.css','design-polish.css','product-suite.css'])assert.equal(fs.existsSync(path.join(pub,f)),false,f);});
 test('single entitlement guards both steps 9 and 10',()=>{const js=read('app.js');assert.match(js,/step>=9&&!BMH\.isUnlocked\(\)/);assert.match(js,/step===8&&!BMH\.isUnlocked\(\)/);});
@@ -22,3 +22,9 @@ test('V3.4 planner provides coordinated floor overlay and structural suggestions
 test('V3.4 planner analyses daylight and natural ventilation',()=>{const js=read('app.js');assert.match(js,/roomEnvironment/);assert.match(js,/daylight/);assert.match(js,/ventilation/);assert.match(js,/scene-analysis-strip/);});
 test('V3.4 planner can coordinate stairs and wet zones across floors',()=>{const js=read('app.js');assert.match(js,/coordinationIssues/);assert.match(js,/alignCurrentFloor/);assert.match(js,/data-align-floor/);});
 test('V3.4 cutaway displays structural column and north orientation layers',()=>{const js=read('app.js');assert.match(js,/iso-column/);assert.match(js,/iso-orientation/);});
+
+test('V3.4.2 Step 4 compass helper is defined before screen render',()=>{const js=read('app.js');assert.match(js,/BMH\.compass\s*=\s*\(\)\s*=>/);assert.match(js,/BMH\.screen4[\s\S]*BMH\.compass\(\)/);});
+test('V3.4.2 Step 4 household needs and interactive site controls exist',()=>{const js=read('app.js');assert.match(js,/BMH\.householdNeeds/);assert.match(js,/data-site-shape/);assert.match(js,/data-road-value/);});
+test('V3.4.2 render errors are contained instead of blanking the app',()=>{const js=read('app.js');assert.match(js,/BMH\.runtimeError/);assert.match(js,/render error at step/);});
+
+test('V3.4.2 Stable Boot removes service worker as critical dependency',()=>{const h=read('index.html'),js=read('app.js');assert.match(h,/getRegistrations/);assert.doesNotMatch(js,/serviceWorker\.register/);assert.match(js,/__BMH_BOOT_OK=true/);});

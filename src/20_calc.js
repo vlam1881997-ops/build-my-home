@@ -40,6 +40,24 @@ BMH.householdAdvice = () => {
   return out;
 };
 
+BMH.householdNeeds = () => {
+  const h=BMH.state.project.household;
+  const separateChildren=h.children.filter(c=>c.room!=='Ngủ chung').length;
+  const sharedChildren=h.children.length-separateChildren;
+  const relativeBedrooms=h.relatives.length?1:0;
+  const bedrooms=1+separateChildren+(sharedChildren?1:0)+relativeBedrooms;
+  const limited=h.relatives.some(r=>r.mobility&&r.mobility!=='Bình thường');
+  const bathrooms=Math.max(1,Math.ceil((2+h.children.length+h.relatives.length)/4));
+  return {
+    bedrooms,
+    bathrooms,
+    groundFloorBedroom: h.relatives.length>0,
+    accessibleWC: limited||h.relatives.length>0,
+    studyZones: h.children.length?Math.max(1,Math.ceil(h.children.length/2)):0,
+    people:2+h.children.length+h.relatives.length
+  };
+};
+
 BMH.designReview = () => {
   const e=BMH.estimate(), issues=BMH.plannerIssues?BMH.plannerIssues():[], p=BMH.state.project;
   const penalty=issues.reduce((s,i)=>s+(i.sev==='error'?10:i.sev==='warn'?5:2),0);

@@ -1,6 +1,7 @@
 const BMH = {
-  VERSION: '3.4.1',
-  STORAGE_KEY: 'bmh-v23-visual',
+  VERSION: '3.4.2',
+  STORAGE_KEY: 'bmh-v342-stable',
+  LEGACY_STORAGE_KEYS: ['bmh-v23-visual'],
   DEV: ['localhost','127.0.0.1',''].includes(location.hostname),
   map: null,
   mapMarker: null,

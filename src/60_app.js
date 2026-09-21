@@ -4,9 +4,11 @@ BMH.header = () => `<header class="topbar"><div class="brand"><img src="assets/i
 BMH.stepper = () => `<nav class="stepper">${BMH.STEPS.map(([short],i)=>{const n=i+1,locked=n>=9&&!BMH.isUnlocked(),active=BMH.state.ui.step===n,done=n<BMH.state.ui.step&&!locked;return `<button data-nav="${n}" class="step ${active?'active':''} ${done?'done':''} ${locked?'locked':''}" ${locked?'aria-label="Bước đang khóa"':''}><i>${locked?'🔒':done?'✓':n}</i><span>${short}</span></button>`}).join('')}</nav>`;
 BMH.footer = () => {const step=BMH.state.ui.step,next=step+1,blocked=step===8&&!BMH.isUnlocked(),e=BMH.estimate();return `<div class="step-footer official-footer"><button class="footer-back" data-nav="${step-1}" ${step===1?'disabled':''}>${BMH.icon('back')} Quay lại</button><div class="footer-budget"><span><small>Ngân sách tối đa</small><b>${BMH.money(e.budget)}</b></span><span><small>Dự toán hiện tại</small><b>${BMH.money(e.total)}</b></span><span class="${e.gap>=0?'good':'bad'}"><small>${e.gap>=0?'Còn dự phòng':'Vượt ngân sách'}</small><b>${BMH.money(Math.abs(e.gap))}</b></span></div>${step<10?`<button class="primary footer-next" data-nav="${next}" ${blocked?'disabled title="Hoàn tất thanh toán để tiếp tục"':''}>${blocked?'🔒 Hoàn tất thanh toán':'Tiếp theo'} ${BMH.icon('arrow')}</button>`:'<button class="primary footer-next" disabled>Hoàn thành</button>'}</div>`};
 BMH.amountBar = () => {const e=BMH.estimate();return `<div class="amountbar"><div><small>Ngân sách tối đa</small><strong>${BMH.money(e.budget)}</strong></div><div><small>Dự toán hiện tại</small><strong class="${e.total>e.budget?'bad':''}">${BMH.money(e.total)}</strong></div><div><small>${e.gap>=0?'Còn dự phòng':'Vượt ngân sách'}</small><strong class="${e.gap>=0?'good':'bad'}">${BMH.money(Math.abs(e.gap))}</strong></div></div>`};
+BMH.runtimeError = (step,err) => `<section class="runtime-error card"><div>⚠</div><h2>Bước ${step} gặp lỗi hiển thị</h2><p>Dữ liệu dự án vẫn được giữ nguyên. Hãy quay lại hoặc tải lại trang; hệ thống không còn để lỗi một màn làm trắng toàn bộ website.</p>${BMH.DEV&&err?`<code>${BMH.esc(err.message||String(err))}</code>`:''}<div><button class="secondary" data-nav="${Math.max(1,step-1)}">${BMH.icon('back')} Quay lại</button><button class="clay" data-nav="1">Về Bước 1</button></div></section>`;
 BMH.render = ({preserveScroll=false}={}) => {
-  const sy=window.scrollY, step=BMH.state.ui.step; const screen=BMH.SCREENS[step-1]||BMH.screen1;
-  BMH.app.innerHTML=`${BMH.header()}${BMH.sidebar()}<main class="main ${step===5?'planner-page':''}">${BMH.stepper()}<div class="screen">${screen()}</div>${BMH.footer()}</main>`;
+  const sy=window.scrollY, step=BMH.state.ui.step; const screen=BMH.SCREENS[step-1]||BMH.screen1; let body='';
+  try{body=screen();}catch(err){console.error(`Build My Home render error at step ${step}`,err);body=BMH.runtimeError(step,err);}
+  try{BMH.app.innerHTML=`${BMH.header()}${BMH.sidebar()}<main class="main ${step===5?'planner-page':''}">${BMH.stepper()}<div class="screen">${body}</div>${BMH.footer()}</main>`;}catch(err){console.error('Build My Home shell render error',err);BMH.app.innerHTML=BMH.runtimeError(step,err);}
   document.documentElement.dataset.version=BMH.VERSION; document.title=`Build My Home · ${BMH.STEPS[step-1][1]}`;
   if(preserveScroll)window.scrollTo(0,sy); requestAnimationFrame(BMH.afterRender);
 };
@@ -74,6 +76,8 @@ BMH.app.addEventListener('click',e=>{
   if(e.target.closest('[data-map-refresh]')){const s=BMH.state.project.site,pt=BMH.regionPoint(s.province,s.district);Object.assign(s,{lat:pt.lat,lng:pt.lng,district:pt.district});BMH.save();BMH.render();return;}
   const nearby=e.target.closest('[data-nearby]');if(nearby){const s=BMH.state.project.site;s.district=nearby.dataset.nearby;s.lat=Number(nearby.dataset.lat);s.lng=Number(nearby.dataset.lng);BMH.save();BMH.render();return;}
   const soil=e.target.closest('[data-soil]');if(soil){BMH.state.project.site.soil=soil.dataset.soil;BMH.save();BMH.render();return;}
+  const shape=e.target.closest('[data-site-shape]');if(shape){BMH.state.project.site.shape=shape.dataset.siteShape;BMH.save();BMH.render();return;}
+  const road=e.target.closest('[data-road-value]');if(road){BMH.state.project.site.road=Number(road.dataset.roadValue);BMH.save();BMH.render();return;}
   const addPerson=e.target.closest('[data-household-add]');if(addPerson){const h=BMH.state.project.household;if(addPerson.dataset.householdAdd==='child')h.children.push({id:BMH.uid('c'),name:`Con ${h.children.length+1}`,birth:new Date().getFullYear()-8,room:'Riêng'});else h.relatives.push({id:BMH.uid('p'),name:`Người thân ${h.relatives.length+1}`,birth:1960,mobility:'Bình thường'});BMH.save();BMH.render();return;}
   const rem=e.target.closest('[data-person-remove]');if(rem){const h=BMH.state.project.household,key=rem.dataset.personRemove==='child'?'children':'relatives';h[key]=h[key].filter(x=>x.id!==rem.dataset.id);BMH.save();BMH.render();return;}
 
@@ -152,7 +156,8 @@ BMH.$('#uploadPhoto')?.addEventListener('change',e=>{if(e.target.files?.[0]){BMH
 BMH.$('#uploadPlan')?.addEventListener('change',e=>{if(e.target.files?.[0]){BMH.toast('Đã nhận bản vẽ tham chiếu. Bạn có thể đối chiếu ở Bước 5.');BMH.navigateTo(2);}});
 
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')BMH.save();}); window.addEventListener('pagehide',BMH.save);
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+window.addEventListener('load',()=>{try{if('serviceWorker'in navigator)navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).catch(()=>{});if('caches'in window)caches.keys().then(keys=>Promise.all(keys.filter(k=>String(k).startsWith('bmh-')).map(k=>caches.delete(k)))).catch(()=>{});}catch(_){}});
 globalThis.BuildMyHome=BMH;
 if(BMH.DEV){const q=new URLSearchParams(location.search);const qs=Number(q.get('step'));if(qs>=1&&qs<=10)BMH.state.ui.step=qs;if(q.get('unlock')==='1'){BMH.state.access.paid=true;BMH.state.access.source='dev-query';}}
 BMH.render();
+globalThis.__BMH_BOOT_OK=true;

@@ -40,3 +40,7 @@ Trong local có thể mở trực tiếp một bước để QA: `?step=5`. Thê
 - Bản vẽ là **mặt bằng kiến trúc sơ bộ**, không thay hồ sơ thi công do KTS/kỹ sư kiểm tra và chịu trách nhiệm.
 - Lãi suất ngân hàng trong app là kịch bản tham khảo, không phải cam kết hiện hành.
 - Thanh toán production cần cấu hình tài khoản nhận tiền + provider/webhook và entitlement server-side; không dùng localStorage làm quyền truy cập.
+
+
+## Stable Boot hotfix
+See `OFFICIAL_V3_4_2_STABLE_BOOT.md`. This package embeds the critical runtime in `index.html` and removes stale service-worker/app.js cache as a boot dependency.
