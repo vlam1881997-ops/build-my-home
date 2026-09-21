@@ -1,9 +1,9 @@
-BUILD MY HOME FULL V2.0 — DESIGN & PLANNER STABILIZATION
+BUILD MY HOME FULL V2.1 — DESIGN & PLANNER STABILIZATION
 
 1. Giải nén và mở thư mục bằng Visual Studio Code.
 2. Test local: npm test ; npm start ; mở http://localhost:8080.
 3. Deploy Vercel: push toàn bộ repo lên main. Build Command: npm run build:vercel. Output Directory: public. Install Command: để mặc định/npm install, KHÔNG để ./.
-4. V2.0 gồm: UI 10 bước + Project Store + paywall 9/10 dùng chung entitlement + hộ gia đình động + planner snap/collision/validator + tài chính/vật liệu + 3D/lifecycle + mobile resilience.
+4. V2.1 gồm: UI 10 bước + Project Store + paywall 9/10 dùng chung entitlement + hộ gia đình động + planner snap/collision/validator + tài chính/vật liệu + 3D/lifecycle + mobile resilience.
 5. Sau deploy kiểm tra /app.js, /styles.css, /v2.js, /v2.css, /manifest.webmanifest đều HTTP 200.
 6. Đọc V2_RELEASE_NOTES.md và V2_QA.md trước khi chốt giao diện. Đọc PAYMENT_V2_SETUP.md trước khi nhận thanh toán thật.
 7. AI cloud tùy chọn: thêm OPENAI_API_KEY và OPENAI_MODEL trong Vercel Environment Variables. Không đưa key vào frontend hoặc commit .env.

@@ -1,6 +1,6 @@
-# Build My Home FULL V2.0 — Design & Planner Stabilization
+# Build My Home FULL V2.1 — Architectural Planner Upgrade
 
-V2.0 hợp nhất toàn bộ vòng Design Polish và các yêu cầu ổn định logic thương mại: **khóa chung Bước 9–10, hộ gia đình động nhiều con/người thân, planner snap/collision/validator, ngân hàng có nguồn + stress test, delta vật liệu, timeline hao mòn 3D, sidebar collapse và Mobile Resilience**. `dist/core.js` vẫn được sinh từ `domain-kit/src/home.mjs`; UI và các file xuất dùng cùng một snapshot tính toán.
+V2.1 kế thừa toàn bộ Design Polish/V2.0 và nâng mạnh Bước 5 thành **mặt bằng kiến trúc sơ bộ** với workspace lớn, chế độ bản vẽ kỹ thuật, tường/cửa/kích thước/ruler/trục tham chiếu/full-screen; đồng thời 3D khối có thể focus theo phòng và đổi bảng màu theo vật liệu đã chọn. Nền V2.0 vẫn giữ **khóa chung Bước 9–10, hộ gia đình động nhiều con/người thân, planner snap/collision/validator, ngân hàng có nguồn + stress test, delta vật liệu, timeline hao mòn 3D, sidebar collapse và Mobile Resilience**. `dist/core.js` vẫn được sinh từ `domain-kit/src/home.mjs`; UI và các file xuất dùng cùng một snapshot tính toán.
 
 ## Chạy ngay
 
@@ -15,7 +15,23 @@ Mở http://localhost:8080. Không cần npm install cho bản đã đóng gói.
 
 
 
-## V2.0 — vòng ổn định trước khi làm V2.1
+
+## V2.1 — Architectural Planner Upgrade
+
+- Bước 5 tự thu sidebar thành icon rail, dành phần lớn màn hình cho bản vẽ. Có **Toàn màn hình**, zoom 70–240%, Fit, undo, upload bản vẽ tham chiếu.
+- Hai chế độ: **Bản vẽ** (kỹ thuật sơ bộ) và **Dễ dùng** (room layout cũ).
+- Bản vẽ kỹ thuật hiển thị lưới phụ 0,2m + lưới chính 1m, ruler, trục A–C / 1–5, ranh đất, footprint phương án, tường theo geometry chung, cửa đi/cửa sổ, kích thước tổng thể/phòng, Bắc, thước tỷ lệ và title block.
+- Nội thất vector cho phòng khách, bếp, ngủ, WC, cầu thang, gara; thêm template Hành lang/Ban công.
+- Inspector bên phải cho tên/loại/X/Y/rộng/sâu, chiều cao tầng, dày tường và công cụ thêm cửa.
+- Validator tiếp tục kiểm tra chồng lấn, cầu thang liên tầng, vùng ướt, mặt thoáng, nhu cầu phòng ngủ; bổ sung cảnh báo thiếu cửa/cửa sổ.
+- Vùng hướng tốt từ Bước 4 có thể bật/tắt ngay trên bản vẽ; đây chỉ là tham khảo văn hóa.
+- Tải **SVG kỹ thuật** riêng cho tầng hiện tại; report/ZIP vẫn lấy cùng snapshot.
+- 3D khối V2.1 nhận màu vật liệu theo lựa chọn Bước 6 và hỗ trợ focus **toàn nhà / tầng / từng phòng**. Đây vẫn là render khối mô phỏng, chưa phải phối cảnh PBR/photoreal.
+- Paywall 9–10, household nhiều con/người thân, ngân hàng/stress test, vật liệu có nguồn, lifecycle 3D và Mobile Resilience của V2.0 được giữ nguyên.
+
+Xem `V2.1_RELEASE_NOTES.md` và `V2.1_QA.md`.
+
+## V2.0 — nền ổn định được giữ trong V2.1
 
 - Paywall Step 9 + Step 10 dùng chung entitlement; click trực tiếp Step 10 không còn lách được luồng UI. DEV unlock chỉ chạy local.
 - Banner phối cảnh/callout AI chỉ còn ở Bước 7; Ngày/Đêm chỉ điều khiển mô hình 3D.

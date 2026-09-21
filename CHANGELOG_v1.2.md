@@ -78,3 +78,10 @@ Không thêm thông tin nhà thầu giả, QR thu tiền hoặc đánh giá chuy
 - Sửa bug mapping key/label của checklist Bước 9.
 - Thêm `v2.js`, `v2.css`, `V2_RELEASE_NOTES.md`, `V2_QA.md`, `PAYMENT_V2_SETUP.md`.
 - 69/69 automated tests PASS. Browser/device visual QA vẫn cần chạy trên production.
+
+## V2.1 — Architectural Planner Upgrade (2026-09-21)
+- Rebuild Bước 5 thành mặt bằng kiến trúc sơ bộ với workspace lớn, technical/simple mode, full-screen, zoom, ruler, trục, grid 0,2m/1m, dimensions, title block, footprint, tường/cửa thật theo geometry.
+- Bổ sung nội thất vector và room templates mới (gara, hành lang, ban công), inspector kỹ thuật và SVG tầng hiện tại.
+- Giữ validator collision/inter-floor và thêm cảnh báo thiếu cửa/cửa sổ.
+- 3D khối nhận palette vật liệu từ Bước 6 và focus theo phòng/tầng/toàn nhà.
+- Giữ toàn bộ paywall 9–10, household động, finance/material/lifecycle/mobile của V2.0.

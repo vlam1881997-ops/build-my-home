@@ -10,7 +10,7 @@ fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 fs.cpSync(src, out, { recursive: true });
 
-const required = ['index.html','app.js','styles.css','core.js','scene3d.js','upgrade.js','mobile-resilience.js','product-suite.js','product-suite.css','design-polish.js','design-polish.css','v2.js','v2.css','manifest.webmanifest'];
+const required = ['index.html','app.js','styles.css','core.js','scene3d.js','upgrade.js','mobile-resilience.js','product-suite.js','product-suite.css','design-polish.js','design-polish.css','v2.js','v2.css','v21.js','v21.css','manifest.webmanifest'];
 for (const file of required) {
   const target = path.join(out, file);
   if (!fs.existsSync(target)) throw new Error(`Missing Vercel output file: ${file}`);

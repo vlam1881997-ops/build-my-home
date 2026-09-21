@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-full",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
-  "description": "Build My Home V2: stabilized paywall, dynamic household, architecture planner validation, sourced finance/material data, lifecycle 3D UX and production-ready mobile shell",
+  "description": "Build My Home V2.1: architectural planner upgrade with technical floor-plan mode, enlarged workspace, dimensioning/rulers, dynamic household, stabilized paywall and material-linked conceptual 3D",
   "engines": {
     "node": ">=22"
   },
