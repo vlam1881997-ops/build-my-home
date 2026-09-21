@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..'),src=path.join(root,'src'),dist=path.join(root,'dist');
 const jsFiles=['00_boot.js','10_state.js','20_calc.js','30_planner.js','40_exports.js','50_screens.js','60_app.js'];
-const banner=`/* Build My Home Official V3.8 Climate-Adaptive Design
+const banner=`/* Build My Home Official V3.9 Maps Studio
  * One state controller · one navigation controller · one planner controller · one runtime bundle.
  * Critical runtime is also embedded into index.html to bypass stale service-worker/app.js cache failures.
  */
@@ -14,9 +14,11 @@ const tail=`
 }
 })();
 `;
-const js=banner+jsFiles.map(f=>`
+let js=banner+jsFiles.map(f=>`
 /* ---- ${f} ---- */
 `+fs.readFileSync(path.join(src,f),'utf8')).join('\n')+tail;
+const googleMapsKey=String(process.env.BMH_GOOGLE_MAPS_API_KEY||'').replace(/[^A-Za-z0-9_\-]/g,'');
+js=js.replaceAll('__BMH_GOOGLE_MAPS_API_KEY__',googleMapsKey);
 fs.rmSync(dist,{recursive:true,force:true});fs.mkdirSync(dist,{recursive:true});
 fs.writeFileSync(path.join(dist,'app.js'),js);
 fs.copyFileSync(path.join(src,'styles.css'),path.join(dist,'styles.css'));
@@ -28,4 +30,4 @@ fs.writeFileSync(path.join(dist,'index.html'),html);
 fs.copyFileSync(path.join(src,'sw.js'),path.join(dist,'sw.js'));
 fs.copyFileSync(path.join(src,'manifest.webmanifest'),path.join(dist,'manifest.webmanifest'));
 fs.cpSync(path.join(root,'assets'),path.join(dist,'assets'),{recursive:true});fs.writeFileSync(path.join(dist,'.nojekyll'),'');
-console.log(`Built V3.8 Climate-Adaptive Design -> ${dist}`);
+console.log(`Built V3.9 Maps Studio -> ${dist}`);

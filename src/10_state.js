@@ -4,7 +4,7 @@ BMH.defaultState = () => ({
   access: {paid:false, source:'none', paidAt:null},
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại',
-    site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật'},
+    site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',mapEngine:'free',mapStyle:'hybrid',mapZoom:17,showLotOverlay:true,frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật'},
     finance:{cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12},
     household:{ownerBirth:1988,ownerGender:'Nam',partnerEnabled:true,partnerBirth:1990,partnerGender:'Nữ',children:[{id:'c1',name:'Con 1',birth:2012,room:'Riêng'}],relatives:[{id:'p1',name:'Ba',birth:1962,mobility:'Hạn chế nhẹ'},{id:'p2',name:'Mẹ',birth:1964,mobility:'Bình thường'}]},
     plan:{rooms:[
@@ -89,6 +89,10 @@ BMH.normalizeState = () => {
   if(typeof h.partnerEnabled!=='boolean')h.partnerEnabled=true;
   if(!s.shape)s.shape='Hình chữ nhật';
   if(!s.geoSource)s.geoSource='Dữ liệu vùng';
+  if(!['free','google'].includes(s.mapEngine))s.mapEngine='free';
+  if(!['roadmap','satellite','hybrid','terrain'].includes(s.mapStyle))s.mapStyle='hybrid';
+  s.mapZoom=BMH.clamp(Number(s.mapZoom)||17,3,21);
+  if(typeof s.showLotOverlay!=='boolean')s.showLotOverlay=true;
   if(!['Bắc','Đông Bắc','Đông','Đông Nam','Nam','Tây Nam','Tây','Tây Bắc'].includes(s.frontDirection))s.frontDirection='Nam';
   const valid=(r.districts||[]).some(d=>d[0]===s.district);
   if(!valid){const pt=BMH.regionPoint(s.province,r.defaultDistrict);Object.assign(s,{district:pt.district,lat:pt.lat,lng:pt.lng});}
