@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "private": true,
-  "description": "Build My Home V3.5.0 architectural studio upgrade - clean source only",
+  "description": "Build My Home V3.6.0 technical drawing and circulation upgrade - clean source only",
   "engines": {
     "node": ">=22"
   },

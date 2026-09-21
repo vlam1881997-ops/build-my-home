@@ -25,7 +25,9 @@ BMH.exportBundle = () => {
   const e=BMH.estimate();
   const loanRows=[['Tháng','Lãi suất năm','Gốc','Lãi','Tổng trả','Dư nợ'],...BMH.loanSchedule().map(r=>[r.month,Number(r.annual.toFixed(2)),Math.round(r.principal),Math.round(r.interest),Math.round(r.payment),Math.round(r.balance)])];
   const estimateRows=[['Hạng mục','Giá trị (VND)'],['Phần thô',e.shell],['Hoàn thiện & vật liệu',e.finish],['Vận chuyển',e.transport],['Chuẩn bị',e.prep],['Dự phòng',e.contingency],['Tổng',e.total]];
-  const files=[['project.json',JSON.stringify(BMH.state,null,2)],['mat-bang-tang-1.svg',BMH.planSvg({interactive:false,floor:0})],['du-toan.xls',BMH.excelXml('Du toan',estimateRows)],['lich-tra-no.xls',BMH.excelXml('Lich tra no',loanRows)]];
+  const areaRows=[['Tầng','Không gian','Diện tích m²','Chu vi m','Cửa đi','Cửa sổ','Ánh sáng','Thông gió'],...BMH.areaSchedule().map(r=>[r.floor,r.name,Number(r.area.toFixed(2)),Number(r.perimeter.toFixed(2)),r.doors,r.windows,r.daylight,r.ventilation])];
+  const openingRows=[['Mã','Tầng','Phòng','Loại','Rộng m','Cao m','Bậu m','Hướng'],...BMH.openingSchedule().map(o=>[o.code,o.floor,o.room,o.kind==='door'?'Cửa đi':'Cửa sổ',o.width,o.height,o.sill,o.side])];
+  const files=[['project.json',JSON.stringify(BMH.state,null,2)],['mat-bang-tang-1.svg',BMH.planSvg({interactive:false,floor:0})],['mat-dung-chinh.svg',BMH.elevationSvg()],['mat-cat-A-A.svg',BMH.sectionSvg()],['bang-dien-tich.xls',BMH.excelXml('Dien tich',areaRows)],['bang-cua.xls',BMH.excelXml('Cua',openingRows)],['du-toan.xls',BMH.excelXml('Du toan',estimateRows)],['lich-tra-no.xls',BMH.excelXml('Lich tra no',loanRows)]];
   for(let f=1;f<BMH.state.project.site.floors;f++)files.push([`mat-bang-tang-${f+1}.svg`,BMH.planSvg({interactive:false,floor:f})]);
   BMH.download('Build-My-Home-ho-so.zip',BMH.zipStored(files),'application/zip');
 };

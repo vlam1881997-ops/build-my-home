@@ -1,6 +1,6 @@
 BMH.defaultState = () => ({
   version: BMH.VERSION,
-  ui: {step:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',showFurniture:true,showDimensions:true,showFeng:true,showBelow:false,showStructure:true,showEnvironment:true}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
+  ui: {step:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',showFurniture:true,showDimensions:true,showFeng:true,showBelow:false,showStructure:true,showEnvironment:true,showCirculation:true,showSectionLine:true}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
   access: {paid:false, source:'none', paidAt:null},
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại',
@@ -93,6 +93,8 @@ BMH.normalizeState = () => {
   if(typeof ui.showBelow!=='boolean')ui.showBelow=false;
   if(typeof ui.showStructure!=='boolean')ui.showStructure=true;
   if(typeof ui.showEnvironment!=='boolean')ui.showEnvironment=true;
+  if(typeof ui.showCirculation!=='boolean')ui.showCirculation=true;
+  if(typeof ui.showSectionLine!=='boolean')ui.showSectionLine=true;
   ui.zoom=BMH.clamp(Number(ui.zoom)||1,.75,2.5);
   if(typeof BMH.state.ui.sceneExploded!=='boolean')BMH.state.ui.sceneExploded=false;
 };
