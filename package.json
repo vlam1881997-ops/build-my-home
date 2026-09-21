@@ -1,6 +1,6 @@
 {
   "name": "build-my-home-full",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "Web tương tác 10 bước cùng bộ đặc tả và domain core",
   "engines": {
@@ -10,6 +10,7 @@
     "build": "node scripts/build-core.cjs",
     "test": "node scripts/build-core.cjs --check && node --test domain-kit/tests/*.test.mjs tests/*.test.cjs && node scripts/check.cjs && node scripts/check-merge.cjs",
     "demo:core": "node domain-kit/examples/demo.mjs",
-    "start": "node --env-file-if-exists=.env scripts/serve.cjs"
+    "start": "node --env-file-if-exists=.env scripts/serve.cjs",
+    "build:vercel": "node scripts/build-core.cjs && node scripts/prepare-vercel.cjs"
   }
 }

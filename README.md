@@ -1,4 +1,4 @@
-# Build My Home FULL v1.2 — bộ tính chung và hồ sơ nhất quán
+# Build My Home FULL v1.2.1 — bộ tính chung và hồ sơ nhất quán
 
 Bản nâng cấp từ FULL v1.1. Giao diện 10 bước nay dùng **bộ tính chung thật** từ `domain-kit/src/home.mjs`; `dist/core.js` được sinh từ nguồn đó, không phải hai bộ tính riêng như v1.1.
 
@@ -94,4 +94,8 @@ Tài liệu trong `domain-kit/docs/` và `docs/WEB_V1_GUIDE.md` là đặc tả/
 ## Vercel
 
 Repository đã có `vercel.json` để deploy đúng thư mục `dist/`. Khi import vào Vercel, giữ Root Directory ở gốc repository và dùng Framework Preset `Other`. Chi tiết xem `VERCEL_DEPLOY.md`.
-Vercel deployment trigger 2026-09-21
+
+
+## Vercel hotfix 1.2.1
+
+Vercel dùng `npm run build:vercel` để tạo thư mục `public/` từ toàn bộ `dist/`, tránh trường hợp HTML lên được nhưng `app.js`, `styles.css` và manifest bị 404.

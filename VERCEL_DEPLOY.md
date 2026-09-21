@@ -1,36 +1,29 @@
-# Deploy Build My Home v1.2 lên Vercel
+# Deploy Build My Home v1.2.1 lên Vercel
 
-Bản này là website static thuần HTML/CSS/JavaScript. Toàn bộ website chạy từ thư mục `dist/`.
+Bản 1.2.1 dùng một thư mục output riêng `public/` cho Vercel. Khi Vercel build, lệnh `npm run build:vercel` sẽ:
 
-## Cấu hình đã chốt trong mã nguồn
+1. Sinh lại `dist/core.js` từ domain core.
+2. Xóa `public/` cũ.
+3. Sao chép toàn bộ website trong `dist/` sang `public/`.
+4. Kiểm tra bắt buộc các file `index.html`, `app.js`, `styles.css`, `core.js`, `scene3d.js`, `upgrade.js`, `manifest.webmanifest` đều tồn tại.
 
-Tệp `vercel.json` ở gốc dự án buộc Vercel dùng:
+`vercel.json` đặt:
 
-- Framework: Other / không framework
-- Build command: `npm run build`
-- Output directory: `dist`
+- Framework: Other
+- Build Command: `npm run build:vercel`
+- Output Directory: `public`
 
-Vì vậy Vercel sẽ xuất bản `dist/index.html`, `dist/app.js`, `dist/styles.css`, `dist/core.js`, `dist/scene3d.js`, `dist/upgrade.js` và `dist/assets/*` cùng một gốc URL. Điều này tránh lỗi trang trắng do `app.js` và `styles.css` trả về 404.
+## Cấu hình Project trên Vercel
 
-## Khi import repository GitHub vào Vercel
+- Root Directory: `./`
+- Không override Build Command/Output Directory trong dashboard nếu không cần.
+- Nếu dashboard đang có Override cũ, tắt Override để `vercel.json` làm nguồn cấu hình.
 
-1. Root Directory: để `./` (gốc repository).
-2. Framework Preset: `Other` hoặc để Vercel đọc `vercel.json`.
-3. Không đặt Output Directory thủ công sang thư mục khác. `vercel.json` đã đặt là `dist`.
-4. Deploy lại commit mới nhất.
-
-## Kiểm tra sau deploy
-
-Mở lần lượt:
+Sau deployment mới, kiểm tra trực tiếp:
 
 - `/`
-- `/styles.css`
 - `/app.js`
-- `/core.js`
-- `/assets/icon.svg`
+- `/styles.css`
+- `/manifest.webmanifest`
 
-Tất cả phải trả về HTTP 200. Nếu project Vercel cũ từng lưu cấu hình Override, vào Project Settings -> Build and Deployment và bỏ các override trái với `vercel.json`, sau đó Redeploy.
-
-## Lưu ý
-
-`npm run start` là server local dành cho chạy trên máy tính và endpoint AI cục bộ. Bản deploy Vercel hiện tại xuất bản phần static trong `dist/`; không đưa API key vào JavaScript phía trình duyệt.
+Tất cả phải trả HTTP 200.

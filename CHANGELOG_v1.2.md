@@ -18,3 +18,9 @@ Không thêm thông tin nhà thầu giả, QR thu tiền hoặc đánh giá chuy
 - Khắc phục tình trạng deployment báo Ready nhưng `/app.js` và `/styles.css` trả 404 khiến trang trắng.
 - Thêm `VERCEL_DEPLOY.md` với cấu hình import/redeploy và checklist HTTP 200.
 - Không thay đổi UI, công thức tính, 10 bước nghiệp vụ hay dữ liệu mẫu.
+
+## v1.2.1 — Vercel static output hardening
+- Tạo bước build riêng `npm run build:vercel`.
+- Sao chép toàn bộ `dist/` sang `public/` trước khi Vercel publish.
+- Đổi `outputDirectory` sang `public` để tránh trường hợp chỉ `index.html` được phục vụ nhưng `app.js`, `styles.css` và `manifest.webmanifest` bị 404.
+- Xác minh 61/61 test pass và kiểm tra đủ toàn bộ entrypoint static.
