@@ -1,6 +1,15 @@
 {
-  "name":"build-my-home-full","version":"2.2.0","private":true,
-  "description":"Build My Home V2.2 Refactored Core — single runtime bundle, single state/navigation/planner controller, cleaned paywall and 10-step product flow",
-  "engines":{"node":">=22"},
-  "scripts":{"build":"node scripts/build-v22.cjs","build:vercel":"node scripts/build-v22.cjs && node scripts/prepare-vercel.cjs","test":"node scripts/build-v22.cjs && node --check dist/app.js && node --test tests/refactor-v22.test.cjs domain-kit/tests/*.test.mjs","start":"node scripts/serve.cjs"}
+  "name": "build-my-home-official",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Build My Home Official V3.0 — mockup-driven 10-step UI with integrated functional core",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "build:vercel": "node scripts/build.cjs && node scripts/prepare-vercel.cjs",
+    "test": "node scripts/build.cjs && node --check dist/app.js && node --test tests/runtime.test.cjs domain-kit/tests/*.test.mjs",
+    "start": "node scripts/serve.cjs"
+  }
 }

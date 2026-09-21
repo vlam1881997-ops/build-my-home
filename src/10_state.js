@@ -1,10 +1,10 @@
 BMH.defaultState = () => ({
   version: BMH.VERSION,
-  ui: {step:1, sidebarCollapsed:false, planner:{floor:0,selected:'r1',snap:.2,zoom:1,mode:'technical',showFurniture:true,showDimensions:true,showFeng:true}, sceneMode:'model', sceneTheme:'day', sceneFocus:'all'},
+  ui: {step:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', planner:{floor:0,selected:'r1',snap:.2,zoom:1,mode:'technical',showFurniture:true,showDimensions:true,showFeng:true}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all'},
   access: {paid:false, source:'none', paidAt:null},
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại',
-    site:{province:'Bình Dương',district:'Thủ Dầu Một',address:'',lat:11.160,lng:106.650,width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng'},
+    site:{country:'Việt Nam',province:'Bình Dương',district:'Thủ Dầu Một',address:'',lat:11.160,lng:106.650,width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng'},
     finance:{cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12},
     household:{ownerBirth:1988,ownerGender:'Nam',partnerEnabled:true,partnerBirth:1990,partnerGender:'Nữ',children:[{id:'c1',name:'Con 1',birth:2012,room:'Riêng'}],relatives:[{id:'p1',name:'Ba',birth:1962,mobility:'Hạn chế nhẹ'},{id:'p2',name:'Mẹ',birth:1964,mobility:'Bình thường'}]},
     plan:{rooms:[
