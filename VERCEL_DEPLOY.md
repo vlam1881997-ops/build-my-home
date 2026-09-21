@@ -1,34 +1,22 @@
-# Deploy Build My Home v1.7 lên Vercel
+# Deploy V2.2 lên Vercel
 
-## Project Settings
-- Root Directory: `./`
+Project Settings:
+
 - Framework Preset: `Other`
 - Build Command: `npm run build:vercel`
 - Output Directory: `public`
-- Install Command: **để mặc định** hoặc `npm install`; tuyệt đối không đặt `./`.
+- Install Command: để mặc định hoặc `npm install` — KHÔNG đặt `./`
 
-`vercel.json` đã khai báo build/output và optional function `api/review.js`. Khi build, `scripts/prepare-vercel.cjs` sao chép toàn bộ `dist/` sang `public/` và kiểm tra các entrypoint bắt buộc.
+Sau khi Push GitHub, kiểm tra Build Logs phải có:
 
-## Sau deploy phải kiểm tra
-- `/`
-- `/app.js`
-- `/styles.css`
-- `/mobile-resilience.js`
-- `/product-suite.js`
-- `/product-suite.css`
-- `/manifest.webmanifest`
+`Built V2.2`
 
-Tất cả phải HTTP 200 và Console không được có asset 404.
+`Prepared clean V2.2 Vercel output`
 
-## GitHub / Hobby
-Nếu repo Private trên Vercel Hobby, commit author phải khớp tài khoản có quyền với project. Với repo `build-my-home`, nên cấu hình Git **local** cho repo thay vì đổi global của repo khác.
+Sau deploy, thử trực tiếp:
 
-## AI tùy chọn trên Vercel
-Trong Project → Settings → Environment Variables:
-- `OPENAI_API_KEY`
-- `OPENAI_MODEL`
+- `/app.js` -> 200
+- `/styles.css` -> 200
+- `/manifest.webmanifest` -> 200
 
-Không cấu hình thì nút AI cloud phải báo `AI_NOT_CONFIGURED`; app vẫn có phân tích cục bộ theo rule/evidence. Không đưa key vào `dist/`, `public/` hay GitHub.
-
-## Domain
-DNS/domain độc lập với code. Khi Vercel báo `Valid Configuration`, không chỉnh DNS chỉ để sửa lỗi JS/CSS. Nếu UI trắng, kiểm tra Console và các URL asset ở trên trước.
+Các URL cũ như `/v21.js`, `/v2.js`, `/design-polish.js` phải trả 404. Đó là trạng thái đúng của refactor.

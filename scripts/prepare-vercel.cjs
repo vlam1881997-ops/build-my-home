@@ -1,18 +1,1 @@
-const fs = require('node:fs');
-const path = require('node:path');
-
-const root = path.resolve(__dirname, '..');
-const src = path.join(root, 'dist');
-const out = path.join(root, 'public');
-
-if (!fs.existsSync(src)) throw new Error('Missing dist directory');
-fs.rmSync(out, { recursive: true, force: true });
-fs.mkdirSync(out, { recursive: true });
-fs.cpSync(src, out, { recursive: true });
-
-const required = ['index.html','app.js','styles.css','core.js','scene3d.js','upgrade.js','mobile-resilience.js','product-suite.js','product-suite.css','design-polish.js','design-polish.css','v2.js','v2.css','v21.js','v21.css','manifest.webmanifest'];
-for (const file of required) {
-  const target = path.join(out, file);
-  if (!fs.existsSync(target)) throw new Error(`Missing Vercel output file: ${file}`);
-}
-console.log(`Prepared Vercel static output in ${out}`);
+const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..'),src=path.join(root,'dist'),out=path.join(root,'public');if(!fs.existsSync(src))throw Error('Missing dist');fs.rmSync(out,{recursive:true,force:true});fs.cpSync(src,out,{recursive:true});for(const f of ['index.html','app.js','styles.css','sw.js','manifest.webmanifest'])if(!fs.existsSync(path.join(out,f)))throw Error(`Missing ${f}`);const forbidden=['v2.js','v21.js','design-polish.js','product-suite.js','mobile-resilience.js','upgrade.js','core.js','v2.css','v21.css','design-polish.css','product-suite.css'];for(const f of forbidden)if(fs.existsSync(path.join(out,f)))throw Error(`Patch file leaked into public: ${f}`);console.log('Prepared clean V2.2 Vercel output');

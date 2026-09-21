@@ -1,16 +1,6 @@
 {
-  "name": "build-my-home-full",
-  "version": "2.1.0",
-  "private": true,
-  "description": "Build My Home V2.1: architectural planner upgrade with technical floor-plan mode, enlarged workspace, dimensioning/rulers, dynamic household, stabilized paywall and material-linked conceptual 3D",
-  "engines": {
-    "node": ">=22"
-  },
-  "scripts": {
-    "build": "node scripts/build-core.cjs",
-    "test": "node scripts/build-core.cjs --check && node --test domain-kit/tests/*.test.mjs tests/*.test.cjs && node scripts/check.cjs && node scripts/check-merge.cjs",
-    "demo:core": "node domain-kit/examples/demo.mjs",
-    "start": "node --env-file-if-exists=.env scripts/serve.cjs",
-    "build:vercel": "node scripts/build-core.cjs && node scripts/prepare-vercel.cjs"
-  }
+  "name":"build-my-home-full","version":"2.2.0","private":true,
+  "description":"Build My Home V2.2 Refactored Core — single runtime bundle, single state/navigation/planner controller, cleaned paywall and 10-step product flow",
+  "engines":{"node":">=22"},
+  "scripts":{"build":"node scripts/build-v22.cjs","build:vercel":"node scripts/build-v22.cjs && node scripts/prepare-vercel.cjs","test":"node scripts/build-v22.cjs && node --check dist/app.js && node --test tests/refactor-v22.test.cjs domain-kit/tests/*.test.mjs","start":"node scripts/serve.cjs"}
 }
