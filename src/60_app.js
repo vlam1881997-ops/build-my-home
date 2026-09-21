@@ -56,8 +56,8 @@ BMH.updateLocationMeta = () => {
 };
 BMH.destroyMap = () => {
   try{if(BMH.mapEngine==='leaflet'&&BMH.map?.remove)BMH.map.remove();}catch(_){}
-  try{if(BMH.mapEngine==='google'){BMH.mapMarker?.setMap?.(null);BMH.mapLot?.setMap?.(null);}}catch(_){}
-  BMH.map=null;BMH.mapMarker=null;BMH.mapLot=null;BMH.mapLabels=null;BMH.mapEngine=null;
+  try{if(BMH.mapEngine==='google'){BMH.mapMarker?.setMap?.(null);BMH.mapLot?.setMap?.(null);(BMH.mapContext||[]).forEach(x=>x?.setMap?.(null));(BMH.mapLotPoints||[]).forEach(x=>x?.setMap?.(null));}}catch(_){}
+  BMH.map=null;BMH.mapMarker=null;BMH.mapLot=null;BMH.mapLabels=null;BMH.mapContext=[];BMH.mapLotPoints=[];BMH.mapEngine=null;
 };
 BMH.meterOffset = (lat,lng,east,north) => ({lat:lat+north/111320,lng:lng+east/(111320*Math.max(.2,Math.cos(lat*Math.PI/180)))});
 BMH.lotCorners = (site=BMH.state.project.site) => {
@@ -65,12 +65,46 @@ BMH.lotCorners = (site=BMH.state.project.site) => {
   const v=(ang,len)=>({e:Math.sin(ang)*len,n:Math.cos(ang)*len}),w=v(right,hw),d=v(back,hd),c={lat:Number(site.lat),lng:Number(site.lng)};
   return [[w.e+d.e,w.n+d.n],[-w.e+d.e,-w.n+d.n],[-w.e-d.e,-w.n-d.n],[w.e-d.e,w.n-d.n]].map(([e,n])=>BMH.meterOffset(c.lat,c.lng,e,n));
 };
+BMH.lotPath = (site=BMH.state.project.site) => site.lotMode==='custom'&&Array.isArray(site.lotPoints)&&site.lotPoints.length>=2?site.lotPoints:BMH.lotCorners(site);
 BMH.syncMapHud = (zoom) => {const z=BMH.$('#mapHudZoom');if(z)z.textContent=`Zoom ${Math.round(Number(zoom)||BMH.state.project.site.mapZoom||17)}`;};
-BMH.updateLotOverlay = () => {
-  const s=BMH.state.project.site,corners=BMH.lotCorners(s);
-  if(BMH.mapEngine==='leaflet'&&window.L&&BMH.map){if(BMH.mapLot)BMH.map.removeLayer(BMH.mapLot);BMH.mapLot=null;if(s.showLotOverlay){BMH.mapLot=L.polygon(corners.map(x=>[x.lat,x.lng]),{color:'#c16f50',weight:2,fillColor:'#d99070',fillOpacity:.18,dashArray:'7 5'}).addTo(BMH.map);}}
-  if(BMH.mapEngine==='google'&&window.google?.maps&&BMH.map){BMH.mapLot?.setMap?.(null);BMH.mapLot=null;if(s.showLotOverlay){BMH.mapLot=new google.maps.Polygon({paths:corners,strokeColor:'#b76246',strokeOpacity:1,strokeWeight:2,fillColor:'#d98d70',fillOpacity:.2,map:BMH.map});}}
+BMH.clearMapExtras = () => {
+  if(BMH.mapEngine==='leaflet'&&BMH.map){(BMH.mapContext||[]).forEach(x=>{try{BMH.map.removeLayer(x)}catch(_){}});(BMH.mapLotPoints||[]).forEach(x=>{try{BMH.map.removeLayer(x)}catch(_){}});}
+  else {(BMH.mapContext||[]).forEach(x=>x?.setMap?.(null));(BMH.mapLotPoints||[]).forEach(x=>x?.setMap?.(null));}
+  BMH.mapContext=[];BMH.mapLotPoints=[];
 };
+BMH.updateMapContext = () => {
+  const s=BMH.state.project.site;BMH.clearMapExtras();
+  if(s.showContextRings){
+    if(BMH.mapEngine==='leaflet'&&window.L&&BMH.map){[250,500].forEach((r,i)=>BMH.mapContext.push(L.circle([s.lat,s.lng],{radius:r,color:i?'#6b8068':'#7b8ea1',weight:1,opacity:.55,fillOpacity:.02,dashArray:i?'7 6':'3 5',interactive:false}).addTo(BMH.map)));}
+    if(BMH.mapEngine==='google'&&window.google?.maps&&BMH.map){[250,500].forEach((r,i)=>BMH.mapContext.push(new google.maps.Circle({center:{lat:s.lat,lng:s.lng},radius:r,strokeColor:i?'#6b8068':'#7b8ea1',strokeOpacity:.55,strokeWeight:1,fillOpacity:.01,map:BMH.map,clickable:false})));}
+  }
+  if(s.lotMode==='custom'&&Array.isArray(s.lotPoints)){
+    if(BMH.mapEngine==='leaflet'&&window.L&&BMH.map)s.lotPoints.forEach((pt,i)=>BMH.mapLotPoints.push(L.circleMarker([pt.lat,pt.lng],{radius:5,color:'#fff',weight:2,fillColor:i===0?'#b95f43':'#53735a',fillOpacity:1,interactive:false}).addTo(BMH.map)));
+    if(BMH.mapEngine==='google'&&window.google?.maps&&BMH.map)s.lotPoints.forEach((pt,i)=>BMH.mapLotPoints.push(new google.maps.Marker({position:pt,map:BMH.map,label:{text:String(i+1),color:'#fff',fontSize:'10px'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:7,fillColor:i===0?'#b95f43':'#53735a',fillOpacity:1,strokeColor:'#fff',strokeWeight:2},clickable:false})));
+  }
+};
+BMH.updateLotOverlay = () => {
+  const s=BMH.state.project.site,path=BMH.lotPath(s),drawing=BMH.state.ui.location?.drawingLot;
+  if(BMH.mapEngine==='leaflet'&&window.L&&BMH.map){if(BMH.mapLot)BMH.map.removeLayer(BMH.mapLot);BMH.mapLot=null;if(s.showLotOverlay&&path.length>=2){BMH.mapLot=path.length>=3?L.polygon(path.map(x=>[x.lat,x.lng]),{color:drawing?'#d25d3f':'#c16f50',weight:drawing?3:2,fillColor:'#d99070',fillOpacity:path.length>=3?.18:0,dashArray:drawing?'4 4':'7 5'}).addTo(BMH.map):L.polyline(path.map(x=>[x.lat,x.lng]),{color:'#d25d3f',weight:3,dashArray:'4 4'}).addTo(BMH.map);}}
+  if(BMH.mapEngine==='google'&&window.google?.maps&&BMH.map){BMH.mapLot?.setMap?.(null);BMH.mapLot=null;if(s.showLotOverlay&&path.length>=2){if(path.length>=3)BMH.mapLot=new google.maps.Polygon({paths:path,strokeColor:drawing?'#d25d3f':'#b76246',strokeOpacity:1,strokeWeight:drawing?3:2,fillColor:'#d98d70',fillOpacity:.2,map:BMH.map,clickable:false});else BMH.mapLot=new google.maps.Polyline({path:path,strokeColor:'#d25d3f',strokeOpacity:1,strokeWeight:3,map:BMH.map,clickable:false});}}
+  BMH.updateMapContext();
+};
+BMH.updateLotDrawStatus = () => {
+  const n=BMH.state.project.site.lotPoints?.length||0,el=BMH.$('#lotDrawStatus');if(el)el.textContent=BMH.state.ui.location?.drawingLot?`Đang vẽ · ${n} điểm · cần tối thiểu 3 điểm`:(BMH.state.project.site.lotMode==='custom'?`Ranh tùy chỉnh · ${n} điểm`:'Lô chữ nhật theo kích thước');
+};
+BMH.startLotDraw = () => {const s=BMH.state.project.site;s.lotMode='custom';s.lotPoints=[];BMH.state.ui.location.drawingLot=true;s.showLotOverlay=true;BMH.save();BMH.render();BMH.toast('Chế độ vẽ ranh đất: bấm lần lượt các góc lô đất trên bản đồ.');};
+BMH.handleMapClick = (lat,lng,source='Chọn trên bản đồ') => {
+  if(BMH.state.ui.location?.drawingLot){const s=BMH.state.project.site;if((s.lotPoints?.length||0)>=12){BMH.toast('Tối đa 12 điểm cho ranh đất sơ bộ.');return;}s.lotMode='custom';s.lotPoints=[...(s.lotPoints||[]),{lat:Number(lat),lng:Number(lng)}];BMH.save();BMH.updateLotOverlay();BMH.updateLotDrawStatus();return;}
+  BMH.applyCoordinates(lat,lng,source);
+};
+BMH.finishLotDraw = () => {
+  const s=BMH.state.project.site,pts=s.lotPoints||[];if(pts.length<3)return BMH.toast('Cần ít nhất 3 điểm để hoàn tất ranh đất.');
+  const stats=BMH.siteParcelStats(s),centroid=pts.reduce((a,p)=>({lat:a.lat+p.lat/pts.length,lng:a.lng+p.lng/pts.length}),{lat:0,lng:0});
+  s.lat=centroid.lat;s.lng=centroid.lng;s.geoSource='Ranh đất vẽ trên bản đồ';s.lotMode='custom';s.shape=pts.length===4?'Không đều':'Không đều';
+  if(stats.frontage>=2&&stats.frontage<=60)s.width=+stats.frontage.toFixed(2);if(stats.approxDepth>=4&&stats.approxDepth<=100)s.depth=+stats.approxDepth.toFixed(2);
+  BMH.state.ui.location.drawingLot=false;BMH.liveWeather=null;BMH.save();BMH.render();BMH.toast(`Đã chốt ranh đất khoảng ${Math.round(stats.area)} m² và đồng bộ kích thước sơ bộ.`);
+};
+BMH.clearCustomLot = () => {const s=BMH.state.project.site;s.lotMode='rect';s.lotPoints=[];BMH.state.ui.location.drawingLot=false;BMH.save();BMH.render();BMH.toast('Đã trở lại lô chữ nhật theo mặt tiền × chiều sâu.');};
 BMH.applyCoordinates = (lat,lng,source='Tọa độ tùy chỉnh',{snapRegion=false,render=false}={}) => {
   lat=Number(lat);lng=Number(lng);if(!Number.isFinite(lat)||!Number.isFinite(lng))return false;
   const s=BMH.state.project.site; s.lat=lat;s.lng=lng;s.geoSource=source;
@@ -133,7 +167,7 @@ BMH.initLeafletMap = async () => {
   const loadTiles=()=>{if(activeLayer)BMH.map.removeLayer(activeLayer);if(labelLayer)BMH.map.removeLayer(labelLayer);const [url,attr]=sources[sourceIndex]||BMH.mapTileConfig('roadmap')[0];tileErrors=0;activeLayer=L.tileLayer(url,{maxZoom:s.mapStyle==='terrain'?17:20,attribution:attr,keepBuffer:4,updateWhenIdle:false,crossOrigin:true}).addTo(BMH.map);if(s.mapStyle==='hybrid'){labelLayer=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Labels © Esri',opacity:.9}).addTo(BMH.map);}activeLayer.on('load',()=>{loaded=true;el.classList.remove('map-loading','fallback-only');});activeLayer.on('tileerror',()=>{tileErrors++;if(tileErrors>=4){if(sourceIndex<sources.length-1){sourceIndex++;loadTiles();}else if(!loaded){el.classList.remove('map-loading');el.classList.add('fallback-only');}}});};loadTiles();
   BMH.mapMarker=L.marker([s.lat,s.lng],{draggable:true,autoPan:true}).addTo(BMH.map).bindPopup(`${BMH.esc(s.district||'')} · ${BMH.esc(s.province)}`);
   BMH.mapMarker.on('dragend',ev=>{const ll=ev.target.getLatLng();BMH.applyCoordinates(ll.lat,ll.lng,'Ghim bản đồ');});
-  BMH.map.on('click',ev=>BMH.applyCoordinates(ev.latlng.lat,ev.latlng.lng,'Chọn trên bản đồ'));
+  BMH.map.on('click',ev=>BMH.handleMapClick(ev.latlng.lat,ev.latlng.lng,'Chọn trên bản đồ'));
   BMH.map.on('mousemove',ev=>{const hud=BMH.$('#mapHudCoords');if(hud)hud.textContent=`${ev.latlng.lat.toFixed(5)}, ${ev.latlng.lng.toFixed(5)}`;});
   BMH.map.on('mouseout',()=>BMH.updateLocationMeta());
   BMH.map.on('zoomend',()=>{s.mapZoom=BMH.map.getZoom();BMH.save();BMH.syncMapHud(s.mapZoom);});
@@ -144,7 +178,7 @@ BMH.initGoogleMap = async () => {
   BMH.map=new google.maps.Map(el,{center:{lat:s.lat,lng:s.lng},zoom:s.mapZoom||17,mapTypeId:s.mapStyle,streetViewControl:true,mapTypeControl:false,fullscreenControl:false,scaleControl:true,gestureHandling:'greedy'});
   BMH.mapMarker=new google.maps.Marker({position:{lat:s.lat,lng:s.lng},map:BMH.map,draggable:true,title:`${s.district||''} · ${s.province||''}`});
   BMH.mapMarker.addListener('dragend',ev=>{if(ev.latLng)BMH.applyCoordinates(ev.latLng.lat(),ev.latLng.lng(),'Ghim Google Maps');});
-  BMH.map.addListener('click',ev=>{if(ev.latLng)BMH.applyCoordinates(ev.latLng.lat(),ev.latLng.lng(),'Chọn trên Google Maps');});
+  BMH.map.addListener('click',ev=>{if(ev.latLng)BMH.handleMapClick(ev.latLng.lat(),ev.latLng.lng(),'Chọn trên Google Maps');});
   BMH.map.addListener('zoom_changed',()=>{const z=BMH.map.getZoom();if(Number.isFinite(z)){s.mapZoom=z;BMH.save();BMH.syncMapHud(z);}});
   BMH.map.addListener('idle',()=>{el.classList.remove('map-loading','fallback-only');BMH.updateLotOverlay();});
   BMH.updateLotOverlay();return true;
@@ -167,6 +201,11 @@ document.addEventListener('click',e=>{
   const mapStyle=e.target.closest('[data-map-style]');if(mapStyle){BMH.state.project.site.mapStyle=mapStyle.dataset.mapStyle;BMH.save();BMH.render();return;}
   if(e.target.closest('[data-map-center]')){const s=BMH.state.project.site;if(BMH.mapEngine==='leaflet')BMH.map?.setView?.([s.lat,s.lng],s.mapZoom||17,{animate:true});else BMH.map?.panTo?.({lat:s.lat,lng:s.lng});return;}
   if(e.target.closest('[data-map-lot]')){BMH.state.project.site.showLotOverlay=!BMH.state.project.site.showLotOverlay;BMH.save();BMH.render();return;}
+  if(e.target.closest('[data-map-climate]')){BMH.state.project.site.showClimateMap=!BMH.state.project.site.showClimateMap;BMH.save();BMH.render();return;}
+  if(e.target.closest('[data-map-context]')){BMH.state.project.site.showContextRings=!BMH.state.project.site.showContextRings;BMH.save();BMH.render();return;}
+  if(e.target.closest('[data-map-draw-lot]')){BMH.startLotDraw();return;}
+  if(e.target.closest('[data-map-finish-lot]')){BMH.finishLotDraw();return;}
+  if(e.target.closest('[data-map-clear-lot]')){BMH.clearCustomLot();return;}
   if(e.target.closest('[data-map-fullscreen]')){const el=BMH.$('.maps-studio');if(el?.requestFullscreen)el.requestFullscreen().then(()=>setTimeout(BMH.mapResize,120)).catch(()=>BMH.toast('Trình duyệt không cho phép toàn màn hình.'));return;}
   if(e.target.closest('[data-open-google]')){const s=BMH.state.project.site;window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.lat+','+s.lng)}`,'_blank','noopener');return;}
   if(e.target.closest('[data-map-refresh]')){const s=BMH.state.project.site,pt=BMH.regionPoint(s.province,s.district);Object.assign(s,{lat:pt.lat,lng:pt.lng,district:pt.district,geoSource:'Dữ liệu vùng'});BMH.liveWeather=null;BMH.save();BMH.render();return;}
@@ -179,6 +218,8 @@ document.addEventListener('click',e=>{
   const rem=e.target.closest('[data-person-remove]');if(rem){const h=BMH.state.project.household,key=rem.dataset.personRemove==='child'?'children':'relatives';h[key]=h[key].filter(x=>x.id!==rem.dataset.id);BMH.save();BMH.render();return;}
 
   const dtab=e.target.closest('[data-design-tab]');if(dtab){BMH.state.ui.designTab=dtab.dataset.designTab;if(dtab.dataset.designTab==='planner')BMH.state.ui.planner.view='plan';BMH.save();BMH.render();return;}
+  const strategy=e.target.closest('[data-design-strategy]');if(strategy){BMH.state.project.site.designStrategy=strategy.dataset.designStrategy;BMH.save();BMH.render();return;}
+  if(e.target.closest('[data-auto-plan]')){BMH.autoPlanConcept(BMH.state.project.site.designStrategy);return;}
   const pview=e.target.closest('[data-plan-view]');if(pview){BMH.state.ui.planner.view=pview.dataset.planView;BMH.state.ui.planner.tool='select';BMH.save();BMH.render();return;}
   const mview=e.target.closest('[data-material-view]');if(mview&&!mview.disabled){BMH.state.ui.materialCategory=mview.dataset.materialView;BMH.save();BMH.render();return;}
   const floor=e.target.closest('[data-floor]');if(floor){BMH.state.ui.planner.view='plan';BMH.state.ui.planner.floor=Number(floor.dataset.floor);const first=BMH.floorRooms()[0];BMH.state.ui.planner.selected=first?.id||null;BMH.save();BMH.render();return;}
@@ -195,6 +236,7 @@ document.addEventListener('click',e=>{
   const zoomBtn=e.target.closest('[data-planner-zoom]');if(zoomBtn){const ui=BMH.state.ui.planner;ui.zoom=BMH.clamp(ui.zoom+(zoomBtn.dataset.plannerZoom==='in'?.15:-.15),.75,2.5);BMH.save();BMH.render();return;}
   if(e.target.closest('[data-planner-fit]')){BMH.state.ui.planner.zoom=1;BMH.save();BMH.render();return;}
   if(e.target.closest('[data-planner-fullscreen]')){const el=BMH.$('.technical-sheet'); if(el?.requestFullscreen) el.requestFullscreen().catch(()=>BMH.toast('Trình duyệt không cho phép toàn màn hình.')); return;}
+  const cpack=e.target.closest('[data-climate-package]');if(cpack){const before=BMH.estimate().total;BMH.state.project.materials.climatePackage=cpack.dataset.climatePackage;const after=BMH.estimate().total;BMH.state.project.materials.lastDelta=after-before;BMH.save();BMH.render();return;}
   const tier=e.target.closest('[data-tier]');if(tier){const before=BMH.estimate().total;BMH.state.project.materials.tier=tier.dataset.tier;const after=BMH.estimate().total;BMH.state.project.materials.lastDelta=after-before;BMH.save();BMH.render();return;}
   const material=e.target.closest('[data-material]');if(material){const before=BMH.estimate().total,cat=material.dataset.materialCat;BMH.state.project.materials.choices[cat]=material.dataset.material;const after=BMH.estimate().total;BMH.state.project.materials.lastDelta=after-before;BMH.save();BMH.render();return;}
   const sm=e.target.closest('[data-scene-mode]');if(sm){BMH.state.ui.sceneMode=sm.dataset.sceneMode;BMH.save();BMH.render();return;}
@@ -214,7 +256,7 @@ document.addEventListener('change',e=>{
   if(!t.closest?.('#app'))return;
   if(t.dataset.path){let v=t.type==='number'?Number(t.value)*(Number(t.dataset.scale)||1):t.value;const path=t.dataset.path;if(path==='project.site.province'){const r=BMH.REGIONS[v];BMH.state.project.site.province=v;if(r){const pt=BMH.regionPoint(v,r.defaultDistrict);Object.assign(BMH.state.project.site,{district:pt.district,lat:pt.lat,lng:pt.lng,geoSource:'Dữ liệu vùng'});}BMH.liveWeather=null;BMH.save();BMH.render();return;}if(path==='project.site.district'){BMH.state.project.site.district=v;const pt=BMH.regionPoint(BMH.state.project.site.province,v);BMH.state.project.site.lat=pt.lat;BMH.state.project.site.lng=pt.lng;BMH.state.project.site.geoSource='Dữ liệu vùng';BMH.liveWeather=null;BMH.save();BMH.render();return;}BMH.set(path,v);return;}
   if(t.dataset.person){const h=BMH.state.project.household,list=t.dataset.person==='child'?h.children:h.relatives,p=list.find(x=>x.id===t.dataset.id);if(p){p[t.dataset.key]=t.type==='number'?Number(t.value):t.value;BMH.save();BMH.render();}return;}
-  if(t.dataset.planner){const ui=BMH.state.ui.planner;if(t.dataset.planner==='snap')ui.snap=Number(t.value);if(t.dataset.planner==='furniture')ui.showFurniture=t.checked;if(t.dataset.planner==='dimensions')ui.showDimensions=t.checked;if(t.dataset.planner==='feng')ui.showFeng=t.checked;if(t.dataset.planner==='below')ui.showBelow=t.checked;if(t.dataset.planner==='structure')ui.showStructure=t.checked;if(t.dataset.planner==='environment')ui.showEnvironment=t.checked;if(t.dataset.planner==='circulation')ui.showCirculation=t.checked;if(t.dataset.planner==='sectionLine')ui.showSectionLine=t.checked;if(t.dataset.planner==='climate')ui.showClimate=t.checked;BMH.save();BMH.render();return;}
+  if(t.dataset.planner){const ui=BMH.state.ui.planner;if(t.dataset.planner==='snap')ui.snap=Number(t.value);if(t.dataset.planner==='furniture')ui.showFurniture=t.checked;if(t.dataset.planner==='dimensions')ui.showDimensions=t.checked;if(t.dataset.planner==='feng')ui.showFeng=t.checked;if(t.dataset.planner==='below')ui.showBelow=t.checked;if(t.dataset.planner==='structure')ui.showStructure=t.checked;if(t.dataset.planner==='environment')ui.showEnvironment=t.checked;if(t.dataset.planner==='circulation')ui.showCirculation=t.checked;if(t.dataset.planner==='sectionLine')ui.showSectionLine=t.checked;if(t.dataset.planner==='climate')ui.showClimate=t.checked;if(t.dataset.planner==='envelope')ui.showEnvelope=t.checked;BMH.save();BMH.render();return;}
   if(t.dataset.roomField){const r=BMH.selectedRoom();if(!r)return;BMH.pushPlanHistory();const key=t.dataset.roomField,old={...r};r[key]=['x','y','w','h'].includes(key)?Number(t.value):t.value;if(['x','y','w','h'].includes(key)){r[key]=BMH.roundTo(r[key],BMH.state.ui.planner.snap);if(!BMH.roomValid(r)){Object.assign(r,old);BMH.toast('Giá trị mới gây chồng phòng hoặc vượt ranh.');}}BMH.save();BMH.render();return;}
   if(t.dataset.openingField){const o=BMH.state.project.plan.openings.find(x=>x.id===t.dataset.openingId);if(o){const old={...o};BMH.pushPlanHistory();o[t.dataset.openingField]=['width','offset'].includes(t.dataset.openingField)?Number(t.value):t.value;if(!BMH.openingFits(o,o.id)){Object.assign(o,old);BMH.planHistory.undo.pop();BMH.toast('Kích thước/vị trí ô mở đang trùng hoặc vượt chiều dài tường.');}BMH.save();BMH.render();}return;}
   if(t.matches('[data-scene-focus]')){BMH.state.ui.sceneFocus=t.value;BMH.save();BMH.render();return;}

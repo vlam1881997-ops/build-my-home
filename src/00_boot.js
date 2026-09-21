@@ -1,5 +1,5 @@
 const BMH = {
-  VERSION: '3.9.0',
+  VERSION: '4.0.0',
   STORAGE_KEY: 'bmh-v342-stable',
   LEGACY_STORAGE_KEYS: ['bmh-v23-visual'],
   DEV: ['localhost','127.0.0.1',''].includes(location.hostname),
@@ -8,6 +8,8 @@ const BMH = {
   mapMarker: null,
   mapLot: null,
   mapLabels: null,
+  mapContext: [],
+  mapLotPoints: [],
   googleMapsPromise: null,
   GOOGLE_MAPS_KEY: '__BMH_GOOGLE_MAPS_API_KEY__',
   liveWeather: null,
@@ -156,6 +158,67 @@ BMH.nearestRegionPoint = (lat,lng) => {
   return best;
 };
 
+BMH.localMeters = (point,origin) => {
+  const lat0=Number(origin?.lat)||0, lng0=Number(origin?.lng)||0, lat=Number(point?.lat)||0, lng=Number(point?.lng)||0;
+  return {x:(lng-lng0)*111320*Math.max(.2,Math.cos(lat0*Math.PI/180)),y:(lat-lat0)*111320};
+};
+BMH.polygonAreaMeters = points => {
+  if(!Array.isArray(points)||points.length<3)return 0;
+  const origin=points.reduce((a,p)=>({lat:a.lat+Number(p.lat)/points.length,lng:a.lng+Number(p.lng)/points.length}),{lat:0,lng:0});
+  const xy=points.map(p=>BMH.localMeters(p,origin)); let sum=0;
+  for(let i=0;i<xy.length;i++){const a=xy[i],b=xy[(i+1)%xy.length];sum+=a.x*b.y-b.x*a.y;}
+  return Math.abs(sum)/2;
+};
+BMH.polygonPerimeterMeters = points => {
+  if(!Array.isArray(points)||points.length<2)return 0; let total=0;
+  for(let i=0;i<points.length;i++)total+=BMH.haversineKm(points[i],points[(i+1)%points.length])*1000;
+  return total;
+};
+BMH.siteParcelStats = (site=BMH.state?.project?.site||{}) => {
+  const custom=site.lotMode==='custom'&&Array.isArray(site.lotPoints)&&site.lotPoints.length>=3;
+  const points=custom?site.lotPoints:[];
+  const area=custom?BMH.polygonAreaMeters(points):Math.max(0,(Number(site.width)||0)*(Number(site.depth)||0));
+  const perimeter=custom?BMH.polygonPerimeterMeters(points):Math.max(0,2*((Number(site.width)||0)+(Number(site.depth)||0)));
+  const frontage=custom&&points.length>=2?BMH.haversineKm(points[0],points[1])*1000:(Number(site.width)||0);
+  const approxDepth=frontage>0?area/frontage:(Number(site.depth)||0);
+  return {mode:custom?'custom':'rect',points,area,perimeter,frontage,approxDepth};
+};
+BMH.buildableEnvelope = (site=BMH.state?.project?.site||{}) => {
+  const width=Math.max(.1,Number(site.width)||5),depth=Math.max(.1,Number(site.depth)||20),plot=BMH.siteParcelStats(site);
+  const front=BMH.clamp(Number(site.setbackFront)||0,0,depth*.45),rear=BMH.clamp(Number(site.setbackRear)||0,0,depth*.35),side=BMH.clamp(Number(site.setbackSide)||0,0,width*.25);
+  const buildWidth=Math.max(.1,width-side*2),buildDepth=Math.max(.1,depth-front-rear),envelopeArea=buildWidth*buildDepth,coverage=BMH.clamp(Number(site.targetCoverage)||.68,.45,.90);
+  const targetPlate=Math.min(envelopeArea,Math.max(0,plot.area)*coverage),floors=Math.max(1,Number(site.floors)||1),gfa=targetPlate*floors;
+  return {plotArea:plot.area,width,depth,front,rear,side,buildWidth,buildDepth,envelopeArea,coverage,targetPlate,gfa,openArea:Math.max(0,plot.area-targetPlate)};
+};
+BMH.siteFeasibility = (site=BMH.state?.project?.site||{}) => {
+  const env=BMH.buildableEnvelope(site),h=BMH.state?.project?.household||{},children=Array.isArray(h.children)?h.children.length:0,relatives=Array.isArray(h.relatives)?h.relatives.length:0,people=2+children+relatives;
+  const separate=(h.children||[]).filter(c=>c.room!=='Ngủ chung').length,bedrooms=1+separate+((children-separate)>0?1:0)+(relatives?1:0),bathrooms=Math.max(1,Math.ceil(people/4));
+  const required=BMH.clamp(54+bedrooms*14+bathrooms*5+people*3,70,260),capacity=required>0?env.gfa/required:1;
+  const p=BMH.regionProfile(site),risk=BMH.riskValue(p.flood)+BMH.riskValue(p.storm)+BMH.riskValue(p.heat)+BMH.riskValue(p.corrosion),road=Number(site.road)||0;
+  const shapePenalty=String(site.shape||'').includes('Không đều')?8:String(site.shape||'').includes('thang')?4:0;
+  const score=BMH.clamp(Math.round(92-Math.max(0,1-capacity)*42-Math.max(0,3.5-road)*6-Math.max(0,risk-6)*2.2-shapePenalty),45,98);
+  const notes=[];
+  if(capacity<.9)notes.push('Diện tích sàn mục tiêu đang thấp hơn nhu cầu công năng ước tính; cân nhắc tăng tầng, giảm phòng hoặc tối ưu diện tích.');
+  else if(capacity>1.55)notes.push('Quỹ diện tích khá dư; có thể tăng sân, giếng trời, khoảng lùi hoặc giảm khối xây để cải thiện vi khí hậu.');
+  else notes.push('Quỹ diện tích và nhu cầu gia đình đang ở vùng tương đối cân bằng để phát triển phương án.');
+  if(road<3)notes.push('Đường tiếp cận hẹp có thể ảnh hưởng vận chuyển vật tư và tổ chức thi công.');
+  if(BMH.riskValue(p.flood)>=3)notes.push('Rủi ro ngập cao: cần xác minh cao độ nền, thoát nước và vị trí thiết bị điện trước khi chốt thiết kế.');
+  if(BMH.riskValue(p.storm)>=3)notes.push('Rủi ro gió bão cao: mặt đứng, mái và cửa cần được kỹ sư kiểm tra tải gió khi triển khai hồ sơ kỹ thuật.');
+  return {score,people,bedrooms,bathrooms,requiredGFA:required,capacity,env,notes};
+};
+BMH.climatePackageMultiplier = level => ({basic:.72,recommended:1,robust:1.38}[level]||1);
+BMH.resiliencePlan = (site=BMH.state?.project?.site||{}) => {
+  const p=BMH.regionProfile(site),pack=BMH.state?.project?.materials?.climatePackage||'recommended',items=[];
+  const add=(id,name,reason,weight)=>items.push({id,name,reason,weight});
+  if(BMH.riskValue(p.flood)>=2)add('drain','Thoát nước & nâng cốt','Ưu tiên rãnh thu, độ dốc sân, chống trào và cao độ thiết bị nhạy nước.',1.2);
+  if(BMH.riskValue(p.heat)>=2)add('heat','Chống nóng & che nắng','Tăng cách nhiệt mái, lam che hướng nắng gắt và lớp bao che giảm hấp thụ nhiệt.',1.0);
+  if(BMH.riskValue(p.storm)>=2)add('storm','Gia cường gió mưa','Kiểm soát liên kết mái, cửa, kính và điểm hắt mưa ở mặt đứng.',1.05);
+  if(BMH.riskValue(p.corrosion)>=2)add('corrosion','Chống ăn mòn','Ưu tiên phụ kiện, vít, sơn phủ và chi tiết kim loại phù hợp môi trường ẩm/hơi muối.',.75);
+  if(!items.length)add('moisture','Kiểm soát ẩm & chống thấm','Duy trì giải pháp chống thấm, thông gió khu ướt và bảo trì định kỳ.',.7);
+  const orient=BMH.orientationAnalysis(site);if(orient.sunPenalty>=9)add('shade','Lam che mặt tiền','Mặt tiền có tải nắng đáng kể; nên bổ sung lớp che nắng chủ động.',.65);
+  return {level:pack,multiplier:BMH.climatePackageMultiplier(pack),items,orientation:orient};
+};
+
 
 BMH.DIRECTIONS = [
   ['Bắc',0,'north'],['Đông Bắc',45,'north-east'],['Đông',90,'east'],['Đông Nam',135,'south-east'],
@@ -199,9 +262,9 @@ BMH.climateMaterialGuide = (category,site=BMH.state?.project?.site||{}) => {
   return guides[category]||'Đối chiếu thông số kỹ thuật thực tế trước khi chốt vật liệu.';
 };
 BMH.materialClimateScore = (site=BMH.state?.project?.site||{}, tier=BMH.state?.project?.materials?.tier||'standard') => {
-  const p=BMH.regionProfile(site), o=BMH.orientationAnalysis(site), base={economy:68,standard:82,premium:91}[tier]||80;
-  const risk=(BMH.riskValue(p.flood)+BMH.riskValue(p.storm)+BMH.riskValue(p.corrosion)+BMH.riskValue(p.heat));
-  return BMH.clamp(Math.round(base-(risk-4)*1.5+(o.score-70)*.12),52,96);
+  const p=BMH.regionProfile(site), o=BMH.orientationAnalysis(site), base={economy:68,standard:82,premium:91}[tier]||80,pack=BMH.state?.project?.materials?.climatePackage||'recommended';
+  const risk=(BMH.riskValue(p.flood)+BMH.riskValue(p.storm)+BMH.riskValue(p.corrosion)+BMH.riskValue(p.heat)),packBonus={basic:-5,recommended:0,robust:7}[pack]||0;
+  return BMH.clamp(Math.round(base-(risk-4)*1.5+(o.score-70)*.12+packBonus),50,98);
 };
 
 BMH.BANKS = [

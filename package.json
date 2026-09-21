@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "3.9.0",
+  "version": "4.0.0",
   "private": true,
-  "description": "Build My Home V3.9.0 Maps Studio with satellite/hybrid maps, optional Google Maps and climate-adaptive design - clean source only",
+  "description": "Build My Home V4.0 Super Studio: Site Intelligence, climate parcel mapping, auto architectural planning and resilience-cost integration - clean source only",
   "engines": {
     "node": ">=22"
   },

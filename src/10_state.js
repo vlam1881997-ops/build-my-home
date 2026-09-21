@@ -1,10 +1,10 @@
 BMH.defaultState = () => ({
   version: BMH.VERSION,
-  ui: {step:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',showFurniture:true,showDimensions:true,showFeng:true,showBelow:false,showStructure:true,showEnvironment:true,showCirculation:true,showSectionLine:true}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
+  ui: {step:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', location:{drawingLot:false}, planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',showFurniture:true,showDimensions:true,showFeng:true,showBelow:false,showStructure:true,showEnvironment:true,showCirculation:true,showSectionLine:true,showClimate:true,showEnvelope:true}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
   access: {paid:false, source:'none', paidAt:null},
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại',
-    site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',mapEngine:'free',mapStyle:'hybrid',mapZoom:17,showLotOverlay:true,frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật'},
+    site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',mapEngine:'free',mapStyle:'hybrid',mapZoom:17,showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotPoints:[],frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
     finance:{cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12},
     household:{ownerBirth:1988,ownerGender:'Nam',partnerEnabled:true,partnerBirth:1990,partnerGender:'Nữ',children:[{id:'c1',name:'Con 1',birth:2012,room:'Riêng'}],relatives:[{id:'p1',name:'Ba',birth:1962,mobility:'Hạn chế nhẹ'},{id:'p2',name:'Mẹ',birth:1964,mobility:'Bình thường'}]},
     plan:{rooms:[
@@ -23,7 +23,7 @@ BMH.defaultState = () => ({
       {id:'o3',floor:0,roomId:'r3',kind:'door',side:'east',offset:.25,width:.8},
       {id:'o4',floor:1,roomId:'r6',kind:'window',side:'east',offset:.4,width:1.6}
     ]},
-    materials:{tier:'standard',choices:{floor:'viglacera',paint:'dulux',door:'xingfa'},lastDelta:0},
+    materials:{tier:'standard',climatePackage:'recommended',choices:{floor:'viglacera',paint:'dulux',door:'xingfa'},lastDelta:0},
     wearYear:0,
     checklist:{pipe114:false,acWire:false,pressure:false,internet:false,elcb:false}
   },
@@ -66,6 +66,7 @@ BMH.normalizeState = () => {
   if(!BMH.state||typeof BMH.state!=='object')BMH.state=base;
   if(!BMH.state.ui||typeof BMH.state.ui!=='object')BMH.state.ui=structuredClone(base.ui);
   if(!BMH.state.ui.planner||typeof BMH.state.ui.planner!=='object')BMH.state.ui.planner=structuredClone(base.ui.planner);
+  if(!BMH.state.ui.location||typeof BMH.state.ui.location!=='object')BMH.state.ui.location=structuredClone(base.ui.location);
   if(!BMH.state.project||typeof BMH.state.project!=='object')BMH.state.project=structuredClone(base.project);
   if(!BMH.state.project.site||typeof BMH.state.project.site!=='object')BMH.state.project.site=structuredClone(base.project.site);
   if(!BMH.state.project.finance||typeof BMH.state.project.finance!=='object')BMH.state.project.finance=structuredClone(base.project.finance);
@@ -74,6 +75,7 @@ BMH.normalizeState = () => {
   if(!Array.isArray(BMH.state.project.plan.rooms))BMH.state.project.plan.rooms=structuredClone(base.project.plan.rooms);
   if(!Array.isArray(BMH.state.project.plan.openings))BMH.state.project.plan.openings=structuredClone(base.project.plan.openings);
   if(!BMH.state.project.materials||typeof BMH.state.project.materials!=='object')BMH.state.project.materials=structuredClone(base.project.materials);
+  if(!['basic','recommended','robust'].includes(BMH.state.project.materials.climatePackage))BMH.state.project.materials.climatePackage='recommended';
   if(!BMH.state.access||typeof BMH.state.access!=='object')BMH.state.access=structuredClone(base.access);
   const s=BMH.state.project.site;
   const alias=BMH.REGION_ALIASES?.[s.province];
@@ -93,6 +95,16 @@ BMH.normalizeState = () => {
   if(!['roadmap','satellite','hybrid','terrain'].includes(s.mapStyle))s.mapStyle='hybrid';
   s.mapZoom=BMH.clamp(Number(s.mapZoom)||17,3,21);
   if(typeof s.showLotOverlay!=='boolean')s.showLotOverlay=true;
+  if(typeof s.showClimateMap!=='boolean')s.showClimateMap=true;
+  if(typeof s.showContextRings!=='boolean')s.showContextRings=true;
+  if(!['rect','custom'].includes(s.lotMode))s.lotMode='rect';
+  if(!Array.isArray(s.lotPoints))s.lotPoints=[];
+  s.lotPoints=s.lotPoints.filter(p=>p&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng))).slice(0,12).map(p=>({lat:Number(p.lat),lng:Number(p.lng)}));
+  s.targetCoverage=BMH.clamp(Number(s.targetCoverage)||.68,.45,.90);
+  s.setbackFront=BMH.clamp(Number(s.setbackFront)||0,0,Math.max(0,Number(s.depth)||20)*.45);
+  s.setbackRear=BMH.clamp(Number(s.setbackRear)||0,0,Math.max(0,Number(s.depth)||20)*.35);
+  s.setbackSide=BMH.clamp(Number(s.setbackSide)||0,0,Math.max(0,Number(s.width)||5)*.25);
+  if(!['climate','balanced','budget'].includes(s.designStrategy))s.designStrategy='climate';
   if(!['Bắc','Đông Bắc','Đông','Đông Nam','Nam','Tây Nam','Tây','Tây Bắc'].includes(s.frontDirection))s.frontDirection='Nam';
   const valid=(r.districts||[]).some(d=>d[0]===s.district);
   if(!valid){const pt=BMH.regionPoint(s.province,r.defaultDistrict);Object.assign(s,{district:pt.district,lat:pt.lat,lng:pt.lng});}
@@ -106,6 +118,8 @@ BMH.normalizeState = () => {
   if(typeof ui.showCirculation!=='boolean')ui.showCirculation=true;
   if(typeof ui.showSectionLine!=='boolean')ui.showSectionLine=true;
   if(typeof ui.showClimate!=='boolean')ui.showClimate=true;
+  if(typeof ui.showEnvelope!=='boolean')ui.showEnvelope=true;
+  if(typeof BMH.state.ui.location.drawingLot!=='boolean')BMH.state.ui.location.drawingLot=false;
   ui.zoom=BMH.clamp(Number(ui.zoom)||1,.75,2.5);
   if(typeof BMH.state.ui.sceneExploded!=='boolean')BMH.state.ui.sceneExploded=false;
 };

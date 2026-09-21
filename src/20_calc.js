@@ -24,9 +24,10 @@ BMH.estimate = () => {
   const shell=Math.round(area*3600000); const finish=Math.round(area*2350000*tierMul)+BMH.materialPremium();
   const adapt=BMH.siteAdaptation?BMH.siteAdaptation(p.site):{roadPct:(p.site.road<3 ? .12 : p.site.road<5 ? .05 : .02),climatePct:0};
   const transport=Math.round((shell+finish)*adapt.roadPct);
-  const climatePrep=Math.round((shell+finish)*adapt.climatePct);
+  const climatePackage=BMH.climatePackageMultiplier?BMH.climatePackageMultiplier(p.materials.climatePackage):1;
+  const climatePrep=Math.round((shell+finish)*adapt.climatePct*climatePackage);
   const prep=Math.round(area*280000); const subtotal=shell+finish+transport+climatePrep+prep; const contingency=Math.round(subtotal*.10); const total=subtotal+contingency;
-  return {area,shell,finish,transport,climatePrep,adaptation:adapt,prep,contingency,total,budget:BMH.financeSummary().available,gap:BMH.financeSummary().available-total};
+  return {area,shell,finish,transport,climatePrep,climatePackage,adaptation:adapt,prep,contingency,total,budget:BMH.financeSummary().available,gap:BMH.financeSummary().available-total};
 };
 BMH.kua = (birth,gender='Nam') => {
   let y=String(Math.round(Number(birth)||0)); if(y.length!==4) return null; let sum=[...y].reduce((s,d)=>s+Number(d),0); while(sum>9)sum=[...String(sum)].reduce((s,d)=>s+Number(d),0);
@@ -67,7 +68,8 @@ BMH.designReview = () => {
   const penalty=issues.reduce((s,i)=>s+(i.sev==='error'?10:i.sev==='warn'?5:2),0);
   const circulationScores=Array.from({length:p.site.floors},(_,f)=>BMH.circulationAnalysis?BMH.circulationAnalysis(f).score:80);
   const circulation=circulationScores.length?Math.round(circulationScores.reduce((a,b)=>a+b,0)/circulationScores.length):80;
-  const functionScore=BMH.clamp(Math.round((96-penalty)*.72+circulation*.28),45,98);
+  const feasibility=BMH.siteFeasibility?BMH.siteFeasibility(p.site):{score:80};
+  const functionScore=BMH.clamp(Math.round((96-penalty)*.60+circulation*.24+feasibility.score*.16),45,98);
   const budgetRatio=e.budget>0?e.total/e.budget:1.4;
   const budgetScore=BMH.clamp(Math.round(94-Math.max(0,budgetRatio-.82)*85),42,96);
   const reg=BMH.regionProfile?BMH.regionProfile(p.site):(BMH.REGIONS[p.site.province]||{});
@@ -79,6 +81,6 @@ BMH.designReview = () => {
   const materialScore=BMH.materialClimateScore?BMH.materialClimateScore(p.site,p.materials.tier):({economy:72,standard:84,premium:93}[p.materials.tier]||82);
   const fengScore=BMH.kua(p.household.ownerBirth,p.household.ownerGender)?78:70;
   const durability=BMH.clamp(materialScore+(p.site.soil.includes('cứng')?3:p.site.soil.includes('trũng')?-6:0),55,96);
-  const overall=Math.round(budgetScore*.18+functionScore*.24+climateScore*.18+materialScore*.15+fengScore*.10+durability*.15);
-  return {overall,budget:budgetScore,function:functionScore,climate:climateScore,material:materialScore,feng:fengScore,durability,daylight,ventilation,circulation,orientation:orientation.score,issues};
+  const overall=Math.round(budgetScore*.17+functionScore*.23+climateScore*.18+materialScore*.14+fengScore*.08+durability*.14+feasibility.score*.06);
+  return {overall,budget:budgetScore,function:functionScore,climate:climateScore,material:materialScore,feng:fengScore,durability,daylight,ventilation,circulation,orientation:orientation.score,siteFit:feasibility.score,issues};
 };
