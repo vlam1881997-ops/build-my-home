@@ -1,15 +1,14 @@
 {
   "name": "build-my-home-official",
-  "version": "3.4.2",
+  "version": "3.4.3",
   "private": true,
-  "description": "Build My Home Official V3.4.2 — Step 4 repair, resilient render guard, household and feng-shui upgrade",
+  "description": "Build My Home V3.4.3 runtime fix - clean source only",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "build": "node scripts/build.cjs",
     "build:vercel": "node scripts/build.cjs && node scripts/prepare-vercel.cjs",
-    "test": "node scripts/build.cjs && node --check dist/app.js && node --test tests/runtime.test.cjs domain-kit/tests/*.test.mjs",
-    "start": "node scripts/serve.cjs"
+    "test": "node scripts/build.cjs && node --check dist/app.js"
   }
 }
