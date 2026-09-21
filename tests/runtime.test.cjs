@@ -10,3 +10,6 @@ test('planner has door and window objects',()=>{const js=read('app.js');assert.m
 test('planner uses one pointer controller',()=>{const js=read('app.js');assert.equal((js.match(/addEventListener\('pointerdown'/g)||[]).length,1);assert.equal((js.match(/addEventListener\('pointermove'/g)||[]).length,1);assert.equal((js.match(/addEventListener\('pointerup'/g)||[]).length,1);});
 test('production does not expose dev pay unless local DEV flag',()=>{const js=read('app.js');assert.match(js,/BMH\.DEV\?'<button class="dev-pay"/);});
 test('step 5 has no watermark labels',()=>{const js=read('app.js');assert.doesNotMatch(js,/THƯỚC TỶ LỆ Ý TƯỞNG|tọa độ theo tim tường|Ranh đất, sơ đồ ý tưởng/);});
+test('V3.2 planner renders architectural wall layer and dimension chains',()=>{const js=read('app.js');assert.match(js,/BMH\.wallSegments/);assert.match(js,/arch-wall/);assert.match(js,/dimension-chain/);});
+test('V3.2 openings are editable and tagged',()=>{const js=read('app.js');assert.match(js,/openingCode/);assert.match(js,/data-opening-field/);assert.match(js,/data-opening-delete/);});
+test('V3.2 3D uses cutaway model linked to planner and materials',()=>{const js=read('app.js');assert.match(js,/3D CUTAWAY/);assert.match(js,/Mặt bằng Bước 5 \+ vật liệu Bước 6/);assert.match(js,/openingMarkup/);});

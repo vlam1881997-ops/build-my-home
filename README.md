@@ -1,4 +1,4 @@
-# Build My Home — Official V3.1
+# Build My Home — Official V3.2
 
 Bản dựng lại theo bộ 10 mockup chính thức: giao diện được coi là spec, còn các tính năng cốt lõi được cắm vào đúng component thay vì patch DOM chồng lớp.
 
