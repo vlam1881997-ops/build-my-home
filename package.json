@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "private": true,
-  "description": "Build My Home Official V3.3 — smart-wall CAD-lite and dynamic cutaway review upgrade",
+  "description": "Build My Home Official V3.4 — coordinated-floor CAD, daylight/ventilation analysis, and enriched cutaway review",
   "engines": {
     "node": ">=22"
   },

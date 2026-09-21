@@ -1,6 +1,6 @@
 BMH.defaultState = () => ({
   version: BMH.VERSION,
-  ui: {step:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',showFurniture:true,showDimensions:true,showFeng:true}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
+  ui: {step:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',showFurniture:true,showDimensions:true,showFeng:true,showBelow:false,showStructure:true,showEnvironment:true}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
   access: {paid:false, source:'none', paidAt:null},
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại',
@@ -49,6 +49,9 @@ BMH.normalizeState = () => {
   const ui=BMH.state.ui.planner;
   if(!ui.selected || !BMH.state.project.plan.rooms.some(x=>x.id===ui.selected))ui.selected=BMH.state.project.plan.rooms[0]?.id||null;
   if(!['select','door','window'].includes(ui.tool))ui.tool='select';
+  if(typeof ui.showBelow!=='boolean')ui.showBelow=false;
+  if(typeof ui.showStructure!=='boolean')ui.showStructure=true;
+  if(typeof ui.showEnvironment!=='boolean')ui.showEnvironment=true;
   ui.zoom=BMH.clamp(Number(ui.zoom)||1,.75,2.5);
   if(typeof BMH.state.ui.sceneExploded!=='boolean')BMH.state.ui.sceneExploded=false;
 };
