@@ -1,5 +1,5 @@
 const BMH = {
-  VERSION: '3.4.3',
+  VERSION: '3.5.0',
   STORAGE_KEY: 'bmh-v342-stable',
   LEGACY_STORAGE_KEYS: ['bmh-v23-visual'],
   DEV: ['localhost','127.0.0.1',''].includes(location.hostname),
