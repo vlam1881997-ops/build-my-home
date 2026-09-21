@@ -1,6 +1,6 @@
-# Build My Home FULL v1.7.0 — Product Suite
+# Build My Home FULL v1.7.1 — Design Polish
 
-Bản hợp nhất một lần các hạng mục V1.3 → V1.7 trên nền bộ tính chung: **Official UI 10 bước + Project Store + floor planner/khối lượng + tài chính/vật liệu + AI-ready 3D + Mobile Resilience**. `dist/core.js` vẫn được sinh từ `domain-kit/src/home.mjs`; UI và các file xuất dùng cùng một snapshot tính toán.
+Bản v1.7.1 tập trung hoàn thiện thiết kế theo bộ mockup đã chốt, trên nền Product Suite V1.3 → V1.7: **Official UI 10 bước + Project Store + floor planner/khối lượng + tài chính/vật liệu + AI-ready 3D + Mobile Resilience**. `dist/core.js` vẫn được sinh từ `domain-kit/src/home.mjs`; UI và các file xuất dùng cùng một snapshot tính toán.
 
 ## Chạy ngay
 
@@ -12,6 +12,25 @@ npm start
 
 Mở http://localhost:8080. Không cần npm install cho bản đã đóng gói. Chỉ server cục bộ mới có route AI. Dữ liệu dự án vẫn lưu trên trình duyệt, chưa có tài khoản hoặc đồng bộ đám mây.
 
+
+
+## Design Polish v1.7.1 — vòng hoàn thiện giao diện hiện tại
+
+- Nâng stepper 10 bước: số lớn hơn, bước hiện tại nổi bật, bước đã đi qua có dấu ✓ rõ ràng.
+- Gom thông tin ngân sách vào sticky footer; bỏ lặp lại ngân sách/kích thước ở sidebar.
+- Bước 1 dùng ảnh tham chiếu sắc nét và 3 luồng A/B/C trực quan.
+- Bước 2 dùng logo ngân hàng và dữ liệu công khai có nguồn/ngày; không tự bịa lãi sau ưu đãi khi nguồn không công bố; thêm kịch bản stress lãi suất và cảnh báo dự tính không phải cam kết.
+- Bước 3 thêm Leaflet + OpenStreetMap, ghim vị trí bằng tìm kiếm có chủ đích.
+- Bước 4 đổi thành “Người đồng hành”, thêm con cái/ba mẹ ở chung, thẻ loại đất và la bàn bát trạch sắc nét.
+- Bước 5 bổ sung ký hiệu nội thất tối giản và lớp chú thích kỹ thuật; vẫn ghi rõ đây là mặt bằng ý tưởng, không thay hồ sơ thi công.
+- Bước 6 thay placeholder bằng ảnh vật liệu minh họa/thông tin sản phẩm có nguồn; nơi chưa có báo giá chính thức thì hiển thị “cần báo giá” thay vì tạo giá giả.
+- Bước 7 cho chọn Ngoại thất/Phòng khách/Bếp/Phòng ngủ/WC, hiển thị phối cảnh tương ứng và AI callout; vẫn giữ mô hình 3D khối theo geometry thật.
+- Bước 8 đưa paywall VietQR 99.000đ thành card lớn. QR hiện tại là **DEMO, không có tài khoản nhận và không được dùng để chuyển tiền** cho tới khi backend/webhook thật được cấu hình.
+- Bước 9 khóa bằng blur overlay nếu chưa có entitlement thanh toán thật; không có nút “mở khóa giả”.
+- Bước 10 PDF/Excel premium khóa theo entitlement; SVG/OBJ vẫn xuất được; Excel dùng SpreadsheetML có công thức tổng.
+- Thêm `design-polish.js`, `design-polish.css`, ảnh local, cache service worker v1.7.1 và bộ QA riêng.
+
+Xem `DESIGN_POLISH_V171_QA.md` và `SOURCE_CREDITS_V171.md` trước khi chốt production.
 
 ## Product Suite v1.7 — 5 nhóm nâng cấp đã ghép vào một bản
 
@@ -94,7 +113,7 @@ npm test
 - `dist/scene3d.js`: hình học khối, camera phối cảnh Canvas, OBJ.
 - `scripts/serve.cjs`, `ai-provider.cjs`: server local và kết nối AI.
 
-65 test tự động + 11 kiểm tra giao diện trong DOM giả lập đã đạt cho Product Suite v1.7. Kiểm tra HTTP và ZIP ở `RELEASE_VALIDATION.json`. **Chưa có QA trình duyệt thật**: tải Chromium bị timeout. Không diễn giải kiểm thử Canvas giả lập thành kiểm tra hình ảnh/chuột/chạm trên thiết bị thực.
+67/67 test tự động đã đạt cho Product Suite + Design Polish v1.7.1. Kiểm tra HTTP và ZIP ở `RELEASE_VALIDATION.json`. **Chưa có QA trình duyệt thật**: tải Chromium bị timeout. Không diễn giải kiểm thử Canvas giả lập thành kiểm tra hình ảnh/chuột/chạm trên thiết bị thực.
 
 ## Dữ liệu v1.1 và lưu phương án
 

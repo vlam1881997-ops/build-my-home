@@ -26,3 +26,17 @@ test('AI Vercel function fails closed when server key/model are not configured',
   if(oldKey!==undefined)process.env.OPENAI_API_KEY=oldKey;if(oldModel!==undefined)process.env.OPENAI_MODEL=oldModel;
   assert.equal(status,503);assert.equal(payload.error,'AI_NOT_CONFIGURED');
 });
+
+
+test('v1.7.1 design polish implements mockup-aligned UI and product honesty',()=>{
+  const js=fs.readFileSync(path.join(root,'dist/design-polish.js'),'utf8');
+  for(const token of ['vietqr-demo.png','paymentUnlocked','realMap','OpenStreetMap','Tải bảng dự tính trả nợ theo tháng','người đồng hành','MÃ DEMO','sceneZone','downloadEstimateExcel'])assert.ok(js.includes(token),token);
+  const css=fs.readFileSync(path.join(root,'dist/design-polish.css'),'utf8');
+  for(const token of ['.paywall-card','.polish-bank-row','.real-material-grid','.premium-overlay','.amountbar','.stepper .step.complete'])assert.ok(css.includes(token),token);
+});
+
+test('design polish assets are local and Vercel output includes polish bundle',()=>{
+  for(const file of ['dist/design-polish.js','dist/design-polish.css','dist/assets/design/vietqr-demo.png','dist/assets/design/hero-step1.jpg','dist/assets/rooms/facade-render.jpg','dist/assets/banks/mb.jpg'])assert.ok(fs.existsSync(path.join(root,file)),file);
+  const html=fs.readFileSync(path.join(root,'dist/index.html'),'utf8');
+  assert.match(html,/design-polish\.css/);assert.match(html,/design-polish\.js/);assert.match(html,/leaflet@1\.9\.4/);
+});

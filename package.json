@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-full",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "private": true,
-  "description": "Build My Home Product Suite v1.7: official 10-step UI, global project store, floor planner, finance/material logic, AI-ready 3D, mobile resilience",
+  "description": "Build My Home v1.7.1 Design Polish: mockup-aligned UI, sourced bank/material data, real map, room visuals, paywall UX and export polish",
   "engines": {
     "node": ">=22"
   },

@@ -46,3 +46,20 @@ Không thêm thông tin nhà thầu giả, QR thu tiền hoặc đánh giá chuy
 - Giữ Mobile Resilience: horizontal tables, camera input, autosave lifecycle, iOS file flows, 3D fallback, safe-area.
 - Nâng service-worker cache lên `bmh-interface-v17-product-suite`; Vercel output bắt buộc có product-suite assets.
 - 65/65 automated tests PASS; HTTP static smoke test `/`, `/app.js`, `/styles.css`, `/product-suite.js`, `/product-suite.css`, `/manifest.webmanifest` trả 200 trên local server.
+
+
+## v1.7.1 — Design Polish theo mockup + dữ liệu có nguồn
+- Nâng global visual system: stepper/tick/current state, card shadow/radius, sticky footer ngân sách, loại bỏ sidebar summary trùng lặp.
+- Bước 1: ảnh hero/flow card local sắc nét và bố cục A/B/C ít chữ hơn.
+- Bước 2: logo ngân hàng, nguồn/ngày dữ liệu, stress +3 điểm %, cảnh báo lãi suất tương lai có thể vượt dự tính; xuất lịch trả nợ Excel.
+- Bước 3: Leaflet/OpenStreetMap + Nominatim geocoding theo thao tác người dùng.
+- Bước 4: Người đồng hành + con cái + ba mẹ; soil cards; compass rõ nét.
+- Bước 5: furniture symbols và chú thích kỹ thuật trên SVG ý tưởng.
+- Bước 6: material gallery có ảnh/sản phẩm/nguồn; không gán giá giả khi chưa có báo giá.
+- Bước 7: room/facade visual selector + AI callout, giữ 3D geometry mode.
+- Bước 8: paywall VietQR 99.000đ thành card nổi bật; QR chỉ là demo không nhận tiền cho tới khi có recipient/webhook thật.
+- Bước 9: blur/lock khi chưa có entitlement; không giả webhook.
+- Bước 10: premium PDF/Excel lock; SVG/OBJ giữ miễn phí; SpreadsheetML Excel có công thức.
+- Cache service worker nâng `bmh-interface-v171-design-polish`.
+- 67/67 automated tests pass; smoke test local các entrypoint và asset chính trả HTTP 200.
+- Browser/device visual QA vẫn cần chạy trên link production, đặc biệt iPhone Safari, Facebook/Zalo in-app browser.
