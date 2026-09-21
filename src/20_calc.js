@@ -74,10 +74,11 @@ BMH.designReview = () => {
   const climatePenalty=(BMH.riskValue?.(reg.flood)||0)*3+(BMH.riskValue?.(reg.storm)||0)*3+(BMH.riskValue?.(reg.heat)||0)*2+(BMH.riskValue?.(reg.corrosion)||0);
   const envRooms=p.plan.rooms.filter(r=>['living','bed','kitchen'].includes(r.type)), envScores=envRooms.map(r=>BMH.roomEnvironment?BMH.roomEnvironment(r):null).filter(Boolean);
   const daylight=envScores.length?Math.round(envScores.reduce((s,x)=>s+x.daylight,0)/envScores.length):70, ventilation=envScores.length?Math.round(envScores.reduce((s,x)=>s+x.ventilation,0)/envScores.length):70;
-  const climateScore=BMH.clamp(Math.round((92-climatePenalty)*.55+daylight*.20+ventilation*.25),52,96);
-  const materialScore={economy:72,standard:84,premium:93}[p.materials.tier]||82;
+  const orientation=BMH.orientationAnalysis?BMH.orientationAnalysis(p.site):{score:75};
+  const climateScore=BMH.clamp(Math.round((92-climatePenalty)*.44+daylight*.18+ventilation*.20+orientation.score*.18),52,96);
+  const materialScore=BMH.materialClimateScore?BMH.materialClimateScore(p.site,p.materials.tier):({economy:72,standard:84,premium:93}[p.materials.tier]||82);
   const fengScore=BMH.kua(p.household.ownerBirth,p.household.ownerGender)?78:70;
   const durability=BMH.clamp(materialScore+(p.site.soil.includes('cứng')?3:p.site.soil.includes('trũng')?-6:0),55,96);
   const overall=Math.round(budgetScore*.18+functionScore*.24+climateScore*.18+materialScore*.15+fengScore*.10+durability*.15);
-  return {overall,budget:budgetScore,function:functionScore,climate:climateScore,material:materialScore,feng:fengScore,durability,daylight,ventilation,circulation,issues};
+  return {overall,budget:budgetScore,function:functionScore,climate:climateScore,material:materialScore,feng:fengScore,durability,daylight,ventilation,circulation,orientation:orientation.score,issues};
 };

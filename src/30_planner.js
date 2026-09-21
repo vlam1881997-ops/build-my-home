@@ -31,6 +31,7 @@ BMH.plannerIssues = () => {
   }
   for(let f=1;f<p.site.floors;f++)issues.push(...(BMH.coordinationIssues?BMH.coordinationIssues(f):[]));
   for(let f=0;f<p.site.floors;f++){const ca=BMH.circulationAnalysis?BMH.circulationAnalysis(f):null;if(ca){if(!ca.entries.length)issues.push({sev:'warn',text:`Tầng ${f+1} chưa có cửa ra/vào ngoài nhà được nhận diện.`});ca.unreachable.forEach(r=>issues.push({sev:'warn',text:`${r.name}: chưa có đường lưu thông liên tục qua cửa đi.`}));ca.narrow.forEach(r=>issues.push({sev:'warn',text:`${r.name}: bề rộng lưu thông nhỏ hơn 0,9m.`}));if(!ca.elderlyReady)issues.push({sev:'info',text:'Lối tiếp cận phòng người lớn tuổi/WC tầng trệt cần được kiểm tra lại.'});}}
+  const hot=BMH.riskValue(BMH.regionProfile(p.site).heat)>=2; p.plan.rooms.filter(r=>['bed','living'].includes(r.type)).forEach(r=>{const env=BMH.roomEnvironment(r);if(hot&&env.westWidth>=1.2)issues.push({sev:'info',text:`${r.name}: ô mở hướng Tây khá lớn trong vùng nóng; nên kiểm tra lam che, kính và cây xanh.`});if(env.windCapture<55)issues.push({sev:'info',text:`${r.name}: khả năng đón gió chủ đạo còn thấp; cân nhắc thêm ô mở đối lưu.`});});
   return issues.filter((x,i,a)=>a.findIndex(y=>y.text===x.text)===i);
 };
 
@@ -111,12 +112,28 @@ BMH.externalSides = room => {
 BMH.roomEnvironment = room => {
   const ext=BMH.externalSides(room), openings=BMH.state.project.plan.openings.filter(o=>o.roomId===room.id), windows=openings.filter(o=>o.kind==='window'&&ext.includes(o.side));
   const totalWidth=windows.reduce((s,o)=>s+(Number(o.width)||0),0), area=Math.max(.1,room.w*room.h), distinct=[...new Set(windows.map(o=>o.side))];
-  const daylight=BMH.clamp(Math.round(42+(totalWidth/Math.max(2.4,Math.sqrt(area)*2))*55+ext.length*4),30,98);
+  const profile=BMH.regionProfile(BMH.state.project.site), heatRisk=BMH.riskValue(profile.heat), windAngles=BMH.windDirectionAngles(profile);
+  const sideAngle={north:0,east:90,south:180,west:270};
+  const westWidth=windows.filter(o=>o.side==='west').reduce((a,o)=>a+(Number(o.width)||0),0);
+  const windAligned=windows.filter(o=>Math.min(...windAngles.map(a=>BMH.angleDiff(sideAngle[o.side]??0,a)))<=55);
+  const heatExposure=BMH.clamp(Math.round(22+westWidth*18*heatRisk+((ext.includes('west')&&heatRisk>=2)?12:0)),12,96);
+  const windCapture=BMH.clamp(Math.round(35+windAligned.length*24+(distinct.length>=2?12:0)),30,98);
+  const daylight=BMH.clamp(Math.round(42+(totalWidth/Math.max(2.4,Math.sqrt(area)*2))*55+ext.length*4-westWidth*heatRisk*1.5),30,98);
   const opposite=(distinct.includes('north')&&distinct.includes('south'))||(distinct.includes('east')&&distinct.includes('west'));
-  const ventilation=BMH.clamp(Math.round(38+distinct.length*22+(opposite?18:0)+(openings.some(o=>o.kind==='door')?5:0)),28,98);
-  return {externalSides:ext,windows:windows.length,totalWidth,daylight,ventilation,crossVent:opposite||distinct.length>=2};
+  const ventilation=BMH.clamp(Math.round(34+distinct.length*18+(opposite?16:0)+(openings.some(o=>o.kind==='door')?5:0)+windCapture*.12),28,98);
+  return {externalSides:ext,windows:windows.length,totalWidth,daylight,ventilation,crossVent:opposite||distinct.length>=2,heatExposure,windCapture,westWidth};
 };
 BMH.environmentOverlaySvg = floor => BMH.floorRooms(floor).map(r=>{const a=BMH.roomEnvironment(r),score=Math.round((a.daylight+a.ventilation)/2),cls=score>=78?'good':score>=60?'mid':'low',x=r.x+r.w/2,y=r.y+r.h-.26;return `<g class="env-badge ${cls}"><rect x="${x-.52}" y="${y-.16}" width="1.04" height=".30" rx=".12"/><text x="${x}" y="${y+.035}">☀ ${a.daylight} · ≋ ${a.ventilation}</text></g>`}).join('');
+
+BMH.climateOverlaySvg = floor => {
+  const site=BMH.state.project.site, p=BMH.regionProfile(site), orient=BMH.orientationAnalysis(site), W=site.width, rooms=BMH.floorRooms(floor);
+  const westRooms=rooms.filter(r=>BMH.externalSides(r).includes('west'));
+  const heatBand=BMH.riskValue(p.heat)>=2?`<g class="climate-heat-band"><rect x="-.52" y="0" width=".48" height="${Math.max(4,Math.min(site.depth,18))}" rx=".12"/><text x="-.29" y="1.1" transform="rotate(-90 -.29 1.1)">NẮNG TÂY</text></g>`:'';
+  const windAngle=(orient.windAngles?.[0]??135)*Math.PI/180, cx=W*.5, cy=Math.min(site.depth,14)*.52, len=Math.max(2.2,W*.42), x1=cx-Math.sin(windAngle)*len, y1=cy+Math.cos(windAngle)*len, x2=cx+Math.sin(windAngle)*len, y2=cy-Math.cos(windAngle)*len;
+  const frontAngle=BMH.directionAngle(site.frontDirection||'Nam')*Math.PI/180, fx=W*.5+Math.sin(frontAngle)*(W*.54), fy=cy-Math.cos(frontAngle)*(W*.54);
+  return `<g class="climate-plan-overlay">${heatBand}<g class="wind-arrow"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/><path d="M${x2} ${y2}l-.28 .16m.28-.16l-.08 .32"/><text x="${(x1+x2)/2}" y="${(y1+y2)/2-.15}">GIÓ CHỦ ĐẠO</text></g><g class="front-arrow"><line x1="${cx}" y1="${cy}" x2="${fx}" y2="${fy}"/><circle cx="${cx}" cy="${cy}" r=".12"/><text x="${fx}" y="${fy-.16}">MẶT TIỀN ${BMH.esc(site.frontDirection||'Nam').toUpperCase()}</text></g>${westRooms.map(r=>`<circle class="heat-dot" cx="${r.x+.12}" cy="${r.y+r.h/2}" r=".09"/>`).join('')}</g>`;
+};
+
 BMH.belowFloorSvg = floor => {
   if(floor<=0)return''; const rs=BMH.floorRooms(floor-1); if(!rs.length)return'';
   return `<g class="below-floor">${rs.map(r=>`<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}"/><text x="${r.x+r.w/2}" y="${r.y+r.h/2}">T${floor} · ${BMH.esc(r.name)}</text>`).join('')}</g>`;
@@ -248,6 +265,7 @@ BMH.planSvg = ({interactive=true, floor=BMH.state.ui.planner.floor}={}) => {
   const below=ui.showBelow?BMH.belowFloorSvg(floor):'';
   const structure=ui.showStructure?BMH.structureSvg(floor):'';
   const environment=ui.showEnvironment?BMH.environmentOverlaySvg(floor):'';
+  const climate=ui.showClimate?BMH.climateOverlaySvg(floor):'';
   const circulation=ui.showCirculation?BMH.circulationSvg(floor):'';
   const sectionLine=ui.showSectionLine?BMH.sectionLineSvg(floor,Hview):'';
   const walls=BMH.archWallsSvg(floor), openings=p.plan.openings.filter(o=>o.floor===floor).map(BMH.openingSvg).join('');
@@ -258,7 +276,7 @@ BMH.planSvg = ({interactive=true, floor=BMH.state.ui.planner.floor}={}) => {
   const scale=`<g class="scale-bar" transform="translate(${Math.max(.2,W-2.2)} ${Hview+.63})"><rect x="0" y="0" width=".5" height=".10"/><rect x=".5" y="0" width=".5" height=".10" class="alt"/><rect x="1" y="0" width="1" height=".10"/><text x="0" y=".30">0</text><text x="1" y=".30">1m</text><text x="2" y=".30" text-anchor="end">2m</text></g>`;
   const baseX=-m,baseY=-m,baseW=W+m*2+1.45,baseH=Hview+m*2+1.15,cx=baseX+baseW/2,cy=baseY+baseH/2,vw=baseW/zoom,vh=baseH/zoom,vx=cx-vw/2,vy=cy-vh/2;
   const placement=interactive&&ui.tool!=='select'?`<g class="placement-layer tool-${ui.tool}">${BMH.wallPlacementSvg(rooms)}</g>`:'';
-  return `<svg id="plannerSvg" class="planner-svg architecture-svg tool-${ui.tool}" viewBox="${vx} ${vy} ${vw} ${vh}" preserveAspectRatio="xMidYMid meet" data-floor="${floor}" aria-label="Mặt bằng kiến trúc sơ bộ tầng ${floor+1}"><defs><pattern id="minorGrid" width="${minor}" height="${minor}" patternUnits="userSpaceOnUse"><path d="M ${minor} 0 L 0 0 0 ${minor}"/></pattern><pattern id="majorGrid" width="${major}" height="${major}" patternUnits="userSpaceOnUse"><path d="M ${major} 0 L 0 0 0 ${major}"/></pattern><marker id="routeArrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#6a8a6c"/></marker></defs><rect x="${baseX}" y="${baseY}" width="${baseW}" height="${baseH}" class="sheet-bg"/><rect x="0" y="0" width="${W}" height="${Hview}" class="paper"/><rect x="0" y="0" width="${W}" height="${Hview}" class="minor-grid"/><rect x="0" y="0" width="${W}" height="${Hview}" class="major-grid"/>${feng}${below}<g class="axis-layer">${axesX}${axesY}</g><g class="room-layer">${roomMarkup}</g><g class="wall-layer">${walls}</g>${structure}<g class="opening-layer">${openings}</g>${environment}${circulation}${sectionLine}${placement}${dims}<rect class="plot-boundary" x="0" y="0" width="${W}" height="${Hview}"/>${north}${scale}</svg>`;
+  return `<svg id="plannerSvg" class="planner-svg architecture-svg tool-${ui.tool}" viewBox="${vx} ${vy} ${vw} ${vh}" preserveAspectRatio="xMidYMid meet" data-floor="${floor}" aria-label="Mặt bằng kiến trúc sơ bộ tầng ${floor+1}"><defs><pattern id="minorGrid" width="${minor}" height="${minor}" patternUnits="userSpaceOnUse"><path d="M ${minor} 0 L 0 0 0 ${minor}"/></pattern><pattern id="majorGrid" width="${major}" height="${major}" patternUnits="userSpaceOnUse"><path d="M ${major} 0 L 0 0 0 ${major}"/></pattern><marker id="routeArrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#6a8a6c"/></marker></defs><rect x="${baseX}" y="${baseY}" width="${baseW}" height="${baseH}" class="sheet-bg"/><rect x="0" y="0" width="${W}" height="${Hview}" class="paper"/><rect x="0" y="0" width="${W}" height="${Hview}" class="minor-grid"/><rect x="0" y="0" width="${W}" height="${Hview}" class="major-grid"/>${feng}${below}<g class="axis-layer">${axesX}${axesY}</g><g class="room-layer">${roomMarkup}</g><g class="wall-layer">${walls}</g>${structure}<g class="opening-layer">${openings}</g>${climate}${environment}${circulation}${sectionLine}${placement}${dims}<rect class="plot-boundary" x="0" y="0" width="${W}" height="${Hview}"/>${north}${scale}</svg>`;
 };
 
 BMH.findFreeSpot = (w,h,floor) => { const s=BMH.state.ui.planner.snap, site=BMH.state.project.site; for(let y=0;y<=site.depth-h+.001;y+=s)for(let x=0;x<=site.width-w+.001;x+=s){const r={id:'temp',floor,x:+x.toFixed(2),y:+y.toFixed(2),w,h};if(BMH.roomValid(r))return {x:r.x,y:r.y};} return null; };

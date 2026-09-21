@@ -1,5 +1,5 @@
 const BMH = {
-  VERSION: '3.7.0',
+  VERSION: '3.8.0',
   STORAGE_KEY: 'bmh-v342-stable',
   LEGACY_STORAGE_KEYS: ['bmh-v23-visual'],
   DEV: ['localhost','127.0.0.1',''].includes(location.hostname),
@@ -149,6 +149,54 @@ BMH.nearestRegionPoint = (lat,lng) => {
   let best=null;
   for(const [province,r] of Object.entries(BMH.REGIONS))for(const d of (r.districts||[])){const km=BMH.haversineKm({lat,lng},{lat:d[1],lng:d[2]});if(!best||km<best.km)best={province,district:d[0],lat,lng,km};}
   return best;
+};
+
+
+BMH.DIRECTIONS = [
+  ['Bắc',0,'north'],['Đông Bắc',45,'north-east'],['Đông',90,'east'],['Đông Nam',135,'south-east'],
+  ['Nam',180,'south'],['Tây Nam',225,'south-west'],['Tây',270,'west'],['Tây Bắc',315,'north-west']
+];
+BMH.directionAngle = name => BMH.DIRECTIONS.find(x=>x[0]===name)?.[1] ?? 180;
+BMH.angleDiff = (a,b) => {let d=Math.abs((a-b)%360);return d>180?360-d:d;};
+BMH.windDirectionAngles = profile => {
+  const t=String(profile?.wind||'').toLowerCase(), out=[];
+  const add=(needle,ang)=>{if(t.includes(needle)&&!out.includes(ang))out.push(ang)};
+  add('đông bắc',45); add('đông nam',135); add('tây nam',225); add('tây bắc',315); add('gió biển',90);
+  return out.length?out:[135,225];
+};
+BMH.orientationAnalysis = (site=BMH.state?.project?.site||{}) => {
+  const p=BMH.regionProfile(site), front=site.frontDirection||'Nam', ang=BMH.directionAngle(front), heat=BMH.riskValue(p.heat), storm=BMH.riskValue(p.storm);
+  const westPenalty=Math.max(0,1-BMH.angleDiff(ang,270)/90), eastPenalty=Math.max(0,1-BMH.angleDiff(ang,90)/110);
+  const sunPenalty=(westPenalty*18+eastPenalty*5)*Math.max(1,heat)/3;
+  const winds=BMH.windDirectionAngles(p), windBest=Math.min(...winds.map(w=>BMH.angleDiff(ang,w))), windScore=BMH.clamp(Math.round(96-windBest*.32),48,96);
+  const rainPenalty=storm>=3&&['Đông','Đông Bắc','Đông Nam'].includes(front)?8:0;
+  const score=BMH.clamp(Math.round(92-sunPenalty-rainPenalty+Math.max(0,windScore-70)*.18),45,97);
+  const heatLevel=sunPenalty>=14?'Cao':sunPenalty>=7?'Trung bình':'Thấp';
+  const notes=[];
+  if(westPenalty>.55&&heat>=2)notes.push('Mặt tiền có xu hướng nhận nắng Tây mạnh: ưu tiên lam sâu, ban công, cây xanh và lớp bao che chống nóng.');
+  if(windScore>=78)notes.push('Hướng mặt tiền khá thuận với một hướng gió chủ đạo; nên tổ chức cửa đối lưu để tận dụng thông gió tự nhiên.');
+  else notes.push('Hướng mặt tiền chưa trùng gió chủ đạo; tăng ô mở hai mặt hoặc dùng sân trong/giếng trời để hỗ trợ đối lưu.');
+  if(storm>=3)notes.push('Khu vực có rủi ro gió bão cao: cần kiểm tra cửa, mái và liên kết mặt đứng theo hồ sơ kỹ thuật thực tế.');
+  return {front,angle:ang,score,windScore,heatLevel,sunPenalty:Math.round(sunPenalty),windAngles:winds,notes};
+};
+BMH.climateMaterialGuide = (category,site=BMH.state?.project?.site||{}) => {
+  const p=BMH.regionProfile(site), flood=BMH.riskValue(p.flood),heat=BMH.riskValue(p.heat),cor=BMH.riskValue(p.corrosion),storm=BMH.riskValue(p.storm);
+  const guides={
+    floor: flood>=2?'Ưu tiên bề mặt chống trượt, độ hút nước thấp và ron dễ vệ sinh ở khu ẩm/ngập.':'Ưu tiên độ bền bề mặt và hệ ron phù hợp khu sử dụng.',
+    paint: heat>=3?'Kiểm tra hệ sơn ngoại thất chịu UV/nhiệt, chống kiềm và chống rêu mốc theo đúng nền tường.':'Kiểm tra hệ sơn phù hợp độ ẩm, nền tường và chu kỳ bảo trì.',
+    door: cor>=3?'Vùng ăn mòn cao: xác minh hệ nhôm/phụ kiện, vít và lớp hoàn thiện phù hợp môi trường hơi muối.':storm>=3?'Vùng gió mạnh: kiểm tra hệ cửa, kính, phụ kiện và liên kết khung theo tải gió.':'Ưu tiên kín nước, kín khí và phụ kiện dễ bảo trì.',
+    waterproof: flood>=2?'Ưu tiên hệ chống thấm có chi tiết chân tường, ban công, WC và khe tiếp giáp rõ ràng.':'Ưu tiên hệ chống thấm đồng bộ với nền và lớp hoàn thiện.',
+    cement:'Đối chiếu cấp phối, điều kiện bảo dưỡng và môi trường sử dụng trước khi chốt.',
+    steel: cor>=2?'Kiểm soát lớp bảo vệ bê tông và điều kiện ăn mòn; không thay thế thiết kế kết cấu.':'Chốt mác thép và bảo vệ cốt thép theo hồ sơ kết cấu.',
+    mep: flood>=2?'Ưu tiên cao độ tủ điện, ổ cắm, bơm thoát và tuyến kỹ thuật tránh vùng ngập.':'Ưu tiên phân khu kỹ thuật, bảo trì và chống ẩm.',
+    sanitary:'Ưu tiên thiết bị dễ bảo trì, phụ kiện thay thế sẵn có và thoát nước phù hợp.'
+  };
+  return guides[category]||'Đối chiếu thông số kỹ thuật thực tế trước khi chốt vật liệu.';
+};
+BMH.materialClimateScore = (site=BMH.state?.project?.site||{}, tier=BMH.state?.project?.materials?.tier||'standard') => {
+  const p=BMH.regionProfile(site), o=BMH.orientationAnalysis(site), base={economy:68,standard:82,premium:91}[tier]||80;
+  const risk=(BMH.riskValue(p.flood)+BMH.riskValue(p.storm)+BMH.riskValue(p.corrosion)+BMH.riskValue(p.heat));
+  return BMH.clamp(Math.round(base-(risk-4)*1.5+(o.score-70)*.12),52,96);
 };
 
 BMH.BANKS = [

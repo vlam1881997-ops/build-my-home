@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "3.7.0",
+  "version": "3.8.0",
   "private": true,
-  "description": "Build My Home V3.7.0 location, climate intelligence and technical drawing upgrade - clean source only",
+  "description": "Build My Home V3.8.0 climate-adaptive design, orientation and material intelligence - clean source only",
   "engines": {
     "node": ">=22"
   },
