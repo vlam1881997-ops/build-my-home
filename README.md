@@ -94,3 +94,4 @@ Tài liệu trong `domain-kit/docs/` và `docs/WEB_V1_GUIDE.md` là đặc tả/
 ## Vercel
 
 Repository đã có `vercel.json` để deploy đúng thư mục `dist/`. Khi import vào Vercel, giữ Root Directory ở gốc repository và dùng Framework Preset `Other`. Chi tiết xem `VERCEL_DEPLOY.md`.
+Vercel deployment trigger 2026-09-21
