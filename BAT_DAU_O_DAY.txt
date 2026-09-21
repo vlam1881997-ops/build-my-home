@@ -1,0 +1,11 @@
+BUILD MY HOME FULL v1.2
+
+1. Giải nén và mở thư mục bằng Visual Studio Code.
+2. Mở dist/index.html để dùng ngay; hoặc chạy npm start (Node.js 22+), mở http://localhost:8080.
+3. Bước 5: cửa/tường/khối lượng; bước 2: dòng tiền; bước 6: giá có nguồn; bước 7: 3D & AI; bước 10: ZIP hồ sơ.
+4. AI thật cần .env với OPENAI_API_KEY và OPENAI_MODEL; chạy server local. GitHub Pages chỉ phục vụ web tĩnh.
+5. GitHub: tải toàn bộ nội dung dự án lên repository; Settings > Pages > GitHub Actions.
+6. Đọc README.md về số liệu minh họa, giới hạn khối lượng và kết quả kiểm thử.
+
+ĐÃ nối UI với bộ tính chung trong domain-kit. Sau khi sửa domain: npm run build rồi npm test.
+Sao lưu JSON dự án trước khi đổi máy/đổi địa chỉ web. Không đưa .env lên GitHub.

@@ -1,0 +1,25 @@
+{
+  "version": "1.2.0",
+  "date": "2026-09-21T01:07:12.366561+00:00",
+  "automated_tests": {
+    "passed": 61,
+    "failed": 0
+  },
+  "vm_screen_checks": {
+    "passed": 11,
+    "failed": 0
+  },
+  "shared_core_bundle_matches_source": true,
+  "http_static_and_private_file_checks": "passed",
+  "api_no_key_status": 503,
+  "api_wrong_origin_status": 403,
+  "export_zip_crc": "passed",
+  "export_file_count": 9,
+  "all_exports_same_snapshot": true,
+  "browser_e2e": "not run; Chromium download timed out",
+  "ai_live_provider": "not run; no API credentials",
+  "ai_provider_adapter": "mock tests passed; not evidence of live model availability",
+  "github_deployment": "not performed",
+  "pricing": "demo defaults plus user-entered source records; no live market feed",
+  "geometry": "concept centerline rectangles and segmented shared walls; not construction takeoff"
+}

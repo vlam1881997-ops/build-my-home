@@ -1,0 +1,264 @@
+{
+  "contractVersion": "0.1.0",
+  "status": "PROPOSED_NOT_IMPLEMENTED",
+  "format": "API design catalog; not OpenAPI",
+  "baseCurrency": "VND",
+  "conventions": {
+    "mutations": "JSON request, runtime schema validation, ownership check, expectedRevision where modifying data",
+    "errors": {
+      "401": "Unauthenticated",
+      "403": "Forbidden/entitlement missing",
+      "404": "Unknown or inaccessible entity",
+      "409": "Revision/idempotency conflict",
+      "413": "File too large",
+      "422": "Validation or missing evidence",
+      "429": "Rate limit",
+      "503": "Provider not configured/unavailable"
+    },
+    "payment": "Signature adapter plus server transaction required. No client-controlled paid flag.",
+    "jobResult": "Must match requested inputRevision; never overwrite a newer project revision.",
+    "freeTrial": "Server policy may grant trial entitlement. Never trust paywallEnabled from request."
+  },
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/api/projects",
+      "purpose": "Tạo dự án",
+      "authorization": "authenticated",
+      "request": "name, entryPath",
+      "response": "Project; 201"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/{projectId}",
+      "purpose": "Đọc dự án",
+      "authorization": "member",
+      "request": "projectId",
+      "response": "Project"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/projects/{projectId}",
+      "purpose": "Lưu thay đổi",
+      "authorization": "editor",
+      "request": "expectedRevision, section, patch",
+      "response": "Project; 409 khi revision sai"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{projectId}/scenarios",
+      "purpose": "Tạo hoặc sao chép phương án",
+      "authorization": "editor",
+      "request": "name, sourceScenarioId?",
+      "response": "Scenario; 201"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{projectId}/assets",
+      "purpose": "Xin upload URL private",
+      "authorization": "editor",
+      "request": "purpose, mimeType, bytes",
+      "response": "assetId, uploadUrl, expiresAt; 201"
+    },
+    {
+      "method": "POST",
+      "path": "/api/assets/{assetId}/complete",
+      "purpose": "Xác nhận upload để quét",
+      "authorization": "editor",
+      "request": "assetId",
+      "response": "Asset pending scan; 202"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{projectId}/analysis",
+      "purpose": "Đọc bản vẽ bất đồng bộ",
+      "authorization": "editor",
+      "request": "assetId, pages, inputRevision",
+      "response": "Job; 202"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/projects/{projectId}/design",
+      "purpose": "Lưu bản vẽ đã xác nhận",
+      "authorization": "editor",
+      "request": "expectedRevision, geometry, calibration",
+      "response": "DesignVersion; 201"
+    },
+    {
+      "method": "GET",
+      "path": "/api/regions",
+      "purpose": "Danh mục vùng",
+      "authorization": "public",
+      "request": "country, parent?, version?",
+      "response": "regions, version"
+    },
+    {
+      "method": "GET",
+      "path": "/api/materials",
+      "purpose": "Danh mục vật liệu",
+      "authorization": "public",
+      "request": "category, regionCode, cursor",
+      "response": "items, nextCursor"
+    },
+    {
+      "method": "GET",
+      "path": "/api/prices",
+      "purpose": "Giá có nguồn",
+      "authorization": "public",
+      "request": "skuId, regionCode, asOf",
+      "response": "PriceRecord[]; có thể rỗng"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{projectId}/finance/calculate",
+      "purpose": "Tính tài chính",
+      "authorization": "member",
+      "request": "scenarioId, inputRevision",
+      "response": "schedule, summary, assumptions"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{projectId}/recommendations",
+      "purpose": "Lọc và giải thích mẫu",
+      "authorization": "member",
+      "request": "scenarioId, inputRevision",
+      "response": "candidates, unmetConstraints"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{projectId}/estimates",
+      "purpose": "Tạo snapshot dự toán",
+      "authorization": "editor",
+      "request": "scenarioId, expectedRevision",
+      "response": "Snapshot; 201 hoặc 422 thiếu dữ liệu"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{projectId}/review",
+      "purpose": "Đánh giá có bằng chứng",
+      "authorization": "editor",
+      "request": "snapshotId, inputRevision",
+      "response": "Job; 202"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{projectId}/simulations",
+      "purpose": "Mô phỏng vòng đời",
+      "authorization": "member",
+      "request": "snapshotId, assumptions",
+      "response": "Simulation"
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders",
+      "purpose": "Tạo đơn giá từ server",
+      "authorization": "owner",
+      "request": "projectId, productId; Idempotency-Key header",
+      "response": "Order, checkoutUrl; 201"
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders/{orderId}",
+      "purpose": "Đọc trạng thái thanh toán",
+      "authorization": "order_owner",
+      "request": "orderId",
+      "response": "Order, entitlementStatus"
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/payments/{provider}",
+      "purpose": "Nhận sự kiện thanh toán",
+      "authorization": "provider_signature",
+      "request": "provider-specific signed payload",
+      "response": "200 khi xử lý/trùng, 4xx invalid, 5xx retry; chưa có adapter"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/{projectId}/entitlements",
+      "purpose": "Quyền từ máy chủ",
+      "authorization": "member",
+      "request": "projectId",
+      "response": "Entitlement[]"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{projectId}/exports",
+      "purpose": "Tạo tài liệu theo snapshot",
+      "authorization": "member_and_package_if_detailed",
+      "request": "snapshotId, format, bundle; Idempotency-Key header",
+      "response": "Job; 202"
+    },
+    {
+      "method": "GET",
+      "path": "/api/jobs/{jobId}",
+      "purpose": "Đọc trạng thái job",
+      "authorization": "project_member",
+      "request": "jobId",
+      "response": "Job"
+    },
+    {
+      "method": "GET",
+      "path": "/api/assets/{assetId}/download",
+      "purpose": "Tải file có kiểm tra quyền",
+      "authorization": "project_member_and_required_entitlement",
+      "request": "assetId",
+      "response": "shortLivedDownloadUrl, expiresAt"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/projects/{projectId}/checklist/{itemId}",
+      "purpose": "Lưu kiểm tra thực tế",
+      "authorization": "editor_and_package",
+      "request": "status, evidenceAssetIds, expectedRevision",
+      "response": "ChecklistItem"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{projectId}/change-orders",
+      "purpose": "Tạo phát sinh",
+      "authorization": "editor_and_package",
+      "request": "scope, costDelta, scheduleDelta, reason",
+      "response": "ChangeOrder pending approval; 201"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{projectId}/milestones",
+      "purpose": "Lưu lịch giải ngân",
+      "authorization": "editor_and_package",
+      "request": "expectedRevision, milestones, retentionTerms",
+      "response": "MilestonePlan"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{projectId}/actual-payments",
+      "purpose": "Ghi khoản chi thực tế",
+      "authorization": "editor_and_package",
+      "request": "milestoneId, amount, paidAt, evidenceAssetId?",
+      "response": "ActualPayment; 201"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{projectId}/handover",
+      "purpose": "Ghi xác nhận bàn giao",
+      "authorization": "owner_and_package",
+      "request": "expectedRevision, acceptedItems, unresolvedItems, evidence",
+      "response": "Project; không tự ký biên bản"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/prices/import",
+      "purpose": "Nhập giá chờ duyệt",
+      "authorization": "admin",
+      "request": "validatedRows, source",
+      "response": "ImportResult"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/prices/{id}/approve",
+      "purpose": "Duyệt bản giá",
+      "authorization": "price_reviewer",
+      "request": "id, reviewNote",
+      "response": "PriceRecord"
+    }
+  ]
+}
