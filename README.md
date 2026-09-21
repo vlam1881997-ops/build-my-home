@@ -1,6 +1,6 @@
-# Build My Home FULL v1.7.1 — Design Polish
+# Build My Home FULL V2.0 — Design & Planner Stabilization
 
-Bản v1.7.1 tập trung hoàn thiện thiết kế theo bộ mockup đã chốt, trên nền Product Suite V1.3 → V1.7: **Official UI 10 bước + Project Store + floor planner/khối lượng + tài chính/vật liệu + AI-ready 3D + Mobile Resilience**. `dist/core.js` vẫn được sinh từ `domain-kit/src/home.mjs`; UI và các file xuất dùng cùng một snapshot tính toán.
+V2.0 hợp nhất toàn bộ vòng Design Polish và các yêu cầu ổn định logic thương mại: **khóa chung Bước 9–10, hộ gia đình động nhiều con/người thân, planner snap/collision/validator, ngân hàng có nguồn + stress test, delta vật liệu, timeline hao mòn 3D, sidebar collapse và Mobile Resilience**. `dist/core.js` vẫn được sinh từ `domain-kit/src/home.mjs`; UI và các file xuất dùng cùng một snapshot tính toán.
 
 ## Chạy ngay
 
@@ -13,6 +13,22 @@ npm start
 Mở http://localhost:8080. Không cần npm install cho bản đã đóng gói. Chỉ server cục bộ mới có route AI. Dữ liệu dự án vẫn lưu trên trình duyệt, chưa có tài khoản hoặc đồng bộ đám mây.
 
 
+
+
+## V2.0 — vòng ổn định trước khi làm V2.1
+
+- Paywall Step 9 + Step 10 dùng chung entitlement; click trực tiếp Step 10 không còn lách được luồng UI. DEV unlock chỉ chạy local.
+- Banner phối cảnh/callout AI chỉ còn ở Bước 7; Ngày/Đêm chỉ điều khiển mô hình 3D.
+- Hộ gia đình động: người đồng hành, nhiều con và ba/mẹ/người thân; snapshot đổi theo cấu hình hộ gia đình.
+- Planner V2: snap grid 0,1/0,2/0,5 m, chống chồng, validator liên tầng/khu ướt/mặt thoáng/nhu cầu phòng ngủ, gara và ký hiệu cửa mở.
+- Bước 2: ngân hàng tự điền dữ liệu công khai có nguồn khi đủ căn cứ; stress +2/+3/+5 điểm %, vẫn cho sửa tay.
+- Bước 6: hiện chênh lệch chi phí ngay khi đổi gói/vật liệu.
+- Bước 7: timeline Hiện tại/Năm 3/Năm 5/Năm 10 + wear overlay/bảo trì dự kiến.
+- Bước 8: paywall gọn above-the-fold, sao chép số tài khoản/nội dung khi đã cấu hình.
+- Sidebar có icon-rail; location chỉ lấy từ Bước 3.
+- Sửa mapping checkbox Checklist MEP ở Bước 9.
+
+Xem `V2_RELEASE_NOTES.md`, `V2_QA.md` và `PAYMENT_V2_SETUP.md`. **Paywall thương mại thật vẫn cần webhook + entitlement server-side + file premium có kiểm quyền backend; V2 không giả phần này khi chưa có thông tin nhà cung cấp thanh toán.**
 
 ## Design Polish v1.7.1 — vòng hoàn thiện giao diện hiện tại
 
@@ -113,7 +129,7 @@ npm test
 - `dist/scene3d.js`: hình học khối, camera phối cảnh Canvas, OBJ.
 - `scripts/serve.cjs`, `ai-provider.cjs`: server local và kết nối AI.
 
-67/67 test tự động đã đạt cho Product Suite + Design Polish v1.7.1. Kiểm tra HTTP và ZIP ở `RELEASE_VALIDATION.json`. **Chưa có QA trình duyệt thật**: tải Chromium bị timeout. Không diễn giải kiểm thử Canvas giả lập thành kiểm tra hình ảnh/chuột/chạm trên thiết bị thực.
+69/69 test tự động đã đạt cho Build My Home V2.0. Kiểm tra HTTP và ZIP ở `RELEASE_VALIDATION.json`. **Chưa có QA trình duyệt thật**: tải Chromium bị timeout. Không diễn giải kiểm thử Canvas giả lập thành kiểm tra hình ảnh/chuột/chạm trên thiết bị thực.
 
 ## Dữ liệu v1.1 và lưu phương án
 

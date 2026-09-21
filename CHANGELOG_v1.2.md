@@ -63,3 +63,18 @@ Không thêm thông tin nhà thầu giả, QR thu tiền hoặc đánh giá chuy
 - Cache service worker nâng `bmh-interface-v171-design-polish`.
 - 67/67 automated tests pass; smoke test local các entrypoint và asset chính trả HTTP 200.
 - Browser/device visual QA vẫn cần chạy trên link production, đặc biệt iPhone Safari, Facebook/Zalo in-app browser.
+
+
+## v2.0.0 — Design & Planner Stabilization
+- Vá paywall: Bước 9 + Bước 10 dùng cùng entitlement, Stepper khóa cả hai; DEV unlock chỉ local.
+- Xóa banner 3D khỏi mọi bước trừ Bước 7; Ngày/Đêm chỉ áp dụng canvas 3D.
+- Hộ gia đình động: người đồng hành, tối đa 8 hồ sơ con và 6 người thân trong UI; snapshot core fingerprint có household chi tiết.
+- Planner: snap grid, collision prevention, validator ranh đất/cầu thang/khu ướt/mặt thoáng/nhu cầu phòng ngủ, gara, layer phong thủy tham khảo và ký hiệu cửa mở 90°.
+- Ngân hàng auto-fill dữ liệu công khai có nguồn khi đủ căn cứ; thêm stress +2/+3/+5.
+- Vật liệu hiển thị delta trước/sau bằng cùng snapshot engine.
+- 3D thêm timeline hao mòn 0/3/5/10 và chi phí bảo trì dự kiến; vẫn tách phối cảnh tham khảo khỏi geometry thật.
+- Bước 8 nâng paywall above-the-fold + copy account/content; production fail-closed nếu chưa có entitlement verified.
+- Sidebar collapse/icon rail, location thống nhất từ Bước 3, map tile fallback.
+- Sửa bug mapping key/label của checklist Bước 9.
+- Thêm `v2.js`, `v2.css`, `V2_RELEASE_NOTES.md`, `V2_QA.md`, `PAYMENT_V2_SETUP.md`.
+- 69/69 automated tests PASS. Browser/device visual QA vẫn cần chạy trên production.

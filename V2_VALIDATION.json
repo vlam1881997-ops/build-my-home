@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "date": "2026-09-21T08:34:30.308412+00:00",
+  "automatedTests": {
+    "passed": 69,
+    "failed": 0
+  },
+  "staticSmoke": {
+    "/": 200,
+    "/app.js": 200,
+    "/styles.css": 200,
+    "/core.js": 200,
+    "/v2.js": 200,
+    "/v2.css": 200,
+    "/design-polish.js": 200,
+    "/manifest.webmanifest": 200
+  },
+  "syntaxChecks": "passed",
+  "browserVisualQA": {
+    "status": "not_completed",
+    "reason": "Headless Chromium in this container timed out because its system DBus/zygote environment is unavailable. Production browser/device QA is still required."
+  },
+  "knownProductionDependencies": [
+    "Real payment webhook/provider + server-side entitlement storage for secure commercial paywall",
+    "Real recipient account / per-order VietQR before accepting money",
+    "OpenAI server environment variables for cloud AI, if enabled",
+    "Architect/engineer review before treating the planner as construction documentation"
+  ]
+}

@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-full",
-  "version": "1.7.1",
+  "version": "2.0.0",
   "private": true,
-  "description": "Build My Home v1.7.1 Design Polish: mockup-aligned UI, sourced bank/material data, real map, room visuals, paywall UX and export polish",
+  "description": "Build My Home V2: stabilized paywall, dynamic household, architecture planner validation, sourced finance/material data, lifecycle 3D UX and production-ready mobile shell",
   "engines": {
     "node": ">=22"
   },
