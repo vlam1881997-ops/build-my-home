@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "private": true,
-  "description": "Build My Home Official V3.0 — mockup-driven 10-step UI with integrated functional core",
+  "description": "Build My Home Official V3.1 — planner, map and 3D stabilization on mockup-driven UI",
   "engines": {
     "node": ">=22"
   },

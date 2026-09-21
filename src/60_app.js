@@ -20,9 +20,18 @@ BMH.afterRender = () => {
   if(BMH.state.ui.step===5 && window.innerWidth>1180 && !BMH.state.ui.sidebarCollapsed){BMH.state.ui.sidebarCollapsed=true;BMH.save();BMH.render();}
 };
 BMH.initMap = () => {
-  const el=BMH.$('#map'); if(!el)return; const s=BMH.state.project.site;
-  try{if(BMH.map){BMH.map.remove();BMH.map=null;} if(!window.L)throw new Error('Leaflet unavailable'); BMH.map=L.map(el,{zoomControl:true}).setView([s.lat,s.lng],12); let tileErrors=0,tileLoads=0; const layer=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(BMH.map); layer.on('tileerror',()=>{tileErrors++;if(tileErrors>=3)el.classList.add('fallback-only')}); layer.on('tileload',()=>{tileLoads++;if(tileLoads>=3&&tileErrors<3)el.classList.remove('fallback-only')}); BMH.mapMarker=L.marker([s.lat,s.lng]).addTo(BMH.map).bindPopup(`${BMH.esc(s.district||'')} · ${BMH.esc(s.province)}`).openPopup(); setTimeout(()=>BMH.map?.invalidateSize(true),80); window.addEventListener('resize',BMH.mapResize,{once:true});}
-  catch(e){el.classList.add('fallback-only');}
+  const el=BMH.$('#map'); if(!el)return; const s=BMH.state.project.site, r=BMH.REGIONS[s.province]||BMH.REGIONS['Bình Dương'];
+  try{
+    if(BMH.map){BMH.map.remove();BMH.map=null;}
+    if(!window.L)throw new Error('Leaflet unavailable');
+    BMH.map=L.map(el,{zoomControl:true,preferCanvas:true}).setView([s.lat,s.lng],r.zoom||12);
+    let switched=false,errors=0;
+    const addLayer=(url,attr)=>{const layer=L.tileLayer(url,{maxZoom:19,attribution:attr,keepBuffer:4,updateWhenIdle:false}).addTo(BMH.map);layer.on('load',()=>{el.classList.remove('map-loading','fallback-only')});layer.on('tileerror',()=>{errors++;if(errors>=5&&!switched){switched=true;BMH.map.removeLayer(layer);errors=0;addLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png','© OpenStreetMap contributors');}else if(errors>=10){el.classList.add('fallback-only');}});return layer;};
+    addLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png','© OpenStreetMap contributors © CARTO');
+    BMH.mapMarker=L.marker([s.lat,s.lng]).addTo(BMH.map).bindPopup(`${BMH.esc(s.district||'')} · ${BMH.esc(s.province)}`).openPopup();
+    setTimeout(()=>BMH.map?.invalidateSize(true),120); setTimeout(()=>BMH.map?.invalidateSize(true),450);
+    window.addEventListener('resize',BMH.mapResize,{once:true});
+  } catch(e){el.classList.remove('map-loading');el.classList.add('fallback-only');}
 };
 BMH.mapResize = () => BMH.map?.invalidateSize(true);
 
@@ -31,7 +40,8 @@ BMH.app.addEventListener('click',e=>{
   const start=e.target.closest('[data-start]'); if(start){BMH.state.project.source=start.dataset.start;BMH.save(); if(start.dataset.start==='photo')BMH.$('#uploadPhoto')?.click(); else if(start.dataset.start==='plan')BMH.$('#uploadPlan')?.click(); else BMH.navigateTo(2); return;}
   if(e.target.closest('[data-sidebar]')){BMH.state.ui.sidebarCollapsed=!BMH.state.ui.sidebarCollapsed;BMH.save();BMH.render();return;}
   const bank=e.target.closest('[data-bank]'); if(bank){const b=BMH.BANKS.find(x=>x.id===bank.dataset.bank);if(b){Object.assign(BMH.state.project.finance,{bank:b.id,introRate:b.intro,postRate:b.post,promoMonths:b.months});BMH.save();BMH.render();BMH.toast(`Đã nạp kịch bản ${b.name}; vẫn có thể chỉnh tay.`);}return;}
-  if(e.target.closest('[data-map-refresh]')){const r=BMH.REGIONS[BMH.state.project.site.province];if(r){BMH.state.project.site.lat=r.lat;BMH.state.project.site.lng=r.lng;BMH.save();BMH.render();}return;}
+  if(e.target.closest('[data-map-refresh]')){const s=BMH.state.project.site,pt=BMH.regionPoint(s.province,s.district);Object.assign(s,{lat:pt.lat,lng:pt.lng,district:pt.district});BMH.save();BMH.render();return;}
+  const nearby=e.target.closest('[data-nearby]');if(nearby){const s=BMH.state.project.site;s.district=nearby.dataset.nearby;s.lat=Number(nearby.dataset.lat);s.lng=Number(nearby.dataset.lng);BMH.save();BMH.render();return;}
   const soil=e.target.closest('[data-soil]');if(soil){BMH.state.project.site.soil=soil.dataset.soil;BMH.save();BMH.render();return;}
   const addPerson=e.target.closest('[data-household-add]');if(addPerson){const h=BMH.state.project.household;if(addPerson.dataset.householdAdd==='child')h.children.push({id:BMH.uid('c'),name:`Con ${h.children.length+1}`,birth:new Date().getFullYear()-8,room:'Riêng'});else h.relatives.push({id:BMH.uid('p'),name:`Người thân ${h.relatives.length+1}`,birth:1960,mobility:'Bình thường'});BMH.save();BMH.render();return;}
   const rem=e.target.closest('[data-person-remove]');if(rem){const h=BMH.state.project.household,key=rem.dataset.personRemove==='child'?'children':'relatives';h[key]=h[key].filter(x=>x.id!==rem.dataset.id);BMH.save();BMH.render();return;}
@@ -44,7 +54,7 @@ BMH.app.addEventListener('click',e=>{
   const opening=e.target.closest('[data-add-opening]');if(opening){BMH.addOpening(opening.dataset.addOpening);return;}
   if(e.target.closest('[data-room-delete]')){const id=BMH.state.ui.planner.selected;BMH.state.project.plan.rooms=BMH.state.project.plan.rooms.filter(r=>r.id!==id);BMH.state.project.plan.openings=BMH.state.project.plan.openings.filter(o=>o.roomId!==id);BMH.state.ui.planner.selected=BMH.floorRooms()[0]?.id||null;BMH.save();BMH.render();return;}
   if(e.target.closest('[data-planner-fit]')){BMH.state.ui.planner.zoom=1;BMH.save();BMH.render();return;}
-  if(e.target.closest('[data-planner-fullscreen]')){const el=BMH.$('.drawing'); if(el?.requestFullscreen) el.requestFullscreen().catch(()=>BMH.toast('Trình duyệt không cho phép toàn màn hình.')); return;}
+  if(e.target.closest('[data-planner-fullscreen]')){const el=BMH.$('.technical-sheet'); if(el?.requestFullscreen) el.requestFullscreen().catch(()=>BMH.toast('Trình duyệt không cho phép toàn màn hình.')); return;}
   const tier=e.target.closest('[data-tier]');if(tier){const before=BMH.estimate().total;BMH.state.project.materials.tier=tier.dataset.tier;const after=BMH.estimate().total;BMH.state.project.materials.lastDelta=after-before;BMH.save();BMH.render();return;}
   const material=e.target.closest('[data-material]');if(material){const before=BMH.estimate().total,cat=material.dataset.materialCat;BMH.state.project.materials.choices[cat]=material.dataset.material;const after=BMH.estimate().total;BMH.state.project.materials.lastDelta=after-before;BMH.save();BMH.render();return;}
   const sm=e.target.closest('[data-scene-mode]');if(sm){BMH.state.ui.sceneMode=sm.dataset.sceneMode;BMH.save();BMH.render();return;}
@@ -58,7 +68,7 @@ BMH.app.addEventListener('click',e=>{
 
 BMH.app.addEventListener('change',e=>{
   const t=e.target;
-  if(t.dataset.path){let v=t.type==='number'?Number(t.value)*(Number(t.dataset.scale)||1):t.value;BMH.set(t.dataset.path,v); if(t.dataset.path==='project.site.province'){const r=BMH.REGIONS[v];if(r){BMH.state.project.site.lat=r.lat;BMH.state.project.site.lng=r.lng;BMH.save();BMH.render();}} return;}
+  if(t.dataset.path){let v=t.type==='number'?Number(t.value)*(Number(t.dataset.scale)||1):t.value;const path=t.dataset.path;if(path==='project.site.province'){const r=BMH.REGIONS[v];BMH.state.project.site.province=v;if(r){const pt=BMH.regionPoint(v,r.defaultDistrict);Object.assign(BMH.state.project.site,{district:pt.district,lat:pt.lat,lng:pt.lng});}BMH.save();BMH.render();return;}if(path==='project.site.district'){BMH.state.project.site.district=v;const pt=BMH.regionPoint(BMH.state.project.site.province,v);BMH.state.project.site.lat=pt.lat;BMH.state.project.site.lng=pt.lng;BMH.save();BMH.render();return;}BMH.set(path,v);return;}
   if(t.dataset.person){const h=BMH.state.project.household,list=t.dataset.person==='child'?h.children:h.relatives,p=list.find(x=>x.id===t.dataset.id);if(p){p[t.dataset.key]=t.type==='number'?Number(t.value):t.value;BMH.save();BMH.render();}return;}
   if(t.dataset.planner){const ui=BMH.state.ui.planner;if(t.dataset.planner==='snap')ui.snap=Number(t.value);if(t.dataset.planner==='furniture')ui.showFurniture=t.checked;if(t.dataset.planner==='dimensions')ui.showDimensions=t.checked;if(t.dataset.planner==='feng')ui.showFeng=t.checked;BMH.save();BMH.render();return;}
   if(t.dataset.roomField){const r=BMH.selectedRoom();if(!r)return;const key=t.dataset.roomField,old={...r};r[key]=['x','y','w','h'].includes(key)?Number(t.value):t.value;if(['x','y','w','h'].includes(key)){r[key]=BMH.roundTo(r[key],BMH.state.ui.planner.snap);if(!BMH.roomValid(r)){Object.assign(r,old);BMH.toast('Giá trị mới gây chồng phòng hoặc vượt ranh.');}}BMH.save();BMH.render();return;}

@@ -4,4 +4,4 @@ const banner=`/* Build My Home Official V3.0 UI + Functional Core\n * One state 
 const js=banner+jsFiles.map(f=>`\n/* ---- ${f} ---- */\n`+fs.readFileSync(path.join(src,f),'utf8')).join('\n')+'\n})();\n';
 fs.rmSync(dist,{recursive:true,force:true});fs.mkdirSync(dist,{recursive:true});
 fs.writeFileSync(path.join(dist,'app.js'),js);fs.copyFileSync(path.join(src,'styles.css'),path.join(dist,'styles.css'));fs.copyFileSync(path.join(src,'index.html'),path.join(dist,'index.html'));fs.copyFileSync(path.join(src,'sw.js'),path.join(dist,'sw.js'));fs.copyFileSync(path.join(src,'manifest.webmanifest'),path.join(dist,'manifest.webmanifest'));fs.cpSync(path.join(root,'assets'),path.join(dist,'assets'),{recursive:true});fs.writeFileSync(path.join(dist,'.nojekyll'),'');
-console.log(`Built V3.0 -> ${dist}`);
+console.log(`Built V3.1 -> ${dist}`);

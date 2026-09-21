@@ -1,5 +1,5 @@
 const BMH = {
-  VERSION: '3.0.0',
+  VERSION: '3.1.0',
   STORAGE_KEY: 'bmh-v23-visual',
   DEV: ['localhost','127.0.0.1',''].includes(location.hostname),
   map: null,
@@ -33,12 +33,17 @@ BMH.STEPS = [
 ];
 
 BMH.REGIONS = {
-  'Bình Dương': {lat:11.160, lng:106.650, climate:'Nhiệt đới gió mùa', flood:'Trung bình', storm:'Thấp - Trung bình', labor:'350.000 – 500.000 đ/ngày'},
-  'TP. Hồ Chí Minh': {lat:10.7769,lng:106.7009,climate:'Nhiệt đới gió mùa',flood:'Trung bình - Cao',storm:'Thấp',labor:'400.000 – 600.000 đ/ngày'},
-  'Đà Nẵng': {lat:16.0544,lng:108.2022,climate:'Nhiệt đới gió mùa',flood:'Trung bình',storm:'Trung bình - Cao',labor:'350.000 – 500.000 đ/ngày'},
-  'Hà Nội': {lat:21.0278,lng:105.8342,climate:'Cận nhiệt đới ẩm',flood:'Trung bình',storm:'Trung bình',labor:'400.000 – 600.000 đ/ngày'},
-  'Đồng Nai': {lat:10.9574,lng:106.8426,climate:'Nhiệt đới gió mùa',flood:'Trung bình',storm:'Thấp - Trung bình',labor:'350.000 – 500.000 đ/ngày'},
-  'Long An': {lat:10.6956,lng:106.2431,climate:'Nhiệt đới gió mùa',flood:'Trung bình - Cao',storm:'Thấp',labor:'330.000 – 480.000 đ/ngày'}
+  'Bình Dương': {lat:11.160, lng:106.650, zoom:12, defaultDistrict:'Thủ Dầu Một', districts:[['Thủ Dầu Một',11.160,106.650],['Dĩ An',10.9060,106.7690],['Thuận An',10.9320,106.7110],['Bến Cát',11.1510,106.5940]], climate:'Nhiệt đới gió mùa', flood:'Trung bình', storm:'Thấp - Trung bình', labor:'350.000 – 500.000 đ/ngày'},
+  'TP. Hồ Chí Minh': {lat:10.7769,lng:106.7009,zoom:12,defaultDistrict:'Quận 1',districts:[['Quận 1',10.7769,106.7009],['TP Thủ Đức',10.8494,106.7537],['Quận 7',10.7340,106.7216],['Bình Thạnh',10.8106,106.7091]],climate:'Nhiệt đới gió mùa',flood:'Trung bình - Cao',storm:'Thấp',labor:'400.000 – 600.000 đ/ngày'},
+  'Đà Nẵng': {lat:16.0544,lng:108.2022,zoom:12,defaultDistrict:'Sơn Trà',districts:[['Sơn Trà',16.1060,108.2520],['Hải Châu',16.0600,108.2210],['Ngũ Hành Sơn',16.0180,108.2600],['Liên Chiểu',16.0820,108.1500]],climate:'Nhiệt đới gió mùa',flood:'Trung bình',storm:'Trung bình - Cao',labor:'350.000 – 500.000 đ/ngày'},
+  'Hà Nội': {lat:21.0278,lng:105.8342,zoom:12,defaultDistrict:'Ba Đình',districts:[['Ba Đình',21.0338,105.8142],['Hoàn Kiếm',21.0288,105.8522],['Cầu Giấy',21.0362,105.7906],['Hà Đông',20.9712,105.7788]],climate:'Cận nhiệt đới ẩm',flood:'Trung bình',storm:'Trung bình',labor:'400.000 – 600.000 đ/ngày'},
+  'Đồng Nai': {lat:10.9574,lng:106.8426,zoom:11,defaultDistrict:'Biên Hòa',districts:[['Biên Hòa',10.9574,106.8426],['Long Thành',10.7899,107.0551],['Nhơn Trạch',10.7245,106.8835],['Trảng Bom',10.9537,107.0054]],climate:'Nhiệt đới gió mùa',flood:'Trung bình',storm:'Thấp - Trung bình',labor:'350.000 – 500.000 đ/ngày'},
+  'Long An': {lat:10.6956,lng:106.2431,zoom:11,defaultDistrict:'Tân An',districts:[['Tân An',10.5359,106.4137],['Bến Lức',10.6408,106.4937],['Đức Hòa',10.8772,106.3999],['Cần Giuộc',10.6084,106.6715]],climate:'Nhiệt đới gió mùa',flood:'Trung bình - Cao',storm:'Thấp',labor:'330.000 – 480.000 đ/ngày'}
+};
+BMH.regionPoint = (province,district) => {
+  const r=BMH.REGIONS[province]||BMH.REGIONS['Bình Dương'];
+  const d=(r.districts||[]).find(x=>x[0]===district);
+  return d?{lat:d[1],lng:d[2],district:d[0],zoom:r.zoom||12}:{lat:r.lat,lng:r.lng,district:r.defaultDistrict||district||province,zoom:r.zoom||12};
 };
 
 BMH.BANKS = [
