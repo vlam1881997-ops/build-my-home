@@ -39,3 +39,19 @@ BMH.householdAdvice = () => {
   if(own) out.push(`Gia chủ thuộc ${own.group}; các hướng tham khảo: ${own.dirs.join(', ')}.`);
   return out;
 };
+
+BMH.designReview = () => {
+  const e=BMH.estimate(), issues=BMH.plannerIssues?BMH.plannerIssues():[], p=BMH.state.project;
+  const penalty=issues.reduce((s,i)=>s+(i.sev==='error'?10:i.sev==='warn'?5:2),0);
+  const functionScore=BMH.clamp(96-penalty,45,98);
+  const budgetRatio=e.budget>0?e.total/e.budget:1.4;
+  const budgetScore=BMH.clamp(Math.round(94-Math.max(0,budgetRatio-.82)*85),42,96);
+  const reg=BMH.REGIONS[p.site.province]||{};
+  const climatePenalty=(String(reg.flood||'').includes('Cao')?9:String(reg.flood||'').includes('Trung bình')?4:1)+(String(reg.storm||'').includes('Cao')?8:String(reg.storm||'').includes('Trung bình')?4:1);
+  const climateScore=BMH.clamp(92-climatePenalty,58,95);
+  const materialScore={economy:72,standard:84,premium:93}[p.materials.tier]||82;
+  const fengScore=BMH.kua(p.household.ownerBirth,p.household.ownerGender)?78:70;
+  const durability=BMH.clamp(materialScore+(p.site.soil.includes('cứng')?3:p.site.soil.includes('trũng')?-6:0),55,96);
+  const overall=Math.round(budgetScore*.20+functionScore*.25+climateScore*.15+materialScore*.15+fengScore*.10+durability*.15);
+  return {overall,budget:budgetScore,function:functionScore,climate:climateScore,material:materialScore,feng:fengScore,durability,issues};
+};

@@ -13,3 +13,8 @@ test('step 5 has no watermark labels',()=>{const js=read('app.js');assert.doesNo
 test('V3.2 planner renders architectural wall layer and dimension chains',()=>{const js=read('app.js');assert.match(js,/BMH\.wallSegments/);assert.match(js,/arch-wall/);assert.match(js,/dimension-chain/);});
 test('V3.2 openings are editable and tagged',()=>{const js=read('app.js');assert.match(js,/openingCode/);assert.match(js,/data-opening-field/);assert.match(js,/data-opening-delete/);});
 test('V3.2 3D uses cutaway model linked to planner and materials',()=>{const js=read('app.js');assert.match(js,/3D CUTAWAY/);assert.match(js,/Mặt bằng Bước 5 \+ vật liệu Bước 6/);assert.match(js,/openingMarkup/);});
+test('V3.3 planner has direct smart-wall edge editing',()=>{const js=read('app.js');assert.match(js,/edgeMoveCandidate/);assert.match(js,/data-edge-id/);assert.match(js,/sharedWallNeighbors/);});
+test('V3.3 door and window tools place openings on clicked walls',()=>{const js=read('app.js');assert.match(js,/placeOpeningAt/);assert.match(js,/data-wall-place/);assert.match(js,/tool==='select'/);});
+test('V3.3 planner supports undo redo and zoom controls',()=>{const js=read('app.js');assert.match(js,/undoPlan/);assert.match(js,/redoPlan/);assert.match(js,/data-plan-undo/);assert.match(js,/data-planner-zoom/);});
+test('V3.3 design review scores are derived from project state',()=>{const js=read('app.js');assert.match(js,/BMH\.designReview/);assert.match(js,/review\.overall/);assert.match(js,/review\.function/);});
+test('V3.3 cutaway can explode floors',()=>{const js=read('app.js');assert.match(js,/sceneExploded/);assert.match(js,/data-scene-explode/);assert.match(js,/zStep=ui\.sceneExploded\?3\.8:3/);});

@@ -1,4 +1,4 @@
-# Build My Home — Official V3.2
+# Build My Home — Official V3.3
 
 Bản dựng lại theo bộ 10 mockup chính thức: giao diện được coi là spec, còn các tính năng cốt lõi được cắm vào đúng component thay vì patch DOM chồng lớp.
 
@@ -12,9 +12,9 @@ Bản dựng lại theo bộ 10 mockup chính thức: giao diện được coi l
 2. Tài chính, lịch trả nợ, DTI và stress test lãi suất.
 3. Vị trí + Leaflet/OpenStreetMap, fallback tọa độ cục bộ.
 4. Đất, địa chất, household động nhiều con/người thân, Bát Trạch tham khảo.
-5. Mặt bằng kiến trúc sơ bộ: grid, dimension, furniture, cửa/cửa sổ, drag/resize, collision, SVG export.
+5. Mặt bằng kiến trúc CAD-lite: smart-wall resize, click đặt cửa/cửa sổ lên tường, grid, dimension, furniture, undo/redo, zoom, collision, SVG export.
 6. Gói vật liệu: ảnh thật/local, lựa chọn vật liệu, tác động dự toán.
-7. 3D phương án dạng khối + phối cảnh tham khảo + timeline hao mòn 0/3/5/10 năm.
+7. 3D Cutaway liên kết mặt bằng/vật liệu + tách tầng/ghép tầng + điểm đánh giá động + timeline hao mòn 0/3/5/10 năm.
 8. Dự toán + Paywall 99.000đ UI. Production mặc định khóa cho tới khi có xác nhận thanh toán server-side.
 9. Giám sát thi công + checklist MEP.
 10. Hồ sơ bàn giao + XLS/SVG/JSON/ZIP.

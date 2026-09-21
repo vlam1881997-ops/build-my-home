@@ -1,6 +1,6 @@
 BMH.defaultState = () => ({
   version: BMH.VERSION,
-  ui: {step:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', planner:{floor:0,selected:'r1',snap:.2,zoom:1,mode:'technical',showFurniture:true,showDimensions:true,showFeng:true}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all'},
+  ui: {step:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',showFurniture:true,showDimensions:true,showFeng:true}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
   access: {paid:false, source:'none', paidAt:null},
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại',
@@ -46,7 +46,11 @@ BMH.normalizeState = () => {
   const s=BMH.state.project.site, r=BMH.REGIONS[s.province]||BMH.REGIONS['Bình Dương'];
   const valid=(r.districts||[]).some(d=>d[0]===s.district);
   if(!valid){const pt=BMH.regionPoint(s.province,r.defaultDistrict);Object.assign(s,{district:pt.district,lat:pt.lat,lng:pt.lng});}
-  if(!BMH.state.ui.planner.selected || !BMH.state.project.plan.rooms.some(x=>x.id===BMH.state.ui.planner.selected))BMH.state.ui.planner.selected=BMH.state.project.plan.rooms[0]?.id||null;
+  const ui=BMH.state.ui.planner;
+  if(!ui.selected || !BMH.state.project.plan.rooms.some(x=>x.id===ui.selected))ui.selected=BMH.state.project.plan.rooms[0]?.id||null;
+  if(!['select','door','window'].includes(ui.tool))ui.tool='select';
+  ui.zoom=BMH.clamp(Number(ui.zoom)||1,.75,2.5);
+  if(typeof BMH.state.ui.sceneExploded!=='boolean')BMH.state.ui.sceneExploded=false;
 };
 BMH.normalizeState();
 BMH.save = () => { BMH.state.version=BMH.VERSION; BMH.state.meta.savedAt=new Date().toISOString(); try{localStorage.setItem(BMH.STORAGE_KEY,JSON.stringify(BMH.state));}catch(e){BMH.toast('Không thể lưu cục bộ. Hãy xuất bản sao dự án.');} };
