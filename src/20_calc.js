@@ -21,8 +21,12 @@ BMH.materialPremium = (choices=BMH.state.project.materials.choices) => Object.en
 BMH.estimate = () => {
   const p=BMH.state.project, area=Math.max(BMH.planArea(),p.site.width*p.site.depth*Math.min(1,p.site.floors*.72));
   const tierMul={economy:.9,standard:1,premium:1.22}[p.materials.tier]||1;
-  const shell=Math.round(area*3600000); const finish=Math.round(area*2350000*tierMul)+BMH.materialPremium(); const transport=Math.round((shell+finish)*(p.site.road<3?0.12:p.site.road<5?0.05:0.02)); const prep=Math.round(area*280000); const subtotal=shell+finish+transport+prep; const contingency=Math.round(subtotal*.10); const total=subtotal+contingency;
-  return {area,shell,finish,transport,prep,contingency,total,budget:BMH.financeSummary().available,gap:BMH.financeSummary().available-total};
+  const shell=Math.round(area*3600000); const finish=Math.round(area*2350000*tierMul)+BMH.materialPremium();
+  const adapt=BMH.siteAdaptation?BMH.siteAdaptation(p.site):{roadPct:(p.site.road<3 ? .12 : p.site.road<5 ? .05 : .02),climatePct:0};
+  const transport=Math.round((shell+finish)*adapt.roadPct);
+  const climatePrep=Math.round((shell+finish)*adapt.climatePct);
+  const prep=Math.round(area*280000); const subtotal=shell+finish+transport+climatePrep+prep; const contingency=Math.round(subtotal*.10); const total=subtotal+contingency;
+  return {area,shell,finish,transport,climatePrep,adaptation:adapt,prep,contingency,total,budget:BMH.financeSummary().available,gap:BMH.financeSummary().available-total};
 };
 BMH.kua = (birth,gender='Nam') => {
   let y=String(Math.round(Number(birth)||0)); if(y.length!==4) return null; let sum=[...y].reduce((s,d)=>s+Number(d),0); while(sum>9)sum=[...String(sum)].reduce((s,d)=>s+Number(d),0);
@@ -66,8 +70,8 @@ BMH.designReview = () => {
   const functionScore=BMH.clamp(Math.round((96-penalty)*.72+circulation*.28),45,98);
   const budgetRatio=e.budget>0?e.total/e.budget:1.4;
   const budgetScore=BMH.clamp(Math.round(94-Math.max(0,budgetRatio-.82)*85),42,96);
-  const reg=BMH.REGIONS[p.site.province]||{};
-  const climatePenalty=(String(reg.flood||'').includes('Cao')?9:String(reg.flood||'').includes('Trung bình')?4:1)+(String(reg.storm||'').includes('Cao')?8:String(reg.storm||'').includes('Trung bình')?4:1);
+  const reg=BMH.regionProfile?BMH.regionProfile(p.site):(BMH.REGIONS[p.site.province]||{});
+  const climatePenalty=(BMH.riskValue?.(reg.flood)||0)*3+(BMH.riskValue?.(reg.storm)||0)*3+(BMH.riskValue?.(reg.heat)||0)*2+(BMH.riskValue?.(reg.corrosion)||0);
   const envRooms=p.plan.rooms.filter(r=>['living','bed','kitchen'].includes(r.type)), envScores=envRooms.map(r=>BMH.roomEnvironment?BMH.roomEnvironment(r):null).filter(Boolean);
   const daylight=envScores.length?Math.round(envScores.reduce((s,x)=>s+x.daylight,0)/envScores.length):70, ventilation=envScores.length?Math.round(envScores.reduce((s,x)=>s+x.ventilation,0)/envScores.length):70;
   const climateScore=BMH.clamp(Math.round((92-climatePenalty)*.55+daylight*.20+ventilation*.25),52,96);
