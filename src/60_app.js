@@ -15,8 +15,39 @@ BMH.navigateTo = step => {
   BMH.state.ui.step=step; if(step!==5){BMH.drag=null;BMH.state.ui.planner.tool='select';} BMH.save(); BMH.render(); window.scrollTo({top:0,behavior:'smooth'}); return true;
 };
 BMH.openPaywall = () => {BMH.navigateTo(8);BMH.toast('Hoàn tất thanh toán tại Bước 8 để mở hồ sơ premium.');};
+BMH.loadExternalScript = (url, timeout=3500) => new Promise((resolve,reject)=>{
+  const script=document.createElement('script'); let settled=false;
+  const finish=(ok,err)=>{if(settled)return;settled=true;clearTimeout(timer);ok?resolve():reject(err||new Error('Load failed'));};
+  script.src=url;script.async=true;script.crossOrigin='anonymous';script.onload=()=>finish(true);script.onerror=()=>finish(false,new Error('Script unavailable'));
+  const timer=setTimeout(()=>finish(false,new Error('Script timeout')),timeout);document.head.appendChild(script);
+});
+BMH.ensureLeaflet = () => {
+  if(window.L)return Promise.resolve(window.L);
+  if(BMH.leafletPromise)return BMH.leafletPromise;
+  const sources=[
+    {js:'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',css:'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'},
+    {js:'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js',css:'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'}
+  ];
+  BMH.leafletPromise=(async()=>{
+    for(const src of sources){
+      try{
+        if(!document.querySelector(`link[data-leaflet-css=\"${src.css}\"]`)){const link=document.createElement('link');link.rel='stylesheet';link.href=src.css;link.dataset.leafletCss=src.css;document.head.appendChild(link);}
+        await BMH.loadExternalScript(src.js);if(window.L)return window.L;
+      }catch(e){}
+    }
+    return null;
+  })();
+  return BMH.leafletPromise;
+};
 BMH.afterRender = () => {
-  if(BMH.state.ui.step===3) BMH.initMap();
+  if(BMH.state.ui.step===3){
+    const mapEl=BMH.$('#map');
+    BMH.ensureLeaflet().then(L=>{
+      if(BMH.state.ui.step!==3)return;
+      if(L)BMH.initMap();
+      else if(mapEl){mapEl.classList.remove('map-loading');mapEl.classList.add('fallback-only');}
+    });
+  }
   if(BMH.state.ui.step===5 && window.innerWidth>1180 && !BMH.state.ui.sidebarCollapsed){BMH.state.ui.sidebarCollapsed=true;BMH.save();BMH.render();}
 };
 BMH.initMap = () => {

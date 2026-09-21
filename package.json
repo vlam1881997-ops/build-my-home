@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "private": true,
-  "description": "Build My Home Official V3.4 — coordinated-floor CAD, daylight/ventilation analysis, and enriched cutaway review",
+  "description": "Build My Home Official V3.4.1 — white-screen boot hotfix, lazy Leaflet loading, cache reset",
   "engines": {
     "node": ">=22"
   },
