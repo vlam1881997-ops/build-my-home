@@ -1,5 +1,5 @@
-import {send,supabaseEnv,payosEnv,PRODUCT_CODE,PAYMENT_AMOUNT} from './_lib.mjs';
-import {geminiEnv} from './_gemini.mjs';
+import {send,supabaseEnv,payosEnv,PRODUCT_CODE,PAYMENT_AMOUNT} from '../server/_lib.mjs';
+import {geminiEnv} from '../server/_gemini.mjs';
 export default async function handler(req,res){
   if(req.method==='OPTIONS')return send(res,200,{ok:true});
   if(req.method!=='GET')return send(res,405,{ok:false,error:'Method not allowed'});

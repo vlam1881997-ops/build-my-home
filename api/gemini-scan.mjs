@@ -1,5 +1,5 @@
-import {send,jsonBody,apiError} from './_lib.mjs';
-import {geminiGenerate,geminiDeleteFile,geminiEnv,geminiRateLimit,validGeminiFileUri} from './_gemini.mjs';
+import {send,jsonBody,apiError} from '../server/_lib.mjs';
+import {geminiGenerate,geminiDeleteFile,geminiEnv,geminiRateLimit,validGeminiFileUri} from '../server/_gemini.mjs';
 
 const SCAN_SCHEMA={
   type:'object',additionalProperties:false,

@@ -1,5 +1,5 @@
-import {send} from './_lib.mjs';
-import {geminiEnv,geminiRateLimit} from './_gemini.mjs';
+import {send} from '../server/_lib.mjs';
+import {geminiEnv,geminiRateLimit} from '../server/_gemini.mjs';
 
 function extractImage(data){
   if(data?.output_image?.data)return {data:data.output_image.data,mimeType:data.output_image.mime_type||'image/jpeg'};

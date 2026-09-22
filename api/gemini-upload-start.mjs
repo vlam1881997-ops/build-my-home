@@ -1,5 +1,5 @@
-import {send,jsonBody,apiError} from './_lib.mjs';
-import {geminiStartUpload,geminiRateLimit} from './_gemini.mjs';
+import {send,jsonBody,apiError} from '../server/_lib.mjs';
+import {geminiStartUpload,geminiRateLimit} from '../server/_gemini.mjs';
 
 const ALLOWED=/^(image\/(png|jpeg|webp|heic|heif)|video\/(mp4|quicktime|webm|mpeg)|application\/pdf)$/i;
 const MAX_MEDIA_BYTES=250*1024*1024,MAX_PDF_BYTES=50*1024*1024;

@@ -1,5 +1,5 @@
-import {send,jsonBody,apiError} from './_lib.mjs';
-import {geminiGenerate,geminiEnv} from './_gemini.mjs';
+import {send,jsonBody,apiError} from '../server/_lib.mjs';
+import {geminiGenerate,geminiEnv} from '../server/_gemini.mjs';
 
 const OPENAI_MODEL=String(process.env.OPENAI_MODEL||'gpt-5.6-terra').trim();
 const OPENAI_URL='https://api.openai.com/v1/responses';

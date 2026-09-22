@@ -1,5 +1,5 @@
-import {send,jsonBody,apiError} from './_lib.mjs';
-import {geminiFileInfo} from './_gemini.mjs';
+import {send,jsonBody,apiError} from '../server/_lib.mjs';
+import {geminiFileInfo} from '../server/_gemini.mjs';
 export default async function handler(req,res){
   try{
     if(req.method==='OPTIONS')return send(res,200,{ok:true});
