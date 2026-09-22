@@ -1,0 +1,8 @@
+{
+  "version": "2.2.0",
+  "release": "Refactored Core",
+  "automated_tests": {"passed": 58, "failed": 0},
+  "public_runtime": {"local_js": ["app.js"], "local_css": ["styles.css"], "legacy_patch_files": 0},
+  "smoke_http": {"/": 200, "/app.js": 200, "/styles.css": 200, "/assets/design/flow-a.jpg": 200, "/assets/banks/vcb.jpg": 200, "/assets/materials/tile-viglacera.jpg": 200, "/v21.js": 404},
+  "known_limits": ["payment webhook not connected", "planner is preliminary architecture, not construction documents", "3D is conceptual, not photoreal"]
+}

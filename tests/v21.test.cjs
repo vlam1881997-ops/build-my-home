@@ -1,0 +1,15 @@
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const root=path.resolve(__dirname,'..');
+const js=fs.readFileSync(path.join(root,'dist/v21.js'),'utf8');
+const css=fs.readFileSync(path.join(root,'dist/v21.css'),'utf8');
+const html=fs.readFileSync(path.join(root,'dist/index.html'),'utf8');
+const app=fs.readFileSync(path.join(root,'dist/app.js'),'utf8');
+const scene=fs.readFileSync(path.join(root,'dist/scene3d.js'),'utf8');
+assert.match(html,/v21\.css/);assert.match(html,/v21\.js/);
+assert.match(js,/Mặt bằng <b>kiến trúc sơ bộ<\/b>/);
+assert.match(js,/technicalPlanSvg/);assert.match(js,/Tải SVG kỹ thuật/);assert.match(js,/data-v21="fullscreen"/);
+assert.match(js,/0,2m/);assert.match(js,/Cửa \/ cửa sổ/);assert.match(js,/MẶT BẰNG KỸ THUẬT SƠ BỘ/);
+assert.match(css,/v21-drawing-scroll/);assert.match(css,/v21-plan \.wall/);assert.match(css,/v21-planner-fullscreen/);
+assert.match(app,/garage/);assert.match(app,/corridor/);assert.match(app,/balcony/);
+assert.match(scene,/room:/);assert.match(scene,/material/);assert.match(scene,/door/);
+console.log('V2.1 planner/static checks passed.');

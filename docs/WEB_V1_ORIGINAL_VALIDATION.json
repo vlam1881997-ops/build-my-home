@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-20T20:18:14.775Z",
+  "result": "passed",
+  "checks": [
+    "10 screen templates render with default project",
+    "Annuity known case: 120000 at 1% monthly for 12 months",
+    "Zero interest and zero loan",
+    "Rate changes preserve principal and end at zero balance",
+    "Cash remainder subtracts living costs and all modeled debt",
+    "Room resizing changes cost and undo restores rooms",
+    "Overlap detection reports colliding rooms",
+    "Project persistence writes complete local state",
+    "JSON restoration rejects invalid geometry and money",
+    "User text is HTML escaped",
+    "All static entrypoints and PWA assets exist"
+  ],
+  "browserQA": {
+    "status": "not_completed",
+    "reason": "No installed Chromium; download unavailable in this environment. Desktop/mobile appearance, pointer drag, print layout and installation require manual browser verification."
+  }
+}

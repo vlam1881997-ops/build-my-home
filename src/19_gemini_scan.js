@@ -4,7 +4,7 @@
  */
 BMH.scan={busy:false,stage:'',progress:0,error:'',fileName:'',mimeType:'',result:null,model:'',intent:'reference'};
 
-BMH.geminiConfigured=()=>!!BMH.runtime?.config?.geminiConfigured;
+BMH.geminiConfigured=()=>!!BMH.cloud?.config?.geminiConfigured;
 BMH.scanState=()=>BMH.state.project.aiScan||(BMH.state.project.aiScan={sourceName:'',mimeType:'',scannedAt:'',model:'',provider:'',intent:'reference',appliedAt:'',result:{}});
 BMH.scanExisting=()=>{const a=BMH.scanState();return BMH.scan.result&&Object.keys(BMH.scan.result).length?BMH.scan.result:a.result&&Object.keys(a.result).length?a.result:null;};
 BMH.scanSetStage=(stage,progress)=>{BMH.scan.stage=stage;BMH.scan.progress=progress;BMH.render({preserveScroll:true});};
@@ -71,7 +71,7 @@ BMH.scanResultHtml=()=>{
 };
 
 BMH.scanDropHtml=()=>{
-  const c=BMH.runtime?.config,ready=!!c?.geminiConfigured,existing=BMH.scanExisting();
+  const c=BMH.cloud?.config,ready=!!c?.geminiConfigured,existing=BMH.scanExisting();
   return `<section class="native-scan-shell consumer-scan">
     <div class="scan-visual"><img src="assets/rooms/facade-render.jpg" alt="Không gian nhà tham khảo"><div class="scan-visual-shade"></div><div class="scan-visual-copy"><span>AI HOME VISION</span><h2>Cho AI xem điều bạn đang hình dung.</h2><p>Video ngoài đời, ảnh nhà mẫu, bản vẽ tay hay PDF đều có thể trở thành điểm bắt đầu.</p><div><i>Video</i><i>Ảnh</i><i>Bản phác</i><i>PDF</i></div></div>${BMH.scan.busy?`<div class="scan-live-progress"><b>${BMH.esc(BMH.scan.stage)}</b><span>${BMH.scan.progress}%</span><i><u style="width:${BMH.scan.progress}%"></u></i></div>`:''}</div>
     <div class="native-scan-copy"><div class="scan-kicker"><span>✦ PHÂN TÍCH BẰNG AI</span><em class="${ready?'ok':'warn'}">${ready?'Sẵn sàng':'Chưa kết nối'}</em></div><h1>Thấy kết quả trước.<br><em>Chỉnh chi tiết sau.</em></h1><p>AI nhận diện quy mô, phong cách, vật liệu và những dữ kiện nghe thấy trong video. Bạn chỉ cần xác nhận các thông tin quan trọng trước khi hệ thống đưa chúng vào thiết kế.</p><div class="scan-intent"><button class="${BMH.scan.intent==='reference'?'active':''}" data-scan-intent="reference">Tôi thích căn nhà này</button><button class="${BMH.scan.intent==='my_home'?'active':''}" data-scan-intent="my_home">Đây là nhà / đất của tôi</button></div><button class="scan-dropzone ${BMH.scan.busy?'busy':''}" data-scan-upload ${ready?'':'disabled'}><i>${BMH.scan.busy?'◌':'+'}</i><b>${BMH.scan.busy?'AI đang quan sát…':'Thả tệp vào đây hoặc chọn từ máy'}</b><span>${BMH.scan.busy?BMH.esc(BMH.scan.stage):'Video · ảnh · PDF'}</span></button><div class="scan-privacy"><i>✓</i><span>AI chỉ đưa ra dữ liệu sơ bộ. Kích thước và kết cấu quan trọng luôn yêu cầu xác nhận.</span></div>${!ready&&BMH.DEV?`<div class="scan-setup"><b>Chế độ phát triển:</b><span>Điền GEMINI_API_KEY trong <code>.env.local</code> rồi khởi động lại server.</span></div>`:''}${BMH.scan.error?`<div class="ai-error">${BMH.esc(BMH.scan.error)}</div>`:''}</div>
