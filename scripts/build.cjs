@@ -1,8 +1,8 @@
 const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..'),src=path.join(root,'src'),dist=path.join(root,'dist');
-const jsFiles=['00_boot.js','01_vn34_catalog.js','15_data_engine.js','10_state.js','17_cloud_payment.js','18_ai_copilot.js','19_gemini_scan.js','20_calc.js','30_planner.js','35_dossier.js','40_exports.js','45_studio3d.js','50_screens.js','60_app.js','61_visual_v504.js','62_visual_v505.js','63_demo_parity_v51.js','64_demo_parity_steps3_7.js','65_video_qa_v511.js','66_v52_completeness.js','67_v53_visual_parity.js'];
-const banner=`/* Build My Home Official V5.3 Visual Parity Upgrade
+const jsFiles=['00_boot.js','01_vn34_catalog.js','15_data_engine.js','10_state.js','17_cloud_payment.js','18_ai_copilot.js','19_gemini_scan.js','20_calc.js','30_planner.js','35_dossier.js','40_exports.js','45_studio3d.js','50_screens.js','60_app.js','61_visual_v504.js','62_visual_v505.js','63_demo_parity_v51.js','64_demo_parity_steps3_7.js','65_video_qa_v511.js','66_v52_completeness.js','67_v53_visual_parity.js','68_v54_visual_completion.js'];
+const banner=`/* Build My Home Official V5.4 Visual Completion Upgrade
  * Existing calculation, Gemini, planner, 3D and dossier engines are retained.
- * V5.3 rebuilds Step 1, Step 5 and Step 7 for closer demo parity while retaining all V5.2 data, AI, finance, map, material and energy engines.
+ * V5.4 completes the visual pass across finance, maps, feng shui, materials, budget, construction and handover, with local bank logo assets.
  */
 (()=>{
 'use strict';
@@ -19,7 +19,7 @@ const googleMapsKey=String(process.env.BMH_GOOGLE_MAPS_API_KEY||'').replace(/[^A
 js=js.replaceAll('__BMH_GOOGLE_MAPS_API_KEY__',googleMapsKey);
 fs.rmSync(dist,{recursive:true,force:true});fs.mkdirSync(dist,{recursive:true});
 fs.writeFileSync(path.join(dist,'app.js'),js);
-const cssFiles=['styles.css','visual-v504.css','visual-v505.css','visual-v51.css','visual-v51-steps3-7.css','visual-v511.css','visual-v52.css','visual-v53.css'];
+const cssFiles=['styles.css','visual-v504.css','visual-v505.css','visual-v51.css','visual-v51-steps3-7.css','visual-v511.css','visual-v52.css','visual-v53.css','visual-v54.css'];
 const css=cssFiles.map(f=>`\n/* ===== ${f} ===== */\n`+fs.readFileSync(path.join(src,f),'utf8')).join('\n');
 fs.writeFileSync(path.join(dist,'styles.css'),css);
 let html=fs.readFileSync(path.join(src,'index.html'),'utf8');
@@ -30,4 +30,4 @@ fs.writeFileSync(path.join(dist,'index.html'),html);
 fs.copyFileSync(path.join(src,'sw.js'),path.join(dist,'sw.js'));
 fs.copyFileSync(path.join(src,'manifest.webmanifest'),path.join(dist,'manifest.webmanifest'));
 fs.cpSync(path.join(root,'assets'),path.join(dist,'assets'),{recursive:true});fs.writeFileSync(path.join(dist,'.nojekyll'),'');
-console.log(`Built V5.3 Visual Parity Upgrade -> ${dist}`);
+console.log(`Built V5.4 Visual Completion Upgrade -> ${dist}`);
