@@ -1,5 +1,5 @@
 const BMH = {
-  VERSION: '4.7.0',
+  VERSION: '4.8.0',
   STORAGE_KEY: 'bmh-v342-stable',
   LEGACY_STORAGE_KEYS: ['bmh-v23-visual'],
   DEV: ['localhost','127.0.0.1',''].includes(location.hostname),
@@ -14,6 +14,8 @@ const BMH = {
   GOOGLE_MAPS_KEY: '__BMH_GOOGLE_MAPS_API_KEY__',
   liveWeather: null,
   liveWeatherKey: '',
+  climateHistory: null,
+  climateHistoryKey: '',
   drag: null,
   lastPlacementReview: null,
   suggestionCache: new Map(),

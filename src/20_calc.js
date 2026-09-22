@@ -53,15 +53,16 @@ BMH.materialPremium = (choices=BMH.state.project.materials.choices) => Object.en
 BMH.estimate = () => {
   const p=BMH.state.project, area=Math.max(BMH.planArea(),p.site.width*p.site.depth*Math.min(1,p.site.floors*.72));
   const tierMul={economy:.9,standard:1,premium:1.22}[p.materials.tier]||1;
-  const shell=Math.round(area*3600000); const finish=Math.round(area*2350000*tierMul)+BMH.materialPremium();
+  const basis=BMH.dataCostBasis?BMH.dataCostBasis():{shellPerM2:3600000,finishPerM2:2350000,prepPerM2:280000};
+  const shell=Math.round(area*basis.shellPerM2); const finish=Math.round(area*basis.finishPerM2*tierMul)+BMH.materialPremium();
   const adapt=BMH.siteAdaptation?BMH.siteAdaptation(p.site):{roadPct:(p.site.road<3 ? .12 : p.site.road<5 ? .05 : .02),climatePct:0};
   const transport=Math.round((shell+finish)*adapt.roadPct);
   const climatePackage=BMH.climatePackageMultiplier?BMH.climatePackageMultiplier(p.materials.climatePackage):1;
   const climatePrep=Math.round((shell+finish)*adapt.climatePct*climatePackage);
   const performance=BMH.performancePlan?BMH.performancePlan():{upgradeCost:0};
   const performanceUpgrade=Math.round(performance.upgradeCost||0);
-  const prep=Math.round(area*280000); const subtotal=shell+finish+transport+climatePrep+performanceUpgrade+prep; const contingency=Math.round(subtotal*.10); const total=subtotal+contingency;
-  return {area,shell,finish,transport,climatePrep,climatePackage,performanceUpgrade,performance,adaptation:adapt,prep,contingency,total,budget:BMH.financeSummary().available,gap:BMH.financeSummary().available-total};
+  const prep=Math.round(area*(basis.prepPerM2||280000)); const subtotal=shell+finish+transport+climatePrep+performanceUpgrade+prep; const contingency=Math.round(subtotal*.10); const total=subtotal+contingency;
+  return {area,shell,finish,transport,climatePrep,climatePackage,performanceUpgrade,performance,adaptation:adapt,basis,prep,contingency,total,budget:BMH.financeSummary().available,gap:BMH.financeSummary().available-total};
 };
 BMH.kua = (birth,gender='Nam') => {
   let y=String(Math.round(Number(birth)||0)); if(y.length!==4) return null; let sum=[...y].reduce((s,d)=>s+Number(d),0); while(sum>9)sum=[...String(sum)].reduce((s,d)=>s+Number(d),0);
