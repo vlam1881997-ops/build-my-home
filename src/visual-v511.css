@@ -1,0 +1,220 @@
+/* Build My Home V5.1.1 — video QA polish */
+html.bmh-v511 body{font-size:15px}
+html.bmh-v511 .v51-global-nav button{font-size:11px}
+html.bmh-v511 .v51-brand b{font-size:19px}
+html.bmh-v511 .v51-brand small{font-size:10px}
+html.bmh-v511 .v51-profile b{font-size:10px}
+html.bmh-v511 .v51-profile small{font-size:8.5px}
+html.bmh-v511 .v51-stepper button{font-size:10.5px;line-height:1.25}
+html.bmh-v511 .v51-stepper button i{font-size:10px;width:27px;height:27px}
+html.bmh-v511 .v51-journey{font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-style:normal;font-size:10px;letter-spacing:0;word-spacing:0}
+html.bmh-v511 .v51-journey b{font-family:Georgia,serif;font-style:italic;font-size:14px;letter-spacing:0;word-spacing:0}
+
+html.bmh-v511 .v51-section-title>span,
+html.bmh-v511 .v51-step4-head>div:first-child>span,
+html.bmh-v511 .v51-package-head>div:first-child>span{font-size:10px}
+html.bmh-v511 .v51-section-title h2{font-size:30px;line-height:1.08}
+html.bmh-v511 .v51-section-title p,
+html.bmh-v511 .v51-step4-head p,
+html.bmh-v511 .v51-package-head p{font-size:11.5px;line-height:1.6}
+html.bmh-v511 .v51-card-head h3{font-size:17px}
+html.bmh-v511 .v51-card-head p{font-size:10px;line-height:1.45}
+html.bmh-v511 .v51-card-head>em{font-size:9px}
+html.bmh-v511 .v51-card-title b{font-size:13px}
+html.bmh-v511 .v51-card-title small,
+html.bmh-v511 .v51-card-title button{font-size:9.5px}
+
+html.bmh-v511 .v51-fin-form label>span,
+html.bmh-v511 .v51-loc label>span,
+html.bmh-v511 .v51-land label>span{font-size:10px}
+html.bmh-v511 .v51-fin-form input,
+html.bmh-v511 .v51-loc input,
+html.bmh-v511 .v51-loc select,
+html.bmh-v511 .v51-land input,
+html.bmh-v511 .v51-land select{font-size:11px}
+html.bmh-v511 .v51-fin-form em,
+html.bmh-v511 .v51-land em{font-size:9px}
+html.bmh-v511 .v51-fin-form h3{font-size:12px}
+html.bmh-v511 .v51-primary,
+html.bmh-v511 .v51-outline{font-size:10.5px}
+
+html.bmh-v511 .v51-ai-read span,
+html.bmh-v511 .v51-ai-read b,
+html.bmh-v511 .v51-result-grid span,
+html.bmh-v511 .v51-ref-grid button small,
+html.bmh-v511 .v51-idea-grid span{font-size:9px}
+html.bmh-v511 .v51-result-grid b{font-size:16px}
+html.bmh-v511 .v51-hero-tags span{font-size:9px}
+html.bmh-v511 .v51-upload-types span{font-size:9px}
+html.bmh-v511 .v51-drop b{font-size:11px}
+html.bmh-v511 .v51-drop small{font-size:9px}
+html.bmh-v511 .v51-idea-input>span{font-size:9.5px}
+html.bmh-v511 .v51-idea-input textarea{font-size:10.5px}
+
+html.bmh-v511 .v51-advice b{font-size:10.5px}
+html.bmh-v511 .v51-advice small{font-size:9.5px}
+html.bmh-v511 .v51-ai-reco b{font-size:9.5px}
+html.bmh-v511 .v51-ai-reco strong{font-size:9.5px}
+html.bmh-v511 .v51-climate-list span{font-size:10px}
+html.bmh-v511 .v51-climate-list b{font-size:10.5px}
+html.bmh-v511 .v51-climate-location b{font-size:12px}
+html.bmh-v511 .v51-climate-location small{font-size:9px}
+html.bmh-v511 .v51-coordinate small,
+html.bmh-v511 .v51-legal small{font-size:8.5px}
+html.bmh-v511 .v51-coordinate b,
+html.bmh-v511 .v51-legal b{font-size:10px}
+
+html.bmh-v511 .v51-step4{align-items:start}
+html.bmh-v511 .v51-step4>.card51{align-self:start}
+html.bmh-v511 .v51-step4-kpis small{font-size:8.5px}
+html.bmh-v511 .v51-step4-kpis b{font-size:12px}
+html.bmh-v511 .v51-land h4,
+html.bmh-v511 .v51-geology h4,
+html.bmh-v511 .v51-feng-body h4{font-size:11px}
+html.bmh-v511 .v51-shapes span,
+html.bmh-v511 .v51-soils b,
+html.bmh-v511 .v51-member-row b{font-size:8.5px}
+html.bmh-v511 .v51-soils small,
+html.bmh-v511 .v51-member-row span{font-size:7.5px}
+html.bmh-v511 .v51-geology-summary b{font-size:10px}
+html.bmh-v511 .v51-geology-summary span{font-size:9px}
+html.bmh-v511 .v51-foundation-box b,
+html.bmh-v511 .v51-foundation-box strong{font-size:9.5px}
+html.bmh-v511 .v51-foundation-box small{font-size:8px}
+html.bmh-v511 .v51-feng-room b{font-size:9px}
+html.bmh-v511 .v51-feng-room small{font-size:8px}
+
+html.bmh-v511 .v51-space-lib h3,
+html.bmh-v511 .v51-drawing-info h3{font-size:15px}
+html.bmh-v511 .v51-space-lib>p{font-size:9px}
+html.bmh-v511 .v51-space-grid span,
+html.bmh-v511 .v51-tool-grid span{font-size:9px}
+html.bmh-v511 .v51-plan-tabs button{font-size:9.5px}
+html.bmh-v511 .v51-plan-canvas{height:610px}
+html.bmh-v511 .v51-plan-float b{font-size:8.5px}
+html.bmh-v511 .v51-plan-float span{font-size:7.5px}
+html.bmh-v511 .v51-plan-legend{font-size:8.5px}
+html.bmh-v511 .v51-drawing-info dt,
+html.bmh-v511 .v51-space-stats span,
+html.bmh-v511 .v51-space-stats b,
+html.bmh-v511 .v51-space-stats em{font-size:8.5px}
+html.bmh-v511 .v51-drawing-info dd{font-size:9.5px}
+html.bmh-v511 .v51-ai-tips p{font-size:8.5px;line-height:1.55}
+
+html.bmh-v511 .v51-tier-cards b{font-size:11px}
+html.bmh-v511 .v51-tier-cards small{font-size:8.5px}
+html.bmh-v511 .v51-tier-cards strong{font-size:9px}
+html.bmh-v511 .v51-material-menu>button span{font-size:9px}
+html.bmh-v511 .v51-menu-ai b{font-size:9.5px}
+html.bmh-v511 .v51-menu-ai small{font-size:8.5px;line-height:1.5}
+html.bmh-v511 .v51-product-grid .body>b{font-size:12px}
+html.bmh-v511 .v51-product-grid .body>small{font-size:8.5px;line-height:1.45}
+html.bmh-v511 .v51-product-tags span{font-size:7.5px}
+html.bmh-v511 .v51-product-grid dt,
+html.bmh-v511 .v51-product-grid dd{font-size:8px}
+html.bmh-v511 .v51-product-grid .body>button{font-size:9px}
+html.bmh-v511 .v51-material-side dt{font-size:8.5px}
+html.bmh-v511 .v51-material-side dd{font-size:9.5px}
+
+html.bmh-v511 .v51-score-panel>p{font-size:10px}
+html.bmh-v511 .v51-score-list span,
+html.bmh-v511 .v51-score-list em{font-size:9px}
+html.bmh-v511 .v51-3d-actions button{font-size:8.5px}
+html.bmh-v511 .v51-life article span{font-size:8px}
+html.bmh-v511 .v51-technical3d summary b{font-size:10px}
+html.bmh-v511 .v51-technical3d summary span{font-size:8.5px}
+
+html.bmh-v511 .v51-cost-body>div>small,
+html.bmh-v511 .v51-cost-body>div>span{font-size:9.5px}
+html.bmh-v511 .v51-cost-body article em,
+html.bmh-v511 .v51-cost-body article span,
+html.bmh-v511 .v51-cost-body article>b{font-size:9px}
+html.bmh-v511 .v51-locked-doc b{font-size:10.5px}
+html.bmh-v511 .v51-locked-doc small{font-size:9px}
+html.bmh-v511 .v51-offer-top span{font-size:9px}
+html.bmh-v511 .v51-dossier-offer>p{font-size:10.5px}
+html.bmh-v511 .v51-offer-list span{font-size:9.5px}
+
+html.bmh-v511 .v51-time-list b{font-size:9.5px}
+html.bmh-v511 .v51-time-list small,
+html.bmh-v511 .v51-time-list em{font-size:8px}
+html.bmh-v511 .v51-project-progress dt{font-size:8px}
+html.bmh-v511 .v51-project-progress dd{font-size:9.5px}
+html.bmh-v511 .v51-site-placeholder b{font-size:9.5px}
+html.bmh-v511 .v51-site-placeholder span{font-size:8.5px;line-height:1.5}
+html.bmh-v511 .v51-upcoming b{font-size:9px}
+html.bmh-v511 .v51-upcoming small{font-size:8px}
+html.bmh-v511 .v51-check-mini span,
+html.bmh-v511 .v51-check-mini em{font-size:8px}
+html.bmh-v511 .v51-mep-strip label b{font-size:8px}
+html.bmh-v511 .v51-mep-strip label small{font-size:7.5px}
+html.bmh-v511 .v51-site-placeholder{height:125px;background:linear-gradient(135deg,#fbfaf7,#f4f7f2)}
+html.bmh-v511 .v51-site-placeholder.compact{height:90px}
+
+html.bmh-v511 .v51-handover-hero p{font-size:10.5px;line-height:1.55}
+html.bmh-v511 .v51-handover-hero>aside span{font-size:8px}
+html.bmh-v511 .v51-doc-grid b{font-size:9.5px}
+html.bmh-v511 .v51-doc-grid small{font-size:8px}
+html.bmh-v511 .v51-doc-grid em{font-size:8px}
+html.bmh-v511 .v51-home-summary small{font-size:8px}
+html.bmh-v511 .v51-home-summary b{font-size:9.5px}
+html.bmh-v511 .v51-closing p{font-size:9.5px;line-height:1.55}
+
+html.bmh-v511 .v51-budget-title b,
+html.bmh-v511 .v51-budget-item b{font-size:9.5px}
+html.bmh-v511 .v51-budget-title small,
+html.bmh-v511 .v51-budget-item small{font-size:8px}
+html.bmh-v511 .v51-prev{font-size:9px}
+html.bmh-v511 .v51-next{font-size:10.5px}
+html.bmh-v511 .v51-next small{font-size:7.5px}
+html.bmh-v511 .v51-copilot b{font-size:9.5px}
+html.bmh-v511 .v51-copilot small{font-size:7.5px}
+
+/* Verified data bug: make the repair visible and readable. */
+html.bmh-v511 .v511-data-warning{grid-column:1/-1;display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center;padding:12px 14px;border:1px solid #eed8c9;border-radius:13px;background:#fff7ef;color:#7b513e}
+html.bmh-v511 .v511-data-warning>i{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#f4dfd1;color:#b75d3d;font-style:normal;font-weight:900}
+html.bmh-v511 .v511-data-warning b{display:block;font-size:11px}
+html.bmh-v511 .v511-data-warning small{display:block;font-size:9px;margin-top:3px}
+html.bmh-v511 .v51-dti-ring.empty{background:#ecebe7!important}
+html.bmh-v511 .v51-dti-ring.empty b{color:#7b837e}
+
+/* Map: never leave the user staring at an empty green rectangle. */
+html.bmh-v511 .v51-map-main .map.fallback-only .map-fallback{opacity:1!important;pointer-events:auto!important;z-index:5}
+html.bmh-v511 .v51-map-main .map-embed-head b,
+html.bmh-v511 .v51-map-main .map-embed-foot b{font-size:13px}
+html.bmh-v511 .v51-map-main .map-embed-head span,
+html.bmh-v511 .v51-map-main .map-embed-foot span{font-size:10px}
+html.bmh-v511 .v51-map-main .map-embed-foot small{font-size:9px}
+
+/* AI becomes a deliberate right-side work drawer instead of covering the middle of the page. */
+html.bmh-v511 .ai-copilot:not(.open) .ai-fab{display:none}
+html.bmh-v511 .ai-copilot.open{top:72px;right:18px;bottom:82px}
+html.bmh-v511 .ai-copilot.open .ai-panel{width:min(470px,calc(100vw - 30px));height:calc(100vh - 166px);max-height:none;border-radius:18px;box-shadow:0 24px 70px rgba(25,42,33,.24)}
+html.bmh-v511 .ai-panel>header h2{font-size:21px}
+html.bmh-v511 .ai-panel>header p{font-size:10px}
+html.bmh-v511 .ai-status{font-size:8px}
+html.bmh-v511 .ai-tabs button{font-size:9.5px}
+html.bmh-v511 .ai-setup b{font-size:12px}
+html.bmh-v511 .ai-setup span,
+html.bmh-v511 .ai-setup small{font-size:9.5px}
+html.bmh-v511 .ai-empty b{font-size:12px}
+html.bmh-v511 .ai-empty span{font-size:10px}
+html.bmh-v511 .ai-panel>footer{font-size:8.5px}
+html.bmh-v511 .v511-ai-offline{background:#fff8f2;border-color:#ecd9c9}
+
+/* Cleaner cinematic fallback and less debug-like framing. */
+html.bmh-v511 .v51-3d-stage{box-shadow:0 18px 46px rgba(34,52,41,.13)}
+html.bmh-v511 .v51-3d-stage>img{filter:saturate(.96) contrast(1.02)}
+html.bmh-v511 .v51-3d-quote{max-width:390px}
+html.bmh-v511 .v51-technical3d{margin-top:0}
+
+/* Avoid giant dead-white columns on step 4 and step 9. */
+html.bmh-v511 .v51-step4>.card51,
+html.bmh-v511 .v51-site-grid>section{height:auto}
+@media(max-width:1450px){
+  html.bmh-v511 .v51-stepper button{font-size:9.5px}
+  html.bmh-v511 .v51-plan-canvas{height:560px}
+}
+@media(max-width:1180px){
+  html.bmh-v511 .ai-copilot.open{top:68px;right:10px;bottom:76px}
+}
