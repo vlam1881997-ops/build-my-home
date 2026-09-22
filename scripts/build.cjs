@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..'),src=path.join(root,'src'),dist=path.join(root,'dist');
-const jsFiles=['00_boot.js','15_data_engine.js','10_state.js','20_calc.js','30_planner.js','40_exports.js','50_screens.js','60_app.js'];
-const banner=`/* Build My Home Official V4.8 Real Data Engine
+const jsFiles=['00_boot.js','15_data_engine.js','10_state.js','17_cloud_payment.js','20_calc.js','30_planner.js','40_exports.js','50_screens.js','60_app.js'];
+const banner=`/* Build My Home Official V4.9 Cloud + Payment
  * One state controller · one navigation controller · one planner controller · one runtime bundle.
  * Critical runtime is also embedded into index.html to bypass stale service-worker/app.js cache failures.
  */
@@ -30,4 +30,4 @@ fs.writeFileSync(path.join(dist,'index.html'),html);
 fs.copyFileSync(path.join(src,'sw.js'),path.join(dist,'sw.js'));
 fs.copyFileSync(path.join(src,'manifest.webmanifest'),path.join(dist,'manifest.webmanifest'));
 fs.cpSync(path.join(root,'assets'),path.join(dist,'assets'),{recursive:true});fs.writeFileSync(path.join(dist,'.nojekyll'),'');
-console.log(`Built V4.8 Real Data Engine -> ${dist}`);
+console.log(`Built V4.9 Cloud + Payment -> ${dist}`);

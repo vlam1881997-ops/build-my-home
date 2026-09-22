@@ -1,7 +1,7 @@
 BMH.defaultState = () => ({
   version: BMH.VERSION,
   ui: {step:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', location:{drawingLot:false}, planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',layout:'wide',textSize:'large',showFurniture:true,showDimensions:true,showFeng:true,showBelow:false,showStructure:true,showEnvironment:true,showCirculation:true,showSectionLine:true,showClimate:true,showEnvelope:true}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
-  access: {paid:false, source:'none', paidAt:null},
+  access: {paid:false, source:'none', paidAt:null, verifiedAt:null, orderCode:null},
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại',
     site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',mapEngine:'free',mapStyle:'hybrid',mapZoom:17,showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotPoints:[],frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
@@ -93,6 +93,7 @@ BMH.normalizeState = () => {
   for(const k of ['solarEnabled','rainwaterEnabled','coolRoof','smartShading'])if(typeof perf[k]!=='boolean')perf[k]=base.project.performance[k];
   if(!['economy','balanced','comfort'].includes(perf.mode))perf.mode='balanced';
   if(!BMH.state.access||typeof BMH.state.access!=='object')BMH.state.access=structuredClone(base.access);
+  for(const k of ['paidAt','verifiedAt','orderCode'])if(!(k in BMH.state.access))BMH.state.access[k]=base.access[k];
   const s=BMH.state.project.site;
   const alias=BMH.REGION_ALIASES?.[s.province];
   if(alias&&alias.province!==s.province){s.district=alias.districts?.[s.district]||s.district;s.province=alias.province;}
@@ -145,4 +146,4 @@ BMH.normalizeState();
 BMH.save = () => { BMH.state.version=BMH.VERSION; BMH.state.meta.savedAt=new Date().toISOString(); try{localStorage.setItem(BMH.STORAGE_KEY,JSON.stringify(BMH.state));}catch(e){BMH.toast('Không thể lưu cục bộ. Hãy xuất bản sao dự án.');} };
 BMH.get = path => path.split('.').reduce((o,k)=>o?.[k],BMH.state);
 BMH.set = (path,value,{render=true}={}) => { const keys=path.split('.'); let o=BMH.state; for(let i=0;i<keys.length-1;i++){if(!o[keys[i]]||typeof o[keys[i]]!=='object')o[keys[i]]={};o=o[keys[i]];} o[keys.at(-1)]=value; BMH.save(); if(render) BMH.render(); };
-BMH.isUnlocked = () => BMH.state.access.paid===true;
+BMH.isUnlocked = () => BMH.state.access.paid===true && (BMH.state.access.source==='server-verified' || (BMH.DEV && String(BMH.state.access.source||'').startsWith('dev')));
