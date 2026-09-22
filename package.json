@@ -1,14 +1,13 @@
 {
-  "name": "build-my-home-official",
+  "name": "build-my-home",
   "version": "5.0.3",
   "private": true,
-  "description": "Build My Home V5.0.3 Studio Transformation: warm consumer UI, result-first flow, real browser 3D studio, Gemini cinematic render, landscape planner and payment deferred for product testing",
-  "engines": {
-    "node": ">=22"
-  },
+  "description": "Build My Home V5.0.3 Full Clean — AI Home Studio, planner, cost engine, Gemini scan and browser 3D.",
+  "engines": {"node": ">=22"},
   "scripts": {
+    "clean": "node scripts/clean.cjs",
     "build": "node scripts/build.cjs",
-    "build:vercel": "node scripts/build.cjs && node scripts/prepare-vercel.cjs",
-    "test": "node scripts/build.cjs && node --check dist/app.js"
+    "build:vercel": "node scripts/build.cjs",
+    "test": "node scripts/build.cjs && node --check public/app.js"
   }
 }

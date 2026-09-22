@@ -1,9 +1,0 @@
-{
-  "version": "2.1.0",
-  "date": "2026-09-21",
-  "automated_tests": {"passed": 70, "failed": 0},
-  "vercel_build": "passed",
-  "http_smoke": {"/": 200, "/v21.js": 200, "/v21.css": 200, "/scene3d.js": 200, "/manifest.webmanifest": 200},
-  "browser_e2e": "not completed in this environment; production/mobile visual QA remains required",
-  "scope_note": "Architectural planner is preliminary/conceptual and is not construction documentation."
-}

@@ -1,33 +1,19 @@
-const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..'),src=path.join(root,'src'),dist=path.join(root,'dist');
-const jsFiles=['00_boot.js','15_data_engine.js','10_state.js','17_cloud_payment.js','18_ai_copilot.js','19_gemini_scan.js','20_calc.js','30_planner.js','35_dossier.js','40_exports.js','45_studio3d.js','50_screens.js','60_app.js'];
-const banner=`/* Build My Home Official V5.0.3 Studio Transformation
- * One state controller · one navigation controller · one planner controller · one runtime bundle.
- * Critical runtime is also embedded into index.html to bypass stale service-worker/app.js cache failures.
- */
-(()=>{
-'use strict';
-try{
-`;
-const tail=`
-}catch(err){
-  try{globalThis.__BMH_BOOT_FAILED=true;globalThis.__BMH_BOOT_ERROR=String(err?.stack||err?.message||err);console.error('Build My Home fatal boot error',err);const a=document.getElementById('app');if(a)a.innerHTML='<div style="min-height:100vh;display:grid;place-items:center;background:#f7f9f6;font-family:Arial,sans-serif;color:#5b4037"><div style="max-width:720px;padding:28px"><h2>Build My Home gặp lỗi khởi động</h2><p>Runtime đã được nạp, nhưng một lỗi JavaScript đã dừng quá trình khởi tạo. Hãy gửi nội dung lỗi dưới đây để xử lý.</p><pre style="white-space:pre-wrap;background:#fff7f3;border:1px solid #efd4c6;border-radius:12px;padding:12px;font-size:12px">'+String(err?.stack||err?.message||err).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))+'</pre></div></div>'; }catch(_){}
-}
-})();
-`;
-let js=banner+jsFiles.map(f=>`
-/* ---- ${f} ---- */
-`+fs.readFileSync(path.join(src,f),'utf8')).join('\n')+tail;
+const fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'..'),src=path.join(root,'src'),out=path.join(root,'public');
+const jsFiles=['00_boot.js','15_data_engine.js','10_state.js','17_runtime.js','18_ai_copilot.js','19_gemini_scan.js','20_calc.js','30_planner.js','35_dossier.js','40_exports.js','45_studio3d.js','50_screens.js','60_app.js'];
+const banner=`/* Build My Home Official V5.0.3 FULL CLEAN\n * Single runtime bundle · Gemini-first AI · planner · cost engine · 3D studio.\n * Payment/cloud intentionally deferred until the core product is finished.\n */\n(()=>{\n'use strict';\ntry{\n`;
+const tail=`\n}catch(err){\n  try{globalThis.__BMH_BOOT_FAILED=true;globalThis.__BMH_BOOT_ERROR=String(err?.stack||err?.message||err);console.error('Build My Home fatal boot error',err);const a=document.getElementById('app');if(a)a.innerHTML='<div style="min-height:100vh;display:grid;place-items:center;background:#f5f2eb;font-family:Arial,sans-serif;color:#5b4037"><div style="max-width:720px;padding:28px"><h2>Build My Home gặp lỗi khởi động</h2><pre style="white-space:pre-wrap;background:#fff7f3;border-radius:12px;padding:12px;font-size:12px">'+String(err?.stack||err?.message||err).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))+'</pre></div></div>'; }catch(_){}\n}\n})();\n`;
+let js=banner+jsFiles.map(f=>`\n/* ---- ${f} ---- */\n`+fs.readFileSync(path.join(src,f),'utf8')).join('\n')+tail;
 const googleMapsKey=String(process.env.BMH_GOOGLE_MAPS_API_KEY||'').replace(/[^A-Za-z0-9_\-]/g,'');
 js=js.replaceAll('__BMH_GOOGLE_MAPS_API_KEY__',googleMapsKey);
-fs.rmSync(dist,{recursive:true,force:true});fs.mkdirSync(dist,{recursive:true});
-fs.writeFileSync(path.join(dist,'app.js'),js);
-fs.copyFileSync(path.join(src,'styles.css'),path.join(dist,'styles.css'));
+fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
+fs.writeFileSync(path.join(out,'app.js'),js);
+fs.copyFileSync(path.join(src,'styles.css'),path.join(out,'styles.css'));
 let html=fs.readFileSync(path.join(src,'index.html'),'utf8');
 if(!html.includes('<!-- BMH_APP_INLINE -->'))throw Error('Missing BMH_APP_INLINE marker');
-const safeJs=js.replace(/<\/script/gi,'<\\/script');
-html=html.replace('<!-- BMH_APP_INLINE -->',`<script id="bmh-inline-app">${safeJs}</script>`);
-fs.writeFileSync(path.join(dist,'index.html'),html);
-fs.copyFileSync(path.join(src,'sw.js'),path.join(dist,'sw.js'));
-fs.copyFileSync(path.join(src,'manifest.webmanifest'),path.join(dist,'manifest.webmanifest'));
-fs.cpSync(path.join(root,'assets'),path.join(dist,'assets'),{recursive:true});fs.writeFileSync(path.join(dist,'.nojekyll'),'');
-console.log(`Built V5.0.3 Studio Transformation -> ${dist}`);
+html=html.replace('<!-- BMH_APP_INLINE -->',`<script id="bmh-inline-app">${js.replace(/<\/script/gi,'<\\/script')}</script>`);
+fs.writeFileSync(path.join(out,'index.html'),html);
+fs.cpSync(path.join(root,'assets'),path.join(out,'assets'),{recursive:true});
+fs.writeFileSync(path.join(out,'.nojekyll'),'');
+for(const f of ['index.html','app.js','styles.css'])if(!fs.existsSync(path.join(out,f)))throw Error(`Missing ${f}`);
+console.log(`Built V5.0.3 FULL CLEAN -> ${out}`);
