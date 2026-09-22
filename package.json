@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "private": true,
-  "description": "Build My Home V5.0 Complete Construction Dossier: unified drawings, BOQ, materials, cashflow, MEP checklist, construction schedule, PDF print, Excel workbook and ZIP exports with V4.9 cloud/payment preserved",
+  "description": "Build My Home V5.0.1 AI + WOW refinement: unified drawings, BOQ, materials, cashflow, MEP checklist, construction schedule, PDF print, Excel workbook and ZIP exports with V4.9 cloud/payment preserved",
   "engines": {
     "node": ">=22"
   },
