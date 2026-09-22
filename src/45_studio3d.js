@@ -26,33 +26,35 @@ BMH.scenePalette = () => {
 BMH.studio3DHtml = () => {
   const ui=BMH.state.ui,p=BMH.state.project,e=BMH.estimate(),review=BMH.designReview();
   const roomOptions=p.plan.rooms.map(r=>`<option value="room:${r.id}" ${ui.sceneFocus===`room:${r.id}`?'selected':''}>T${r.floor+1} · ${BMH.esc(r.name)}</option>`).join('');
-  return `<section class="studio-3d-shell">
-    <div class="studio-3d-stage" id="studio3dStage">
-      <div class="studio-3d-loading" id="studio3dLoading"><i>⌂</i><b>Đang dựng mô hình từ mặt bằng thật…</b><span>Nếu WebGL/CDN bị chặn, hệ thống sẽ giữ ảnh phối cảnh dự phòng.</span></div>
-      <canvas id="studio3dCanvas" aria-label="Mô hình 3D ngôi nhà"></canvas>
-      <div class="studio-3d-fallback"><img src="assets/rooms/facade-render.jpg" alt="Phối cảnh tham khảo"><span>Ảnh tham khảo dự phòng · chưa dùng để đo kích thước</span></div>
-      <div class="studio-3d-topbar">
-        <div class="studio-view-tabs"><button class="${ui.sceneFocus==='all'?'active':''}" data-scene-focus-btn="all">Toàn nhà</button>${Array.from({length:p.site.floors},(_,i)=>`<button class="${ui.sceneFocus===`floor:${i}`?'active':''}" data-scene-focus-btn="floor:${i}">Tầng ${i+1}</button>`).join('')}<select data-scene-focus><option value="all">Chọn phòng…</option>${roomOptions}</select></div>
-        <div class="studio-view-actions"><button data-scene-theme>${ui.sceneTheme==='day'?'☀ Ban ngày':'☾ Ban đêm'}</button><button data-scene-explode class="${ui.sceneExploded?'active':''}">${ui.sceneExploded?'Ghép tầng':'Tách tầng'}</button><button data-studio3d-reset>⌂ Góc đẹp</button></div>
-      </div>
-      <div class="studio-3d-hud"><span><small>Tổng dự toán</small><b>${BMH.money(e.total)}</b></span><span><small>Diện tích</small><b>${BMH.num(BMH.planArea())} m²</b></span><span><small>Tiện nghi</small><b>${review.function}/100</b></span></div>
-      <div class="studio-3d-tip">Kéo chuột để xoay · lăn chuột để zoom · chọn từng phòng để bước vào không gian</div>
+  const hero=BMH.cinematicRender.dataUrl||'assets/rooms/facade-render.jpg';
+  return `<section class="cinematic-primary-studio">
+    <div class="cinematic-primary-visual">
+      <img src="${hero}" alt="Phối cảnh ngôi nhà theo phương án hiện tại">
+      <div class="cinematic-primary-shade"></div>
+      <div class="cinematic-primary-copy"><span>PHỐI CẢNH TRẢI NGHIỆM</span><h2>Hình dung ngôi nhà trước khi bước vào chi tiết kỹ thuật.</h2><p>${BMH.cinematicRender.dataUrl?'Phối cảnh AI được tạo từ mô hình hiện tại.':'Phối cảnh tham khảo được dùng làm lớp cảm xúc; mô hình kỹ thuật nằm phía dưới.'}</p></div>
+      <div class="cinematic-primary-tabs"><button class="active" data-scene-focus-btn="all">Ngoại thất</button>${Array.from({length:p.site.floors},(_,i)=>`<button data-scene-focus-btn="floor:${i}">Tầng ${i+1}</button>`).join('')}<select data-scene-focus><option value="all">Xem từng phòng…</option>${roomOptions}</select></div>
+      <div class="cinematic-primary-actions"><button class="studio-secondary" data-scene-theme>${ui.sceneTheme==='day'?'☀ Ban ngày':'☾ Ban đêm'}</button><button class="studio-primary" data-cinematic-render ${BMH.cinematicRender.loading?'disabled':''}>${BMH.cinematicRender.loading?'Đang tạo phối cảnh…':'✦ Tạo phối cảnh điện ảnh'}</button></div>
     </div>
-    <aside class="studio-3d-insight">
-      <div class="studio-3d-score"><span>Phương án hiện tại</span><strong>${review.overall}<em>/100</em></strong><small>${review.overall>=82?'Cân bằng tốt giữa công năng, khí hậu và ngân sách':'Còn vài điểm đáng tối ưu trước khi chốt'}</small></div>
-      <div class="studio-3d-decisions">
-        <article><i>☀</i><div><b>Ánh sáng</b><span>${review.daylight}/100 · ${review.daylight>=75?'Khá tốt':'Cần tăng ô mở/giếng trời'}</span></div></article>
-        <article><i>≋</i><div><b>Thông gió</b><span>${review.ventilation}/100 · ${review.ventilation>=75?'Luồng gió ổn':'Nên tạo thông gió chéo'}</span></div></article>
-        <article><i>₫</i><div><b>Ngân sách</b><span>${review.budget}/100 · ${e.gap>=0?`còn dự phòng ${BMH.money(e.gap)}`:`vượt ${BMH.money(Math.abs(e.gap))}`}</span></div></article>
-      </div>
-      <div class="cinematic-card">
-        <div><span class="eyebrow">AI CINEMATIC</span><h3>Biến mô hình hiện tại thành phối cảnh cảm xúc</h3><p>Gemini dùng ảnh chụp từ 3D thật + vật liệu hiện tại để tạo render. Ảnh này dùng để hình dung thẩm mỹ, không thay bản vẽ kỹ thuật.</p></div>
-        ${BMH.cinematicRender.dataUrl?`<img src="${BMH.cinematicRender.dataUrl}" alt="Phối cảnh AI từ mô hình hiện tại"><small>Tạo ${BMH.cinematicRender.generatedAt?new Date(BMH.cinematicRender.generatedAt).toLocaleString('vi-VN'):''}</small>`:''}
-        ${BMH.cinematicRender.error?`<div class="studio-ai-error">${BMH.esc(BMH.cinematicRender.error)}</div>`:''}
-        <button class="studio-primary" data-cinematic-render ${BMH.cinematicRender.loading?'disabled':''}>${BMH.cinematicRender.loading?'Đang render…':'✦ Tạo phối cảnh điện ảnh'}</button>
-      </div>
+    <aside class="cinematic-primary-insight">
+      <div class="cinematic-score-card"><small>ĐÁNH GIÁ TỔNG THỂ</small><strong>${review.overall}<em>/100</em></strong><p>${review.overall>=82?'Phương án đang cân bằng tốt giữa công năng, khí hậu và ngân sách.':'Còn một số điểm đáng tối ưu trước khi chốt phương án.'}</p></div>
+      <div class="cinematic-insight-list"><article><i>⌖</i><div><b>Vị trí & quy hoạch</b><span>${review.site||review.overall}/100 · Site Fit đang được theo dõi</span></div></article><article><i>☀</i><div><b>Ánh sáng & vi khí hậu</b><span>${review.daylight}/100 · ${review.daylight>=75?'Khá tốt':'Nên tăng ô mở/giếng trời'}</span></div></article><article><i>≋</i><div><b>Thông gió</b><span>${review.ventilation}/100 · ${review.ventilation>=75?'Luồng gió ổn':'Nên tạo thông gió chéo'}</span></div></article><article><i>₫</i><div><b>Ngân sách</b><span>${review.budget}/100 · ${e.gap>=0?`còn ${BMH.money(e.gap)} dự phòng`:`vượt ${BMH.money(Math.abs(e.gap))}`}</span></div></article><article><i>♡</i><div><b>Thoải mái gia đình</b><span>${review.comfort}/100 · ưu tiên nhu cầu sống thực tế</span></div></article></div>
+      ${BMH.cinematicRender.error?`<div class="studio-ai-error">${BMH.esc(BMH.cinematicRender.error)}</div>`:''}
+      <div class="cinematic-project-kpis"><span><small>Diện tích</small><b>${BMH.num(BMH.planArea())}m²</b></span><span><small>Số tầng</small><b>${p.site.floors}</b></span><span><small>Dự toán</small><b>${BMH.money(e.total)}</b></span></div>
     </aside>
-  </section>`;
+  </section>
+  <details class="technical-3d-panel">
+    <summary><span><b>◎ Mở mô hình 3D kỹ thuật tương tác</b><small> Xoay, zoom, tách tầng, xem từng phòng và đối chiếu hình học.</small></span><em>Chi tiết kỹ thuật ↓</em></summary>
+    <section class="studio-3d-shell technical-mode">
+      <div class="studio-3d-stage" id="studio3dStage">
+        <div class="studio-3d-loading" id="studio3dLoading"><i>⌂</i><b>Đang dựng mô hình từ mặt bằng thật…</b><span>Nếu WebGL/CDN bị chặn, hệ thống vẫn giữ phối cảnh dự phòng ở phía trên.</span></div>
+        <canvas id="studio3dCanvas" aria-label="Mô hình 3D ngôi nhà"></canvas>
+        <div class="studio-3d-fallback"><img src="assets/rooms/facade-render.jpg" alt="Phối cảnh tham khảo"><span>Ảnh tham khảo dự phòng · chưa dùng để đo kích thước</span></div>
+        <div class="studio-3d-topbar"><div class="studio-view-tabs"><button class="${ui.sceneFocus==='all'?'active':''}" data-scene-focus-btn="all">Toàn nhà</button>${Array.from({length:p.site.floors},(_,i)=>`<button class="${ui.sceneFocus===`floor:${i}`?'active':''}" data-scene-focus-btn="floor:${i}">Tầng ${i+1}</button>`).join('')}<select data-scene-focus><option value="all">Chọn phòng…</option>${roomOptions}</select></div><div class="studio-view-actions"><button data-scene-theme>${ui.sceneTheme==='day'?'☀ Ban ngày':'☾ Ban đêm'}</button><button data-scene-explode class="${ui.sceneExploded?'active':''}">${ui.sceneExploded?'Ghép tầng':'Tách tầng'}</button><button data-studio3d-reset>⌂ Góc đẹp</button></div></div>
+        <div class="studio-3d-hud"><span><small>Tổng dự toán</small><b>${BMH.money(e.total)}</b></span><span><small>Diện tích</small><b>${BMH.num(BMH.planArea())} m²</b></span><span><small>Tiện nghi</small><b>${review.function}/100</b></span></div>
+        <div class="studio-3d-tip">Kéo chuột để xoay · lăn chuột để zoom · chọn từng phòng để bước vào không gian</div>
+      </div>
+    </section>
+  </details>`;
 };
 BMH.disposeStudio3D = () => {
   const s=BMH.studio3d;if(!s)return;
