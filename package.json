@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "private": true,
-  "description": "Build My Home V5.1 Demo Parity Rebuild: complete 10-step consumer UI rebuild over the existing finance, climate, planner, Gemini, 3D, estimate and dossier engines",
+  "description": "Build My Home V5.1.1 Video QA Upgrade: fixes production-recording issues across site data, maps, planner defaults, AI drawer, finance empty states and readability",
   "engines": {
     "node": "22.x"
   },
