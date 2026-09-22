@@ -81,3 +81,120 @@ html.bmh-v60 .v6-plan-canvas .resize-handle{fill:#287451!important;stroke:#fff!i
 @media(max-width:760px){
   .v6-header{padding:0 14px;height:66px;grid-template-columns:1fr auto}.v6-brand img{width:32px;height:32px}.v6-brand b{font-size:17px}.v6-location{display:none}.studio-main.demo-main{padding-left:12px!important;padding-right:12px!important}.v6-stepper{height:82px;margin:0 -12px;padding-left:12px}.v6-title h1{font-size:27px}.v6-s1-hero,.v6-s1-hero>img{min-height:480px}.v6-hero-facts{width:175px}.v6-gallery{grid-template-columns:1fr 1fr}.v6-banks,.v6-products,.v6-people,.v6-mep>div:last-child,.v6-climate-grid,.v6-kpi-grid{grid-template-columns:1fr}.v6-plan-canvas{height:480px}.v6-cost-main{grid-template-columns:1fr}.v6-footer{height:72px;padding:0 12px;grid-template-columns:92px 1fr 130px}.v6-budgetbar .v6-kpi:nth-child(n+3){display:none}.v6-budgetbar{grid-template-columns:1fr 1fr}.v6-back span,.v6-next span{display:none}.v6-docs>div:last-child{grid-template-columns:1fr}
 }
+
+/* ===== V6.1 CRITICAL RUNTIME FIXES ===== */
+
+/* Readability: remove the 7–8px microcopy feel from the production UI. */
+html.bmh-v60 body{font-size:16px}
+html.bmh-v60 .v6-title>span{font-size:11px}
+html.bmh-v60 .v6-title p{font-size:13px}
+html.bmh-v60 .v6-panel-title b{font-size:15px}
+html.bmh-v60 .v6-panel-title span{font-size:11px}
+html.bmh-v60 .v6-kpi small{font-size:10px}
+html.bmh-v60 .v6-kpi b{font-size:13px}
+html.bmh-v60 .v6-kpi span{font-size:9px}
+html.bmh-v60 .v6-stepper b{font-size:11px}
+html.bmh-v60 .v6-stepper small{font-size:9px}
+html.bmh-v60 .v6-fields label>span{font-size:10.5px}
+html.bmh-v60 .v6-fields input,html.bmh-v60 .v6-fields select{font-size:12px}
+html.bmh-v60 .v6-banks span b{font-size:11px}
+html.bmh-v60 .v6-banks span small,html.bmh-v60 .v6-banks span em{font-size:9px}
+html.bmh-v60 .v6-banks strong{font-size:10px}
+html.bmh-v60 .v6-advice b{font-size:11px}
+html.bmh-v60 .v6-advice span{font-size:10px}
+html.bmh-v60 .v6-room-types span{font-size:9.5px}
+html.bmh-v60 .v6-tool-buttons button{font-size:9px}
+html.bmh-v60 .v6-plan-toolbar button{font-size:9.5px}
+html.bmh-v60 .v6-room-list button{font-size:9.5px}
+html.bmh-v60 .v6-products small{font-size:8.5px}
+html.bmh-v60 .v6-products h3{font-size:13px}
+html.bmh-v60 .v6-products p{font-size:9.5px}
+html.bmh-v60 .v6-product-score span{font-size:8.5px}
+html.bmh-v60 .v6-products strong{font-size:10px}
+html.bmh-v60 .v6-products button{font-size:9.5px}
+
+/* Step 3 — map is visible immediately, not a blank loading block. */
+.v6-map-panel #map{height:610px;position:relative;background:#dfe7e1}
+.v6-map-panel .map-fallback{position:absolute;inset:0;z-index:1;opacity:1;visibility:visible}
+.v6-map-panel .map-embed-shell.v61-map-first{position:absolute;inset:0;background:#dde6df;overflow:hidden}
+.v6-map-panel .map-embed-frame{position:absolute;inset:0;width:100%;height:100%;min-height:610px;border:0;background:#dde6df}
+.v61-map-overlay{position:absolute;left:14px;bottom:14px;z-index:3;min-width:210px;padding:11px 13px;border-radius:12px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(26,44,33,.16);pointer-events:none}
+.v61-map-overlay span,.v61-map-overlay b,.v61-map-overlay small{display:block}
+.v61-map-overlay span{font-size:9px;color:#7a847e}
+.v61-map-overlay b{font-size:12px;margin-top:2px}
+.v61-map-overlay small{font-size:9px;color:#637269;margin-top:2px}
+.v6-map-panel #map .leaflet-map-pane,.v6-map-panel #map .leaflet-control-container{z-index:5}
+.v6-map-panel #map:not(.fallback-only) .map-fallback{opacity:0;visibility:hidden;transition:opacity .2s ease}
+.v6-map-toolbar button{font-size:9.5px;height:35px}
+
+/* Step 5 — long Vietnamese townhouses are shown landscape on screen without changing the real model coordinates. */
+.v6-plan-canvas{height:720px;position:relative;overflow:hidden;background:#f6f3ec}
+.v6-plan-canvas.v61-landscape-plan{background:linear-gradient(135deg,#f6f3ec,#fff)}
+.v6-plan-canvas.v61-landscape-plan svg[data-auto-rotate="1"]{max-width:none!important;max-height:none!important}
+.v6-plan-canvas.v61-landscape-plan svg[data-auto-rotate="1"] text{
+  transform-box:fill-box;
+  transform-origin:center;
+  transform:rotate(90deg);
+}
+.v6-plan-canvas.v61-landscape-plan svg[data-auto-rotate="1"] .north-arrow text,
+.v6-plan-canvas.v61-landscape-plan svg[data-auto-rotate="1"] .scale-bar text,
+.v6-plan-canvas.v61-landscape-plan svg[data-auto-rotate="1"] .opening-tag text{
+  transform:rotate(90deg);
+}
+html.bmh-v60 .v6-plan-canvas .room-name{font-size:.42px!important;font-weight:900!important}
+html.bmh-v60 .v6-plan-canvas .room-area{font-size:.31px!important}
+.v6-plan-legend{font-size:9px;height:48px}
+.v6-plan-legend b{font-size:8.5px}
+
+/* Step 7 — the true WebGL model is now the primary viewport. */
+.v61-s7-live{grid-template-columns:290px minmax(0,1fr) 320px;grid-template-areas:"head head head" "score live ai"}
+.v61-s7-live .v6-s7-head{grid-area:head}
+.v61-s7-live .v6-score{grid-area:score}
+.v61-s7-live .v6-3d-ai{grid-area:ai}
+.v61-live3d{grid-area:live;position:relative;min-height:680px;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#e9e2d7,#d8d0c4);box-shadow:0 28px 80px rgba(26,43,33,.16)}
+.v61-live3d canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;z-index:1}
+.v61-live3d .studio-3d-loading{position:absolute;inset:0;z-index:4;display:grid;place-items:center;align-content:center;text-align:center;background:linear-gradient(135deg,#e8e2d7,#d8d1c5);color:#20372b}
+.v61-live3d .studio-3d-loading i{font-style:normal;font-size:38px}
+.v61-live3d .studio-3d-loading b{font-size:13px;margin-top:8px}
+.v61-live3d .studio-3d-loading span{font-size:10px;color:#69766f;margin-top:3px}
+.v61-live3d .studio-3d-fallback{display:none;position:absolute;inset:0;z-index:2}
+.v61-live3d.three-failed .studio-3d-fallback{display:block}
+.v61-live3d.three-failed .studio-3d-fallback img{width:100%;height:100%;object-fit:cover}
+.v61-live3d.three-failed .studio-3d-fallback span{position:absolute;left:14px;bottom:14px;padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.9);font-size:9px}
+.v61-3d-top{position:absolute;left:12px;right:12px;top:12px;z-index:5;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
+.v61-3d-top>div{display:flex;gap:5px;pointer-events:auto}
+.v61-3d-top button,.v61-3d-top select{height:34px;border:1px solid rgba(255,255,255,.42);border-radius:9px;background:rgba(255,255,255,.88);backdrop-filter:blur(10px);padding:0 9px;font-size:9px;color:#294638}
+.v61-3d-top button.active{background:#175f43;color:#fff;border-color:#175f43}
+.v61-3d-hud{position:absolute;left:12px;right:12px;bottom:48px;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;pointer-events:none}
+.v61-3d-hud .v6-kpi{background:rgba(255,255,255,.88);backdrop-filter:blur(9px);box-shadow:0 8px 20px rgba(30,48,37,.08)}
+.v61-3d-tip{position:absolute;left:50%;bottom:12px;z-index:5;transform:translateX(-50%);padding:7px 11px;border-radius:999px;background:rgba(16,33,23,.72);color:#fff;font-size:9px;white-space:nowrap;pointer-events:none}
+.v61-cinematic-card{margin-top:12px;border:1px solid #e8e2da;border-radius:12px;overflow:hidden;background:#fff}
+.v61-cinematic-card>img{width:100%;height:145px;object-fit:cover}
+.v61-cinematic-card>div{padding:10px}
+.v61-cinematic-card small,.v61-cinematic-card b{display:block}
+.v61-cinematic-card small{font-size:8px;color:#9e654b}
+.v61-cinematic-card b{font-size:10px;margin:3px 0 8px}
+.v61-cinematic-card button{width:100%;height:34px;border:0;border-radius:8px;background:#155f43;color:#fff;font-size:9px;font-weight:850}
+
+/* Material cards: never show a broken image icon; preserve a useful visual fallback. */
+.v6-products img{background:linear-gradient(135deg,#e7e0d4,#f8f5ef);font-size:0}
+.v6-products article{min-height:420px}
+.v6-products article>div{display:flex;flex-direction:column}
+.v6-products article>div>button{margin-top:auto}
+
+/* Keep important bottom information readable. */
+.v6-footer{height:82px}
+.v6-budgetbar .v6-kpi small{font-size:9px}
+.v6-budgetbar .v6-kpi b{font-size:11px}
+.v6-copilot span b{font-size:10px}
+.v6-copilot span small{font-size:8.5px}
+
+@media(max-width:1500px){
+  .v6-plan-canvas{height:660px}
+  .v61-live3d{min-height:620px}
+}
+@media(max-width:1180px){
+  .v61-s7-live{grid-template-columns:1fr;grid-template-areas:none}
+  .v61-s7-live>*{grid-area:auto}
+  .v61-live3d{min-height:620px}
+}
