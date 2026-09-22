@@ -29,7 +29,8 @@ BMH.defaultState = () => ({
     performance:{solarEnabled:true,rainwaterEnabled:true,coolRoof:true,smartShading:true,mode:'balanced'},
     dataEngine: BMH.defaultDataEngineState(),
     wearYear:0,
-    checklist:{pipe114:false,acWire:false,pressure:false,internet:false,elcb:false}
+    checklist:{pipe114:false,acWire:false,pressure:false,internet:false,elcb:false,waterTank:false,drainSlope:false,grounding:false,rcbo:false,acDrain:false,kitchenHood:false,conduitReserve:false},
+    dossier:{startDate:'2026-03-01',progress:35,currentStage:'structure',revision:'A',architect:'',contractor:'',notes:''}
   },
   meta:{savedAt:null}
 });
@@ -87,6 +88,10 @@ BMH.normalizeState = () => {
   if(!BMH.state.project.materials||typeof BMH.state.project.materials!=='object')BMH.state.project.materials=structuredClone(base.project.materials);
   if(!['basic','recommended','robust'].includes(BMH.state.project.materials.climatePackage))BMH.state.project.materials.climatePackage='recommended';
   if(!BMH.state.project.performance||typeof BMH.state.project.performance!=='object')BMH.state.project.performance=structuredClone(base.project.performance);
+  if(!BMH.state.project.checklist||typeof BMH.state.project.checklist!=='object')BMH.state.project.checklist=structuredClone(base.project.checklist);
+  else for(const [k,v] of Object.entries(base.project.checklist))if(typeof BMH.state.project.checklist[k]!=='boolean')BMH.state.project.checklist[k]=v;
+  if(!BMH.state.project.dossier||typeof BMH.state.project.dossier!=='object')BMH.state.project.dossier=structuredClone(base.project.dossier);
+  else {const d=BMH.state.project.dossier;for(const [k,v] of Object.entries(base.project.dossier))if(!(k in d))d[k]=v;d.progress=BMH.clamp(Number(d.progress)||0,0,100);if(!['foundation','structure','walls','roof','mep','finish','handover'].includes(d.currentStage))d.currentStage='structure';if(!/^\d{4}-\d{2}-\d{2}$/.test(String(d.startDate||'')))d.startDate=base.project.dossier.startDate;d.revision=String(d.revision||'A').slice(0,12);}
   if(!BMH.state.project.dataEngine||typeof BMH.state.project.dataEngine!=='object')BMH.state.project.dataEngine=BMH.defaultDataEngineState();
   else {const d=BMH.state.project.dataEngine,b=BMH.defaultDataEngineState();if(!d.cost||typeof d.cost!=='object')d.cost=structuredClone(b.cost);for(const [k,v] of Object.entries(b.cost))if(!Number.isFinite(Number(d.cost[k])))d.cost[k]=v;if(!d.quote||typeof d.quote!=='object')d.quote=structuredClone(b.quote);if(!d.materialOverrides||typeof d.materialOverrides!=='object'||Array.isArray(d.materialOverrides))d.materialOverrides={};if(!d.status||typeof d.status!=='object')d.status=structuredClone(b.status);if(!Array.isArray(d.snapshots))d.snapshots=[];d.snapshots=d.snapshots.slice(0,12);if(!['regional','baseline'].includes(d.pricingMode))d.pricingMode='regional';}
   const perf=BMH.state.project.performance;
