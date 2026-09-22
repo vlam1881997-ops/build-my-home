@@ -32,14 +32,14 @@ BMH.regionOptions=()=>BMH.VN_REGION_ORDER.map(x=>[x,x]);
 /* More homeowner-facing bank choices. These are simulation presets, not live quoted rates. */
 const bankAdd=[
   {id:'VTB',name:'VietinBank',img:'assets/banks/vtb.jpg',intro:6.8,post:10.6,months:12},
-  {id:'VPB',name:'VPBank',img:'',intro:7.2,post:11.4,months:12},
-  {id:'TPB',name:'TPBank',img:'',intro:7.1,post:11.2,months:12},
-  {id:'HDB',name:'HDBank',img:'',intro:7.3,post:11.1,months:12},
-  {id:'VIB',name:'VIB',img:'',intro:7.4,post:11.3,months:12},
-  {id:'SHB',name:'SHB',img:'',intro:7.0,post:11.0,months:12},
-  {id:'MSB',name:'MSB',img:'',intro:7.4,post:11.5,months:12},
-  {id:'OCB',name:'OCB',img:'',intro:7.3,post:11.4,months:12},
-  {id:'STB',name:'Sacombank',img:'',intro:7.5,post:11.6,months:12}
+  {id:'VPB',name:'VPBank',img:'assets/banks/vpb.svg',intro:7.2,post:11.4,months:12},
+  {id:'TPB',name:'TPBank',img:'assets/banks/tpb.svg',intro:7.1,post:11.2,months:12},
+  {id:'HDB',name:'HDBank',img:'assets/banks/hdb.svg',intro:7.3,post:11.1,months:12},
+  {id:'VIB',name:'VIB',img:'assets/banks/vib.svg',intro:7.4,post:11.3,months:12},
+  {id:'SHB',name:'SHB',img:'assets/banks/shb.svg',intro:7.0,post:11.0,months:12},
+  {id:'MSB',name:'MSB',img:'assets/banks/msb.svg',intro:7.4,post:11.5,months:12},
+  {id:'OCB',name:'OCB',img:'assets/banks/ocb.svg',intro:7.3,post:11.4,months:12},
+  {id:'STB',name:'Sacombank',img:'assets/banks/stb.svg',intro:7.5,post:11.6,months:12}
 ].map(x=>({...x,note:'Kịch bản mô phỏng để tính DTI; không phải lãi suất niêm yết hiện hành. Hãy thay bằng báo giá tín dụng thực tế.'}));
 for(const b of bankAdd)if(!BMH.BANKS.some(x=>x.id===b.id))BMH.BANKS.push(b);
 
