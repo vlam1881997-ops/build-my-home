@@ -1,5 +1,5 @@
-/* V5.0.1 · OpenAI AI Copilot
- * Server-side key only. Frontend sends a compact project snapshot to /api/ai.
+/* V5.0.2 · Gemini-first AI Decision Engine
+ * Gemini is primary. OpenAI is optional fallback. Server-side keys only.
  */
 BMH.ai={open:false,loading:false,mode:'review',error:'',result:null,model:'',lastAction:'',prompt:'',imageName:''};
 
@@ -18,7 +18,7 @@ BMH.aiContext=()=>{
 };
 
 BMH.aiCall=async(action,prompt='',extra={})=>{
-  if(!BMH.aiConfigured())throw new Error('AI chưa được cấu hình. Điền OPENAI_API_KEY trong .env.local/Vercel Environment Variables rồi deploy lại.');
+  if(!BMH.aiConfigured())throw new Error('AI chưa được cấu hình. Điền GEMINI_API_KEY trong .env.local/Vercel Environment Variables. OpenAI chỉ là fallback tùy chọn.');
   const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,prompt,project:BMH.aiContext(),...extra})});
   let data={};try{data=await r.json();}catch(_){}
   if(!r.ok)throw new Error(data?.error||`AI HTTP ${r.status}`);
@@ -27,11 +27,11 @@ BMH.aiCall=async(action,prompt='',extra={})=>{
 
 BMH.aiSeverityLabel=s=>s==='high'?'Cần xử lý':s==='medium'?'Nên tối ưu':'Gợi ý';
 
-BMH.aiPresetPrompt=mode=>({review:'Đánh giá mặt bằng hiện tại. Ưu tiên công năng, người già/trẻ em, ánh sáng, thông gió, giao thông, an toàn và những việc đáng sửa trước khi chốt với KTS.',cost:'Tìm các cơ hội tiết kiệm chi phí có cơ sở nhưng không làm giảm an toàn, chống thấm, tiện nghi thiết yếu hay độ bền. Xếp ưu tiên theo số tiền có thể tiết kiệm và mức ảnh hưởng.',whatif:'Nếu tôi thay đổi một điều trong dự án, hãy so sánh tác động lên chi phí, công năng, tiện nghi và rủi ro. Hãy hỏi lại nếu thiếu giả định quan trọng.',chat:'Hãy xem toàn bộ dự án hiện tại và giúp tôi quyết định việc tiếp theo đáng làm nhất.'})[mode]||'';
-BMH.aiInlineCTA=(mode,title,desc)=>`<section class="ai-inline-cta ai-${mode}"><div><span>✦ AI COPILOT</span><b>${BMH.esc(title)}</b><small>${BMH.esc(desc)}</small></div><button class="clay" data-ai-direct="${mode}">${BMH.aiConfigured()?'Mở AI phân tích':'Bật AI'} →</button></section>`;
+BMH.aiPresetPrompt=mode=>({review:'Đánh giá mặt bằng hiện tại. Ưu tiên công năng, người già/trẻ em, ánh sáng, thông gió, giao thông, an toàn và những việc đáng sửa trước khi chốt với KTS.',cost:'Tìm các cơ hội tiết kiệm chi phí có cơ sở nhưng không làm giảm an toàn, chống thấm, tiện nghi thiết yếu hay độ bền. Xếp ưu tiên theo số tiền có thể tiết kiệm và mức ảnh hưởng.',whatif:'Nếu tôi thay đổi một điều trong dự án, hãy so sánh tác động lên chi phí, công năng, tiện nghi và rủi ro. Hãy hỏi lại nếu thiếu giả định quan trọng.'})[mode]||'';
+BMH.aiInlineCTA=(mode,title,desc)=>`<section class="ai-inline-cta ai-${mode}"><div><span>✦ AI DECISION ENGINE</span><b>${BMH.esc(title)}</b><small>${BMH.esc(desc)}</small></div><button class="clay" data-ai-direct="${mode}">${BMH.aiConfigured()?'Mở AI phân tích':'Bật AI'} →</button></section>`;
 BMH.aiMoney=n=>Number(n)>0?BMH.money(n):'—';
 BMH.aiResultHtml=result=>{
-  if(!result)return '<div class="ai-empty"><i>✦</i><b>AI Copilot đang chờ dự án của bạn</b><span>Hãy yêu cầu đánh giá, tối ưu chi phí hoặc thử một kịch bản “nếu như”.</span></div>';
+  if(!result)return '<div class="ai-empty"><i>✦</i><b>AI Decision Engine đang chờ dự án của bạn</b><span>Hãy yêu cầu đánh giá, tối ưu chi phí hoặc thử một kịch bản “nếu như”.</span></div>';
   const recs=(result.recommendations||[]).map((x,i)=>`<article class="ai-rec"><div><i>${i+1}</i><span><b>${BMH.esc(x.title)}</b><small>${BMH.esc(x.detail)}</small></span></div><div class="ai-rec-meta"><em>${x.estimated_saving_vnd>0?`Tiết kiệm ~${BMH.money(x.estimated_saving_vnd)}`:BMH.esc(x.benefit||'')}</em><button data-ai-goto="${x.step}">Bước ${x.step} →</button></div></article>`).join('');
   const findings=(result.findings||[]).map(x=>`<article class="ai-finding ${BMH.esc(x.severity)}"><span>${BMH.aiSeverityLabel(x.severity)}</span><b>${BMH.esc(x.title)}</b><p>${BMH.esc(x.detail)}</p></article>`).join('');
   const qs=(result.questions||[]).map(q=>`<button class="ai-question" data-ai-question="${BMH.esc(q)}">${BMH.esc(q)}</button>`).join('');
@@ -39,8 +39,8 @@ BMH.aiResultHtml=result=>{
 };
 
 BMH.aiDock=()=>{
-  const c=BMH.cloud?.config,status=!c?'checking':c.aiConfigured?'ok':'warn',label=!c?'Đang kiểm tra AI':c.aiConfigured?`AI · ${BMH.esc(c.aiModel||'OpenAI')}`:'AI chưa cấu hình';
-  return `<div class="ai-copilot ${BMH.ai.open?'open':''}"><button class="ai-fab" data-ai-open aria-label="Mở AI Copilot"><i>✦</i><span>AI Copilot</span><em class="${status}"></em></button>${BMH.ai.open?`<section class="ai-panel" role="dialog" aria-label="Build My Home AI Copilot"><header><div><span class="ai-status ${status}">${label}</span><h2>AI xây nhà cùng bạn</h2><p>Đọc toàn bộ dự án · tối ưu chi phí · tiện nghi · an toàn</p></div><button data-ai-close aria-label="Đóng">×</button></header><div class="ai-tabs">${[['review','Đánh giá'],['cost','Tiết kiệm'],['whatif','What-if'],['chat','Hỏi AI']].map(([id,n])=>`<button class="${BMH.ai.mode===id?'active':''}" data-ai-mode="${id}">${n}</button>`).join('')}</div>${!BMH.aiConfigured()?`<div class="ai-setup"><b>1 phút để bật AI thật</b><span>Mở file <code>.env.example</code>, copy thành <code>.env.local</code>, điền <code>OPENAI_API_KEY</code>; khi deploy Vercel hãy thêm cùng biến này trong Environment Variables.</span><small>API key chỉ nằm ở server, không xuất hiện trong trình duyệt.</small></div>`:`<div class="ai-prompt"><textarea id="aiPrompt" rows="3" placeholder="${BMH.ai.mode==='whatif'?'Ví dụ: Nếu giảm ngân sách còn 1,2 tỷ thì nên đổi gì?':BMH.ai.mode==='cost'?'Tìm cách tiết kiệm nhưng không ảnh hưởng an toàn và tiện nghi…':BMH.ai.mode==='review'?'Đánh giá căn nhà hiện tại và chỉ ra 5 việc đáng sửa nhất…':'Hỏi bất cứ điều gì về dự án hiện tại…'}">${BMH.esc(BMH.ai.prompt||'')}</textarea><button class="clay" data-ai-run ${BMH.ai.loading?'disabled':''}>${BMH.ai.loading?'AI đang phân tích…':'✦ Phân tích dự án'}</button></div>`}${BMH.ai.error?`<div class="ai-error">${BMH.esc(BMH.ai.error)}</div>`:''}<div class="ai-result">${BMH.ai.loading?'<div class="ai-thinking"><i></i><i></i><i></i><span>AI đang đọc mặt bằng, khí hậu, ngân sách và vật liệu…</span></div>':BMH.aiResultHtml(BMH.ai.result)}</div><footer>AI đưa ra phương án sơ bộ. Kết cấu, MEP, pháp lý và hồ sơ thi công cần KTS/kỹ sư có chuyên môn xác nhận.</footer></section>`:''}</div>`;
+  const c=BMH.cloud?.config,status=!c?'checking':c.aiConfigured?'ok':'warn',label=!c?'Đang kiểm tra AI':c.aiConfigured?`${BMH.esc(c.aiProvider||'AI')} · ${BMH.esc(c.aiModel||'model')}`:'AI chưa cấu hình';
+  return `<div class="ai-copilot ${BMH.ai.open?'open':''}"><button class="ai-fab" data-ai-open aria-label="Mở AI phân tích"><i>✦</i><span>AI phân tích</span><em class="${status}"></em></button>${BMH.ai.open?`<section class="ai-panel" role="dialog" aria-label="Build My Home AI Decision Engine"><header><div><span class="ai-status ${status}">${label}</span><h2>AI Decision Engine</h2><p>Đọc toàn bộ dự án · tối ưu chi phí · tiện nghi · an toàn</p></div><button data-ai-close aria-label="Đóng">×</button></header><div class="ai-tabs">${[['review','Đánh giá'],['cost','Tiết kiệm'],['whatif','What-if']].map(([id,n])=>`<button class="${BMH.ai.mode===id?'active':''}" data-ai-mode="${id}">${n}</button>`).join('')}</div>${!BMH.aiConfigured()?`<div class="ai-setup"><b>1 phút để bật AI thật</b><span>Mở <code>.env.example</code>, copy thành <code>.env.local</code>, điền <code>GEMINI_API_KEY</code>; khi deploy Vercel thêm cùng biến này trong Environment Variables. <code>gemini-flash-latest</code> tự theo bản Flash mới của Google.</span><small>API key chỉ nằm ở server, không xuất hiện trong trình duyệt.</small></div>`:`<div class="ai-prompt"><textarea id="aiPrompt" rows="3" placeholder="${BMH.ai.mode==='whatif'?'Ví dụ: Nếu giảm ngân sách còn 1,2 tỷ thì nên đổi gì?':BMH.ai.mode==='cost'?'Tìm cách tiết kiệm nhưng không ảnh hưởng an toàn và tiện nghi…':BMH.ai.mode==='review'?'Đánh giá căn nhà hiện tại và chỉ ra 5 việc đáng sửa nhất…':'Mô tả thay đổi bạn muốn kiểm tra…'}">${BMH.esc(BMH.ai.prompt||'')}</textarea><button class="clay" data-ai-run ${BMH.ai.loading?'disabled':''}>${BMH.ai.loading?'AI đang phân tích…':'✦ Phân tích dự án'}</button></div>`}${BMH.ai.error?`<div class="ai-error">${BMH.esc(BMH.ai.error)}</div>`:''}<div class="ai-result">${BMH.ai.loading?'<div class="ai-thinking"><i></i><i></i><i></i><span>AI đang đọc mặt bằng, khí hậu, ngân sách và vật liệu…</span></div>':BMH.aiResultHtml(BMH.ai.result)}</div><footer>AI đưa ra phương án sơ bộ. Kết cấu, MEP, pháp lý và hồ sơ thi công cần KTS/kỹ sư có chuyên môn xác nhận.</footer></section>`:''}</div>`;
 };
 
 BMH.aiOpen=()=>{BMH.ai.open=true;BMH.render({preserveScroll:true});};
@@ -64,8 +64,8 @@ BMH.applyAIBrief=result=>{
 BMH.aiStartBrief=async()=>{
   const prompt=BMH.$('#aiStartPrompt')?.value?.trim()||'';
   if(!prompt){BMH.toast('Hãy kể ngắn gọn về khu đất, gia đình và ngân sách.');return;}
-  if(!BMH.aiConfigured()){BMH.ai.open=true;BMH.ai.error='AI chưa có API key. Hãy cấu hình OPENAI_API_KEY trước.';BMH.render({preserveScroll:true});return;}
-  BMH.ai.open=true;BMH.ai.mode='chat';BMH.ai.prompt=prompt;BMH.ai.loading=true;BMH.ai.error='';BMH.render({preserveScroll:true});
+  if(!BMH.aiConfigured()){BMH.ai.open=true;BMH.ai.error='AI chưa có API key. Hãy cấu hình GEMINI_API_KEY trước.';BMH.render({preserveScroll:true});return;}
+  BMH.ai.open=true;BMH.ai.mode='review';BMH.ai.prompt=prompt;BMH.ai.loading=true;BMH.ai.error='';BMH.render({preserveScroll:true});
   try{const data=await BMH.aiCall('brief',prompt);BMH.ai.result=data.result;BMH.ai.model=data.model||'';BMH.applyAIBrief(data.result);BMH.state.project.source='suggest';BMH.state.ui.step=2;BMH.save();BMH.toast('AI đã tạo brief ban đầu. Hãy kiểm tra tài chính và tiếp tục tinh chỉnh.');}
   catch(err){BMH.ai.error=err.message;}
   finally{BMH.ai.loading=false;BMH.render();}
@@ -82,7 +82,7 @@ BMH.aiAnalyzeImage=async(file,kind='photo')=>{
   if(!file||!file.type?.startsWith('image/'))return false;
   if(!BMH.aiConfigured())return false;
   if(file.size>12*1024*1024){BMH.toast('Ảnh quá lớn; hãy chọn ảnh dưới 12MB. Hệ thống sẽ tự nén ảnh phù hợp trước khi gửi AI.');return false;}
-  BMH.ai.open=true;BMH.ai.mode='chat';BMH.ai.imageName=file.name;BMH.ai.loading=true;BMH.ai.error='';BMH.render({preserveScroll:true});
+  BMH.ai.open=true;BMH.ai.mode='review';BMH.ai.imageName=file.name;BMH.ai.loading=true;BMH.ai.error='';BMH.render({preserveScroll:true});
   try{const image_data_url=await BMH.imageForAI(file);const prompt=kind==='plan'?'Đây là bản vẽ/mặt bằng tham khảo. Hãy nhận diện tổ chức không gian, điểm mạnh/yếu và những câu hỏi cần xác minh trước khi dùng làm cơ sở thiết kế.':'Đây là ảnh nhà mẫu người dùng thích. Hãy nhận diện phong cách, vật liệu, hình khối, giải pháp mặt tiền và những yếu tố có thể áp dụng thực tế cho dự án hiện tại.';const data=await BMH.aiCall('vision',prompt,{image_data_url});BMH.ai.result=data.result;BMH.ai.model=data.model||'';BMH.state.project.source=kind==='plan'?'plan':'photo';BMH.save();BMH.toast('AI đã phân tích ảnh tham khảo.');return true;}
   catch(err){BMH.ai.error=err.message;return false;}
   finally{BMH.ai.loading=false;BMH.state.ui.step=2;BMH.save();BMH.render();}
@@ -97,7 +97,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest?.('[data-ai-run]')){BMH.aiRun();return;}
   if(e.target.closest?.('[data-ai-start]')){BMH.aiStartBrief();return;}
   const go=e.target.closest?.('[data-ai-goto]');if(go){BMH.navigateTo(Number(go.dataset.aiGoto));return;}
-  const q=e.target.closest?.('[data-ai-question]');if(q){BMH.ai.prompt=q.dataset.aiQuestion||'';BMH.ai.mode='chat';BMH.render({preserveScroll:true});return;}
+  const q=e.target.closest?.('[data-ai-question]');if(q){BMH.ai.prompt=q.dataset.aiQuestion||'';BMH.ai.mode='whatif';BMH.render({preserveScroll:true});return;}
 });
 
 document.addEventListener('change',e=>{
@@ -106,5 +106,5 @@ document.addEventListener('change',e=>{
   if(t.id==='uploadPlan'&&t.files?.[0]&&t.files[0].type?.startsWith('image/')&&BMH.aiConfigured()){e.stopImmediatePropagation();BMH.aiAnalyzeImage(t.files[0],'plan');t.value='';}
 });
 
-BMH.aiHeaderChip=()=>{const c=BMH.cloud?.config,status=!c?'checking':c.aiConfigured?'ok':'warn';return `<button class="ai-header-chip ${status}" data-ai-open title="AI Copilot"><i>✦</i><span>${!c?'AI':c.aiConfigured?'AI online':'Bật AI'}</span></button>`;};
-BMH.aiInsightCard=()=>{const r=BMH.ai.result,fromAI=!!r&&BMH.ai.lastAction==='review';return `<article class="card ai-review-card"><div class="between"><h2>✦ AI Review thật</h2><button class="secondary" data-ai-review-open>${fromAI?'Phân tích lại':'Phân tích bằng AI'}</button></div><p>${fromAI?BMH.esc(r.summary):'Rule engine hiện đang kiểm tra hình học và điểm số. Bấm để OpenAI đọc toàn bộ dự án và đưa ra nhận xét có ngữ cảnh.'}</p>${fromAI?`<small>${(r.recommendations||[]).slice(0,2).map(x=>BMH.esc(x.title)).join(' · ')}</small>`:'<small>AI key được giữ ở backend; trình duyệt không nhận secret.</small>'}</article>`;};
+BMH.aiHeaderChip=()=>{const c=BMH.cloud?.config,status=!c?'checking':c.aiConfigured?'ok':'warn';return `<button class="ai-header-chip ${status}" data-ai-open title="AI Decision Engine"><i>✦</i><span>${!c?'AI':c.aiConfigured?'AI online':'Bật AI'}</span></button>`;};
+BMH.aiInsightCard=()=>{const r=BMH.ai.result,fromAI=!!r&&BMH.ai.lastAction==='review';return `<article class="card ai-review-card"><div class="between"><h2>✦ AI Review thật</h2><button class="secondary" data-ai-review-open>${fromAI?'Phân tích lại':'Phân tích bằng AI'}</button></div><p>${fromAI?BMH.esc(r.summary):'Rule engine đang kiểm tra hình học và điểm số. Bấm để Gemini đọc toàn bộ dự án và đưa ra nhận xét có ngữ cảnh.'}</p>${fromAI?`<small>${(r.recommendations||[]).slice(0,2).map(x=>BMH.esc(x.title)).join(' · ')}</small>`:'<small>AI key được giữ ở backend; trình duyệt không nhận secret.</small>'}</article>`;};

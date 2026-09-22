@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "private": true,
-  "description": "Build My Home V5.0.1 AI + WOW refinement: unified drawings, BOQ, materials, cashflow, MEP checklist, construction schedule, PDF print, Excel workbook and ZIP exports with V4.9 cloud/payment preserved",
+  "description": "Build My Home V5.0.2 Gemini AI-Native Scan: native image/video/PDF scan, AI Decision Engine, auto-updating Gemini Flash alias, planner hotfix, cloud/payment and dossier preserved",
   "engines": {
     "node": ">=22"
   },
