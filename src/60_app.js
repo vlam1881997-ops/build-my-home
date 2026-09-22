@@ -16,15 +16,6 @@ BMH.render = ({preserveScroll=false}={}) => {
 BMH.navigateTo = step => {step=BMH.clamp(Number(step)||1,1,10);BMH.state.ui.step=step;if(step!==5){BMH.drag=null;BMH.state.ui.planner.tool='select';}BMH.save();BMH.render();window.scrollTo({top:0,behavior:'smooth'});return true;};
 BMH.openPaywall = () => {BMH.navigateTo(8);BMH.toast('Thanh toán đang tạm tắt để hoàn thiện sản phẩm. Toàn bộ hồ sơ hiện được mở để kiểm thử.');};
 BMH.amountBar = () => BMH.decisionCards?.()||'';
-BMH.runtimeError = (step,err) => `<section class="runtime-error studio-card"><div>⚠</div><h2>Bước ${step} gặp lỗi hiển thị</h2><p>Dữ liệu dự án vẫn được giữ nguyên. Hãy quay lại hoặc tải lại trang.</p>${BMH.DEV&&err?`<code>${BMH.esc(err.message||String(err))}</code>`:''}<div><button class="studio-secondary" data-nav="${Math.max(1,step-1)}">${BMH.icon('back')} Quay lại</button><button class="studio-primary" data-nav="1">Về Studio</button></div></section>`;
-BMH.render = ({preserveScroll=false}={}) => {
-  const sy=window.scrollY,step=BMH.state.ui.step;BMH.disposeStudio3D?.();const screen=BMH.SCREENS[step-1]||BMH.screen1;let body='';
-  try{body=screen();}catch(err){console.error(`Build My Home render error at step ${step}`,err);body=BMH.runtimeError(step,err);}
-  try{const appRoot=BMH.root();if(!appRoot)throw new Error('Missing #app root');appRoot.innerHTML=`${BMH.header()}${BMH.sidebar()}<main class="studio-main step-${step} ${step===5?'planner-page':''} ${step===7?'house-studio-page':''}">${BMH.stepper()}<div class="studio-screen">${body}</div>${BMH.footer()}</main>${BMH.cloudOverlay?BMH.cloudOverlay():''}${BMH.ai?.open&&BMH.aiDock?BMH.aiDock():''}`;}catch(err){console.error('Build My Home shell render error',err);const appRoot=BMH.root();if(appRoot)appRoot.innerHTML=BMH.runtimeError(step,err);}
-  document.documentElement.dataset.version=BMH.VERSION;document.title=`Build My Home · ${BMH.STEPS[step-1][1]}`;if(preserveScroll)window.scrollTo(0,sy);requestAnimationFrame(BMH.afterRender);
-};
-BMH.navigateTo = step => {step=BMH.clamp(Number(step)||1,1,10);BMH.state.ui.step=step;if(step!==5){BMH.drag=null;BMH.state.ui.planner.tool='select';}BMH.save();BMH.render();window.scrollTo({top:0,behavior:'smooth'});return true;};
-BMH.openPaywall = () => {BMH.navigateTo(8);BMH.toast('Thanh toán đang tạm tắt để hoàn thiện sản phẩm. Toàn bộ hồ sơ hiện được mở để kiểm thử.');};
 BMH.loadExternalScript = (url, timeout=6000) => new Promise((resolve,reject)=>{
   const script=document.createElement('script'); let settled=false;
   const finish=(ok,err)=>{if(settled)return;settled=true;clearTimeout(timer);ok?resolve():reject(err||new Error('Load failed'));};
