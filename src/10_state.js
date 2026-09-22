@@ -22,7 +22,9 @@ BMH.defaultState = () => ({
       {id:'o2',floor:0,roomId:'r1',kind:'window',side:'east',offset:.35,width:1.6},
       {id:'o3',floor:0,roomId:'r3',kind:'door',side:'east',offset:.25,width:.8},
       {id:'o4',floor:1,roomId:'r6',kind:'window',side:'east',offset:.4,width:1.6}
-    ]},
+    ], lockedRoomIds:[]},
+    planVariants:[],
+    planVersions:[],
     materials:{tier:'standard',climatePackage:'recommended',choices:{floor:'viglacera',paint:'dulux',door:'xingfa'},lastDelta:0},
     performance:{solarEnabled:true,rainwaterEnabled:true,coolRoof:true,smartShading:true,mode:'balanced'},
     wearYear:0,
@@ -75,6 +77,12 @@ BMH.normalizeState = () => {
   if(!BMH.state.project.plan||typeof BMH.state.project.plan!=='object')BMH.state.project.plan=structuredClone(base.project.plan);
   if(!Array.isArray(BMH.state.project.plan.rooms))BMH.state.project.plan.rooms=structuredClone(base.project.plan.rooms);
   if(!Array.isArray(BMH.state.project.plan.openings))BMH.state.project.plan.openings=structuredClone(base.project.plan.openings);
+  if(!Array.isArray(BMH.state.project.plan.lockedRoomIds))BMH.state.project.plan.lockedRoomIds=[];
+  BMH.state.project.plan.lockedRoomIds=BMH.state.project.plan.lockedRoomIds.filter(id=>BMH.state.project.plan.rooms.some(r=>r.id===id));
+  if(!Array.isArray(BMH.state.project.planVariants))BMH.state.project.planVariants=[];
+  if(!Array.isArray(BMH.state.project.planVersions))BMH.state.project.planVersions=[];
+  BMH.state.project.planVariants=BMH.state.project.planVariants.slice(0,3);
+  BMH.state.project.planVersions=BMH.state.project.planVersions.slice(0,6);
   if(!BMH.state.project.materials||typeof BMH.state.project.materials!=='object')BMH.state.project.materials=structuredClone(base.project.materials);
   if(!['basic','recommended','robust'].includes(BMH.state.project.materials.climatePackage))BMH.state.project.materials.climatePackage='recommended';
   if(!BMH.state.project.performance||typeof BMH.state.project.performance!=='object')BMH.state.project.performance=structuredClone(base.project.performance);

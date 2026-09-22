@@ -272,6 +272,98 @@ BMH.redoPlan = () => {
   const snap=BMH.planHistory.redo.pop(); if(!snap)return BMH.toast('Chưa có thao tác để làm lại.');
   BMH.planHistory.undo.push(BMH.planSnapshot()); BMH.state.project.plan=structuredClone(snap); BMH.normalizeState(); BMH.save(); BMH.render();
 };
+BMH.isRoomLocked = id => (BMH.state.project.plan.lockedRoomIds||[]).includes(id);
+BMH.toggleRoomLock = id => {
+  const list=BMH.state.project.plan.lockedRoomIds||(BMH.state.project.plan.lockedRoomIds=[]),i=list.indexOf(id);
+  if(i>=0)list.splice(i,1);else list.push(id);
+  BMH.save();BMH.render({preserveScroll:true});
+  BMH.toast(i>=0?'Đã mở khóa phòng.':'Đã khóa phòng để tránh kéo nhầm.');
+};
+BMH.withPlan = (plan,fn) => {
+  const old=BMH.state.project.plan;BMH.state.project.plan=structuredClone(plan);
+  try{return fn();}finally{BMH.state.project.plan=old;}
+};
+BMH.planMetrics = plan => BMH.withPlan(plan,()=>{
+  const reviews=BMH.state.project.plan.rooms.map(r=>BMH.roomPlacementReview(r)).filter(Boolean);
+  const placement=reviews.length?Math.round(reviews.reduce((a,r)=>a+r.score,0)/reviews.length):70;
+  const circs=Array.from({length:Math.max(1,BMH.state.project.site.floors)},(_,f)=>BMH.circulationAnalysis(f).score);
+  const circulation=Math.round(circs.reduce((a,b)=>a+b,0)/Math.max(1,circs.length));
+  const issues=BMH.plannerIssues(),review=BMH.designReview(),area=BMH.planArea();
+  const score=BMH.clamp(Math.round(review.overall*.58+placement*.24+circulation*.18-issues.filter(i=>i.sev==='error').length*4),35,98);
+  return {score,placement,circulation,overall:review.overall,area,issues:issues.length};
+});
+BMH.roomSuggestionSpots = (room,limit=3) => {
+  if(!room)return[];
+  const plan=BMH.planSnapshot(),site=BMH.state.project.site,env=BMH.buildableEnvelope(site),step=Math.max(.5,Number(BMH.state.ui.planner.snap)||.2),spots=[];
+  const xs=[],ys=[];for(let x=0;x<=site.width-room.w+.001;x+=step)xs.push(+x.toFixed(2));for(let y=0;y<=site.depth-room.h+.001;y+=step)ys.push(+y.toFixed(2));
+  for(const y of ys)for(const x of xs){
+    if(Math.abs(x-room.x)<.05&&Math.abs(y-room.y)<.05)continue;
+    const candidate=structuredClone(plan),r=candidate.rooms.find(q=>q.id===room.id);if(!r)continue;r.x=x;r.y=y;
+    if(!BMH.layoutValid(candidate.rooms))continue;
+    const review=BMH.withPlan(candidate,()=>BMH.roomPlacementReview(r));if(!review)continue;
+    const inside=x>=env.side-.01&&x+room.w<=site.width-env.side+.01&&y>=env.front-.01&&y+room.h<=site.depth-env.rear+.01;
+    const distance=Math.hypot(x-room.x,y-room.y),rank=review.score+(inside?2:0)-Math.min(6,distance*.12);
+    spots.push({x,y,score:review.score,rank,sector:review.sector,status:review.status,note:review.notes[0]||''});
+  }
+  spots.sort((a,b)=>b.rank-a.rank||b.score-a.score||a.y-b.y||a.x-b.x);
+  const out=[];for(const spot of spots){if(out.every(x=>Math.hypot(x.x-spot.x,x.y-spot.y)>1.1))out.push(spot);if(out.length>=limit)break;}return out;
+};
+BMH.applyRoomSuggestion = (id,x,y) => {
+  const r=BMH.state.project.plan.rooms.find(q=>q.id===id);if(!r)return;
+  if(BMH.isRoomLocked(id))return BMH.toast('Phòng này đang khóa. Hãy mở khóa trước khi di chuyển.');
+  BMH.pushPlanHistory();const old={x:r.x,y:r.y};r.x=Number(x);r.y=Number(y);
+  if(!BMH.layoutValid(BMH.state.project.plan.rooms)){r.x=old.x;r.y=old.y;BMH.planHistory.undo.pop();return BMH.toast('Vị trí gợi ý hiện không còn trống.');}
+  BMH.save();BMH.render({preserveScroll:true});const rev=BMH.roomPlacementReview(r);BMH.toast(`${r.name}: ${rev.status} ${rev.score}/100.`);
+};
+BMH.autoImprovePlan = () => {
+  const locked=new Set(BMH.state.project.plan.lockedRoomIds||[]),candidates=BMH.state.project.plan.rooms.filter(r=>!locked.has(r.id)).map(r=>({r,rev:BMH.roomPlacementReview(r)})).sort((a,b)=>a.rev.score-b.rev.score);
+  if(!candidates.length)return BMH.toast('Tất cả phòng đang khóa.');
+  BMH.pushPlanHistory();let moved=0;
+  for(const item of candidates.slice(0,5)){
+    const current=BMH.state.project.plan.rooms.find(r=>r.id===item.r.id),best=BMH.roomSuggestionSpots(current,1)[0];
+    if(best&&best.score>=item.rev.score+3){current.x=best.x;current.y=best.y;moved++;}
+  }
+  if(!moved){BMH.planHistory.undo.pop();return BMH.toast('Phương án hiện đã khá ổn; không tìm được bước cải thiện an toàn rõ rệt.');}
+  BMH.state.project.planVariants=[];BMH.save();BMH.render({preserveScroll:true});BMH.toast(`Đã tối ưu lại ${moved} phòng chưa khóa.`);
+};
+BMH.capturePlanVersion = label => {
+  const versions=BMH.state.project.planVersions||(BMH.state.project.planVersions=[]),metrics=BMH.planMetrics(BMH.state.project.plan);
+  versions.unshift({id:BMH.uid('ver'),label:label||`Mốc ${versions.length+1}`,createdAt:new Date().toISOString(),metrics,plan:BMH.planSnapshot()});
+  if(versions.length>6)versions.length=6;BMH.save();BMH.render({preserveScroll:true});BMH.toast('Đã lưu mốc phương án.');
+};
+BMH.restorePlanVersion = id => {
+  const v=(BMH.state.project.planVersions||[]).find(x=>x.id===id);if(!v)return;
+  BMH.pushPlanHistory();BMH.state.project.plan=structuredClone(v.plan);BMH.normalizeState();BMH.save();BMH.render({preserveScroll:true});BMH.toast(`Đã khôi phục ${v.label}.`);
+};
+BMH.deletePlanVersion = id => {BMH.state.project.planVersions=(BMH.state.project.planVersions||[]).filter(x=>x.id!==id);BMH.save();BMH.render({preserveScroll:true});};
+BMH.generateAutoPlanSnapshot = strategy => {
+  const oldPlan=BMH.planSnapshot(),oldUi=structuredClone(BMH.state.ui.planner),oldStrategy=BMH.state.project.site.designStrategy,oldUndo=BMH.planHistory.undo.slice(),oldRedo=BMH.planHistory.redo.slice();
+  const save=BMH.save,render=BMH.render,toast=BMH.toast,push=BMH.pushPlanHistory;let result=null;
+  BMH.save=()=>{};BMH.render=()=>{};BMH.toast=()=>{};BMH.pushPlanHistory=()=>{};
+  try{BMH.autoPlanConcept(strategy);result=BMH.planSnapshot();}catch(_){result=null;}
+  finally{BMH.state.project.plan=oldPlan;BMH.state.ui.planner=oldUi;BMH.state.project.site.designStrategy=oldStrategy;BMH.planHistory.undo=oldUndo;BMH.planHistory.redo=oldRedo;BMH.save=save;BMH.render=render;BMH.toast=toast;BMH.pushPlanHistory=push;}
+  return result;
+};
+BMH.generatePlanVariants = () => {
+  const defs=[['A','climate','Ưu tiên khí hậu'],['B','balanced','Cân bằng'],['C','budget','Gọn chi phí']],variants=[];
+  for(const [code,strategy,label] of defs){const plan=BMH.generateAutoPlanSnapshot(strategy);if(!plan)continue;const metrics=BMH.planMetrics(plan);variants.push({id:`variant-${code}`,code,strategy,label,metrics,plan});}
+  BMH.state.project.planVariants=variants;BMH.save();BMH.render({preserveScroll:true});BMH.toast(variants.length===3?'Đã tạo 3 phương án A/B/C để so sánh.':'Đã tạo các phương án khả dụng.');
+};
+BMH.applyPlanVariant = id => {
+  const v=(BMH.state.project.planVariants||[]).find(x=>x.id===id);if(!v)return;
+  BMH.pushPlanHistory();BMH.state.project.plan=structuredClone(v.plan);BMH.state.project.site.designStrategy=v.strategy;BMH.normalizeState();BMH.save();BMH.render({preserveScroll:true});BMH.toast(`Đã áp dụng phương án ${v.code} · ${v.label}.`);
+};
+BMH.smartSnapMove = (room,rooms) => {
+  const site=BMH.state.project.site,env=BMH.buildableEnvelope(site),others=rooms.filter(r=>r.id!==room.id&&r.floor===room.floor),threshold=Math.max(.12,(BMH.state.ui.planner.snap||.2)*.75),guides=[];
+  const xTargets=[env.side,site.width-env.side-room.w,0,site.width-room.w],yTargets=[env.front,site.depth-env.rear-room.h,0,site.depth-room.h];
+  others.forEach(o=>{xTargets.push(o.x,o.x+o.w,o.x-room.w,o.x+o.w-room.w,o.x+o.w/2-room.w/2);yTargets.push(o.y,o.y+o.h,o.y-room.h,o.y+o.h-room.h,o.y+o.h/2-room.h/2);});
+  const snapAxis=(value,targets,axis)=>{let best=value,dist=threshold;for(const t of targets){const d=Math.abs(t-value);if(d<dist){dist=d;best=t;}}if(best!==value)guides.push({axis,value:axis==='x'?best+(room.w/2):best+(room.h/2)});return best;};
+  room.x=BMH.clamp(snapAxis(room.x,xTargets,'x'),0,site.width-room.w);room.y=BMH.clamp(snapAxis(room.y,yTargets,'y'),0,site.depth-room.h);return guides;
+};
+BMH.smartGuideSvg = floor => {
+  if(!BMH.drag?.guides?.length)return'';const site=BMH.state.project.site;
+  return `<g class="smart-guides">${BMH.drag.guides.map(g=>g.axis==='x'?`<line x1="${g.value}" y1="-.4" x2="${g.value}" y2="${site.depth+.4}"/>`:`<line x1="-.4" y1="${g.value}" x2="${site.width+.4}" y2="${g.value}"/>`).join('')}</g>`;
+};
 
 BMH.buildableEnvelopeSvg = floor => {
   const s=BMH.state.project.site,e=BMH.buildableEnvelope(s),x=e.side,y=e.front,w=Math.max(.05,s.width-e.side*2),h=Math.max(.05,s.depth-e.front-e.rear);
@@ -308,7 +400,7 @@ BMH.autoPlanConcept = (strategy=BMH.state.project.site.designStrategy||'climate'
     const last=rooms.filter(x=>x.floor===f&&x.type==='bed').at(-1);if(last)door(last,'south',.72,.85);addService(f);
   }
   // Window pass: add a second opening when climate strategy needs cross-ventilation and the side is externally available.
-  p.plan={rooms,openings};
+  p.plan={rooms,openings,lockedRoomIds:[]};
   if(strategy==='climate'){
     for(const r of rooms.filter(r=>['living','kitchen','bed'].includes(r.type))){const ext=BMH.externalSides(r);const current=new Set(openings.filter(o=>o.roomId===r.id&&o.kind==='window').map(o=>o.side));const alt=ext.find(side=>!current.has(side)&&side!=='west')||ext.find(side=>!current.has(side));if(alt)win(r,alt,.6,Math.min(1.2,(alt==='north'||alt==='south'?r.w:r.h)*.38));}
   }
@@ -355,7 +447,7 @@ BMH.planSvg = ({interactive=true, floor=BMH.state.ui.planner.floor}={}) => {
   const usedH=Math.max(6,...rooms.map(r=>r.y+r.h)), Hview=Math.min(H,Math.max(usedH+1,10)), m=2.55, major=1, minor=.2, zoom=BMH.clamp(ui.zoom||1,.75,2.5);
   const fengProfile=BMH.fengProfile?BMH.fengProfile():null, good=fengProfile?.dirs?.[0];
   const feng=ui.showFeng&&good?(()=>{const pos={'Bắc':[W*.2,0,W*.6,Hview*.22],'Nam':[W*.2,Hview*.78,W*.6,Hview*.22],'Đông':[W*.78,Hview*.2,W*.22,Hview*.6],'Tây':[0,Hview*.2,W*.22,Hview*.6],'Đông Nam':[W*.58,Hview*.58,W*.42,Hview*.42],'Đông Bắc':[W*.58,0,W*.42,Hview*.42],'Tây Nam':[0,Hview*.58,W*.42,Hview*.42],'Tây Bắc':[0,0,W*.42,Hview*.42]}[good];return pos?`<g class="feng-zone"><rect x="${pos[0]}" y="${pos[1]}" width="${pos[2]}" height="${pos[3]}"/><text x="${pos[0]+.16}" y="${pos[1]+.34}">Hướng tốt tham khảo · ${good}</text></g>`:''})():'';
-  const roomMarkup=rooms.map(r=>{const review=BMH.roomPlacementReview(r),selected=ui.selected===r.id;return `<g class="room room-${r.type} placement-${review?.code||'mid'} ${selected?'selected':''}" data-room-id="${r.id}"><rect class="room-interior" x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}"/>${ui.showFurniture?BMH.furnitureSvg(r):''}<g class="room-label"><text class="room-name" x="${r.x+r.w/2}" y="${r.y+r.h/2-.07}">${BMH.esc(r.name).toUpperCase()}</text><text class="room-area" x="${r.x+r.w/2}" y="${r.y+r.h/2+.25}">${BMH.num(r.w*r.h)} m² · ${BMH.num(r.w)}×${BMH.num(r.h)}m</text></g>${interactive&&ui.tool==='select'?BMH.roomDragGripSvg(r):''}${interactive&&selected&&ui.tool==='select'?`<rect class="selection-outline" x="${r.x+.04}" y="${r.y+.04}" width="${Math.max(.01,r.w-.08)}" height="${Math.max(.01,r.h-.08)}"/>${BMH.edgeHandlesSvg(r)}<circle class="resize-handle" data-resize-id="${r.id}" cx="${r.x+r.w}" cy="${r.y+r.h}" r=".20"/>`:''}</g>`}).join('');
+  const roomMarkup=rooms.map(r=>{const review=BMH.roomPlacementReview(r),selected=ui.selected===r.id,locked=BMH.isRoomLocked(r.id);return `<g class="room room-${r.type} placement-${review?.code||'mid'} ${selected?'selected':''} ${locked?'locked':''}" data-room-id="${r.id}"><rect class="room-interior" x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}"/>${ui.showFurniture?BMH.furnitureSvg(r):''}<g class="room-label"><text class="room-name" x="${r.x+r.w/2}" y="${r.y+r.h/2-.07}">${BMH.esc(r.name).toUpperCase()}</text><text class="room-area" x="${r.x+r.w/2}" y="${r.y+r.h/2+.25}">${BMH.num(r.w*r.h)} m² · ${BMH.num(r.w)}×${BMH.num(r.h)}m</text></g>${locked?`<g class="room-lock-tag"><rect x="${r.x+r.w-.48}" y="${r.y+.10}" width=".36" height=".28" rx=".08"/><text x="${r.x+r.w-.30}" y="${r.y+.30}">LOCK</text></g>`:''}${interactive&&ui.tool==='select'&&!locked?BMH.roomDragGripSvg(r):''}${interactive&&selected&&ui.tool==='select'&&!locked?`<rect class="selection-outline" x="${r.x+.04}" y="${r.y+.04}" width="${Math.max(.01,r.w-.08)}" height="${Math.max(.01,r.h-.08)}"/>${BMH.edgeHandlesSvg(r)}<circle class="resize-handle" data-resize-id="${r.id}" cx="${r.x+r.w}" cy="${r.y+r.h}" r=".20"/>`:''}</g>`}).join('');
   const below=ui.showBelow?BMH.belowFloorSvg(floor):'';
   const structure=ui.showStructure?BMH.structureSvg(floor):'';
   const environment=ui.showEnvironment?BMH.environmentOverlaySvg(floor):'';
@@ -371,7 +463,8 @@ BMH.planSvg = ({interactive=true, floor=BMH.state.ui.planner.floor}={}) => {
   const scale=`<g class="scale-bar" transform="translate(${Math.max(.2,W-2.2)} ${Hview+.63})"><rect x="0" y="0" width=".5" height=".10"/><rect x=".5" y="0" width=".5" height=".10" class="alt"/><rect x="1" y="0" width="1" height=".10"/><text x="0" y=".30">0</text><text x="1" y=".30">1m</text><text x="2" y=".30" text-anchor="end">2m</text></g>`;
   const baseX=-m,baseY=-m,baseW=W+m*2+1.45,baseH=Hview+m*2+1.15,cx=baseX+baseW/2,cy=baseY+baseH/2,vw=baseW/zoom,vh=baseH/zoom,vx=cx-vw/2,vy=cy-vh/2;
   const placement=interactive&&ui.tool!=='select'?`<g class="placement-layer tool-${ui.tool}">${BMH.wallPlacementSvg(rooms)}</g>`:'';
-  return `<svg id="plannerSvg" class="planner-svg architecture-svg tool-${ui.tool}" viewBox="${vx} ${vy} ${vw} ${vh}" preserveAspectRatio="xMidYMid meet" data-floor="${floor}" aria-label="Mặt bằng kiến trúc sơ bộ tầng ${floor+1}"><defs><pattern id="minorGrid" width="${minor}" height="${minor}" patternUnits="userSpaceOnUse"><path d="M ${minor} 0 L 0 0 0 ${minor}"/></pattern><pattern id="majorGrid" width="${major}" height="${major}" patternUnits="userSpaceOnUse"><path d="M ${major} 0 L 0 0 0 ${major}"/></pattern><marker id="routeArrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#6a8a6c"/></marker></defs><rect x="${baseX}" y="${baseY}" width="${baseW}" height="${baseH}" class="sheet-bg"/><rect x="0" y="0" width="${W}" height="${Hview}" class="paper"/><rect x="0" y="0" width="${W}" height="${Hview}" class="minor-grid"/><rect x="0" y="0" width="${W}" height="${Hview}" class="major-grid"/>${feng}${below}${envelope}<g class="axis-layer">${axesX}${axesY}</g><g class="room-layer">${roomMarkup}</g><g class="wall-layer">${walls}</g>${structure}<g class="opening-layer">${openings}</g>${climate}${environment}${circulation}${sectionLine}${placement}${dims}<rect class="plot-boundary" x="0" y="0" width="${W}" height="${Hview}"/>${north}${scale}</svg>`;
+  const smartGuides=interactive?BMH.smartGuideSvg(floor):'';
+  return `<svg id="plannerSvg" class="planner-svg architecture-svg tool-${ui.tool}" viewBox="${vx} ${vy} ${vw} ${vh}" preserveAspectRatio="xMidYMid meet" data-floor="${floor}" aria-label="Mặt bằng kiến trúc sơ bộ tầng ${floor+1}"><defs><pattern id="minorGrid" width="${minor}" height="${minor}" patternUnits="userSpaceOnUse"><path d="M ${minor} 0 L 0 0 0 ${minor}"/></pattern><pattern id="majorGrid" width="${major}" height="${major}" patternUnits="userSpaceOnUse"><path d="M ${major} 0 L 0 0 0 ${major}"/></pattern><marker id="routeArrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#6a8a6c"/></marker></defs><rect x="${baseX}" y="${baseY}" width="${baseW}" height="${baseH}" class="sheet-bg"/><rect x="0" y="0" width="${W}" height="${Hview}" class="paper"/><rect x="0" y="0" width="${W}" height="${Hview}" class="minor-grid"/><rect x="0" y="0" width="${W}" height="${Hview}" class="major-grid"/>${feng}${below}${envelope}${smartGuides}<g class="axis-layer">${axesX}${axesY}</g><g class="room-layer">${roomMarkup}</g><g class="wall-layer">${walls}</g>${structure}<g class="opening-layer">${openings}</g>${climate}${environment}${circulation}${sectionLine}${placement}${dims}<rect class="plot-boundary" x="0" y="0" width="${W}" height="${Hview}"/>${north}${scale}</svg>`;
 };
 
 BMH.findFreeSpot = (w,h,floor) => { const s=BMH.state.ui.planner.snap, site=BMH.state.project.site; for(let y=0;y<=site.depth-h+.001;y+=s)for(let x=0;x<=site.width-w+.001;x+=s){const r={id:'temp',floor,x:+x.toFixed(2),y:+y.toFixed(2),w,h};if(BMH.roomValid(r))return {x:r.x,y:r.y};} return null; };

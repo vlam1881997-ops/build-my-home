@@ -239,6 +239,14 @@ document.addEventListener('click',e=>{
   const dtab=e.target.closest('[data-design-tab]');if(dtab){BMH.state.ui.designTab=dtab.dataset.designTab;if(dtab.dataset.designTab==='planner')BMH.state.ui.planner.view='plan';BMH.save();BMH.render();return;}
   const strategy=e.target.closest('[data-design-strategy]');if(strategy){BMH.state.project.site.designStrategy=strategy.dataset.designStrategy;BMH.save();BMH.render();return;}
   if(e.target.closest('[data-auto-plan]')){BMH.autoPlanConcept(BMH.state.project.site.designStrategy);return;}
+  if(e.target.closest('[data-generate-variants]')){BMH.generatePlanVariants();return;}
+  if(e.target.closest('[data-auto-improve]')){BMH.autoImprovePlan();return;}
+  const variant=e.target.closest('[data-apply-variant]');if(variant){BMH.applyPlanVariant(variant.dataset.applyVariant);return;}
+  const lock=e.target.closest('[data-room-lock]');if(lock){BMH.toggleRoomLock(lock.dataset.roomLock);return;}
+  const suggestion=e.target.closest('[data-room-suggest]');if(suggestion){BMH.applyRoomSuggestion(suggestion.dataset.roomSuggest,Number(suggestion.dataset.x),Number(suggestion.dataset.y));return;}
+  if(e.target.closest('[data-save-version]')){const now=new Date(),label=`Mốc ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;BMH.capturePlanVersion(label);return;}
+  const restoreVersion=e.target.closest('[data-restore-version]');if(restoreVersion){BMH.restorePlanVersion(restoreVersion.dataset.restoreVersion);return;}
+  const deleteVersion=e.target.closest('[data-delete-version]');if(deleteVersion){BMH.deletePlanVersion(deleteVersion.dataset.deleteVersion);return;}
   const pview=e.target.closest('[data-plan-view]');if(pview){BMH.state.ui.planner.view=pview.dataset.planView;BMH.state.ui.planner.tool='select';BMH.save();BMH.render();return;}
   const mview=e.target.closest('[data-material-view]');if(mview&&!mview.disabled){BMH.state.ui.materialCategory=mview.dataset.materialView;BMH.save();BMH.render();return;}
   const floor=e.target.closest('[data-floor]');if(floor){BMH.state.ui.planner.view='plan';BMH.state.ui.planner.floor=Number(floor.dataset.floor);const first=BMH.floorRooms()[0];BMH.state.ui.planner.selected=first?.id||null;BMH.save();BMH.render();return;}
@@ -298,7 +306,7 @@ document.addEventListener('pointerdown',e=>{
   if(BMH.state.ui.step!==5||BMH.state.ui.planner.tool!=='select')return;
   const edge=e.target.closest('[data-edge-id]'),handle=e.target.closest('[data-resize-id]'),group=e.target.closest('[data-room-id]');
   const id=edge?.dataset.edgeId||handle?.dataset.resizeId||group?.dataset.roomId;if(!id)return;
-  const r=BMH.state.project.plan.rooms.find(x=>x.id===id);if(!r)return;const svg=BMH.$('#plannerSvg');if(!svg)return;
+  const r=BMH.state.project.plan.rooms.find(x=>x.id===id);if(!r)return;if(BMH.isRoomLocked(id)){BMH.state.ui.planner.selected=id;BMH.save();BMH.render({preserveScroll:true});BMH.toast('Phòng này đang khóa. Mở khóa trong bảng thông tin nếu muốn di chuyển.');return;}const svg=BMH.$('#plannerSvg');if(!svg)return;
   const rect=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal,selectionChanged=BMH.state.ui.planner.selected!==id;
   BMH.drag={id,mode:edge?'edge':handle?'resize':'move',side:edge?.dataset.edgeSide||null,startX:e.clientX,startY:e.clientY,scaleX:vb.width/rect.width,scaleY:vb.height/rect.height,originalPlan:BMH.planSnapshot(),changed:false,selectionChanged,invalid:false,historyPushed:false,raf:false};
   BMH.state.ui.planner.selected=id;document.documentElement.classList.add('room-dragging');BMH.paintPlacementHint(BMH.roomPlacementReview(r));e.preventDefault();
@@ -306,10 +314,10 @@ document.addEventListener('pointerdown',e=>{
 window.addEventListener('pointermove',e=>{
   const d=BMH.drag;if(!d)return;const dx=(e.clientX-d.startX)*d.scaleX,dy=(e.clientY-d.startY)*d.scaleY,s=BMH.state.ui.planner.snap,site=BMH.state.project.site;
   let candidate=structuredClone(d.originalPlan.rooms),r=candidate.find(x=>x.id===d.id);if(!r)return;
-  if(d.mode==='move'){r.x=BMH.clamp(BMH.roundTo(r.x+dx,s),0,site.width-r.w);r.y=BMH.clamp(BMH.roundTo(r.y+dy,s),0,site.depth-r.h);}
-  else if(d.mode==='resize'){r.w=BMH.clamp(BMH.roundTo(r.w+dx,s),.6,site.width-r.x);r.h=BMH.clamp(BMH.roundTo(r.h+dy,s),.6,site.depth-r.y);}
-  else {const delta=BMH.roundTo((d.side==='east'||d.side==='west')?dx:dy,s);candidate=BMH.edgeMoveCandidate(d.originalPlan.rooms,d.id,d.side,delta);}
-  if(!candidate||!BMH.layoutValid(candidate)){d.invalid=true;BMH.paintPlacementHint(null,'Phòng đang chồng không gian khác hoặc vượt ranh lô đất. Hãy kéo về vùng trống.');return;}
+  if(d.mode==='move'){r.x=BMH.clamp(BMH.roundTo(r.x+dx,s),0,site.width-r.w);r.y=BMH.clamp(BMH.roundTo(r.y+dy,s),0,site.depth-r.h);d.guides=BMH.smartSnapMove(r,candidate);}
+  else if(d.mode==='resize'){d.guides=[];r.w=BMH.clamp(BMH.roundTo(r.w+dx,s),.6,site.width-r.x);r.h=BMH.clamp(BMH.roundTo(r.h+dy,s),.6,site.depth-r.y);}
+  else {d.guides=[];const delta=BMH.roundTo((d.side==='east'||d.side==='west')?dx:dy,s);candidate=BMH.edgeMoveCandidate(d.originalPlan.rooms,d.id,d.side,delta);}
+  if(!candidate||!BMH.layoutValid(candidate)){d.invalid=true;d.guides=[];BMH.paintPlacementHint(null,'Phòng đang chồng không gian khác hoặc vượt ranh lô đất. Hãy kéo về vùng trống.');return;}
   d.invalid=false;
   if(!d.historyPushed){BMH.planHistory.undo.push(structuredClone(d.originalPlan));if(BMH.planHistory.undo.length>30)BMH.planHistory.undo.shift();BMH.planHistory.redo.length=0;d.historyPushed=true;}
   BMH.state.project.plan.rooms=candidate;d.changed=true;const moved=candidate.find(x=>x.id===d.id);d.review=BMH.roomPlacementReview(moved);BMH.lastPlacementReview=d.review;BMH.paintPlacementHint(d.review);

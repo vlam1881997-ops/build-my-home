@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "4.4.0",
+  "version": "4.7.0",
   "private": true,
-  "description": "Build My Home V4.4 Interactive Planner Studio: interactive drag planner, placement guidance, site intelligence, climate-adaptive design, solar, rainwater and lifecycle planning - clean source only",
+  "description": "Build My Home V4.7 Design Optimizer Suite: smart room drag, room locking, placement suggestions, A/B/C concept comparison, checkpoints, site/climate/feng integration - clean source only",
   "engines": {
     "node": ">=22"
   },
