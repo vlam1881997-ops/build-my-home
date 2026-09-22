@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "5.4.0",
+  "version": "6.0.0",
   "private": true,
-  "description": "Build My Home V5.4 Visual Completion Upgrade: premium pass for finance, maps, feng shui, materials, budget, construction and handover with local bank logo assets",
+  "description": "Build My Home V6 Product UI Reset: one coherent 10-step UI layer over the existing planning, finance, map, AI, material, energy, 3D and dossier engines",
   "engines": {
     "node": "22.x"
   },
