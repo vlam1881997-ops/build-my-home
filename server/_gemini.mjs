@@ -75,7 +75,7 @@ async function postInteraction(apiVersion,model,payload,key,signal){
   return {r,data};
 }
 
-export async function geminiGenerate({parts,input,systemInstruction='',schema,maxOutputTokens=2200,thinkingLevel='low',timeoutMs=60000}){
+export async function geminiGenerate({parts,input,systemInstruction='',schema,maxOutputTokens=2200,thinkingLevel='low',timeoutMs=60000,tools=[]}){
   const env=geminiEnv();
   if(!env.key)throw Object.assign(new Error('Gemini chưa cấu hình GEMINI_API_KEY trên server.'),{statusCode:503});
   const normalized=Array.isArray(input)?input:normalizeInput(parts);
@@ -89,7 +89,8 @@ export async function geminiGenerate({parts,input,systemInstruction='',schema,ma
       system_instruction:systemInstruction||undefined,
       store:false,
       generation_config:{max_output_tokens:maxOutputTokens},
-      response_format:schema?{type:'text',mime_type:'application/json',schema}:undefined
+      response_format:schema?{type:'text',mime_type:'application/json',schema}:undefined,
+      tools:Array.isArray(tools)&&tools.length?tools:undefined
     };
     const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),timeoutMs);
     try{
@@ -102,7 +103,10 @@ export async function geminiGenerate({parts,input,systemInstruction='',schema,ma
       }
       const text=extractInteractionText(data);if(!text)throw Object.assign(new Error('Gemini không trả về nội dung có thể đọc.'),{statusCode:502,model,apiVersion});
       let result;try{result=schema?JSON.parse(text):text;}catch{throw Object.assign(new Error('Gemini trả về dữ liệu không đúng JSON.'),{statusCode:502,model,apiVersion});}
-      return {result,model,apiVersion,usage:data?.usage||data?.usage_metadata||data?.usageMetadata||null,raw:data};
+      const citations=[];const seen=new Set();
+      const walk=v=>{if(!v||typeof v!=='object')return;if(Array.isArray(v)){for(const x of v)walk(x);return;}if(v.type==='url_citation'&&v.url){const url=String(v.url),title=String(v.title||'Nguồn web');if(!seen.has(url)){seen.add(url);citations.push({url,title});}}for(const x of Object.values(v))walk(x);};
+      walk(data);
+      return {result,model,apiVersion,usage:data?.usage||data?.usage_metadata||data?.usageMetadata||null,citations,raw:data};
     }catch(err){
       lastErr=err?.name==='AbortError'?Object.assign(new Error('Gemini xử lý quá thời gian cho phép.'),{statusCode:504,model,apiVersion}):err;
       if(i===combos.length-1)throw lastErr;
