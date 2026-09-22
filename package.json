@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "5.0.2",
+  "version": "5.0.3",
   "private": true,
-  "description": "Build My Home V5.0.2 Gemini AI-Native Scan: native image/video/PDF scan, AI Decision Engine, auto-updating Gemini Flash alias, planner hotfix, cloud/payment and dossier preserved",
+  "description": "Build My Home V5.0.3 Studio Transformation: warm consumer UI, result-first flow, real browser 3D studio, Gemini cinematic render, landscape planner and payment deferred for product testing",
   "engines": {
     "node": ">=22"
   },

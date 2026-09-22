@@ -1,22 +1,21 @@
 BMH.root = () => document.getElementById('app');
-BMH.sidebar = () => `<aside class="sidebar ${BMH.state.ui.sidebarCollapsed?'collapsed':''}"><button class="collapse" data-sidebar aria-label="Thu gọn/mở rộng">${BMH.state.ui.sidebarCollapsed?'›':'‹'}</button><div class="side-brand-mini"><img src="assets/icon.svg"><span>Build My Home</span></div><nav><button data-nav="1" class="${BMH.state.ui.step===1?'active':''}">${BMH.icon('home')}<span>Trang chủ</span></button><button data-cloud-open>${BMH.icon('user')}<span>Hồ sơ của tôi</span></button><button data-cloud-open>${BMH.icon('folder')}<span>Dự án</span></button><button>${BMH.icon('image')}<span>Thư viện mẫu</span></button><button>${BMH.icon('users')}<span>Nhà thầu</span></button><button data-nav="6">${BMH.icon('cube')}<span>Vật liệu</span></button><button>${BMH.icon('book')}<span>Kiến thức</span></button><button>${BMH.icon('gear')}<span>Cài đặt</span></button></nav><div class="side-quote"><b>⌂</b><span>Ngôi nhà tốt hơn<br>một cuộc sống đẹp hơn</span></div></aside>`;
-BMH.header = () => `<header class="topbar"><div class="brand"><img src="assets/icon.svg" alt=""><div><b>Build My Home</b><span>Kiến tạo tổ ấm, vững bền tương lai</span></div></div><div class="header-actions"><button class="location-chip" data-nav="3">${BMH.icon('pin')} ${BMH.esc(BMH.state.project.site.province)}</button><span class="lang">◎ Tiếng Việt</span><button class="icon-btn">${BMH.icon('bell')}</button>${BMH.aiHeaderChip?BMH.aiHeaderChip():''}${BMH.accountChip?BMH.accountChip():''}</div></header>`;
-BMH.stepper = () => `<nav class="stepper">${BMH.STEPS.map(([short],i)=>{const n=i+1,locked=n>=9&&!BMH.isUnlocked(),active=BMH.state.ui.step===n,done=n<BMH.state.ui.step&&!locked;return `<button data-nav="${n}" class="step ${active?'active':''} ${done?'done':''} ${locked?'locked':''}" ${locked?'aria-label="Bước đang khóa"':''}><i>${locked?'🔒':done?'✓':n}</i><span>${short}</span></button>`}).join('')}</nav>`;
-BMH.footer = () => {const step=BMH.state.ui.step,next=step+1,blocked=step===8&&!BMH.isUnlocked(),e=BMH.estimate();return `<div class="step-footer official-footer"><button class="footer-back" data-nav="${step-1}" ${step===1?'disabled':''}>${BMH.icon('back')} Quay lại</button><div class="footer-budget"><span><small>Ngân sách tối đa</small><b>${BMH.money(e.budget)}</b></span><span><small>Dự toán hiện tại</small><b>${BMH.money(e.total)}</b></span><span class="${e.gap>=0?'good':'bad'}"><small>${e.gap>=0?'Còn dự phòng':'Vượt ngân sách'}</small><b>${BMH.money(Math.abs(e.gap))}</b></span></div>${step<10?`<button class="primary footer-next" data-nav="${next}" ${blocked?'disabled title="Hoàn tất thanh toán để tiếp tục"':''}>${blocked?'🔒 Hoàn tất thanh toán':'Tiếp theo'} ${BMH.icon('arrow')}</button>`:'<button class="primary footer-next" disabled>Hoàn thành</button>'}</div>`};
-BMH.amountBar = () => {const e=BMH.estimate();return `<div class="amountbar"><div><small>Ngân sách tối đa</small><strong>${BMH.money(e.budget)}</strong></div><div><small>Dự toán hiện tại</small><strong class="${e.total>e.budget?'bad':''}">${BMH.money(e.total)}</strong></div><div><small>${e.gap>=0?'Còn dự phòng':'Vượt ngân sách'}</small><strong class="${e.gap>=0?'good':'bad'}">${BMH.money(Math.abs(e.gap))}</strong></div></div>`};
-BMH.runtimeError = (step,err) => `<section class="runtime-error card"><div>⚠</div><h2>Bước ${step} gặp lỗi hiển thị</h2><p>Dữ liệu dự án vẫn được giữ nguyên. Hãy quay lại hoặc tải lại trang; hệ thống không còn để lỗi một màn làm trắng toàn bộ website.</p>${BMH.DEV&&err?`<code>${BMH.esc(err.message||String(err))}</code>`:''}<div><button class="secondary" data-nav="${Math.max(1,step-1)}">${BMH.icon('back')} Quay lại</button><button class="clay" data-nav="1">Về Bước 1</button></div></section>`;
+BMH.STUDIO_NAV = [
+  ['⌂','Ý tưởng'],['₫','Tài chính'],['⌖','Khu đất'],['♡','Gia đình'],['▱','Thiết kế'],['◫','Vật liệu'],['◇','3D Studio'],['≋','Chi phí'],['✓','Thi công'],['↓','Hồ sơ']
+];
+BMH.sidebar = () => `<aside class="studio-dock" aria-label="Điều hướng dự án"><div class="studio-dock-brand"><img src="assets/icon.svg" alt="Build My Home"></div><nav>${BMH.STUDIO_NAV.map(([ico,name],i)=>{const n=i+1;return `<button data-nav="${n}" class="${BMH.state.ui.step===n?'active':''}" aria-label="${name}" title="${name}"><i>${ico}</i><span>${name}</span></button>`}).join('')}</nav><button class="dock-save" data-cloud-open title="Lưu dự án"><i>↥</i><span>Lưu</span></button></aside>`;
+BMH.header = () => {const s=BMH.state.project.site;return `<header class="studio-topbar"><button class="studio-brand" data-nav="1"><img src="assets/icon.svg" alt=""><span><b>Build My Home</b><small>AI Home Studio</small></span></button><div class="studio-project-chip"><i>●</i><span>${BMH.esc(BMH.state.project.name||'Ngôi nhà của tôi')}</span><em>V${BMH.VERSION}</em></div><div class="studio-top-actions"><button class="studio-location" data-nav="3">${BMH.icon('pin')} <span>${BMH.esc(s.district||s.province)}</span></button><button class="studio-save" data-cloud-open>↥ Lưu dự án</button></div></header>`};
+BMH.stepper = () => {const step=BMH.state.ui.step,phases=[['Khám phá',[1]],['Hiểu dự án',[2,3,4]],['Thiết kế',[5,6,7]],['Chi phí',[8]],['Xây & hồ sơ',[9,10]]];return `<nav class="studio-journey" aria-label="Hành trình xây nhà">${phases.map(([name,steps])=>{const active=steps.includes(step),done=Math.max(...steps)<step,target=active?step:steps[0];return `<button data-nav="${target}" class="${active?'active':''} ${done?'done':''}"><i>${done?'✓':phases.indexOf(phases.find(x=>x[0]===name))+1}</i><span>${name}</span></button>`}).join('')}<div class="journey-step"><span>Bước ${step}/10</span><b>${BMH.STEPS[step-1][0]}</b></div></nav>`};
+BMH.footer = () => {const step=BMH.state.ui.step,e=BMH.estimate(),review=BMH.designReview();return `<div class="studio-nextbar"><button class="studio-back" data-nav="${Math.max(1,step-1)}" ${step===1?'disabled':''}>${BMH.icon('back')} <span>Quay lại</span></button><div class="studio-mini-metrics"><span><small>Dự toán</small><b>${BMH.money(e.total)}</b></span><span><small>Tiện nghi</small><b>${review.comfort}/100</b></span><span><small>Dự phòng</small><b class="${e.gap>=0?'good':'bad'}">${e.gap>=0?BMH.money(e.gap):'− '+BMH.money(Math.abs(e.gap))}</b></span></div>${step<10?`<button class="studio-primary studio-next" data-nav="${step+1}">Tiếp tục ${BMH.icon('arrow')}</button>`:`<button class="studio-primary studio-next" data-nav="10">Dự án đã sẵn sàng ✓</button>`}</div>`};
+BMH.amountBar = () => BMH.decisionCards?.()||'';
+BMH.runtimeError = (step,err) => `<section class="runtime-error studio-card"><div>⚠</div><h2>Bước ${step} gặp lỗi hiển thị</h2><p>Dữ liệu dự án vẫn được giữ nguyên. Hãy quay lại hoặc tải lại trang.</p>${BMH.DEV&&err?`<code>${BMH.esc(err.message||String(err))}</code>`:''}<div><button class="studio-secondary" data-nav="${Math.max(1,step-1)}">${BMH.icon('back')} Quay lại</button><button class="studio-primary" data-nav="1">Về Studio</button></div></section>`;
 BMH.render = ({preserveScroll=false}={}) => {
-  const sy=window.scrollY, step=BMH.state.ui.step; const screen=BMH.SCREENS[step-1]||BMH.screen1; let body='';
+  const sy=window.scrollY,step=BMH.state.ui.step;BMH.disposeStudio3D?.();const screen=BMH.SCREENS[step-1]||BMH.screen1;let body='';
   try{body=screen();}catch(err){console.error(`Build My Home render error at step ${step}`,err);body=BMH.runtimeError(step,err);}
-  try{const appRoot=BMH.root();if(!appRoot||typeof appRoot.innerHTML==='undefined')throw new Error('Missing #app root');appRoot.innerHTML=`${BMH.header()}${BMH.sidebar()}<main class="main ${step===5?'planner-page':''}">${BMH.stepper()}<div class="screen">${body}</div>${BMH.footer()}</main>${BMH.cloudOverlay?BMH.cloudOverlay():''}${BMH.aiDock?BMH.aiDock():''}`;}catch(err){console.error('Build My Home shell render error',err);const appRoot=BMH.root();if(appRoot)appRoot.innerHTML=BMH.runtimeError(step,err);}
-  document.documentElement.dataset.version=BMH.VERSION; document.title=`Build My Home · ${BMH.STEPS[step-1][1]}`;
-  if(preserveScroll)window.scrollTo(0,sy); requestAnimationFrame(BMH.afterRender);
+  try{const appRoot=BMH.root();if(!appRoot)throw new Error('Missing #app root');appRoot.innerHTML=`${BMH.header()}${BMH.sidebar()}<main class="studio-main step-${step} ${step===5?'planner-page':''} ${step===7?'house-studio-page':''}">${BMH.stepper()}<div class="studio-screen">${body}</div>${BMH.footer()}</main>${BMH.cloudOverlay?BMH.cloudOverlay():''}${BMH.ai?.open&&BMH.aiDock?BMH.aiDock():''}`;}catch(err){console.error('Build My Home shell render error',err);const appRoot=BMH.root();if(appRoot)appRoot.innerHTML=BMH.runtimeError(step,err);}
+  document.documentElement.dataset.version=BMH.VERSION;document.title=`Build My Home · ${BMH.STEPS[step-1][1]}`;if(preserveScroll)window.scrollTo(0,sy);requestAnimationFrame(BMH.afterRender);
 };
-BMH.navigateTo = step => {
-  step=BMH.clamp(Number(step)||1,1,10); if(step>=9&&!BMH.isUnlocked()){BMH.state.ui.step=8;BMH.save();BMH.render();BMH.toast('Bước 9 và 10 chỉ mở sau khi thanh toán được xác nhận.');return false;}
-  BMH.state.ui.step=step; if(step!==5){BMH.drag=null;BMH.state.ui.planner.tool='select';} BMH.save(); BMH.render(); window.scrollTo({top:0,behavior:'smooth'}); return true;
-};
-BMH.openPaywall = () => {BMH.navigateTo(8);BMH.toast('Hoàn tất thanh toán tại Bước 8 để mở hồ sơ premium.');};
+BMH.navigateTo = step => {step=BMH.clamp(Number(step)||1,1,10);BMH.state.ui.step=step;if(step!==5){BMH.drag=null;BMH.state.ui.planner.tool='select';}BMH.save();BMH.render();window.scrollTo({top:0,behavior:'smooth'});return true;};
+BMH.openPaywall = () => {BMH.navigateTo(8);BMH.toast('Thanh toán đang tạm tắt để hoàn thiện sản phẩm. Toàn bộ hồ sơ hiện được mở để kiểm thử.');};
 BMH.loadExternalScript = (url, timeout=6000) => new Promise((resolve,reject)=>{
   const script=document.createElement('script'); let settled=false;
   const finish=(ok,err)=>{if(settled)return;settled=true;clearTimeout(timer);ok?resolve():reject(err||new Error('Load failed'));};
@@ -167,7 +166,7 @@ BMH.useDeviceLocation = () => {
 };
 BMH.afterRender = () => {
   if(BMH.state.ui.step===3){BMH.loadLiveWeather();BMH.loadClimateHistory?.();BMH.initMapStudio();}
-  if(BMH.state.ui.step===5 && window.innerWidth>1180 && !BMH.state.ui.sidebarCollapsed){BMH.state.ui.sidebarCollapsed=true;BMH.save();BMH.render();}
+  if(BMH.state.ui.step===7)BMH.mountStudio3D?.();
 };
 BMH.mapTileConfig = style => ({
   roadmap:[['https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png','© OpenStreetMap contributors © CARTO'],['https://tile.openstreetmap.org/{z}/{x}/{y}.png','© OpenStreetMap contributors']],
@@ -181,14 +180,14 @@ BMH.initLeafletMap = async () => {
 const sources=BMH.mapTileConfig(s.mapStyle);let sourceIndex=0,activeLayer=null,tileErrors=0,loaded=false,labelLayer=null,stallTimer=null;
 const clearStall=()=>{if(stallTimer){clearTimeout(stallTimer);stallTimer=null;}};
 const setLoaded=()=>{loaded=true;clearStall();el.classList.remove('map-loading','fallback-only');};
-const loadTiles=()=>{clearStall();if(activeLayer)BMH.map.removeLayer(activeLayer);if(labelLayer)BMH.map.removeLayer(labelLayer);const [url,attr]=sources[sourceIndex]||BMH.mapTileConfig('roadmap')[0];tileErrors=0;activeLayer=L.tileLayer(url,{maxZoom:s.mapStyle==='terrain'?17:20,attribution:attr,keepBuffer:4,updateWhenIdle:false,crossOrigin:true}).addTo(BMH.map);if(s.mapStyle==='hybrid'){labelLayer=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Labels © Esri',opacity:.9}).addTo(BMH.map);}activeLayer.on('load',setLoaded);activeLayer.on('tileerror',()=>{tileErrors++;if(tileErrors>=4){if(sourceIndex<sources.length-1){sourceIndex++;loadTiles();}else if(!loaded){BMH.renderMapIframeFallback('Không tải được lớp bản đồ nền trực tuyến, đã chuyển sang bản đồ nhúng dự phòng.');}}});stallTimer=setTimeout(()=>{if(!loaded)BMH.renderMapIframeFallback('Bản đồ nền phản hồi chậm, đã bật lớp dự phòng để bạn tiếp tục thao tác.');},3800);};loadTiles();
+const loadTiles=()=>{clearStall();if(activeLayer)BMH.map.removeLayer(activeLayer);if(labelLayer)BMH.map.removeLayer(labelLayer);const [url,attr]=sources[sourceIndex]||BMH.mapTileConfig('roadmap')[0];tileErrors=0;activeLayer=L.tileLayer(url,{maxZoom:s.mapStyle==='terrain'?17:20,attribution:attr,keepBuffer:4,updateWhenIdle:false,crossOrigin:true}).addTo(BMH.map);if(s.mapStyle==='hybrid'){labelLayer=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Labels © Esri',opacity:.9}).addTo(BMH.map);}activeLayer.on('load',setLoaded);activeLayer.on('tileerror',()=>{tileErrors++;if(tileErrors>=4){if(sourceIndex<sources.length-1){sourceIndex++;loadTiles();}else if(!loaded){BMH.renderMapIframeFallback('Không tải được lớp bản đồ nền trực tuyến, đã chuyển sang bản đồ nhúng dự phòng.');}}});stallTimer=setTimeout(()=>{if(!loaded)BMH.renderMapIframeFallback('Bản đồ nền phản hồi chậm, đã bật lớp dự phòng để bạn tiếp tục thao tác.');},1800);};loadTiles();
   BMH.mapMarker=L.marker([s.lat,s.lng],{draggable:true,autoPan:true}).addTo(BMH.map).bindPopup(`${BMH.esc(s.district||'')} · ${BMH.esc(s.province)}`);
   BMH.mapMarker.on('dragend',ev=>{const ll=ev.target.getLatLng();BMH.applyCoordinates(ll.lat,ll.lng,'Ghim bản đồ');});
   BMH.map.on('click',ev=>BMH.handleMapClick(ev.latlng.lat,ev.latlng.lng,'Chọn trên bản đồ'));
   BMH.map.on('mousemove',ev=>{const hud=BMH.$('#mapHudCoords');if(hud)hud.textContent=`${ev.latlng.lat.toFixed(5)}, ${ev.latlng.lng.toFixed(5)}`;});
   BMH.map.on('mouseout',()=>BMH.updateLocationMeta());
   BMH.map.on('zoomend',()=>{s.mapZoom=BMH.map.getZoom();BMH.save();BMH.syncMapHud(s.mapZoom);});
-  BMH.updateLotOverlay();setTimeout(()=>BMH.map?.invalidateSize(true),80);setTimeout(()=>BMH.map?.invalidateSize(true),360);setTimeout(()=>{if(!loaded)BMH.renderMapIframeFallback('Bản đồ nền chưa tải xong, đã hiển thị lớp dự phòng.');},4500);return true;
+  BMH.updateLotOverlay();setTimeout(()=>BMH.map?.invalidateSize(true),80);setTimeout(()=>BMH.map?.invalidateSize(true),360);setTimeout(()=>{if(!loaded)BMH.renderMapIframeFallback('Bản đồ nền chưa tải xong, đã hiển thị lớp dự phòng.');},2300);return true;
 };
 BMH.initGoogleMap = async () => {
   const el=BMH.$('#map'),s=BMH.state.project.site;if(!el||!BMH.GOOGLE_MAPS_KEY)return false;const gm=await BMH.ensureGoogleMaps();if(!gm)return false;BMH.destroyMap();BMH.mapEngine='google';
@@ -275,7 +274,9 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-plan-redo]')){BMH.redoPlan();return;}
   const zoomBtn=e.target.closest('[data-planner-zoom]');if(zoomBtn){const ui=BMH.state.ui.planner;ui.zoom=BMH.clamp(ui.zoom+(zoomBtn.dataset.plannerZoom==='in'?.15:-.15),.75,2.5);BMH.save();BMH.render();return;}
   if(e.target.closest('[data-planner-fit]')){BMH.state.ui.planner.zoom=1;BMH.save();BMH.render();return;}
-  if(e.target.closest('[data-planner-layout]')){const ui=BMH.state.ui.planner;ui.layout=ui.layout==='wide'?'compact':'wide';BMH.save();BMH.render();return;}
+  if(e.target.closest('[data-planner-layout]')){const ui=BMH.state.ui.planner;ui.layout=ui.layout==='wide'?'compact':'wide';if(ui.layout==='wide'){ui.toolsOpen=false;ui.inspectorOpen=false;}BMH.save();BMH.render();return;}
+  const plannerPanel=e.target.closest('[data-planner-panel]');if(plannerPanel){const ui=BMH.state.ui.planner,key=plannerPanel.dataset.plannerPanel==='tools'?'toolsOpen':'inspectorOpen';ui[key]=!ui[key];if(ui[key]&&ui.layout==='wide'){const other=key==='toolsOpen'?'inspectorOpen':'toolsOpen';ui[other]=false;}BMH.save();BMH.render({preserveScroll:true});return;}
+  if(e.target.closest('[data-planner-legend]')){const ui=BMH.state.ui.planner;ui.legendOpen=!ui.legendOpen;BMH.save();BMH.render({preserveScroll:true});return;}
   if(e.target.closest('[data-planner-text]')){const ui=BMH.state.ui.planner;ui.textSize=ui.textSize==='large'?'normal':'large';BMH.save();BMH.render();return;}
   if(e.target.closest('[data-planner-fullscreen]')){const el=BMH.$('.technical-sheet'); if(el?.requestFullscreen) el.requestFullscreen().catch(()=>BMH.toast('Trình duyệt không cho phép toàn màn hình.')); return;}
   const cpack=e.target.closest('[data-climate-package]');if(cpack){const before=BMH.estimate().total;BMH.state.project.materials.climatePackage=cpack.dataset.climatePackage;const after=BMH.estimate().total;BMH.state.project.materials.lastDelta=after-before;BMH.save();BMH.render();return;}
@@ -286,6 +287,9 @@ document.addEventListener('click',e=>{
   const sm=e.target.closest('[data-scene-mode]');if(sm){BMH.state.ui.sceneMode=sm.dataset.sceneMode;BMH.save();BMH.render();return;}
   if(e.target.closest('[data-scene-explode]')){BMH.state.ui.sceneExploded=!BMH.state.ui.sceneExploded;BMH.save();BMH.render();return;}
   if(e.target.closest('[data-scene-theme]')){BMH.state.ui.sceneTheme=BMH.state.ui.sceneTheme==='day'?'night':'day';BMH.save();BMH.render();return;}
+  const focusBtn=e.target.closest('[data-scene-focus-btn]');if(focusBtn){BMH.state.ui.sceneFocus=focusBtn.dataset.sceneFocusBtn||'all';BMH.save();BMH.render();return;}
+  if(e.target.closest('[data-studio3d-reset]')){BMH.resetStudio3D?.();return;}
+  if(e.target.closest('[data-cinematic-render]')){BMH.generateCinematicRender?.();return;}
   const wear=e.target.closest('[data-wear]');if(wear){BMH.state.project.wearYear=Number(wear.dataset.wear);BMH.save();BMH.render();return;}
   const copy=e.target.closest('[data-copy]');if(copy){navigator.clipboard?.writeText(copy.dataset.copy).then(()=>BMH.toast('Đã sao chép.')).catch(()=>BMH.toast('Không thể sao chép tự động.'));return;}
   if(e.target.closest('[data-dev-pay]')&&BMH.DEV){BMH.state.access.paid=!BMH.state.access.paid;BMH.state.access.source=BMH.state.access.paid?'dev-local':'none';BMH.state.access.paidAt=BMH.state.access.paid?new Date().toISOString():null;BMH.state.access.verifiedAt=BMH.state.access.paid?new Date().toISOString():null;BMH.save();BMH.render();return;}
@@ -315,29 +319,52 @@ BMH.paintPlacementHint = (review,invalidText='') => {
   if(!review)return;
   box.classList.add(`placement-${review.code}`);box.innerHTML=`<strong>${review.status}</strong><b>${review.score}/100</b><span>${BMH.esc(review.name)} · vùng ${BMH.esc(review.sector)}</span><small>${BMH.esc(review.notes[0]||'Vị trí đang được đánh giá.')}</small>`;
 };
+BMH.roomDragMatrix = (from,to) => {
+  if(!from||!to)return 'matrix(1 0 0 1 0 0)';
+  const sx=from.w?to.w/from.w:1,sy=from.h?to.h/from.h:1,e=to.x-sx*from.x,f=to.y-sy*from.y;
+  return `matrix(${sx} 0 0 ${sy} ${e} ${f})`;
+};
+BMH.paintRoomDragPreview = candidate => {
+  const d=BMH.drag;if(!d)return;
+  for(const next of candidate||[]){
+    if(next.floor!==BMH.state.ui.planner.floor)continue;
+    const prev=d.originalPlan.rooms.find(x=>x.id===next.id),g=document.querySelector(`#plannerSvg [data-room-id="${CSS.escape(next.id)}"]`);if(!prev||!g)continue;
+    const changed=Math.abs(prev.x-next.x)>.001||Math.abs(prev.y-next.y)>.001||Math.abs(prev.w-next.w)>.001||Math.abs(prev.h-next.h)>.001;
+    if(changed){g.setAttribute('transform',BMH.roomDragMatrix(prev,next));g.classList.add('drag-preview');}else{g.removeAttribute('transform');g.classList.remove('drag-preview');}
+  }
+};
+BMH.clearRoomDragPreview = () => {document.querySelectorAll('#plannerSvg .drag-preview').forEach(g=>{g.removeAttribute('transform');g.classList.remove('drag-preview');});};
+
+document.addEventListener('wheel',e=>{
+  if(BMH.state.ui.step!==5||!e.target.closest?.('.planner-canvas-stage')||!BMH.$('#plannerSvg'))return;
+  e.preventDefault();const ui=BMH.state.ui.planner,delta=e.deltaY>0?-.1:.1,next=BMH.clamp(Math.round(((ui.zoom||1)+delta)*10)/10,.75,2.5);if(next===ui.zoom)return;ui.zoom=next;BMH.save();BMH.render({preserveScroll:true});
+},{passive:false});
+
 document.addEventListener('pointerdown',e=>{
   if(!e.target.closest?.('#app'))return;
   if(BMH.state.ui.step!==5||BMH.state.ui.planner.tool!=='select')return;
   const edge=e.target.closest('[data-edge-id]'),handle=e.target.closest('[data-resize-id]'),group=e.target.closest('[data-room-id]');
   const id=edge?.dataset.edgeId||handle?.dataset.resizeId||group?.dataset.roomId;if(!id)return;
-  const r=BMH.state.project.plan.rooms.find(x=>x.id===id);if(!r)return;if(BMH.isRoomLocked(id)){BMH.state.ui.planner.selected=id;BMH.save();BMH.render({preserveScroll:true});BMH.toast('Phòng này đang khóa. Mở khóa trong bảng thông tin nếu muốn di chuyển.');return;}const svg=BMH.$('#plannerSvg');if(!svg)return;
-  const rect=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal,selectionChanged=BMH.state.ui.planner.selected!==id;
-  BMH.drag={id,mode:edge?'edge':handle?'resize':'move',side:edge?.dataset.edgeSide||null,startX:e.clientX,startY:e.clientY,scaleX:vb.width/rect.width,scaleY:vb.height/rect.height,originalPlan:BMH.planSnapshot(),changed:false,selectionChanged,invalid:false,historyPushed:false,raf:false};
-  BMH.state.ui.planner.selected=id;document.documentElement.classList.add('room-dragging');BMH.paintPlacementHint(BMH.roomPlacementReview(r));e.preventDefault();
+  const r=BMH.state.project.plan.rooms.find(x=>x.id===id);if(!r)return;if(BMH.isRoomLocked(id)){BMH.state.ui.planner.selected=id;BMH.save();BMH.render({preserveScroll:true});BMH.toast('Phòng này đang khóa. Mở khóa trong bảng thuộc tính nếu muốn di chuyển.');return;}const svg=BMH.$('#plannerSvg');if(!svg)return;
+  const selectionChanged=BMH.state.ui.planner.selected!==id,startPoint=BMH.svgPoint(e,svg);
+  BMH.drag={id,mode:edge?'edge':handle?'resize':'move',side:edge?.dataset.edgeSide||null,startPoint,originalPlan:BMH.planSnapshot(),changed:false,selectionChanged,invalid:false,historyPushed:false,pointerId:e.pointerId,captureEl:svg,lastCandidate:null};
+  BMH.state.ui.planner.selected=id;document.documentElement.classList.add('room-dragging');BMH.paintPlacementHint(BMH.roomPlacementReview(r));
+  try{svg.setPointerCapture?.(e.pointerId);}catch(_){}
+  e.preventDefault();
 });
 window.addEventListener('pointermove',e=>{
-  const d=BMH.drag;if(!d)return;const dx=(e.clientX-d.startX)*d.scaleX,dy=(e.clientY-d.startY)*d.scaleY,s=BMH.state.ui.planner.snap,site=BMH.state.project.site;
+  const d=BMH.drag;if(!d||e.pointerId!==d.pointerId)return;const svg=BMH.$('#plannerSvg'),pt=svg?BMH.svgPoint(e,svg):d.startPoint,dx=pt.x-d.startPoint.x,dy=pt.y-d.startPoint.y,s=BMH.state.ui.planner.snap,site=BMH.state.project.site;
   let candidate=structuredClone(d.originalPlan.rooms),r=candidate.find(x=>x.id===d.id);if(!r)return;
   if(d.mode==='move'){r.x=BMH.clamp(BMH.roundTo(r.x+dx,s),0,site.width-r.w);r.y=BMH.clamp(BMH.roundTo(r.y+dy,s),0,site.depth-r.h);d.guides=BMH.smartSnapMove(r,candidate);}
   else if(d.mode==='resize'){d.guides=[];r.w=BMH.clamp(BMH.roundTo(r.w+dx,s),.6,site.width-r.x);r.h=BMH.clamp(BMH.roundTo(r.h+dy,s),.6,site.depth-r.y);}
   else {d.guides=[];const delta=BMH.roundTo((d.side==='east'||d.side==='west')?dx:dy,s);candidate=BMH.edgeMoveCandidate(d.originalPlan.rooms,d.id,d.side,delta);}
-  if(!candidate||!BMH.layoutValid(candidate)){d.invalid=true;d.guides=[];BMH.paintPlacementHint(null,'Phòng đang chồng không gian khác hoặc vượt ranh lô đất. Hãy kéo về vùng trống.');return;}
+  if(!candidate||!BMH.layoutValid(candidate)){d.invalid=true;BMH.paintPlacementHint(null,'Phòng đang chồng không gian khác hoặc vượt ranh lô đất. Kéo về vùng trống rồi thả.');return;}
   d.invalid=false;
   if(!d.historyPushed){BMH.planHistory.undo.push(structuredClone(d.originalPlan));if(BMH.planHistory.undo.length>30)BMH.planHistory.undo.shift();BMH.planHistory.redo.length=0;d.historyPushed=true;}
-  BMH.state.project.plan.rooms=candidate;d.changed=true;const moved=candidate.find(x=>x.id===d.id);d.review=BMH.roomPlacementReview(moved);BMH.lastPlacementReview=d.review;BMH.paintPlacementHint(d.review);
-  if(!d.raf){d.raf=true;requestAnimationFrame(()=>{d.raf=false;BMH.render({preserveScroll:true});});}
-});
-BMH.finishRoomDrag = () => {const d=BMH.drag;if(!d)return;BMH.drag=null;document.documentElement.classList.remove('room-dragging');if(d.changed){BMH.save();const r=BMH.state.project.plan.rooms.find(x=>x.id===d.id),review=r?BMH.roomPlacementReview(r):d.review;BMH.lastPlacementReview=review;BMH.render({preserveScroll:true});if(review)BMH.toast(`${review.name}: ${review.status} ${review.score}/100 · ${review.notes[0]||'Đã cập nhật vị trí.'}`);}else if(d.selectionChanged){BMH.save();BMH.render({preserveScroll:true});}else if(d.invalid){BMH.toast('Vị trí đó không hợp lệ vì chồng phòng hoặc vượt ranh.');}};
+  BMH.state.project.plan.rooms=candidate;d.lastCandidate=candidate;d.changed=true;const moved=candidate.find(x=>x.id===d.id);d.review=BMH.roomPlacementReview(moved);BMH.lastPlacementReview=d.review;BMH.paintPlacementHint(d.review);BMH.paintRoomDragPreview(candidate);
+  e.preventDefault();
+},{passive:false});
+BMH.finishRoomDrag = e => {const d=BMH.drag;if(!d)return;if(e?.pointerId!=null&&e.pointerId!==d.pointerId)return;try{d.captureEl?.releasePointerCapture?.(d.pointerId);}catch(_){}BMH.clearRoomDragPreview();BMH.drag=null;document.documentElement.classList.remove('room-dragging');if(d.changed){BMH.save();const r=BMH.state.project.plan.rooms.find(x=>x.id===d.id),review=r?BMH.roomPlacementReview(r):d.review;BMH.lastPlacementReview=review;BMH.render({preserveScroll:true});if(d.invalid)BMH.toast('Điểm thả cuối không hợp lệ; đã giữ vị trí hợp lệ gần nhất.');else if(review)BMH.toast(`${review.name}: ${review.status} ${review.score}/100 · ${review.notes[0]||'Đã cập nhật vị trí.'}`);}else if(d.selectionChanged){BMH.save();BMH.render({preserveScroll:true});}else if(d.invalid){BMH.toast('Vị trí đó không hợp lệ vì chồng phòng hoặc vượt ranh.');}};
 window.addEventListener('pointerup',BMH.finishRoomDrag);
 window.addEventListener('pointercancel',BMH.finishRoomDrag);
 
