@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "6.0.0",
+  "version": "6.1.0",
   "private": true,
-  "description": "Build My Home V6 Product UI Reset: one coherent 10-step UI layer over the existing planning, finance, map, AI, material, energy, 3D and dossier engines",
+  "description": "Build My Home V6.1 Critical Runtime Fixes: visible map fallback, landscape planner fit, true interactive 3D primary stage, readable typography and repaired bank logos",
   "engines": {
     "node": "22.x"
   },
