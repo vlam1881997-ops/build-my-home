@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "5.2.0",
+  "version": "5.3.0",
   "private": true,
-  "description": "Build My Home V5.2 Completeness Upgrade: Vietnam 34 provinces, editable family feng shui, Google-grounded research, expanded materials, solar energy, broader banks and map/upload fixes",
+  "description": "Build My Home V5.3 Visual Parity Upgrade: high-impact rebuild of Step 1, Step 5 and Step 7 while retaining V5.2 data, AI, finance, map, materials and energy",
   "engines": {
     "node": "22.x"
   },
