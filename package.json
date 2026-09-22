@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "5.1.1",
+  "version": "5.2.0",
   "private": true,
-  "description": "Build My Home V5.1.1 Video QA Upgrade: fixes production-recording issues across site data, maps, planner defaults, AI drawer, finance empty states and readability",
+  "description": "Build My Home V5.2 Completeness Upgrade: Vietnam 34 provinces, editable family feng shui, Google-grounded research, expanded materials, solar energy, broader banks and map/upload fixes",
   "engines": {
     "node": "22.x"
   },
