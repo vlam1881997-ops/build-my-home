@@ -13,6 +13,18 @@ function rateLimit(req){
   if(aiBuckets.size>500)for(const [k,v] of aiBuckets)if(now-v.start>AI_WINDOW_MS)aiBuckets.delete(k);
 }
 
+
+const FENG_SCHEMA={
+  type:'object',additionalProperties:false,
+  properties:{
+    headline:{type:'string'},summary:{type:'string'},confidence:{type:'integer',minimum:0,maximum:100},
+    family:{type:'array',maxItems:12,items:{type:'object',additionalProperties:false,properties:{role:{type:'string'},birth:{type:'integer'},kua:{type:'integer'},group:{type:'string'},good_directions:{type:'array',items:{type:'string'},maxItems:4},notes:{type:'array',items:{type:'string'},maxItems:5}},required:['role','birth','kua','group','good_directions','notes']}},
+    home_recommendations:{type:'array',maxItems:10,items:{type:'object',additionalProperties:false,properties:{area:{type:'string'},recommendation:{type:'string'},rationale:{type:'string'},priority:{type:'string',enum:['low','medium','high']}},required:['area','recommendation','rationale','priority']}},
+    conflicts:{type:'array',maxItems:8,items:{type:'string'}},
+    caveats:{type:'array',maxItems:8,items:{type:'string'}}
+  },required:['headline','summary','confidence','family','home_recommendations','conflicts','caveats']
+};
+
 const RESULT_SCHEMA={
   type:'object',additionalProperties:false,
   properties:{
@@ -46,7 +58,8 @@ function actionInstruction(action){
     review:'Đánh giá phương án hiện tại theo công năng, lưu thông, ánh sáng, thông gió, người già/trẻ em, khí hậu, chi phí và khả năng trao đổi với KTS. Chỉ ra vấn đề cụ thể.',
     cost:'Tìm cơ hội tiết kiệm mà vẫn giữ tiện nghi và an toàn. Ưu tiên giảm diện tích lãng phí, chuẩn hóa cửa/kích thước, gom khu ướt, lựa chọn hoàn thiện, thiết bị và vận hành.',
     whatif:'Phân tích thay đổi giả định và tác động lên chi phí, công năng, tiện nghi, khí hậu và rủi ro; nêu giả định nào cần engine/KTS kiểm tra.',
-    vision:'Phân tích ảnh nhà mẫu hoặc bản vẽ tham khảo; nhận diện phong cách, vật liệu, tổ chức không gian và điều cần xác minh; không bịa kích thước khi ảnh không có tỷ lệ.'
+    vision:'Phân tích ảnh nhà mẫu hoặc bản vẽ tham khảo; nhận diện phong cách, vật liệu, tổ chức không gian và điều cần xác minh; không bịa kích thước khi ảnh không có tỷ lệ.',
+    fengshui:'Nghiên cứu phong thủy nhà ở theo thông tin từng thành viên và khu đất. Dùng Google Search để tổng hợp nhiều nguồn công khai, ưu tiên nguồn giải thích phương pháp Bát trạch/Cung phi rõ ràng. Phân biệt điều có tính truyền thống, điều còn tranh luận và điều chỉ nên xem như tham khảo. Không bịa sách, tác giả hay quy tắc. Không dùng phong thủy để thay thế quy chuẩn an toàn, kết cấu, ánh sáng, thông gió, sức khỏe hay pháp lý.'
   };
   return `${map[action]||map.review} ${common}`;
 }
@@ -67,13 +80,22 @@ async function openAIFallback({action,prompt,project,image}){
 export default async function handler(req,res){
   try{
     if(req.method==='OPTIONS')return send(res,200,{ok:true});if(req.method!=='POST')return send(res,405,{ok:false,error:'Method not allowed'});rateLimit(req);
-    const body=await jsonBody(req),action=String(body.action||'review').toLowerCase();if(!['brief','review','cost','whatif','vision'].includes(action))return send(res,400,{ok:false,error:'AI action không hợp lệ.'});
+    const body=await jsonBody(req),action=String(body.action||'review').toLowerCase();if(!['brief','review','cost','whatif','vision','fengshui'].includes(action))return send(res,400,{ok:false,error:'AI action không hợp lệ.'});
     const prompt=String(body.prompt||'').trim().slice(0,6000),project=cleanProject(body.project||{}),image=String(body.image_data_url||'');
     if(geminiEnv().key){
       const parts=[];if(action==='vision'&&/^data:image\/(png|jpe?g|webp);base64,/i.test(image)&&image.length<12_000_000){const m=image.match(/^data:([^;]+);base64,(.+)$/i);if(m)parts.push({inline_data:{mime_type:m[1],data:m[2]}});}
       parts.push({text:`Yêu cầu: ${prompt||'(không có câu hỏi bổ sung)'}\n\nDữ liệu dự án JSON:\n${JSON.stringify(project)}`});
-      const {result,model,apiVersion,usage}=await geminiGenerate({parts,systemInstruction:`Bạn là Build My Home AI Decision Engine. ${actionInstruction(action)} Trả lời tiếng Việt rõ ràng, ngắn gọn, có hành động cụ thể.`,schema:RESULT_SCHEMA,maxOutputTokens:2200,thinkingLevel:action==='review'||action==='cost'?'medium':'low',timeoutMs:65000});
-      return send(res,200,{ok:true,provider:'gemini',model,apiVersion,autoUpgrade:geminiEnv().auto,usage,result});
+      const grounded=action==='fengshui';
+      const {result,model,apiVersion,usage,citations}=await geminiGenerate({
+        parts,
+        systemInstruction:`Bạn là Build My Home AI Decision Engine. ${actionInstruction(action)} Trả lời tiếng Việt rõ ràng, ngắn gọn, có hành động cụ thể.`,
+        schema:grounded?FENG_SCHEMA:RESULT_SCHEMA,
+        maxOutputTokens:grounded?3200:2200,
+        thinkingLevel:grounded?'medium':(action==='review'||action==='cost'?'medium':'low'),
+        timeoutMs:grounded?80000:65000,
+        tools:grounded?[{type:'google_search'}]:[]
+      });
+      return send(res,200,{ok:true,provider:'gemini',model,apiVersion,autoUpgrade:geminiEnv().auto,usage,result,citations:citations||[],grounded});
     }
     const out=await openAIFallback({action,prompt,project,image});return send(res,200,{ok:true,...out});
   }catch(err){apiError(res,err);}
