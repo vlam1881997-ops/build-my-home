@@ -1,8 +1,8 @@
 const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..'),src=path.join(root,'src'),dist=path.join(root,'dist');
 const jsFiles=['00_boot.js','01_vn34_catalog.js','15_data_engine.js','10_state.js','17_cloud_payment.js','18_ai_copilot.js','19_gemini_scan.js','20_calc.js','30_planner.js','35_dossier.js','40_exports.js','45_studio3d.js','50_screens.js','60_app.js','70_v60_product_ui.js'];
-const banner=`/* Build My Home Official V6 Product UI Reset
+const banner=`/* Build My Home Official V6.1 Critical Runtime Fixes
  * Existing calculation, Gemini, planner, 3D and dossier engines are retained.
- * V6 removes the stacked visual-patch chain and uses one coherent UI layer across all 10 steps while retaining the existing engines.
+ * V6.1 fixes the production gaps found in the screen recording: blank map, portrait planner fit, image-only 3D, tiny text and broken bank logos.
  */
 (()=>{
 'use strict';
@@ -30,4 +30,4 @@ fs.writeFileSync(path.join(dist,'index.html'),html);
 fs.copyFileSync(path.join(src,'sw.js'),path.join(dist,'sw.js'));
 fs.copyFileSync(path.join(src,'manifest.webmanifest'),path.join(dist,'manifest.webmanifest'));
 fs.cpSync(path.join(root,'assets'),path.join(dist,'assets'),{recursive:true});fs.writeFileSync(path.join(dist,'.nojekyll'),'');
-console.log(`Built V6 Product UI Reset -> ${dist}`);
+console.log(`Built V6.1 Critical Runtime Fixes -> ${dist}`);
