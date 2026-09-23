@@ -84,8 +84,8 @@ function recoverableAIError(err){
 function parseNumber(v){return Number(String(v||'').replace(',','.'))||0;}
 function parseBudgetVnd(text=''){
   const s=String(text).toLowerCase();let total=0;
-  const ty=s.match(/(\d+(?:[.,]\d+)?)\s*(?:tỷ|ty)\b/i);if(ty)total+=parseNumber(ty[1])*1_000_000_000;
-  const tr=s.match(/(\d+(?:[.,]\d+)?)\s*(?:triệu|trieu|tr)\b/i);if(tr)total+=parseNumber(tr[1])*1_000_000;
+  const ty=s.match(/(\d+(?:[.,]\d+)?)\s*(?:tỷ|ty)(?=\s|$|[.,;])/i);if(ty)total+=parseNumber(ty[1])*1_000_000_000;
+  const tr=s.match(/(\d+(?:[.,]\d+)?)\s*(?:triệu|trieu|tr)(?=\s|$|[.,;])/i);if(tr)total+=parseNumber(tr[1])*1_000_000;
   return Math.round(total);
 }
 export function localBriefFallback(prompt,project={}){
