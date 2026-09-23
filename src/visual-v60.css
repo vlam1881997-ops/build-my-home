@@ -1315,3 +1315,94 @@ html.bmh-v60 .v63-bank-empty{grid-column:1/-1;padding:30px;text-align:center;bor
   html.bmh-v60 .v63-bank-card{grid-template-columns:58px minmax(0,1fr)}
   html.bmh-v60 .v63-bank-pay{grid-column:2;text-align:left}
 }
+
+
+/* ===== V6.4.0 compact selected-bank dropdown ===== */
+html.bmh-v60 .v64-finance{
+  grid-template-areas:"input dash ai";
+}
+html.bmh-v60 .v64-selected-bank{position:relative;overflow:visible}
+html.bmh-v60 .v64-selected-row{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center
+}
+html.bmh-v60 .v64-bank-picker{position:relative;min-width:0}
+html.bmh-v60 .v64-bank-picker>summary{
+  list-style:none;min-height:58px;border:1px solid #e2ddd4;border-radius:12px;background:#fff;
+  display:grid;grid-template-columns:82px minmax(0,1fr) 22px;gap:10px;align-items:center;padding:8px 10px;cursor:pointer
+}
+html.bmh-v60 .v64-bank-picker>summary::-webkit-details-marker{display:none}
+html.bmh-v60 .v64-bank-picker>summary:hover{border-color:#adc1b4;box-shadow:0 6px 18px rgba(30,60,43,.05)}
+html.bmh-v60 .v64-bank-picker[open]>summary{border-color:#2b7655;box-shadow:0 0 0 3px rgba(43,118,85,.08)}
+html.bmh-v60 .v64-picker-logo{display:flex;align-items:center;justify-content:center}
+html.bmh-v60 .v64-picker-logo img,
+html.bmh-v60 .v64-picker-logo svg{width:76px;height:34px;object-fit:contain;display:block}
+html.bmh-v60 .v64-bank-picker>summary span{min-width:0}
+html.bmh-v60 .v64-bank-picker>summary small,
+html.bmh-v60 .v64-bank-picker>summary b,
+html.bmh-v60 .v64-bank-picker>summary em{display:block}
+html.bmh-v60 .v64-bank-picker>summary small{font-size:7px;letter-spacing:.12em;color:#8a938e;font-weight:900}
+html.bmh-v60 .v64-bank-picker>summary b{font-size:12px;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.bmh-v60 .v64-bank-picker>summary em{font-size:8px;font-style:normal;color:#98664e}
+html.bmh-v60 .v64-bank-picker>summary>i{font-style:normal;color:#65746b;font-size:15px;text-align:center;transition:transform .18s ease}
+html.bmh-v60 .v64-bank-picker[open]>summary>i{transform:rotate(180deg)}
+html.bmh-v60 .v64-loan-export{
+  height:58px;border:1px solid #d8ded9;border-radius:11px;background:#fff;color:#285f45;
+  font-size:8.5px;font-weight:850;padding:0 12px;white-space:nowrap
+}
+html.bmh-v60 .v64-loan-export:hover{background:#f5f8f5;border-color:#afc5b6}
+
+html.bmh-v60 .v64-bank-menu{
+  position:absolute;z-index:120;left:0;right:0;top:66px;
+  border:1px solid #d9dfda;border-radius:14px;background:rgba(255,255,255,.985);
+  box-shadow:0 24px 60px rgba(20,42,29,.18);padding:10px
+}
+html.bmh-v60 .v64-bank-search{
+  height:38px;border:1px solid #e2ddd5;border-radius:10px;background:#f8f7f3;
+  display:flex;align-items:center;gap:7px;padding:0 10px
+}
+html.bmh-v60 .v64-bank-search i{font-style:normal;color:#64756b}
+html.bmh-v60 .v64-bank-search input{width:100%;border:0;outline:0;background:transparent;font-size:9px}
+html.bmh-v60 .v64-bank-menu-meta{display:flex;justify-content:space-between;align-items:center;padding:8px 2px 6px}
+html.bmh-v60 .v64-bank-menu-meta b{font-size:8.5px}
+html.bmh-v60 .v64-bank-menu-meta span{font-size:7.5px;color:#87918b}
+html.bmh-v60 .v64-bank-menu-list{max-height:390px;overflow:auto;display:grid;gap:5px;padding-right:3px}
+html.bmh-v60 .v64-bank-option{
+  position:relative;min-height:54px;border:1px solid transparent;border-radius:10px;background:#fff;
+  display:grid;grid-template-columns:78px minmax(0,1fr) 110px 20px;gap:9px;align-items:center;padding:7px 8px;text-align:left
+}
+html.bmh-v60 .v64-bank-option:hover{background:#f7faf8;border-color:#dce6df}
+html.bmh-v60 .v64-bank-option.active{background:#eef7f1;border-color:#bad3c2}
+html.bmh-v60 .v64-bank-option>div{display:flex;align-items:center;justify-content:center}
+html.bmh-v60 .v64-bank-option img,
+html.bmh-v60 .v64-bank-option svg{width:72px;height:30px;object-fit:contain;display:block}
+html.bmh-v60 .v64-bank-option span{min-width:0}
+html.bmh-v60 .v64-bank-option span b,
+html.bmh-v60 .v64-bank-option span small{display:block}
+html.bmh-v60 .v64-bank-option span b{font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.bmh-v60 .v64-bank-option span small{font-size:7px;color:#89928c;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.bmh-v60 .v64-bank-option>em{
+  justify-self:end;font-style:normal;font-size:7.5px;font-weight:800;padding:5px 7px;border-radius:999px;white-space:nowrap
+}
+html.bmh-v60 .v64-bank-option>em.ready{background:#eef7f1;color:#2c6d4d}
+html.bmh-v60 .v64-bank-option>em.waiting{background:#fff4ea;color:#9a674d}
+html.bmh-v60 .v64-bank-option>i{
+  width:18px;height:18px;border-radius:50%;border:1px solid #cbd2cd;display:grid;place-items:center;
+  font-style:normal;font-size:8px;color:#fff
+}
+html.bmh-v60 .v64-bank-option.active>i{background:#246b4c;border-color:#246b4c}
+
+html.bmh-v60 .v64-bank-real-logo{background:#fff;border-radius:8px;padding:2px}
+html.bmh-v60 .v64-bank-vector-logo{filter:drop-shadow(0 2px 5px rgba(36,60,47,.05))}
+html.bmh-v60 .v63-bank-explorer{display:none!important}
+
+@media(max-width:1180px){
+  html.bmh-v60 .v64-finance{grid-template-areas:"input" "dash" "ai"}
+}
+@media(max-width:700px){
+  html.bmh-v60 .v64-selected-row{grid-template-columns:1fr}
+  html.bmh-v60 .v64-loan-export{height:40px}
+  html.bmh-v60 .v64-bank-menu{position:fixed;left:12px;right:12px;top:86px;max-height:72vh}
+  html.bmh-v60 .v64-bank-menu-list{max-height:58vh}
+  html.bmh-v60 .v64-bank-option{grid-template-columns:64px minmax(0,1fr) 20px}
+  html.bmh-v60 .v64-bank-option>em{display:none}
+}
