@@ -125,7 +125,7 @@ export function localBriefFallback(prompt,project={}){
     brief:{budget_vnd:budget,province:String(project?.site?.province||''),floors,style,bedrooms,household_size:people,priorities:priorities.slice(0,8)},
     metrics:{current_cost_vnd:current,target_saving_vnd:targetSaving,comfort_risk:'Cần xác nhận thêm ở bước bản vẽ',safety_note:'Brief dự phòng chỉ dùng cho lập kế hoạch; kết cấu, MEP và hồ sơ thi công vẫn cần chuyên gia xác nhận.'},
     findings,
-    recommendations:[{title:'Hoàn thiện hồ sơ gia đình',detail:'Sang Bước 4 để khai báo rõ từng thành viên thay vì chỉ dùng tổng số người.',benefit:'Giúp bố trí phòng và công năng chính xác hơn.',estimated_saving_vnd:0,step:4,safe_to_apply:true},{title:'Đối chiếu ngân sách',detail:'Sang Bước 2 để nhập thu nhập, tiền sẵn có và khoản vay trước khi khóa quy mô.',benefit:'Giảm rủi ro thiết kế vượt khả năng chi trả.',estimated_saving_vnd:targetSaving,step:2,safe_to_apply:true}],
+    recommendations:[{title:'Hoàn thiện hồ sơ gia đình',detail:'Sang Bước 3 để khai báo rõ từng thành viên thay vì chỉ dùng tổng số người.',benefit:'Giúp bố trí phòng và công năng chính xác hơn.',estimated_saving_vnd:0,step:3,safe_to_apply:true},{title:'Đối chiếu khả năng tài chính',detail:'Sau khi hoàn tất vật liệu và dự toán ở Bước 7, sang Bước 8 để đối chiếu tiền đang có, thiếu hụt vốn, DTI và phương án vay.',benefit:'Chỉ quyết định khoản vay sau khi chi phí dự kiến đã đủ rõ.',estimated_saving_vnd:targetSaving,step:8,safe_to_apply:true}],
     questions
   };
 }
