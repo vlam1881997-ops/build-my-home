@@ -328,9 +328,9 @@ BMH.screen1=()=>{
   const currentUpload=BMH.v6.upload;
   const heroSlides=[
     currentUpload?.dataUrl?{img:currentUpload.dataUrl,pos:'center center',kicker:'TỆP CỦA BẠN',title:'Bắt đầu từ chính hình ảnh bạn vừa chọn.',copy:'Tệp đã vào Step 1. Nếu AI online, hệ thống sẽ phân tích nội dung và tạo brief.'}:null,
-    {img:'assets/rooms/facade-render.jpg',pos:'58% center',kicker:'AI HOME VISION',title:'Một ngôi nhà tốt bắt đầu từ một ý tưởng rõ ràng.',copy:'Hình ảnh làm mốc thẩm mỹ; dữ liệu phía sau kiểm tra tính khả thi.'},
-    {img:'assets/design/hero-step1.jpg',pos:'center 48%',kicker:'KHÔNG GIAN & ÁNH SÁNG',title:'Tỷ lệ, ánh sáng và khoảng xanh tạo nên cảm giác sống dễ chịu.',copy:'AI biến cảm hứng thành tiêu chí để kiểm tra ở các bước tiếp theo.'},
-    {img:'assets/rooms/facade-local.jpg',pos:'center 46%',kicker:'MẶT TIỀN THAM KHẢO',title:'Mặt đứng gọn, có chiều sâu và đủ khoảng thở cho nhà phố.',copy:'Ảnh tham khảo định hướng thẩm mỹ, không thay thế hồ sơ kiến trúc.'}
+    {img:'assets/rooms/facade-render.jpg',pos:'58% center',kicker:'CONCEPT THEO HỒ SƠ THẬT',title:aiStyle+' · '+floors+' tầng · '+members+' người',copy:BMH.v6Esc((p.site.district||p.site.province)+' · đất '+BMH.num(p.site.width)+'×'+BMH.num(p.site.depth)+'m · ngân sách '+BMH.money(budget))},
+    {img:'assets/design/hero-step1.jpg',pos:'center 48%',kicker:'KHÔNG GIAN & ÁNH SÁNG',title:bedrooms+' phòng ngủ gợi ý cho '+members+' người',copy:'Ưu tiên ánh sáng tự nhiên, thông gió và khoảng xanh theo khí hậu '+BMH.v6Esc(p.site.province)+'.'},
+    {img:'assets/rooms/facade-local.jpg',pos:'center 46%',kicker:'MẶT TIỀN THEO BỐI CẢNH',title:'Hình khối hiện đại, dễ bảo trì và bám ngân sách',copy:'Ảnh chỉ là định hướng thẩm mỹ. Quy mô, số tầng, gia đình và ngân sách luôn lấy từ hồ sơ dự án.'}
   ].filter(Boolean);
   const idx=BMH.clamp(Number(BMH.v6.s1HeroIndex)||0,0,Math.max(0,heroSlides.length-1)),slide=heroSlides[idx];
   const fit=Math.max(0,Math.min(100,Math.round((review.comfort+review.function+review.budget)/3)));
@@ -359,7 +359,7 @@ BMH.screen1=()=>{
 
    +'<section class="v6-s1-hero step01-hero">'
       +'<img src="'+slide.img+'" alt="" style="object-position:'+BMH.v6Esc(slide.pos||'center center')+'"><div class="v6-image-shade"></div>'
-      +'<div class="step01-hero-quote"><span>'+slide.kicker+'</span><h2>'+slide.title+'</h2><p>'+slide.copy+'</p></div>'
+      +'<div class="step01-hero-quote"><span>'+slide.kicker+'</span><h2>'+slide.title+'</h2><p>'+slide.copy+'</p><div class="step01-hero-meta"><em>'+BMH.v6Esc(p.site.district||p.site.province)+'</em><em>'+floors+' tầng</em><em>'+members+' người</em><em>'+bedrooms+' PN</em></div></div>'
       +'<div class="step01-hero-badges">'
         +'<article><i>⌂</i><span><small>Số tầng ước tính</small><b>~ '+floors+' tầng</b></span></article>'
         +'<article><i>◇</i><span><small>Phong cách</small><b>'+aiStyle+'</b></span></article>'
@@ -379,7 +379,7 @@ BMH.screen1=()=>{
         +'<article><i>▣</i><span><small>Diện tích kế hoạch</small><b>~ '+BMH.num(area)+' m²</b></span><button data-s1-edit="area" title="Chỉnh mặt bằng">✎</button></article>'
         +'<article><i>◉</i><span><small>Ngân sách mục tiêu</small><b>'+BMH.money(budget)+'</b></span><button data-s1-edit="budget" title="Chỉnh tài chính">✎</button></article>'
         +'<article><i>☀</i><span><small>Khí hậu vùng</small><b>'+BMH.v6Esc(climate.climate)+'</b></span><button data-s1-edit="climate" title="Chỉnh vị trí và khí hậu">✎</button></article>'
-        +'<article><i>♙</i><span><small>Hồ sơ gia đình</small><b>'+members+' thành viên'+(members!==structuredMembers?' dự kiến':'')+'</b></span><button data-s1-edit="household" title="Chỉnh hồ sơ gia đình">✎</button></article>'
+        +'<article class="'+(projectedMembers?'needs-detail':'')+'"><i>♙</i><span><small>Hồ sơ gia đình</small><b>'+members+' thành viên</b><em>'+familyDetail+'</em></span><button data-s1-edit="household" title="Chỉnh hồ sơ gia đình">✎</button></article>'
       +'</div>'
       +'<div class="step01-next"><i>☼</i><div><small>Gợi ý bước tiếp theo</small><b>'+(result?'Concept đã có. Tiếp tục sang phân tích tài chính chuyên sâu khi bạn muốn.':'Xem hình ảnh, tải tài liệu tham khảo hoặc để AI tự tạo concept từ hồ sơ nền.')+'</b></div><button data-nav="2">→</button></div>'
     +'</aside>'
