@@ -1655,3 +1655,28 @@ html.bmh-v60 .v67-disclaimer small{font-size:8.5px;line-height:1.45;color:#806c5
   html.bmh-v60 .v67-market-grid,html.bmh-v60 .v67-intel-kpis{grid-template-columns:1fr}
   html.bmh-v60 .v67-intel-head{flex-direction:column}
 }
+
+
+/* ===== V6.8.0 pin-first auto scan ===== */
+html.bmh-v60 .v67-pin-flow{
+  display:grid;grid-template-columns:28px 1fr 18px 28px 1fr;gap:7px;align-items:center;
+  margin:14px 0;padding:10px;border-radius:12px;background:#f3f7f4;border:1px solid #dfe9e2
+}
+html.bmh-v60 .v67-pin-flow>i{
+  width:28px;height:28px;border-radius:50%;background:#1f6849;color:#fff;display:grid;place-items:center;
+  font-style:normal;font-size:11px;font-weight:900
+}
+html.bmh-v60 .v67-pin-flow>span b,html.bmh-v60 .v67-pin-flow>span small{display:block}
+html.bmh-v60 .v67-pin-flow>span b{font-size:10px}
+html.bmh-v60 .v67-pin-flow>span small{font-size:8px;line-height:1.35;color:#75817a;margin-top:2px}
+html.bmh-v60 .v67-pin-flow>em{font-style:normal;color:#9aa39e;text-align:center}
+html.bmh-v60 .v6-coordinate.scanning{
+  background:#eef7f1;border:1px solid #cfe3d5;position:relative;overflow:hidden
+}
+html.bmh-v60 .v6-coordinate.scanning:after{
+  content:'';position:absolute;left:-30%;top:0;width:30%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);
+  animation:v68scan 1.4s linear infinite
+}
+html.bmh-v60 .v67-scan-btn{display:none!important}
+@keyframes v68scan{to{left:110%}}
