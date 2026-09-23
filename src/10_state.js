@@ -3,10 +3,12 @@ BMH.defaultState = () => ({
   ui: {step:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', location:{drawingLot:false}, planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',layout:'wide',textSize:'large',toolsOpen:false,inspectorOpen:false,legendOpen:true,showFurniture:true,showDimensions:true,showFeng:true,showBelow:false,showStructure:true,showEnvironment:true,showCirculation:true,showSectionLine:true,showClimate:true,showEnvelope:true}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
   access: {paid:false, source:'none', paidAt:null, verifiedAt:null, orderCode:null},
   project: {
-    name:'Nhà của mình', source:'suggest', style:'Hiện đại',
+    name:'Nhà của mình', source:'suggest', style:'Hiện đại', briefIdea:'',
+    brief:{provider:'',model:'',notice:'',updatedAt:'',result:{}},
+    sourceRefs:[],
     site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',mapEngine:'free',mapStyle:'hybrid',mapZoom:17,showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotPoints:[],frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
-    finance:{cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12},
-    household:{ownerBirth:1988,ownerGender:'Nam',partnerEnabled:true,partnerBirth:1990,partnerGender:'Nữ',children:[{id:'c1',name:'Con 1',birth:2012,room:'Riêng'}],relatives:[{id:'p1',name:'Ba',birth:1962,mobility:'Hạn chế nhẹ'},{id:'p2',name:'Mẹ',birth:1964,mobility:'Bình thường'}]},
+    finance:{cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,targetBudget:0,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12},
+    household:{ownerBirth:1988,ownerGender:'Nam',partnerEnabled:true,partnerBirth:1990,partnerGender:'Nữ',requestedSize:0,children:[{id:'c1',name:'Con 1',birth:2012,room:'Riêng'}],relatives:[{id:'p1',name:'Ba',birth:1962,mobility:'Hạn chế nhẹ'},{id:'p2',name:'Mẹ',birth:1964,mobility:'Bình thường'}]},
     plan:{rooms:[
       {id:'r1',floor:0,name:'Phòng khách',type:'living',x:0,y:0,w:5,h:4},
       {id:'r2',floor:0,name:'Bếp + ăn',type:'kitchen',x:0,y:4,w:5,h:4},
@@ -36,17 +38,19 @@ BMH.defaultState = () => ({
   meta:{savedAt:null}
 });
 
+BMH.DYNAMIC_STATE_PATHS=new Set(['project.aiScan.result','project.dataEngine.materialOverrides','project.brief.result']);
 BMH.mergeState = (base, incoming) => {
   const isPlain=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
   if(!isPlain(incoming)) return structuredClone(base);
   const out=structuredClone(base);
-  const merge=(a,b)=>{
+  const merge=(a,b,path='')=>{
     if(!isPlain(a)||!isPlain(b))return a;
     for(const [k,v] of Object.entries(b)){
       if(!(k in a))continue;
-      const current=a[k];
-      if(Array.isArray(current)){if(Array.isArray(v))a[k]=v;continue;}
-      if(isPlain(current)){if(isPlain(v))merge(current,v);continue;}
+      const next=path?path+'.'+k:k,current=a[k];
+      if(BMH.DYNAMIC_STATE_PATHS.has(next)){if(isPlain(v))a[k]=structuredClone(v);continue;}
+      if(Array.isArray(current)){if(Array.isArray(v))a[k]=structuredClone(v);continue;}
+      if(isPlain(current)){if(isPlain(v))merge(current,v,next);continue;}
       if(v===null||typeof v==='object'||typeof v==='undefined')continue;
       a[k]=v;
     }
@@ -74,8 +78,14 @@ BMH.normalizeState = () => {
   if(!BMH.state.ui.planner||typeof BMH.state.ui.planner!=='object')BMH.state.ui.planner=structuredClone(base.ui.planner);
   if(!BMH.state.ui.location||typeof BMH.state.ui.location!=='object')BMH.state.ui.location=structuredClone(base.ui.location);
   if(!BMH.state.project||typeof BMH.state.project!=='object')BMH.state.project=structuredClone(base.project);
+  if(typeof BMH.state.project.briefIdea!=='string')BMH.state.project.briefIdea='';
+  if(!BMH.state.project.brief||typeof BMH.state.project.brief!=='object')BMH.state.project.brief=structuredClone(base.project.brief);
+  else {const b=BMH.state.project.brief,d=base.project.brief;for(const [k,v] of Object.entries(d))if(!(k in b))b[k]=structuredClone(v);if(!b.result||typeof b.result!=='object'||Array.isArray(b.result))b.result={};b.provider=String(b.provider||'').slice(0,40);b.model=String(b.model||'').slice(0,120);b.notice=String(b.notice||'').slice(0,500);b.updatedAt=String(b.updatedAt||'').slice(0,40);}
+  if(!Array.isArray(BMH.state.project.sourceRefs))BMH.state.project.sourceRefs=[];
+  BMH.state.project.sourceRefs=BMH.state.project.sourceRefs.filter(x=>x&&typeof x==='object').slice(0,6).map(x=>({id:String(x.id||BMH.uid('src')),kind:['image','video','pdf','file'].includes(x.kind)?x.kind:'file',name:String(x.name||'Tài liệu').slice(0,180),type:String(x.type||'').slice(0,120),size:Math.max(0,Number(x.size)||0),status:String(x.status||'Đã lưu tham chiếu').slice(0,120)}));
   if(!BMH.state.project.site||typeof BMH.state.project.site!=='object')BMH.state.project.site=structuredClone(base.project.site);
   if(!BMH.state.project.finance||typeof BMH.state.project.finance!=='object')BMH.state.project.finance=structuredClone(base.project.finance);
+  BMH.state.project.finance.targetBudget=Math.max(0,Number(BMH.state.project.finance.targetBudget)||0);
   if(!BMH.state.project.household||typeof BMH.state.project.household!=='object')BMH.state.project.household=structuredClone(base.project.household);
   if(!BMH.state.project.plan||typeof BMH.state.project.plan!=='object')BMH.state.project.plan=structuredClone(base.project.plan);
   if(!Array.isArray(BMH.state.project.plan.rooms))BMH.state.project.plan.rooms=structuredClone(base.project.plan.rooms);
@@ -114,6 +124,7 @@ BMH.normalizeState = () => {
   h.ownerGender=['Nam','Nữ'].includes(h.ownerGender)?h.ownerGender:'Nam';
   h.partnerGender=['Nam','Nữ'].includes(h.partnerGender)?h.partnerGender:'Nữ';
   if(typeof h.partnerEnabled!=='boolean')h.partnerEnabled=true;
+  h.requestedSize=BMH.clamp(Number(h.requestedSize)||0,0,20);
   if(!s.shape)s.shape='Hình chữ nhật';
   if(!s.geoSource)s.geoSource='Dữ liệu vùng';
   if(!['free','google'].includes(s.mapEngine))s.mapEngine='free';
@@ -151,6 +162,12 @@ BMH.normalizeState = () => {
   if(typeof BMH.state.ui.sceneExploded!=='boolean')BMH.state.ui.sceneExploded=false;
 };
 BMH.normalizeState();
+BMH.syncHouseholdSize=()=>{
+  const h=BMH.state.project.household;
+  const actual=1+(h.partnerEnabled!==false?1:0)+(h.children?.length||0)+(h.relatives?.length||0);
+  h.requestedSize=actual;
+  return actual;
+};
 BMH.save = () => { BMH.state.version=BMH.VERSION; BMH.state.meta.savedAt=new Date().toISOString(); try{localStorage.setItem(BMH.STORAGE_KEY,JSON.stringify(BMH.state));}catch(e){BMH.toast('Không thể lưu cục bộ. Hãy xuất bản sao dự án.');} };
 BMH.get = path => path.split('.').reduce((o,k)=>o?.[k],BMH.state);
 BMH.set = (path,value,{render=true}={}) => { const keys=path.split('.'); let o=BMH.state; for(let i=0;i<keys.length-1;i++){if(!o[keys[i]]||typeof o[keys[i]]!=='object')o[keys[i]]={};o=o[keys[i]];} o[keys.at(-1)]=value; BMH.save(); if(render) BMH.render(); };
