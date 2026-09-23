@@ -88,7 +88,7 @@ function parseBudgetVnd(text=''){
   const tr=s.match(/(\d+(?:[.,]\d+)?)\s*(?:triệu|trieu|tr)\b/i);if(tr)total+=parseNumber(tr[1])*1_000_000;
   return Math.round(total);
 }
-function localBriefFallback(prompt,project={}){
+export function localBriefFallback(prompt,project={}){
   const raw=String(prompt||''),text=raw.toLowerCase();
   const floors=Math.max(1,Math.min(5,Number(text.match(/(\d+)\s*tầng/i)?.[1])||Number(project?.site?.floors)||2));
   const people=Math.max(1,Math.min(20,Number(text.match(/(\d+)\s*(?:người|nguoi|thành viên|thanh vien)/i)?.[1])||Number(project?.household?.requestedSize)||2+(project?.household?.children?.length||0)+(project?.household?.relatives?.length||0)));
