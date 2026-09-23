@@ -39,3 +39,12 @@ test('Step 1 edits reopen the matching setup stage for foundation data',()=>{
   assert.match(js,/key==='budget'[\s\S]*onboardingStep=2/);
   assert.match(js,/key==='household'[\s\S]*onboardingStep=3/);
 });
+
+
+test('finishing setup invalidates stale AI concept but keeps media/upload stack',()=>{
+  const js=read('dist/app.js');
+  assert.match(js,/Hồ sơ nền vừa được cập nhật\. Hãy tạo lại concept AI để đồng bộ\./);
+  assert.match(js,/BMH\.v6\.briefResult=null/);
+  assert.match(js,/aiSuggestions:\{\}/);
+  assert.match(js,/BMH\.v6PersistSourceRefs/);
+});
