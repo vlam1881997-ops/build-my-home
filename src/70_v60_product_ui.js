@@ -475,7 +475,7 @@ BMH.v6BankMark=b=>{
 BMH.v65DateLabel=value=>{
   const raw=String(value||'').trim();if(!raw)return '';
   const d=new Date(raw.length===10?raw+'T12:00:00Z':raw);if(Number.isNaN(d.getTime()))return raw;
-  return d.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
+  return 'ngày '+String(d.getDate()).padStart(2,'0')+' tháng '+String(d.getMonth()+1).padStart(2,'0')+' năm '+d.getFullYear();
 };
 BMH.v65SafeCitations=list=>(Array.isArray(list)?list:[]).filter(x=>/^https:\/\//i.test(String(x?.url||''))).slice(0,3);
 BMH.v65RefreshBankRate=async(bank,{force=false,silent=false}={})=>{
