@@ -1,8 +1,8 @@
 /* Build My Home V6.0 — product UI reset.
  * One visual system for all 10 steps. Keeps the existing engines, removes patch-on-patch UI.
  */
-BMH.VERSION='6.3.0';
-BMH.VISUAL_RELEASE='step2-vietnam-bank-explorer-v630';
+BMH.VERSION='6.4.0';
+BMH.VISUAL_RELEASE='step2-compact-bank-picker-v640';
 
 const v6SavedBrief=BMH.state?.project?.brief||{},v6SavedResult=v6SavedBrief.result&&Object.keys(v6SavedBrief.result).length?v6SavedBrief.result:null;
 const v6SavedSources=Array.isArray(BMH.state?.project?.sourceRefs)?BMH.state.project.sourceRefs.map(x=>({...x,status:x.status||'Đã lưu tham chiếu · chọn lại tệp nếu cần AI đọc lại'})):[];
@@ -418,33 +418,48 @@ BMH.screen1=()=>{
    +'</div>';
 };
 
-BMH.v6BankMark=b=>b?.img?'<img src="'+BMH.v6Esc(b.img)+'" alt="'+BMH.v6Esc(b.name)+'">':'<div class="v63-bank-mark">'+BMH.v6Esc(String(b?.name||'BK').replace(/[^A-Za-z0-9]/g,'').slice(0,3).toUpperCase())+'</div>';
-BMH.v6BankCard=(b,f)=>{
-  const active=f.bank===b.id,hasRate=BMH.bankHasPreset?.(b),pay=hasRate?BMH.monthlyPayment(f.loan,b.intro,Math.max(1,f.years*12)):0;
-  return '<button class="v63-bank-card '+(active?'active ':'')+(hasRate?'has-rate':'needs-rate')+'" data-bank="'+BMH.v6Esc(b.id)+'">'
-    +'<div class="v63-bank-brand">'+BMH.v6BankMark(b)+'</div>'
-    +'<div class="v63-bank-copy"><div><b>'+BMH.v6Esc(b.name)+'</b><span>'+BMH.v6Esc(BMH.bankCategoryLabel?.(b)||'Ngân hàng')+'</span></div><small>'+BMH.v6Esc(b.fullName||b.name)+'</small>'
-    +(hasRate?'<div class="v63-rate-row"><em>'+b.intro+'% ưu đãi</em><i>→</i><em>'+b.post+'% sau ưu đãi</em><i>·</i><em>'+b.months+' tháng</em></div>':'<div class="v63-rate-row missing"><em>Chưa đồng bộ lãi vay</em><i>·</i><em>Nhập theo báo giá thực tế</em></div>')
-    +'</div>'
-    +'<div class="v63-bank-pay">'+(hasRate?'<small>Ước trả tháng đầu</small><b>'+BMH.money(pay)+'</b>':'<small>Trạng thái</small><b>Cần báo giá</b>')+'</div>'
-    +'<i class="v63-bank-check">'+(active?'✓':'')+'</i>'
+BMH.v64BankHue=b=>{
+  const s=String(b?.id||b?.name||'BANK');let n=0;
+  for(let i=0;i<s.length;i++)n=(n*31+s.charCodeAt(i))%360;
+  return n;
+};
+BMH.v64BankInitials=b=>{
+  const words=String(b?.name||'BANK').replace(/[^A-Za-z0-9 ]/g,' ').trim().split(/\s+/).filter(Boolean);
+  const short=(words.length>1?words.map(x=>x[0]).join(''):words[0]||'BK').slice(0,3).toUpperCase();
+  return short;
+};
+BMH.v6BankMark=b=>{
+  if(b?.img)return '<img class="v64-bank-real-logo" src="'+BMH.v6Esc(b.img)+'" alt="'+BMH.v6Esc(b.name)+'">';
+  const hue=BMH.v64BankHue(b),short=BMH.v64BankInitials(b);
+  return '<svg class="v64-bank-vector-logo" viewBox="0 0 120 48" role="img" aria-label="'+BMH.v6Esc(b?.name||'Ngân hàng')+'">'
+    +'<rect x="1" y="1" width="118" height="46" rx="12" fill="hsl('+hue+' 42% 96%)" stroke="hsl('+hue+' 26% 84%)"/>'
+    +'<circle cx="24" cy="24" r="14" fill="hsl('+hue+' 58% 40%)"/>'
+    +'<path d="M17 26h14M18.5 21.5h11M20 17h8M20 30.5h8" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/>'
+    +'<text x="45" y="28" fill="hsl('+hue+' 46% 28%)" font-family="Arial, sans-serif" font-size="14" font-weight="800">'+BMH.v6Esc(short)+'</text>'
+    +'</svg>';
+};
+BMH.v64BankOption=(b,f)=>{
+  const active=f.bank===b.id,hasRate=BMH.bankHasPreset?.(b);
+  return '<button type="button" data-bank="'+BMH.v6Esc(b.id)+'" data-bank-option data-bank-search="'+BMH.v6Esc([b.name,b.fullName,b.id,b.swift].join(' ').toLowerCase())+'" class="v64-bank-option '+(active?'active':'')+'">'
+    +'<div>'+BMH.v6BankMark(b)+'</div>'
+    +'<span><b>'+BMH.v6Esc(b.name)+'</b><small>'+BMH.v6Esc(BMH.bankCategoryLabel?.(b)||'Ngân hàng')+'</small></span>'
+    +'<em class="'+(hasRate?'ready':'waiting')+'">'+(hasRate?b.intro+'% → '+b.post+'%':'Chờ báo giá')+'</em>'
+    +'<i>'+(active?'✓':'')+'</i>'
     +'</button>';
 };
 
 BMH.screen2=()=>{
   const f=BMH.state.project.finance,s=BMH.financeSummary(),e=BMH.estimate(),income=Number(f.income)||0,pct=income?Math.round(BMH.clamp(s.dti*100,0,100)):null,active=BMH.BANKS.find(x=>x.id===f.bank)||BMH.BANKS[0];
-  const q=String(BMH.v6.bankQuery||'').trim().toLowerCase(),cat=BMH.v6.bankCategory||'all';
-  const categories=['all','jsc','state','transferred','foreign','joint','policy','cooperative'];
-  const bankList=BMH.BANKS.filter(b=>(cat==='all'||b.category===cat)&&(!q||[b.name,b.fullName,b.id,b.swift].some(v=>String(v||'').toLowerCase().includes(q))));
   const withPreset=BMH.BANKS.filter(b=>BMH.bankHasPreset?.(b)).length;
   const postPayment=BMH.monthlyPayment(f.loan,f.postRate,Math.max(1,f.years*12));
   const promoPayment=BMH.monthlyPayment(f.loan,f.introRate,Math.max(1,f.years*12));
   const stress=[1,2,3].map(d=>{const rate=Number(f.postRate||0)+d,pay=BMH.monthlyPayment(f.loan,rate,Math.max(1,f.years*12)),dti=income?Math.round((pay+Number(f.existingDebt||0))/income*100):null;return {d,rate,pay,dti};});
   const capacity=Math.max(0,Number(s.capacity)||0),loanPct=capacity?Math.round(Number(f.loan||0)/capacity*100):0;
   const activeRateStatus=BMH.bankHasPreset?.(active)?'Preset mô phỏng':'Chờ báo giá thực tế';
-  return '<div class="v6-s2 v63-finance">'
+  const bankOptions=BMH.BANKS.map(b=>BMH.v64BankOption(b,f)).join('');
+  return '<div class="v6-s2 v63-finance v64-finance">'
    +'<section class="v6-card v6-fin-form v63-fin-input">'
-      +BMH.v6Title(2,'TÀI CHÍNH SÂU','Biết giới hạn an toàn trước khi mơ lớn hơn.','Dòng tiền thật ở bên trái, kịch bản vay ở giữa, ngân hàng phía dưới. Các mức lãi chưa xác minh luôn được ghi rõ.')
+      +BMH.v6Title(2,'TÀI CHÍNH SÂU','Biết giới hạn an toàn trước khi mơ lớn hơn.','Dòng tiền thật ở bên trái, kịch bản vay ở giữa. Chọn ngân hàng ngay trong thẻ khoản vay để giao diện gọn và dễ dùng hơn.')
       +'<div class="v63-fin-hero"><small>NGÂN SÁCH XÂY HIỆN TẠI</small><b>'+BMH.money(e.budget)+'</b><span>Tiền có thể dùng: '+BMH.money(capacity)+' · Vay chiếm '+loanPct+'%</span></div>'
       +'<div class="v6-fields v63-fin-fields">'
         +[['Thu nhập / tháng','project.finance.income',f.income],['Chi phí sinh hoạt','project.finance.living',f.living],['Tiền hiện có','project.finance.cash',f.cash],['Quỹ dự phòng','project.finance.reserve',f.reserve],['Nợ trả mỗi tháng','project.finance.existingDebt',f.existingDebt],['Khoản vay mong muốn','project.finance.loan',f.loan]].map(x=>'<label><span>'+x[0]+'</span><div><input data-path="'+x[1]+'" data-scale="1000000" type="number" value="'+Number(x[2]||0)/1000000+'"><em>triệu</em></div></label>').join('')
@@ -458,7 +473,18 @@ BMH.screen2=()=>{
         +'<div class="v6-ring v63-dti-ring" style="--p:'+(pct||0)+'"><div><b>'+(pct===null?'—':pct+'%')+'</b><span>DTI mô phỏng</span><small>'+(pct===null?'Chưa đủ dữ liệu':pct<=36?'Vùng kiểm soát':pct<=45?'Cần thận trọng':'Áp lực cao')+'</small></div></div>'
         +'<div class="v63-afford"><span>KHẢ NĂNG CHI TRẢ</span><h2>'+(pct===null?'Nhập thu nhập để bắt đầu':pct<=36?'Dòng tiền đang trong vùng kiểm soát':pct<=45?'Nên giảm áp lực vay':'Áp lực trả nợ đang cao')+'</h2><p>DTI dùng khoản trả nợ đỉnh hiện tại. Đây là mô phỏng tài chính, không phải phê duyệt tín dụng.</p><div class="v6-kpi-row">'+BMH.v6Kpi('Khoản trả đỉnh',BMH.money(s.peak))+BMH.v6Kpi('Còn lại / tháng',BMH.money(s.remainder))+BMH.v6Kpi('Quỹ dự phòng',BMH.money(f.reserve))+BMH.v6Kpi('Khoản vay',BMH.money(f.loan))+'</div></div>'
       +'</div>'
-      +'<div class="v63-selected-bank"><div class="v63-selected-head"><div>'+BMH.v6BankMark(active)+'<span><small>NGÂN HÀNG ĐANG CHỌN</small><b>'+BMH.v6Esc(active.name)+'</b><em>'+BMH.v6Esc(activeRateStatus)+'</em></span></div><button data-export="loan">Tải lịch trả nợ ↓</button></div>'
+      +'<div class="v63-selected-bank v64-selected-bank">'
+        +'<div class="v64-selected-row">'
+          +'<details class="v64-bank-picker">'
+            +'<summary><div class="v64-picker-logo">'+BMH.v6BankMark(active)+'</div><span><small>NGÂN HÀNG ĐANG CHỌN</small><b>'+BMH.v6Esc(active.name)+'</b><em>'+BMH.v6Esc(activeRateStatus)+'</em></span><i>⌄</i></summary>'
+            +'<div class="v64-bank-menu">'
+              +'<label class="v64-bank-search"><i>⌕</i><input data-bank-menu-search placeholder="Tìm trong '+BMH.BANKS.length+' ngân hàng…"></label>'
+              +'<div class="v64-bank-menu-meta"><b data-bank-menu-count>'+BMH.BANKS.length+' ngân hàng</b><span>Việt Nam</span></div>'
+              +'<div class="v64-bank-menu-list">'+bankOptions+'</div>'
+            +'</div>'
+          +'</details>'
+          +'<button class="v64-loan-export" data-export="loan">Tải lịch trả nợ ↓</button>'
+        +'</div>'
         +'<div class="v63-rate-editor"><label><span>Lãi ưu đãi</span><div><input data-path="project.finance.introRate" type="number" min="0" max="30" step=".1" value="'+Number(f.introRate||0)+'"><em>%/năm</em></div></label><label><span>Thời gian ưu đãi</span><div><input data-path="project.finance.promoMonths" type="number" min="0" max="120" value="'+Number(f.promoMonths||0)+'"><em>tháng</em></div></label><label><span>Lãi sau ưu đãi</span><div><input data-path="project.finance.postRate" type="number" min="0" max="30" step=".1" value="'+Number(f.postRate||0)+'"><em>%/năm</em></div></label></div>'
         +'<div class="v63-payment-shift"><article><small>Trong ưu đãi</small><b>'+BMH.money(promoPayment)+'</b><span>/ tháng đầu</span></article><i>→</i><article><small>Sau ưu đãi</small><b>'+BMH.money(postPayment)+'</b><span>/ tháng ước tính</span></article><em class="'+(postPayment>promoPayment?'up':'')+'">'+(postPayment>=promoPayment?'+':'−')+BMH.money(Math.abs(postPayment-promoPayment))+'</em></div>'
       +'</div>'
@@ -470,14 +496,8 @@ BMH.screen2=()=>{
       +'<div class="v6-advice"><article><i>'+(pct!==null&&pct<=36?'✓':'!')+'</i><div><b>DTI</b><span>'+(pct===null?'Nhập thu nhập để tính.':'Tỷ lệ mô phỏng '+pct+'%.')+'</span></div></article><article><i>◉</i><div><b>Quỹ dự phòng</b><span>'+BMH.money(f.reserve)+' đang được giữ riêng.</span></div></article><article><i>'+(e.gap>=0?'✓':'!')+'</i><div><b>Cân đối xây dựng</b><span>'+(e.gap>=0?'Còn '+BMH.money(e.gap)+' so với ngân sách.':'Thiếu '+BMH.money(Math.abs(e.gap))+' so với dự toán.')+'</span></div></article></div>'
       +'<div class="v63-ai-score"><small>ĐỘ BỀN DÒNG TIỀN</small><b>'+(pct===null?'—':Math.max(0,100-Math.max(0,pct-30)*3))+'/100</b><span>Điểm nội bộ để so sánh kịch bản, không phải điểm tín dụng ngân hàng.</span></div>'
       +'<button class="v6-primary full" data-ai-direct="cost">✦ Phân tích phương án vay</button>'
-      +'<div class="v6-callout"><small>Dữ liệu lãi suất</small><b>'+withPreset+' ngân hàng có preset mô phỏng</b><span>'+BMH.BANKS.length+' ngân hàng trong catalog Việt Nam. Các ngân hàng chưa có dữ liệu được để trạng thái “chờ báo giá”, không tự gán lãi suất.</span></div>'
+      +'<div class="v6-callout"><small>Dữ liệu lãi suất</small><b>'+withPreset+' ngân hàng có preset mô phỏng</b><span>Danh mục '+BMH.BANKS.length+' ngân hàng Việt Nam nằm ngay trong ô chọn ngân hàng. Ngân hàng chưa có dữ liệu vẫn giữ trạng thái “chờ báo giá”, không tự gán lãi suất.</span></div>'
    +'</aside>'
-
-   +'<section class="v6-card v63-bank-explorer">'
-      +'<div class="v63-bank-explorer-head"><div><span>DANH MỤC NGÂN HÀNG · VIỆT NAM</span><h2>So sánh ngân hàng phù hợp với hồ sơ của bạn</h2><p>'+BMH.BANKS.length+' ngân hàng · cập nhật catalog '+BMH.v6Esc(BMH.BANK_CATALOG_META?.asOf||'')+' · lãi suất chỉ hiển thị khi có preset/nguồn rõ ràng.</p></div><label><i>⌕</i><input id="bankSearch" value="'+BMH.v6Esc(BMH.v6.bankQuery||'')+'" placeholder="Tìm tên ngân hàng, mã SWIFT…"></label></div>'
-      +'<div class="v63-bank-filters">'+categories.map(x=>'<button data-bank-filter="'+x+'" class="'+(cat===x?'active':'')+'">'+(x==='all'?'Tất cả '+BMH.BANKS.length:BMH.v6Esc(BMH.BANK_CATEGORY_LABELS[x]||x)+' '+BMH.BANKS.filter(b=>b.category===x).length)+'</button>').join('')+'</div>'
-      +'<div class="v63-bank-results"><div class="v63-result-meta"><b>'+bankList.length+' kết quả</b><span>'+withPreset+' ngân hàng đang có preset mô phỏng</span></div><div class="v63-bank-grid">'+(bankList.length?bankList.map(b=>BMH.v6BankCard(b,f)).join(''):'<div class="v63-bank-empty">Không tìm thấy ngân hàng phù hợp với bộ lọc hiện tại.</div>')+'</div></div>'
-   +'</section>'
    +'</div>';
 };
 
@@ -660,6 +680,18 @@ document.addEventListener('change',e=>{
 });
 
 document.addEventListener('input',e=>{
+  if(e.target?.matches?.('[data-bank-menu-search]')){
+    const menu=e.target.closest('.v64-bank-menu'),q=String(e.target.value||'').trim().toLowerCase();
+    if(menu){
+      let visible=0;
+      menu.querySelectorAll('[data-bank-option]').forEach(row=>{
+        const ok=!q||String(row.dataset.bankSearch||'').includes(q);
+        row.hidden=!ok;if(ok)visible++;
+      });
+      const n=menu.querySelector('[data-bank-menu-count]');if(n)n.textContent=visible+' ngân hàng';
+    }
+    return;
+  }
   if(e.target?.id==='bankSearch'){
     BMH.v6.bankQuery=e.target.value||'';
     clearTimeout(BMH.v6.bankSearchTimer);
