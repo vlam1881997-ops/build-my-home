@@ -606,3 +606,22 @@ html.bmh-v60 .step01-key-help{display:none!important}
   html.bmh-v60 .step01-hero-quote{max-width:320px}
   html.bmh-v60 .step01-hero-quote h2{font-size:27px}
 }
+
+
+/* ===== V6.1.1 interaction + hero typography hardening ===== */
+html.bmh-v60 .step01-hero .v6-image-shade{pointer-events:none}
+html.bmh-v60 .step01-hero-quote h2{
+  font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif!important;
+  font-style:normal!important;
+  font-weight:800!important;
+  letter-spacing:-.038em;
+  line-height:1.04;
+  text-shadow:0 2px 20px rgba(0,0,0,.22)
+}
+html.bmh-v60 .step01-hero>img{
+  filter:saturate(1.06) contrast(1.025) brightness(1.015);
+  image-rendering:auto
+}
+html.bmh-v60 [data-export]{pointer-events:auto;touch-action:manipulation}
+html.bmh-v60 [data-export].is-working{opacity:.72;transform:translateY(1px)}
+html.bmh-v60 button{touch-action:manipulation}

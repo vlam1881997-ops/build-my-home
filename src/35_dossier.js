@@ -129,7 +129,21 @@ BMH.dossierPrintHtml = (snap=BMH.createDossierSnapshot(),{mepOnly=false}={}) => 
 };
 BMH.printDossier = ({mepOnly=false}={}) => {
   if(!BMH.isUnlocked())return BMH.openPaywall();
-  const w=window.open('','_blank');if(!w)return BMH.toast('Trình duyệt đang chặn cửa sổ in. Hãy cho phép pop-up rồi thử lại.');
-  w.document.open();w.document.write(BMH.dossierPrintHtml(BMH.createDossierSnapshot(),{mepOnly}));w.document.close();
-  const run=()=>setTimeout(()=>{try{w.focus();w.print();}catch(_){}},250);if(w.document.readyState==='complete')run();else w.addEventListener('load',run,{once:true});
+  const html=BMH.dossierPrintHtml(BMH.createDossierSnapshot(),{mepOnly});
+  const fallback=()=>{
+    const name=mepOnly?'BMH-MEP-in-luu-PDF.html':'BMH-Ho-so-in-luu-PDF.html';
+    BMH.download(name,html,'text/html;charset=utf-8');
+    BMH.toast('Trình duyệt chặn cửa sổ in. Đã tải bản hồ sơ in dự phòng.');
+  };
+  let w=null;try{w=window.open('about:blank','_blank');}catch(_){}
+  if(!w)return fallback();
+  try{
+    w.document.open();w.document.write(html);w.document.close();
+    const run=()=>setTimeout(()=>{try{w.focus();w.print();BMH.toast('Hồ sơ đã mở. Chọn “Lưu thành PDF” trong hộp thoại in.');}catch(err){try{w.close();}catch(_){}fallback();}},180);
+    if(w.document.readyState==='complete')run();else w.addEventListener('load',run,{once:true});
+  }catch(err){
+    console.error('Build My Home print dossier error',err);
+    try{w.close();}catch(_){}
+    fallback();
+  }
 };

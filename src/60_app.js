@@ -293,7 +293,19 @@ document.addEventListener('click',e=>{
   const wear=e.target.closest('[data-wear]');if(wear){BMH.state.project.wearYear=Number(wear.dataset.wear);BMH.save();BMH.render();return;}
   const copy=e.target.closest('[data-copy]');if(copy){navigator.clipboard?.writeText(copy.dataset.copy).then(()=>BMH.toast('Đã sao chép.')).catch(()=>BMH.toast('Không thể sao chép tự động.'));return;}
   if(e.target.closest('[data-dev-pay]')&&BMH.DEV){BMH.state.access.paid=!BMH.state.access.paid;BMH.state.access.source=BMH.state.access.paid?'dev-local':'none';BMH.state.access.paidAt=BMH.state.access.paid?new Date().toISOString():null;BMH.state.access.verifiedAt=BMH.state.access.paid?new Date().toISOString():null;BMH.save();BMH.render();return;}
-  const exp=e.target.closest('[data-export]');if(exp){({loan:BMH.exportLoan,estimate:BMH.exportEstimate,plan:BMH.exportPlanSvg,json:BMH.exportProjectJson,bundle:BMH.exportDossierBundle||BMH.exportBundle,'dossier-pdf':()=>BMH.printDossier(),'mep-pdf':()=>BMH.printDossier({mepOnly:true}),'dossier-excel':BMH.exportDossierExcel,drawings:BMH.exportDrawingsBundle}[exp.dataset.export]?.());return;}
+  const exp=e.target.closest('[data-export]');if(exp){
+    e.preventDefault();e.stopPropagation();
+    const actions={loan:BMH.exportLoan,estimate:BMH.exportEstimate,plan:BMH.exportPlanSvg,json:BMH.exportProjectJson,bundle:BMH.exportDossierBundle||BMH.exportBundle,'dossier-pdf':()=>BMH.printDossier(),'mep-pdf':()=>BMH.printDossier({mepOnly:true}),'dossier-excel':BMH.exportDossierExcel,drawings:BMH.exportDrawingsBundle};
+    const fn=actions[exp.dataset.export];
+    if(typeof fn!=='function'){BMH.toast('Chức năng tải tài liệu này chưa sẵn sàng.');return;}
+    exp.classList.add('is-working');exp.setAttribute('aria-busy','true');
+    try{
+      const out=fn();
+      if(out&&typeof out.then==='function')out.catch(err=>{console.error('Build My Home export error',err);BMH.toast('Xuất tài liệu gặp lỗi. Hãy thử lại.');});
+    }catch(err){console.error('Build My Home export error',err);BMH.toast('Xuất tài liệu gặp lỗi. Hãy thử lại.');}
+    setTimeout(()=>{exp.classList.remove('is-working');exp.removeAttribute('aria-busy');},650);
+    return;
+  }
   if(e.target.closest('[data-print]')){window.print();return;}
 });
 

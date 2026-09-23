@@ -1,7 +1,7 @@
 /* Build My Home V6.0 — product UI reset.
  * One visual system for all 10 steps. Keeps the existing engines, removes patch-on-patch UI.
  */
-BMH.VERSION='6.0.0';
+BMH.VERSION='6.1.1';
 BMH.VISUAL_RELEASE='product-ui-reset-v60';
 
 BMH.v6={
@@ -225,10 +225,10 @@ BMH.screen1=()=>{
   const currentUpload=BMH.v6.upload;
   const heroSlides=[
     currentUpload?.dataUrl?{img:currentUpload.dataUrl,pos:'center center',kicker:'TỆP CỦA BẠN',title:'Bắt đầu từ chính hình ảnh bạn vừa chọn.',copy:'Tệp đã vào Step 1. Nếu AI online, hệ thống sẽ phân tích nội dung và tạo brief.'}:null,
-    {img:'assets/design/flow-a.jpg',pos:'center 48%',kicker:'AI HOME VISION',title:'Một ngôi nhà tốt bắt đầu từ một ý tưởng đẹp.',copy:'Bạn thấy hướng đi trước. Dữ liệu phía sau kiểm tra tính khả thi.'},
-    {img:'assets/design/flow-b.jpg',pos:'center 50%',kicker:'ÁNH SÁNG & KHÔNG GIAN',title:'Giếng trời, cây xanh và thông gió làm nhà phố dễ thở hơn.',copy:'AI biến cảm hứng thành tiêu chí để kiểm tra ở các bước tiếp theo.'},
-    {img:'assets/rooms/living-local.jpg',pos:'center 54%',kicker:'NỘI THẤT & TRẢI NGHIỆM',title:'Không gian ấm, gọn và đủ ánh sáng cho nhịp sống hằng ngày.',copy:'Vật liệu và công năng sẽ được kiểm tra sau khi brief được xác nhận.'},
-    {img:'assets/rooms/facade-render.jpg',pos:'58% center',kicker:'MẶT TIỀN THAM KHẢO',title:'Tỷ lệ mặt đứng tốt giúp căn nhà có bản sắc ngay từ cái nhìn đầu tiên.',copy:'Ảnh tham khảo chỉ định hướng thẩm mỹ, không thay thế hồ sơ kiến trúc.'}
+    {img:'assets/rooms/facade-render.jpg',pos:'58% center',kicker:'AI HOME VISION',title:'Một ngôi nhà tốt bắt đầu từ một ý tưởng rõ ràng.',copy:'Hình ảnh chất lượng cao làm mốc thẩm mỹ; dữ liệu phía sau kiểm tra tính khả thi.'},
+    {img:'assets/design/hero-step1.jpg',pos:'center 48%',kicker:'KHÔNG GIAN & ÁNH SÁNG',title:'Tỷ lệ, ánh sáng và khoảng xanh tạo nên cảm giác sống dễ chịu.',copy:'AI biến cảm hứng thành tiêu chí để kiểm tra ở các bước tiếp theo.'},
+    {img:'assets/rooms/facade-local.jpg',pos:'center 48%',kicker:'MẶT TIỀN THAM KHẢO',title:'Mặt đứng gọn, có chiều sâu và đủ khoảng thở cho nhà phố.',copy:'Ảnh tham khảo định hướng thẩm mỹ, không thay thế hồ sơ kiến trúc.'},
+    {img:'assets/rooms/living-local.jpg',pos:'center 54%',kicker:'NỘI THẤT & TRẢI NGHIỆM',title:'Không gian ấm, gọn và đủ ánh sáng cho nhịp sống hằng ngày.',copy:'Vật liệu và công năng sẽ được kiểm tra sau khi brief được xác nhận.'}
   ].filter(Boolean);
   const idx=BMH.clamp(Number(BMH.v6.s1HeroIndex)||0,0,Math.max(0,heroSlides.length-1)),slide=heroSlides[idx];
   const fit=Math.max(0,Math.min(100,Math.round((review.comfort+review.function+review.budget)/3)));
@@ -430,16 +430,22 @@ document.addEventListener('click',e=>{
   }
   const upload=e.target.closest?.('[data-s1-upload]');
   if(upload){
-    const input=BMH.$('#uploadScan'); if(!input)return;
+    e.preventDefault();
+    const input=BMH.v6EnsureUploadInput?.()||BMH.$('#uploadScan'); if(!input){BMH.toast('Không mở được bộ chọn tài liệu. Hãy tải lại trang và thử lại.');return;}
     const type=upload.dataset.s1Upload;
     input.accept=type==='video'?'video/*':type==='image'?'image/*':'image/*,video/*,application/pdf';
     input.click(); return;
   }
-  if(e.target.closest?.('[data-s1-focus-prompt]')){ const t=BMH.$('#aiStartPrompt'); t?.focus(); t?.scrollIntoView({behavior:'smooth',block:'center'}); return; }
+  if(e.target.closest?.('[data-s1-focus-prompt]')){ e.preventDefault();const t=BMH.$('#aiStartPrompt'); t?.focus(); t?.scrollIntoView({behavior:'smooth',block:'center'}); return; }
   const hero=e.target.closest?.('[data-s1-hero]');
-  if(hero){ BMH.v6.s1HeroIndex=Math.max(0,(Number(BMH.v6.s1HeroIndex)||0)+Number(hero.dataset.s1Hero)); if(BMH.v6.s1HeroIndex>3)BMH.v6.s1HeroIndex=0; BMH.render({preserveScroll:true}); return; }
+  if(hero){
+    e.preventDefault();
+    const total=Math.max(1,document.querySelectorAll('[data-s1-dot]').length),delta=Number(hero.dataset.s1Hero)||0,current=Number(BMH.v6.s1HeroIndex)||0;
+    BMH.v6.s1HeroIndex=(current+delta+total)%total;
+    BMH.render({preserveScroll:true}); return;
+  }
   const dot=e.target.closest?.('[data-s1-dot]');
-  if(dot){ BMH.v6.s1HeroIndex=Number(dot.dataset.s1Dot)||0; BMH.render({preserveScroll:true}); return; }
+  if(dot){ e.preventDefault();BMH.v6.s1HeroIndex=Number(dot.dataset.s1Dot)||0; BMH.render({preserveScroll:true}); return; }
 });
 
 document.addEventListener('input',e=>{

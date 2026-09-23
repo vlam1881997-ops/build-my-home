@@ -33,8 +33,20 @@ BMH.money = n => new Intl.NumberFormat('vi-VN',{maximumFractionDigits:0}).format
 BMH.num = (n,d=1) => new Intl.NumberFormat('vi-VN',{maximumFractionDigits:d}).format(Number(n)||0);
 BMH.uid = p => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;
 BMH.download = (name, content, type='text/plain;charset=utf-8') => {
-  const blob = content instanceof Blob ? content : new Blob([content],{type});
-  const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+  try{
+    const blob=content instanceof Blob?content:new Blob([content],{type});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=name||'Build-My-Home-file';a.rel='noopener';a.style.display='none';
+    (document.body||document.documentElement).appendChild(a);
+    a.click();
+    setTimeout(()=>{try{a.remove();}catch(_){}try{URL.revokeObjectURL(url);}catch(_){}},30000);
+    BMH.toast?.('Đang tải '+(name||'tài liệu')+'…');
+    return true;
+  }catch(err){
+    console.error('Build My Home download error',err);
+    BMH.toast?.('Không thể tải tài liệu. Hãy thử lại hoặc kiểm tra quyền tải xuống của trình duyệt.');
+    return false;
+  }
 };
 BMH.toast = msg => {
   const el=BMH.$('#toast'); if(!el) return; el.textContent=msg; el.classList.add('show'); clearTimeout(BMH.toastTimer); BMH.toastTimer=setTimeout(()=>el.classList.remove('show'),3200);
