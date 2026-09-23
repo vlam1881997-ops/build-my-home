@@ -1,8 +1,8 @@
 /* Build My Home V6.0 — product UI reset.
  * One visual system for all 10 steps. Keeps the existing engines, removes patch-on-patch UI.
  */
-BMH.VERSION='6.1.6';
-BMH.VISUAL_RELEASE='step1-functional-lock-v616';
+BMH.VERSION='6.1.7';
+BMH.VISUAL_RELEASE='prestudio-workflow-v617';
 
 const v6SavedBrief=BMH.state?.project?.brief||{},v6SavedResult=v6SavedBrief.result&&Object.keys(v6SavedBrief.result).length?v6SavedBrief.result:null;
 const v6SavedSources=Array.isArray(BMH.state?.project?.sourceRefs)?BMH.state.project.sourceRefs.map(x=>({...x,status:x.status||'Đã lưu tham chiếu · chọn lại tệp nếu cần AI đọc lại'})):[];
@@ -24,10 +24,10 @@ BMH.v6={
 };
 
 BMH.V6_STEPS=[
-  ['Khởi tạo','Ý tưởng → brief'],
-  ['Tài chính','DTI & ngân sách'],
-  ['Vị trí','Khí hậu & khu vực'],
-  ['Đất & gia đình','Địa chất · phong thủy'],
+  ['AI Home Vision','Concept & cảm hứng'],
+  ['Tài chính sâu','DTI & dòng tiền'],
+  ['Khu đất','Vị trí & khí hậu'],
+  ['Gia đình','Địa chất · phong thủy'],
   ['Bản vẽ','Mặt bằng tương tác'],
   ['Vật liệu','Showroom & năng lượng'],
   ['3D','Mô phỏng & đánh giá'],
@@ -46,7 +46,7 @@ BMH.header=()=>{
   return '<header class="v6-header step01-shell">'
     +'<button class="v6-brand" data-nav="1"><img src="assets/icon.svg" alt=""><span><b>Build My Home</b><small>KIẾN TẠO TỔ ẤM, CÙNG AI</small></span></button>'
     +'<nav class="v6-topnav"><button data-nav="1">Ngôi nhà của tôi</button><button data-cloud-open>Dự án</button><button data-v6-global="ideas">Thư viện ý tưởng</button><button data-nav="6">Báo giá vật liệu</button><button data-v6-global="ai">AI tư vấn</button></nav>'
-    +'<div class="v6-head-actions"><label class="step01-search"><i>⌕</i><input id="globalSearch" placeholder="Tìm bước, vật liệu, hồ sơ…"></label><button class="step01-bell" data-v6-global="notifications" aria-label="Thông báo">♢'+(alertCount?'<em>'+alertCount+'</em>':'')+'</button><button class="step01-profile" data-cloud-open><i>⌂</i><span><b>Gia đình của bạn</b><small>'+BMH.v6Esc(s.district||s.province)+'</small></span><em>⌄</em></button></div>'
+    +'<div class="v6-head-actions"><label class="step01-search"><i>⌕</i><input id="globalSearch" placeholder="Tìm bước, vật liệu, hồ sơ…"></label><button class="step01-bell" data-v6-global="notifications" aria-label="Thông báo">♢'+(alertCount?'<em>'+alertCount+'</em>':'')+'</button><button class="step01-profile" data-v6-global="setup"><i>⌂</i><span><b>Hồ sơ đầu vào</b><small>'+BMH.v6Esc(s.district||s.province)+'</small></span><em>⌄</em></button></div>'
     +'</header>';
 };
 BMH.stepper=()=>{
@@ -181,10 +181,9 @@ if(v6BaseScan){
 BMH.v6AnalyzeBrief=async()=>{
   if(BMH.v6.briefLoading)return;
   const t=BMH.$('#aiStartPrompt');
-  const prompt=(t?.value||BMH.v6.ideaDraft||'').trim();
-  if(!prompt){BMH.toast('Hãy nhập ý tưởng về ngôi nhà trước khi phân tích.');t?.focus();return;}
-  BMH.v6.ideaDraft=prompt;
-  BMH.state.project.briefIdea=prompt;
+  const typed=(t?.value||BMH.v6.ideaDraft||'').trim(),prompt=typed||BMH.v6ConceptPrompt();
+  BMH.v6.ideaDraft=typed;
+  BMH.state.project.briefIdea=typed;
   BMH.save();
   BMH.v6.briefError='';
   BMH.v6.briefLoading=true;
@@ -205,7 +204,7 @@ BMH.v6AnalyzeBrief=async()=>{
     BMH.state.project.source='ai-brief';
     BMH.state.project.brief={provider:data.provider||'',model:data.model||'',notice:data.notice||'',updatedAt:new Date().toISOString(),result:data.result||{}};
     BMH.save();
-    BMH.toast(data.degraded?'AI cloud đang giới hạn · đã tạo brief bằng bộ phân tích dự phòng.':'AI đã tạo brief. Step 1 giữ nguyên để bạn kiểm tra trước khi sang Step 2.');
+    BMH.toast(data.degraded?'AI cloud đang giới hạn · đã tạo brief bằng bộ phân tích dự phòng.':'AI đã tạo concept từ hồ sơ nền. Step 1 giữ nguyên để bạn xem và bổ sung cảm hứng.');
   }catch(err){
     BMH.v6.briefError=err.message||String(err);
   }finally{
@@ -230,6 +229,42 @@ BMH.v6PersonCard=m=>{
     return '<article class="v6-person '+(m.kind==='owner'?'primary':'')+'"><div class="v6-person-head"><i>'+(m.kind==='owner'?'⌂':'♡')+'</i><div><b>'+m.role+'</b><span>Năm sinh & giới tính</span></div>'+(m.kind==='partner'?'<button data-v6-partner="off">Ẩn</button>':'')+'</div><label>Năm sinh<input data-path="project.household.'+prefix+'Birth" type="number" min="1900" max="2026" value="'+m.birth+'"></label><label>Giới tính<select data-path="project.household.'+prefix+'Gender"><option '+(m.gender==='Nam'?'selected':'')+'>Nam</option><option '+(m.gender==='Nữ'?'selected':'')+'>Nữ</option></select></label></article>';
   }
   return '<article class="v6-person"><div class="v6-person-head"><i>'+(m.kind==='child'?'☺':'♙')+'</i><div><b>'+BMH.v6Esc(m.name)+'</b><span>'+m.role+'</span></div><button class="danger" data-person-remove="'+m.kind+'" data-id="'+BMH.v6Esc(m.id)+'">Xóa</button></div><label>Tên<input data-v6-person="'+m.kind+'" data-id="'+BMH.v6Esc(m.id)+'" data-key="name" value="'+BMH.v6Esc(m.name)+'"></label><label>Năm sinh<input data-v6-person="'+m.kind+'" data-id="'+BMH.v6Esc(m.id)+'" data-key="birth" type="number" min="1900" max="2026" value="'+m.birth+'"></label></article>';
+};
+
+BMH.v6SetupSteps=[['⌖','Vị trí','Khu vực & quy mô đất'],['◉','Tài chính','Ngân sách sơ bộ'],['♙','Gia đình','Thành viên sinh sống']];
+
+BMH.v6SetupValidate=stage=>{
+  const p=BMH.state.project,s=p.site,f=p.finance,h=p.household;
+  if(stage===1){
+    if(!s.province||!s.district){BMH.toast('Hãy chọn khu vực xây nhà.');return false;}
+    if(!(Number(s.width)>0&&Number(s.depth)>0)){BMH.toast('Hãy nhập kích thước khu đất.');return false;}
+    if(!(Number(s.floors)>=1&&Number(s.floors)<=5)){BMH.toast('Số tầng dự kiến cần từ 1 đến 5.');return false;}
+  }
+  if(stage===2&&Number(f.targetBudget||0)<100000000){BMH.toast('Hãy nhập ngân sách dự kiến trước khi tiếp tục.');return false;}
+  if(stage===3){
+    BMH.syncHouseholdSize?.();
+    if((Number(h.requestedSize)||0)<1){BMH.toast('Hãy khai báo ít nhất gia chủ.');return false;}
+  }
+  return true;
+};
+
+BMH.v6SetupScreen=()=>{
+  const p=BMH.state.project,s=p.site,f=p.finance,h=p.household,stage=BMH.clamp(Number(BMH.state.ui.onboardingStep)||1,1,3);
+  const region=BMH.REGIONS[s.province]||BMH.REGIONS['TP. Hồ Chí Minh'];
+  const provinces=Object.keys(BMH.REGIONS).map(x=>'<option '+(x===s.province?'selected':'')+'>'+BMH.v6Esc(x)+'</option>').join('');
+  const districts=(region?.districts||[]).map(x=>'<option '+(x[0]===s.district?'selected':'')+'>'+BMH.v6Esc(x[0])+'</option>').join('');
+  const target=Math.max(0,Number(f.targetBudget)||0),needs=BMH.householdNeeds?.()||{},members=BMH.v6Household();
+  const body1='<section class="setup-card setup-location"><div class="setup-heading"><span>KHỞI TẠO DỰ ÁN · 1/3</span><h1>Ngôi nhà sẽ được xây ở đâu?</h1><p>Chọn vị trí và quy mô nền trước. Các dữ liệu này sẽ đi xuyên suốt toàn bộ Studio và AI không được tự ý thay đổi.</p></div><div class="setup-fields"><label>Tỉnh / thành<select data-path="project.site.province">'+provinces+'</select></label><label>Khu vực<select data-path="project.site.district">'+districts+'</select></label><label>Mặt tiền<div><input data-path="project.site.width" type="number" min="2" step=".1" value="'+s.width+'"><em>m</em></div></label><label>Chiều sâu<div><input data-path="project.site.depth" type="number" min="4" step=".1" value="'+s.depth+'"><em>m</em></div></label><label>Số tầng dự kiến<div><input data-path="project.site.floors" type="number" min="1" max="5" value="'+s.floors+'"><em>tầng</em></div></label></div><div class="setup-insight"><i>☀</i><div><b>'+BMH.v6Esc(region?.climate||'Khí hậu vùng')+'</b><span>'+BMH.v6Esc(s.district||s.province)+' · dữ liệu này sẽ được dùng ở Step 1 và các bước phân tích sau.</span></div></div></section>';
+  const body2='<section class="setup-card setup-finance"><div class="setup-heading"><span>KHỞI TẠO DỰ ÁN · 2/3</span><h1>Giới hạn tài chính ban đầu là bao nhiêu?</h1><p>Chỉ lấy ba con số nền. Sang Step 2 mới tính sâu tiền mặt, khoản vay, DTI và lịch trả nợ.</p></div><div class="setup-budget-hero"><small>NGÂN SÁCH MỤC TIÊU</small><label><input data-path="project.finance.targetBudget" data-scale="1000000" type="number" min="100" step="50" value="'+Math.round(target/1000000)+'"><em>triệu đồng</em></label><b>'+BMH.money(target)+'</b></div><div class="setup-fields two"><label>Thu nhập hộ gia đình / tháng<div><input data-path="project.finance.income" data-scale="1000000" type="number" min="0" step="1" value="'+Math.round((Number(f.income)||0)/1000000)+'"><em>triệu</em></div></label><label>Chi phí sinh hoạt / tháng<div><input data-path="project.finance.living" data-scale="1000000" type="number" min="0" step="1" value="'+Math.round((Number(f.living)||0)/1000000)+'"><em>triệu</em></div></label></div><div class="setup-insight"><i>◉</i><div><b>Step 1 sẽ dùng '+BMH.money(target)+' làm trần ngân sách.</b><span>AI Home Vision chỉ đề xuất concept phù hợp với trần này; không được tự tăng ngân sách.</span></div></div></section>';
+  const personCards=members.map(BMH.v6PersonCard).join('');
+  const body3='<section class="setup-card setup-family"><div class="setup-heading"><span>KHỞI TẠO DỰ ÁN · 3/3</span><h1>Ai sẽ sống trong ngôi nhà này?</h1><p>Khai báo thành viên trước khi tạo concept để AI hiểu số phòng, khả năng tiếp cận và nhu cầu sinh hoạt thực tế.</p></div><div class="setup-family-summary"><article><small>Thành viên hiện có</small><b>'+members.length+' người</b></article><article><small>Phòng ngủ gợi ý</small><b>'+Number(needs.bedrooms||1)+' phòng</b></article><article><small>WC gợi ý</small><b>'+Number(needs.bathrooms||1)+' phòng</b></article></div><div class="setup-family-actions"><button data-household-add="child">＋ Thêm con</button><button data-household-add="relative">＋ Thêm người thân</button>'+(h.partnerEnabled===false?'<button data-v6-partner="on">＋ Thêm bạn đời</button>':'')+'</div><div class="v6-people setup-people">'+personCards+'</div><div class="setup-review"><b>Hồ sơ nền sắp hoàn tất</b><span>'+BMH.v6Esc(s.district||s.province)+' · '+BMH.money(target)+' · '+members.length+' thành viên · '+s.floors+' tầng dự kiến</span></div></section>';
+  const bodies=[body1,body2,body3];
+  return '<div class="setup-shell"><header class="setup-top"><div class="setup-brand"><img src="assets/icon.svg" alt=""><span><b>Build My Home</b><small>KHỞI TẠO HỒ SƠ NỀN</small></span></div><button data-cloud-open>Dự án đã lưu</button></header><main class="setup-main"><nav class="setup-stepper">'+BMH.v6SetupSteps.map((x,i)=>{const n=i+1;return '<button data-setup-jump="'+n+'" class="'+(stage===n?'active ':'')+(stage>n?'done':'')+'"><i>'+(stage>n?'✓':x[0])+'</i><span><b>'+x[1]+'</b><small>'+x[2]+'</small></span></button>';}).join('')+'</nav>'+bodies[stage-1]+'<footer class="setup-footer"><button data-setup-back '+(stage===1?'disabled':'')+'>← Quay lại</button><div><small>Hoàn tất hồ sơ nền trước khi AI tạo concept</small><b>'+stage+'/3</b></div>'+(stage<3?'<button class="primary" data-setup-next>Tiếp tục →</button>':'<button class="primary" data-setup-finish>Vào Step 1 · AI Home Vision →</button>')+'</footer></main></div>';
+};
+
+BMH.v6ConceptPrompt=()=>{
+  const p=BMH.state.project,s=p.site,f=p.finance,needs=BMH.householdNeeds?.()||{};
+  return 'Hãy tạo concept kiến trúc phù hợp cho khu đất '+BMH.num(s.width)+'×'+BMH.num(s.depth)+'m tại '+(s.district||s.province)+', '+s.floors+' tầng, ngân sách mục tiêu '+BMH.money(Number(f.targetBudget)||BMH.financeSummary().available)+', gia đình '+(needs.people||1)+' người. Tập trung vào phong cách, hình khối, ánh sáng, cây xanh và trải nghiệm sống; không thay đổi dữ liệu nền nếu chưa được người dùng xác nhận.';
 };
 
 BMH.v6RunFeng=async()=>{
@@ -295,11 +330,11 @@ BMH.screen1=()=>{
   }).join('');
   return '<div class="v6-s1 step01-locked">'
    +'<section class="v6-s1-left v6-card step01-start">'
-      +BMH.v6Title(1,'KHỞI TẠO','Khởi tạo','Bắt đầu từ ý tưởng. AI biến hình dung của bạn thành một brief rõ ràng để kiểm tra trước khi sang tài chính.')
+      +BMH.v6Title(1,'AI HOME VISION','Khám phá ý tưởng','Vị trí, tài chính và gia đình đã được khóa ở phần khởi tạo. Step 1 chỉ tập trung vào hình ảnh, cảm hứng và concept AI.')
       +'<label class="step01-drop" for="step1UploadAll" role="button" tabindex="0"><i>↥</i><b>Kéo thả file vào đây hoặc chọn từ thiết bị</b><span>JPG · PNG · WEBP · MP4 · MOV · PDF</span></label>'
       +'<div class="step01-upload-actions"><label for="step1UploadVideo" role="button" tabindex="0"><i>▶</i><span>Upload video</span></label><label for="step1UploadImage" role="button" tabindex="0"><i>▧</i><span>Upload ảnh</span></label><label for="step1UploadPdf" role="button" tabindex="0"><i class="pdf">PDF</i><span>Upload PDF</span></label><button data-s1-focus-prompt><i>▤</i><span>Nhập ý tưởng</span></button></div>'
-      +'<label class="step01-prompt"><i>✎</i><textarea id="aiStartPrompt" maxlength="1000" rows="4" placeholder="Ví dụ: nhà 3 tầng, đất 5×20m, gia đình 5 người, có phòng ông bà tầng trệt, nhiều cây xanh, 4 phòng ngủ, ngân sách khoảng 2,5 tỷ…">'+BMH.v6Esc(BMH.v6.ideaDraft||p.briefIdea||'')+'</textarea><em><span id="step01PromptCount">'+String((BMH.v6.ideaDraft||p.briefIdea||'').length)+'</span>/1000</em></label>'
-      +'<button class="step01-analyze '+(ready?'ready':'needs-key')+'" data-s1-analyze '+(BMH.v6.briefLoading?'disabled':'')+'>'+(BMH.v6.briefLoading?'◌ AI đang tạo brief…':'✦ AI phân tích & tạo brief →')+'</button>'
+      +'<label class="step01-prompt"><i>✎</i><textarea id="aiStartPrompt" maxlength="1000" rows="4" placeholder="Không bắt buộc. Ví dụ: tôi thích mặt tiền hiện đại nhiều cây xanh, ánh sáng ấm, vật liệu gỗ và bê tông, cảm giác nghỉ dưỡng nhưng dễ bảo trì…">'+BMH.v6Esc(BMH.v6.ideaDraft||p.briefIdea||'')+'</textarea><em><span id="step01PromptCount">'+String((BMH.v6.ideaDraft||p.briefIdea||'').length)+'</span>/1000</em></label>'
+      +'<button class="step01-analyze '+(ready?'ready':'needs-key')+'" data-s1-analyze '+(BMH.v6.briefLoading?'disabled':'')+'>'+(BMH.v6.briefLoading?'◌ AI đang tạo concept…':'✦ AI tạo concept từ hồ sơ →')+'</button>'
       +'<div class="step01-connection '+(ready?'online':'offline')+'"><i>'+(ready?'✓':'!')+'</i><div><b>'+(ready?'AI server đã cấu hình':'AI server chưa cấu hình')+'</b><span>'+(ready?'Provider ưu tiên: '+BMH.v6Esc(BMH.cloud?.config?.aiProvider||'AI')+' · '+BMH.v6Esc(BMH.cloud?.config?.aiModel||'model server'):(aiStatus.error?BMH.v6Esc(aiStatus.error):'Website production chưa có provider AI khả dụng.'))+'</span></div><button data-s1-ai-refresh>'+(aiStatus.loading?'Đang kiểm tra…':'Kiểm tra trạng thái')+'</button></div>'
       +(BMH.v6.briefNotice?'<div class="step01-notice">'+BMH.v6Esc(BMH.v6.briefNotice)+'</div>':'')
       +(BMH.v6.briefError?'<div class="step01-error">'+BMH.v6Esc(BMH.v6.briefError)+'</div>':'')
@@ -319,8 +354,8 @@ BMH.screen1=()=>{
     +'</section>'
 
    +'<aside class="v6-s1-right v6-card step01-ai">'
-      +'<div class="step01-ai-head"><div><i>✦</i><span><b>AI hiểu trước</b><small>'+(result?'Brief vừa được tạo từ nội dung của bạn.':'Dữ liệu hiện tại của dự án, chờ AI bổ sung.')+'</small></span></div><em class="'+(result&&BMH.v6.briefProvider==='local-fallback'?'warn':ready?'ok':'warn')+'">'+(result&&BMH.v6.briefProvider==='local-fallback'?'Dự phòng':ready?'Sẵn sàng':'Chưa cấu hình')+'</em></div>'
-      +'<div class="step01-ai-summary"><b>'+(result?BMH.v6Esc(result.headline||'Brief ban đầu đã sẵn sàng'):'Chưa có brief AI')+'</b><p>'+BMH.v6Esc(summary)+'</p>'+(priorities.length?'<div>'+priorities.map(x=>'<span>'+BMH.v6Esc(x)+'</span>').join('')+'</div>':'')+'</div>'
+      +'<div class="step01-ai-head"><div><i>✦</i><span><b>AI hiểu hồ sơ nền</b><small>'+(result?'Concept vừa được tạo từ hồ sơ nền và cảm hứng của bạn.':'Vị trí, ngân sách và gia đình đã có; chờ AI bổ sung hướng thiết kế.')+'</small></span></div><em class="'+(result&&BMH.v6.briefProvider==='local-fallback'?'warn':ready?'ok':'warn')+'">'+(result&&BMH.v6.briefProvider==='local-fallback'?'Dự phòng':ready?'Sẵn sàng':'Chưa cấu hình')+'</em></div>'
+      +'<div class="step01-ai-summary"><b>'+(result?BMH.v6Esc(result.headline||'Concept ban đầu đã sẵn sàng'):'Chưa tạo concept AI')+'</b><p>'+BMH.v6Esc(summary)+'</p>'+(priorities.length?'<div>'+priorities.map(x=>'<span>'+BMH.v6Esc(x)+'</span>').join('')+'</div>':'')+'</div>'
       +'<div class="step01-ai-facts">'
         +'<article><i>⌂</i><span><small>Phong cách</small><b>'+aiStyle+'</b></span><button data-s1-edit="style" title="Chỉnh phong cách">✎</button></article>'
         +'<article><i>▱</i><span><small>Số tầng (ước tính)</small><b>'+floors+' tầng</b></span><button data-s1-edit="floors" title="Chỉnh số tầng">✎</button></article>'
@@ -329,7 +364,7 @@ BMH.screen1=()=>{
         +'<article><i>☀</i><span><small>Khí hậu vùng</small><b>'+BMH.v6Esc(climate.climate)+'</b></span><button data-s1-edit="climate" title="Chỉnh vị trí và khí hậu">✎</button></article>'
         +'<article><i>♙</i><span><small>Hồ sơ gia đình</small><b>'+members+' thành viên'+(members!==structuredMembers?' dự kiến':'')+'</b></span><button data-s1-edit="household" title="Chỉnh hồ sơ gia đình">✎</button></article>'
       +'</div>'
-      +'<div class="step01-next"><i>☼</i><div><small>Gợi ý bước tiếp theo</small><b>'+(result?'Brief đã có. Kiểm tra lại rồi mới sang Hồ sơ tài chính & DTI.':'Nhập ý tưởng hoặc tải tài liệu để AI hiểu ngôi nhà trước khi sang tài chính.')+'</b></div><button data-nav="2">→</button></div>'
+      +'<div class="step01-next"><i>☼</i><div><small>Gợi ý bước tiếp theo</small><b>'+(result?'Concept đã có. Tiếp tục sang phân tích tài chính chuyên sâu khi bạn muốn.':'Xem hình ảnh, tải tài liệu tham khảo hoặc để AI tự tạo concept từ hồ sơ nền.')+'</b></div><button data-nav="2">→</button></div>'
     +'</aside>'
 
    +'<section class="v6-card step01-reference">'
@@ -352,7 +387,7 @@ BMH.screen1=()=>{
     +'</section>'
 
    +'<section class="v6-card step01-prelim">'
-      +'<div class="step01-section-head"><div>'+BMH.v6PanelTitle('▥','Kết quả phân tích sơ bộ',result?'Kết hợp AI brief và rule engine hiện tại.':'Rule engine hiện tại; không cần gọi AI để xem chi tiết.')+'</div><button data-s1-prelim-toggle>'+(BMH.v6.prelimExpanded?'Thu gọn ↑':'Xem chi tiết →')+'</button></div>'
+      +'<div class="step01-section-head"><div>'+BMH.v6PanelTitle('▥','Kết quả phân tích sơ bộ',result?'Kết hợp concept AI và rule engine hiện tại.':'Rule engine hiện tại; không cần gọi AI để xem chi tiết.')+'</div><button data-s1-prelim-toggle>'+(BMH.v6.prelimExpanded?'Thu gọn ↑':'Xem chi tiết →')+'</button></div>'
       +'<div class="step01-prelim-grid">'
         +'<article><i class="ring" style="--p:'+fit+'"><b>'+fit+'%</b></i><span><small>Độ phù hợp nhu cầu</small><b>'+(fit>=85?'Rất cao':fit>=75?'Khá cao':'Cần chỉnh')+'</b></span></article>'
         +'<article><i class="bars">▮▮▮</i><span><small>Mức độ khả thi</small><b>'+feasibility+'</b></span></article>'
@@ -480,11 +515,10 @@ BMH.v6EditFact=key=>{
     if(next!==null&&next.trim()){BMH.state.project.style=next.trim().slice(0,80);BMH.save();BMH.render({preserveScroll:true});BMH.toast('Đã cập nhật phong cách.');}
     return;
   }
-  if(key==='floors')return jump(4,'[data-path="project.site.floors"]','Đã mở đúng trường Số tầng.');
+  if(key==='floors'||key==='climate'){BMH.state.ui.onboardingComplete=false;BMH.state.ui.onboardingStep=1;BMH.save();BMH.render();BMH.toast('Đã mở lại phần Vị trí & quy mô nền.');return;}
+  if(key==='budget'){BMH.state.ui.onboardingComplete=false;BMH.state.ui.onboardingStep=2;BMH.save();BMH.render();BMH.toast('Đã mở lại phần Tài chính sơ bộ.');return;}
+  if(key==='household'){BMH.state.ui.onboardingComplete=false;BMH.state.ui.onboardingStep=3;BMH.save();BMH.render();BMH.toast('Đã mở lại hồ sơ Gia đình.');return;}
   if(key==='area')return jump(5,'.v6-plan-main','Đã mở Bản vẽ để chỉnh diện tích và phòng.');
-  if(key==='budget')return jump(2,'.v6-fin-form','Đã mở Hồ sơ tài chính để chỉnh ngân sách.');
-  if(key==='climate')return jump(3,'.v6-location-form','Đã mở Vị trí & khí hậu.');
-  if(key==='household')return jump(4,'.v6-family','Đã mở Hồ sơ gia đình.');
 };
 BMH.v6GlobalSearch=q=>{
   const s=String(q||'').trim().toLowerCase();if(!s)return;
@@ -503,11 +537,20 @@ BMH.v6GlobalSearch=q=>{
 };
 
 document.addEventListener('click',e=>{
+  const jump=e.target.closest?.('[data-setup-jump]');
+  if(jump){const next=BMH.clamp(Number(jump.dataset.setupJump)||1,1,3),current=BMH.state.ui.onboardingStep||1;if(next>current&&!BMH.v6SetupValidate(current))return;BMH.state.ui.onboardingStep=next;BMH.save();BMH.render();return;}
+  if(e.target.closest?.('[data-setup-back]')){BMH.state.ui.onboardingStep=Math.max(1,(BMH.state.ui.onboardingStep||1)-1);BMH.save();BMH.render();return;}
+  if(e.target.closest?.('[data-setup-next]')){const current=BMH.state.ui.onboardingStep||1;if(!BMH.v6SetupValidate(current))return;BMH.state.ui.onboardingStep=Math.min(3,current+1);BMH.save();BMH.render();return;}
+  if(e.target.closest?.('[data-setup-finish]')){if(!BMH.v6SetupValidate(3))return;BMH.syncHouseholdSize?.();BMH.state.ui.onboardingComplete=true;BMH.state.ui.onboardingStep=3;BMH.state.ui.step=1;BMH.state.project.source='setup';BMH.save();BMH.render();BMH.toast('Hồ sơ nền đã sẵn sàng · bắt đầu AI Home Vision.');return;}
+});
+
+document.addEventListener('click',e=>{
   const global=e.target.closest?.('[data-v6-global]');
   if(global){
     const action=global.dataset.v6Global;
     if(action==='ideas'){ if(BMH.state.ui.step!==1)BMH.navigateTo(1);BMH.v6.ideaExpanded=true;BMH.render({preserveScroll:true});setTimeout(()=>document.querySelector('.step01-ideas')?.scrollIntoView({behavior:'smooth',block:'center'}),60);return; }
     if(action==='ai'){ BMH.aiOpen?.(); return; }
+    if(action==='setup'){ BMH.state.ui.onboardingComplete=false;BMH.state.ui.onboardingStep=1;BMH.save();BMH.render();return; }
     if(action==='notifications'){
       if(BMH.v6.briefError){if(BMH.state.ui.step!==1)BMH.navigateTo(1);setTimeout(()=>document.querySelector('.step01-error')?.scrollIntoView({behavior:'smooth',block:'center'}),80);}
       else BMH.toast?.('Không có thông báo mới.');
@@ -602,6 +645,19 @@ document.addEventListener('change',e=>{
     if(room){const key=rf.dataset.v6Room;room[key]=key==='name'?rf.value:Number(rf.value);BMH.save();BMH.render({preserveScroll:true});}
   }
 });
+
+BMH.renderStudio=BMH.render;
+BMH.render=(opts={})=>{
+  if(BMH.state?.ui?.onboardingComplete===false&&typeof BMH.v6SetupScreen==='function'){
+    const sy=window.scrollY,appRoot=BMH.root();BMH.disposeStudio3D?.();
+    if(appRoot)appRoot.innerHTML=BMH.v6SetupScreen();
+    document.documentElement.dataset.version=BMH.VERSION;
+    document.title='Build My Home · Khởi tạo dự án';
+    if(opts.preserveScroll)window.scrollTo(0,sy);else window.scrollTo(0,0);
+    return;
+  }
+  return BMH.renderStudio(opts);
+};
 
 BMH.navigateTo=((base)=>step=>{
   step=BMH.clamp(Number(step)||1,1,10);
