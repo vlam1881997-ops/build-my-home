@@ -48,3 +48,12 @@ test('finishing setup invalidates stale AI concept but keeps media/upload stack'
   assert.match(js,/aiSuggestions:\{\}/);
   assert.match(js,/BMH\.v6PersistSourceRefs/);
 });
+
+
+test('premium onboarding uses architectural split-screen hierarchy',()=>{
+  const js=read('dist/app.js'),css=read('dist/styles.css');
+  for(const token of ['setup-premium','setup-visual','setup-workspace','setup-visual-copy','setup-top-progress'])assert.ok(js.includes(token),token);
+  assert.match(css,/\.setup-main\.setup-premium/);
+  assert.match(css,/grid-template-columns:minmax\(360px,42%\) minmax\(0,58%\)/);
+  assert.match(css,/\.setup-visual-copy h2/);
+});
