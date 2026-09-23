@@ -288,14 +288,70 @@ BMH.materialClimateScore = (site=BMH.state?.project?.site||{}, tier=BMH.state?.p
   return BMH.clamp(Math.round(base-(risk-4)*1.5+(o.score-70)*.12+packBonus),50,98);
 };
 
+BMH.BANK_CATALOG_META={country:'VN',countryName:'Việt Nam',asOf:'2026-09',catalogVersion:'VN-2026.09',sourceNote:'Danh mục ngân hàng Việt Nam; lãi suất chỉ là preset mô phỏng khi có ghi rõ.'};
+BMH.BANK_CATEGORY_LABELS={
+  state:'Ngân hàng Nhà nước',jsc:'Ngân hàng TMCP',transferred:'Ngân hàng chuyển giao',
+  joint:'Ngân hàng liên doanh',foreign:'100% vốn nước ngoài',policy:'Ngân hàng chính sách',cooperative:'Ngân hàng hợp tác xã'
+};
 BMH.BANKS = [
-  {id:'VCB',name:'Vietcombank',img:'assets/banks/vcb.jpg',intro:6.9,post:10.9,months:12,note:'Kịch bản tham khảo; cần đối chiếu báo giá tín dụng thực tế.'},
-  {id:'BIDV',name:'BIDV',img:'assets/banks/bidv.jpg',intro:7.0,post:10.5,months:12,note:'Kịch bản tham khảo; mức thực tế thay đổi theo chương trình và hồ sơ.'},
-  {id:'AGR',name:'Agribank',img:'assets/banks/agr.jpg',intro:6.5,post:10.0,months:12,note:'Kịch bản tham khảo; cần xác minh điều kiện áp dụng.'},
-  {id:'TCB',name:'Techcombank',img:'assets/banks/tcb.jpg',intro:6.8,post:11.0,months:18,note:'Kịch bản tham khảo; không phải cam kết lãi suất.'},
-  {id:'MB',name:'MB Bank',img:'assets/banks/mb.jpg',intro:7.2,post:10.8,months:12,note:'Kịch bản tham khảo; cần đối chiếu đề nghị tín dụng.'},
-  {id:'ACB',name:'ACB',img:'assets/banks/acb.jpg',intro:7.5,post:11.2,months:12,note:'Kịch bản tham khảo; người dùng có thể chỉnh tay.'}
+  {id:'AGR',name:'Agribank',fullName:'Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam',country:'VN',category:'state',swift:'VBAAVNVX',img:'assets/banks/agr.jpg',intro:6.5,post:10.0,months:12,rateStatus:'preset',note:'Preset mô phỏng nội bộ; cần đối chiếu gói vay thực tế của ngân hàng.'},
+
+  {id:'ACB',name:'ACB',fullName:'Ngân hàng TMCP Á Châu',country:'VN',category:'jsc',swift:'ASCBVNVX',img:'assets/banks/acb.jpg',intro:7.5,post:11.2,months:12,rateStatus:'preset',note:'Preset mô phỏng nội bộ; không phải báo giá tín dụng.'},
+  {id:'ABB',name:'ABBANK',fullName:'Ngân hàng TMCP An Bình',country:'VN',category:'jsc',swift:'ABBKVNVX'},
+  {id:'BAB',name:'Bac A Bank',fullName:'Ngân hàng TMCP Bắc Á',country:'VN',category:'jsc',swift:'NASCVNVX'},
+  {id:'BVBC',name:'BVBank',fullName:'Ngân hàng TMCP Bản Việt',country:'VN',category:'jsc',swift:'VCBCVNVX'},
+  {id:'BAOVIET',name:'BAOVIET Bank',fullName:'Ngân hàng TMCP Bảo Việt',country:'VN',category:'jsc',swift:'BVBVVNVX'},
+  {id:'VTB',name:'VietinBank',fullName:'Ngân hàng TMCP Công Thương Việt Nam',country:'VN',category:'jsc',swift:'ICBVVNVX',img:'assets/banks/vtb.jpg'},
+  {id:'PVCB',name:'PVcomBank',fullName:'Ngân hàng TMCP Đại Chúng Việt Nam',country:'VN',category:'jsc',swift:'WBVNVNVX'},
+  {id:'BIDV',name:'BIDV',fullName:'Ngân hàng TMCP Đầu tư và Phát triển Việt Nam',country:'VN',category:'jsc',swift:'BIDVVNVX',img:'assets/banks/bidv.jpg',intro:7.0,post:10.5,months:12,rateStatus:'preset',note:'Preset mô phỏng nội bộ; mức thực tế thay đổi theo chương trình và hồ sơ.'},
+  {id:'SEAB',name:'SeABank',fullName:'Ngân hàng TMCP Đông Nam Á',country:'VN',category:'jsc',swift:'SEAVVNVX'},
+  {id:'MSB',name:'MSB',fullName:'Ngân hàng TMCP Hàng Hải',country:'VN',category:'jsc',swift:'MCOBVNVX',img:'assets/banks/msb.svg'},
+  {id:'KLB',name:'KienlongBank',fullName:'Ngân hàng TMCP Kiên Long',country:'VN',category:'jsc',swift:'KLBKVNVX'},
+  {id:'TCB',name:'Techcombank',fullName:'Ngân hàng TMCP Kỹ Thương Việt Nam',country:'VN',category:'jsc',swift:'VTCBVNVX',img:'assets/banks/tcb.jpg',intro:6.8,post:11.0,months:18,rateStatus:'preset',note:'Preset mô phỏng nội bộ; không phải cam kết lãi suất.'},
+  {id:'LPB',name:'LPBank',fullName:'Ngân hàng TMCP Lộc Phát Việt Nam',country:'VN',category:'jsc',swift:'LVBKVNVX'},
+  {id:'NAB',name:'Nam A Bank',fullName:'Ngân hàng TMCP Nam Á',country:'VN',category:'jsc',swift:'NAMAVNVX'},
+  {id:'VCB',name:'Vietcombank',fullName:'Ngân hàng TMCP Ngoại Thương Việt Nam',country:'VN',category:'jsc',swift:'BFTVVNVX',img:'assets/banks/vcb.jpg',intro:6.9,post:10.9,months:12,rateStatus:'preset',note:'Preset mô phỏng nội bộ; cần đối chiếu báo giá tín dụng thực tế.'},
+  {id:'HDB',name:'HDBank',fullName:'Ngân hàng TMCP Phát triển TP.HCM',country:'VN',category:'jsc',swift:'HDBCVNVX',img:'assets/banks/hdb.svg'},
+  {id:'OCB',name:'OCB',fullName:'Ngân hàng TMCP Phương Đông',country:'VN',category:'jsc',swift:'ORCOVNVX',img:'assets/banks/ocb.svg'},
+  {id:'MB',name:'MB',fullName:'Ngân hàng TMCP Quân Đội',country:'VN',category:'jsc',swift:'MSCBVNVX',img:'assets/banks/mb.jpg',intro:7.2,post:10.8,months:12,rateStatus:'preset',note:'Preset mô phỏng nội bộ; cần đối chiếu đề nghị tín dụng.'},
+  {id:'NCB',name:'NCB',fullName:'Ngân hàng TMCP Quốc Dân',country:'VN',category:'jsc',swift:'NVBAVNVX'},
+  {id:'VIB',name:'VIB',fullName:'Ngân hàng TMCP Quốc Tế Việt Nam',country:'VN',category:'jsc',swift:'VNIBVNVX',img:'assets/banks/vib.svg'},
+  {id:'SCB',name:'SCB',fullName:'Ngân hàng TMCP Sài Gòn',country:'VN',category:'jsc',swift:'SACLVNVX'},
+  {id:'SHB',name:'SHB',fullName:'Ngân hàng TMCP Sài Gòn - Hà Nội',country:'VN',category:'jsc',swift:'SHBAVNVX',img:'assets/banks/shb.svg'},
+  {id:'SGB',name:'SAIGONBANK',fullName:'Ngân hàng TMCP Sài Gòn Công Thương',country:'VN',category:'jsc',swift:'SBITVNVX'},
+  {id:'STB',name:'SACOMBANK',fullName:'Ngân hàng TMCP Sài Gòn Tài Lộc',country:'VN',category:'jsc',swift:'SGTTVNVX',img:'assets/banks/stb.svg'},
+  {id:'PGB',name:'PGBank',fullName:'Ngân hàng TMCP Thịnh Vượng và Phát Triển',country:'VN',category:'jsc',swift:'PGBLVNVX'},
+  {id:'TPB',name:'TPBank',fullName:'Ngân hàng TMCP Tiên Phong',country:'VN',category:'jsc',swift:'TPBVVNVX',img:'assets/banks/tpb.svg'},
+  {id:'VAB',name:'VietABank',fullName:'Ngân hàng TMCP Việt Á',country:'VN',category:'jsc',swift:'VNTTVNVX'},
+  {id:'VPB',name:'VPBank',fullName:'Ngân hàng TMCP Việt Nam Thịnh Vượng',country:'VN',category:'jsc',swift:'VPBKVNVX',img:'assets/banks/vpb.svg'},
+  {id:'VIETBANK',name:'Vietbank',fullName:'Ngân hàng TMCP Việt Nam Thương Tín',country:'VN',category:'jsc',swift:'VNACVNVX'},
+  {id:'EIB',name:'Eximbank',fullName:'Ngân hàng TMCP Xuất Nhập Khẩu Việt Nam',country:'VN',category:'jsc',swift:'EBVIVNVX'},
+
+  {id:'GPB',name:'GPBank',fullName:'Ngân hàng Thương mại TNHH MTV Kỷ Nguyên Thịnh Vượng',country:'VN',category:'transferred',swift:'GBNKVNVX'},
+  {id:'VCBNEO',name:'VCBNeo',fullName:'Ngân hàng TNHH MTV Ngoại thương Công nghệ số',country:'VN',category:'transferred',swift:'GTBAVNVX'},
+  {id:'VIKKI',name:'Vikki Bank',fullName:'Ngân hàng TNHH MTV Số Vikki',country:'VN',category:'transferred',swift:'EACBVNVX'},
+  {id:'MBV',name:'MBV',fullName:'Ngân hàng TNHH MTV Việt Nam Hiện Đại',country:'VN',category:'transferred',swift:'OJBAVNVX'},
+
+  {id:'IVB',name:'Indovina Bank',fullName:'Ngân hàng TNHH Indovina',country:'VN',category:'joint',swift:'IABBVNVX'},
+  {id:'VRB',name:'VRB',fullName:'Ngân hàng Liên doanh Việt Nga',country:'VN',category:'joint',swift:'VRBAVNVX'},
+
+  {id:'ANZ',name:'ANZ Vietnam',fullName:'Ngân hàng TNHH MTV ANZ Việt Nam',country:'VN',category:'foreign',swift:'ANZBVNVX'},
+  {id:'CIMB',name:'CIMB Vietnam',fullName:'Ngân hàng TNHH MTV CIMB Việt Nam',country:'VN',category:'foreign',swift:'CIBBVNVN'},
+  {id:'HLB',name:'Hong Leong Vietnam',fullName:'Ngân hàng TNHH MTV Hong Leong Việt Nam',country:'VN',category:'foreign',swift:'HLBBVNVX'},
+  {id:'HSBC',name:'HSBC Vietnam',fullName:'Ngân hàng TNHH MTV HSBC Việt Nam',country:'VN',category:'foreign',swift:'HSBCVNVX'},
+  {id:'PBVN',name:'Public Bank Vietnam',fullName:'Ngân hàng TNHH MTV Public Bank Việt Nam',country:'VN',category:'foreign',swift:'VIDPVNV5'},
+  {id:'SHBVN',name:'Shinhan Vietnam',fullName:'Ngân hàng TNHH MTV Shinhan Việt Nam',country:'VN',category:'foreign',swift:'SHBKVNVX'},
+  {id:'SCBVL',name:'Standard Chartered Vietnam',fullName:'Ngân hàng TNHH MTV Standard Chartered Việt Nam',country:'VN',category:'foreign',swift:'SCBLVNVX'},
+  {id:'UOB',name:'UOB Vietnam',fullName:'Ngân hàng TNHH MTV UOB Việt Nam',country:'VN',category:'foreign',swift:'UOVBVNVX'},
+  {id:'WOORI',name:'Woori Vietnam',fullName:'Ngân hàng TNHH MTV Woori Việt Nam',country:'VN',category:'foreign',swift:'HVBKVNVX'},
+
+  {id:'VBSP',name:'VBSP',fullName:'Ngân hàng Chính sách Xã hội Việt Nam',country:'VN',category:'policy'},
+  {id:'VDB',name:'VDB',fullName:'Ngân hàng Phát triển Việt Nam',country:'VN',category:'policy'},
+  {id:'COOP',name:'Co-opBank',fullName:'Ngân hàng Hợp tác xã Việt Nam',country:'VN',category:'cooperative'}
 ];
+BMH.bankHasPreset=b=>!!b&&b.rateStatus==='preset'&&Number.isFinite(Number(b.intro))&&Number.isFinite(Number(b.post))&&Number(b.months)>0;
+BMH.bankCategoryLabel=b=>BMH.BANK_CATEGORY_LABELS[b?.category]||'Ngân hàng';
+
 
 BMH.MATERIALS = {
   floor:[
