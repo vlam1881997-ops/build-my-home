@@ -224,10 +224,11 @@ BMH.screen1=()=>{
   const uploads=Array.isArray(BMH.v6.uploads)?BMH.v6.uploads:[];
   const currentUpload=BMH.v6.upload;
   const heroSlides=[
-    currentUpload?.dataUrl?{img:currentUpload.dataUrl,kicker:'TỆP CỦA BẠN',title:'Bắt đầu từ chính hình ảnh bạn vừa chọn.',copy:'Tệp đã vào Step 1. Nếu AI online, hệ thống sẽ phân tích nội dung và tạo brief.'}:null,
-    {img:'assets/rooms/facade-render.jpg',kicker:'AI HOME VISION',title:'Một ngôi nhà tốt bắt đầu từ một ý tưởng đẹp.',copy:'Hình ảnh dẫn cảm xúc. Dữ liệu phía sau kiểm tra tính khả thi.'},
-    {img:'assets/design/hero-step1.jpg',kicker:'CẢM HỨNG MẶT TIỀN',title:'Nhà phố hiện đại có thể mềm mại hơn nhờ cây xanh và ánh sáng.',copy:'Giữ hình ảnh ở vai trò định hướng, không thay thế hồ sơ thiết kế.'},
-    {img:'assets/design/flow-a.jpg',kicker:'KHÔNG GIAN SỐNG',title:'Khoảng xanh, thông tầng và ánh sáng tự nhiên tạo nên chất lượng sống.',copy:'AI chuyển gu thẩm mỹ thành tiêu chí để kiểm tra ở các bước tiếp theo.'}
+    currentUpload?.dataUrl?{img:currentUpload.dataUrl,pos:'center center',kicker:'TỆP CỦA BẠN',title:'Bắt đầu từ chính hình ảnh bạn vừa chọn.',copy:'Tệp đã vào Step 1. Nếu AI online, hệ thống sẽ phân tích nội dung và tạo brief.'}:null,
+    {img:'assets/design/flow-a.jpg',pos:'center 48%',kicker:'AI HOME VISION',title:'Một ngôi nhà tốt bắt đầu từ một ý tưởng đẹp.',copy:'Bạn thấy hướng đi trước. Dữ liệu phía sau kiểm tra tính khả thi.'},
+    {img:'assets/design/flow-b.jpg',pos:'center 50%',kicker:'ÁNH SÁNG & KHÔNG GIAN',title:'Giếng trời, cây xanh và thông gió làm nhà phố dễ thở hơn.',copy:'AI biến cảm hứng thành tiêu chí để kiểm tra ở các bước tiếp theo.'},
+    {img:'assets/rooms/living-local.jpg',pos:'center 54%',kicker:'NỘI THẤT & TRẢI NGHIỆM',title:'Không gian ấm, gọn và đủ ánh sáng cho nhịp sống hằng ngày.',copy:'Vật liệu và công năng sẽ được kiểm tra sau khi brief được xác nhận.'},
+    {img:'assets/rooms/facade-render.jpg',pos:'58% center',kicker:'MẶT TIỀN THAM KHẢO',title:'Tỷ lệ mặt đứng tốt giúp căn nhà có bản sắc ngay từ cái nhìn đầu tiên.',copy:'Ảnh tham khảo chỉ định hướng thẩm mỹ, không thay thế hồ sơ kiến trúc.'}
   ].filter(Boolean);
   const idx=BMH.clamp(Number(BMH.v6.s1HeroIndex)||0,0,Math.max(0,heroSlides.length-1)),slide=heroSlides[idx];
   const fit=Math.max(0,Math.min(100,Math.round((review.comfort+review.function+review.budget)/3)));
@@ -253,7 +254,7 @@ BMH.screen1=()=>{
     +'</section>'
 
    +'<section class="v6-s1-hero step01-hero">'
-      +'<img src="'+slide.img+'" alt=""><div class="v6-image-shade"></div>'
+      +'<img src="'+slide.img+'" alt="" style="object-position:'+BMH.v6Esc(slide.pos||'center center')+'"><div class="v6-image-shade"></div>'
       +'<div class="step01-hero-quote"><span>'+slide.kicker+'</span><h2>'+slide.title+'</h2><p>'+slide.copy+'</p></div>'
       +'<div class="step01-hero-badges">'
         +'<article><i>⌂</i><span><small>Số tầng ước tính</small><b>~ '+floors+' tầng</b></span></article>'
