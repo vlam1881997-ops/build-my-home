@@ -64,7 +64,7 @@ BMH.aiRun=async(action=BMH.ai.mode,prompt='')=>{
 
 BMH.applyAIBrief=result=>{
   const b=result?.brief||{},p=BMH.state.project;
-  if(Number.isFinite(Number(b.budget_vnd))&&Number(b.budget_vnd)>100000000){const target=Number(b.budget_vnd);p.finance.loan=Math.max(0,target-(Number(p.finance.cash)||0));}
+  if(Number.isFinite(Number(b.budget_vnd))&&Number(b.budget_vnd)>100000000)p.finance.targetBudget=Math.round(Number(b.budget_vnd));
   if(Number.isFinite(Number(b.floors)))p.site.floors=BMH.clamp(Math.round(Number(b.floors)),1,5);
   if(Number.isFinite(Number(b.household_size))&&Number(b.household_size)>0)p.household.requestedSize=BMH.clamp(Math.round(Number(b.household_size)),1,20);
   if(b.style)p.style=String(b.style).slice(0,80);
