@@ -1,8 +1,8 @@
 /* Build My Home V6.0 — product UI reset.
  * One visual system for all 10 steps. Keeps the existing engines, removes patch-on-patch UI.
  */
-BMH.VERSION='6.6.0';
-BMH.VISUAL_RELEASE='cost-before-finance-workflow-v660';
+BMH.VERSION='6.7.0';
+BMH.VISUAL_RELEASE='site-intelligence-suppliers-v670';
 
 const v6SavedBrief=BMH.state?.project?.brief||{},v6SavedResult=v6SavedBrief.result&&Object.keys(v6SavedBrief.result).length?v6SavedBrief.result:null;
 const v6SavedSources=Array.isArray(BMH.state?.project?.sourceRefs)?BMH.state.project.sourceRefs.map(x=>({...x,status:x.status||'Đã lưu tham chiếu · chọn lại tệp nếu cần AI đọc lại'})):[];
@@ -584,14 +584,42 @@ BMH.screen2=()=>{
    +'</div>';
 };
 
+BMH.v67RiskText=(kind,value)=>{
+  const v=String(value||'').toLowerCase();
+  if(kind==='flood'){if(v==='high')return 'Cao';if(v==='medium')return 'Trung bình';if(v==='low')return 'Thấp';if(v==='unknown')return 'Chưa đủ dữ liệu';}
+  if(kind==='access'){if(v==='good')return 'Thuận tiện';if(v==='medium')return 'Trung bình';if(v==='difficult')return 'Khó tiếp cận';if(v==='unknown')return 'Chưa đủ dữ liệu';}
+  return value||'Chưa đánh giá';
+};
+BMH.v67PlaceCard=(x,type='supplier')=>{
+  const url=/^https:\/\//i.test(String(x?.website||''))?String(x.website):'',km=Number(x?.distanceKm);
+  return '<article class="v67-place-card"><i>'+(type==='supplier'?'▦':'⌂')+'</i><div><b>'+BMH.v6Esc(x?.name||'Chưa có tên')+'</b><span>'+BMH.v6Esc(x?.category||x?.reason||(type==='supplier'?'Nhà cung cấp vật liệu':'Đơn vị xây dựng'))+'</span>'+(Number.isFinite(km)?'<small>~ '+BMH.num(km,1)+' km từ khu đất</small>':x?.address?'<small>'+BMH.v6Esc(x.address)+'</small>':'')+'</div>'+(url?'<a href="'+BMH.v6Esc(url)+'" target="_blank" rel="noopener noreferrer">Mở ↗</a>':'')+'</article>';
+};
 BMH.screen3=()=>{
-  const s=BMH.state.project.site,p=BMH.regionProfile(s),near=BMH.regionNearbyPlaces?.(s)||[];
+  const s=BMH.state.project.site,p=BMH.regionProfile(s),near=BMH.regionNearbyPlaces?.(s)||[],si=BMH.state.project.siteIntelligence||{},e=BMH.estimate();
   const options=(BMH.VN_REGION_ORDER||Object.keys(BMH.REGIONS||{})).map(x=>'<option value="'+BMH.v6Esc(x)+'" '+(s.province===x?'selected':'')+'>'+BMH.v6Esc(x)+'</option>').join('');
-  const embed=BMH.mapEmbedUrl?.(s)||'';
-  return '<div class="v6-s3">'
-   +'<section class="v6-card v6-location-form">'+BMH.v6Title(2,'VỊ TRÍ','Đặt ngôi nhà vào đúng bối cảnh thật.','Vị trí quyết định nắng, gió, mưa, tiếp cận công trường và nhiều chi phí ẩn.')+'<div class="v6-fields"><label><span>Tỉnh / thành</span><select data-path="project.site.province">'+options+'</select></label><label><span>Khu vực / phường xã</span><input data-path="project.site.district" value="'+BMH.v6Esc(s.district||'')+'"></label><label><span>Địa chỉ cụ thể</span><input data-path="project.site.address" value="'+BMH.v6Esc(s.address||'')+'" placeholder="Nhập tên đường, phường/xã…"></label></div><div class="v6-inline-actions"><button class="v6-primary" data-geocode>⌖ Tìm trên bản đồ</button><button class="v6-secondary" data-device-location>Dùng GPS</button></div><div class="v6-coordinate"><b>'+Number(s.lat).toFixed(5)+', '+Number(s.lng).toFixed(5)+'</b><span>'+BMH.v6Esc(s.geoSource||'Tọa độ dự án')+'</span></div></section>'
-   +'<section class="v6-card v6-map-panel"><div class="v6-map-toolbar"><div><button data-map-style="satellite" class="'+(s.mapStyle==='satellite'?'active':'')+'">Vệ tinh</button><button data-map-style="hybrid" class="'+(s.mapStyle==='hybrid'?'active':'')+'">Hybrid</button><button data-map-style="roadmap" class="'+(s.mapStyle==='roadmap'?'active':'')+'">Bản đồ</button><button data-map-style="terrain" class="'+(s.mapStyle==='terrain'?'active':'')+'">Địa hình</button></div><span id="mapHudCoords">'+Number(s.lat).toFixed(5)+', '+Number(s.lng).toFixed(5)+'</span></div><div id="map" class="map fallback-only"><div class="map-fallback"><div class="map-embed-shell v61-map-first"><iframe class="map-embed-frame" loading="eager" referrerpolicy="no-referrer-when-downgrade" src="'+BMH.v6Esc(embed)+'" title="Bản đồ khu đất"></iframe><div class="v61-map-overlay"><span>Vị trí dự án</span><b>'+BMH.v6Esc(s.district||s.province)+'</b><small>'+Number(s.lat).toFixed(5)+', '+Number(s.lng).toFixed(5)+'</small></div></div></div></div><div class="v6-nearby">'+near.slice(0,4).map(x=>'<button data-nearby="'+BMH.v6Esc(x.name)+'" data-lat="'+x.lat+'" data-lng="'+x.lng+'"><b>'+BMH.v6Esc(x.name)+'</b><span>'+BMH.v6Esc(x.note||'Điểm tham chiếu')+'</span></button>').join('')+'</div></section>'
-   +'<aside class="v6-card v6-climate">'+BMH.v6PanelTitle('☀','Hồ sơ khí hậu khu vực',s.province+' · '+s.district)+'<div class="v6-climate-grid">'+BMH.v6Kpi('Nhiệt độ',BMH.v6Esc(p.temp))+BMH.v6Kpi('Độ ẩm',BMH.v6Esc(p.humidity))+BMH.v6Kpi('Mùa mưa',BMH.v6Esc(p.wet))+BMH.v6Kpi('Gió chính',BMH.v6Esc(p.wind))+BMH.v6Kpi('Nguy cơ ngập',BMH.v6Esc(p.flood))+BMH.v6Kpi('Nắng nóng',BMH.v6Esc(p.heat))+'</div><div class="v6-climate-tip"><i>✦</i><div><b>Khuyến nghị thiết kế</b><span>'+BMH.v6Esc((p.designTips||[])[0]||'Ưu tiên thông gió, che nắng và thoát nước phù hợp địa phương.')+'</span></div></div></aside>'
+  const embed=BMH.mapEmbedUrl?.(s)||'',loading=si.status==='loading'||BMH.siteIntelLoading,ready=si.status==='ready';
+  const floodAI=si.flood?.aiLevel?BMH.v67RiskText('flood',si.flood.aiLevel):si.flood?.level||p.flood;
+  const accessAI=si.access?.aiLevel?BMH.v67RiskText('access',si.access.aiLevel):si.access?.level||'Chưa đánh giá';
+  const surcharge=Number(si.transport?.surchargePct)||Math.round((BMH.siteAdaptation?.(s)?.roadPct||0)*100);
+  const localSup=(si.suppliers||[]).slice(0,5),webSup=(si.webSuppliers||[]).slice(0,3),localBuilders=(si.builders||[]).slice(0,4),webBuilders=(si.webBuilders||[]).slice(0,3);
+  const sourceLinks=(si.citations||[]).filter(x=>/^https:\/\//i.test(String(x?.url||''))).slice(0,5);
+  return '<div class="v6-s3 v67-site">'
+   +'<section class="v6-card v6-location-form">'+BMH.v6Title(2,'KHU ĐẤT & VỊ TRÍ','Đặt đúng chấm đất trước khi hệ thống đánh giá.','Chấm vị trí là đầu vào cho khí hậu, ngập sơ bộ, giao thông, logistics và mạng lưới nhà cung cấp quanh công trình.')+'<div class="v6-fields"><label><span>Tỉnh / thành</span><select data-path="project.site.province">'+options+'</select></label><label><span>Khu vực / phường xã</span><input data-path="project.site.district" value="'+BMH.v6Esc(s.district||'')+'"></label><label><span>Địa chỉ cụ thể</span><input data-path="project.site.address" value="'+BMH.v6Esc(s.address||'')+'" placeholder="Nhập số nhà, đường, phường/xã…"></label><label><span>Đường tiếp cận công trình</span><div><input data-path="project.site.road" type="number" min="1" step=".5" value="'+Number(s.road||0)+'"><em>m</em></div></label></div><div class="v6-inline-actions"><button class="v6-primary" data-geocode>⌖ Tìm & đặt ghim</button><button class="v6-secondary" data-device-location>Dùng GPS</button></div><div class="v6-coordinate"><b>● '+Number(s.lat).toFixed(5)+', '+Number(s.lng).toFixed(5)+'</b><span>'+BMH.v6Esc(s.geoSource||'Tọa độ dự án')+'</span></div><button class="v67-scan-btn" data-site-intel-refresh '+(loading?'disabled':'')+'>'+(loading?'◌ Đang quét khu vực…':'✦ Quét khu đất & nhà cung cấp')+'</button></section>'
+   +'<section class="v6-card v6-map-panel"><div class="v6-map-toolbar"><div><button data-map-style="satellite" class="'+(s.mapStyle==='satellite'?'active':'')+'">Vệ tinh</button><button data-map-style="hybrid" class="'+(s.mapStyle==='hybrid'?'active':'')+'">Hybrid</button><button data-map-style="roadmap" class="'+(s.mapStyle==='roadmap'?'active':'')+'">Bản đồ</button><button data-map-style="terrain" class="'+(s.mapStyle==='terrain'?'active':'')+'">Địa hình</button></div><span id="mapHudCoords">'+Number(s.lat).toFixed(5)+', '+Number(s.lng).toFixed(5)+'</span></div><div id="map" class="map fallback-only"><div class="map-fallback"><div class="map-embed-shell v61-map-first"><iframe class="map-embed-frame" loading="eager" referrerpolicy="no-referrer-when-downgrade" src="'+BMH.v6Esc(embed)+'" title="Bản đồ khu đất"></iframe><div class="v67-fallback-site-pin"><i>⌂</i><b>KHU ĐẤT</b></div><div class="v61-map-overlay"><span>Vị trí dự án</span><b>'+BMH.v6Esc(s.district||s.province)+'</b><small>'+Number(s.lat).toFixed(5)+', '+Number(s.lng).toFixed(5)+'</small></div></div></div></div><div class="v67-map-legend"><span><i class="site"></i>Khu đất</span><span><i class="supplier"></i>Nhà cung cấp VLXD</span><span><i class="builder"></i>Đơn vị thi công</span></div></section>'
+   +'<aside class="v6-card v6-climate">'+BMH.v6PanelTitle('☀','Khí hậu & rủi ro khu vực',s.province+' · '+s.district)+'<div class="v6-climate-grid">'+BMH.v6Kpi('Nhiệt độ',BMH.v6Esc(p.temp))+BMH.v6Kpi('Độ ẩm',BMH.v6Esc(p.humidity))+BMH.v6Kpi('Mùa mưa',BMH.v6Esc(p.wet))+BMH.v6Kpi('Gió chính',BMH.v6Esc(p.wind))+BMH.v6Kpi('Ngập sơ bộ',BMH.v6Esc(floodAI))+BMH.v6Kpi('Cao độ',si.elevation_m==null?'Đang nạp':BMH.num(si.elevation_m,0)+' m')+'</div><div class="v6-climate-tip"><i>✦</i><div><b>Khuyến nghị thiết kế</b><span>'+BMH.v6Esc((p.designTips||[])[0]||'Ưu tiên thông gió, che nắng và thoát nước phù hợp địa phương.')+'</span></div></div></aside>'
+   +'<section class="v6-card v67-intelligence">'
+      +'<div class="v67-intel-head"><div><span>SITE INTELLIGENCE</span><h2>Khảo sát sơ bộ quanh chấm khu đất</h2><p>'+(loading?'Đang lấy cao độ, đường, sông/kênh, nhà cung cấp và đối chiếu nguồn web…':ready?(BMH.v6Esc(si.aiSummary||'Đã quét dữ liệu khu vực quanh tọa độ dự án.')):'Bấm “Quét khu đất & nhà cung cấp” để bắt đầu.')+'</p></div><button data-site-intel-refresh '+(loading?'disabled':'')+'>↻ '+(loading?'Đang quét':'Quét lại')+'</button></div>'
+      +'<div class="v67-intel-kpis">'
+        +'<article><small>Ngập / thoát nước</small><b>'+BMH.v6Esc(floodAI)+'</b><span>'+BMH.v6Esc(si.flood?.aiReason||si.flood?.note||'Sàng lọc theo vùng; cần dữ liệu chấm đất để đánh giá kỹ hơn.')+'</span></article>'
+        +'<article><small>Tiếp cận công trình</small><b>'+BMH.v6Esc(accessAI)+'</b><span>'+BMH.v6Esc(si.access?.aiReason||si.access?.note||('Đường tiếp cận khai báo '+s.road+' m.'))+'</span></article>'
+        +'<article><small>Phụ phí vận chuyển</small><b>~ '+surcharge+'%</b><span>'+BMH.money(e.transport)+' đang nằm trong dự toán vận chuyển hiện tại.</span></article>'
+        +'<article><small>Đường chính gần nhất</small><b>'+(si.access?.majorRoadDistanceKm==null?'Chưa có dữ liệu':'~ '+BMH.num(si.access.majorRoadDistanceKm,1)+' km')+'</b><span>'+BMH.v6Esc(si.access?.majorRoadName||'OpenStreetMap sẽ được quét theo tọa độ.')+'</span></article>'
+      +'</div>'
+      +'<div class="v67-market-grid"><div><div class="v67-list-title"><span><b>Nhà cung cấp vật liệu gần công trình</b><small>Điểm có tọa độ được đánh dấu trực tiếp trên bản đồ.</small></span><em>'+localSup.length+' địa điểm OSM</em></div><div class="v67-place-list">'+(localSup.length?localSup.map(x=>BMH.v67PlaceCard(x,'supplier')).join(''):'<div class="v67-empty">Chưa thấy điểm VLXD có dữ liệu địa lý trong bán kính quét.</div>')+(webSup.length?'<div class="v67-web-label">Gemini tìm thêm trên web</div>'+webSup.map(x=>BMH.v67PlaceCard(x,'supplier')).join(''):'')+'</div></div>'
+        +'<div><div class="v67-list-title"><span><b>Đơn vị xây dựng tham khảo</b><small>Đề xuất để người xây dựng liên hệ khảo sát/báo giá, chưa phải xếp hạng chất lượng.</small></span><em>'+localBuilders.length+' địa điểm OSM</em></div><div class="v67-place-list">'+(localBuilders.length?localBuilders.map(x=>BMH.v67PlaceCard(x,'builder')).join(''):'<div class="v67-empty">Chưa thấy nhà thầu có dữ liệu địa lý gần khu đất.</div>')+(webBuilders.length?'<div class="v67-web-label">Gemini tìm thêm trên web</div>'+webBuilders.map(x=>BMH.v67PlaceCard(x,'builder')).join(''):'')+'</div></div></div>'
+      +(sourceLinks.length?'<div class="v67-sources"><b>Nguồn đối chiếu</b>'+sourceLinks.map((x,i)=>'<a href="'+BMH.v6Esc(x.url)+'" target="_blank" rel="noopener noreferrer">'+(i+1)+'. '+BMH.v6Esc(x.title||'Nguồn web')+'</a>').join('')+'</div>':'')
+      +'<div class="v67-disclaimer"><i>!</i><span><b>Ngập là đánh giá sàng lọc, không phải kết luận khảo sát.</b><small>Trước thi công vẫn cần kiểm tra cao độ thực địa, hệ thống thoát nước, lịch sử ngập tại đúng tuyến đường và khảo sát địa chất khi cần.</small></span></div>'
+   +'</section>'
    +'</div>';
 };
 
@@ -682,7 +710,7 @@ BMH.afterRender=()=>{
     setTimeout(()=>BMH.v65RefreshBankRate?.(bank,{force:false,silent:true}),80);
   }
   if(step===2){
-    BMH.loadLiveWeather?.();BMH.loadClimateHistory?.();
+    BMH.loadLiveWeather?.();BMH.loadClimateHistory?.();BMH.loadSiteIntelligence?.();
     setTimeout(()=>Promise.resolve(BMH.initMapStudio?.()).catch(()=>{}),120);
   }
   if(step===4)setTimeout(()=>BMH.v61OrientPlanner?.(),40);
