@@ -202,7 +202,7 @@ BMH.v6AnalyzeBrief=async()=>{
     BMH.ai.result=data.result||null;BMH.ai.model=data.model||'';BMH.ai.provider=data.provider||'';BMH.ai.notice=data.notice||'';BMH.ai.lastAction='brief';
     if(data.result)BMH.applyAIBrief(data.result);
     BMH.state.project.source='ai-brief';
-    BMH.state.project.brief={provider:data.provider||'',model:data.model||'',notice:data.notice||'',updatedAt:new Date().toISOString(),result:data.result||{}};
+    BMH.state.project.brief={...(BMH.state.project.brief||{}),provider:data.provider||'',model:data.model||'',notice:data.notice||'',updatedAt:new Date().toISOString(),result:data.result||{}};
     BMH.save();
     BMH.toast(data.degraded?'AI cloud đang giới hạn · đã tạo brief bằng bộ phân tích dự phòng.':'AI đã tạo concept từ hồ sơ nền. Step 1 giữ nguyên để bạn xem và bổ sung cảm hứng.');
   }catch(err){
@@ -541,7 +541,7 @@ document.addEventListener('click',e=>{
   if(jump){const next=BMH.clamp(Number(jump.dataset.setupJump)||1,1,3),current=BMH.state.ui.onboardingStep||1;if(next>current&&!BMH.v6SetupValidate(current))return;BMH.state.ui.onboardingStep=next;BMH.save();BMH.render();return;}
   if(e.target.closest?.('[data-setup-back]')){BMH.state.ui.onboardingStep=Math.max(1,(BMH.state.ui.onboardingStep||1)-1);BMH.save();BMH.render();return;}
   if(e.target.closest?.('[data-setup-next]')){const current=BMH.state.ui.onboardingStep||1;if(!BMH.v6SetupValidate(current))return;BMH.state.ui.onboardingStep=Math.min(3,current+1);BMH.save();BMH.render();return;}
-  if(e.target.closest?.('[data-setup-finish]')){if(!BMH.v6SetupValidate(3))return;BMH.syncHouseholdSize?.();BMH.state.ui.onboardingComplete=true;BMH.state.ui.onboardingStep=3;BMH.state.ui.step=1;BMH.state.project.source='setup';BMH.save();BMH.render();BMH.toast('Hồ sơ nền đã sẵn sàng · bắt đầu AI Home Vision.');return;}
+  if(e.target.closest?.('[data-setup-finish]')){if(!BMH.v6SetupValidate(3))return;BMH.syncHouseholdSize?.();BMH.state.ui.onboardingComplete=true;BMH.state.ui.onboardingStep=3;BMH.state.ui.step=1;BMH.state.project.source='setup';BMH.state.project.brief={...(BMH.state.project.brief||{}),provider:'',model:'',notice:'Hồ sơ nền vừa được cập nhật. Hãy tạo lại concept AI để đồng bộ.',updatedAt:new Date().toISOString(),result:{},aiSuggestions:{}};BMH.v6.briefResult=null;BMH.v6.briefProvider='';BMH.v6.briefNotice=BMH.state.project.brief.notice;BMH.save();BMH.render();BMH.toast('Hồ sơ nền đã sẵn sàng · bắt đầu AI Home Vision.');return;}
 });
 
 document.addEventListener('click',e=>{
