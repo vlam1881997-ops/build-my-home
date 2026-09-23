@@ -64,11 +64,18 @@ BMH.aiRun=async(action=BMH.ai.mode,prompt='')=>{
 
 BMH.applyAIBrief=result=>{
   const b=result?.brief||{},p=BMH.state.project;
-  if(Number.isFinite(Number(b.budget_vnd))&&Number(b.budget_vnd)>100000000)p.finance.targetBudget=Math.round(Number(b.budget_vnd));
-  if(Number.isFinite(Number(b.floors)))p.site.floors=BMH.clamp(Math.round(Number(b.floors)),1,5);
-  if(Number.isFinite(Number(b.household_size))&&Number(b.household_size)>0)p.household.requestedSize=BMH.clamp(Math.round(Number(b.household_size)),1,20);
+  // V6.1.7: Location, finance and household are canonical inputs collected before Step 1.
+  // AI Home Vision may enrich creative direction, but must not silently overwrite those foundations.
   if(b.style)p.style=String(b.style).slice(0,80);
-  if(b.province&&BMH.REGIONS[b.province]){p.site.province=b.province;const r=BMH.REGIONS[b.province],pt=BMH.regionPoint(b.province,r.defaultDistrict);Object.assign(p.site,{district:pt.district,lat:pt.lat,lng:pt.lng,geoSource:'AI brief · dữ liệu vùng'});}
+  p.brief=p.brief||{};
+  p.brief.aiSuggestions={
+    budget_vnd:Number(b.budget_vnd)||0,
+    province:String(b.province||'').slice(0,80),
+    floors:Number(b.floors)||0,
+    bedrooms:Number(b.bedrooms)||0,
+    household_size:Number(b.household_size)||0,
+    priorities:Array.isArray(b.priorities)?b.priorities.slice(0,8).map(String):[]
+  };
   BMH.save();
 };
 
