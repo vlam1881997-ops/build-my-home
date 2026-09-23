@@ -14,7 +14,7 @@ test('Step 1 action labels map to real handlers',()=>{
 test('Step 1 canonical data survives reload and manual edits win over stale AI',()=>{
   const s=js();
   for(const token of [
-    "brief:{provider:'',model:'',notice:'',updatedAt:'',result:{}}",
+    "brief:{provider:'',model:'',notice:'',updatedAt:'',result:{},aiSuggestions:{}}",
     'sourceRefs:[]','targetBudget:0','requestedSize:0','project.brief.result',
     'BMH.v6PersistSourceRefs','p.finance?.targetBudget','p.household?.requestedSize','p.style||brief.style'
   ]) assert.ok(s.includes(token),token);
