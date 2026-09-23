@@ -45,7 +45,7 @@ const centerOf=e=>{
 const placeName=e=>safe(e?.tags?.name||e?.tags?.brand||e?.tags?.operator||'',140);
 const webUrl=e=>{
   const t=e?.tags||{},u=String(t.website||t['contact:website']||'').trim();
-  return /^https?:\\/\\//i.test(u)?u.slice(0,500):'';
+  return /^https?:\/\//i.test(u)?u.slice(0,500):'';
 };
 const addr=e=>{
   const t=e?.tags||{},parts=[t['addr:housenumber'],t['addr:street'],t['addr:suburb'],t['addr:city']].filter(Boolean);
