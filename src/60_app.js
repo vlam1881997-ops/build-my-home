@@ -220,7 +220,20 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-payment-refresh]')){BMH.refreshEntitlement().then(ok=>BMH.toast(ok?'Premium đã được server xác nhận.':'Chưa thấy quyền premium trên server.'));return;}
   const start=e.target.closest('[data-start]'); if(start){BMH.state.project.source=start.dataset.start;BMH.save(); if(start.dataset.start==='photo')BMH.$('#uploadPhoto')?.click(); else if(start.dataset.start==='plan')BMH.$('#uploadPlan')?.click(); else BMH.navigateTo(2); return;}
   if(e.target.closest('[data-sidebar]')){BMH.state.ui.sidebarCollapsed=!BMH.state.ui.sidebarCollapsed;BMH.save();BMH.render();return;}
-  const bank=e.target.closest('[data-bank]'); if(bank){const b=BMH.BANKS.find(x=>x.id===bank.dataset.bank);if(b){Object.assign(BMH.state.project.finance,{bank:b.id,introRate:b.intro,postRate:b.post,promoMonths:b.months});BMH.save();BMH.render();BMH.toast(`Đã nạp kịch bản ${b.name}; vẫn có thể chỉnh tay.`);}return;}
+  const bank=e.target.closest('[data-bank]'); if(bank){
+    const b=BMH.BANKS.find(x=>x.id===bank.dataset.bank);
+    if(b){
+      BMH.state.project.finance.bank=b.id;
+      if(BMH.bankHasPreset?.(b)){
+        Object.assign(BMH.state.project.finance,{introRate:b.intro,postRate:b.post,promoMonths:b.months});
+        BMH.toast(`Đã nạp preset mô phỏng ${b.name}. Hãy đối chiếu báo giá tín dụng trước khi vay.`);
+      }else{
+        BMH.toast(`Đã chọn ${b.name}. Chưa có lãi suất xác minh nên hệ thống giữ nguyên lãi suất hiện tại để bạn nhập theo báo giá thực tế.`);
+      }
+      BMH.save();BMH.render({preserveScroll:true});
+    }
+    return;
+  }
   if(e.target.closest('[data-geocode]')){BMH.geocodeAddress();return;}
   if(e.target.closest('[data-device-location]')){BMH.useDeviceLocation();return;}
   const mapEngine=e.target.closest('[data-map-engine]');if(mapEngine){const s=BMH.state.project.site;s.mapEngine=mapEngine.dataset.mapEngine;if(s.mapEngine==='google'&&!BMH.GOOGLE_MAPS_KEY)BMH.toast('Google Satellite cần Maps JavaScript API key. Bản đồ sẽ fallback sang vệ tinh miễn phí nếu chưa cấu hình.');BMH.save();BMH.render();return;}
