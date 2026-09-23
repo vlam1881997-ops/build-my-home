@@ -1,21 +1,23 @@
 /* Build My Home V6.0 — product UI reset.
  * One visual system for all 10 steps. Keeps the existing engines, removes patch-on-patch UI.
  */
-BMH.VERSION='6.1.5';
-BMH.VISUAL_RELEASE='step1-ai-actions-v615';
+BMH.VERSION='6.1.6';
+BMH.VISUAL_RELEASE='step1-functional-lock-v616';
 
+const v6SavedBrief=BMH.state?.project?.brief||{},v6SavedResult=v6SavedBrief.result&&Object.keys(v6SavedBrief.result).length?v6SavedBrief.result:null;
+const v6SavedSources=Array.isArray(BMH.state?.project?.sourceRefs)?BMH.state.project.sourceRefs.map(x=>({...x,status:x.status||'Đã lưu tham chiếu · chọn lại tệp nếu cần AI đọc lại'})):[];
 BMH.v6={
   upload:null,
-  uploads:[],
-  ideaDraft:'',
-  briefResult:null,
+  uploads:v6SavedSources,
+  ideaDraft:BMH.state?.project?.briefIdea||'',
+  briefResult:v6SavedResult,
   briefLoading:false,
   briefError:'',
   s1HeroIndex:0,
   ideaExpanded:false,
   prelimExpanded:false,
-  briefProvider:'',
-  briefNotice:'',
+  briefProvider:v6SavedBrief.provider||'',
+  briefNotice:v6SavedBrief.notice||'',
   uploadBusy:false,
   aiStatus:{checkedAt:0,loading:false,error:''},
   feng:{loading:false,error:'',result:null,citations:[]}
@@ -121,6 +123,9 @@ BMH.v6ValidateUpload=file=>{
 BMH.v6FileSize=size=>{
   const n=Number(size)||0;if(n<1024)return n+' B';if(n<1024*1024)return (n/1024).toFixed(1)+' KB';return (n/1024/1024).toFixed(1)+' MB';
 };
+BMH.v6PersistSourceRefs=()=>{
+  BMH.state.project.sourceRefs=(BMH.v6.uploads||[]).slice(0,6).map(x=>({id:x.id,kind:x.kind,name:x.name,type:x.type,size:x.size,status:x.status||'Đã lưu tham chiếu'}));
+};
 
 const v6BaseScan=BMH.geminiScanFile;
 BMH.v6ReceiveFiles=async(files,intent=BMH.scan?.intent||'reference')=>{
@@ -139,7 +144,7 @@ BMH.v6ReceiveFiles=async(files,intent=BMH.scan?.intent||'reference')=>{
   const incoming=accepted.map(x=>x.item),names=new Set(incoming.map(x=>x.name));
   BMH.v6.uploads=[...incoming,...(BMH.v6.uploads||[]).filter(x=>!names.has(x.name))].slice(0,6);
   BMH.v6.upload=incoming.find(x=>x.dataUrl)||incoming[0]||BMH.v6.upload;
-  BMH.state.project.source='upload';BMH.save();
+  BMH.state.project.source='upload';BMH.v6PersistSourceRefs();BMH.save();
   if(chosen.length>6)BMH.toast('Đã nhận 6 tệp đầu tiên. Hãy thêm phần còn lại ở lượt tiếp theo.');
   BMH.render({preserveScroll:true});
 
@@ -197,6 +202,7 @@ BMH.v6AnalyzeBrief=async()=>{
     BMH.ai.result=data.result||null;BMH.ai.model=data.model||'';BMH.ai.provider=data.provider||'';BMH.ai.notice=data.notice||'';BMH.ai.lastAction='brief';
     if(data.result)BMH.applyAIBrief(data.result);
     BMH.state.project.source='ai-brief';
+    BMH.state.project.brief={provider:data.provider||'',model:data.model||'',notice:data.notice||'',updatedAt:new Date().toISOString(),result:data.result||{}};
     BMH.save();
     BMH.toast(data.degraded?'AI cloud đang giới hạn · đã tạo brief bằng bộ phân tích dự phòng.':'AI đã tạo brief. Step 1 giữ nguyên để bạn kiểm tra trước khi sang Step 2.');
   }catch(err){
@@ -260,11 +266,11 @@ BMH.v6MatMeta={
 
 BMH.screen1=()=>{
   const p=BMH.state.project,e=BMH.estimate(),review=BMH.designReview(),scan=BMH.scanExisting?.(),scanBuilding=scan?.building||{},brief=BMH.v6.briefResult?.brief||{};
-  const ready=!!BMH.aiConfigured?.(),climate=BMH.regionProfile(p.site),structuredMembers=BMH.v6Household().length,members=Number(brief.household_size||p.household?.requestedSize)||structuredMembers;
-  const aiStyle=BMH.v6Esc(brief.style||scanBuilding.style||p.style||'Hiện đại, tối giản');
-  const floors=Number(brief.floors||scanBuilding.estimated_floors)||p.site.floors;
-  const area=BMH.planArea(),budget=Number(brief.budget_vnd)||e.budget;
-  const bedrooms=Number(brief.bedrooms)||Math.max(2,Math.round(members*.7));
+  const ready=!!BMH.aiConfigured?.(),climate=BMH.regionProfile(p.site),structuredMembers=BMH.v6Household().length,members=Number(p.household?.requestedSize)||structuredMembers,needs=BMH.householdNeeds?.()||{};
+  const aiStyle=BMH.v6Esc(p.style||brief.style||scanBuilding.style||'Hiện đại, tối giản');
+  const floors=Number(p.site.floors)||Number(brief.floors||scanBuilding.estimated_floors)||2;
+  const area=BMH.planArea(),budget=Number(p.finance?.targetBudget)||e.budget||Number(brief.budget_vnd)||0;
+  const bedrooms=Number(needs.bedrooms)||Number(brief.bedrooms)||Math.max(2,Math.round(members*.7));
   const uploads=Array.isArray(BMH.v6.uploads)?BMH.v6.uploads:[];
   const currentUpload=BMH.v6.upload;
   const heroSlides=[
@@ -551,8 +557,8 @@ document.addEventListener('click',e=>{
     const row=(BMH.v6.uploads||[]).find(x=>x.id===id);
     if(row?.previewUrl)try{URL.revokeObjectURL(row.previewUrl);}catch(_){}
     BMH.v6.uploads=(BMH.v6.uploads||[]).filter(x=>x.id!==id);
-    if(BMH.v6.upload?.id===id)BMH.v6.upload=BMH.v6.uploads[0]||null;
-    BMH.render({preserveScroll:true});return;
+    if(BMH.v6.upload?.id===id)BMH.v6.upload=BMH.v6.uploads.find(x=>x.dataUrl||x.previewUrl)||null;
+    BMH.v6PersistSourceRefs();BMH.save();BMH.render({preserveScroll:true});return;
   }
 });
 
@@ -578,7 +584,7 @@ document.addEventListener('keydown',e=>{
 document.addEventListener('click',e=>{
   if(!e.target.closest?.('#app'))return;
   const pt=e.target.closest('[data-v6-partner]');
-  if(pt){BMH.state.project.household.partnerEnabled=pt.dataset.v6Partner==='on';BMH.save();BMH.render({preserveScroll:true});return;}
+  if(pt){BMH.state.project.household.partnerEnabled=pt.dataset.v6Partner==='on';BMH.syncHouseholdSize?.();BMH.save();BMH.render({preserveScroll:true});return;}
   if(e.target.closest('[data-v6-feng]')){e.preventDefault();BMH.v6RunFeng();return;}
 });
 
@@ -586,7 +592,7 @@ document.addEventListener('change',e=>{
   const person=e.target.closest?.('[data-v6-person]');
   if(person){
     const h=BMH.state.project.household,key=person.dataset.v6Person==='child'?'children':'relatives',row=h[key].find(x=>x.id===person.dataset.id);
-    if(row){row[person.dataset.key]=person.dataset.key==='birth'?Number(person.value):person.value;BMH.save();BMH.render({preserveScroll:true});}
+    if(row){row[person.dataset.key]=person.dataset.key==='birth'?Number(person.value):person.value;BMH.syncHouseholdSize?.();BMH.save();BMH.render({preserveScroll:true});}
     return;
   }
   const rf=e.target.closest?.('[data-v6-room]');
