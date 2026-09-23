@@ -656,3 +656,11 @@ html.bmh-v60 .step01-remove-source:hover{background:#fff0ea}
   html.bmh-v60 .step01-upload-actions{grid-template-columns:repeat(2,1fr)}
   html.bmh-v60 .step01-source-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+/* V6.1.3 native Step 1 controls */
+.bmh-native-file-input{position:fixed!important;left:-10000px!important;top:0!important;width:1px!important;height:1px!important;opacity:.001!important;pointer-events:none!important}
+html.bmh-v60 .step01-drop,html.bmh-v60 .step01-upload-actions label,html.bmh-v60 .step01-section-head>label,html.bmh-v60 .step01-add-source{cursor:pointer;user-select:none;pointer-events:auto}
+html.bmh-v60 .step01-upload-actions label{height:68px;padding:6px;border:1px solid #e8e2d9;border-radius:10px;background:#fff;display:grid;place-items:center;align-content:center;gap:4px;color:#1d3f2e}
+html.bmh-v60 .step01-upload-actions label:hover{transform:translateY(-1px);border-color:#9fbba9;box-shadow:0 8px 20px rgba(30,62,44,.10)}
+html.bmh-v60 .step01-section-head>label{min-height:32px;display:inline-flex;align-items:center;padding:0 8px;border-radius:8px;color:#c35e3c;font-size:10px;font-weight:850}
+html.bmh-v60 .step01-section-head>label:hover{background:#fff2eb}

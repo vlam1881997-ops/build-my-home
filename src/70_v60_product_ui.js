@@ -1,8 +1,8 @@
 /* Build My Home V6.0 — product UI reset.
  * One visual system for all 10 steps. Keeps the existing engines, removes patch-on-patch UI.
  */
-BMH.VERSION='6.1.2';
-BMH.VISUAL_RELEASE='step1-complete-v612';
+BMH.VERSION='6.1.3';
+BMH.VISUAL_RELEASE='step1-native-controls-v613';
 
 BMH.v6={
   upload:null,
@@ -58,14 +58,23 @@ BMH.footer=()=>{
     +'</div>';
 };
 
-BMH.v6EnsureUploadInput=()=>{
-  let input=BMH.$('#step1UploadInput');
+BMH.v6UploadInputIds={all:'step1UploadAll',video:'step1UploadVideo',image:'step1UploadImage',pdf:'step1UploadPdf'};
+BMH.v6UploadAccept=type=>type==='video'?'video/mp4,video/quicktime,video/webm,video/mpeg,.mp4,.mov,.webm,.mpeg,.mpg':type==='image'?'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp':type==='pdf'?'application/pdf,.pdf':'image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/mpeg,application/pdf,.jpg,.jpeg,.png,.webp,.mp4,.mov,.webm,.mpeg,.mpg,.pdf';
+BMH.v6EnsureUploadInput=(type='all')=>{
+  const id=BMH.v6UploadInputIds[type]||BMH.v6UploadInputIds.all;
+  let input=document.getElementById(id);
   if(input)return input;
   input=document.createElement('input');
-  input.hidden=true;input.id='step1UploadInput';input.type='file';input.multiple=true;
-  input.accept='image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/mpeg,application/pdf,.jpg,.jpeg,.png,.webp,.mp4,.mov,.webm,.mpeg,.mpg,.pdf';
+  input.id=id;input.type='file';input.multiple=true;input.accept=BMH.v6UploadAccept(type);
+  input.className='bmh-native-file-input';input.tabIndex=-1;input.setAttribute('aria-hidden','true');
   document.body.appendChild(input);
   return input;
+};
+BMH.v6OpenUploadPicker=(type='all')=>{
+  const input=BMH.v6EnsureUploadInput(type);
+  input.accept=BMH.v6UploadAccept(type);input.multiple=true;input.value='';
+  try{if(typeof input.showPicker==='function'){input.showPicker();return true;}}catch(_){}
+  try{input.click();return true;}catch(err){console.error(err);BMH.toast('Không mở được bộ chọn tệp.');return false;}
 };
 
 BMH.v6RefreshAIConfig=async({force=false,render=false}={})=>{
@@ -276,8 +285,8 @@ BMH.screen1=()=>{
   return '<div class="v6-s1 step01-locked">'
    +'<section class="v6-s1-left v6-card step01-start">'
       +BMH.v6Title(1,'KHỞI TẠO','Khởi tạo','Bắt đầu từ ý tưởng. AI biến hình dung của bạn thành một brief rõ ràng để kiểm tra trước khi sang tài chính.')
-      +'<button class="step01-drop" data-s1-upload="all"><i>↥</i><b>Kéo thả file vào đây hoặc chọn từ thiết bị</b><span>JPG · PNG · MP4 · MOV · PDF</span></button>'
-      +'<div class="step01-upload-actions"><button data-s1-upload="video"><i>▶</i><span>Upload video</span></button><button data-s1-upload="image"><i>▧</i><span>Upload ảnh</span></button><button data-s1-upload="pdf"><i class="pdf">PDF</i><span>Upload PDF</span></button><button data-s1-focus-prompt><i>▤</i><span>Nhập ý tưởng</span></button></div>'
+      +'<label class="step01-drop" for="step1UploadAll" role="button" tabindex="0"><i>↥</i><b>Kéo thả file vào đây hoặc chọn từ thiết bị</b><span>JPG · PNG · WEBP · MP4 · MOV · PDF</span></label>'
+      +'<div class="step01-upload-actions"><label for="step1UploadVideo" role="button" tabindex="0"><i>▶</i><span>Upload video</span></label><label for="step1UploadImage" role="button" tabindex="0"><i>▧</i><span>Upload ảnh</span></label><label for="step1UploadPdf" role="button" tabindex="0"><i class="pdf">PDF</i><span>Upload PDF</span></label><button data-s1-focus-prompt><i>▤</i><span>Nhập ý tưởng</span></button></div>'
       +'<label class="step01-prompt"><i>✎</i><textarea id="aiStartPrompt" maxlength="1000" rows="4" placeholder="Ví dụ: nhà 3 tầng, đất 5×20m, gia đình 5 người, có phòng ông bà tầng trệt, nhiều cây xanh, 4 phòng ngủ, ngân sách khoảng 2,5 tỷ…">'+BMH.v6Esc(BMH.v6.ideaDraft||p.briefIdea||'')+'</textarea><em><span id="step01PromptCount">'+String((BMH.v6.ideaDraft||p.briefIdea||'').length)+'</span>/1000</em></label>'
       +'<button class="step01-analyze '+(ready?'ready':'needs-key')+'" data-s1-analyze '+(BMH.v6.briefLoading?'disabled':'')+'>'+(BMH.v6.briefLoading?'◌ AI đang tạo brief…':'✦ AI phân tích & tạo brief →')+'</button>'
       +'<div class="step01-connection '+(ready?'online':'offline')+'"><i>'+(ready?'✓':'!')+'</i><div><b>'+(ready?'AI production đã kết nối':'AI production chưa kết nối')+'</b><span>'+(ready?'Backend đang nhận '+BMH.v6Esc(BMH.cloud?.config?.aiProvider||'AI')+' · '+BMH.v6Esc(BMH.cloud?.config?.aiModel||'model server'):(aiStatus.error?BMH.v6Esc(aiStatus.error):'Website đang chạy trên Vercel nhưng chưa nhận GEMINI_API_KEY ở môi trường Production.'))+'</span></div><button data-s1-ai-refresh>'+(aiStatus.loading?'Đang kiểm tra…':'Kiểm tra lại')+'</button></div>'
@@ -312,11 +321,11 @@ BMH.screen1=()=>{
     +'</aside>'
 
    +'<section class="v6-card step01-reference">'
-      +'<div class="step01-section-head"><div>'+BMH.v6PanelTitle('▧','Nguồn tham chiếu','Ảnh, video và PDF bạn đưa vào Step 1.')+'</div><button data-s1-upload="all">Thêm tài liệu ＋</button></div>'
+      +'<div class="step01-section-head"><div>'+BMH.v6PanelTitle('▧','Nguồn tham chiếu','Ảnh, video và PDF bạn đưa vào Step 1.')+'</div><label for="step1UploadAll" role="button" tabindex="0">Thêm tài liệu ＋</label></div>'
       +'<div class="step01-source-grid">'+sourceCards
         +(uploads.length<3?'<article class="step01-source-card"><img src="assets/design/flow-c.jpg" alt=""><span><b>Mẫu mặt tiền</b><small>Thư viện tham khảo</small></span></article>':'')
         +(uploads.length<2?'<article class="step01-source-card"><img src="assets/rooms/living-local.jpg" alt=""><span><b>Không gian phòng khách</b><small>Thư viện tham khảo</small></span></article>':'')
-        +(uploads.length<4?'<button class="step01-add-source" data-s1-upload="all"><i>＋</i><span>Thêm tài liệu</span></button>':'')
+        +(uploads.length<4?'<label class="step01-add-source" for="step1UploadAll" role="button" tabindex="0"><i>＋</i><span>Thêm tài liệu</span></label>':'')
       +'</div>'
     +'</section>'
 
@@ -439,7 +448,7 @@ BMH.SCREENS=[BMH.screen1,BMH.screen2,BMH.screen3,BMH.screen4,BMH.screen5,BMH.scr
 BMH.afterRender=()=>{
   const step=BMH.state.ui.step;
   if(step===1){
-    BMH.v6EnsureUploadInput?.();
+    ['all','video','image','pdf'].forEach(x=>BMH.v6EnsureUploadInput?.(x));
     const last=Number(BMH.v6.aiStatus?.checkedAt)||0;
     if(Date.now()-last>15000)BMH.v6RefreshAIConfig?.({force:false,render:true});
   }
@@ -464,10 +473,7 @@ document.addEventListener('click',e=>{
   const upload=e.target.closest?.('[data-s1-upload]');
   if(upload){
     e.preventDefault();
-    const input=BMH.v6EnsureUploadInput?.();if(!input){BMH.toast('Không mở được bộ chọn tài liệu. Hãy tải lại trang và thử lại.');return;}
-    const type=upload.dataset.s1Upload;
-    input.accept=type==='video'?'video/mp4,video/quicktime,video/webm,video/mpeg,.mp4,.mov,.webm,.mpeg,.mpg':type==='image'?'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp':type==='pdf'?'application/pdf,.pdf':'image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/mpeg,application/pdf,.jpg,.jpeg,.png,.webp,.mp4,.mov,.webm,.mpeg,.mpg,.pdf';
-    input.multiple=true;input.value='';input.click();return;
+    BMH.v6OpenUploadPicker?.(upload.dataset.s1Upload||'all');return;
   }
   if(e.target.closest?.('[data-s1-focus-prompt]')){ e.preventDefault();const t=BMH.$('#aiStartPrompt'); t?.focus(); t?.scrollIntoView({behavior:'smooth',block:'center'}); return; }
   const hero=e.target.closest?.('[data-s1-hero]');
@@ -482,9 +488,10 @@ document.addEventListener('click',e=>{
 });
 
 document.addEventListener('change',e=>{
-  const t=e.target;if(t?.id!=='step1UploadInput')return;
+  const t=e.target;
+  if(!t?.id||!Object.values(BMH.v6UploadInputIds||{}).includes(t.id))return;
   const files=[...(t.files||[])];t.value='';
-  if(files.length)BMH.v6ReceiveFiles(files,BMH.scan?.intent||'reference');
+  if(files.length){BMH.toast('Đã nhận '+files.length+' tệp · đang đưa vào Step 1…');BMH.v6ReceiveFiles(files,BMH.scan?.intent||'reference');}
 });
 
 document.addEventListener('input',e=>{
