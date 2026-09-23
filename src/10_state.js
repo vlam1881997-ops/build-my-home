@@ -7,6 +7,7 @@ BMH.defaultState = () => ({
     brief:{provider:'',model:'',notice:'',updatedAt:'',result:{},aiSuggestions:{},userRequirements:{}},
     sourceRefs:[],
     site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',mapEngine:'free',mapStyle:'hybrid',mapZoom:17,showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotPoints:[],frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
+    siteIntelligence:{key:'',status:'idle',fetchedAt:'',elevation_m:null,flood:{level:'Chưa đánh giá',score:0,note:'',waterwayDistanceKm:null,riverSignal:null},access:{level:'Chưa đánh giá',score:0,note:'',majorRoadDistanceKm:null,majorRoadName:'',majorRoadType:''},transport:{level:'Chưa đánh giá',surchargePct:0,note:''},suppliers:[],builders:[],webSuppliers:[],webBuilders:[],citations:[],sources:[],aiSummary:'',warnings:[]},
     finance:{cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,targetBudget:0,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12,rateMeta:{bankId:'VCB',status:'preset',verified:false,product:'',sourceDate:'',fetchedAt:'',provider:'',model:'',introRate:0,postRate:0,promoMonths:0,citations:[],note:''}},
     household:{ownerBirth:1988,ownerGender:'Nam',partnerEnabled:true,partnerBirth:1990,partnerGender:'Nữ',requestedSize:0,children:[{id:'c1',name:'Con 1',birth:2012,room:'Riêng'}],relatives:[{id:'p1',name:'Ba',birth:1962,mobility:'Hạn chế nhẹ'},{id:'p2',name:'Mẹ',birth:1964,mobility:'Bình thường'}]},
     plan:{rooms:[
@@ -38,7 +39,7 @@ BMH.defaultState = () => ({
   meta:{savedAt:null}
 });
 
-BMH.DYNAMIC_STATE_PATHS=new Set(['project.aiScan.result','project.dataEngine.materialOverrides','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements']);
+BMH.DYNAMIC_STATE_PATHS=new Set(['project.aiScan.result','project.dataEngine.materialOverrides','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence']);
 BMH.mergeState = (base, incoming) => {
   const isPlain=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
   if(!isPlain(incoming)) return structuredClone(base);
@@ -86,6 +87,15 @@ BMH.normalizeState = () => {
   if(!Array.isArray(BMH.state.project.sourceRefs))BMH.state.project.sourceRefs=[];
   BMH.state.project.sourceRefs=BMH.state.project.sourceRefs.filter(x=>x&&typeof x==='object').slice(0,6).map(x=>({id:String(x.id||BMH.uid('src')),kind:['image','video','pdf','file'].includes(x.kind)?x.kind:'file',name:String(x.name||'Tài liệu').slice(0,180),type:String(x.type||'').slice(0,120),size:Math.max(0,Number(x.size)||0),status:String(x.status||'Đã lưu tham chiếu').slice(0,120)}));
   if(!BMH.state.project.site||typeof BMH.state.project.site!=='object')BMH.state.project.site=structuredClone(base.project.site);
+  if(!BMH.state.project.siteIntelligence||typeof BMH.state.project.siteIntelligence!=='object'||Array.isArray(BMH.state.project.siteIntelligence))BMH.state.project.siteIntelligence=structuredClone(base.project.siteIntelligence);
+  else{
+    const si=BMH.state.project.siteIntelligence,di=base.project.siteIntelligence;
+    for(const [k,v] of Object.entries(di))if(!(k in si))si[k]=structuredClone(v);
+    si.key=String(si.key||'').slice(0,120);si.status=String(si.status||'idle').slice(0,24);si.fetchedAt=String(si.fetchedAt||'').slice(0,40);
+    for(const k of ['suppliers','builders','webSuppliers','webBuilders','citations','sources','warnings'])if(!Array.isArray(si[k]))si[k]=[];
+    si.suppliers=si.suppliers.slice(0,12);si.builders=si.builders.slice(0,10);si.webSuppliers=si.webSuppliers.slice(0,8);si.webBuilders=si.webBuilders.slice(0,8);si.citations=si.citations.slice(0,10);si.sources=si.sources.slice(0,8);si.warnings=si.warnings.slice(0,8);
+    si.aiSummary=String(si.aiSummary||'').slice(0,1200);
+  }
   if(!BMH.state.project.finance||typeof BMH.state.project.finance!=='object')BMH.state.project.finance=structuredClone(base.project.finance);
   BMH.state.project.finance.targetBudget=Math.max(0,Number(BMH.state.project.finance.targetBudget)||0);
   if(!BMH.state.project.finance.rateMeta||typeof BMH.state.project.finance.rateMeta!=='object'||Array.isArray(BMH.state.project.finance.rateMeta))BMH.state.project.finance.rateMeta=structuredClone(base.project.finance.rateMeta);
