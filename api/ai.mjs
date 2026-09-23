@@ -1,5 +1,6 @@
 import {send,jsonBody,apiError} from '../server/_lib.mjs';
 import {geminiGenerate,geminiEnv} from '../server/_gemini.mjs';
+import {runSiteIntelligence} from '../server/_site_intelligence.mjs';
 
 const OPENAI_MODEL=String(process.env.OPENAI_MODEL||'gpt-5.6-terra').trim();
 const OPENAI_URL='https://api.openai.com/v1/responses';
@@ -133,9 +134,13 @@ export function localBriefFallback(prompt,project={}){
 export default async function handler(req,res){
   try{
     if(req.method==='OPTIONS')return send(res,200,{ok:true});if(req.method!=='POST')return send(res,405,{ok:false,error:'Method not allowed'});
-    const body=await jsonBody(req),action=String(body.action||'review').toLowerCase();if(!['brief','review','cost','whatif','vision','fengshui'].includes(action))return send(res,400,{ok:false,error:'AI action không hợp lệ.'});
+    const body=await jsonBody(req),action=String(body.action||'review').toLowerCase();if(!['brief','review','cost','whatif','vision','fengshui','site'].includes(action))return send(res,400,{ok:false,error:'AI action không hợp lệ.'});
     const prompt=String(body.prompt||'').trim().slice(0,6000),project=cleanProject(body.project||{}),image=String(body.image_data_url||'');
     try{rateLimit(req);}catch(limitErr){if(action==='brief')return send(res,200,{ok:true,provider:'local-fallback',model:'local-brief-parser-v1',degraded:true,notice:'AI cloud đang bận. Hệ thống dùng bộ phân tích cục bộ để Step 1 vẫn hoạt động.',result:localBriefFallback(prompt,project)});throw limitErr;}
+    if(action==='site'){
+      const out=await runSiteIntelligence(body);
+      return send(res,200,{ok:true,provider:'site-intelligence',...out});
+    }
     if(geminiEnv().key){
       try{
         const parts=[];if(action==='vision'&&/^data:image\/(png|jpe?g|webp);base64,/i.test(image)&&image.length<12_000_000){const m=image.match(/^data:([^;]+);base64,(.+)$/i);if(m)parts.push({inline_data:{mime_type:m[1],data:m[2]}});}
