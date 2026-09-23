@@ -459,7 +459,7 @@ BMH.v65LoadBankLogos=async()=>{
     }
     BMH.v6.bankLogos=logos;BMH.v6.bankLogosLoaded=true;
   }catch(err){console.warn('[BMH bank logos]',err);}
-  finally{BMH.v6.bankLogosLoading=false;if(BMH.state.ui.step===2)BMH.render({preserveScroll:true});}
+  finally{BMH.v6.bankLogosLoading=false;if(BMH.state.ui.step===8)BMH.render({preserveScroll:true});}
 };
 BMH.v6BankMark=b=>{
   const logo=b?.img||BMH.v6.bankLogos?.[b?.id]||'';
@@ -487,7 +487,7 @@ BMH.v65RefreshBankRate=async(bank,{force=false,silent=false}={})=>{
   if(!force&&meta.bankId===bank.id&&fetched&&now-fetched<24*60*60*1000)return false;
   if(!force&&last.bankId===bank.id&&now-Number(last.at||0)<10*60*1000)return false;
   BMH.v6.bankRateLoading=true;BMH.v6.bankRateBankId=bank.id;BMH.v6.bankRateError='';BMH.v6.bankRateLastAttempt={bankId:bank.id,at:now};
-  if(BMH.state.ui.step===2)BMH.render({preserveScroll:true});
+  if(BMH.state.ui.step===8)BMH.render({preserveScroll:true});
   try{
     const res=await fetch('/api/bank-rate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bank_id:bank.id,bank_name:bank.name,full_name:bank.fullName||bank.name,swift:bank.swift||'',force})});
     let data={};try{data=await res.json();}catch(_){}
@@ -513,7 +513,7 @@ BMH.v65RefreshBankRate=async(bank,{force=false,silent=false}={})=>{
     return false;
   }finally{
     BMH.v6.bankRateLoading=false;BMH.v6.bankRateBankId='';
-    if(BMH.state.ui.step===2)BMH.render({preserveScroll:true});
+    if(BMH.state.ui.step===8)BMH.render({preserveScroll:true});
   }
 };
 
