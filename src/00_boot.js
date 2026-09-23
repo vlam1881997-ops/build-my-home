@@ -177,10 +177,12 @@ BMH.climateCalendar = (profile) => {
   return Array.from({length:12},(_,i)=>{const m=i+1;return {month:m,status:risk.has(m)?'risk':watch.has(m)?'watch':best.has(m)?'good':'neutral'};});
 };
 BMH.siteAdaptation = (site=BMH.state?.project?.site||{}) => {
-  const p=BMH.regionProfile(site), roadPct=site.road<3 ? .12 : site.road<5 ? .05 : .02;
+  const p=BMH.regionProfile(site),intel=BMH.state?.project?.siteIntelligence||{};
+  const livePct=Number(intel?.transport?.surchargePct);
+  const roadPct=Number.isFinite(livePct)&&livePct>0?BMH.clamp(livePct/100,.02,.18):(site.road<3 ? .12 : site.road<5 ? .05 : .02);
   const flood=BMH.riskValue(p.flood),storm=BMH.riskValue(p.storm),corrosion=BMH.riskValue(p.corrosion),heat=BMH.riskValue(p.heat);
   const climatePct=BMH.clamp((Math.max(0,flood-1)*.012)+(Math.max(0,storm-1)*.008)+(Math.max(0,corrosion-1)*.004)+(Math.max(0,heat-1)*.003),0,.07);
-  return {roadPct,climatePct,totalPct:roadPct+climatePct,profile:p};
+  return {roadPct,climatePct,totalPct:roadPct+climatePct,profile:p,transportSource:Number.isFinite(livePct)&&livePct>0?'site-intelligence':'road-width'};
 };
 BMH.haversineKm = (a,b) => {const R=6371,toRad=x=>x*Math.PI/180,dLat=toRad(b.lat-a.lat),dLng=toRad(b.lng-a.lng),la1=toRad(a.lat),la2=toRad(b.lat);const h=Math.sin(dLat/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(h));};
 BMH.nearestRegionPoint = (lat,lng) => {
