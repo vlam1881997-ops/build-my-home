@@ -1,14 +1,14 @@
 {
   "name": "build-my-home-official",
-  "version": "6.1.0",
+  "version": "6.1.6",
   "private": true,
-  "description": "Build My Home V6.1 Critical Runtime Fixes: visible map fallback, landscape planner fit, true interactive 3D primary stage, readable typography and repaired bank logos",
+  "description": "Build My Home V6.1.6 Step 1 functional lock: persistent brief data, canonical budget/household state, AI fallback and contract tests",
   "engines": {
     "node": "22.x"
   },
   "scripts": {
     "build": "node scripts/build.cjs",
     "build:vercel": "node scripts/build.cjs && node scripts/prepare-vercel.cjs",
-    "test": "node scripts/build.cjs && node --check dist/app.js"
+    "test": "node scripts/build.cjs && node --check dist/app.js && node --test tests/step1-contract.test.cjs tests/step1-ai.test.mjs"
   }
 }
