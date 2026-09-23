@@ -7,7 +7,7 @@ BMH.defaultState = () => ({
     brief:{provider:'',model:'',notice:'',updatedAt:'',result:{},aiSuggestions:{},userRequirements:{}},
     sourceRefs:[],
     site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',mapEngine:'free',mapStyle:'hybrid',mapZoom:17,showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotPoints:[],frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
-    finance:{cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,targetBudget:0,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12,rateMeta:{bankId:'VCB',status:'preset',verified:false,product:'',sourceDate:'',fetchedAt:'',provider:'',model:'',citations:[],note:''}},
+    finance:{cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,targetBudget:0,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12,rateMeta:{bankId:'VCB',status:'preset',verified:false,product:'',sourceDate:'',fetchedAt:'',provider:'',model:'',introRate:0,postRate:0,promoMonths:0,citations:[],note:''}},
     household:{ownerBirth:1988,ownerGender:'Nam',partnerEnabled:true,partnerBirth:1990,partnerGender:'Nữ',requestedSize:0,children:[{id:'c1',name:'Con 1',birth:2012,room:'Riêng'}],relatives:[{id:'p1',name:'Ba',birth:1962,mobility:'Hạn chế nhẹ'},{id:'p2',name:'Mẹ',birth:1964,mobility:'Bình thường'}]},
     plan:{rooms:[
       {id:'r1',floor:0,name:'Phòng khách',type:'living',x:0,y:0,w:5,h:4},
@@ -95,6 +95,7 @@ BMH.normalizeState = () => {
     m.bankId=String(m.bankId||'').slice(0,24);m.status=String(m.status||'preset').slice(0,24);m.verified=m.verified===true;
     m.product=String(m.product||'').slice(0,180);m.sourceDate=String(m.sourceDate||'').slice(0,40);m.fetchedAt=String(m.fetchedAt||'').slice(0,40);
     m.provider=String(m.provider||'').slice(0,40);m.model=String(m.model||'').slice(0,120);m.note=String(m.note||'').slice(0,400);
+    m.introRate=Math.max(0,Math.min(30,Number(m.introRate)||0));m.postRate=Math.max(0,Math.min(30,Number(m.postRate)||0));m.promoMonths=Math.max(0,Math.min(120,Number(m.promoMonths)||0));
     if(!Array.isArray(m.citations))m.citations=[];m.citations=m.citations.slice(0,8).map(x=>({title:String(x?.title||'Nguồn').slice(0,180),url:String(x?.url||'').slice(0,600)}));
   }
   if(!BMH.state.project.household||typeof BMH.state.project.household!=='object')BMH.state.project.household=structuredClone(base.project.household);
