@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "6.1.8",
+  "version": "6.1.9",
   "private": true,
-  "description": "Build My Home V6.1.8 premium onboarding: preserved setup workflow and Step 1 AI/upload stack with architectural split-screen presentation",
+  "description": "Build My Home V6.1.9 readability and sharpness pass: larger onboarding typography, clearer controls, and sharper architectural visuals",
   "engines": {
     "node": "22.x"
   },

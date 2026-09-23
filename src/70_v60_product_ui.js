@@ -1,8 +1,8 @@
 /* Build My Home V6.0 — product UI reset.
  * One visual system for all 10 steps. Keeps the existing engines, removes patch-on-patch UI.
  */
-BMH.VERSION='6.1.8';
-BMH.VISUAL_RELEASE='premium-onboarding-v618';
+BMH.VERSION='6.1.9';
+BMH.VISUAL_RELEASE='readable-sharp-onboarding-v619';
 
 const v6SavedBrief=BMH.state?.project?.brief||{},v6SavedResult=v6SavedBrief.result&&Object.keys(v6SavedBrief.result).length?v6SavedBrief.result:null;
 const v6SavedSources=Array.isArray(BMH.state?.project?.sourceRefs)?BMH.state.project.sourceRefs.map(x=>({...x,status:x.status||'Đã lưu tham chiếu · chọn lại tệp nếu cần AI đọc lại'})):[];
