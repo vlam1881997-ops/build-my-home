@@ -4,7 +4,7 @@ const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 
 test('pre-Studio onboarding is Location -> Finance -> Family before Step 1',()=>{
   const js=read('dist/app.js');
-  assert.match(js,/onboardingComplete:false,onboardingStep:1/);
+  assert.match(js,/onboardingComplete:false,\s*onboardingStep:1/);
   assert.match(js,/\['⌖','Vị trí','Khu vực & quy mô đất'\],\['◉','Tài chính','Ngân sách sơ bộ'\],\['♙','Gia đình','Thành viên sinh sống'\]/);
   assert.match(js,/data-setup-next/);
   assert.match(js,/data-setup-finish/);
