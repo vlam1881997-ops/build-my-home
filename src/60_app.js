@@ -142,7 +142,7 @@ BMH.loadLiveWeather = async (force=false) => {
     BMH.liveWeather={key,ts:Date.now(),temp:Number(c.temperature_2m),humidity:Number(c.relative_humidity_2m),precip:Number(c.precipitation)||0,wind:Number(c.wind_speed_10m)||0,maxTemp:Number(d.temperature_2m_max?.[0]),minTemp:Number(d.temperature_2m_min?.[0]),rainChance:Number(d.precipitation_probability_max?.[0]),forecast:(d.time||[]).slice(0,3).map((date,i)=>({date,max:Number(d.temperature_2m_max?.[i]),min:Number(d.temperature_2m_min?.[i]),rain:Number(d.precipitation_probability_max?.[i])})),timeLabel:'Open-Meteo'};if(BMH.state.project.dataEngine)BMH.state.project.dataEngine.status.weather='live';
   }catch(_){if(BMH.liveWeatherKey!==key)return;BMH.liveWeather={key,ts:Date.now(),error:true};if(BMH.state.project.dataEngine)BMH.state.project.dataEngine.status.weather='fallback';}
   finally{clearTimeout(timer);try{BMH.save();}catch(_){}}
-  const old=BMH.$('#liveWeather');if(old&&BMH.state.ui.step===3){const wrap=document.createElement('div');wrap.innerHTML=BMH.weatherCard();old.replaceWith(wrap.firstElementChild);}
+  const old=BMH.$('#liveWeather');if(old&&BMH.state.ui.step===2){const wrap=document.createElement('div');wrap.innerHTML=BMH.weatherCard();old.replaceWith(wrap.firstElementChild);}
 };
 BMH.geocodeAddress = async () => {
   const s=BMH.state.project.site,q=[s.address,s.district,s.province,'Việt Nam'].filter(Boolean).join(', ');
