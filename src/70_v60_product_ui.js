@@ -1,8 +1,8 @@
 /* Build My Home V6.0 — product UI reset.
  * One visual system for all 10 steps. Keeps the existing engines, removes patch-on-patch UI.
  */
-BMH.VERSION='6.1.9';
-BMH.VISUAL_RELEASE='readable-sharp-onboarding-v619';
+BMH.VERSION='6.2.0';
+BMH.VISUAL_RELEASE='profile-sync-context-hero-v620';
 
 const v6SavedBrief=BMH.state?.project?.brief||{},v6SavedResult=v6SavedBrief.result&&Object.keys(v6SavedBrief.result).length?v6SavedBrief.result:null;
 const v6SavedSources=Array.isArray(BMH.state?.project?.sourceRefs)?BMH.state.project.sourceRefs.map(x=>({...x,status:x.status||'Đã lưu tham chiếu · chọn lại tệp nếu cần AI đọc lại'})):[];
@@ -181,7 +181,9 @@ if(v6BaseScan){
 BMH.v6AnalyzeBrief=async()=>{
   if(BMH.v6.briefLoading)return;
   const t=BMH.$('#aiStartPrompt');
-  const typed=(t?.value||BMH.v6.ideaDraft||'').trim(),prompt=typed||BMH.v6ConceptPrompt();
+  const typed=(t?.value||BMH.v6.ideaDraft||'').trim();
+  const sync=typed&&BMH.applyExplicitRequirements?BMH.applyExplicitRequirements(typed,{save:false}):{summary:''};
+  const prompt=typed||BMH.v6ConceptPrompt();
   BMH.v6.ideaDraft=typed;
   BMH.state.project.briefIdea=typed;
   BMH.save();
@@ -204,7 +206,8 @@ BMH.v6AnalyzeBrief=async()=>{
     BMH.state.project.source='ai-brief';
     BMH.state.project.brief={...(BMH.state.project.brief||{}),provider:data.provider||'',model:data.model||'',notice:data.notice||'',updatedAt:new Date().toISOString(),result:data.result||{}};
     BMH.save();
-    BMH.toast(data.degraded?'AI cloud đang giới hạn · đã tạo brief bằng bộ phân tích dự phòng.':'AI đã tạo concept từ hồ sơ nền. Step 1 giữ nguyên để bạn xem và bổ sung cảm hứng.');
+    const doneMsg=data.degraded?'AI cloud đang giới hạn · đã tạo brief bằng bộ phân tích dự phòng.':'AI đã tạo concept từ hồ sơ nền. Step 1 giữ nguyên để bạn xem và bổ sung cảm hứng.';
+    BMH.toast(sync?.summary?sync.summary+' · '+doneMsg:doneMsg);
   }catch(err){
     BMH.v6.briefError=err.message||String(err);
   }finally{
@@ -316,7 +319,7 @@ BMH.v6MatMeta={
 
 BMH.screen1=()=>{
   const p=BMH.state.project,e=BMH.estimate(),review=BMH.designReview(),scan=BMH.scanExisting?.(),scanBuilding=scan?.building||{},brief=BMH.v6.briefResult?.brief||{};
-  const ready=!!BMH.aiConfigured?.(),climate=BMH.regionProfile(p.site),structuredMembers=BMH.v6Household().length,members=Number(p.household?.requestedSize)||structuredMembers,needs=BMH.householdNeeds?.()||{};
+  const ready=!!BMH.aiConfigured?.(),climate=BMH.regionProfile(p.site),structuredMembers=BMH.v6Household().length,members=Math.max(structuredMembers,Number(p.household?.requestedSize)||0),needs=BMH.householdNeeds?.()||{},projectedMembers=Math.max(0,members-structuredMembers),familyDetail=projectedMembers?structuredMembers+' hồ sơ chi tiết + '+projectedMembers+' chưa khai báo':structuredMembers+' hồ sơ chi tiết';
   const aiStyle=BMH.v6Esc(p.style||brief.style||scanBuilding.style||'Hiện đại, tối giản');
   const floors=Number(p.site.floors)||Number(brief.floors||scanBuilding.estimated_floors)||2;
   const area=BMH.planArea(),budget=Number(p.finance?.targetBudget)||e.budget||Number(brief.budget_vnd)||0;
