@@ -1,8 +1,8 @@
 /* Build My Home V6.0 — product UI reset.
  * One visual system for all 10 steps. Keeps the existing engines, removes patch-on-patch UI.
  */
-BMH.VERSION='6.2.0';
-BMH.VISUAL_RELEASE='profile-sync-context-hero-v620';
+BMH.VERSION='6.3.0';
+BMH.VISUAL_RELEASE='step2-vietnam-bank-explorer-v630';
 
 const v6SavedBrief=BMH.state?.project?.brief||{},v6SavedResult=v6SavedBrief.result&&Object.keys(v6SavedBrief.result).length?v6SavedBrief.result:null;
 const v6SavedSources=Array.isArray(BMH.state?.project?.sourceRefs)?BMH.state.project.sourceRefs.map(x=>({...x,status:x.status||'Đã lưu tham chiếu · chọn lại tệp nếu cần AI đọc lại'})):[];
@@ -618,6 +618,8 @@ document.addEventListener('click',e=>{
 });
 
 document.addEventListener('click',e=>{
+  const bankFilter=e.target.closest?.('[data-bank-filter]');
+  if(bankFilter){e.preventDefault();BMH.v6.bankCategory=bankFilter.dataset.bankFilter||'all';BMH.render({preserveScroll:true});return;}
   const global=e.target.closest?.('[data-v6-global]');
   if(global){
     const action=global.dataset.v6Global;
@@ -658,6 +660,12 @@ document.addEventListener('change',e=>{
 });
 
 document.addEventListener('input',e=>{
+  if(e.target?.id==='bankSearch'){
+    BMH.v6.bankQuery=e.target.value||'';
+    clearTimeout(BMH.v6.bankSearchTimer);
+    BMH.v6.bankSearchTimer=setTimeout(()=>BMH.render({preserveScroll:true}),120);
+    return;
+  }
   if(e.target?.id==='aiStartPrompt'){
     BMH.v6.ideaDraft=e.target.value;
     const n=document.querySelector('#step01PromptCount'); if(n)n.textContent=String(e.target.value.length);
