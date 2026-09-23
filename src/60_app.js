@@ -1,20 +1,20 @@
 BMH.root = () => document.getElementById('app');
 BMH.STUDIO_NAV = [
-  ['⌂','Khởi tạo'],['₫','Hồ sơ tài chính & DTI'],['⌖','Vị trí & khí hậu vùng'],['♡','Đất, địa chất & phong thủy'],['▱','Bản vẽ thiết kế'],['◫','Gói vật liệu'],['◇','Mô phỏng 3D & đánh giá'],['≋','Dự toán & thanh toán'],['✓','Giám sát thi công & MEP'],['↓','Hồ sơ bàn giao & giải ngân']
+  ['⌂','AI Home Vision'],['⌖','Khu đất & vị trí'],['♡','Gia đình & địa chất'],['▱','Bản vẽ thiết kế'],['◫','Gói vật liệu'],['◇','Mô phỏng 3D & đánh giá'],['≋','Dự toán'],['₫','Tài chính sâu & vay'],['✓','Giám sát thi công & MEP'],['↓','Hồ sơ bàn giao & giải ngân']
 ];
 BMH.sidebar = () => '';
-BMH.header = () => {const s=BMH.state.project.site;return `<header class="studio-topbar demo-topbar"><button class="studio-brand demo-brand" data-nav="1"><img src="assets/icon.svg" alt=""><span><b>Build My Home</b><small>Kiến tạo tổ ấm, cùng AI</small></span></button><nav class="demo-header-nav" aria-label="Điều hướng nhanh"><span>Ngôi nhà của tôi</span><span>Dự án</span><span>Thư viện ý tưởng</span><span>Báo giá vật liệu</span><span>Chuyên gia</span></nav><div class="studio-top-actions demo-top-actions"><button class="studio-location" data-nav="3">${BMH.icon('pin')} <span>${BMH.esc(s.district||s.province)}</span></button><button class="studio-save" data-cloud-open>↥ Lưu dự án</button></div></header>`};
+BMH.header = () => {const s=BMH.state.project.site;return `<header class="studio-topbar demo-topbar"><button class="studio-brand demo-brand" data-nav="1"><img src="assets/icon.svg" alt=""><span><b>Build My Home</b><small>Kiến tạo tổ ấm, cùng AI</small></span></button><nav class="demo-header-nav" aria-label="Điều hướng nhanh"><span>Ngôi nhà của tôi</span><span>Dự án</span><span>Thư viện ý tưởng</span><span>Báo giá vật liệu</span><span>Chuyên gia</span></nav><div class="studio-top-actions demo-top-actions"><button class="studio-location" data-nav="2">${BMH.icon('pin')} <span>${BMH.esc(s.district||s.province)}</span></button><button class="studio-save" data-cloud-open>↥ Lưu dự án</button></div></header>`};
 BMH.stepper = () => {const step=BMH.state.ui.step;return `<nav class="demo-stepper" aria-label="10 bước xây nhà">${BMH.STUDIO_NAV.map(([ico,name],i)=>{const n=i+1,active=step===n,done=n<step;return `<button data-nav="${n}" class="demo-step ${active?'active':''} ${done?'done':''}"><i>${done?'✓':n}</i><span>${name}</span></button>`}).join('')}</nav>`};
 BMH.footer = () => {const step=BMH.state.ui.step,e=BMH.estimate(),review=BMH.designReview();return `<div class="demo-nextbar"><button class="studio-back" data-nav="${Math.max(1,step-1)}" ${step===1?'disabled':''}>${BMH.icon('back')} <span>Quay lại</span></button><div class="demo-budget-summary"><span><small>Ngân sách tối đa</small><b>${BMH.money(e.budget)}</b></span><span><small>Dự toán hiện tại</small><b>${BMH.money(e.total)}</b></span><span><small>Còn dự phòng</small><b class="${e.gap>=0?'good':'bad'}">${e.gap>=0?BMH.money(e.gap):'− '+BMH.money(Math.abs(e.gap))}</b></span><span><small>Điểm tiện nghi</small><b>${review.comfort}/100</b></span></div>${step<10?`<button class="studio-primary studio-next" data-nav="${step+1}">Tiếp theo ${BMH.icon('arrow')}</button>`:`<button class="studio-primary studio-next" data-nav="10">Hoàn tất dự án ✓</button>`}</div>`};
 BMH.runtimeError = (step,err) => `<section class="runtime-error studio-card"><div>⚠</div><h2>Bước ${step} gặp lỗi hiển thị</h2><p>Dữ liệu dự án vẫn được giữ nguyên. Hãy quay lại hoặc tải lại trang.</p>${BMH.DEV&&err?`<code>${BMH.esc(err.message||String(err))}</code>`:''}<div><button class="studio-secondary" data-nav="${Math.max(1,step-1)}">${BMH.icon('back')} Quay lại</button><button class="studio-primary" data-nav="1">Về Studio</button></div></section>`;
 BMH.render = ({preserveScroll=false}={}) => {
   const sy=window.scrollY,step=BMH.state.ui.step;BMH.disposeStudio3D?.();const screen=BMH.SCREENS[step-1]||BMH.screen1;let body='';
   try{body=screen();}catch(err){console.error(`Build My Home render error at step ${step}`,err);body=BMH.runtimeError(step,err);}
-  try{const appRoot=BMH.root();if(!appRoot)throw new Error('Missing #app root');appRoot.innerHTML=`${BMH.header()}<main class="studio-main demo-main step-${step} ${step===5?'planner-page':''} ${step===7?'house-studio-page':''}">${BMH.stepper()}<div class="studio-screen demo-screen">${body}</div>${BMH.footer()}</main>${BMH.cloudOverlay?BMH.cloudOverlay():''}${BMH.ai?.open&&BMH.aiDock?BMH.aiDock():''}`;}catch(err){console.error('Build My Home shell render error',err);const appRoot=BMH.root();if(appRoot)appRoot.innerHTML=BMH.runtimeError(step,err);}
+  try{const appRoot=BMH.root();if(!appRoot)throw new Error('Missing #app root');appRoot.innerHTML=`${BMH.header()}<main class="studio-main demo-main step-${step} ${step===4?'planner-page':''} ${step===6?'house-studio-page':''}">${BMH.stepper()}<div class="studio-screen demo-screen">${body}</div>${BMH.footer()}</main>${BMH.cloudOverlay?BMH.cloudOverlay():''}${BMH.ai?.open&&BMH.aiDock?BMH.aiDock():''}`;}catch(err){console.error('Build My Home shell render error',err);const appRoot=BMH.root();if(appRoot)appRoot.innerHTML=BMH.runtimeError(step,err);}
   document.documentElement.dataset.version=BMH.VERSION;document.title=`Build My Home · ${BMH.STEPS[step-1][1]}`;if(preserveScroll)window.scrollTo(0,sy);requestAnimationFrame(BMH.afterRender);
 };
 BMH.navigateTo = step => {step=BMH.clamp(Number(step)||1,1,10);BMH.state.ui.step=step;if(step!==5){BMH.drag=null;BMH.state.ui.planner.tool='select';}BMH.save();BMH.render();window.scrollTo({top:0,behavior:'smooth'});return true;};
-BMH.openPaywall = () => {BMH.navigateTo(8);BMH.toast('Thanh toán đang tạm tắt để hoàn thiện sản phẩm. Toàn bộ hồ sơ hiện được mở để kiểm thử.');};
+BMH.openPaywall = () => {BMH.navigateTo(7);BMH.toast('Thanh toán đang tạm tắt để hoàn thiện sản phẩm. Toàn bộ hồ sơ hiện được mở để kiểm thử.');};
 BMH.amountBar = () => BMH.decisionCards?.()||'';
 BMH.loadExternalScript = (url, timeout=6000) => new Promise((resolve,reject)=>{
   const script=document.createElement('script'); let settled=false;
@@ -165,8 +165,8 @@ BMH.useDeviceLocation = () => {
   navigator.geolocation.getCurrentPosition(pos=>{BMH.applyCoordinates(pos.coords.latitude,pos.coords.longitude,'GPS thiết bị',{snapRegion:true,render:true});BMH.toast('Đã dùng vị trí thiết bị. Hãy kiểm tra ghim trước khi tiếp tục.');},()=>BMH.toast('Không lấy được vị trí thiết bị. Bạn vẫn có thể nhập địa chỉ hoặc chọn khu vực.'),{enableHighAccuracy:true,timeout:8000,maximumAge:60000});
 };
 BMH.afterRender = () => {
-  if(BMH.state.ui.step===3){BMH.loadLiveWeather();BMH.loadClimateHistory?.();BMH.initMapStudio();}
-  if(BMH.state.ui.step===7)BMH.mountStudio3D?.();
+  if(BMH.state.ui.step===2){BMH.loadLiveWeather();BMH.loadClimateHistory?.();BMH.initMapStudio();}
+  if(BMH.state.ui.step===6)BMH.mountStudio3D?.();
 };
 BMH.mapTileConfig = style => ({
   roadmap:[['https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png','© OpenStreetMap contributors © CARTO'],['https://tile.openstreetmap.org/{z}/{x}/{y}.png','© OpenStreetMap contributors']],
@@ -328,7 +328,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{
   const t=e.target;
   if(t?.id==='uploadPhoto'){if(t.files?.[0]){BMH.toast('Đã nhận ảnh tham khảo. Tiếp tục nhập thông tin dự án.');BMH.navigateTo(2);}t.value='';return;}
-  if(t?.id==='uploadPlan'){if(t.files?.[0]){BMH.toast('Đã nhận bản vẽ tham chiếu. Bạn có thể đối chiếu ở Bước 5.');BMH.navigateTo(2);}t.value='';return;}
+  if(t?.id==='uploadPlan'){if(t.files?.[0]){BMH.toast('Đã nhận bản vẽ tham chiếu. Bạn có thể đối chiếu ở Bước 4.');BMH.navigateTo(2);}t.value='';return;}
   if(t?.id==='priceQuoteUpload'){if(t.files?.[0])BMH.importPriceQuote(t.files[0]).catch(()=>BMH.toast('Không đọc được file báo giá. Dùng JSON hoặc CSV theo mẫu V4.8.'));t.value='';return;}
   if(!t.closest?.('#app'))return;
   if(t.dataset.path){let v=t.type==='checkbox'?t.checked:(t.type==='number'?Number(t.value)*(Number(t.dataset.scale)||1):t.value);const path=t.dataset.path;if(path==='project.dossier.progress')v=BMH.clamp(Number(v)||0,0,100);if(path==='project.site.province'){const r=BMH.REGIONS[v];BMH.state.project.site.province=v;if(r){const pt=BMH.regionPoint(v,r.defaultDistrict);Object.assign(BMH.state.project.site,{district:pt.district,lat:pt.lat,lng:pt.lng,geoSource:'Dữ liệu vùng'});}BMH.liveWeather=null;BMH.save();BMH.render();return;}if(path==='project.site.district'){BMH.state.project.site.district=v;const pt=BMH.regionPoint(BMH.state.project.site.province,v);BMH.state.project.site.lat=pt.lat;BMH.state.project.site.lng=pt.lng;BMH.state.project.site.geoSource='Dữ liệu vùng';BMH.liveWeather=null;BMH.save();BMH.render();return;}if(['project.finance.cash','project.finance.reserve','project.finance.loan'].includes(path))BMH.state.project.finance.targetBudget=0;
