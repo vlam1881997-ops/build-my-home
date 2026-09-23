@@ -223,14 +223,17 @@ document.addEventListener('click',e=>{
   const bank=e.target.closest('[data-bank]'); if(bank){
     const b=BMH.BANKS.find(x=>x.id===bank.dataset.bank);
     if(b){
-      BMH.state.project.finance.bank=b.id;
+      const f=BMH.state.project.finance;
+      f.bank=b.id;
       if(BMH.bankHasPreset?.(b)){
-        Object.assign(BMH.state.project.finance,{introRate:b.intro,postRate:b.post,promoMonths:b.months});
-        BMH.toast(`Đã nạp preset mô phỏng ${b.name}. Hãy đối chiếu báo giá tín dụng trước khi vay.`);
+        Object.assign(f,{introRate:b.intro,postRate:b.post,promoMonths:b.months});
+        BMH.toast(`Đã chọn ${b.name}. Gemini sẽ kiểm tra lãi suất công khai mới nhất.`);
       }else{
-        BMH.toast(`Đã chọn ${b.name}. Chưa có lãi suất xác minh nên hệ thống giữ nguyên lãi suất hiện tại để bạn nhập theo báo giá thực tế.`);
+        BMH.toast(`Đã chọn ${b.name}. Gemini đang chuẩn bị kiểm tra lãi suất công khai.`);
       }
+      f.rateMeta={bankId:b.id,status:'pending',verified:false,product:'',sourceDate:'',fetchedAt:'',provider:'',model:'',introRate:0,postRate:0,promoMonths:0,citations:[],note:''};
       BMH.save();BMH.render({preserveScroll:true});
+      setTimeout(()=>BMH.v65RefreshBankRate?.(b,{force:true,silent:true}),80);
     }
     return;
   }
@@ -328,7 +331,12 @@ document.addEventListener('change',e=>{
   if(t?.id==='uploadPlan'){if(t.files?.[0]){BMH.toast('Đã nhận bản vẽ tham chiếu. Bạn có thể đối chiếu ở Bước 5.');BMH.navigateTo(2);}t.value='';return;}
   if(t?.id==='priceQuoteUpload'){if(t.files?.[0])BMH.importPriceQuote(t.files[0]).catch(()=>BMH.toast('Không đọc được file báo giá. Dùng JSON hoặc CSV theo mẫu V4.8.'));t.value='';return;}
   if(!t.closest?.('#app'))return;
-  if(t.dataset.path){let v=t.type==='checkbox'?t.checked:(t.type==='number'?Number(t.value)*(Number(t.dataset.scale)||1):t.value);const path=t.dataset.path;if(path==='project.dossier.progress')v=BMH.clamp(Number(v)||0,0,100);if(path==='project.site.province'){const r=BMH.REGIONS[v];BMH.state.project.site.province=v;if(r){const pt=BMH.regionPoint(v,r.defaultDistrict);Object.assign(BMH.state.project.site,{district:pt.district,lat:pt.lat,lng:pt.lng,geoSource:'Dữ liệu vùng'});}BMH.liveWeather=null;BMH.save();BMH.render();return;}if(path==='project.site.district'){BMH.state.project.site.district=v;const pt=BMH.regionPoint(BMH.state.project.site.province,v);BMH.state.project.site.lat=pt.lat;BMH.state.project.site.lng=pt.lng;BMH.state.project.site.geoSource='Dữ liệu vùng';BMH.liveWeather=null;BMH.save();BMH.render();return;}if(['project.finance.cash','project.finance.reserve','project.finance.loan'].includes(path))BMH.state.project.finance.targetBudget=0;BMH.set(path,v);return;}
+  if(t.dataset.path){let v=t.type==='checkbox'?t.checked:(t.type==='number'?Number(t.value)*(Number(t.dataset.scale)||1):t.value);const path=t.dataset.path;if(path==='project.dossier.progress')v=BMH.clamp(Number(v)||0,0,100);if(path==='project.site.province'){const r=BMH.REGIONS[v];BMH.state.project.site.province=v;if(r){const pt=BMH.regionPoint(v,r.defaultDistrict);Object.assign(BMH.state.project.site,{district:pt.district,lat:pt.lat,lng:pt.lng,geoSource:'Dữ liệu vùng'});}BMH.liveWeather=null;BMH.save();BMH.render();return;}if(path==='project.site.district'){BMH.state.project.site.district=v;const pt=BMH.regionPoint(BMH.state.project.site.province,v);BMH.state.project.site.lat=pt.lat;BMH.state.project.site.lng=pt.lng;BMH.state.project.site.geoSource='Dữ liệu vùng';BMH.liveWeather=null;BMH.save();BMH.render();return;}if(['project.finance.cash','project.finance.reserve','project.finance.loan'].includes(path))BMH.state.project.finance.targetBudget=0;
+if(['project.finance.introRate','project.finance.postRate','project.finance.promoMonths'].includes(path)){
+  const m=BMH.state.project.finance.rateMeta||{};
+  BMH.state.project.finance.rateMeta={...m,status:'manual',verified:false,note:'Lãi suất đã được người dùng chỉnh tay sau lần cập nhật AI.'};
+}
+BMH.set(path,v);return;}
   if(t.dataset.person){const h=BMH.state.project.household,list=t.dataset.person==='child'?h.children:h.relatives,p=list.find(x=>x.id===t.dataset.id);if(p){p[t.dataset.key]=t.type==='number'?Number(t.value):t.value;BMH.save();BMH.render();}return;}
   if(t.dataset.planner){const ui=BMH.state.ui.planner;if(t.dataset.planner==='snap')ui.snap=Number(t.value);if(t.dataset.planner==='furniture')ui.showFurniture=t.checked;if(t.dataset.planner==='dimensions')ui.showDimensions=t.checked;if(t.dataset.planner==='feng')ui.showFeng=t.checked;if(t.dataset.planner==='below')ui.showBelow=t.checked;if(t.dataset.planner==='structure')ui.showStructure=t.checked;if(t.dataset.planner==='environment')ui.showEnvironment=t.checked;if(t.dataset.planner==='circulation')ui.showCirculation=t.checked;if(t.dataset.planner==='sectionLine')ui.showSectionLine=t.checked;if(t.dataset.planner==='climate')ui.showClimate=t.checked;if(t.dataset.planner==='envelope')ui.showEnvelope=t.checked;BMH.save();BMH.render();return;}
   if(t.dataset.roomField){const r=BMH.selectedRoom();if(!r)return;BMH.pushPlanHistory();const key=t.dataset.roomField,old={...r};r[key]=['x','y','w','h'].includes(key)?Number(t.value):t.value;if(['x','y','w','h'].includes(key)){r[key]=BMH.roundTo(r[key],BMH.state.ui.planner.snap);if(!BMH.roomValid(r)){Object.assign(r,old);BMH.toast('Giá trị mới gây chồng phòng hoặc vượt ranh.');}}BMH.save();BMH.render();return;}
