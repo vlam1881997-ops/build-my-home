@@ -13,8 +13,9 @@ BMH.loanSchedule = (finance=BMH.state.project.finance) => {
 };
 BMH.financeSummary = (finance=BMH.state.project.finance) => {
   const schedule=BMH.loanSchedule(finance); const first=schedule[0]?.payment||0; const post=schedule[Math.min(finance.promoMonths,schedule.length-1)]?.payment||first; const peak=Math.max(...schedule.map(r=>r.payment),0)+finance.existingDebt;
-  const dti=finance.income?peak/finance.income:0; const remainder=finance.income-finance.living-peak; const available=finance.cash-finance.reserve+finance.loan;
-  return {first,post,peak,dti,remainder,available,schedule};
+  const dti=finance.income?peak/finance.income:0; const remainder=finance.income-finance.living-peak; const capacity=finance.cash-finance.reserve+finance.loan;
+  const targetBudget=Math.max(0,Number(finance.targetBudget)||0),available=targetBudget>0?targetBudget:capacity;
+  return {first,post,peak,dti,remainder,capacity,targetBudget,available,schedule};
 };
 BMH.planArea = () => BMH.state.project.plan.rooms.reduce((s,r)=>s+r.w*r.h,0);
 
@@ -120,19 +121,23 @@ const feng=BMH.fengProfile(), own=feng?.owner; const childCount=h.children.lengt
 
 BMH.householdNeeds = () => {
   const h=BMH.state.project.household;
+  const baseAdults=1+(h.partnerEnabled!==false?1:0),actualPeople=baseAdults+h.children.length+h.relatives.length;
+  const requested=Math.max(0,Number(h.requestedSize)||0),people=Math.max(actualPeople,requested),extraPeople=Math.max(0,people-actualPeople);
   const separateChildren=h.children.filter(c=>c.room!=='Ngủ chung').length;
   const sharedChildren=h.children.length-separateChildren;
   const relativeBedrooms=h.relatives.length?1:0;
-  const bedrooms=1+separateChildren+(sharedChildren?1:0)+relativeBedrooms;
+  const bedrooms=Math.max(1,1+separateChildren+(sharedChildren?1:0)+relativeBedrooms+Math.ceil(extraPeople/2));
   const limited=h.relatives.some(r=>r.mobility&&r.mobility!=='Bình thường');
-  const bathrooms=Math.max(1,Math.ceil((2+h.children.length+h.relatives.length)/4));
+  const bathrooms=Math.max(1,Math.ceil(people/4));
   return {
     bedrooms,
     bathrooms,
     groundFloorBedroom: h.relatives.length>0,
     accessibleWC: limited||h.relatives.length>0,
     studyZones: h.children.length?Math.max(1,Math.ceil(h.children.length/2)):0,
-    people:2+h.children.length+h.relatives.length
+    people,
+    actualPeople,
+    projectedPeople:requested>actualPeople
   };
 };
 
