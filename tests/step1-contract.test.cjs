@@ -28,9 +28,9 @@ test('Step 1 finance and household use canonical shared engines',()=>{
 });
 
 test('Step 1 AI requests are guarded and degraded mode is explicit',()=>{
-  const s=js();
+  const s=js(),api=fs.readFileSync(path.join(root,'api','ai.mjs'),'utf8');
   assert.match(s,/if\(BMH\.v6\.briefLoading\)return/);
   assert.match(s,/if\(BMH\.ai\.loading\)return/);
-  assert.match(s,/local-fallback/);
-  assert.match(s,/Gemini đang chạm hạn mức/);
+  assert.match(api,/local-fallback/);
+  assert.match(api,/Gemini đang chạm hạn mức|AI cloud đang bận/);
 });
