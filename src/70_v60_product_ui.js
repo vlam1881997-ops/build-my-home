@@ -1,8 +1,8 @@
 /* Build My Home V6.0 — product UI reset.
  * One visual system for all 10 steps. Keeps the existing engines, removes patch-on-patch UI.
  */
-BMH.VERSION='6.1.3';
-BMH.VISUAL_RELEASE='step1-native-controls-v613';
+BMH.VERSION='6.1.4';
+BMH.VISUAL_RELEASE='step1-hero-clarity-v614';
 
 BMH.v6={
   upload:null,
@@ -264,10 +264,9 @@ BMH.screen1=()=>{
   const currentUpload=BMH.v6.upload;
   const heroSlides=[
     currentUpload?.dataUrl?{img:currentUpload.dataUrl,pos:'center center',kicker:'TỆP CỦA BẠN',title:'Bắt đầu từ chính hình ảnh bạn vừa chọn.',copy:'Tệp đã vào Step 1. Nếu AI online, hệ thống sẽ phân tích nội dung và tạo brief.'}:null,
-    {img:'assets/rooms/facade-render.jpg',pos:'58% center',kicker:'AI HOME VISION',title:'Một ngôi nhà tốt bắt đầu từ một ý tưởng rõ ràng.',copy:'Hình ảnh chất lượng cao làm mốc thẩm mỹ; dữ liệu phía sau kiểm tra tính khả thi.'},
+    {img:'assets/rooms/facade-render.jpg',pos:'58% center',kicker:'AI HOME VISION',title:'Một ngôi nhà tốt bắt đầu từ một ý tưởng rõ ràng.',copy:'Hình ảnh làm mốc thẩm mỹ; dữ liệu phía sau kiểm tra tính khả thi.'},
     {img:'assets/design/hero-step1.jpg',pos:'center 48%',kicker:'KHÔNG GIAN & ÁNH SÁNG',title:'Tỷ lệ, ánh sáng và khoảng xanh tạo nên cảm giác sống dễ chịu.',copy:'AI biến cảm hứng thành tiêu chí để kiểm tra ở các bước tiếp theo.'},
-    {img:'assets/rooms/facade-local.jpg',pos:'center 48%',kicker:'MẶT TIỀN THAM KHẢO',title:'Mặt đứng gọn, có chiều sâu và đủ khoảng thở cho nhà phố.',copy:'Ảnh tham khảo định hướng thẩm mỹ, không thay thế hồ sơ kiến trúc.'},
-    {img:'assets/rooms/living-local.jpg',pos:'center 54%',kicker:'NỘI THẤT & TRẢI NGHIỆM',title:'Không gian ấm, gọn và đủ ánh sáng cho nhịp sống hằng ngày.',copy:'Vật liệu và công năng sẽ được kiểm tra sau khi brief được xác nhận.'}
+    {img:'assets/rooms/facade-local.jpg',pos:'center 46%',kicker:'MẶT TIỀN THAM KHẢO',title:'Mặt đứng gọn, có chiều sâu và đủ khoảng thở cho nhà phố.',copy:'Ảnh tham khảo định hướng thẩm mỹ, không thay thế hồ sơ kiến trúc.'}
   ].filter(Boolean);
   const idx=BMH.clamp(Number(BMH.v6.s1HeroIndex)||0,0,Math.max(0,heroSlides.length-1)),slide=heroSlides[idx];
   const fit=Math.max(0,Math.min(100,Math.round((review.comfort+review.function+review.budget)/3)));
