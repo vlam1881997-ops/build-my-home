@@ -124,11 +124,16 @@ BMH.applyCoordinates = (lat,lng,source='Tọa độ tùy chỉnh',{snapRegion=fa
   lat=Number(lat);lng=Number(lng);if(!Number.isFinite(lat)||!Number.isFinite(lng))return false;
   const s=BMH.state.project.site; s.lat=lat;s.lng=lng;s.geoSource=source;
   if(snapRegion){const near=BMH.nearestRegionPoint(lat,lng);if(near&&near.km<180){s.province=near.province;s.district=near.district;}}
-  BMH.liveWeather=null;BMH.liveWeatherKey='';BMH.save();
-  if(render){BMH.render();return true;}
+  BMH.liveWeather=null;BMH.liveWeatherKey='';
+  BMH.state.project.siteIntelligence={...BMH.defaultState().project.siteIntelligence,status:'idle'};
+  BMH.save();
+  if(render){BMH.render();BMH.toast('Đã ghim vị trí khu đất. AI đang tự quét khu vực xung quanh…');return true;}
   if(BMH.mapEngine==='leaflet')BMH.mapMarker?.setLatLng?.([lat,lng]);
   else if(BMH.mapEngine==='google')BMH.mapMarker?.setPosition?.({lat,lng});
-  BMH.updateLotOverlay();BMH.updateLocationMeta();BMH.loadLiveWeather(true);return true;
+  BMH.updateLotOverlay();BMH.updateLocationMeta();BMH.loadLiveWeather(true);
+  BMH.toast('Đã ghim vị trí khu đất. AI đang tự quét khu vực xung quanh…');
+  setTimeout(()=>BMH.loadSiteIntelligence?.(true),120);
+  return true;
 };
 BMH.loadLiveWeather = async (force=false) => {
   const s=BMH.state.project.site,key=`${s.lat.toFixed(3)},${s.lng.toFixed(3)}`;
@@ -147,16 +152,14 @@ BMH.loadLiveWeather = async (force=false) => {
 BMH.geocodeAddress = async () => {
   const s=BMH.state.project.site,q=[s.address,s.district,s.province,'Việt Nam'].filter(Boolean).join(', ');
   BMH.toast('Đang tìm địa chỉ trên bản đồ…');
-  if(s.mapEngine==='google'&&BMH.GOOGLE_MAPS_KEY){const gm=await BMH.ensureGoogleMaps();if(gm){try{const geocoder=new google.maps.Geocoder();const {results}=await geocoder.geocode({address:q,region:'VN'});if(results?.[0]){const loc=results[0].geometry.location,lat=loc.lat(),lng=loc.lng(),near=BMH.nearestRegionPoint(lat,lng);s.lat=lat;s.lng=lng;s.geoSource='Địa chỉ · Google Maps';if(near&&near.km<180){s.province=near.province;s.district=near.district;}BMH.liveWeather=null;BMH.save();BMH.render();BMH.toast('Đã định vị bằng Google Maps.');return;}}catch(_){}}}
+  if(s.mapEngine==='google'&&BMH.GOOGLE_MAPS_KEY){const gm=await BMH.ensureGoogleMaps();if(gm){try{const geocoder=new google.maps.Geocoder();const {results}=await geocoder.geocode({address:q,region:'VN'});if(results?.[0]){const loc=results[0].geometry.location,lat=loc.lat(),lng=loc.lng();BMH.applyCoordinates(lat,lng,'Địa chỉ · Google Maps',{snapRegion:true,render:true});return;}}catch(_){}}}
   const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),6000);
   try{
     const url=`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=vn&accept-language=vi&q=${encodeURIComponent(q)}`;
     const res=await fetch(url,{signal:ctl.signal,headers:{'Accept':'application/json'}});if(!res.ok)throw new Error('geocode');const rows=await res.json();if(!rows?.length)throw new Error('not-found');
-    const row=rows[0],lat=Number(row.lat),lng=Number(row.lon),near=BMH.nearestRegionPoint(lat,lng);
-    s.lat=lat;s.lng=lng;s.geoSource='Địa chỉ · OpenStreetMap';
-    if(near&&near.km<180){s.province=near.province;s.district=near.district;}
-    BMH.liveWeather=null;BMH.save();BMH.render();BMH.toast('Đã cập nhật tọa độ theo địa chỉ. Bạn có thể kéo ghim để tinh chỉnh.');
-  }catch(_){const pt=BMH.regionPoint(s.province,s.district);Object.assign(s,{lat:pt.lat,lng:pt.lng,geoSource:'Dữ liệu vùng (fallback)'});BMH.save();BMH.render();BMH.toast('Không tìm được địa chỉ trực tuyến. Đã dùng điểm tham chiếu khu vực.');}
+    const row=rows[0],lat=Number(row.lat),lng=Number(row.lon);
+    BMH.applyCoordinates(lat,lng,'Địa chỉ · OpenStreetMap',{snapRegion:true,render:true});
+  }catch(_){const pt=BMH.regionPoint(s.province,s.district);BMH.applyCoordinates(pt.lat,pt.lng,'Dữ liệu vùng (fallback)',{render:true});BMH.toast('Không tìm được địa chỉ chính xác. Đã ghim điểm tham chiếu khu vực và AI sẽ quét quanh điểm này.');}
   finally{clearTimeout(timer);}
 };
 BMH.useDeviceLocation = () => {
@@ -215,17 +218,18 @@ BMH.renderSiteIntelMarkers=()=>{
 BMH.initLeafletMap = async () => {
   const el=BMH.$('#map'),s=BMH.state.project.site;if(!el)return false;const L=await BMH.ensureLeaflet();if(!L)return false;
   BMH.destroyMap();BMH.mapEngine='leaflet';BMH.map=L.map(el,{zoomControl:true,preferCanvas:true,attributionControl:true,scrollWheelZoom:true,doubleClickZoom:true}).setView([s.lat,s.lng],s.mapZoom||17);
+  el.classList.remove('fallback-only');
 const sources=BMH.mapTileConfig(s.mapStyle);let sourceIndex=0,activeLayer=null,tileErrors=0,loaded=false,labelLayer=null,stallTimer=null;
 const clearStall=()=>{if(stallTimer){clearTimeout(stallTimer);stallTimer=null;}};
 const setLoaded=()=>{loaded=true;clearStall();el.classList.remove('map-loading','fallback-only');};
-const loadTiles=()=>{clearStall();if(activeLayer)BMH.map.removeLayer(activeLayer);if(labelLayer)BMH.map.removeLayer(labelLayer);const [url,attr]=sources[sourceIndex]||BMH.mapTileConfig('roadmap')[0];tileErrors=0;activeLayer=L.tileLayer(url,{maxZoom:s.mapStyle==='terrain'?17:20,attribution:attr,keepBuffer:4,updateWhenIdle:false,crossOrigin:true}).addTo(BMH.map);if(s.mapStyle==='hybrid'){labelLayer=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Labels © Esri',opacity:.9}).addTo(BMH.map);}activeLayer.on('load',setLoaded);activeLayer.on('tileerror',()=>{tileErrors++;if(tileErrors>=4){if(sourceIndex<sources.length-1){sourceIndex++;loadTiles();}else if(!loaded){BMH.renderMapIframeFallback('Không tải được lớp bản đồ nền trực tuyến, đã chuyển sang bản đồ nhúng dự phòng.');}}});stallTimer=setTimeout(()=>{if(!loaded)BMH.renderMapIframeFallback('Bản đồ nền phản hồi chậm, đã bật lớp dự phòng để bạn tiếp tục thao tác.');},1800);};loadTiles();
+const loadTiles=()=>{clearStall();if(activeLayer)BMH.map.removeLayer(activeLayer);if(labelLayer)BMH.map.removeLayer(labelLayer);const [url,attr]=sources[sourceIndex]||BMH.mapTileConfig('roadmap')[0];tileErrors=0;activeLayer=L.tileLayer(url,{maxZoom:s.mapStyle==='terrain'?17:20,attribution:attr,keepBuffer:4,updateWhenIdle:false,crossOrigin:true}).addTo(BMH.map);if(s.mapStyle==='hybrid'){labelLayer=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Labels © Esri',opacity:.9}).addTo(BMH.map);}activeLayer.on('load',setLoaded);activeLayer.on('tileerror',()=>{tileErrors++;if(tileErrors>=4){if(sourceIndex<sources.length-1){sourceIndex++;loadTiles();}else if(!loaded){BMH.renderMapIframeFallback('Không tải được lớp bản đồ nền trực tuyến. Hãy nhập địa chỉ/GPS hoặc thử tải lại bản đồ tương tác.');}}});stallTimer=setTimeout(()=>{if(!loaded){el.classList.remove('map-loading');BMH.map?.invalidateSize?.(true);}},5000);};loadTiles();
   BMH.mapMarker=L.marker([s.lat,s.lng],{draggable:true,autoPan:true,icon:BMH.sitePinLeafletIcon(L),zIndexOffset:1000}).addTo(BMH.map).bindPopup('<b>Vị trí khu đất</b><br>'+BMH.esc(s.district||'')+' · '+BMH.esc(s.province));
   BMH.mapMarker.on('dragend',ev=>{const ll=ev.target.getLatLng();BMH.applyCoordinates(ll.lat,ll.lng,'Ghim bản đồ');});
   BMH.map.on('click',ev=>BMH.handleMapClick(ev.latlng.lat,ev.latlng.lng,'Chọn trên bản đồ'));
   BMH.map.on('mousemove',ev=>{const hud=BMH.$('#mapHudCoords');if(hud)hud.textContent=`${ev.latlng.lat.toFixed(5)}, ${ev.latlng.lng.toFixed(5)}`;});
   BMH.map.on('mouseout',()=>BMH.updateLocationMeta());
   BMH.map.on('zoomend',()=>{s.mapZoom=BMH.map.getZoom();BMH.save();BMH.syncMapHud(s.mapZoom);});
-  BMH.updateLotOverlay();BMH.renderSiteIntelMarkers();setTimeout(()=>BMH.map?.invalidateSize(true),80);setTimeout(()=>BMH.map?.invalidateSize(true),360);setTimeout(()=>{if(!loaded)BMH.renderMapIframeFallback('Bản đồ nền chưa tải xong, đã hiển thị lớp dự phòng.');},2300);return true;
+  BMH.updateLotOverlay();BMH.renderSiteIntelMarkers();setTimeout(()=>BMH.map?.invalidateSize(true),80);setTimeout(()=>BMH.map?.invalidateSize(true),360);return true;
 };
 BMH.initGoogleMap = async () => {
   const el=BMH.$('#map'),s=BMH.state.project.site;if(!el||!BMH.GOOGLE_MAPS_KEY)return false;const gm=await BMH.ensureGoogleMaps();if(!gm)return false;BMH.destroyMap();BMH.mapEngine='google';
