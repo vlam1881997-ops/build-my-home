@@ -1,8 +1,8 @@
 /* Build My Home V6.0 — product UI reset.
  * One visual system for all 10 steps. Keeps the existing engines, removes patch-on-patch UI.
  */
-BMH.VERSION='6.1.7';
-BMH.VISUAL_RELEASE='prestudio-workflow-v617';
+BMH.VERSION='6.1.8';
+BMH.VISUAL_RELEASE='premium-onboarding-v618';
 
 const v6SavedBrief=BMH.state?.project?.brief||{},v6SavedResult=v6SavedBrief.result&&Object.keys(v6SavedBrief.result).length?v6SavedBrief.result:null;
 const v6SavedSources=Array.isArray(BMH.state?.project?.sourceRefs)?BMH.state.project.sourceRefs.map(x=>({...x,status:x.status||'Đã lưu tham chiếu · chọn lại tệp nếu cần AI đọc lại'})):[];
@@ -259,7 +259,21 @@ BMH.v6SetupScreen=()=>{
   const personCards=members.map(BMH.v6PersonCard).join('');
   const body3='<section class="setup-card setup-family"><div class="setup-heading"><span>KHỞI TẠO DỰ ÁN · 3/3</span><h1>Ai sẽ sống trong ngôi nhà này?</h1><p>Khai báo thành viên trước khi tạo concept để AI hiểu số phòng, khả năng tiếp cận và nhu cầu sinh hoạt thực tế.</p></div><div class="setup-family-summary"><article><small>Thành viên hiện có</small><b>'+members.length+' người</b></article><article><small>Phòng ngủ gợi ý</small><b>'+Number(needs.bedrooms||1)+' phòng</b></article><article><small>WC gợi ý</small><b>'+Number(needs.bathrooms||1)+' phòng</b></article></div><div class="setup-family-actions"><button data-household-add="child">＋ Thêm con</button><button data-household-add="relative">＋ Thêm người thân</button>'+(h.partnerEnabled===false?'<button data-v6-partner="on">＋ Thêm bạn đời</button>':'')+'</div><div class="v6-people setup-people">'+personCards+'</div><div class="setup-review"><b>Hồ sơ nền sắp hoàn tất</b><span>'+BMH.v6Esc(s.district||s.province)+' · '+BMH.money(target)+' · '+members.length+' thành viên · '+s.floors+' tầng dự kiến</span></div></section>';
   const bodies=[body1,body2,body3];
-  return '<div class="setup-shell"><header class="setup-top"><div class="setup-brand"><img src="assets/icon.svg" alt=""><span><b>Build My Home</b><small>KHỞI TẠO HỒ SƠ NỀN</small></span></div><button data-cloud-open>Dự án đã lưu</button></header><main class="setup-main"><nav class="setup-stepper">'+BMH.v6SetupSteps.map((x,i)=>{const n=i+1;return '<button data-setup-jump="'+n+'" class="'+(stage===n?'active ':'')+(stage>n?'done':'')+'"><i>'+(stage>n?'✓':x[0])+'</i><span><b>'+x[1]+'</b><small>'+x[2]+'</small></span></button>';}).join('')+'</nav>'+bodies[stage-1]+'<footer class="setup-footer"><button data-setup-back '+(stage===1?'disabled':'')+'>← Quay lại</button><div><small>Hoàn tất hồ sơ nền trước khi AI tạo concept</small><b>'+stage+'/3</b></div>'+(stage<3?'<button class="primary" data-setup-next>Tiếp tục →</button>':'<button class="primary" data-setup-finish>Vào Step 1 · AI Home Vision →</button>')+'</footer></main></div>';
+  const visual=[
+    {img:'assets/rooms/facade-render.jpg',eyebrow:'01 · LOCATION INTELLIGENCE',title:'Bắt đầu từ nơi ngôi nhà sẽ thuộc về.',copy:'Vị trí, khí hậu và quy mô khu đất là nền tảng để mọi đề xuất phía sau có lý do.',pills:['Khí hậu vùng','Quy mô khu đất','Số tầng dự kiến']},
+    {img:'assets/design/hero-step1.jpg',eyebrow:'02 · FINANCIAL FRAME',title:'Đẹp đến đâu cũng phải nằm trong khả năng thực hiện.',copy:'Khóa một trần ngân sách thực tế trước khi AI tạo concept để tránh những phương án đẹp nhưng không thể xây.',pills:['Ngân sách mục tiêu','Thu nhập hộ gia đình','Không tự tăng ngân sách']},
+    {img:'assets/rooms/living-local.jpg',eyebrow:'03 · FAMILY DNA',title:'Ngôi nhà được thiết kế cho những người sẽ sống trong đó.',copy:'AI cần hiểu gia đình trước khi nghĩ về phòng, ánh sáng, sự riêng tư và cách mọi người gặp nhau mỗi ngày.',pills:['Thành viên','Phòng ngủ gợi ý','Nhu cầu sinh hoạt']}
+  ][stage-1];
+  const progress=Math.round(stage/3*100);
+  const stepper='<nav class="setup-stepper">'+BMH.v6SetupSteps.map((x,i)=>{const n=i+1;return '<button data-setup-jump="'+n+'" class="'+(stage===n?'active ':'')+(stage>n?'done':'')+'"><i>'+(stage>n?'✓':String(n).padStart(2,'0'))+'</i><span><b>'+x[1]+'</b><small>'+x[2]+'</small></span></button>';}).join('')+'</nav>';
+  const footer='<footer class="setup-footer"><button data-setup-back '+(stage===1?'disabled':'')+'>← Quay lại</button><div><small>HỒ SƠ NỀN</small><b>'+progress+'% hoàn tất</b></div>'+(stage<3?'<button class="primary" data-setup-next>Tiếp tục <span>→</span></button>':'<button class="primary" data-setup-finish>Vào AI Home Vision <span>→</span></button>')+'</footer>';
+  return '<div class="setup-shell">'
+    +'<header class="setup-top"><div class="setup-brand"><img src="assets/icon.svg" alt=""><span><b>Build My Home</b><small>KIẾN TẠO TỔ ẤM, CÙNG AI</small></span></div><div class="setup-top-progress"><span><i style="width:'+progress+'%"></i></span><small>'+stage+' / 3</small></div><button data-cloud-open><i>▣</i> Dự án đã lưu</button></header>'
+    +'<main class="setup-main setup-premium">'
+      +'<aside class="setup-visual"><img src="'+visual.img+'" alt=""><div class="setup-visual-shade"></div><div class="setup-visual-copy"><span>'+visual.eyebrow+'</span><h2>'+visual.title+'</h2><p>'+visual.copy+'</p><div>'+visual.pills.map(x=>'<em>✓ '+x+'</em>').join('')+'</div></div><div class="setup-visual-signature"><i>✦</i><span><b>Build My Home AI</b><small>Hồ sơ nền trước · concept sau</small></span></div></aside>'
+      +'<section class="setup-workspace"><div class="setup-workspace-inner">'+stepper+bodies[stage-1]+footer+'</div></section>'
+    +'</main>'
+  +'</div>';
 };
 
 BMH.v6ConceptPrompt=()=>{
