@@ -1,14 +1,14 @@
 {
   "name": "build-my-home-official",
-  "version": "6.1.6",
+  "version": "6.1.7",
   "private": true,
-  "description": "Build My Home V6.1.6 Step 1 functional lock: persistent brief data, canonical budget/household state, AI fallback and contract tests",
+  "description": "Build My Home V6.1.7 workflow realignment: pre-Studio Location-Finance-Family onboarding, Step 1 AI Home Vision, preserved AI/upload stack",
   "engines": {
     "node": "22.x"
   },
   "scripts": {
     "build": "node scripts/build.cjs",
     "build:vercel": "node scripts/build.cjs && node scripts/prepare-vercel.cjs",
-    "test": "node scripts/build.cjs && node --check dist/app.js && node --test tests/step1-contract.test.cjs tests/step1-ai.test.mjs"
+    "test": "node scripts/build.cjs && node --check dist/app.js && node --test tests/step1-contract.test.cjs tests/step1-ai.test.mjs tests/setup-flow.test.cjs"
   }
 }
