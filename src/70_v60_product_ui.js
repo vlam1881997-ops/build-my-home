@@ -867,7 +867,7 @@ BMH.render=(opts={})=>{
 
 BMH.navigateTo=((base)=>step=>{
   step=BMH.clamp(Number(step)||1,1,10);
-  if(step===5&&BMH.state.ui.step!==5){
+  if(step===4&&BMH.state.ui.step!==4){
     Object.assign(BMH.state.ui.planner,{view:'plan',floor:0,zoom:1,tool:'select',showFeng:false,showEnvironment:false,showCirculation:false,showClimate:false,showEnvelope:false,showSectionLine:false,showBelow:false,showFurniture:true,showDimensions:true});
   }
   return base(step);
