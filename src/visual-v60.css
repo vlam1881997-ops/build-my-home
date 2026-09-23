@@ -703,3 +703,40 @@ html.bmh-v60 .step01-prelim-detail b{font-size:12px;margin:3px 0}
 html.bmh-v60 .step01-prelim-detail span{font-size:8.5px;line-height:1.4;color:#657169}
 html.bmh-v60 .step01-ai-facts button[data-s1-edit]{cursor:pointer}
 @media(max-width:1280px){html.bmh-v60 .step01-prelim-detail{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* ===== V6.1.7 Pre-Studio workflow: Location -> Finance -> Family -> AI Home Vision ===== */
+html.bmh-v60 .setup-shell{min-height:100vh;background:#f5f2eb;color:#243a30}
+html.bmh-v60 .setup-top{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-bottom:1px solid #ddd7cb;background:rgba(250,248,243,.96);position:sticky;top:0;z-index:20}
+html.bmh-v60 .setup-brand{display:flex;align-items:center;gap:10px}.setup-brand img{width:31px;height:31px}.setup-brand span{display:flex;flex-direction:column}.setup-brand b{font-size:13px}.setup-brand small{font-size:7px;letter-spacing:.16em;color:#79857e}
+html.bmh-v60 .setup-top>button{border:1px solid #d9d3c8;background:#fff;border-radius:10px;padding:8px 12px;font:600 9px/1.2 inherit;color:#42554a;cursor:pointer}
+html.bmh-v60 .setup-main{width:min(1120px,calc(100% - 32px));margin:0 auto;padding:24px 0 40px}
+html.bmh-v60 .setup-stepper{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+html.bmh-v60 .setup-stepper button{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid #ddd7cb;border-radius:13px;background:#eeebe4;padding:10px 12px;color:#657269;cursor:pointer}
+html.bmh-v60 .setup-stepper button i{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#fff;border:1px solid #d8d1c5;font-style:normal;font-weight:800}
+html.bmh-v60 .setup-stepper button span{display:flex;flex-direction:column;gap:2px}.setup-stepper button b{font-size:10px}.setup-stepper button small{font-size:8px;color:#859088}
+html.bmh-v60 .setup-stepper button.active{background:#233f31;color:#fff;border-color:#233f31}.setup-stepper button.active i{background:#d7af78;color:#26392f;border-color:#d7af78}.setup-stepper button.active small{color:#cbd4ce}
+html.bmh-v60 .setup-stepper button.done{background:#e7efe9;border-color:#cbd8ce}
+html.bmh-v60 .setup-card{background:#fff;border:1px solid #e1dbcf;border-radius:18px;padding:24px;box-shadow:0 12px 38px rgba(49,58,52,.06);min-height:430px}
+html.bmh-v60 .setup-heading{max-width:720px}.setup-heading>span{font-size:8px;font-weight:800;letter-spacing:.15em;color:#9d7649}.setup-heading h1{font-size:28px;line-height:1.06;letter-spacing:-.035em;margin:7px 0 8px;color:#263c31}.setup-heading p{font-size:10px;line-height:1.55;color:#718078;max-width:660px}
+html.bmh-v60 .setup-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}.setup-fields.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+html.bmh-v60 .setup-fields label{font-size:8px;font-weight:800;color:#68756d;display:flex;flex-direction:column;gap:6px}.setup-fields label>div{position:relative}.setup-fields input,.setup-fields select{width:100%;height:42px;border:1px solid #dcd6cb;border-radius:10px;background:#fbfaf7;padding:0 12px;font:700 11px/1 inherit;color:#2c4035;outline:none}.setup-fields label>div input{padding-right:48px}.setup-fields em{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:8px;font-style:normal;color:#8a938e}
+html.bmh-v60 .setup-fields input:focus,.setup-fields select:focus{border-color:#8ba391;box-shadow:0 0 0 3px rgba(90,126,101,.08)}
+html.bmh-v60 .setup-insight{display:flex;align-items:center;gap:12px;margin-top:18px;padding:13px 14px;border:1px solid #d9e2da;background:#f3f7f3;border-radius:12px}.setup-insight>i{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#244233;color:#fff;font-style:normal}.setup-insight div{display:flex;flex-direction:column;gap:3px}.setup-insight b{font-size:10px}.setup-insight span{font-size:8.5px;color:#6d7a72}
+html.bmh-v60 .setup-budget-hero{margin-top:24px;padding:18px;border:1px solid #e3dccf;border-radius:14px;background:linear-gradient(135deg,#faf6ed,#f1f6f0);display:grid;grid-template-columns:1fr 1.4fr 1fr;align-items:end;gap:18px}.setup-budget-hero small{font-size:8px;font-weight:800;letter-spacing:.13em;color:#8a765c;align-self:center}.setup-budget-hero label{display:flex;align-items:center;gap:8px}.setup-budget-hero input{width:100%;height:46px;border:1px solid #d7cfbf;border-radius:10px;padding:0 12px;font:800 15px/1 inherit;color:#2b4035}.setup-budget-hero em{font-size:9px;font-style:normal;color:#7b847f;white-space:nowrap}.setup-budget-hero>b{text-align:right;font-size:18px;color:#2c4b3a}
+html.bmh-v60 .setup-family-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0 12px}.setup-family-summary article{padding:12px;border:1px solid #e4ded4;border-radius:12px;background:#faf9f5}.setup-family-summary small,.setup-family-summary b{display:block}.setup-family-summary small{font-size:8px;color:#7c8881}.setup-family-summary b{font-size:13px;margin-top:3px}
+html.bmh-v60 .setup-family-actions{display:flex;gap:8px;margin-bottom:12px}.setup-family-actions button{border:1px solid #d9d2c6;background:#fff;border-radius:9px;padding:8px 10px;font:700 8.5px/1 inherit;color:#3d5548;cursor:pointer}
+html.bmh-v60 .setup-people{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+html.bmh-v60 .setup-review{margin-top:14px;padding:12px 14px;border-radius:12px;background:#263e32;color:#fff;display:flex;justify-content:space-between;gap:12px;align-items:center}.setup-review b{font-size:10px}.setup-review span{font-size:8.5px;color:#d2ddd6;text-align:right}
+html.bmh-v60 .setup-footer{margin-top:12px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:12px 14px;border:1px solid #ddd7cc;border-radius:13px;background:#fff}.setup-footer>button{justify-self:start;border:1px solid #d8d2c8;background:#fff;border-radius:10px;padding:9px 13px;font:700 9px/1 inherit;color:#405449;cursor:pointer}.setup-footer>button:disabled{opacity:.35;cursor:not-allowed}.setup-footer>button.primary{justify-self:end;background:#274536;border-color:#274536;color:#fff}.setup-footer>div{text-align:center}.setup-footer small,.setup-footer b{display:block}.setup-footer small{font-size:7.5px;color:#89928d}.setup-footer b{font-size:10px;margin-top:2px}
+html.bmh-v60 .step01-start .v6-title h1{font-size:22px}
+@media(max-width:900px){
+  html.bmh-v60 .setup-main{width:min(100% - 20px,720px);padding-top:14px}
+  html.bmh-v60 .setup-stepper{grid-template-columns:1fr}
+  html.bmh-v60 .setup-card{padding:18px;min-height:0}
+  html.bmh-v60 .setup-heading h1{font-size:24px}
+  html.bmh-v60 .setup-fields,html.bmh-v60 .setup-fields.two,html.bmh-v60 .setup-family-summary,html.bmh-v60 .setup-people{grid-template-columns:1fr}
+  html.bmh-v60 .setup-budget-hero{grid-template-columns:1fr}
+  html.bmh-v60 .setup-budget-hero>b{text-align:left}
+  html.bmh-v60 .setup-footer{grid-template-columns:1fr 1fr}.setup-footer>div{display:none}
+}
