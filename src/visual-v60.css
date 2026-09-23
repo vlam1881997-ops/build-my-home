@@ -449,3 +449,160 @@ html.bmh-v60 .step01-key-help p{margin:5px 0 0}
   html.bmh-v60 .step01-hero-quote h2{font-size:29px}
   html.bmh-v60 .step01-hero-badges{width:170px}
 }
+
+
+/* ===== STEP 1 hero polish + larger step typography ===== */
+
+/* Stepper: bigger and better balanced for desktop width */
+html.bmh-v60 .v6-stepper{height:112px;padding:14px 4.2vw 12px;gap:8px}
+html.bmh-v60 .v6-stepper button{grid-template-columns:34px 1fr;gap:9px;padding:8px 7px}
+html.bmh-v60 .v6-stepper i{width:32px;height:32px;font-size:12px}
+html.bmh-v60 .v6-stepper b{font-size:13px;line-height:1.2;letter-spacing:-.01em}
+html.bmh-v60 .v6-stepper small{font-size:10px;line-height:1.28;color:#7f8983}
+
+/* Make Step 1's three-column composition feel less cramped */
+html.bmh-v60 .step01-locked{grid-template-columns:28% minmax(0,1.22fr) 27%;gap:16px}
+html.bmh-v60 .step01-start,
+html.bmh-v60 .step01-ai{padding:20px}
+
+/* Hero becomes the visual focus */
+html.bmh-v60 .step01-hero{
+  min-height:500px;
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 28px 72px rgba(24,43,31,.16);
+  background:#dfe6e0
+}
+html.bmh-v60 .step01-hero>img{
+  width:100%;
+  height:100%;
+  min-height:500px;
+  object-fit:cover;
+  display:block;
+  transform:scale(1.012);
+  transition:transform .45s ease,filter .35s ease
+}
+html.bmh-v60 .step01-hero:hover>img{transform:scale(1.025)}
+html.bmh-v60 .step01-hero .v6-image-shade{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  background:
+    linear-gradient(90deg,rgba(13,27,18,.42) 0%,rgba(13,27,18,.20) 30%,rgba(13,27,18,.05) 58%,rgba(13,27,18,.08) 100%),
+    linear-gradient(0deg,rgba(8,23,15,.42) 0%,rgba(8,23,15,.06) 48%,rgba(8,23,15,.05) 100%)
+}
+
+/* Smaller, cleaner copy card so the architecture remains visible */
+html.bmh-v60 .step01-hero-quote{
+  left:24px;
+  top:auto;
+  bottom:26px;
+  max-width:390px;
+  padding:15px 17px 14px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:15px;
+  background:rgba(14,33,22,.42);
+  backdrop-filter:blur(9px);
+  box-shadow:0 14px 32px rgba(10,25,16,.16)
+}
+html.bmh-v60 .step01-hero-quote>span{
+  font-size:10px;
+  letter-spacing:.18em;
+  font-weight:900;
+  opacity:.94
+}
+html.bmh-v60 .step01-hero-quote h2{
+  font-family:Georgia,serif;
+  font-size:clamp(27px,2vw,36px);
+  line-height:1.08;
+  font-weight:500;
+  font-style:italic;
+  margin:6px 0 8px;
+  text-wrap:balance
+}
+html.bmh-v60 .step01-hero-quote p{
+  font-size:11.5px;
+  line-height:1.5;
+  max-width:350px;
+  margin:0;
+  opacity:.96
+}
+
+/* Stats move into a cleaner stack and cover less of the house */
+html.bmh-v60 .step01-hero-badges{
+  top:20px;
+  right:18px;
+  width:205px;
+  gap:8px
+}
+html.bmh-v60 .step01-hero-badges article{
+  padding:9px 11px;
+  grid-template-columns:30px 1fr;
+  gap:8px;
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:13px;
+  background:rgba(255,255,255,.88);
+  backdrop-filter:blur(12px);
+  box-shadow:0 10px 26px rgba(29,45,35,.10)
+}
+html.bmh-v60 .step01-hero-badges i{
+  width:30px;
+  height:30px;
+  border-radius:9px
+}
+html.bmh-v60 .step01-hero-badges small{font-size:8.5px}
+html.bmh-v60 .step01-hero-badges b{font-size:10.5px}
+
+/* Navigation is compact and no longer crowds the copy */
+html.bmh-v60 .step01-arrow{
+  width:42px;
+  height:42px;
+  bottom:18px;
+  font-size:16px
+}
+html.bmh-v60 .step01-arrow.prev{right:64px}
+html.bmh-v60 .step01-arrow.next{right:16px}
+html.bmh-v60 .step01-dots{bottom:20px}
+html.bmh-v60 .step01-dots button{width:8px;height:8px}
+html.bmh-v60 .step01-dots button.active{width:24px}
+
+/* Increase small text in the lower Step 1 panels */
+html.bmh-v60 .step01-section-head .v6-panel-title b{font-size:15px}
+html.bmh-v60 .step01-section-head .v6-panel-title span{font-size:10px}
+html.bmh-v60 .step01-section-head>button{font-size:10px}
+html.bmh-v60 .step01-source-card b{font-size:10px}
+html.bmh-v60 .step01-source-card small{font-size:8.8px}
+html.bmh-v60 .step01-add-source span{font-size:9.5px}
+html.bmh-v60 .step01-idea-grid b{font-size:10px}
+html.bmh-v60 .step01-idea-grid small{font-size:8.8px;line-height:1.35}
+html.bmh-v60 .step01-prelim-grid small{font-size:9px}
+html.bmh-v60 .step01-prelim-grid b{font-size:11px}
+html.bmh-v60 .step01-ai-facts small{font-size:9.5px}
+html.bmh-v60 .step01-ai-facts b{font-size:12px}
+
+/* Keep the already-connected AI status visible but compact */
+html.bmh-v60 .step01-connection{padding:10px 11px}
+html.bmh-v60 .step01-connection b{font-size:11px}
+html.bmh-v60 .step01-connection span{font-size:9.2px}
+
+/* Remove stale API-key help styles from previous pass */
+html.bmh-v60 .step01-key-help{display:none!important}
+
+@media(max-width:1500px){
+  html.bmh-v60 .v6-stepper{padding-left:2.4vw;padding-right:2.4vw}
+  html.bmh-v60 .v6-stepper b{font-size:12px}
+  html.bmh-v60 .v6-stepper small{font-size:9px}
+  html.bmh-v60 .step01-locked{grid-template-columns:29.5% minmax(0,1fr) 28.5%}
+  html.bmh-v60 .step01-hero{min-height:470px}
+  html.bmh-v60 .step01-hero>img{min-height:470px}
+  html.bmh-v60 .step01-hero-quote{max-width:350px}
+  html.bmh-v60 .step01-hero-quote h2{font-size:30px}
+  html.bmh-v60 .step01-hero-badges{width:185px}
+}
+
+@media(max-width:1280px){
+  html.bmh-v60 .v6-stepper small{display:none}
+  html.bmh-v60 .v6-stepper b{font-size:11.5px}
+  html.bmh-v60 .step01-hero-quote{max-width:320px}
+  html.bmh-v60 .step01-hero-quote h2{font-size:27px}
+}
