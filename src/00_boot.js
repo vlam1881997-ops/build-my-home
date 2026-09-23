@@ -60,8 +60,18 @@ BMH.icon = name => {
   return `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[name]||paths.home}"/></svg>`;
 };
 
+BMH.WORKFLOW={home:1,site:2,family:3,plan:4,materials:5,model3d:6,estimate:7,finance:8,build:9,handover:10};
 BMH.STEPS = [
-  ['Khởi tạo','Khởi tạo dự án mới'],['Hồ sơ tài chính & DTI','Hồ sơ tài chính & DTI'],['Vị trí & khí hậu vùng','Vị trí & khí hậu vùng'],['Đất, địa chất & phong thủy','Đất, địa chất & phong thủy gia đình'],['Bản vẽ thiết kế','Bản vẽ thiết kế'],['Gói vật liệu','Gói vật liệu'],['Mô phỏng 3D & đánh giá','Mô phỏng 3D & đánh giá'],['Dự toán & thanh toán','Dự toán & thanh toán'],['Giám sát thi công & MEP','Giám sát thi công & checklist MEP'],['Hồ sơ bàn giao & giải ngân','Hồ sơ bàn giao & giải ngân']
+  ['AI Home Vision','Concept & cảm hứng'],
+  ['Khu đất & vị trí','Vị trí, khí hậu & tiếp cận'],
+  ['Gia đình & địa chất','Địa chất, nhu cầu & phong thủy'],
+  ['Bản vẽ thiết kế','Mặt bằng tương tác'],
+  ['Gói vật liệu','Vật liệu & hiệu suất'],
+  ['Mô phỏng 3D & đánh giá','Mô phỏng 3D & đánh giá'],
+  ['Dự toán','Chi phí dự kiến & hồ sơ'],
+  ['Tài chính sâu & vay','DTI, thiếu hụt vốn & ngân hàng'],
+  ['Giám sát thi công & MEP','Giám sát thi công & checklist MEP'],
+  ['Hồ sơ bàn giao & giải ngân','Hồ sơ bàn giao & giải ngân']
 ];
 
 BMH.REGIONS = {
