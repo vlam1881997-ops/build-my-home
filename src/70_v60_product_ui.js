@@ -155,7 +155,7 @@ BMH.v6ReceiveFiles=async(files,intent=BMH.scan?.intent||'reference')=>{
     if(!mediaReady){
       accepted.forEach(({item})=>item.status='Đã nhận · chờ AI media');
       BMH.v6.briefError='Tài liệu đã được thêm vào Step 1. AI media chưa sẵn sàng nên hệ thống giữ file để bạn tiếp tục làm việc.';
-      BMH.render({preserveScroll:true});
+      BMH.v6PersistSourceRefs();BMH.save();BMH.render({preserveScroll:true});
       return;
     }
     BMH.v6.briefError='';
@@ -170,6 +170,7 @@ BMH.v6ReceiveFiles=async(files,intent=BMH.scan?.intent||'reference')=>{
       }
       BMH.render({preserveScroll:true});
     }
+    BMH.v6PersistSourceRefs();BMH.save();
     BMH.toast('Đã thêm '+accepted.length+' tài liệu vào Nguồn tham chiếu.');
   }finally{BMH.v6.uploadBusy=false;}
 };
