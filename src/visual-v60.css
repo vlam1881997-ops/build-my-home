@@ -664,3 +664,30 @@ html.bmh-v60 .step01-upload-actions label{height:68px;padding:6px;border:1px sol
 html.bmh-v60 .step01-upload-actions label:hover{transform:translateY(-1px);border-color:#9fbba9;box-shadow:0 8px 20px rgba(30,62,44,.10)}
 html.bmh-v60 .step01-section-head>label{min-height:32px;display:inline-flex;align-items:center;padding:0 8px;border-radius:8px;color:#c35e3c;font-size:10px;font-weight:850}
 html.bmh-v60 .step01-section-head>label:hover{background:#fff2eb}
+
+
+/* ===== V6.1.4 Step 1 hero clarity ===== */
+html.bmh-v60 .step01-hero-quote{
+  max-width:365px!important;
+  padding:14px 16px!important;
+  background:rgba(13,31,21,.42)!important
+}
+html.bmh-v60 .step01-hero-quote h2{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif!important;
+  font-size:clamp(24px,1.6vw,31px)!important;
+  line-height:1.08!important;
+  font-weight:700!important;
+  font-style:normal!important;
+  letter-spacing:-.032em!important;
+  text-shadow:0 1px 12px rgba(0,0,0,.18)!important
+}
+html.bmh-v60 .step01-hero-quote p{font-size:11px!important;line-height:1.45!important}
+html.bmh-v60 .step01-hero>img{
+  transform:none!important;
+  filter:saturate(1.04) contrast(1.025) brightness(1.01)!important;
+  image-rendering:auto
+}
+html.bmh-v60 .step01-hero:hover>img{transform:none!important}
+@media(max-width:1500px){
+  html.bmh-v60 .step01-hero-quote h2{font-size:27px!important}
+}
