@@ -182,7 +182,7 @@ BMH.loadSiteIntelligence=async(force=false)=>{
   BMH.siteIntelLoading=true;si.status='loading';BMH.state.project.siteIntelligence=si;BMH.save();
   if(BMH.state.ui.step===2)BMH.render({preserveScroll:true});
   try{
-    const res=await fetch('/api/site-intelligence',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat:s.lat,lng:s.lng,address:s.address||'',district:s.district||'',province:s.province||'',road_width_m:s.road||0,force})});
+    const res=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'site',lat:s.lat,lng:s.lng,address:s.address||'',district:s.district||'',province:s.province||'',road_width_m:s.road||0,force})});
     let data={};try{data=await res.json();}catch(_){}
     if(!res.ok)throw new Error(data?.error||('HTTP '+res.status));
     BMH.state.project.siteIntelligence={...data,status:'ready',key:data.key||key};
