@@ -1,8 +1,8 @@
 /* Build My Home V6.0 — product UI reset.
  * One visual system for all 10 steps. Keeps the existing engines, removes patch-on-patch UI.
  */
-BMH.VERSION='6.4.0';
-BMH.VISUAL_RELEASE='step2-compact-bank-picker-v640';
+BMH.VERSION='6.5.0';
+BMH.VISUAL_RELEASE='step2-gemini-live-bank-rates-v650';
 
 const v6SavedBrief=BMH.state?.project?.brief||{},v6SavedResult=v6SavedBrief.result&&Object.keys(v6SavedBrief.result).length?v6SavedBrief.result:null;
 const v6SavedSources=Array.isArray(BMH.state?.project?.sourceRefs)?BMH.state.project.sourceRefs.map(x=>({...x,status:x.status||'Đã lưu tham chiếu · chọn lại tệp nếu cần AI đọc lại'})):[];
@@ -22,7 +22,11 @@ BMH.v6={
   aiStatus:{checkedAt:0,loading:false,error:''},
   feng:{loading:false,error:'',result:null,citations:[]},
   bankQuery:'',
-  bankCategory:'all'
+  bankCategory:'all',
+  bankRateLoading:false,
+  bankRateBankId:'',
+  bankRateError:'',
+  bankRateLastAttempt:{bankId:'',at:0}
 };
 
 BMH.V6_STEPS=[
@@ -438,6 +442,49 @@ BMH.v6BankMark=b=>{
     +'<text x="45" y="28" fill="hsl('+hue+' 46% 28%)" font-family="Arial, sans-serif" font-size="14" font-weight="800">'+BMH.v6Esc(short)+'</text>'
     +'</svg>';
 };
+BMH.v65DateLabel=value=>{
+  const raw=String(value||'').trim();if(!raw)return '';
+  const d=new Date(raw.length===10?raw+'T12:00:00Z':raw);if(Number.isNaN(d.getTime()))return raw;
+  return d.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
+};
+BMH.v65SafeCitations=list=>(Array.isArray(list)?list:[]).filter(x=>/^https:\/\//i.test(String(x?.url||''))).slice(0,3);
+BMH.v65RefreshBankRate=async(bank,{force=false,silent=false}={})=>{
+  if(!bank?.id||!BMH.cloud?.config?.geminiConfigured)return false;
+  const f=BMH.state.project.finance,meta=f.rateMeta||{},now=Date.now(),fetched=Date.parse(meta.fetchedAt||'')||0,last=BMH.v6.bankRateLastAttempt||{};
+  if(BMH.v6.bankRateLoading&&BMH.v6.bankRateBankId===bank.id)return false;
+  if(!force&&meta.bankId===bank.id&&fetched&&now-fetched<24*60*60*1000)return false;
+  if(!force&&last.bankId===bank.id&&now-Number(last.at||0)<10*60*1000)return false;
+  BMH.v6.bankRateLoading=true;BMH.v6.bankRateBankId=bank.id;BMH.v6.bankRateError='';BMH.v6.bankRateLastAttempt={bankId:bank.id,at:now};
+  if(BMH.state.ui.step===2)BMH.render({preserveScroll:true});
+  try{
+    const res=await fetch('/api/bank-rate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bank_id:bank.id,bank_name:bank.name,full_name:bank.fullName||bank.name,swift:bank.swift||'',force})});
+    let data={};try{data=await res.json();}catch(_){}
+    if(!res.ok)throw new Error(data?.error||('HTTP '+res.status));
+    const x=data.result||{},verified=x.verified===true,intro=Math.max(0,Math.min(30,Number(x.intro_rate_pct)||0)),post=Math.max(0,Math.min(30,Number(x.post_rate_pct)||0)),months=Math.max(0,Math.min(120,Number(x.intro_months)||0));
+    f.rateMeta={
+      bankId:bank.id,status:verified?'verified':'unverified',verified,
+      product:String(x.product||'').slice(0,180),sourceDate:String(x.source_date||'').slice(0,40),
+      fetchedAt:String(data.fetched_at||new Date().toISOString()),provider:String(data.provider||'gemini').slice(0,40),model:String(data.model||'').slice(0,120),
+      introRate:intro,postRate:post,promoMonths:months,citations:BMH.v65SafeCitations(data.citations),note:String(x.note||'').slice(0,400)
+    };
+    if(verified){
+      if(intro>0)f.introRate=intro;
+      if(post>0)f.postRate=post;
+      if(months>0)f.promoMonths=months;
+    }
+    BMH.save();
+    if(!silent)BMH.toast(verified?'Gemini đã cập nhật lãi suất '+bank.name+' từ nguồn web công khai.':'Gemini chưa tìm đủ nguồn để xác minh lãi suất '+bank.name+'.');
+    return verified;
+  }catch(err){
+    BMH.v6.bankRateError=err.message||String(err);
+    if(!silent)BMH.toast('Chưa cập nhật được lãi suất ngân hàng: '+BMH.v6.bankRateError);
+    return false;
+  }finally{
+    BMH.v6.bankRateLoading=false;BMH.v6.bankRateBankId='';
+    if(BMH.state.ui.step===2)BMH.render({preserveScroll:true});
+  }
+};
+
 BMH.v64BankOption=(b,f)=>{
   const active=f.bank===b.id,hasRate=BMH.bankHasPreset?.(b);
   return '<button type="button" data-bank="'+BMH.v6Esc(b.id)+'" data-bank-option data-bank-search="'+BMH.v6Esc([b.name,b.fullName,b.id,b.swift].join(' ').toLowerCase())+'" class="v64-bank-option '+(active?'active':'')+'">'
@@ -455,7 +502,9 @@ BMH.screen2=()=>{
   const promoPayment=BMH.monthlyPayment(f.loan,f.introRate,Math.max(1,f.years*12));
   const stress=[1,2,3].map(d=>{const rate=Number(f.postRate||0)+d,pay=BMH.monthlyPayment(f.loan,rate,Math.max(1,f.years*12)),dti=income?Math.round((pay+Number(f.existingDebt||0))/income*100):null;return {d,rate,pay,dti};});
   const capacity=Math.max(0,Number(s.capacity)||0),loanPct=capacity?Math.round(Number(f.loan||0)/capacity*100):0;
-  const activeRateStatus=BMH.bankHasPreset?.(active)?'Preset mô phỏng':'Chờ báo giá thực tế';
+  const meta=f.rateMeta||{},metaMatches=meta.bankId===active.id,liveVerified=metaMatches&&meta.verified===true,rateLoading=BMH.v6.bankRateLoading&&BMH.v6.bankRateBankId===active.id;
+  const activeRateStatus=rateLoading?'Gemini đang cập nhật…':liveVerified?'Đã xác minh từ web':metaMatches&&meta.status==='unverified'?'Chưa đủ nguồn xác minh':BMH.bankHasPreset?.(active)?'Preset · AI sẽ kiểm tra':'AI sẽ quét lãi suất';
+  const updateDate=metaMatches?BMH.v65DateLabel(meta.sourceDate||meta.fetchedAt):'',rateCitations=metaMatches?BMH.v65SafeCitations(meta.citations):[];
   const bankOptions=BMH.BANKS.map(b=>BMH.v64BankOption(b,f)).join('');
   return '<div class="v6-s2 v63-finance v64-finance">'
    +'<section class="v6-card v6-fin-form v63-fin-input">'
@@ -476,7 +525,7 @@ BMH.screen2=()=>{
       +'<div class="v63-selected-bank v64-selected-bank">'
         +'<div class="v64-selected-row">'
           +'<details class="v64-bank-picker">'
-            +'<summary><div class="v64-picker-logo">'+BMH.v6BankMark(active)+'</div><span><small>NGÂN HÀNG ĐANG CHỌN</small><b>'+BMH.v6Esc(active.name)+'</b><em>'+BMH.v6Esc(activeRateStatus)+'</em></span><i>⌄</i></summary>'
+            +'<summary><div class="v64-picker-logo">'+BMH.v6BankMark(active)+'</div><span><small>NGÂN HÀNG ĐANG CHỌN</small><b>'+BMH.v6Esc(active.name)+'</b><em>'+BMH.v6Esc(activeRateStatus)+'</em></span><i>＋</i></summary>'
             +'<div class="v64-bank-menu">'
               +'<label class="v64-bank-search"><i>⌕</i><input data-bank-menu-search placeholder="Tìm trong '+BMH.BANKS.length+' ngân hàng…"></label>'
               +'<div class="v64-bank-menu-meta"><b data-bank-menu-count>'+BMH.BANKS.length+' ngân hàng</b><span>Việt Nam</span></div>'
@@ -485,6 +534,8 @@ BMH.screen2=()=>{
           +'</details>'
           +'<button class="v64-loan-export" data-export="loan">Tải lịch trả nợ ↓</button>'
         +'</div>'
+        +'<div class="v65-rate-freshness '+(liveVerified?'verified':rateLoading?'loading':'')+'"><div><i>'+(liveVerified?'✓':rateLoading?'◌':'✦')+'</i><span><b>'+(rateLoading?'Gemini đang quét nguồn ngân hàng…':liveVerified?'Lãi suất đã được AI xác minh':'AI kiểm tra lãi suất từ web công khai')+'</b><small>'+(updateDate?'Cập nhật ngày '+updateDate+(meta.product?' · '+BMH.v6Esc(meta.product):''):(metaMatches&&meta.note?BMH.v6Esc(meta.note):'Ưu tiên website chính thức của ngân hàng; số chưa đủ nguồn sẽ không tự ghi đè.'))+'</small></span></div><button data-bank-rate-refresh '+(rateLoading?'disabled':'')+'>↻ Cập nhật</button></div>'
+        +'<div class="v65-rate-sources">'+(rateCitations.length?rateCitations.map((x,i)=>'<a href="'+BMH.v6Esc(x.url)+'" target="_blank" rel="noopener noreferrer">Nguồn '+(i+1)+' · '+BMH.v6Esc(x.title||active.name)+'</a>').join(''):'')+'</div>'
         +'<div class="v63-rate-editor"><label><span>Lãi ưu đãi</span><div><input data-path="project.finance.introRate" type="number" min="0" max="30" step=".1" value="'+Number(f.introRate||0)+'"><em>%/năm</em></div></label><label><span>Thời gian ưu đãi</span><div><input data-path="project.finance.promoMonths" type="number" min="0" max="120" value="'+Number(f.promoMonths||0)+'"><em>tháng</em></div></label><label><span>Lãi sau ưu đãi</span><div><input data-path="project.finance.postRate" type="number" min="0" max="30" step=".1" value="'+Number(f.postRate||0)+'"><em>%/năm</em></div></label></div>'
         +'<div class="v63-payment-shift"><article><small>Trong ưu đãi</small><b>'+BMH.money(promoPayment)+'</b><span>/ tháng đầu</span></article><i>→</i><article><small>Sau ưu đãi</small><b>'+BMH.money(postPayment)+'</b><span>/ tháng ước tính</span></article><em class="'+(postPayment>promoPayment?'up':'')+'">'+(postPayment>=promoPayment?'+':'−')+BMH.money(Math.abs(postPayment-promoPayment))+'</em></div>'
       +'</div>'
@@ -593,6 +644,10 @@ BMH.afterRender=()=>{
     const last=Number(BMH.v6.aiStatus?.checkedAt)||0;
     if(Date.now()-last>15000)BMH.v6RefreshAIConfig?.({force:false,render:true});
   }
+  if(step===2){
+    const bank=BMH.BANKS.find(x=>x.id===BMH.state.project.finance.bank)||BMH.BANKS[0];
+    setTimeout(()=>BMH.v65RefreshBankRate?.(bank,{force:false,silent:true}),80);
+  }
   if(step===3){
     BMH.loadLiveWeather?.();BMH.loadClimateHistory?.();
     setTimeout(()=>Promise.resolve(BMH.initMapStudio?.()).catch(()=>{}),120);
@@ -638,6 +693,11 @@ document.addEventListener('click',e=>{
 });
 
 document.addEventListener('click',e=>{
+  if(e.target.closest?.('[data-bank-rate-refresh]')){
+    e.preventDefault();
+    const bank=BMH.BANKS.find(x=>x.id===BMH.state.project.finance.bank)||BMH.BANKS[0];
+    BMH.v65RefreshBankRate?.(bank,{force:true,silent:false});return;
+  }
   const bankFilter=e.target.closest?.('[data-bank-filter]');
   if(bankFilter){e.preventDefault();BMH.v6.bankCategory=bankFilter.dataset.bankFilter||'all';BMH.render({preserveScroll:true});return;}
   const global=e.target.closest?.('[data-v6-global]');
