@@ -177,8 +177,8 @@ BMH.climateCalendar = (profile) => {
   return Array.from({length:12},(_,i)=>{const m=i+1;return {month:m,status:risk.has(m)?'risk':watch.has(m)?'watch':best.has(m)?'good':'neutral'};});
 };
 BMH.siteAdaptation = (site=BMH.state?.project?.site||{}) => {
-  const p=BMH.regionProfile(site),intel=BMH.state?.project?.siteIntelligence||{};
-  const livePct=Number(intel?.transport?.surchargePct);
+  const p=BMH.regionProfile(site),intel=BMH.state?.project?.siteIntelligence||{},expected=(Number(site.lat)||0).toFixed(4)+','+(Number(site.lng)||0).toFixed(4)+':'+(Number(site.road)||0);
+  const livePct=intel.key===expected?Number(intel?.transport?.surchargePct):NaN;
   const roadPct=Number.isFinite(livePct)&&livePct>0?BMH.clamp(livePct/100,.02,.18):(site.road<3 ? .12 : site.road<5 ? .05 : .02);
   const flood=BMH.riskValue(p.flood),storm=BMH.riskValue(p.storm),corrosion=BMH.riskValue(p.corrosion),heat=BMH.riskValue(p.heat);
   const climatePct=BMH.clamp((Math.max(0,flood-1)*.012)+(Math.max(0,storm-1)*.008)+(Math.max(0,corrosion-1)*.004)+(Math.max(0,heat-1)*.003),0,.07);
