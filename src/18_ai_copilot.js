@@ -4,17 +4,19 @@
 BMH.ai={open:false,loading:false,mode:'review',error:'',result:null,model:'',provider:'',notice:'',lastAction:'',prompt:'',imageName:'',inflight:null};
 
 BMH.aiConfigured=()=>!!BMH.cloud?.config?.aiConfigured;
-BMH.aiContext=()=>{
-  const p=BMH.state.project,e=BMH.estimate(),review=BMH.designReview(),perf=BMH.performancePlan?.()||{},needs=BMH.householdNeeds?.()||{};
-  return {
-    name:p.name,style:p.style,site:p.site,finance:p.finance,household:p.household,plan:p.plan,materials:p.materials,performance:p.performance,
-    computed:{
-      estimate:{area:e.area,total:e.total,budget:e.budget,gap:e.gap,shell:e.shell,finish:e.finish,transport:e.transport,climatePrep:e.climatePrep,performanceUpgrade:e.performanceUpgrade,contingency:e.contingency},
-      designReview:{overall:review.overall,budget:review.budget,function:review.function,climate:review.climate,daylight:review.daylight,ventilation:review.ventilation,circulation:review.circulation,siteFit:review.siteFit,durability:review.durability},
-      householdNeeds:needs,
-      performance:{energyScore:perf.energyScore,comfortScore:perf.comfortScore,waterScore:perf.waterScore,annualSavings:perf.annualSavings,payback:perf.payback,gridDemand:perf.gridDemand}
-    }
+BMH.aiContext=({lightweight=false}={})=>{
+  const p=BMH.state.project,safe=(label,fn,fallback={})=>{try{return fn()||fallback;}catch(err){console.warn('[BMH aiContext] '+label+' unavailable',err);return fallback;}};
+  const e=safe('estimate',()=>BMH.estimate(),{}),needs=safe('householdNeeds',()=>BMH.householdNeeds?.(),{});
+  const review=lightweight?{}:safe('designReview',()=>BMH.designReview(),{}),perf=lightweight?{}:safe('performance',()=>BMH.performancePlan?.(),{});
+  const computed={
+    estimate:{area:e.area,total:e.total,budget:e.budget,gap:e.gap,shell:e.shell,finish:e.finish,transport:e.transport,climatePrep:e.climatePrep,performanceUpgrade:e.performanceUpgrade,contingency:e.contingency},
+    householdNeeds:needs
   };
+  if(!lightweight){
+    computed.designReview={overall:review.overall,budget:review.budget,function:review.function,climate:review.climate,daylight:review.daylight,ventilation:review.ventilation,circulation:review.circulation,siteFit:review.siteFit,durability:review.durability};
+    computed.performance={energyScore:perf.energyScore,comfortScore:perf.comfortScore,waterScore:perf.waterScore,annualSavings:perf.annualSavings,payback:perf.payback,gridDemand:perf.gridDemand};
+  }
+  return {name:p.name,style:p.style,site:p.site,finance:p.finance,household:p.household,plan:p.plan,materials:p.materials,performance:p.performance,computed};
 };
 
 BMH.aiCall=async(action,prompt='',extra={})=>{
@@ -22,7 +24,7 @@ BMH.aiCall=async(action,prompt='',extra={})=>{
   const stamp=String(BMH.state?.meta?.savedAt||''),key=action+'|'+String(prompt||'').trim()+'|'+stamp;
   if(BMH.ai.inflight?.key===key)return BMH.ai.inflight.promise;
   const promise=(async()=>{
-    const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,prompt,project:BMH.aiContext(),...extra})});
+    const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,prompt,project:BMH.aiContext({lightweight:action==='brief'}),...extra})});
     let data={};try{data=await r.json();}catch(_){}
     if(!r.ok){
       const message=r.status===429?'AI đang bị giới hạn lượt gọi tạm thời. Hệ thống sẽ tự dùng provider/model dự phòng khi có thể.':(data?.error||`AI HTTP ${r.status}`);
@@ -62,6 +64,44 @@ BMH.aiRun=async(action=BMH.ai.mode,prompt='')=>{
   finally{BMH.ai.loading=false;BMH.render({preserveScroll:true});}
 };
 
+BMH.aiNumberToken=value=>{
+  const raw=String(value||'').trim();
+  if(!raw)return 0;
+  if(raw.includes(','))return Number(raw.replace(/\./g,'').replace(',','.'))||0;
+  if(/^\d{1,3}(?:\.\d{3})+$/.test(raw))return Number(raw.replace(/\./g,''))||0;
+  return Number(raw)||0;
+};
+BMH.extractExplicitRequirements=text=>{
+  const s=String(text||'').toLowerCase(),one=re=>{const m=s.match(re);return m?BMH.aiNumberToken(m[1]):0;};
+  const billion=one(/(\d+(?:[.,]\d+)?)\s*t(?:ỷ|y)/i),million=one(/(\d+(?:[.,]\d+)?)\s*tri(?:ệu|eu)/i);
+  const people=Math.round(one(/(\d{1,2})\s*(?:người|nguoi|thành\s*viên|thanh\s*vien)/i));
+  const floors=Math.round(one(/(\d{1,2})\s*tầng/i)),bedrooms=Math.round(one(/(\d{1,2})\s*(?:phòng\s*ngủ|phong\s*ngu|pn)\b/i));
+  const dim=s.match(/(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*m?\b/i);
+  const styles=['tân cổ điển','indochine','scandinavian','tối giản','hiện đại','nhật bản','japandi'];
+  const style=styles.find(x=>s.includes(x))||'';
+  return {
+    people:people>=1&&people<=20?people:0,
+    floors:floors>=1&&floors<=5?floors:0,
+    bedrooms:bedrooms>=1&&bedrooms<=12?bedrooms:0,
+    budget_vnd:(billion>0?billion*1e9:0)+(million>0?million*1e6:0),
+    width:dim?BMH.aiNumberToken(dim[1]):0,
+    depth:dim?BMH.aiNumberToken(dim[2]):0,
+    style
+  };
+};
+BMH.applyExplicitRequirements=(text,{save=true}={})=>{
+  const req=BMH.extractExplicitRequirements(text),p=BMH.state.project,h=p.household,s=p.site,f=p.finance,labels=[];
+  p.brief=p.brief||{};p.brief.userRequirements={...req,sourceText:String(text||'').slice(0,1000),updatedAt:new Date().toISOString()};
+  if(req.people){h.requestedSize=req.people;labels.push(req.people+' người');}
+  if(req.floors){s.floors=req.floors;labels.push(req.floors+' tầng');}
+  if(req.budget_vnd>=100000000&&req.budget_vnd<=20000000000){f.targetBudget=Math.round(req.budget_vnd);labels.push(BMH.money(f.targetBudget));}
+  if(req.width>=2&&req.width<=30&&req.depth>=4&&req.depth<=80){s.width=req.width;s.depth=req.depth;labels.push(BMH.num(req.width)+'×'+BMH.num(req.depth)+'m');}
+  if(req.style){p.style=req.style.replace(/^./,x=>x.toUpperCase());labels.push(p.style);}
+  BMH.normalizeState?.();
+  if(save)BMH.save();
+  return {requirements:req,summary:labels.length?'Đã đồng bộ yêu cầu: '+labels.join(' · '):''};
+};
+
 BMH.applyAIBrief=result=>{
   const b=result?.brief||{},p=BMH.state.project;
   // V6.1.7: Location, finance and household are canonical inputs collected before Step 1.
@@ -76,13 +116,13 @@ BMH.applyAIBrief=result=>{
     household_size:Number(b.household_size)||0,
     priorities:Array.isArray(b.priorities)?b.priorities.slice(0,8).map(String):[]
   };
-  BMH.save();
 };
 
 BMH.aiStartBrief=async()=>{
   if(BMH.ai.loading)return;
   const prompt=BMH.$('#aiStartPrompt')?.value?.trim()||'';
   if(!prompt){BMH.toast('Hãy kể ngắn gọn về khu đất, gia đình và ngân sách.');return;}
+  BMH.applyExplicitRequirements?.(prompt);
   if(!BMH.aiConfigured()){BMH.ai.open=true;BMH.ai.error='AI chưa có API key. Hãy cấu hình GEMINI_API_KEY trước.';BMH.render({preserveScroll:true});return;}
   BMH.ai.open=true;BMH.ai.mode='review';BMH.ai.prompt=prompt;BMH.ai.loading=true;BMH.ai.error='';BMH.render({preserveScroll:true});
   try{const data=await BMH.aiCall('brief',prompt);BMH.ai.result=data.result;BMH.ai.model=data.model||'';BMH.ai.provider=data.provider||'';BMH.ai.notice=data.notice||'';BMH.applyAIBrief(data.result);BMH.state.project.source='suggest';BMH.state.ui.step=2;BMH.save();BMH.toast('AI đã tạo brief ban đầu. Hãy kiểm tra tài chính và tiếp tục tinh chỉnh.');}
