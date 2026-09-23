@@ -125,7 +125,7 @@ BMH.aiStartBrief=async()=>{
   BMH.applyExplicitRequirements?.(prompt);
   if(!BMH.aiConfigured()){BMH.ai.open=true;BMH.ai.error='AI chưa có API key. Hãy cấu hình GEMINI_API_KEY trước.';BMH.render({preserveScroll:true});return;}
   BMH.ai.open=true;BMH.ai.mode='review';BMH.ai.prompt=prompt;BMH.ai.loading=true;BMH.ai.error='';BMH.render({preserveScroll:true});
-  try{const data=await BMH.aiCall('brief',prompt);BMH.ai.result=data.result;BMH.ai.model=data.model||'';BMH.ai.provider=data.provider||'';BMH.ai.notice=data.notice||'';BMH.applyAIBrief(data.result);BMH.state.project.source='suggest';BMH.state.ui.step=2;BMH.save();BMH.toast('AI đã tạo brief ban đầu. Hãy kiểm tra tài chính và tiếp tục tinh chỉnh.');}
+  try{const data=await BMH.aiCall('brief',prompt);BMH.ai.result=data.result;BMH.ai.model=data.model||'';BMH.ai.provider=data.provider||'';BMH.ai.notice=data.notice||'';BMH.applyAIBrief(data.result);BMH.state.project.source='suggest';BMH.state.ui.step=2;BMH.save();BMH.toast('AI đã tạo brief ban đầu. Tiếp tục khảo sát khu đất và vị trí để khóa bối cảnh thực tế.');}
   catch(err){BMH.ai.error=err.message;}
   finally{BMH.ai.loading=false;BMH.render();}
 };
