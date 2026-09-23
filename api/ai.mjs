@@ -54,7 +54,7 @@ function cleanProject(p={}){return {
 function actionInstruction(action){
   const common='Ưu tiên sự hữu ích cho chủ nhà Việt Nam. Không bịa số liệu chưa có. Dữ liệu computed do engine cung cấp là nguồn sự thật cho chi phí và điểm số. Tuyệt đối không khuyên cắt giảm thép, bê tông, móng, chống thấm, bảo vệ điện, PCCC hay hạng mục an toàn chỉ để tiết kiệm. Mọi kết luận về kết cấu, pháp lý, MEP và khả năng thi công phải ghi là cần KTS/kỹ sư/đơn vị có chuyên môn xác nhận.';
   const map={
-    brief:'Đọc mô tả tự nhiên, trích xuất brief xây nhà, nhu cầu gia đình, ngân sách, số tầng/phòng và ưu tiên. Chỉ hỏi lại dữ liệu thực sự thiếu.',
+    brief:'Tạo AI Home Vision từ hồ sơ dự án đã có. project.site, project.finance.targetBudget và project.household/requestedSize là dữ liệu nền do người dùng đã chọn trước Step 1; không tự ý ghi đè hay suy đoán khác. Dùng prompt/tài liệu tải lên chủ yếu để hiểu phong cách, cảm hứng, ưu tiên không gian và các ý tưởng nên thử. Nếu người dùng chủ động nêu thay đổi về dữ liệu nền thì chỉ ghi đó là đề xuất cần xác nhận, không xem là nguồn sự thật mới.',
     review:'Đánh giá phương án hiện tại theo công năng, lưu thông, ánh sáng, thông gió, người già/trẻ em, khí hậu, chi phí và khả năng trao đổi với KTS. Chỉ ra vấn đề cụ thể.',
     cost:'Tìm cơ hội tiết kiệm mà vẫn giữ tiện nghi và an toàn. Ưu tiên giảm diện tích lãng phí, chuẩn hóa cửa/kích thước, gom khu ướt, lựa chọn hoàn thiện, thiết bị và vận hành.',
     whatif:'Phân tích thay đổi giả định và tác động lên chi phí, công năng, tiện nghi, khí hậu và rủi ro; nêu giả định nào cần engine/KTS kiểm tra.',
