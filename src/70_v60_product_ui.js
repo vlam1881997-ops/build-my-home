@@ -26,7 +26,10 @@ BMH.v6={
   bankRateLoading:false,
   bankRateBankId:'',
   bankRateError:'',
-  bankRateLastAttempt:{bankId:'',at:0}
+  bankRateLastAttempt:{bankId:'',at:0},
+  bankLogos:{},
+  bankLogosLoaded:false,
+  bankLogosLoading:false
 };
 
 BMH.V6_STEPS=[
@@ -432,8 +435,35 @@ BMH.v64BankInitials=b=>{
   const short=(words.length>1?words.map(x=>x[0]).join(''):words[0]||'BK').slice(0,3).toUpperCase();
   return short;
 };
+BMH.v65Norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+BMH.v65LoadBankLogos=async()=>{
+  if(BMH.v6.bankLogosLoaded||BMH.v6.bankLogosLoading)return;
+  BMH.v6.bankLogosLoading=true;
+  try{
+    const r=await fetch('/api/bank-directory'),data=await r.json();
+    const rows=Array.isArray(data?.data)?data.data:[],logos={...BMH.v6.bankLogos};
+    for(const b of BMH.BANKS){
+      if(b.img){logos[b.id]=b.img;continue;}
+      const id=BMH.v65Norm(b.id),name=BMH.v65Norm(b.name),full=BMH.v65Norm(b.fullName);
+      let best=null,bestScore=0;
+      for(const row of rows){
+        const code=BMH.v65Norm(row.code),short=BMH.v65Norm(row.shortName),legal=BMH.v65Norm(row.name);let score=0;
+        if(code&&code===id)score+=120;
+        if(short&&short===name)score+=110;
+        if(legal&&full&&(legal===full||legal.includes(full)||full.includes(legal)))score+=90;
+        if(short&&name&&Math.min(short.length,name.length)>=3&&(short.includes(name)||name.includes(short)))score+=55;
+        if(code&&name&&Math.min(code.length,name.length)>=3&&(code.includes(name)||name.includes(code)))score+=40;
+        if(score>bestScore){bestScore=score;best=row;}
+      }
+      if(best?.logo&&bestScore>=40)logos[b.id]=best.logo;
+    }
+    BMH.v6.bankLogos=logos;BMH.v6.bankLogosLoaded=true;
+  }catch(err){console.warn('[BMH bank logos]',err);}
+  finally{BMH.v6.bankLogosLoading=false;if(BMH.state.ui.step===2)BMH.render({preserveScroll:true});}
+};
 BMH.v6BankMark=b=>{
-  if(b?.img)return '<img class="v64-bank-real-logo" src="'+BMH.v6Esc(b.img)+'" alt="'+BMH.v6Esc(b.name)+'">';
+  const logo=b?.img||BMH.v6.bankLogos?.[b?.id]||'';
+  if(logo)return '<img class="v64-bank-real-logo" src="'+BMH.v6Esc(logo)+'" alt="'+BMH.v6Esc(b.name)+'">';
   const hue=BMH.v64BankHue(b),short=BMH.v64BankInitials(b);
   return '<svg class="v64-bank-vector-logo" viewBox="0 0 120 48" role="img" aria-label="'+BMH.v6Esc(b?.name||'Ngân hàng')+'">'
     +'<rect x="1" y="1" width="118" height="46" rx="12" fill="hsl('+hue+' 42% 96%)" stroke="hsl('+hue+' 26% 84%)"/>'
@@ -449,7 +479,9 @@ BMH.v65DateLabel=value=>{
 };
 BMH.v65SafeCitations=list=>(Array.isArray(list)?list:[]).filter(x=>/^https:\/\//i.test(String(x?.url||''))).slice(0,3);
 BMH.v65RefreshBankRate=async(bank,{force=false,silent=false}={})=>{
-  if(!bank?.id||!BMH.cloud?.config?.geminiConfigured)return false;
+  if(!bank?.id)return false;
+  if(!BMH.cloud?.config?.geminiConfigured)await BMH.v6RefreshAIConfig?.({force:false,render:false});
+  if(!BMH.cloud?.config?.geminiConfigured)return false;
   const f=BMH.state.project.finance,meta=f.rateMeta||{},now=Date.now(),fetched=Date.parse(meta.fetchedAt||'')||0,last=BMH.v6.bankRateLastAttempt||{};
   if(BMH.v6.bankRateLoading&&BMH.v6.bankRateBankId===bank.id)return false;
   if(!force&&meta.bankId===bank.id&&fetched&&now-fetched<24*60*60*1000)return false;
@@ -645,6 +677,7 @@ BMH.afterRender=()=>{
     if(Date.now()-last>15000)BMH.v6RefreshAIConfig?.({force:false,render:true});
   }
   if(step===2){
+    BMH.v65LoadBankLogos?.();
     const bank=BMH.BANKS.find(x=>x.id===BMH.state.project.finance.bank)||BMH.BANKS[0];
     setTimeout(()=>BMH.v65RefreshBankRate?.(bank,{force:false,silent:true}),80);
   }
