@@ -5,7 +5,7 @@ export function geminiEnv(){
   const auto=String(process.env.GEMINI_AUTO_UPGRADE??'true').toLowerCase()!=='false';
   const configured=String(process.env.GEMINI_MODEL||'').trim();
   const primary=configured||(auto?'gemini-flash-latest':'gemini-3.8-flash');
-  const fallback=String(process.env.GEMINI_FALLBACK_MODEL||'gemini-3.8-flash').trim();
+  const fallback=String(process.env.GEMINI_FALLBACK_MODEL||'gemini-3.5-flash-lite').trim();
   const apiVersion=String(process.env.GEMINI_API_VERSION||'auto').trim().toLowerCase();
   return {key,auto,primary,fallback,apiVersion,deleteUploads:String(process.env.GEMINI_DELETE_UPLOADS??'true').toLowerCase()!=='false'};
 }
@@ -13,6 +13,7 @@ export function geminiEnv(){
 export function geminiModelCandidates(){
   const e=geminiEnv(),list=[e.primary];
   if(e.fallback&&e.fallback!==e.primary)list.push(e.fallback);
+  if(!list.includes('gemini-3.5-flash-lite'))list.push('gemini-3.5-flash-lite');
   return [...new Set(list.filter(Boolean))];
 }
 
@@ -81,9 +82,10 @@ export async function geminiGenerate({parts,input,systemInstruction='',schema,ma
   const normalized=Array.isArray(input)?input:normalizeInput(parts);
   if(!normalized.length)throw Object.assign(new Error('Gemini không có dữ liệu đầu vào.'),{statusCode:400});
   const combos=[];for(const model of geminiModelCandidates())for(const apiVersion of apiVersions())combos.push({model,apiVersion});
-  let lastErr=null;
+  let lastErr=null,quotaModel='';
   for(let i=0;i<combos.length;i++){
     const {model,apiVersion}=combos[i];
+    if(quotaModel===model)continue;
     const payload={
       input:normalized,
       system_instruction:systemInstruction||undefined,
@@ -98,7 +100,8 @@ export async function geminiGenerate({parts,input,systemInstruction='',schema,ma
       if(!r.ok){
         const err=Object.assign(new Error(data?.error?.message||`Gemini HTTP ${r.status}`),{statusCode:r.status>=400&&r.status<500?r.status:502,details:data,model,apiVersion});
         const msg=String(data?.error?.message||'').toLowerCase(),more=i<combos.length-1;
-        if(more&&(r.status===404||r.status===400||msg.includes('model')||msg.includes('unsupported')||msg.includes('api version'))){lastErr=err;continue;}
+        if(more&&r.status===429){lastErr=err;quotaModel=model;continue;}
+        if(more&&(r.status===408||r.status>=500||r.status===404||r.status===400||msg.includes('model')||msg.includes('unsupported')||msg.includes('api version'))){lastErr=err;continue;}
         throw err;
       }
       const text=extractInteractionText(data);if(!text)throw Object.assign(new Error('Gemini không trả về nội dung có thể đọc.'),{statusCode:502,model,apiVersion});

@@ -691,3 +691,15 @@ html.bmh-v60 .step01-hero:hover>img{transform:none!important}
 @media(max-width:1500px){
   html.bmh-v60 .step01-hero-quote h2{font-size:27px!important}
 }
+
+
+/* ===== V6.1.5 Step 1 AI + action semantics ===== */
+html.bmh-v60 .step01-notice{margin-top:8px;padding:9px 10px;border:1px solid #ead7a8;border-radius:10px;background:#fff8e7;color:#6f5522;font-size:9px;line-height:1.45}
+html.bmh-v60 .step01-prelim-detail{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid #eee7dc}
+html.bmh-v60 .step01-prelim-detail article{padding:10px;border:1px solid #e8e2d8;border-radius:10px;background:#fbfaf7}
+html.bmh-v60 .step01-prelim-detail small,html.bmh-v60 .step01-prelim-detail b,html.bmh-v60 .step01-prelim-detail span{display:block}
+html.bmh-v60 .step01-prelim-detail small{font-size:8px;color:#7a857e}
+html.bmh-v60 .step01-prelim-detail b{font-size:12px;margin:3px 0}
+html.bmh-v60 .step01-prelim-detail span{font-size:8.5px;line-height:1.4;color:#657169}
+html.bmh-v60 .step01-ai-facts button[data-s1-edit]{cursor:pointer}
+@media(max-width:1280px){html.bmh-v60 .step01-prelim-detail{grid-template-columns:repeat(2,minmax(0,1fr))}}

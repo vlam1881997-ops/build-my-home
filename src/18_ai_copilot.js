@@ -1,7 +1,7 @@
 /* V5.0.2 · Gemini-first AI Decision Engine
  * Gemini is primary. OpenAI is optional fallback. Server-side keys only.
  */
-BMH.ai={open:false,loading:false,mode:'review',error:'',result:null,model:'',lastAction:'',prompt:'',imageName:''};
+BMH.ai={open:false,loading:false,mode:'review',error:'',result:null,model:'',provider:'',notice:'',lastAction:'',prompt:'',imageName:'',inflight:null};
 
 BMH.aiConfigured=()=>!!BMH.cloud?.config?.aiConfigured;
 BMH.aiContext=()=>{
@@ -18,11 +18,20 @@ BMH.aiContext=()=>{
 };
 
 BMH.aiCall=async(action,prompt='',extra={})=>{
-  if(!BMH.aiConfigured())throw new Error('AI chưa được cấu hình. Điền GEMINI_API_KEY trong .env.local/Vercel Environment Variables. OpenAI chỉ là fallback tùy chọn.');
-  const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,prompt,project:BMH.aiContext(),...extra})});
-  let data={};try{data=await r.json();}catch(_){}
-  if(!r.ok)throw new Error(data?.error||`AI HTTP ${r.status}`);
-  return data;
+  if(!BMH.aiConfigured())throw new Error('AI chưa được cấu hình trên server.');
+  const stamp=String(BMH.state?.meta?.savedAt||''),key=action+'|'+String(prompt||'').trim()+'|'+stamp;
+  if(BMH.ai.inflight?.key===key)return BMH.ai.inflight.promise;
+  const promise=(async()=>{
+    const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,prompt,project:BMH.aiContext(),...extra})});
+    let data={};try{data=await r.json();}catch(_){}
+    if(!r.ok){
+      const message=r.status===429?'AI đang bị giới hạn lượt gọi tạm thời. Hệ thống sẽ tự dùng provider/model dự phòng khi có thể.':(data?.error||`AI HTTP ${r.status}`);
+      const err=new Error(message);err.status=r.status;err.details=data?.details;throw err;
+    }
+    return data;
+  })();
+  BMH.ai.inflight={key,promise};
+  try{return await promise;}finally{if(BMH.ai.inflight?.promise===promise)BMH.ai.inflight=null;}
 };
 
 BMH.aiSeverityLabel=s=>s==='high'?'Cần xử lý':s==='medium'?'Nên tối ưu':'Gợi ý';
@@ -46,8 +55,9 @@ BMH.aiDock=()=>{
 BMH.aiOpen=()=>{BMH.ai.open=true;BMH.render({preserveScroll:true});};
 BMH.aiClose=()=>{BMH.ai.open=false;BMH.render({preserveScroll:true});};
 BMH.aiRun=async(action=BMH.ai.mode,prompt='')=>{
+  if(BMH.ai.loading)return;
   BMH.ai.open=true;BMH.ai.mode=action;BMH.ai.prompt=prompt||BMH.$('#aiPrompt')?.value||'';BMH.ai.loading=true;BMH.ai.error='';BMH.render({preserveScroll:true});
-  try{const data=await BMH.aiCall(action,BMH.ai.prompt);BMH.ai.result=data.result;BMH.ai.model=data.model||'';BMH.ai.lastAction=action;}
+  try{const data=await BMH.aiCall(action,BMH.ai.prompt);BMH.ai.result=data.result;BMH.ai.model=data.model||'';BMH.ai.provider=data.provider||'';BMH.ai.notice=data.notice||'';BMH.ai.lastAction=action;}
   catch(err){BMH.ai.error=err.message;}
   finally{BMH.ai.loading=false;BMH.render({preserveScroll:true});}
 };
@@ -56,17 +66,19 @@ BMH.applyAIBrief=result=>{
   const b=result?.brief||{},p=BMH.state.project;
   if(Number.isFinite(Number(b.budget_vnd))&&Number(b.budget_vnd)>100000000){const target=Number(b.budget_vnd);p.finance.loan=Math.max(0,target-(Number(p.finance.cash)||0));}
   if(Number.isFinite(Number(b.floors)))p.site.floors=BMH.clamp(Math.round(Number(b.floors)),1,5);
+  if(Number.isFinite(Number(b.household_size))&&Number(b.household_size)>0)p.household.requestedSize=BMH.clamp(Math.round(Number(b.household_size)),1,20);
   if(b.style)p.style=String(b.style).slice(0,80);
   if(b.province&&BMH.REGIONS[b.province]){p.site.province=b.province;const r=BMH.REGIONS[b.province],pt=BMH.regionPoint(b.province,r.defaultDistrict);Object.assign(p.site,{district:pt.district,lat:pt.lat,lng:pt.lng,geoSource:'AI brief · dữ liệu vùng'});}
   BMH.save();
 };
 
 BMH.aiStartBrief=async()=>{
+  if(BMH.ai.loading)return;
   const prompt=BMH.$('#aiStartPrompt')?.value?.trim()||'';
   if(!prompt){BMH.toast('Hãy kể ngắn gọn về khu đất, gia đình và ngân sách.');return;}
   if(!BMH.aiConfigured()){BMH.ai.open=true;BMH.ai.error='AI chưa có API key. Hãy cấu hình GEMINI_API_KEY trước.';BMH.render({preserveScroll:true});return;}
   BMH.ai.open=true;BMH.ai.mode='review';BMH.ai.prompt=prompt;BMH.ai.loading=true;BMH.ai.error='';BMH.render({preserveScroll:true});
-  try{const data=await BMH.aiCall('brief',prompt);BMH.ai.result=data.result;BMH.ai.model=data.model||'';BMH.applyAIBrief(data.result);BMH.state.project.source='suggest';BMH.state.ui.step=2;BMH.save();BMH.toast('AI đã tạo brief ban đầu. Hãy kiểm tra tài chính và tiếp tục tinh chỉnh.');}
+  try{const data=await BMH.aiCall('brief',prompt);BMH.ai.result=data.result;BMH.ai.model=data.model||'';BMH.ai.provider=data.provider||'';BMH.ai.notice=data.notice||'';BMH.applyAIBrief(data.result);BMH.state.project.source='suggest';BMH.state.ui.step=2;BMH.save();BMH.toast('AI đã tạo brief ban đầu. Hãy kiểm tra tài chính và tiếp tục tinh chỉnh.');}
   catch(err){BMH.ai.error=err.message;}
   finally{BMH.ai.loading=false;BMH.render();}
 };
