@@ -1818,6 +1818,23 @@ html.bmh-v60 .v6-s9 .v6-site-empty b{font-size:16px}
 html.bmh-v60 .v6-s9 .v6-site-empty span{font-size:13px}
 html.bmh-v60 .v6-s9 .v6-advice b{font-size:14px}
 html.bmh-v60 .v6-s9 .v6-advice span{font-size:12px;line-height:1.45}
+html.bmh-v60 .v6-s6 .v69-material-source{display:block;font-size:12px;line-height:1.45;color:#5c7465;margin:6px 0 10px}
+html.bmh-v60 .v6-s6 .v69-material-caveat{font-size:12px;line-height:1.45;color:#745e4d;background:#fff8ed;border-radius:8px;padding:8px;margin:6px 0}
+html.bmh-v60 .v6-s6 .v69-supplier-link{display:block;margin:12px 0 0;width:100%;min-height:44px;border:1px solid #b9d2c0;border-radius:10px;background:#f1f8f2;color:#245e42;font-size:14px;font-weight:800;cursor:pointer}
+html.bmh-v60 .v6-s6 .v6-tier button{height:auto;min-height:70px}
+html.bmh-v60 .v6-s6 .v6-tier b,html.bmh-v60 .v6-s6 .v6-mat-nav span{font-size:13px}
+html.bmh-v60 .v6-s6 .v6-tier span,html.bmh-v60 .v6-s6 .v6-mat-nav em{font-size:11px;line-height:1.35}
+html.bmh-v60 .v6-s6 .v6-mat-nav button{height:46px}
+html.bmh-v60 .v6-s6 .v6-products article>div{padding:14px}
+html.bmh-v60 .v6-s6 .v6-products small{font-size:12px;line-height:1.4}
+html.bmh-v60 .v6-s6 .v6-products h3{font-size:16px;line-height:1.3}
+html.bmh-v60 .v6-s6 .v6-products p{font-size:13px;line-height:1.5}
+html.bmh-v60 .v6-s6 .v6-products strong{font-size:15px;line-height:1.4}
+html.bmh-v60 .v6-s6 .v6-products button{min-height:44px;font-size:13px}
+html.bmh-v60 .v6-s6 .v6-showroom-note b{font-size:14px}
+html.bmh-v60 .v6-s6 .v6-showroom-note span,html.bmh-v60 .v6-s6 .v6-energy-hero span,html.bmh-v60 .v6-s6 .v6-toggle-grid button{font-size:12px;line-height:1.4}
+@media(max-width:1180px){html.bmh-v60 .v6-s6 .v6-mat-nav>div:last-child{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){html.bmh-v60 .v6-s6 .v6-tier{grid-template-columns:1fr 1fr 1fr}html.bmh-v60 .v6-s6 .v6-mat-nav>div:last-child{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:1180px){html.bmh-v60 .v6-s4{grid-template-columns:1fr 1fr;grid-template-areas:"head head" "land family" "feng feng"}}
 @media(max-width:900px){html.bmh-v60 .v6-s5{grid-template-columns:1fr 1fr;grid-template-areas:"head head" "tools inspector" "plan plan"}html.bmh-v60 .v6-s5.v68-has-empty{grid-template-areas:"head head" "empty empty" "tools inspector" "plan plan"}}
 @media(max-width:700px){

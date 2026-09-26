@@ -85,6 +85,18 @@ test('bank rates require a dated bank-specific source and both rates',()=>{
   assert.equal(verifyRateEvidence(result,[],bank,now),false);
 });
 
+test('planning prices never inherit the build date as a supplier source date',()=>{
+  const BMH={state:{project:{site:{province:'Hà Nội'},dataEngine:{pricingMode:'regional',cost:{shellPerM2:3600000,finishPerM2:2350000,prepPerM2:280000},quote:{},materialOverrides:{}}}},
+    regionProfile:()=>({labor:[500000,500000]}),rangeAverage:()=>500000,clamp:(n,min,max)=>Math.min(max,Math.max(min,n))};
+  vm.runInNewContext(fs.readFileSync(new URL('../src/15_data_engine.js',import.meta.url),'utf8'),{BMH,Math,Number,Intl});
+  const baseline=BMH.dataCostBasis();
+  assert.equal(baseline.sourceDate,'');
+  assert.match(baseline.reference,/chưa xác nhận giá mua/);
+  assert.match(BMH.materialSourceLabel({id:'floor-sample'}),/Giá hiển thị mẫu/);
+  BMH.state.project.dataEngine.quote={name:'Nhà cung cấp A',date:'2026-09-25'};
+  assert.equal(BMH.dataCostBasis().sourceDate,'2026-09-25');
+});
+
 test('a new construction dossier starts at zero and records actual spending by stage',()=>{
   const {BMH}=stateEngine();
   assert.equal(BMH.state.project.dossier.progress,0);
