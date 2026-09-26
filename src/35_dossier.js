@@ -25,18 +25,19 @@ BMH.MEP_ITEMS = [
 BMH.toDate = value => {const d=new Date(`${String(value||'').slice(0,10)}T12:00:00`);return Number.isNaN(d.getTime())?new Date():d;};
 BMH.addDays = (date,days) => {const d=new Date(date);d.setDate(d.getDate()+days);return d;};
 BMH.isoDay = date => {const d=new Date(date),pad=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;};
-BMH.dateLabel = value => BMH.toDate(value).toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
+BMH.dateLabel = value => /^\d{4}-\d{2}-\d{2}$/.test(String(value||''))?BMH.toDate(value).toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'}):'Chưa đặt lịch';
 BMH.dossierSchedule = () => {
-  const d=BMH.state.project.dossier||{},start=BMH.toDate(d.startDate),e=BMH.estimate(),overall=BMH.clamp(Number(d.progress)||0,0,100);
+  const d=BMH.state.project.dossier||{},hasStart=/^\d{4}-\d{2}-\d{2}$/.test(String(d.startDate||'')),start=BMH.toDate(d.startDate),e=BMH.estimate(),overall=BMH.clamp(Number(d.progress)||0,0,100);
   let cursor=new Date(start),paid=0,physicalCursor=0,allocated=0;
   return BMH.DOSSIER_STAGE_DEFS.map((s,i)=>{
     const stageStart=new Date(cursor),end=BMH.addDays(stageStart,s.weeks*7-1);cursor=BMH.addDays(end,1);
     const amount=i===BMH.DOSSIER_STAGE_DEFS.length-1?Math.max(0,e.total-allocated):Math.round(e.total*s.pct/100);allocated+=amount;
     const p0=physicalCursor,p1=physicalCursor+s.pct;physicalCursor=p1;
     const progress=BMH.clamp(Math.round((overall-p0)/Math.max(1,p1-p0)*100),0,100);
-    const status=progress>=100?'done':progress>0||d.currentStage===s.id?'active':'pending';
+    const status=progress>=100?'done':progress>0?'active':'pending';
     paid+=status==='done'?amount:status==='active'?Math.round(amount*progress/100):0;
-    return {...s,start:BMH.isoDay(stageStart),end:BMH.isoDay(end),amount,progress,status,paidToDate:paid};
+    const actualSpent=Math.max(0,Number(d.actualCosts?.[s.id])||0);
+    return {...s,start:hasStart?BMH.isoDay(stageStart):'',end:hasStart?BMH.isoDay(end):'',amount,actualSpent,variance:actualSpent-amount,progress,status,paidToDate:paid};
   });
 };
 BMH.wallFinishArea = () => {
@@ -87,8 +88,8 @@ BMH.cashflowSchedule = () => BMH.dossierSchedule().map((s,i)=>({no:i+1,stage:s.n
 BMH.dossierCompleteness = () => {
   const checks=BMH.mepChecklistRows(),mats=BMH.materialSchedule(),s=BMH.state.project.site,d=BMH.state.project.dossier,e=BMH.estimate();
   const parts=[
-    {name:'Bản vẽ sơ bộ',ok:(BMH.state.project.plan.rooms||[]).length>0},
-    {name:'Dự toán/BOQ',ok:e.total>0&&BMH.boqSchedule().length>=10},
+    {name:'Bản vẽ sơ bộ',ok:e.areaSource==='plan'},
+    {name:'Dự toán/BOQ',ok:e.areaSource==='plan'&&e.total>0&&BMH.boqSchedule().length>=10},
     {name:'Vật liệu',ok:mats.filter(x=>x.status==='Đã chọn').length>=3},
     {name:'Tiến độ',ok:!!d?.startDate&&BMH.dossierSchedule().length===7},
     {name:'MEP checklist',ok:checks.some(x=>x.checked)},
@@ -101,7 +102,7 @@ BMH.createDossierSnapshot = () => {
   return {
     schema:'BMH-DOSSIER-5.0',version:BMH.VERSION,generatedAt:now.toISOString(),revision:p.dossier?.revision||'A',
     project:{name:p.name,style:p.style,address:p.site.address||'',province:p.site.province,district:p.site.district,coordinates:[p.site.lat,p.site.lng],lot:`${p.site.width} × ${p.site.depth} m`,floors:p.site.floors,frontDirection:p.site.frontDirection,architect:p.dossier?.architect||'',contractor:p.dossier?.contractor||'',notes:p.dossier?.notes||''},
-    summary:{grossArea:e.area,budget:e.budget,estimate:e.total,gap:e.gap,progress:p.dossier?.progress||0,currentStage:p.dossier?.currentStage||'structure',startDate:p.dossier?.startDate,completeness:complete},
+    summary:{grossArea:e.area,areaSource:e.areaSource,budget:e.budget,estimate:e.total,gap:e.gap,progress:p.dossier?.progress||0,currentStage:p.dossier?.currentStage||'structure',startDate:p.dossier?.startDate,completeness:complete},
     pricing:{source:basis.sourceLabel,date:basis.sourceDate,reference:basis.reference,mode:p.dataEngine?.pricingMode||'regional'},
     areas:area,openings,boq,materials,schedule,cashflow,mep,
     drawings:[...Array.from({length:Math.max(1,Number(p.site.floors)||1)},(_,i)=>({code:`A-${String(i+1).padStart(2,'0')}`,name:`Mặt bằng tầng ${i+1}`,file:`mat-bang-tang-${i+1}.svg`})),{code:'A-E01',name:'Mặt đứng chính',file:'mat-dung-chinh.svg'},{code:'A-S01',name:'Mặt cắt A-A',file:'mat-cat-A-A.svg'}],

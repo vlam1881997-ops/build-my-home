@@ -1717,3 +1717,98 @@ html.bmh-v60 .v67-site .v67-disclaimer b{font-size:14px}
   html.bmh-v60 .v67-site .v6-map-toolbar>div{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%}
   html.bmh-v60 .v67-site .v6-map-toolbar button{padding:0 5px}
 }
+
+/* ===== Family, planner, estimate and finance reading sizes ===== */
+html.bmh-v60 .v6-s4 .v6-title p,html.bmh-v60 .v6-s5 .v6-title p,
+html.bmh-v60 .v6-s8 .v6-title p{font-size:14px;line-height:1.55}
+html.bmh-v60 .v6-s4 .v6-panel-title b,html.bmh-v60 .v6-s5 .v6-panel-title b,
+html.bmh-v60 .v6-s8 .v6-panel-title b{font-size:17px}
+html.bmh-v60 .v6-s4 .v6-panel-title span,html.bmh-v60 .v6-s5 .v6-panel-title span,
+html.bmh-v60 .v6-s8 .v6-panel-title span{font-size:12px;line-height:1.45}
+html.bmh-v60 .v6-s4 .v6-kpi small,html.bmh-v60 .v6-s5 .v6-kpi small{font-size:11px}
+html.bmh-v60 .v6-s4 .v6-kpi b,html.bmh-v60 .v6-s5 .v6-kpi b{font-size:17px}
+html.bmh-v60 .v6-s4 .v6-kpi span,html.bmh-v60 .v6-s5 .v6-kpi span{font-size:11px}
+html.bmh-v60 .v6-s4 .v6-fields label>span,html.bmh-v60 .v6-s5 .v6-fields label>span{font-size:13px}
+html.bmh-v60 .v6-s4 .v6-fields input,html.bmh-v60 .v6-s5 .v6-fields input{font-size:15px;min-height:44px}
+html.bmh-v60 .v6-s4 .v6-fields label>div,html.bmh-v60 .v6-s5 .v6-fields label>div{min-height:44px}
+html.bmh-v60 .v6-s4 .v6-fields em,html.bmh-v60 .v6-s5 .v6-fields em{font-size:12px}
+html.bmh-v60 .v6-s4 .v6-soils button{min-height:75px}
+html.bmh-v60 .v6-s4 .v6-soils b{font-size:12px}
+html.bmh-v60 .v6-s4 .v6-land-note b{font-size:14px}
+html.bmh-v60 .v6-s4 .v6-land-note span{font-size:12px;line-height:1.5}
+html.bmh-v60 .v6-s4 .v6-person{padding:13px}
+html.bmh-v60 .v6-s4 .v6-person-head b{font-size:14px}
+html.bmh-v60 .v6-s4 .v6-person-head span{font-size:11px}
+html.bmh-v60 .v6-s4 .v6-person-head button{font-size:12px;min-height:32px}
+html.bmh-v60 .v6-s4 .v6-person label{font-size:12px;line-height:1.4}
+html.bmh-v60 .v6-s4 .v6-person input,html.bmh-v60 .v6-s4 .v6-person select{font-size:14px;height:42px}
+html.bmh-v60 .v6-s4 .v6-person-actions button{font-size:13px;height:42px}
+html.bmh-v60 .v6-s4 .v6-feng-base small,html.bmh-v60 .v6-s4 .v6-feng-result small{font-size:11px}
+html.bmh-v60 .v6-s4 .v6-feng-base h3{font-size:20px}
+html.bmh-v60 .v6-s4 .v6-feng-base p,html.bmh-v60 .v6-s4 .v6-feng-result p{font-size:13px;line-height:1.55}
+html.bmh-v60 .v6-s4 .v6-feng-base b,html.bmh-v60 .v6-s4 .v6-ai-research b,
+html.bmh-v60 .v6-s4 .v6-feng-result article b{font-size:14px}
+html.bmh-v60 .v6-s4 .v6-ai-research span,html.bmh-v60 .v6-s4 .v6-feng-result article span,
+html.bmh-v60 .v6-s4 .v6-feng-result article small,html.bmh-v60 .v6-s4 .v6-feng-result footer a{font-size:12px;line-height:1.5}
+html.bmh-v60 .v6-s4 .v6-feng-result h4{font-size:18px}
+html.bmh-v60 .v6-s4 .v6-feng-result footer b{font-size:13px}
+html.bmh-v60 .v6-s5.v68-has-empty{grid-template-areas:"head head head" "empty empty empty" "tools plan inspector"}
+html.bmh-v60 .v6-s5 .v68-plan-empty{grid-area:empty;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:24px;background:#f1f7f2;border-color:#d4e6d8}
+html.bmh-v60 .v68-plan-empty small{font-size:11px;color:#327253;font-weight:850;letter-spacing:.1em}
+html.bmh-v60 .v68-plan-empty h3{font-size:22px;margin:5px 0}
+html.bmh-v60 .v68-plan-empty p{font-size:14px;line-height:1.5;margin:0;color:#64766b}
+html.bmh-v60 .v68-plan-empty button{min-height:46px;padding:0 18px;border:0;border-radius:10px;background:#1c6848;color:#fff;font-size:14px;font-weight:800;white-space:nowrap;cursor:pointer}
+html.bmh-v60 .v6-s5 .v6-room-types span{font-size:12px}
+html.bmh-v60 .v6-s5 .v6-tool-buttons button,html.bmh-v60 .v6-s5 .v6-plan-toolbar button{font-size:12px;min-height:40px;height:auto}
+html.bmh-v60 .v6-s5 .v6-plan-toolbar{min-height:50px;height:auto;flex-wrap:wrap;padding:5px 0}
+html.bmh-v60 .v6-s5 .v6-plan-toolbar>div{flex-wrap:wrap}
+html.bmh-v60 .v6-s5 .v6-plan-legend,html.bmh-v60 .v6-s5 .v6-plan-legend b{font-size:11px;height:auto;min-height:44px;line-height:1.5}
+html.bmh-v60 .v6-s5 .v6-room-editor h3{font-size:19px}
+html.bmh-v60 .v6-s5 .v6-room-editor label{font-size:13px}
+html.bmh-v60 .v6-s5 .v6-room-editor label>input{font-size:14px;height:42px}
+html.bmh-v60 .v6-s5 .v6-room-list button,html.bmh-v60 .v6-s5 .v6-room-list b{font-size:12px}
+html.bmh-v60 .v6-s8 .v6-cost-total small,html.bmh-v60 .v6-s8 .v6-cost-total span{font-size:12px;line-height:1.45}
+html.bmh-v60 .v6-s8 .v6-cost-total b{font-size:32px}
+html.bmh-v60 .v6-s8 .v6-cost-bars article b,html.bmh-v60 .v6-s8 .v6-cost-bars article span,
+html.bmh-v60 .v6-s8 .v6-cost-bars article strong,html.bmh-v60 .v6-s8 .v6-doc-list span{font-size:13px}
+html.bmh-v60 .v68-estimate-caveat,html.bmh-v60 .v68-fin-warning{font-size:13px;line-height:1.5;padding:12px;border:1px solid #edcf9d;background:#fff7e9;color:#72512d;border-radius:10px}
+html.bmh-v60 .v68-fin-warning{margin:12px 0}
+html.bmh-v60 .v68-funding-plan{display:grid;grid-template-columns:auto 1fr;gap:3px 11px;padding:14px;margin-top:12px;border:1px solid #d9e8dc;border-radius:12px;background:#f5faf6;align-items:center}
+html.bmh-v60 .v68-funding-plan b,html.bmh-v60 .v68-funding-plan strong{font-size:17px;color:#24684a}
+html.bmh-v60 .v68-funding-plan strong{color:#a85635}
+html.bmh-v60 .v68-funding-plan span{font-size:12px;line-height:1.45;color:#52675a}
+html.bmh-v60 .v68-funding-plan i{grid-column:1 / -1;font-size:14px;font-style:normal;color:#8eaa98}
+html.bmh-v60 .v68-fin-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+html.bmh-v60 .v68-fin-actions button{border:1px solid #bd8d5f;background:#fff;border-radius:8px;padding:8px 11px;font-size:12px;color:#845531;cursor:pointer}
+html.bmh-v60 .v6-s9 .v6-title p,html.bmh-v60 .v6-s10 .v6-title p{font-size:14px;line-height:1.55}
+html.bmh-v60 .v6-s9 .v6-panel-title b{font-size:17px}
+html.bmh-v60 .v6-s9 .v6-panel-title span{font-size:12px;line-height:1.45}
+html.bmh-v60 .v68-build-inputs{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}
+html.bmh-v60 .v68-build-inputs label,html.bmh-v60 .v68-build-cost{display:grid;gap:5px;font-size:12px;font-weight:700;color:#52645a}
+html.bmh-v60 .v68-build-inputs input,html.bmh-v60 .v68-build-cost input{min-width:0;height:40px;border:1px solid #dcded7;border-radius:8px;background:#fff;padding:0 9px;font-size:14px;color:#25382d}
+html.bmh-v60 .v68-build-total{display:grid;gap:4px;margin:10px 0;padding:11px;border-radius:10px;background:#f2f8f3}
+html.bmh-v60 .v68-build-total span{font-size:12px}
+html.bmh-v60 .v68-build-total b{font-size:15px}
+html.bmh-v60 .v6-s9 .v6-timeline article b{font-size:14px}
+html.bmh-v60 .v6-s9 .v6-timeline article span,html.bmh-v60 .v6-s9 .v6-timeline article small,
+html.bmh-v60 .v6-s9 .v6-timeline article em{font-size:12px;line-height:1.45}
+html.bmh-v60 .v6-s9 .v6-timeline article{align-items:start}
+html.bmh-v60 .v6-s9 .v6-timeline article>div{min-width:0}
+html.bmh-v60 .v68-build-cost{margin:9px 0}
+html.bmh-v60 .v6-s9{grid-template-columns:minmax(350px,390px) minmax(0,1fr) minmax(270px,315px)}
+html.bmh-v60 .v6-s9 .v6-timeline article{grid-template-columns:25px minmax(0,1fr)}
+html.bmh-v60 .v6-s9 .v6-timeline article>em{grid-column:2}
+@media(max-width:1180px){html.bmh-v60 .v6-s4{grid-template-columns:1fr 1fr;grid-template-areas:"head head" "land family" "feng feng"}}
+@media(max-width:900px){html.bmh-v60 .v6-s5{grid-template-columns:1fr 1fr;grid-template-areas:"head head" "tools inspector" "plan plan"}html.bmh-v60 .v6-s5.v68-has-empty{grid-template-areas:"head head" "empty empty" "tools inspector" "plan plan"}}
+@media(max-width:700px){
+  html.bmh-v60 .v6-s4,html.bmh-v60 .v6-s5,html.bmh-v60 .v6-s5.v68-has-empty{grid-template-columns:1fr;grid-template-areas:none}
+  html.bmh-v60 .v6-s4>*,html.bmh-v60 .v6-s5>*,html.bmh-v60 .v6-s5 .v68-plan-empty{grid-area:auto}
+  html.bmh-v60 .v6-s4-head,html.bmh-v60 .v6-plan-head{grid-template-columns:1fr}
+  html.bmh-v60 .v6-s4 .v6-people{grid-template-columns:1fr}
+  html.bmh-v60 .v6-s4 .v6-feng-base{grid-template-columns:1fr}
+  html.bmh-v60 .v6-s5 .v68-plan-empty{align-items:stretch;flex-direction:column}
+  html.bmh-v60 .v6-s5 .v6-plan-legend{flex-wrap:wrap;padding:9px}
+  html.bmh-v60 .v6-s8 .v6-cost-total b{font-size:27px}
+  html.bmh-v60 .v68-build-inputs{grid-template-columns:1fr}
+}
+@media(max-width:1180px){html.bmh-v60 .v6-s9{grid-template-columns:1fr;grid-template-areas:none}html.bmh-v60 .v6-s9>*{grid-area:auto}}

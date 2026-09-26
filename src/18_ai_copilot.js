@@ -9,14 +9,14 @@ BMH.aiContext=({lightweight=false}={})=>{
   const e=safe('estimate',()=>BMH.estimate(),{}),needs=safe('householdNeeds',()=>BMH.householdNeeds?.(),{});
   const review=lightweight?{}:safe('designReview',()=>BMH.designReview(),{}),perf=lightweight?{}:safe('performance',()=>BMH.performancePlan?.(),{});
   const computed={
-    estimate:{area:e.area,total:e.total,budget:e.budget,gap:e.gap,shell:e.shell,finish:e.finish,transport:e.transport,climatePrep:e.climatePrep,performanceUpgrade:e.performanceUpgrade,contingency:e.contingency},
+    estimate:{area:e.area,areaSource:e.areaSource,total:e.total,budget:e.budget,gap:e.gap,shell:e.shell,finish:e.finish,transport:e.transport,climatePrep:e.climatePrep,performanceUpgrade:e.performanceUpgrade,contingency:e.contingency},
     householdNeeds:needs
   };
   if(!lightweight){
     computed.designReview={overall:review.overall,budget:review.budget,function:review.function,climate:review.climate,daylight:review.daylight,ventilation:review.ventilation,circulation:review.circulation,siteFit:review.siteFit,durability:review.durability};
     computed.performance={energyScore:perf.energyScore,comfortScore:perf.comfortScore,waterScore:perf.waterScore,annualSavings:perf.annualSavings,payback:perf.payback,gridDemand:perf.gridDemand};
   }
-  return {name:p.name,style:p.style,site:p.site,finance:p.finance,household:p.household,plan:p.plan,materials:p.materials,performance:p.performance,computed};
+  return {name:p.name,style:p.style,site:p.site,siteIntelligence:p.siteIntelligence,finance:p.finance,household:p.household,plan:p.plan,materials:p.materials,performance:p.performance,computed};
 };
 
 BMH.aiCall=async(action,prompt='',extra={})=>{

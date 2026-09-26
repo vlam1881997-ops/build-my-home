@@ -52,7 +52,10 @@ BMH.performancePlan = () => {
 };
 BMH.materialPremium = (choices=BMH.state.project.materials.choices) => Object.entries(choices).reduce((s,[cat,id])=>s+(BMH.MATERIALS[cat]?.find(x=>x.id===id)?.premium||0),0);
 BMH.estimate = () => {
-  const p=BMH.state.project, area=Math.max(BMH.planArea(),p.site.width*p.site.depth*Math.min(1,p.site.floors*.72));
+  const p=BMH.state.project,env=BMH.buildableEnvelope(p.site),floors=Math.max(1,Math.min(10,Number(p.site.floors)||1)),planArea=BMH.planArea();
+  const plannedFloors=Array.from({length:floors},(_,floor)=>p.plan.rooms.filter(r=>r.floor===floor));
+  const planComplete=plannedFloors.every(rooms=>rooms.length>=2&&rooms.reduce((a,r)=>a+r.w*r.h,0)>=env.targetPlate*.65);
+  const areaSource=planComplete?'plan':'provisional',area=planComplete?planArea:Math.max(planArea,env.gfa*.85);
   const tierMul={economy:.9,standard:1,premium:1.22}[p.materials.tier]||1;
   const basis=BMH.dataCostBasis?BMH.dataCostBasis():{shellPerM2:3600000,finishPerM2:2350000,prepPerM2:280000};
   const shell=Math.round(area*basis.shellPerM2); const finish=Math.round(area*basis.finishPerM2*tierMul)+BMH.materialPremium();
@@ -68,7 +71,7 @@ BMH.estimate = () => {
   const performance=BMH.performancePlan?BMH.performancePlan():{upgradeCost:0};
   const performanceUpgrade=Math.round(performance.upgradeCost||0);
   const prep=Math.round(area*(basis.prepPerM2||280000)); const subtotal=shell+finish+transport+climatePrep+performanceUpgrade+prep; const contingency=Math.round(subtotal*.10); const total=subtotal+contingency;
-  return {area,shell,finish,transport,climatePrep,climatePackage,performanceUpgrade,performance,adaptation:adapt,basis,prep,contingency,total,budget:BMH.financeSummary().available,gap:BMH.financeSummary().available-total};
+  return {area,planArea,areaSource,shell,finish,transport,climatePrep,climatePackage,performanceUpgrade,performance,adaptation:adapt,basis,prep,contingency,total,budget:BMH.financeSummary().available,gap:BMH.financeSummary().available-total};
 };
 BMH.kua = (birth,gender='Nam') => {
   let y=String(Math.round(Number(birth)||0)); if(y.length!==4) return null; let sum=[...y].reduce((s,d)=>s+Number(d),0); while(sum>9)sum=[...String(sum)].reduce((s,d)=>s+Number(d),0);

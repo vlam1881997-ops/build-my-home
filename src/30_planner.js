@@ -377,7 +377,9 @@ BMH.autoPlanConcept = (strategy=BMH.state.project.site.designStrategy||'climate'
   const snap=n=>+BMH.roundTo(n,.1).toFixed(2), add=(floor,name,type,x,y,w,hh)=>{const r={id:`auto-r${++rid}`,floor,name,type,x:snap(x),y:snap(y),w:snap(w),h:snap(hh)};rooms.push(r);return r;};
   const door=(r,side='north',offset=.5,width=.9)=>openings.push({id:`auto-o${++oid}`,floor:r.floor,roomId:r.id,kind:'door',side,offset,width:Math.min(width,(side==='north'||side==='south'?r.w:r.h)-.12)});
   const win=(r,side='east',offset=.5,width=1.4)=>{const len=side==='north'||side==='south'?r.w:r.h;if(len>.8)openings.push({id:`auto-o${++oid}`,floor:r.floor,roomId:r.id,kind:'window',side,offset,width:Math.min(width,len-.18)});};
-  const people=2+(h.children?.length||0)+(h.relatives?.length||0), childNames=(h.children||[]).map((c,i)=>c.name||`Con ${i+1}`), upperBeds=['Phòng ngủ chính',...childNames.map(n=>`Phòng ${n}`)];
+  const childNames=(h.children||[]).map((c,i)=>c.name||`Con ${i+1}`), upperBeds=['Phòng ngủ chính',...childNames.map(n=>`Phòng ${n}`)];
+  const bedroomTarget=BMH.householdNeeds?.().bedrooms||upperBeds.length;
+  while(upperBeds.length+(h.relatives?.length?1:0)<bedroomTarget)upperBeds.push(`Phòng ngủ ${upperBeds.length+1}`);
   const serviceD=BMH.clamp(D*.19,2.8,3.8), serviceY=y0+D-serviceD, stairW=BMH.clamp(W*.42,1.7,2.35), bathW=W-stairW;
   const addService=(floor)=>{const bath=add(floor,`WC tầng ${floor+1}`,'bath',x0,serviceY,bathW,serviceD),stairs=add(floor,'Cầu thang','stairs',x0+bathW,serviceY,stairW,serviceD);door(bath,'north',.4,.75);door(stairs,'north',.55,.9);win(bath,'west',.5,.7);return {bath,stairs};};
   const hasRelative=(h.relatives||[]).length>0, oneFloor=floors===1, mainD=D-serviceD, weights=oneFloor?(hasRelative?[.24,.22,.27,.27]:[.32,.30,.38]):(hasRelative?[.34,.31,.35]:[.52,.48]), ys=[],depths=[];let acc=y0;
