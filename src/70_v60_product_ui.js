@@ -737,7 +737,7 @@ BMH.afterRender=()=>{
     setTimeout(()=>Promise.resolve(BMH.initMapStudio?.()).catch(()=>{}),120);
   }
   if(step===4)setTimeout(()=>BMH.v61OrientPlanner?.(),40);
-  if(step===6)BMH.mountStudio3D?.();
+  if(step===6)Promise.resolve(BMH.mountStudio3D?.()).catch(()=>{document.querySelector('#studio3dStage')?.classList.add('three-failed');document.querySelector('#studio3dLoading')?.remove();});
 };
 
 BMH.v6EditFact=key=>{
