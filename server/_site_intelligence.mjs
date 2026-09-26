@@ -81,7 +81,7 @@ function deterministic(site,places,elev){
   let floodScore=0;
   if(Number.isFinite(elev)){if(elev<3)floodScore+=3;else if(elev<8)floodScore+=2;else if(elev<15)floodScore+=1;}
   if(water?.distanceKm<.3)floodScore+=3;else if(water?.distanceKm<1)floodScore+=2;else if(water?.distanceKm<2)floodScore+=1;
-  const floodLevel=floodScore>=5?'Cao':floodScore>=3?'Trung bình':floodScore>=1?'Thấp - Trung bình':'Chưa thấy tín hiệu cao';
+  const floodLevel=floodScore>=5?'Cao':floodScore>=3?'Trung bình':floodScore>=1?'Cần kiểm tra thêm':'Chưa đủ dữ liệu';
   return {
     access:{level:accessLevel,score:accessScore,note:roadWidth?'Đường tiếp cận khai báo '+roadWidth+' m'+(major?' · đường chính gần nhất ~'+major.distanceKm+' km':'')+'.':'Chưa có bề rộng đường tiếp cận; đánh giá đang dùng dữ liệu đường lân cận.',majorRoadDistanceKm:major?.distanceKm??null,majorRoadName:major?.name||'',majorRoadType:major?.type||''},
     transport:{level:surcharge<=4?'Thấp':surcharge<=8?'Trung bình':'Cao',surchargePct:surcharge,note:'Hệ số sàng lọc vận chuyển '+surcharge+'% dựa trên bề rộng đường, khoảng cách đường chính và nhà cung cấp gần nhất.'},
@@ -94,7 +94,8 @@ export async function runSiteIntelligence(body={}){
   if(!Number.isFinite(lat)||!Number.isFinite(lng)||lat<-90||lat>90||lng<-180||lng>180)throw Object.assign(new Error('Tọa độ khu đất không hợp lệ.'),{statusCode:400});
   const key=lat.toFixed(4)+','+lng.toFixed(4)+':'+(Number(body.road_width_m)||0),now=Date.now(),cached=cache.get(key);
   if(body.force!==true&&cached&&now-cached.at<CACHE_TTL)return {cached:true,...cached.payload};
-  const [elements,elev]=await Promise.all([overpass(lat,lng).catch(()=>[]),elevation(lat,lng)]);
+  const [osm,elev]=await Promise.all([overpass(lat,lng).then(elements=>({ok:true,elements})).catch(()=>({ok:false,elements:[]})),elevation(lat,lng)]);
+  const elements=osm.elements;
   const places=classify(elements,lat,lng),screen=deterministic({road_width_m:body.road_width_m},places,elev);
   let ai=null,citations=[];
   if(geminiEnv().key){
@@ -118,15 +119,20 @@ export async function runSiteIntelligence(body={}){
       ai=g.result;citations=(g.citations||[]).slice(0,10);
     }catch(_){}
   }
+  const citedDomains=new Set(citations.flatMap(c=>{try{return [new URL(c.url).hostname.replace(/^www\./,'')];}catch{return [];}}));
+  const citedPlaces=items=>(items||[]).filter(x=>{
+    try{const host=new URL(x.website).hostname.replace(/^www\./,'');return /^https:\/\//i.test(x.website)&&[...citedDomains].some(d=>host===d||host.endsWith('.'+d));}catch{return false;}
+  }).map(x=>({...x,sourceUrl:x.website}));
   const payload={
     fetchedAt:new Date().toISOString(),key,elevation_m:elev,
-    flood:{...screen.flood,aiLevel:ai?.flood?.level||'',aiReason:safe(ai?.flood?.reason,500),sourceDate:safe(ai?.flood?.source_date,40)},
+    flood:{...screen.flood,aiLevel:citations.length&&['medium','high'].includes(ai?.flood?.level)?ai.flood.level:'',aiReason:safe(ai?.flood?.reason,500),sourceDate:safe(ai?.flood?.source_date,40)},
     access:{...screen.access,aiLevel:ai?.access?.level||'',aiReason:safe(ai?.access?.reason,500)},
     transport:{...screen.transport,aiLevel:ai?.transport?.level||'',aiReason:safe(ai?.transport?.reason,500),aiSurchargePct:Number(ai?.transport?.surcharge_pct)||0},
     suppliers:places.suppliers,builders:places.builders,
-    webSuppliers:(ai?.supplier_recommendations||[]).slice(0,8),webBuilders:(ai?.builder_recommendations||[]).slice(0,6),
-    citations,sources:['OpenStreetMap / Overpass','Open-Meteo Elevation'].concat(ai?['Gemini + Google Search grounding']:[]),
-    aiSummary:safe(ai?.summary,1200),warnings:(ai?.warnings||[]).map(x=>safe(x,300)).slice(0,8)
+    webSuppliers:citedPlaces(ai?.supplier_recommendations).slice(0,8),webBuilders:citedPlaces(ai?.builder_recommendations).slice(0,6),
+    citations,sources:[...(osm.ok?['OpenStreetMap / Overpass']:[]),...(elev!=null?['Open-Meteo Elevation']:[]),...(ai&&citations.length?['Gemini + Google Search grounding']:[])],
+    sourceStatus:{osm:osm.ok?'verified':'unavailable',elevation:elev!=null?'verified':'unavailable',web:ai&&citations.length?'cited':'unverified'},
+    aiSummary:safe(ai?.summary,1200),warnings:[...(!osm.ok?['Không lấy được dữ liệu OpenStreetMap; danh sách đường và nhà cung cấp chưa đầy đủ.']:[]),...(ai?.warnings||[]).map(x=>safe(x,300))].slice(0,8)
   };
   cache.set(key,{at:now,payload});return {cached:false,...payload};
 }

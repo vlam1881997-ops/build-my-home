@@ -57,6 +57,11 @@ BMH.estimate = () => {
   const basis=BMH.dataCostBasis?BMH.dataCostBasis():{shellPerM2:3600000,finishPerM2:2350000,prepPerM2:280000};
   const shell=Math.round(area*basis.shellPerM2); const finish=Math.round(area*basis.finishPerM2*tierMul)+BMH.materialPremium();
   const adapt=BMH.siteAdaptation?BMH.siteAdaptation(p.site):{roadPct:(p.site.road<3 ? .12 : p.site.road<5 ? .05 : .02),climatePct:0};
+  const si=p.siteIntelligence||{},siteKey=(Number(p.site.lat)||0).toFixed(4)+','+(Number(p.site.lng)||0).toFixed(4)+':'+(Number(p.site.road)||0);
+  if(si.status==='ready'&&si.key===siteKey&&Number.isFinite(Number(si.transport?.surchargePct))){
+    adapt.roadPct=BMH.clamp(Number(si.transport.surchargePct),0,25)/100;
+    adapt.transportSource='Site Intelligence · '+String(si.fetchedAt||'');
+  }else adapt.transportSource='Ước tính theo bề rộng đường khai báo';
   const transport=Math.round((shell+finish)*adapt.roadPct);
   const climatePackage=BMH.climatePackageMultiplier?BMH.climatePackageMultiplier(p.materials.climatePackage):1;
   const climatePrep=Math.round((shell+finish)*adapt.climatePct*climatePackage);

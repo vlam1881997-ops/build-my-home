@@ -1564,6 +1564,15 @@ html.bmh-v60 .v67-fallback-site-pin i::first-letter{transform:rotate(45deg)}
 html.bmh-v60 .v67-fallback-site-pin b{
   margin-top:5px;padding:4px 7px;border-radius:999px;background:#fff;color:#173d2c;font-size:8px;letter-spacing:.09em
 }
+html.bmh-v60 .bmh-pin-capture{position:absolute;inset:0;z-index:35;cursor:crosshair;touch-action:none}
+html.bmh-v60 .bmh-pin-capture:before{content:'Bấm hoặc kéo ghim để chọn khu đất';position:absolute;top:12px;left:50%;transform:translateX(-50%);padding:9px 13px;border-radius:999px;background:rgba(18,62,43,.94);color:#fff;font-size:12px;font-weight:750;white-space:nowrap;pointer-events:none}
+html.bmh-v60 .bmh-pin-capture:focus-visible{outline:3px solid #f6aa54;outline-offset:-4px}
+html.bmh-v60 .v67-fallback-site-pin{z-index:38}
+html.bmh-v60 .v67-weather-source{margin:10px 0 0;color:#526a5c;font-size:12px;line-height:1.45}
+html.bmh-v60 .v67-data-status{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:14px 0;padding:11px 13px;border:1px solid #dce6dc;border-radius:12px;background:#f3f8f2;color:#355745;font-size:12px}
+html.bmh-v60 .v67-data-status b{font-size:13px}
+html.bmh-v60 .v67-data-warnings{margin:8px 0;color:#855239;font-size:12px;line-height:1.45}
+html.bmh-v60 .v67-data-warnings p{margin:4px 0}
 html.bmh-v60 .v67-site-pin-wrap{background:transparent!important;border:0!important}
 html.bmh-v60 .v67-site-pin{
   position:relative;width:42px;height:48px;display:flex;justify-content:center;align-items:flex-start
@@ -1680,3 +1689,30 @@ html.bmh-v60 .v6-coordinate.scanning:after{
 }
 html.bmh-v60 .v67-scan-btn{display:none!important}
 @keyframes v68scan{to{left:110%}}
+
+/* Site Intelligence reading size on desktop and phone. */
+html.bmh-v60 .v67-site .v6-fields label>span{font-size:13px}
+html.bmh-v60 .v67-site .v6-fields input,html.bmh-v60 .v67-site .v6-fields select{min-height:44px;font-size:14px}
+html.bmh-v60 .v67-site .v6-inline-actions button{min-height:44px;font-size:13px}
+html.bmh-v60 .v67-site .v6-coordinate b{font-size:14px}
+html.bmh-v60 .v67-site .v6-coordinate span{font-size:12px}
+html.bmh-v60 .v67-site .v6-map-toolbar button{font-size:12px;min-height:40px}
+html.bmh-v60 .v67-site .v67-map-legend span{font-size:12px}
+html.bmh-v60 .v67-site .v67-pin-flow>span b{font-size:13px}
+html.bmh-v60 .v67-site .v67-pin-flow>span small{font-size:11px}
+html.bmh-v60 .v67-site .v67-intel-head p{font-size:14px}
+html.bmh-v60 .v67-site .v67-intel-kpis small{font-size:12px}
+html.bmh-v60 .v67-site .v67-intel-kpis b{font-size:19px}
+html.bmh-v60 .v67-site .v67-intel-kpis span{font-size:13px}
+html.bmh-v60 .v67-site .v67-list-title span b{font-size:15px}
+html.bmh-v60 .v67-site .v67-list-title span small,html.bmh-v60 .v67-site .v67-list-title>em{font-size:12px}
+html.bmh-v60 .v67-site .v67-place-card b{font-size:14px}
+html.bmh-v60 .v67-site .v67-place-card span,html.bmh-v60 .v67-site .v67-place-card small,html.bmh-v60 .v67-site .v67-place-card>a{font-size:12px}
+html.bmh-v60 .v67-site .v67-empty,html.bmh-v60 .v67-site .v67-sources a,html.bmh-v60 .v67-site .v67-disclaimer small{font-size:12px}
+html.bmh-v60 .v67-site .v67-disclaimer b{font-size:14px}
+@media(max-width:760px){
+  html.bmh-v60 .v67-site .v6-map-panel #map{height:420px!important;min-height:420px!important}
+  html.bmh-v60 .v67-site .v6-map-toolbar{align-items:flex-start;flex-direction:column}
+  html.bmh-v60 .v67-site .v6-map-toolbar>div{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%}
+  html.bmh-v60 .v67-site .v6-map-toolbar button{padding:0 5px}
+}
