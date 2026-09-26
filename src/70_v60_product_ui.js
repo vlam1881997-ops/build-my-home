@@ -696,13 +696,14 @@ BMH.screen8=()=>{
    +'</div>';
 };
 
+BMH.v69EvidenceCard=(x,stages)=>'<article class="v69-evidence-row"><i>'+(x.type==='application/pdf'?'▤':'▧')+'</i><div><b>'+BMH.v6Esc(x.name)+'</b><span>'+BMH.v6Esc(stages[x.stage]||'Giai đoạn')+' · '+BMH.num(x.size/1048576,1)+' MB · '+BMH.v6Esc(x.addedAt?new Date(x.addedAt).toLocaleDateString('vi-VN'):'')+'</span></div><button data-evidence-open="'+BMH.v6Esc(x.id)+'">Xem</button><button data-evidence-delete="'+BMH.v6Esc(x.id)+'" aria-label="Xóa '+BMH.v6Esc(x.name)+'">×</button></article>';
 BMH.screen9=()=>{
-  const d=BMH.state.project.dossier||{},schedule=BMH.dossierSchedule(),mep=BMH.mepChecklistRows(),progress=BMH.clamp(Number(d.progress)||0,0,100),checked=mep.filter(x=>x.checked).length,spent=schedule.reduce((sum,x)=>sum+x.actualSpent,0),planned=schedule.reduce((sum,x)=>sum+x.amount,0);
+  const d=BMH.state.project.dossier||{},schedule=BMH.dossierSchedule(),mep=BMH.mepChecklistRows(),progress=BMH.clamp(Number(d.progress)||0,0,100),checked=mep.filter(x=>x.checked).length,spent=schedule.reduce((sum,x)=>sum+x.actualSpent,0),planned=schedule.reduce((sum,x)=>sum+x.amount,0),evidence=d.evidence||[],stages=Object.fromEntries(BMH.DOSSIER_STAGE_DEFS.map(x=>[x.id,x.name]));
   return '<div class="v6-s9">'
    +'<section class="v6-card v6-build-head">'+BMH.v6Title(9,'GIÁM SÁT THI CÔNG','Một màn hình để biết công trình đang ở đâu và việc gì chưa được phép bỏ sót.','Tiến độ, checklist MEP và nhật ký hiện trường được gom về một chỗ.')+'<div class="v6-progress"><small>Tổng tiến độ</small><b>'+progress+'%</b><i><span style="width:'+progress+'%"></span></i></div></section>'
    +'<aside class="v6-card v6-timeline">'+BMH.v6PanelTitle('✓','Tiến độ thi công','Nhập số liệu thực tế để theo dõi chênh lệch.')+'<div class="v68-build-inputs"><label>Ngày dự kiến khởi công<input data-path="project.dossier.startDate" type="date" value="'+BMH.v6Esc(d.startDate||'')+'"></label><label>Tiến độ thực tế (%)<input data-path="project.dossier.progress" type="number" min="0" max="100" value="'+progress+'"></label></div><div class="v68-build-total"><span>Đã ghi chi phí: <b>'+BMH.money(spent)+'</b></span><span>Dự toán: <b>'+BMH.money(planned)+'</b></span></div><div>'+schedule.map(x=>'<article class="'+x.status+'"><i>'+(x.status==='done'?'✓':x.status==='active'?'●':'○')+'</i><div><b>'+BMH.v6Esc(x.name)+'</b><span>'+(x.start?BMH.dateLabel(x.start)+' → '+BMH.dateLabel(x.end):'Chưa đặt ngày khởi công')+'</span><label class="v68-build-cost">Chi phí thực tế (triệu)<input type="number" min="0" step="1" data-scale="1000000" data-path="project.dossier.actualCosts.'+x.id+'" value="'+Math.round(x.actualSpent/1000000)+'"></label><small>Kế hoạch '+BMH.money(x.amount)+(x.actualSpent>x.amount?' · Vượt phân bổ '+BMH.money(x.actualSpent-x.amount):'')+'</small></div><em>'+(x.status==='done'?'Hoàn thành':x.status==='active'?'Đang làm':'Chưa bắt đầu')+'</em></article>').join('')+'</div></aside>'
-   +'<section class="v6-build-main"><div class="v6-card v6-site-log">'+BMH.v6PanelTitle('▧','Nhật ký hiện trường','Không dùng ảnh minh họa giả khi chưa có dữ liệu thật.')+'<div class="v6-site-empty"><i>＋</i><div><b>Chưa có ảnh thực địa</b><span>Khi module nhật ký được nối, ảnh sẽ được nhóm theo giai đoạn và AI có thể đối chiếu issue / checklist.</span></div></div></div><div class="v6-card v6-mep">'+BMH.v6PanelTitle('⚙','Checklist nghiệm thu MEP',checked+'/'+mep.length+' hạng mục đã kiểm')+'<div>'+mep.map(x=>'<label><input type="checkbox" data-check="'+x.id+'" '+(x.checked?'checked':'')+'><i>'+(x.checked?'✓':'○')+'</i><span>'+BMH.v6Esc(x.name)+'</span><em>'+(x.checked?'Đã kiểm':'Chưa kiểm')+'</em></label>').join('')+'</div></div></section>'
-   +'<aside class="v6-card v6-supervisor">'+BMH.v6PanelTitle('✦','AI Giám sát viên','Chỉ phân tích dữ liệu dự án thật đang có.')+'<div class="v6-advice"><article><i>✓</i><div><b>Tiến độ</b><span>'+progress+'% dự án đã được ghi nhận.</span></div></article><article><i>'+(mep.length-checked>4?'!':'✓')+'</i><div><b>MEP</b><span>'+(mep.length-checked)+' hạng mục chưa đánh dấu kiểm.</span></div></article><article><i>!</i><div><b>Dữ liệu hiện trường</b><span>Chưa có ảnh thực địa để AI xác minh chất lượng.</span></div></article></div><div class="v6-next-card"><small>Ưu tiên</small><b>Khóa checklist kỹ thuật trước khi tô tường, đóng trần hoặc che hệ MEP.</b><button data-ai-open>Hỏi AI →</button></div></aside>'
+   +'<section class="v6-build-main"><div class="v6-card v6-site-log">'+BMH.v6PanelTitle('▧','Nhật ký hiện trường',evidence.length+' tệp thực tế theo giai đoạn')+'<div class="v69-evidence-upload"><label>Giai đoạn<select data-path="project.dossier.currentStage">'+BMH.DOSSIER_STAGE_DEFS.map(x=>'<option value="'+x.id+'" '+(d.currentStage===x.id?'selected':'')+'>'+BMH.v6Esc(x.name)+'</option>').join('')+'</select></label><label class="v69-file-picker">＋ Thêm ảnh hoặc PDF<input type="file" data-evidence-upload multiple accept="image/jpeg,image/png,image/webp,application/pdf"></label></div><p class="v69-evidence-note">Tệp lưu trên trình duyệt này, tối đa 8 MB/tệp và 30 tệp. Tải ZIP ở Bước 10 để sao lưu cùng hồ sơ.</p>'+(evidence.length?'<div class="v69-evidence-list">'+evidence.map(x=>BMH.v69EvidenceCard(x,stages)).join('')+'</div>':'<div class="v6-site-empty"><i>＋</i><div><b>Chưa có ảnh/hồ sơ thực địa</b><span>Chọn giai đoạn rồi thêm ảnh hoặc PDF để lưu chứng cứ thi công thật.</span></div></div>')+'</div><div class="v6-card v6-mep">'+BMH.v6PanelTitle('⚙','Checklist nghiệm thu MEP',checked+'/'+mep.length+' hạng mục đã kiểm')+'<div>'+mep.map(x=>'<label><input type="checkbox" data-check="'+x.id+'" '+(x.checked?'checked':'')+'><i>'+(x.checked?'✓':'○')+'</i><span>'+BMH.v6Esc(x.name)+'</span><em>'+(x.checked?'Đã kiểm':'Chưa kiểm')+'</em></label>').join('')+'</div></div></section>'
+   +'<aside class="v6-card v6-supervisor">'+BMH.v6PanelTitle('✦','AI Giám sát viên','Chỉ phân tích dữ liệu dự án thật đang có.')+'<div class="v6-advice"><article><i>✓</i><div><b>Tiến độ</b><span>'+progress+'% dự án đã được ghi nhận.</span></div></article><article><i>'+(mep.length-checked>4?'!':'✓')+'</i><div><b>MEP</b><span>'+(mep.length-checked)+' hạng mục chưa đánh dấu kiểm.</span></div></article><article><i>!</i><div><b>Dữ liệu hiện trường</b><span>'+evidence.length+' tệp đã lưu cục bộ. AI chưa tự xác minh chất lượng ảnh/hồ sơ.</span></div></article></div><div class="v6-next-card"><small>Ưu tiên</small><b>Khóa checklist kỹ thuật trước khi tô tường, đóng trần hoặc che hệ MEP.</b><button data-ai-open>Hỏi AI →</button></div></aside>'
    +'</div>';
 };
 
@@ -882,12 +883,21 @@ document.addEventListener('keydown',e=>{
 
 document.addEventListener('click',e=>{
   if(!e.target.closest?.('#app'))return;
+  const evidenceOpen=e.target.closest('[data-evidence-open]');
+  if(evidenceOpen){e.preventDefault();BMH.openEvidence(evidenceOpen.dataset.evidenceOpen);return;}
+  const evidenceDelete=e.target.closest('[data-evidence-delete]');
+  if(evidenceDelete){e.preventDefault();BMH.deleteEvidence(evidenceDelete.dataset.evidenceDelete);return;}
   const pt=e.target.closest('[data-v6-partner]');
   if(pt){BMH.state.project.household.partnerEnabled=pt.dataset.v6Partner==='on';BMH.syncHouseholdSize?.();BMH.save();BMH.render({preserveScroll:true});return;}
   if(e.target.closest('[data-v6-feng]')){e.preventDefault();BMH.v6RunFeng();return;}
 });
 
 document.addEventListener('change',e=>{
+  if(e.target?.matches?.('[data-evidence-upload]')){
+    const files=[...(e.target.files||[])],stage=BMH.state.project.dossier.currentStage;e.target.value='';
+    if(files.length)BMH.addEvidenceFiles(files,stage);
+    return;
+  }
   const person=e.target.closest?.('[data-v6-person]');
   if(person){
     const h=BMH.state.project.household,key=person.dataset.v6Person==='child'?'children':'relatives',row=h[key].find(x=>x.id===person.dataset.id);

@@ -105,3 +105,41 @@ test('a new construction dossier starts at zero and records actual spending by s
   assert.equal(BMH.dossierSchedule()[0].actualSpent,120000000);
   assert.equal(BMH.dossierSchedule()[0].variance,20000000);
 });
+
+test('construction evidence metadata survives project save and reload',()=>{
+  const {BMH}=stateEngine();
+  BMH.state.project.dossier.evidence.push({id:'evidence-1',stage:'mep',name:'test-ap-luc.pdf',type:'application/pdf',size:1042,addedAt:'2026-09-26T00:00:00Z'});
+  BMH.save();
+  const evidence=stateEngine(BMH.state).BMH.state.project.dossier.evidence;
+  assert.equal(evidence.length,1);
+  assert.equal(evidence[0].stage,'mep');
+  assert.equal(evidence[0].name,'test-ap-luc.pdf');
+});
+
+test('dossier ZIP contains the original construction evidence bytes',async()=>{
+  let downloaded=null;
+  const bytes=new Uint8Array([0x25,0x50,0x44,0x46,0x00,0xff]);
+  const BMH={
+    state:{project:{site:{floors:1}}},isUnlocked:()=>true,
+    createDossierSnapshot:()=>({evidence:[{id:'evidence-1',stage:'mep',name:'kiem-tra.pdf',type:'application/pdf',size:bytes.length,addedAt:'2026-09-26T00:00:00Z'}],boq:[],materials:[],cashflow:[],mep:[]}),
+    evidenceGet:async()=>new Blob([bytes]),planSvg:()=>'<svg/>',elevationSvg:()=>'<svg/>',sectionSvg:()=>'<svg/>',realDataExport:()=>({}),
+    download:(name,blob)=>{downloaded={name,blob};},toast:()=>{}
+  };
+  vm.runInNewContext(fs.readFileSync(new URL('../src/40_exports.js',import.meta.url),'utf8'),{BMH,TextEncoder,Uint8Array,Blob,JSON,Math,Number,String,Intl});
+  BMH.dossierWorkbook=()=>'<Workbook/>';
+  BMH.dossierPrintHtml=()=>'<html/>';
+  await BMH.exportDossierBundle();
+  assert.equal(downloaded.name,'Build-My-Home-Ho-So-V5.0.zip');
+  const buffer=Buffer.from(await downloaded.blob.arrayBuffer());
+  let cursor=0,found=false;
+  while(buffer.readUInt32LE(cursor)===0x04034b50){
+    assert.equal(buffer.readUInt16LE(cursor+6)&0x0800,0x0800);
+    const size=buffer.readUInt32LE(cursor+18),nameLength=buffer.readUInt16LE(cursor+26),extraLength=buffer.readUInt16LE(cursor+28);
+    const name=buffer.toString('utf8',cursor+30,cursor+30+nameLength),start=cursor+30+nameLength+extraLength;
+    if(name==='thuc-dia/mep/evidence-1-kiem-tra.pdf'){
+      assert.deepEqual(buffer.subarray(start,start+size),Buffer.from(bytes));found=true;
+    }
+    cursor=start+size;
+  }
+  assert.equal(found,true);
+});

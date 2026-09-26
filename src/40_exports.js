@@ -17,7 +17,7 @@ BMH.zipStored = files => {
   const crc32=u8=>{let c=0xffffffff;for(const b of u8)c=crcTable[(c^b)&255]^(c>>>8);return (c^0xffffffff)>>>0;};
   const parts=[], central=[]; let offset=0;
   const u16=n=>new Uint8Array([n&255,(n>>>8)&255]); const u32=n=>new Uint8Array([n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]);
-  for(const [name,content] of files){const n=enc.encode(name),d=content instanceof Uint8Array?content:enc.encode(String(content)),crc=crc32(d);const local=[u32(0x04034b50),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(d.length),u32(d.length),u16(n.length),u16(0),n,d]; const len=local.reduce((s,x)=>s+x.length,0); parts.push(...local); central.push(...[u32(0x02014b50),u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(d.length),u32(d.length),u16(n.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset),n]); offset+=len;}
+  for(const [name,content] of files){const n=enc.encode(name),d=content instanceof Uint8Array?content:enc.encode(String(content)),crc=crc32(d);const local=[u32(0x04034b50),u16(20),u16(0x0800),u16(0),u16(0),u16(0),u32(crc),u32(d.length),u32(d.length),u16(n.length),u16(0),n,d]; const len=local.reduce((s,x)=>s+x.length,0); parts.push(...local); central.push(...[u32(0x02014b50),u16(20),u16(20),u16(0x0800),u16(0),u16(0),u16(0),u32(crc),u32(d.length),u32(d.length),u16(n.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset),n]); offset+=len;}
   const centralOffset=offset, centralLen=central.reduce((s,x)=>s+x.length,0); parts.push(...central,...[u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(centralLen),u32(centralOffset),u16(0)]); return new Blob(parts,{type:'application/zip'});
 };
 BMH.exportBundle = () => {
@@ -45,17 +45,18 @@ BMH.excelWorkbook = sheets => {
   return `<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Top"/><Font ss:FontName="Arial" ss:Size="10"/></Style><Style ss:ID="Header"><Font ss:FontName="Arial" ss:Size="10" ss:Bold="1"/><Interior ss:Color="#EAF2E7" ss:Pattern="Solid"/><Alignment ss:Vertical="Top" ss:WrapText="1"/></Style></Styles>${sheets.map((s,i)=>`<Worksheet ss:Name="${esc(cleanName(s.name,i))}"><Table>${(s.rows||[]).map((r,ri)=>`<Row>${r.map(v=>cell(v,ri===0)).join('')}</Row>`).join('')}</Table></Worksheet>`).join('')}</Workbook>`;
 };
 BMH.dossierWorkbook = (snap=BMH.createDossierSnapshot()) => {
-  const summary=[['Nội dung','Giá trị'],['Tên dự án',snap.project.name],['Phiên bản',snap.version],['Revision',snap.revision],['Ngày xuất',snap.generatedAt],['Địa điểm',[snap.project.address,snap.project.district,snap.project.province].filter(Boolean).join(', ')],['Lô đất',snap.project.lot],['Số tầng',snap.project.floors],['Hướng mặt tiền',snap.project.frontDirection],['Diện tích quy đổi (m²)',snap.summary.grossArea],['Ngân sách',snap.summary.budget],['Dự toán',snap.summary.estimate],['Chênh lệch',snap.summary.gap],['Tiến độ (%)',snap.summary.progress],['Mức hoàn thiện dữ liệu hồ sơ (%)',snap.summary.completeness.percent],['Kiến trúc sư',snap.project.architect||''],['Nhà thầu',snap.project.contractor||''],['Nguồn đơn giá',snap.pricing.source],['Ngày nguồn',snap.pricing.date],['Tham chiếu',snap.pricing.reference]];
+  const summary=[['Nội dung','Giá trị'],['Tên dự án',snap.project.name],['Phiên bản',snap.version],['Revision',snap.revision],['Ngày xuất',snap.generatedAt],['Địa điểm',[snap.project.address,snap.project.district,snap.project.province].filter(Boolean).join(', ')],['Lô đất',snap.project.lot],['Số tầng',snap.project.floors],['Hướng mặt tiền',snap.project.frontDirection],['Diện tích quy đổi (m²)',snap.summary.grossArea],['Ngân sách',snap.summary.budget],['Dự toán',snap.summary.estimate],['Đã ghi chi phí thực tế',snap.summary.actualSpent],['Chênh lệch với ngân sách',snap.summary.gap],['Tiến độ (%)',snap.summary.progress],['Mức hoàn thiện dữ liệu hồ sơ (%)',snap.summary.completeness.percent],['Kiến trúc sư',snap.project.architect||''],['Nhà thầu',snap.project.contractor||''],['Nguồn đơn giá',snap.pricing.source],['Ngày nguồn',snap.pricing.date],['Tham chiếu',snap.pricing.reference]];
   const boq=[['Mã','Nhóm','Hạng mục','ĐVT','Khối lượng','Đơn giá phân bổ','Thành tiền','Ghi chú'],...snap.boq.map(x=>[x.code,x.group,x.name,x.unit,x.qty,x.rate,x.amount,x.note])];
   const mats=[['Nhóm','Vật liệu','Quy cách','Khối lượng','ĐVT','Giá / báo giá','Nguồn','Trạng thái'],...snap.materials.map(x=>[x.group,x.name,x.spec,x.qty,x.unit,x.price,x.source,x.status])];
   const areas=[['Tầng','Không gian','Diện tích m²','Chu vi m','Loại','Cửa đi','Cửa sổ','Ánh sáng','Thông gió'],...snap.areas.map(x=>[x.floor,x.name,+x.area.toFixed(2),+x.perimeter.toFixed(2),x.type,x.doors,x.windows,x.daylight,x.ventilation])];
   const openings=[['Mã','Tầng','Phòng','Loại','Rộng m','Cao m','Bậu m','Hướng'],...snap.openings.map(x=>[x.code,x.floor,x.room,x.kind==='door'?'Cửa đi':'Cửa sổ',x.width,x.height,x.sill,x.side])];
-  const schedule=[['#','Giai đoạn','Bắt đầu','Kết thúc','Tuần','Tỷ lệ giải ngân %','Số tiền','Tiến độ %','Trạng thái','Mốc nghiệm thu'],...snap.schedule.map((x,i)=>[i+1,x.name,x.start,x.end,x.weeks,x.pct,x.amount,x.progress,x.status,x.milestone])];
-  const cash=[['#','Giai đoạn','Bắt đầu','Kết thúc','Tỷ lệ %','Số tiền','Mốc nghiệm thu'],...snap.cashflow.map(x=>[x.no,x.stage,x.start,x.end,x.pct,x.amount,x.milestone])];
+  const schedule=[['#','Giai đoạn','Bắt đầu','Kết thúc','Tuần','Tỷ lệ giải ngân %','Số tiền dự toán','Chi thực tế','Chênh lệch','Tiến độ %','Trạng thái','Mốc nghiệm thu'],...snap.schedule.map((x,i)=>[i+1,x.name,x.start,x.end,x.weeks,x.pct,x.amount,x.actualSpent,x.variance,x.progress,x.status,x.milestone])];
+  const cash=[['#','Giai đoạn','Bắt đầu','Kết thúc','Tỷ lệ %','Số tiền dự toán','Chi thực tế','Chênh lệch','Mốc nghiệm thu'],...snap.cashflow.map(x=>[x.no,x.stage,x.start,x.end,x.pct,x.amount,x.actualSpent,x.variance,x.milestone])];
   const mep=[['#','Hạng mục','Đã kiểm tra','Ghi chú'],...snap.mep.map(x=>[x.no,x.name,x.checked?'Có':'Chưa',x.note])];
   const drawings=[['Mã','Tên bản vẽ','Tên tệp'],...snap.drawings.map(x=>[x.code,x.name,x.file])];
+  const evidence=[['Giai đoạn','Tên tệp','Loại','Dung lượng (byte)','Ngày thêm'],...(snap.evidence||[]).map(x=>[x.stage,x.name,x.type,x.size,x.addedAt])];
   const notes=[['Lưu ý'],...snap.disclaimers.map(x=>[x])];
-  return BMH.excelWorkbook([{name:'Tong quan',rows:summary},{name:'BOQ',rows:boq},{name:'Vat lieu',rows:mats},{name:'Dien tich',rows:areas},{name:'Cua',rows:openings},{name:'Tien do',rows:schedule},{name:'Dong tien',rows:cash},{name:'MEP',rows:mep},{name:'Ban ve',rows:drawings},{name:'Luu y',rows:notes}]);
+  return BMH.excelWorkbook([{name:'Tong quan',rows:summary},{name:'BOQ',rows:boq},{name:'Vat lieu',rows:mats},{name:'Dien tich',rows:areas},{name:'Cua',rows:openings},{name:'Tien do',rows:schedule},{name:'Dong tien',rows:cash},{name:'MEP',rows:mep},{name:'Ban ve',rows:drawings},{name:'Thuc dia',rows:evidence},{name:'Luu y',rows:notes}]);
 };
 BMH.exportDossierExcel = () => {
   if(!BMH.isUnlocked())return BMH.openPaywall();
@@ -68,7 +69,7 @@ BMH.exportDrawingsBundle = () => {
   files.push(['mat-dung-chinh.svg',BMH.elevationSvg()],['mat-cat-A-A.svg',BMH.sectionSvg()],['danh-muc-ban-ve.csv',BMH.csv([['Mã','Tên bản vẽ','Tệp'],...snap.drawings.map(x=>[x.code,x.name,x.file])])]);
   BMH.download('BMH-Ban-ve-V5.0.zip',BMH.zipStored(files),'application/zip');
 };
-BMH.exportDossierBundle = () => {
+BMH.exportDossierBundle = async () => {
   if(!BMH.isUnlocked())return BMH.openPaywall();
   const snap=BMH.createDossierSnapshot(),files=[
     ['BMH-Ho-so-xay-nha-V5.0.xls',BMH.dossierWorkbook(snap)],
@@ -76,11 +77,20 @@ BMH.exportDossierBundle = () => {
     ['BMH-du-lieu-ho-so.json',JSON.stringify(snap,null,2)],
     ['BOQ.csv',BMH.csv([['Mã','Nhóm','Hạng mục','ĐVT','Khối lượng','Đơn giá phân bổ','Thành tiền','Ghi chú'],...snap.boq.map(x=>[x.code,x.group,x.name,x.unit,x.qty,x.rate,x.amount,x.note])])],
     ['vat-lieu.csv',BMH.csv([['Nhóm','Vật liệu','Quy cách','Khối lượng','ĐVT','Giá / báo giá','Nguồn','Trạng thái'],...snap.materials.map(x=>[x.group,x.name,x.spec,x.qty,x.unit,x.price,x.source,x.status])])],
-    ['tien-do-dong-tien.csv',BMH.csv([['#','Giai đoạn','Bắt đầu','Kết thúc','Tỷ lệ %','Số tiền','Tiến độ %','Mốc nghiệm thu'],...snap.cashflow.map(x=>[x.no,x.stage,x.start,x.end,x.pct,x.amount,x.progress,x.milestone])])],
+    ['tien-do-dong-tien.csv',BMH.csv([['#','Giai đoạn','Bắt đầu','Kết thúc','Tỷ lệ %','Số tiền dự toán','Chi thực tế','Chênh lệch','Tiến độ %','Mốc nghiệm thu'],...snap.cashflow.map(x=>[x.no,x.stage,x.start,x.end,x.pct,x.amount,x.actualSpent,x.variance,x.progress,x.milestone])])],
     ['MEP-checklist.csv',BMH.csv([['#','Hạng mục','Trạng thái','Ghi chú'],...snap.mep.map(x=>[x.no,x.name,x.checked?'Đã kiểm tra':'Chưa kiểm tra',x.note])])]
   ];
   for(let i=0;i<Math.max(1,Number(BMH.state.project.site.floors)||1);i++)files.push([`ban-ve/mat-bang-tang-${i+1}.svg`,BMH.planSvg({interactive:false,floor:i})]);
   files.push(['ban-ve/mat-dung-chinh.svg',BMH.elevationSvg()],['ban-ve/mat-cat-A-A.svg',BMH.sectionSvg()],['project-backup.json',JSON.stringify(BMH.state,null,2)],['real-data-engine.json',JSON.stringify(BMH.realDataExport(),null,2)]);
+  const evidenceRows=[['Giai đoạn','Tên tệp','Dung lượng (byte)','Ngày thêm','Tệp trong ZIP','Trạng thái']];let missing=0;
+  for(const x of snap.evidence||[]){
+    let blob=null;try{blob=await BMH.evidenceGet(x.id);}catch(_){}
+    const cleanName=String(x.name||'tep').replace(/[\\/\x00-\x1f<>:"|?*]/g,'_').slice(0,100),zipName=`thuc-dia/${x.stage}/${x.id}-${cleanName}`;
+    if(blob){files.push([zipName,new Uint8Array(await blob.arrayBuffer())]);evidenceRows.push([x.stage,x.name,x.size,x.addedAt,zipName,'Có tệp gốc']);}
+    else{missing++;evidenceRows.push([x.stage,x.name,x.size,x.addedAt,'','Thiếu tệp gốc trên trình duyệt này']);}
+  }
+  files.push(['thuc-dia/danh-muc.csv',BMH.csv(evidenceRows)]);
   BMH.download('Build-My-Home-Ho-So-V5.0.zip',BMH.zipStored(files),'application/zip');
+  if(missing)BMH.toast(missing+' tệp thực địa không còn trên trình duyệt này; xem danh mục trong ZIP.');
 };
 BMH.exportBundle = BMH.exportDossierBundle;
