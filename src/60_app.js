@@ -26,7 +26,7 @@ BMH.ensureLeaflet = () => {
   if(window.L)return Promise.resolve(window.L);
   if(BMH.leafletPromise)return BMH.leafletPromise;
   const sources=[
-    {js:'/vendor/leaflet/leaflet.js',css:'/vendor/leaflet/leaflet.css'},
+    {js:'vendor/leaflet/leaflet.js',css:'vendor/leaflet/leaflet.css'},
     {js:'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',css:'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'},
     {js:'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js',css:'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'}
   ];
