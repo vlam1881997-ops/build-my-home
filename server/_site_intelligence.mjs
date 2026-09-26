@@ -102,7 +102,8 @@ export async function runSiteIntelligence(body={}){
     const loc=[safe(body.address,220),safe(body.district,120),safe(body.province,120),'Việt Nam'].filter(Boolean).join(', ');
     const prompt=[
       'Đánh giá sơ bộ khu đất phục vụ xây nhà tại Việt Nam dựa trên dữ liệu dưới đây và Google Search.',
-      'Vị trí: '+loc,'Tọa độ: '+lat+', '+lng,'Cao độ Open-Meteo: '+(elev==null?'không có':elev+' m'),
+      'Vị trí khai báo (nếu đã xác nhận): '+loc,'Tọa độ ghim ưu tiên: '+lat+', '+lng,'Cao độ Open-Meteo: '+(elev==null?'không có':elev+' m'),
+      'Tọa độ ghim là nguồn vị trí chính. Chỉ dùng địa chỉ khi đối chiếu được với tọa độ; không suy diễn rủi ro hay nhà cung cấp ở địa danh khác.',
       'Đường tiếp cận do người dùng khai báo: '+(Number(body.road_width_m)||0)+' m',
       'Đường chính OSM gần nhất: '+(places.roads[0]?JSON.stringify(places.roads[0]):'không có dữ liệu'),
       'Sông/kênh/mặt nước OSM gần nhất: '+(places.waters[0]?JSON.stringify(places.waters[0]):'không có dữ liệu'),
@@ -125,14 +126,14 @@ export async function runSiteIntelligence(body={}){
   }).map(x=>({...x,sourceUrl:x.website}));
   const payload={
     fetchedAt:new Date().toISOString(),key,elevation_m:elev,
-    flood:{...screen.flood,aiLevel:citations.length&&['medium','high'].includes(ai?.flood?.level)?ai.flood.level:'',aiReason:safe(ai?.flood?.reason,500),sourceDate:safe(ai?.flood?.source_date,40)},
-    access:{...screen.access,aiLevel:ai?.access?.level||'',aiReason:safe(ai?.access?.reason,500)},
-    transport:{...screen.transport,aiLevel:ai?.transport?.level||'',aiReason:safe(ai?.transport?.reason,500),aiSurchargePct:Number(ai?.transport?.surcharge_pct)||0},
+    flood:{...screen.flood,aiLevel:citations.length&&['medium','high'].includes(ai?.flood?.level)?ai.flood.level:'',aiReason:citations.length&&['medium','high'].includes(ai?.flood?.level)?safe(ai.flood.reason,500):'',sourceDate:citations.length?safe(ai?.flood?.source_date,40):''},
+    access:{...screen.access,aiLevel:citations.length?ai?.access?.level||'':'',aiReason:citations.length?safe(ai?.access?.reason,500):''},
+    transport:{...screen.transport,aiLevel:citations.length?ai?.transport?.level||'':'',aiReason:citations.length?safe(ai?.transport?.reason,500):'',aiSurchargePct:citations.length?Number(ai?.transport?.surcharge_pct)||0:0},
     suppliers:places.suppliers,builders:places.builders,
     webSuppliers:citedPlaces(ai?.supplier_recommendations).slice(0,8),webBuilders:citedPlaces(ai?.builder_recommendations).slice(0,6),
     citations,sources:[...(osm.ok?['OpenStreetMap / Overpass']:[]),...(elev!=null?['Open-Meteo Elevation']:[]),...(ai&&citations.length?['Gemini + Google Search grounding']:[])],
     sourceStatus:{osm:osm.ok?'verified':'unavailable',elevation:elev!=null?'verified':'unavailable',web:ai&&citations.length?'cited':'unverified'},
-    aiSummary:safe(ai?.summary,1200),warnings:[...(!osm.ok?['Không lấy được dữ liệu OpenStreetMap; danh sách đường và nhà cung cấp chưa đầy đủ.']:[]),...(ai?.warnings||[]).map(x=>safe(x,300))].slice(0,8)
+    aiSummary:citations.length?safe(ai?.summary,1200):'',warnings:[...(!osm.ok?['Không lấy được dữ liệu OpenStreetMap; danh sách đường và nhà cung cấp chưa đầy đủ.']:[]),...(citations.length?ai?.warnings||[]:[]).map(x=>safe(x,300))].slice(0,8)
   };
   cache.set(key,{at:now,payload});return {cached:false,...payload};
 }

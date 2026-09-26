@@ -1696,6 +1696,7 @@ html.bmh-v60 .v67-site .v6-fields input,html.bmh-v60 .v67-site .v6-fields select
 html.bmh-v60 .v67-site .v6-inline-actions button{min-height:44px;font-size:13px}
 html.bmh-v60 .v67-site .v6-coordinate b{font-size:14px}
 html.bmh-v60 .v67-site .v6-coordinate span{font-size:12px}
+html.bmh-v60 .v67-site .v67-location-review{margin:10px 0 0;padding:11px 13px;border-radius:10px;background:#fff5e8;border:1px solid #ecd6b2;color:#704b2e;font-size:13px;line-height:1.5}
 html.bmh-v60 .v67-site .v6-map-toolbar button{font-size:12px;min-height:40px}
 html.bmh-v60 .v67-site .v67-map-legend span{font-size:12px}
 html.bmh-v60 .v67-site .v67-pin-flow>span b{font-size:13px}
