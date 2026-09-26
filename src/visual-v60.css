@@ -1825,6 +1825,8 @@ html.bmh-v60 .v6-s6 .v6-tier button{height:auto;min-height:70px}
 html.bmh-v60 .v6-s6 .v6-tier b,html.bmh-v60 .v6-s6 .v6-mat-nav span{font-size:13px}
 html.bmh-v60 .v6-s6 .v6-tier span,html.bmh-v60 .v6-s6 .v6-mat-nav em{font-size:11px;line-height:1.35}
 html.bmh-v60 .v6-s6 .v6-mat-nav button{height:46px}
+html.bmh-v60 .v6-s6 .v6-mat-nav button:disabled{opacity:.55;cursor:not-allowed}
+html.bmh-v60 .v6-s6 .v69-material-delta{display:block;margin:9px 0 0;font-size:14px;color:#995a38}
 html.bmh-v60 .v6-s6 .v6-products article>div{padding:14px}
 html.bmh-v60 .v6-s6 .v6-products small{font-size:12px;line-height:1.4}
 html.bmh-v60 .v6-s6 .v6-products h3{font-size:16px;line-height:1.3}
@@ -1833,6 +1835,12 @@ html.bmh-v60 .v6-s6 .v6-products strong{font-size:15px;line-height:1.4}
 html.bmh-v60 .v6-s6 .v6-products button{min-height:44px;font-size:13px}
 html.bmh-v60 .v6-s6 .v6-showroom-note b{font-size:14px}
 html.bmh-v60 .v6-s6 .v6-showroom-note span,html.bmh-v60 .v6-s6 .v6-energy-hero span,html.bmh-v60 .v6-s6 .v6-toggle-grid button{font-size:12px;line-height:1.4}
+html.bmh-v60 .v6-s7 .v61-cinematic-card small{font-size:12px}
+html.bmh-v60 .v6-s7 .v61-cinematic-card b{font-size:15px}
+html.bmh-v60 .v6-s7 .v61-cinematic-card button{min-height:44px;font-size:13px;cursor:pointer}
+html.bmh-v60 .v6-s7 .v61-cinematic-card button:disabled{opacity:.65;cursor:wait}
+html.bmh-v60 .v6-s7 .v69-render-note,html.bmh-v60 .v6-s7 .v69-render-error{display:block;font-size:12px;line-height:1.45;margin-top:9px;color:#5e6c62}
+html.bmh-v60 .v6-s7 .v69-render-error{color:#a04437}
 @media(max-width:1180px){html.bmh-v60 .v6-s6 .v6-mat-nav>div:last-child{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:700px){html.bmh-v60 .v6-s6 .v6-tier{grid-template-columns:1fr 1fr 1fr}html.bmh-v60 .v6-s6 .v6-mat-nav>div:last-child{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:1180px){html.bmh-v60 .v6-s4{grid-template-columns:1fr 1fr;grid-template-areas:"head head" "land family" "feng feng"}}

@@ -58,7 +58,7 @@ BMH.studio3DHtml = () => {
 };
 BMH.disposeStudio3D = () => {
   const s=BMH.studio3d;if(!s)return;
-  try{s.raf&&cancelAnimationFrame(s.raf);s.renderer?.dispose?.();s.renderer?.domElement?.removeEventListener?.('pointerdown',s.onDown);window.removeEventListener('pointermove',s.onMove);window.removeEventListener('pointerup',s.onUp);s.renderer?.domElement?.removeEventListener?.('wheel',s.onWheel);}catch(_){}
+  try{s.raf&&cancelAnimationFrame(s.raf);s.ro?.disconnect?.();s.renderer?.dispose?.();s.renderer?.domElement?.removeEventListener?.('pointerdown',s.onDown);window.removeEventListener('pointermove',s.onMove);window.removeEventListener('pointerup',s.onUp);s.renderer?.domElement?.removeEventListener?.('wheel',s.onWheel);}catch(_){}
   BMH.studio3d=null;
 };
 BMH.mountStudio3D = async () => {
@@ -111,13 +111,24 @@ BMH.mountStudio3D = async () => {
   BMH.studio3d={scene,camera,renderer,state,ro,onDown,onMove,onUp,onWheel,raf:0};animate();stage.classList.add('three-ready');BMH.$('#studio3dLoading')?.remove();
 };
 BMH.resetStudio3D = () => {const s=BMH.studio3d;if(!s)return;s.state.yaw=-.68;s.state.pitch=.52;s.state.dist=(BMH.state.ui.sceneFocus||'all').startsWith('room:')?8:Math.max(18,(Number(BMH.state.project.site.depth)||20)*.92);};
+BMH.cinematicSignature = () => {
+  const p=BMH.state.project;
+  return JSON.stringify({style:p.style,site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,frontDirection:p.site.frontDirection},materials:p.materials?.choices||{},tier:p.materials?.tier,rooms:p.plan.rooms.map(r=>[r.floor,r.name,r.type,r.x,r.y,r.w,r.h])});
+};
 BMH.generateCinematicRender = async () => {
-  const canvas=BMH.$('#studio3dCanvas');if(!canvas||!BMH.studio3d){BMH.toast('Mô hình 3D chưa sẵn sàng để render.');return;}
+  if(BMH.cinematicRender.loading)return;
+  const canvas=BMH.$('#studio3dCanvas'),scene=BMH.studio3d;
+  if(!canvas||!scene){BMH.toast('Mô hình 3D chưa sẵn sàng để render.');return;}
+  let screenshot;
+  try{screenshot=scene.renderer.domElement.toDataURL('image/jpeg',.8);}catch{BMH.toast('Không chụp được mô hình 3D trên thiết bị này.');return;}
+  const signature=BMH.cinematicSignature(),p=BMH.state.project;
+  const selectedMaterials=Object.fromEntries(Object.entries(p.materials.choices||{}).map(([cat,id])=>[cat,(BMH.MATERIALS[cat]||[]).find(x=>x.id===id)?.name||id]));
+  const payload={image:screenshot,project:{style:p.style,site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,frontDirection:p.site.frontDirection},materials:{choices:selectedMaterials},rooms:p.plan.rooms.map(r=>({name:r.name,type:r.type,floor:r.floor,w:r.w,h:r.h}))}};
   BMH.cinematicRender.loading=true;BMH.cinematicRender.error='';BMH.render({preserveScroll:true});
   try{
-    const screenshot=BMH.studio3d?.renderer?.domElement?.toDataURL('image/jpeg',.86);if(!screenshot)throw new Error('Không chụp được mô hình 3D.');
-    const p=BMH.state.project, payload={image:screenshot,project:{style:p.style,site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,frontDirection:p.site.frontDirection,province:p.site.province},materials:p.materials,rooms:p.plan.rooms.map(r=>({name:r.name,type:r.type,floor:r.floor,w:r.w,h:r.h}))}};
     const r=await fetch('/api/gemini-render',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||`Render HTTP ${r.status}`);if(!data.image)throw new Error('Gemini không trả về ảnh render.');
-    BMH.cinematicRender.dataUrl=`data:${data.mimeType||'image/jpeg'};base64,${data.image}`;BMH.cinematicRender.generatedAt=new Date().toISOString();BMH.cinematicRender.error='';
-  }catch(err){BMH.cinematicRender.error=err.message||String(err);}finally{BMH.cinematicRender.loading=false;BMH.render({preserveScroll:true});}
+    if(signature!==BMH.cinematicSignature()){BMH.toast('Thiết kế đã đổi khi đang render. Hãy tạo lại phối cảnh cho phương án mới.');return;}
+    const mime=['image/jpeg','image/png','image/webp'].includes(data.mimeType)?data.mimeType:'image/jpeg';
+    BMH.cinematicRender.dataUrl=`data:${mime};base64,${data.image}`;BMH.cinematicRender.signature=signature;BMH.cinematicRender.generatedAt=data.generatedAt||new Date().toISOString();BMH.cinematicRender.error='';
+  }catch(err){BMH.cinematicRender.error=err.message||String(err);BMH.toast(BMH.cinematicRender.error);}finally{BMH.cinematicRender.loading=false;BMH.render({preserveScroll:true});}
 };

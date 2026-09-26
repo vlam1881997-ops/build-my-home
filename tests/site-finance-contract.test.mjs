@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {cleanProject} from '../api/ai.mjs';
 import {verifyRateEvidence} from '../api/bank-rate.mjs';
+import renderHandler,{renderRequestPayload,extractRenderedImage} from '../api/gemini-render.mjs';
 
 function stateEngine(saved){
   const values=new Map(saved?[["bmh-test",JSON.stringify(saved)]]:[]);
@@ -95,6 +96,57 @@ test('planning prices never inherit the build date as a supplier source date',()
   assert.match(BMH.materialSourceLabel({id:'floor-sample'}),/Giá hiển thị mẫu/);
   BMH.state.project.dataEngine.quote={name:'Nhà cung cấp A',date:'2026-09-25'};
   assert.equal(BMH.dataCostBasis().sourceDate,'2026-09-25');
+});
+
+test('image render accepts only a bounded image and keeps plan details in the prompt',()=>{
+  const image='data:image/jpeg;base64,'+'A'.repeat(128);
+  const request=renderRequestPayload({image,project:{site:{floors:2,width:5,depth:16},style:'Hiện đại',materials:{choices:{floor:'Gạch nhám'}},rooms:[{name:'Phòng khách',floor:0}]}});
+  assert.match(request.prompt,/2 floors/);
+  assert.match(request.prompt,/Gạch nhám/);
+  assert.match(request.prompt,/Phòng khách/);
+  assert.equal(request.mimeType,'image/jpeg');
+  assert.throws(()=>renderRequestPayload({image:'data:text/html;base64,'+'A'.repeat(128)}),/ảnh chụp mô hình/);
+  assert.throws(()=>renderRequestPayload({image:'data:image/png;base64,'+'A'.repeat(1_500_001)}),/ảnh chụp mô hình/);
+  assert.equal(extractRenderedImage({candidates:[{content:{parts:[{inlineData:{mimeType:'image/png',data:'B'.repeat(128)}}]}}]}).mimeType,'image/png');
+});
+
+test('image endpoint is opt-in and returns the Gemini image with a server-only key',async()=>{
+  const oldEnabled=process.env.GEMINI_IMAGE_ENABLED,oldKey=process.env.GEMINI_API_KEY,oldFetch=globalThis.fetch;
+  const res=()=>({status(code){this.code=code;return this;},setHeader(){return this;},end(text){this.body=JSON.parse(text);}});
+  const req={method:'POST',headers:{'x-forwarded-for':'render-test'},body:{image:'data:image/jpeg;base64,'+'A'.repeat(128),project:{site:{floors:2}}}};
+  try{
+    delete process.env.GEMINI_IMAGE_ENABLED;
+    const disabled=res();await renderHandler(req,disabled);assert.equal(disabled.code,503);
+    process.env.GEMINI_IMAGE_ENABLED='true';process.env.GEMINI_API_KEY='server-test-key';
+    let upstream=null;
+    globalThis.fetch=async(url,options)=>{upstream={url,options};return {ok:true,json:async()=>({candidates:[{content:{parts:[{inlineData:{mimeType:'image/png',data:'B'.repeat(128)}}]}}]})};};
+    const enabled=res();await renderHandler(req,enabled);
+    assert.equal(enabled.code,200);
+    assert.equal(enabled.body.mimeType,'image/png');
+    assert.match(upstream.url,/gemini-3\.1-flash-lite-image:generateContent$/);
+    assert.equal(upstream.options.headers['x-goog-api-key'],'server-test-key');
+    assert.equal(enabled.body.image.length,128);
+  }finally{
+    if(oldEnabled===undefined)delete process.env.GEMINI_IMAGE_ENABLED;else process.env.GEMINI_IMAGE_ENABLED=oldEnabled;
+    if(oldKey===undefined)delete process.env.GEMINI_API_KEY;else process.env.GEMINI_API_KEY=oldKey;
+    globalThis.fetch=oldFetch;
+  }
+});
+
+test('cinematic capture completes even when the loading view disposes WebGL',async()=>{
+  let posted=null,renderCount=0;
+  const BMH={state:{project:{style:'Hiện đại',site:{width:5,depth:16,floors:2},materials:{choices:{floor:'tile'}},plan:{rooms:[]}}},
+    MATERIALS:{floor:[{id:'tile',name:'Gạch nhám'}]},
+    $:()=>({}),toast:()=>{},render:()=>{renderCount++;BMH.studio3d=null;}};
+  const fetch=async(url,options)=>{posted={url,body:JSON.parse(options.body)};return {ok:true,json:async()=>({image:'B'.repeat(128),mimeType:'image/png',generatedAt:'2026-09-26T00:00:00Z'})};};
+  vm.runInNewContext(fs.readFileSync(new URL('../src/45_studio3d.js',import.meta.url),'utf8'),{BMH,window:{},fetch,JSON,Math,Number,Object,Date});
+  BMH.studio3d={renderer:{domElement:{toDataURL:()=> 'data:image/jpeg;base64,'+'A'.repeat(128)}}};
+  await BMH.generateCinematicRender();
+  assert.equal(posted.url,'/api/gemini-render');
+  assert.equal(posted.body.project.materials.choices.floor,'Gạch nhám');
+  assert.equal(renderCount,2);
+  assert.equal(BMH.cinematicRender.dataUrl,'data:image/png;base64,'+'B'.repeat(128));
+  assert.equal(BMH.cinematicRender.signature,BMH.cinematicSignature());
 });
 
 test('a new construction dossier starts at zero and records actual spending by stage',()=>{
