@@ -85,7 +85,27 @@ BMH.wallSegments = (floor=BMH.state.ui.planner.floor) => {
   return out;
 };
 
-BMH.archWallsSvg = floor => BMH.wallSegments(floor).map(s=>{
+BMH.openingWallSpan = (opening,rooms=BMH.state.project.plan.rooms) => {
+  const r=rooms.find(x=>x.id===opening.roomId);
+  if(!r||r.floor!==opening.floor||!['north','south','east','west'].includes(opening.side))return null;
+  const horizontal=opening.side==='north'||opening.side==='south',len=horizontal?r.w:r.h;
+  const width=Number(opening.width),offset=Number(opening.offset);
+  if(!Number.isFinite(width)||width<=0||width>len||!Number.isFinite(offset))return null;
+  const start=(horizontal?r.x:r.y)+(len-width)*BMH.clamp(offset,0,1);
+  return {o:horizontal?'h':'v',c:horizontal?(opening.side==='north'?r.y:r.y+r.h):(opening.side==='west'?r.x:r.x+r.w),a:start,b:start+width};
+};
+BMH.wallSolidSegments = (floor=BMH.state.ui.planner.floor) => {
+  const holes=BMH.state.project.plan.openings.filter(o=>o.floor===floor).map(o=>BMH.openingWallSpan(o)).filter(Boolean);
+  return BMH.wallSegments(floor).flatMap(s=>{
+    const cut=holes.filter(h=>h.o===s.o&&Math.abs(h.c-s.c)<.001&&h.a<s.b-.001&&h.b>s.a+.001)
+      .map(h=>({a:Math.max(s.a,h.a),b:Math.min(s.b,h.b)})).sort((a,b)=>a.a-b.a);
+    const solid=[];let cursor=s.a;
+    for(const gap of cut){if(gap.a>cursor+.001)solid.push({...s,a:cursor,b:gap.a});cursor=Math.max(cursor,gap.b);}
+    if(cursor<s.b-.001)solid.push({...s,a:cursor,b:s.b});
+    return solid;
+  });
+};
+BMH.archWallsSvg = floor => BMH.wallSolidSegments(floor).map(s=>{
   const thickness=s.count>1?.12:.22,half=thickness/2;
   return s.o==='h'
     ? `<rect class="arch-wall-fill ${s.count>1?'internal':'external'}" x="${s.a}" y="${s.c-half}" width="${s.b-s.a}" height="${thickness}"/>`
@@ -456,8 +476,12 @@ BMH.svgPoint = (e,svg) => {
 BMH.openingFits = (candidate,ignoreId=null) => {
   const r=BMH.state.project.plan.rooms.find(x=>x.id===candidate.roomId);if(!r)return false;
   const len=(candidate.side==='north'||candidate.side==='south')?r.w:r.h,w=Number(candidate.width)||0;if(w<.5||w>len-.08)return false;
-  const start=(len-w)*BMH.clamp(Number(candidate.offset)||0,0,1),end=start+w;
-  return !BMH.state.project.plan.openings.some(o=>o.id!==ignoreId&&o.roomId===candidate.roomId&&o.side===candidate.side&&(()=>{const ow=Number(o.width)||0,os=(len-ow)*BMH.clamp(Number(o.offset)||0,0,1),oe=os+ow;return start<oe+.08&&end>os-.08;})());
+  const span=BMH.openingWallSpan(candidate);if(!span)return false;
+  return !BMH.state.project.plan.openings.some(o=>{
+    if(o.id===ignoreId||o.floor!==candidate.floor)return false;
+    const other=BMH.openingWallSpan(o);
+    return other&&span.o===other.o&&Math.abs(span.c-other.c)<.001&&span.a<other.b+.08&&span.b>other.a-.08;
+  });
 };
 BMH.placeOpeningAt = (kind,roomId,side,point) => {
   const r=BMH.state.project.plan.rooms.find(x=>x.id===roomId);if(!r)return;const width=kind==='door'?.9:1.4;let offset=.5;

@@ -5,6 +5,33 @@ import vm from 'node:vm';
 import configHandler from '../api/config.mjs';
 import {geminiGenerate} from '../server/_gemini.mjs';
 
+test('planner cuts real wall geometry at a door and rejects an opening from the other room on the same span',()=>{
+  const rooms=[{id:'living',floor:0,x:0,y:0,w:4,h:4,type:'living'},{id:'bed',floor:0,x:4,y:0,w:4,h:4,type:'bed'}];
+  const door={id:'d1',roomId:'living',floor:0,kind:'door',side:'east',offset:.5,width:.9};
+  const BMH={state:{project:{site:{width:8,depth:8},plan:{rooms,openings:[door]}},ui:{planner:{floor:0}}},clamp:(v,a,b)=>Math.max(a,Math.min(b,v))};
+  vm.runInNewContext(fs.readFileSync(new URL('../src/30_planner.js',import.meta.url),'utf8'),{BMH,Math,Number,String,Map,Set});
+  const wall=BMH.wallSegments(0).filter(s=>s.o==='v'&&s.c===4);
+  const solid=BMH.wallSolidSegments(0).filter(s=>s.o==='v'&&s.c===4);
+  assert.equal(wall.reduce((sum,s)=>sum+s.b-s.a,0),4);
+  assert.ok(Math.abs(solid.reduce((sum,s)=>sum+s.b-s.a,0)-3.1)<.001);
+  assert.equal(BMH.openingFits({id:'d2',roomId:'bed',floor:0,kind:'door',side:'west',offset:.5,width:.9}),false);
+  assert.equal(BMH.openingFits({id:'w1',roomId:'bed',floor:0,kind:'window',side:'east',offset:.5,width:1.2}),true);
+});
+
+test('AI scan requires an actual parcel pin, not a regional or Gemini reference point',()=>{
+  const source=fs.readFileSync(new URL('../src/60_app.js',import.meta.url),'utf8');
+  const begin=source.indexOf('BMH.sitePinConfirmed=');
+  const fragment=source.slice(begin,source.indexOf('BMH.siteIntelLoading=false;',begin));
+  const BMH={state:{project:{site:{lat:10.8,lng:106.7,geoSource:'Dữ liệu vùng'}}}};
+  vm.runInNewContext(fragment,{BMH,Number,String});
+  for(const geoSource of ['Dữ liệu vùng','Điểm tham chiếu vùng','Gemini scan · cần xác nhận']){
+    assert.equal(BMH.sitePinConfirmed({...BMH.state.project.site,geoSource}),false);
+  }
+  for(const geoSource of ['Ghim bản đồ','Địa chỉ · OpenStreetMap','Ranh GeoJSON do người dùng cung cấp']){
+    assert.equal(BMH.sitePinConfirmed({...BMH.state.project.site,geoSource}),true);
+  }
+});
+
 const response=()=>({status(code){this.code=code;return this;},setHeader(){return this;},end(body){this.body=JSON.parse(body);}});
 
 test('public AI capability endpoint reports configured provider without leaking a key',()=>{

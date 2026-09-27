@@ -271,7 +271,7 @@ BMH.mapTileConfig = style => ({
   terrain:[['https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png','Map data © OpenStreetMap contributors · SRTM · OpenTopoMap'],['https://tile.openstreetmap.org/{z}/{x}/{y}.png','© OpenStreetMap contributors · bản đồ đường phố dự phòng']]
 }[style]||[]);
 BMH.siteIntelClientKey=(s=BMH.state.project.site)=>(Number(s.lat)||0).toFixed(4)+','+(Number(s.lng)||0).toFixed(4)+':'+(Number(s.road)||0);
-BMH.sitePinConfirmed=(s=BMH.state.project.site)=>Number.isFinite(Number(s.lat))&&Number.isFinite(Number(s.lng))&&!/^Dữ liệu vùng/.test(String(s.geoSource||'Dữ liệu vùng'));
+BMH.sitePinConfirmed=(s=BMH.state.project.site)=>Number.isFinite(Number(s.lat))&&Number.isFinite(Number(s.lng))&&/^(Ghim |Kéo ghim|Chọn trên |Địa chỉ ·|GPS thiết bị|Ranh đất vẽ|Ranh GeoJSON|Tọa độ tùy chỉnh)/.test(String(s.geoSource||''));
 BMH.siteIntelLoading=false;
 BMH.siteIntelScanId=0;
 BMH.loadSiteIntelligence=async(force=false)=>{
