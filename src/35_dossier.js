@@ -40,13 +40,13 @@ BMH.dossierSchedule = () => {
     return {...s,start:hasStart?BMH.isoDay(stageStart):'',end:hasStart?BMH.isoDay(end):'',amount,actualSpent,variance:actualSpent-amount,progress,status,paidToDate:paid};
   });
 };
-BMH.wallFinishArea = () => {
+BMH.wallFinishArea = (estimatedArea=BMH.estimate().area) => {
   const rooms=BMH.state.project.plan.rooms||[];
   const perimeter=rooms.reduce((s,r)=>s+2*(Number(r.w||0)+Number(r.h||0)),0);
-  return Math.max(BMH.estimate().area*1.8,perimeter*3.0*.62);
+  return Math.max(estimatedArea*1.8,perimeter*3.0*.62);
 };
 BMH.boqSchedule = () => {
-  const e=BMH.estimate(),area=Math.max(1,e.area),wall=BMH.wallFinishArea(),bath=(BMH.state.project.plan.rooms||[]).filter(r=>r.type==='bath').length||1;
+  const e=BMH.estimate(),area=Math.max(1,e.area),wall=BMH.wallFinishArea(e.area),bath=(BMH.state.project.plan.rooms||[]).filter(r=>r.type==='bath').length||1;
   const doorArea=(BMH.openingSchedule?.()||[]).reduce((s,o)=>s+Number(o.width||0)*Number(o.height||0),0)||area*.08;
   const rows=[];const add=(code,group,name,unit,qty,cost,note='')=>rows.push({code,group,name,unit,qty:+Math.max(.01,qty).toFixed(2),rate:Math.round(cost/Math.max(.01,qty)),amount:Math.round(cost),note});
   add('A01','Chuẩn bị','Chuẩn bị mặt bằng, định vị, che chắn','m²',area,e.prep,'Khối lượng quy đổi theo diện tích xây dựng');
@@ -55,19 +55,30 @@ BMH.boqSchedule = () => {
   add('B03','Phần thô','Cốt thép kết cấu','kg',area*.12*120,e.shell*.27,'Suất thép giả định để phối hợp ngân sách');
   add('B04','Phần thô','Tường xây và xây tô','m²',wall,e.shell*.12,'Diện tích tường quy đổi');
   add('B05','Phần thô','Mái / cấu tạo mái thô','m²',area/Math.max(1,Number(BMH.state.project.site.floors)||1),e.shell*.06,'Theo cấu hình công trình hiện tại');
-  add('C01','Hoàn thiện','Điện âm tường, tủ điện, thiết bị cơ bản','điểm',Math.max(24,area*.45),e.finish*.11,'Số điểm quy đổi');
-  add('C02','Hoàn thiện','Cấp thoát nước và phụ kiện MEP','điểm',Math.max(12,area*.18),e.finish*.11,'Số điểm quy đổi');
-  add('C03','Hoàn thiện','Lát sàn / ốp khu vực chính','m²',area*.92,e.finish*.18,'Đã tính hao hụt sơ bộ');
-  add('C04','Hoàn thiện','Cửa đi, cửa sổ và vách kính','m²',Math.max(8,doorArea),e.finish*.12,'Theo danh sách ô mở');
-  add('C05','Hoàn thiện','Bả và sơn nội/ngoại thất','m²',wall*1.85,e.finish*.16,'Diện tích sơn quy đổi hai mặt');
-  add('C06','Hoàn thiện','Chống thấm WC, mái, ban công','m²',area*.26,e.finish*.08,'Phải test nước trước hoàn thiện');
-  add('C07','Hoàn thiện','Thiết bị vệ sinh','bộ',Math.max(1,bath),e.finish*.08,'Bộ quy đổi theo số WC');
-  add('C08','Hoàn thiện','Trần, mộc và hoàn thiện phụ trợ','m²',area*.82,e.finish*.16,'Khối lượng quy đổi');
+  const quoteByCategory=Object.fromEntries((e.materialQuotes||[]).map(q=>[q.category,q]));
+  // The base allowance is allocated once. A dated quote replaces one category;
+  // an unquoted showroom upgrade stays on that category's BOQ row.
+  const baseFinish=e.finishAllowance;
+  const finishCost=(share,category)=>{
+    if(quoteByCategory[category])return quoteByCategory[category].amount;
+    const selected=BMH.state.project.materials.choices?.[category];
+    const premium=Number(BMH.MATERIALS[category]?.find(x=>x.id===selected)?.premium)||0;
+    return baseFinish*share+premium;
+  };
+  const quoteNote=category=>quoteByCategory[category]?`Báo giá ${quoteByCategory[category].source} · ${quoteByCategory[category].date}; đơn giá ${Math.round(quoteByCategory[category].unitPrice)} đ/m²`:'Khối lượng và phân bổ sơ bộ; cần báo giá';
+  add('C01','Hoàn thiện','Điện âm tường, tủ điện, thiết bị cơ bản','điểm',Math.max(24,area*.45),baseFinish*.11,'Số điểm quy đổi');
+  add('C02','Hoàn thiện','Cấp thoát nước và phụ kiện MEP','điểm',Math.max(12,area*.18),baseFinish*.11,'Số điểm quy đổi');
+  add('C03','Hoàn thiện','Lát sàn / ốp khu vực chính','m²',BMH.materialQuantity('floor',area),finishCost(.18,'floor'),quoteNote('floor'));
+  add('C04','Hoàn thiện','Cửa đi, cửa sổ và vách kính','m²',BMH.materialQuantity('door',area),finishCost(.12,'door'),quoteNote('door'));
+  add('C05','Hoàn thiện','Bả và sơn nội/ngoại thất','m²',BMH.materialQuantity('paint',area),finishCost(.16,'paint'),quoteNote('paint'));
+  add('C06','Hoàn thiện','Chống thấm WC, mái, ban công','m²',area*.26,baseFinish*.08,'Phải test nước trước hoàn thiện');
+  add('C07','Hoàn thiện','Thiết bị vệ sinh','bộ',Math.max(1,bath),baseFinish*.08,'Bộ quy đổi theo số WC');
+  add('C08','Hoàn thiện','Trần, mộc và hoàn thiện phụ trợ','m²',area*.82,baseFinish*.16,'Khối lượng quy đổi');
   if(e.transport>0)add('D01','Điều kiện công trường','Vận chuyển / tiếp cận công trường','gói',1,e.transport,'Theo điều kiện đường tiếp cận');
   if(e.climatePrep>0)add('D02','Khí hậu','Gói thích ứng khí hậu','gói',1,e.climatePrep,'Theo dữ liệu vị trí và gói đã chọn');
   if(e.performanceUpgrade>0)add('D03','Hiệu suất','Năng lượng & nước bền vững','gói',1,e.performanceUpgrade,'Theo Performance Studio');
   add('Z01','Dự phòng','Dự phòng phát sinh','gói',1,e.contingency,'Dự phòng kế hoạch; không thay thế báo giá nhà thầu');
-  const diff=e.total-rows.reduce((s,r)=>s+r.amount,0);if(rows.length&&diff)rows.at(-1).amount+=diff;
+  const diff=e.total-rows.reduce((s,r)=>s+r.amount,0);if(rows.length&&diff){const last=rows.at(-1);last.amount+=diff;last.rate=last.amount;}
   return rows;
 };
 BMH.materialSchedule = () => {
@@ -76,9 +87,7 @@ BMH.materialSchedule = () => {
   return [
     {group:'Kết cấu',name:'Xi măng / bê tông',spec:'Theo cấp phối và thiết kế kết cấu được duyệt',qty:pick('B02')?.qty||0,unit:'m³',price:'Theo BOQ / báo giá',source:BMH.dataCostBasis().sourceLabel,status:'Cần KTS/KS chốt'},
     {group:'Kết cấu',name:'Thép cốt bê tông',spec:'Chủng loại theo hồ sơ kết cấu',qty:pick('B03')?.qty||0,unit:'kg',price:'Theo BOQ / báo giá',source:BMH.dataCostBasis().sourceLabel,status:'Cần KS chốt'},
-    {group:'Hoàn thiện',name:floor?.name||'Gạch lát',spec:floor?.sub||'Chưa chọn',qty:+(e.area*.92).toFixed(1),unit:'m²',price:floor?BMH.materialPriceLabel('floor',floor):'Cần báo giá',source:floor?BMH.materialSourceLabel(floor):'—',status:floor?'Đã chọn':'Chưa chọn'},
-    {group:'Hoàn thiện',name:paint?.name||'Sơn',spec:paint?.sub||'Chưa chọn',qty:+(BMH.wallFinishArea()*1.85).toFixed(1),unit:'m²',price:paint?BMH.materialPriceLabel('paint',paint):'Cần báo giá',source:paint?BMH.materialSourceLabel(paint):'—',status:paint?'Đã chọn':'Chưa chọn'},
-    {group:'Hoàn thiện',name:door?.name||'Hệ cửa',spec:door?.sub||'Chưa chọn',qty:+Math.max(8,(BMH.openingSchedule?.()||[]).reduce((s,o)=>s+o.width*o.height,0)).toFixed(1),unit:'m²',price:door?BMH.materialPriceLabel('door',door):'Cần báo giá',source:door?BMH.materialSourceLabel(door):'—',status:door?'Đã chọn':'Chưa chọn'},
+    ...[['floor',floor,'Gạch lát'],['paint',paint,'Sơn'],['door',door,'Hệ cửa']].map(([cat,item,label])=>({group:'Hoàn thiện',name:item?.name||label,spec:item?.sub||'Chưa chọn',qty:+BMH.materialQuantity(cat,e.area).toFixed(1),unit:'m²',price:item?BMH.materialPriceLabel(cat,item):'Cần báo giá',source:item?BMH.materialSourceLabel(item):'—',status:e.materialQuotes.some(q=>q.category===cat)?'Báo giá đã tính vào dự toán':item?'Đã chọn · giá mẫu':'Chưa chọn'})),
     {group:'Chống thấm',name:'Hệ chống thấm',spec:`Gói khí hậu: ${p.materials.climatePackage}`,qty:+(e.area*.26).toFixed(1),unit:'m²',price:'Theo BOQ / báo giá',source:BMH.dataCostBasis().sourceLabel,status:'Cần nhà thầu chốt'},
     {group:'MEP',name:'Ống, dây và thiết bị MEP',spec:'Theo checklist và bản vẽ MEP triển khai',qty:1,unit:'gói',price:'Theo BOQ / báo giá',source:BMH.dataCostBasis().sourceLabel,status:'Cần KS MEP chốt'}
   ];
@@ -139,14 +148,14 @@ BMH.deleteEvidence=async id=>{
   BMH.state.project.dossier.evidence=list.filter(x=>x.id!==id);BMH.save();BMH.render({preserveScroll:true});
 };
 BMH.dossierCompleteness = () => {
-  const checks=BMH.mepChecklistRows(),mats=BMH.materialSchedule(),s=BMH.state.project.site,d=BMH.state.project.dossier,e=BMH.estimate();
+  const checks=BMH.mepChecklistRows(),s=BMH.state.project.site,d=BMH.state.project.dossier,e=BMH.estimate();
   const parts=[
-    {name:'Bản vẽ sơ bộ',ok:e.areaSource==='plan'},
+    {name:'Bản vẽ sơ bộ không chồng phòng',ok:e.areaSource==='plan'&&!(BMH.plannerIssues?.()||[]).some(x=>x.sev==='error')},
     {name:'Dự toán/BOQ',ok:e.areaSource==='plan'&&e.total>0&&BMH.boqSchedule().length>=10},
-    {name:'Vật liệu',ok:mats.filter(x=>x.status==='Đã chọn').length>=3},
-    {name:'Tiến độ',ok:!!d?.startDate&&BMH.dossierSchedule().length===7},
-    {name:'MEP checklist',ok:checks.some(x=>x.checked)},
-    {name:'Vị trí công trình',ok:!!s?.province&&Number.isFinite(Number(s?.lat))&&Number.isFinite(Number(s?.lng))},
+    {name:'3 nhóm vật liệu có báo giá',ok:e.materialQuotes.length>=3},
+    {name:'Tiến độ đã ghi đến bàn giao',ok:!!d?.startDate&&Number(d.progress)>=100},
+    {name:'MEP checklist đã kiểm hết',ok:checks.length>0&&checks.every(x=>x.checked)},
+    {name:'Vị trí công trình đã ghim',ok:!!s?.province&&!!BMH.sitePinConfirmed?.(s)},
     {name:'Ảnh/hồ sơ thực địa',ok:(d?.evidence||[]).length>0}
   ];
   return {parts,done:parts.filter(x=>x.ok).length,total:parts.length,percent:Math.round(parts.filter(x=>x.ok).length/parts.length*100)};
@@ -157,7 +166,8 @@ BMH.createDossierSnapshot = () => {
     schema:'BMH-DOSSIER-5.0',version:BMH.VERSION,generatedAt:now.toISOString(),revision:p.dossier?.revision||'A',
     project:{name:p.name,style:p.style,address:p.site.address||'',province:p.site.province,district:p.site.district,coordinates:[p.site.lat,p.site.lng],lot:`${p.site.width} × ${p.site.depth} m`,floors:p.site.floors,frontDirection:p.site.frontDirection,architect:p.dossier?.architect||'',contractor:p.dossier?.contractor||'',notes:p.dossier?.notes||''},
     summary:{grossArea:e.area,areaSource:e.areaSource,budget:e.budget,estimate:e.total,actualSpent:schedule.reduce((a,x)=>a+x.actualSpent,0),gap:e.gap,progress:p.dossier?.progress||0,currentStage:p.dossier?.currentStage||'foundation',startDate:p.dossier?.startDate,completeness:complete},
-    pricing:{source:basis.sourceLabel,date:basis.sourceDate,reference:basis.reference,mode:p.dataEngine?.pricingMode||'regional'},
+    pricing:{source:basis.sourceLabel,date:basis.sourceDate,reference:basis.reference,mode:p.dataEngine?.pricingMode||'regional',materialQuotes:e.materialQuotes,unquotedCategories:['floor','paint','door'].filter(cat=>!e.materialQuotes.some(q=>q.category===cat)),estimateStatus:e.areaSource==='plan'?'Phương án theo mặt bằng sơ bộ':'Diện tích tạm tính'},
+    siteEvidence:{pinSource:p.site.geoSource,addressNeedsReview:!!p.site.pinAddressNeedsReview,parcelSource:p.site.lotSource,parcelReference:p.site.deedReference||'',siteScanCurrent:!!BMH.sitePinConfirmed?.(p.site)&&p.siteIntelligence?.status==='ready'&&p.siteIntelligence?.key===(Number(p.site.lat)||0).toFixed(4)+','+(Number(p.site.lng)||0).toFixed(4)+':'+(Number(p.site.road)||0),siteScanAt:p.siteIntelligence?.fetchedAt||''},
     areas:area,openings,boq,materials,schedule,cashflow,mep,evidence:(p.dossier?.evidence||[]).map(x=>({...x})),
     drawings:[...Array.from({length:Math.max(1,Number(p.site.floors)||1)},(_,i)=>({code:`A-${String(i+1).padStart(2,'0')}`,name:`Mặt bằng tầng ${i+1}`,file:`mat-bang-tang-${i+1}.svg`})),{code:'A-E01',name:'Mặt đứng chính',file:'mat-dung-chinh.svg'},{code:'A-S01',name:'Mặt cắt A-A',file:'mat-cat-A-A.svg'}],
     disclaimers:['Hồ sơ do web app tạo để lập phương án, dự toán và trao đổi với kiến trúc sư/nhà thầu.','Không thay thế hồ sơ xin phép xây dựng, bản vẽ thi công có thẩm tra, thiết kế kết cấu/MEP hoặc khảo sát địa chất.','Khối lượng BOQ là khối lượng sơ bộ theo mô hình hiện tại; cần bóc tách và xác nhận lại trước khi ký hợp đồng/đặt vật tư.']

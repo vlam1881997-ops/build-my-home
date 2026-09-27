@@ -2004,3 +2004,25 @@ html.bmh-v60 .v67-site .v67-weather-source{font-size:12px;line-height:1.5}
   html.bmh-v60 .v6-s5 .v6-plan-legend b{margin:0}
   html.bmh-v60 .v72-review>b{font-size:15px}
 }
+/* Local project backup stays available when the optional cloud account is absent. */
+html.bmh-v60 .v71-local-project{display:none;align-items:center;gap:5px}
+html.bmh-v60 .v71-local-project button{border:1px solid #cddbd0;background:#f6faf6;color:#244c36;border-radius:10px;min-height:40px;padding:0 11px;font-size:12px;font-weight:750;cursor:pointer}
+html.bmh-v60 .v71-local-project button:hover{background:#e8f3ea}
+@media(max-width:1180px){html.bmh-v60 .v71-local-project{display:flex}}
+@media(max-width:700px){html.bmh-v60 .v71-local-project button{padding:0 8px;font-size:11px}html.bmh-v60 .v6-head-actions{gap:5px}html.bmh-v60 .step01-bell,html.bmh-v60 .step01-profile span,html.bmh-v60 .step01-profile em{display:none}html.bmh-v60 .step01-profile{display:grid;grid-template-columns:1fr;width:38px;padding:0;border:0}}
+html.bmh-v60 .v6-s8{grid-template-areas:"head head" "main status" "price price" "ops ops"}
+html.bmh-v60 .v71-price-evidence{grid-area:price;padding:22px;display:grid;gap:16px}
+html.bmh-v60 .v71-price-basis,html.bmh-v60 .v71-price-quotes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+html.bmh-v60 .v71-price-basis article,html.bmh-v60 .v71-price-quotes article{padding:15px;border:1px solid #dfebe1;border-radius:13px;background:#f8fbf8;min-width:0}
+html.bmh-v60 .v71-price-basis small,html.bmh-v60 .v71-price-basis b,html.bmh-v60 .v71-price-basis span,html.bmh-v60 .v71-price-quotes b,html.bmh-v60 .v71-price-quotes span,html.bmh-v60 .v71-price-quotes small,html.bmh-v60 .v71-price-quotes strong,html.bmh-v60 .v71-price-quotes em{display:block}
+html.bmh-v60 .v71-price-basis small{font-size:11px;color:#65786a}html.bmh-v60 .v71-price-basis b{font-size:21px;margin:5px 0;color:#234e36}html.bmh-v60 .v71-price-basis span,html.bmh-v60 .v71-price-quotes span,html.bmh-v60 .v71-price-quotes small{font-size:12px;line-height:1.45;color:#64746c;overflow-wrap:anywhere}
+html.bmh-v60 .v71-price-quotes b{font-size:16px}html.bmh-v60 .v71-price-quotes strong{font-size:20px;margin:10px 0 3px;color:#215d3c}html.bmh-v60 .v71-price-quotes em{font-size:12px;font-style:normal;color:#477753}html.bmh-v60 .v71-price-quotes em.up{color:#ad553c}
+html.bmh-v60 .v71-price-evidence>p{font-size:13px;line-height:1.55;margin:0;color:#53695a}html.bmh-v60 .v71-price-evidence>.v6-secondary{justify-self:start;min-height:42px}
+@media(max-width:1180px){html.bmh-v60 .v6-s8{grid-template-areas:none}html.bmh-v60 .v71-price-evidence{grid-area:auto}}
+@media(max-width:760px){html.bmh-v60 .v71-price-basis,html.bmh-v60 .v71-price-quotes{grid-template-columns:1fr}}
+html.bmh-v60 .v71-fund-button{border:1px solid #b8d5bd;border-radius:11px;background:#eaf6ec;color:#245338;padding:13px 16px;font-size:14px;font-weight:760;text-align:left;cursor:pointer;width:100%}
+html.bmh-v60 .v71-fund-button:hover{background:#dff0e2}
+html.bmh-v60 .v71-fund-note{font-size:13px;line-height:1.5;color:#5c6c61;margin:8px 0}
+html.bmh-v60 .v71-setup-files{display:flex;gap:6px;align-items:center}
+html.bmh-v60 .v71-setup-files button{border:1px solid #d7ded6;border-radius:10px;background:#fff;color:#2e5039;min-height:38px;padding:0 11px;font-size:12px;font-weight:720;cursor:pointer}
+@media(max-width:700px){html.bmh-v60 .v71-setup-files button{font-size:11px;padding:0 7px}}

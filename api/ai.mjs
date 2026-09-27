@@ -43,7 +43,7 @@ const RESULT_SCHEMA={
 };
 
 export function cleanProject(p={}){
-  const site=p.site||{},intel=p.siteIntelligence||{},key=(Number(site.lat)||0).toFixed(4)+','+(Number(site.lng)||0).toFixed(4)+':'+(Number(site.road)||0),siteCurrent=intel.status==='ready'&&intel.key===key;
+  const site=p.site||{},intel=p.siteIntelligence||{},key=(Number(site.lat)||0).toFixed(4)+','+(Number(site.lng)||0).toFixed(4)+':'+(Number(site.road)||0),siteCurrent=!/^Dữ liệu vùng/.test(String(site.geoSource||'Dữ liệu vùng'))&&intel.status==='ready'&&intel.key===key;
   return {
   name:String(p.name||'').slice(0,120),style:String(p.style||'').slice(0,80),
   site:p.site&&typeof p.site==='object'?{province:site.pinAddressNeedsReview?'':String(site.province||'').slice(0,80),district:site.pinAddressNeedsReview?'':String(site.district||'').slice(0,120),addressStatus:site.pinAddressNeedsReview?'unverified':'user_or_geocoded',lat:Number.isFinite(Number(site.lat))?Number(site.lat):null,lng:Number.isFinite(Number(site.lng))?Number(site.lng):null,geoSource:String(site.geoSource||'').slice(0,80),frontDirection:String(site.frontDirection||'').slice(0,24),width:Number(site.width)||0,depth:Number(site.depth)||0,floors:Number(site.floors)||0,road:Number(site.road)||0,soil:String(site.soil||'').slice(0,120),shape:String(site.shape||'').slice(0,80),targetCoverage:Number(site.targetCoverage)||0}:null,

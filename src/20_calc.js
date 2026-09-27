@@ -17,7 +17,29 @@ BMH.financeSummary = (finance=BMH.state.project.finance) => {
   const targetBudget=Math.max(0,Number(finance.targetBudget)||0),available=targetBudget>0?targetBudget:capacity;
   return {first,post,peak,dti,remainder,capacity,targetBudget,available,schedule};
 };
-BMH.planArea = () => BMH.state.project.plan.rooms.reduce((s,r)=>s+r.w*r.h,0);
+BMH.fundingNeed = (estimateTotal,finance=BMH.state.project.finance) => {
+  const ownCapital=Math.max(0,(Number(finance.cash)||0)-(Number(finance.reserve)||0));
+  const needed=Math.max(0,(Number(estimateTotal)||0)-ownCapital);
+  return {ownCapital,needed,remaining:Math.max(0,needed-(Number(finance.loan)||0)),excess:Math.max(0,(Number(finance.loan)||0)-needed)};
+};
+// The costed area is the union of room rectangles on each floor. Counting the
+// room list directly would charge twice for accidental overlaps in an import.
+BMH.floorPlanArea = (rooms,site) => {
+  const rects=rooms.map(r=>({x:Math.max(0,Number(r.x)||0),y:Math.max(0,Number(r.y)||0),right:Math.min(Number(site.width)||0,(Number(r.x)||0)+(Number(r.w)||0)),bottom:Math.min(Number(site.depth)||0,(Number(r.y)||0)+(Number(r.h)||0))})).filter(r=>r.right>r.x&&r.bottom>r.y);
+  const xs=[...new Set(rects.flatMap(r=>[r.x,r.right]))].sort((a,b)=>a-b);
+  let area=0;
+  for(let i=0;i<xs.length-1;i++){
+    const left=xs[i],right=xs[i+1],spans=rects.filter(r=>r.x<right&&r.right>left).map(r=>[r.y,r.bottom]).sort((a,b)=>a[0]-b[0]);
+    let height=0,end=-Infinity;
+    for(const [from,to] of spans){height+=Math.max(0,to-Math.max(from,end));end=Math.max(end,to);}
+    area+=(right-left)*height;
+  }
+  return area;
+};
+BMH.planArea = () => {
+  const p=BMH.state.project;
+  return Array.from({length:Math.max(1,Number(p.site.floors)||1)},(_,floor)=>BMH.floorPlanArea(p.plan.rooms.filter(r=>r.floor===floor),p.site)).reduce((a,b)=>a+b,0);
+};
 
 BMH.rangeAverage = value => {
   const nums=String(value||'').replaceAll('.','').match(/\d+(?:,\d+)?/g)?.map(x=>Number(x.replace(',','.'))).filter(Number.isFinite)||[];
@@ -50,18 +72,44 @@ BMH.performancePlan = () => {
   const tenYearOps=Math.round(annualElectricCost*10), tenYearSavings=Math.round(annualSavings*10), solarCoverage=Math.round(selfUse/Math.max(1,demandAfterPassive)*100);
   return {roofArea,usableSolarArea,solarFactor,solarCapacity,solarYield,floorArea,baseDemand,passiveReduction,demandAfterPassive,selfUse,gridDemand,electricityRate,baselineElectricCost,annualElectricCost,rainfall,rainCollected,rainDemand,rainReuse,waterRate,annualWaterSavings,tankSize,solarCapex,rainCapex,coolRoofCapex,shadingCapex,upgradeCost,annualEnergySavings,annualSavings,payback,comfortScore,waterScore,energyScore,tenYearOps,tenYearSavings,solarCoverage,avgHeat:Math.round(avgHeat),avgVent:Math.round(avgVent),mode:perf.mode||'balanced'};
 };
-BMH.materialPremium = (choices=BMH.state.project.materials.choices) => Object.entries(choices).reduce((s,[cat,id])=>s+(BMH.MATERIALS[cat]?.find(x=>x.id===id)?.premium||0),0);
+BMH.materialQuantity = (category,area) => {
+  if(category==='floor')return area*.92;
+  if(category==='paint')return BMH.wallFinishArea?BMH.wallFinishArea(area)*1.85:area*2.5;
+  if(category==='door')return Math.max(8,(BMH.openingSchedule?.()||[]).reduce((sum,o)=>sum+Number(o.width||0)*Number(o.height||0),0));
+  return 0;
+};
+BMH.materialQuoteAdjustments = (area,finishAllowance) => {
+  const choices=BMH.state.project.materials.choices||{},overrides=BMH.state.project.dataEngine?.materialOverrides||{};
+  const shares={floor:.18,paint:.16,door:.12},out=[];
+  for(const [category,share] of Object.entries(shares)){
+    const id=choices[category],quote=overrides[id];if(!quote)continue;
+    const unit=String(quote.unit||'').trim().toLowerCase().replace(/\s/g,'');
+    if(!['m2','m²','sqm'].includes(unit))continue; // Litres, sets and pieces need a conversion/specification first.
+    const unitPrice=Number(quote.value),qty=BMH.materialQuantity(category,area);
+    if(!Number.isFinite(unitPrice)||unitPrice<=0||!Number.isFinite(qty)||qty<=0)continue;
+    const premium=Number(BMH.MATERIALS[category]?.find(x=>x.id===id)?.premium)||0;
+    const allowance=Math.round(finishAllowance*share)+premium;
+    const amount=Math.round(qty*unitPrice);
+    out.push({category,id,quantity:qty,unit:'m²',unitPrice,amount,allowance,delta:amount-allowance,source:String(quote.source||''),date:String(quote.date||'')});
+  }
+  return out;
+};
+BMH.materialPremium = (choices=BMH.state.project.materials.choices,quoted=[]) => Object.entries(choices||{}).reduce((s,[cat,id])=>s+(quoted.some(q=>q.category===cat)?0:(BMH.MATERIALS[cat]?.find(x=>x.id===id)?.premium||0)),0);
 BMH.estimate = () => {
   const p=BMH.state.project,env=BMH.buildableEnvelope(p.site),floors=Math.max(1,Math.min(10,Number(p.site.floors)||1)),planArea=BMH.planArea();
   const plannedFloors=Array.from({length:floors},(_,floor)=>p.plan.rooms.filter(r=>r.floor===floor));
-  const planComplete=plannedFloors.every(rooms=>rooms.length>=2&&rooms.reduce((a,r)=>a+r.w*r.h,0)>=env.targetPlate*.65);
+  const validRoom=r=>[r.x,r.y,r.w,r.h].every(Number.isFinite)&&r.w>0&&r.h>0&&r.x>=0&&r.y>=0&&r.x+r.w<=p.site.width+.001&&r.y+r.h<=p.site.depth+.001;
+  const noOverlaps=plannedFloors.every(rooms=>rooms.every((r,i)=>rooms.slice(i+1).every(o=>r.x>=o.x+o.w-.001||o.x>=r.x+r.w-.001||r.y>=o.y+o.h-.001||o.y>=r.y+r.h-.001)));
+  const planComplete=noOverlaps&&plannedFloors.every(rooms=>rooms.length>=2&&rooms.every(validRoom)&&BMH.floorPlanArea(rooms,p.site)>=env.targetPlate*.65);
   const areaSource=planComplete?'plan':'provisional',area=planComplete?planArea:Math.max(planArea,env.gfa*.85);
   const tierMul={economy:.9,standard:1,premium:1.22}[p.materials.tier]||1;
   const basis=BMH.dataCostBasis?BMH.dataCostBasis():{shellPerM2:3600000,finishPerM2:2350000,prepPerM2:280000};
-  const shell=Math.round(area*basis.shellPerM2); const finish=Math.round(area*basis.finishPerM2*tierMul)+BMH.materialPremium();
+  const shell=Math.round(area*basis.shellPerM2),finishAllowance=Math.round(area*basis.finishPerM2*tierMul);
+  const materialQuotes=BMH.materialQuoteAdjustments(area,finishAllowance);
+  const finish=finishAllowance+BMH.materialPremium(p.materials.choices,materialQuotes)+materialQuotes.reduce((sum,q)=>sum+q.amount-Math.round(finishAllowance*{floor:.18,paint:.16,door:.12}[q.category]),0);
   const adapt=BMH.siteAdaptation?BMH.siteAdaptation(p.site):{roadPct:(p.site.road<3 ? .12 : p.site.road<5 ? .05 : .02),climatePct:0};
   const si=p.siteIntelligence||{},siteKey=(Number(p.site.lat)||0).toFixed(4)+','+(Number(p.site.lng)||0).toFixed(4)+':'+(Number(p.site.road)||0);
-  if(si.status==='ready'&&si.key===siteKey&&Number.isFinite(Number(si.transport?.surchargePct))){
+  if((BMH.sitePinConfirmed?.(p.site)??!/^Dữ liệu vùng/.test(String(p.site.geoSource||'Dữ liệu vùng')))&&si.status==='ready'&&si.key===siteKey&&Number.isFinite(Number(si.transport?.surchargePct))){
     adapt.roadPct=BMH.clamp(Number(si.transport.surchargePct),0,25)/100;
     adapt.transportSource='Site Intelligence · '+String(si.fetchedAt||'');
   }else adapt.transportSource='Ước tính theo bề rộng đường khai báo';
@@ -71,7 +119,7 @@ BMH.estimate = () => {
   const performance=BMH.performancePlan?BMH.performancePlan():{upgradeCost:0};
   const performanceUpgrade=Math.round(performance.upgradeCost||0);
   const prep=Math.round(area*(basis.prepPerM2||280000)); const subtotal=shell+finish+transport+climatePrep+performanceUpgrade+prep; const contingency=Math.round(subtotal*.10); const total=subtotal+contingency;
-  return {area,planArea,areaSource,shell,finish,transport,climatePrep,climatePackage,performanceUpgrade,performance,adaptation:adapt,basis,prep,contingency,total,budget:BMH.financeSummary().available,gap:BMH.financeSummary().available-total};
+  return {area,planArea,areaSource,layoutValid:planComplete,finishAllowance,materialQuotes,shell,finish,transport,climatePrep,climatePackage,performanceUpgrade,performance,adaptation:adapt,basis,prep,contingency,total,budget:BMH.financeSummary().available,gap:BMH.financeSummary().available-total};
 };
 BMH.kua = (birth,gender='Nam') => {
   if(!['Nam','Nữ'].includes(gender))return null;

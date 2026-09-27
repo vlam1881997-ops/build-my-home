@@ -62,10 +62,12 @@ test('AI sees the pin and only the Site Intelligence scan matching that pin',()=
   assert.equal(current.finance.rateStatus,'unverified_scenario');
   p.site.lat=21.1010;
   assert.equal(cleanProject(p).siteIntelligence,null);
+  p.site.lat=21.0321;p.site.geoSource='Dữ liệu vùng';
+  assert.equal(cleanProject(p).siteIntelligence,null);
 });
 
 test('estimate uses all floors while plan is empty or incomplete, then exact planned area',()=>{
-  const BMH={state:{project:{site:{floors:3,lat:21,lng:105,road:3},plan:{rooms:[]},materials:{tier:'standard',climatePackage:'basic',choices:{}},finance:{loan:0,cash:0,reserve:0,income:0,living:0,existingDebt:0,years:15,introRate:0,postRate:0,promoMonths:0,targetBudget:1500000000}}},
+  const BMH={state:{project:{site:{floors:3,width:10,depth:20,lat:21,lng:105,road:3},plan:{rooms:[]},materials:{tier:'standard',climatePackage:'basic',choices:{}},finance:{loan:0,cash:0,reserve:0,income:0,living:0,existingDebt:0,years:15,introRate:0,postRate:0,promoMonths:0,targetBudget:1500000000}}},
     clamp:(n,min,max)=>Math.min(max,Math.max(min,n)),buildableEnvelope:()=>({gfa:180,targetPlate:60}),MATERIALS:{},siteAdaptation:()=>({roadPct:.05,climatePct:0})};
   vm.runInNewContext(fs.readFileSync(new URL('../src/20_calc.js',import.meta.url),'utf8'),{BMH,Math,Number,String,Intl});
   BMH.performancePlan=()=>({upgradeCost:0});
@@ -73,10 +75,10 @@ test('estimate uses all floors while plan is empty or incomplete, then exact pla
   const empty=BMH.estimate();
   assert.equal(empty.areaSource,'provisional');
   assert.equal(empty.area,153);
-  BMH.state.project.plan.rooms=[0,1].flatMap(floor=>[{floor,w:5,h:8},{floor,w:5,h:8}]);
+  BMH.state.project.plan.rooms=[0,1].flatMap(floor=>[{floor,x:0,y:0,w:5,h:8},{floor,x:5,y:0,w:5,h:8}]);
   assert.equal(BMH.estimate().area,160);
   assert.equal(BMH.estimate().areaSource,'provisional');
-  BMH.state.project.plan.rooms.push({floor:2,w:5,h:8},{floor:2,w:5,h:8});
+  BMH.state.project.plan.rooms.push({floor:2,x:0,y:0,w:5,h:8},{floor:2,x:5,y:0,w:5,h:8});
   const complete=BMH.estimate();
   assert.equal(complete.areaSource,'plan');
   assert.equal(complete.area,240);

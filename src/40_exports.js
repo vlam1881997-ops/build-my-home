@@ -12,6 +12,21 @@ BMH.exportLoan = () => {
 BMH.exportEstimate = () => { const e=BMH.estimate(), b=BMH.dataCostBasis(), rows=[['Hạng mục','Giá trị (VND)'],['Đơn giá phần thô / m²',b.shellPerM2],['Đơn giá hoàn thiện / m²',b.finishPerM2],['Đơn giá chuẩn bị / m²',b.prepPerM2],['Phần thô',e.shell],['Hoàn thiện & vật liệu',e.finish],['Vận chuyển',e.transport],['Thích ứng khí hậu',e.climatePrep||0],['Năng lượng & nước bền vững',e.performanceUpgrade||0],['Chuẩn bị',e.prep],['Dự phòng 10%',e.contingency],['TỔNG',e.total],['Nguồn đơn giá',b.sourceLabel],['Ngày nguồn',b.sourceDate],['Tham chiếu',b.reference]]; BMH.download('BMH-du-toan.xls',BMH.excelXml('Du toan',rows),'application/vnd.ms-excel'); };
 BMH.exportPlanSvg = () => BMH.download(`BMH-mat-bang-tang-${BMH.state.ui.planner.floor+1}.svg`,BMH.planSvg({interactive:false}),'image/svg+xml');
 BMH.exportProjectJson = () => BMH.download('BMH-project.json',JSON.stringify(BMH.state,null,2),'application/json');
+BMH.importProjectJson = async file => {
+  if(!file||file.size>5_000_000)throw new Error('Bản sao dự án cần là JSON nhỏ hơn 5 MB.');
+  let incoming;try{incoming=JSON.parse(await file.text());}catch(_){throw new Error('Tệp không phải JSON dự án hợp lệ.');}
+  if(!incoming||typeof incoming!=='object'||Array.isArray(incoming)||!incoming.project?.site||!Array.isArray(incoming.project?.plan?.rooms)||!incoming.project?.finance||!incoming.project?.materials)throw new Error('Tệp thiếu dữ liệu khu đất, bản vẽ hoặc tài chính của Build My Home.');
+  const site=incoming.project.site,rooms=incoming.project.plan.rooms;
+  if(rooms.length>300||!Number.isFinite(Number(site.width))||Number(site.width)<=0||Number(site.width)>1000||!Number.isFinite(Number(site.depth))||Number(site.depth)<=0||Number(site.depth)>1000||!Number.isInteger(Number(site.floors))||Number(site.floors)<1||Number(site.floors)>10)throw new Error('Kích thước khu đất hoặc số phòng trong bản sao không hợp lệ.');
+  if(rooms.some(r=>![r.x,r.y,r.w,r.h,r.floor].every(x=>Number.isFinite(Number(x)))||Number(r.w)<=0||Number(r.h)<=0||Number(r.floor)<0||Number(r.floor)>=Number(site.floors)))throw new Error('Bản vẽ trong tệp có phòng không hợp lệ.');
+  const oldAccess=structuredClone(BMH.state.access);
+  const next=BMH.mergeState(BMH.defaultState(),incoming);
+  next.access=oldAccess;next.ui.step=BMH.clamp(Number(next.ui.step)||1,1,10);
+  if(BMH.cloud){clearTimeout(BMH.cloud.saveTimer);BMH.cloud.activeProjectId='';BMH.cloud.syncStatus='local';try{localStorage.removeItem(BMH.CLOUD_ACTIVE_KEY);}catch(_){}}
+  BMH.state=next;BMH.normalizeState();BMH.save();BMH.render();
+  BMH.toast('Đã mở bản sao dự án. Tệp ảnh hiện trường chỉ được khôi phục từ ZIP trên thiết bị đã lưu.');
+  return BMH.state;
+};
 BMH.zipStored = files => {
   const enc=new TextEncoder(); const crcTable=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?0xedb88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
   const crc32=u8=>{let c=0xffffffff;for(const b of u8)c=crcTable[(c^b)&255]^(c>>>8);return (c^0xffffffff)>>>0;};
