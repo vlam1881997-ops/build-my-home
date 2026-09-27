@@ -51,7 +51,8 @@ BMH.ensureGoogleMaps = () => {
 };
 BMH.mapEmbedUrl = (site=BMH.state.project.site) => {
   const lat=Number(site.lat)||10.77,lng=Number(site.lng)||106.69,z=BMH.clamp(Number(site.mapZoom)||17,3,20);
-  if(['satellite','hybrid'].includes(site.mapStyle)) return `https://maps.google.com/maps?q=${lat},${lng}&t=k&z=${z}&ie=UTF8&iwloc=&output=embed`;
+  // The fallback must work without a Google/CARTO key. The interactive map
+  // provides imagery when available; the embedded fallback is street mapping.
   const span=Math.max(.004,0.04/Math.max(1,z/6));
   const bbox=[lng-span,lat-span,lng+span,lat+span].map(v=>Number(v).toFixed(6)).join(',');
   return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat.toFixed(6)}%2C${lng.toFixed(6)}`;
@@ -61,7 +62,7 @@ BMH.renderMapIframeFallback = (reason='') => {
   const fallback=el.querySelector('.map-fallback');
   if(!fallback)return;
   el.querySelector('.bmh-pin-capture')?.remove();
-  const title=['satellite','hybrid'].includes(s.mapStyle)?'Bản đồ nhúng dự phòng (vệ tinh)':'Bản đồ nhúng dự phòng';
+  const title='Bản đồ đường phố dự phòng';
   fallback.innerHTML=`<div class="fallback-grid"></div><div class="map-embed-shell"><div class="map-embed-head"><b>${title}</b><span>${reason||'Đã bật lớp dự phòng để luôn nhìn thấy vị trí khu đất.'}</span></div><iframe class="map-embed-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${BMH.mapEmbedUrl(s)}" title="Bản đồ dự phòng"></iframe><div class="v67-fallback-site-pin"><i>⌂</i><b>KHU ĐẤT</b></div><div class="map-embed-foot"><b>${BMH.esc(s.district||s.province)}</b><span>${s.lat.toFixed(5)}, ${s.lng.toFixed(5)}</span><small>Bấm trên bản đồ hoặc kéo ghim để đặt vị trí; tọa độ trên bản nhúng là ước tính.</small></div></div>`;
   el.classList.remove('map-loading');
   el.classList.add('fallback-only');
@@ -264,9 +265,9 @@ BMH.afterRender = () => {
 };
 BMH.mapTileConfig = style => ({
   roadmap:[['https://tile.openstreetmap.org/{z}/{x}/{y}.png','© OpenStreetMap contributors']],
-  satellite:[['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}','Tiles © Esri']],
-  hybrid:[['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}','Tiles © Esri']],
-  terrain:[['https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png','Map data © OpenStreetMap contributors · SRTM · OpenTopoMap']]
+  satellite:[['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}','Tiles © Esri'],['https://tile.openstreetmap.org/{z}/{x}/{y}.png','© OpenStreetMap contributors · bản đồ đường phố dự phòng']],
+  hybrid:[['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}','Tiles © Esri'],['https://tile.openstreetmap.org/{z}/{x}/{y}.png','© OpenStreetMap contributors · bản đồ đường phố dự phòng']],
+  terrain:[['https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png','Map data © OpenStreetMap contributors · SRTM · OpenTopoMap'],['https://tile.openstreetmap.org/{z}/{x}/{y}.png','© OpenStreetMap contributors · bản đồ đường phố dự phòng']]
 }[style]||[]);
 BMH.siteIntelClientKey=(s=BMH.state.project.site)=>(Number(s.lat)||0).toFixed(4)+','+(Number(s.lng)||0).toFixed(4)+':'+(Number(s.road)||0);
 BMH.siteIntelLoading=false;
@@ -322,7 +323,7 @@ BMH.initLeafletMap = async (initId) => {
 const sources=BMH.mapTileConfig(s.mapStyle);let sourceIndex=0,activeLayer=null,tileErrors=0,loaded=false,labelLayer=null,stallTimer=null;
 const clearStall=()=>{if(stallTimer){clearTimeout(stallTimer);stallTimer=null;}};
 const setLoaded=()=>{loaded=true;clearStall();el.classList.remove('map-loading','fallback-only');};
-const loadTiles=()=>{clearStall();if(activeLayer)BMH.map.removeLayer(activeLayer);if(labelLayer)BMH.map.removeLayer(labelLayer);const [url,attr]=sources[sourceIndex]||BMH.mapTileConfig('roadmap')[0];tileErrors=0;activeLayer=L.tileLayer(url,{maxZoom:s.mapStyle==='terrain'?17:20,maxNativeZoom:s.mapStyle==='roadmap'?19:undefined,attribution:attr,keepBuffer:4,updateWhenIdle:false,crossOrigin:true}).addTo(BMH.map);if(s.mapStyle==='hybrid'){labelLayer=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Labels © Esri',opacity:.9}).addTo(BMH.map);}activeLayer.on('load',setLoaded);activeLayer.on('tileerror',()=>{tileErrors++;if(tileErrors>=4){if(sourceIndex<sources.length-1){sourceIndex++;loadTiles();}else if(!loaded){BMH.renderMapIframeFallback('Không tải được lớp bản đồ nền trực tuyến. Hãy nhập địa chỉ/GPS hoặc thử tải lại bản đồ tương tác.');}}});stallTimer=setTimeout(()=>{if(!loaded){el.classList.remove('map-loading');BMH.map?.invalidateSize?.(true);}},5000);};loadTiles();
+const loadTiles=()=>{clearStall();if(activeLayer)BMH.map.removeLayer(activeLayer);if(labelLayer){BMH.map.removeLayer(labelLayer);labelLayer=null;}const [url,attr]=sources[sourceIndex]||BMH.mapTileConfig('roadmap')[0];tileErrors=0;loaded=false;const layer=L.tileLayer(url,{maxZoom:20,maxNativeZoom:s.mapStyle==='terrain'&&sourceIndex===0?17:sourceIndex>0||s.mapStyle==='roadmap'?19:undefined,attribution:attr,keepBuffer:4,updateWhenIdle:false,crossOrigin:true}).addTo(BMH.map);activeLayer=layer;if(s.mapStyle==='hybrid'&&sourceIndex===0){labelLayer=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Labels © Esri',opacity:.9}).addTo(BMH.map);}const fail=()=>{if(activeLayer!==layer)return;if(sourceIndex<sources.length-1){sourceIndex++;loadTiles();BMH.toast('Ảnh vệ tinh/địa hình chưa tải được; đang dùng bản đồ đường phố.');}else {activeLayer=null;BMH.map.removeLayer(layer);if(labelLayer){BMH.map.removeLayer(labelLayer);labelLayer=null;}BMH.renderMapIframeFallback('Không tải được lớp bản đồ nền trực tuyến. Bạn vẫn có thể đặt ghim và nhập địa chỉ/GPS.');}};layer.on('load',()=>{if(activeLayer===layer)setLoaded();});layer.on('tileerror',()=>{if(activeLayer!==layer)return;tileErrors++;if(tileErrors>=4)fail();});stallTimer=setTimeout(()=>{if(activeLayer===layer&&!loaded)fail();},6500);};loadTiles();
   BMH.mapMarker=L.marker([s.lat,s.lng],{draggable:true,autoPan:true,icon:BMH.sitePinLeafletIcon(L),zIndexOffset:1000}).addTo(BMH.map).bindPopup('<b>Vị trí khu đất</b><br>'+BMH.esc(s.district||'')+' · '+BMH.esc(s.province));
   BMH.mapMarker.on('dragend',ev=>{const ll=ev.target.getLatLng();BMH.applyCoordinates(ll.lat,ll.lng,'Ghim bản đồ');});
   BMH.map.on('click',ev=>BMH.handleMapClick(ev.latlng.lat,ev.latlng.lng,'Chọn trên bản đồ'));

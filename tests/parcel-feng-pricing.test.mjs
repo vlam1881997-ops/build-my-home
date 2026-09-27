@@ -123,3 +123,33 @@ test('a user drawn boundary cannot silently change the unverified design area',(
   assert.equal(drawn.gfa,baseline.gfa);
   assert.equal(drawn.legalVerified,false);
 });
+
+test('keyless map fallback keeps the parcel pin available when imagery fails',()=>{
+  const source=fs.readFileSync(new URL('../src/60_app.js',import.meta.url),'utf8');
+  const embed=source.slice(source.indexOf('BMH.mapEmbedUrl ='),source.indexOf('BMH.renderMapIframeFallback ='));
+  const tiles=source.slice(source.indexOf('BMH.mapTileConfig ='),source.indexOf('BMH.siteIntelClientKey='));
+  const BMH={state:{project:{site:{lat:10.85,lng:106.75,mapZoom:17,mapStyle:'hybrid'}}},clamp:(n,min,max)=>Math.min(max,Math.max(min,n))};
+  vm.runInNewContext(embed+tiles,{BMH,Number,Math});
+  const url=BMH.mapEmbedUrl();
+  assert.match(url,/openstreetmap\.org\/export\/embed\.html/);
+  assert.doesNotMatch(url,/google|api.key/i);
+  assert.equal(BMH.mapTileConfig('hybrid').length,2);
+  assert.match(BMH.mapTileConfig('hybrid')[1][0],/tile\.openstreetmap\.org/);
+});
+
+test('planner shows the active tool, position controls and placement feedback',()=>{
+  const source=fs.readFileSync(new URL('../src/70_v60_product_ui.js',import.meta.url),'utf8');
+  const fragment=source.slice(source.indexOf('BMH.screen5=()=>'),source.indexOf('BMH.screen6=()=>'));
+  const room={id:'bed-1',name:'Phòng ngủ',type:'bed',floor:0,x:1,y:2,w:3,h:4};
+  const BMH={state:{ui:{planner:{view:'plan',floor:0,selected:'bed-1',tool:'select'}},project:{site:{floors:2,width:5,depth:20},plan:{rooms:[room]}}},
+    floorRooms:()=>[room],designReview:()=>({overall:78}),planSvg:()=>'<svg id="plannerSvg"></svg>',plannerIssues:()=>[{sev:'warn',text:'Cần một lối đi'}],
+    roomPlacementReview:()=>({code:'mid',status:'CÂN NHẮC',score:68,name:'Phòng ngủ',sector:'Đông',notes:['Kiểm tra cửa sổ']}),
+    isFloorLocked:()=>false,isRoomLocked:()=>false,v6Title:()=>'',v6PanelTitle:()=>'',v6Kpi:()=>'',v6Esc:x=>String(x),num:n=>String(n)};
+  vm.runInNewContext(fragment,{BMH,Number,Array,Math});
+  const html=BMH.screen5();
+  assert.match(html,/data-plan-tool="select" class="active"/);
+  assert.match(html,/id="placementHint"/);
+  assert.match(html,/data-v6-room="x"/);
+  assert.match(html,/data-v6-room="y"/);
+  assert.match(html,/Cần một lối đi/);
+});

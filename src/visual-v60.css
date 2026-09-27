@@ -1913,3 +1913,94 @@ html.bmh-v60 .v70-quote-sources a{color:#256449;text-decoration:none;font-size:1
   html.bmh-v60 .v70-quote-panel{align-items:stretch;flex-direction:column}
   html.bmh-v60 .v70-parcel-stats b{font-size:19px}
 }
+
+/* V7.2: give the drawing a real workspace and keep its tools reachable on phones. */
+html.bmh-v60 .v6-s5{grid-template-columns:minmax(0,1fr) minmax(350px,410px);grid-template-areas:"head head" "plan plan" "tools inspector";gap:18px}
+html.bmh-v60 .v6-s5.v68-has-empty{grid-template-areas:"head head" "empty empty" "plan plan" "tools inspector"}
+html.bmh-v60 .v6-s5 .v6-plan-head{padding:24px 28px;grid-template-columns:minmax(0,1fr) minmax(420px,.85fr)}
+html.bmh-v60 .v6-s5 .v6-plan-main{padding:16px 20px 10px;min-width:0}
+html.bmh-v60 .v72-plan-intro{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:3px 4px 13px}
+html.bmh-v60 .v72-plan-intro small{color:#a55638;font-size:12px;font-weight:850;letter-spacing:.11em}
+html.bmh-v60 .v72-plan-intro h2{font-size:clamp(23px,2vw,32px);line-height:1.12;letter-spacing:-.035em;margin:5px 0 0}
+html.bmh-v60 .v72-plan-intro>span{font-size:14px;color:#617166;white-space:nowrap}
+html.bmh-v60 .v6-s5 .v6-plan-toolbar{padding:12px 3px;gap:12px;border-top:1px solid #e8ebe4}
+html.bmh-v60 .v6-s5 .v6-plan-toolbar>div{gap:6px}
+html.bmh-v60 .v6-s5 .v6-plan-toolbar button{min-height:42px;padding:0 13px;font-size:13px;font-weight:750}
+html.bmh-v60 .v6-s5 .v6-plan-toolbar button:focus-visible,
+html.bmh-v60 .v6-s5 .v6-room-types button:focus-visible,
+html.bmh-v60 .v6-s5 .v6-tool-buttons button:focus-visible{outline:3px solid #8ebca2;outline-offset:2px}
+html.bmh-v60 .v6-s5 .v6-plan-canvas{height:clamp(570px,57vw,780px);border:1px solid #e2e6df;border-radius:14px;background:#f2f3ef;position:relative}
+html.bmh-v60 .v6-s5 #placementHint{left:auto;right:16px;top:16px;transform:none;white-space:normal;color:#213d2c;width:min(310px,calc(100% - 32px));max-width:none;padding:13px 15px}
+html.bmh-v60 .v6-s5 #placementHint strong{font-size:13px}
+html.bmh-v60 .v6-s5 #placementHint>b{font-size:14px}
+html.bmh-v60 .v6-s5 #placementHint>span{font-size:13px}
+html.bmh-v60 .v6-s5 #placementHint>small{font-size:12px;line-height:1.45}
+html.bmh-v60 .v6-s5 .v6-plan-legend{min-height:52px;gap:22px;padding:7px 5px;font-size:13px;flex-wrap:wrap}
+html.bmh-v60 .v6-s5 .v6-plan-legend b{font-size:13px;font-weight:650}
+html.bmh-v60 .v6-s5 .v6-plan-tools,
+html.bmh-v60 .v6-s5 .v6-inspector{padding:23px 25px;min-width:0}
+html.bmh-v60 .v6-s5 .v6-room-types{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:18px}
+html.bmh-v60 .v6-s5 .v6-room-types button{height:84px;gap:5px;border-color:#dce5dc;border-radius:12px;transition:background .15s,border-color .15s}
+html.bmh-v60 .v6-s5 .v6-room-types button:hover{background:#f2f8f3;border-color:#8db69c}
+html.bmh-v60 .v6-s5 .v6-room-types button:disabled{opacity:.45;cursor:not-allowed}
+html.bmh-v60 .v6-s5 .v6-room-types i{font-size:23px}
+html.bmh-v60 .v6-s5 .v6-room-types span{font-size:13px;font-weight:750}
+html.bmh-v60 .v6-s5 .v6-tool-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+html.bmh-v60 .v6-s5 .v6-tool-buttons button{min-height:44px;height:auto;padding:7px 13px;border-radius:10px;font-size:13px}
+html.bmh-v60 .v6-s5 .v6-tool-buttons button.active{background:#1b6549;color:#fff;border-color:#1b6549}
+html.bmh-v60 .v72-tool-help{font-size:13px;color:#627469;line-height:1.5;margin:13px 0 0}
+html.bmh-v60 .v6-s5 .v6-room-editor{padding:17px 0}
+html.bmh-v60 .v6-s5 .v6-room-editor h3{font-size:24px;line-height:1.1;margin:7px 0 14px}
+html.bmh-v60 .v6-s5 .v6-room-editor>label{font-size:13px;font-weight:750}
+html.bmh-v60 .v6-s5 .v6-room-editor>label input{height:44px;font-size:15px}
+html.bmh-v60 .v6-s5 .v6-room-editor .v6-fields{margin-top:14px;gap:11px}
+html.bmh-v60 .v6-s5 .v6-room-editor .v6-fields label>span{font-size:13px}
+html.bmh-v60 .v72-room-actions{display:flex;gap:9px;margin-top:15px}
+html.bmh-v60 .v72-room-actions button{min-height:44px;flex:1;padding:0 10px;font-size:13px;border-radius:10px;border:1px solid #cbd9cd;background:#f6faf6;color:#245f43;font-weight:750}
+html.bmh-v60 .v72-room-actions .v6-danger{border-color:#efcfc3;background:#fff2ed;color:#aa5139}
+html.bmh-v60 .v72-room-actions button:disabled{opacity:.48;cursor:not-allowed}
+html.bmh-v60 .v72-review{margin:17px 0;padding:17px;border:1px solid #dce9df;background:#f6faf6;border-radius:13px}
+html.bmh-v60 .v72-review>b{font-size:17px;display:flex;justify-content:space-between;gap:8px}
+html.bmh-v60 .v72-review>b span{font-size:12px;color:#8a5b39;white-space:nowrap}
+html.bmh-v60 .v72-review p{font-size:13px;line-height:1.45;padding:9px 0;margin:0;border-bottom:1px solid #e0e9e0}
+html.bmh-v60 .v72-review p.error{color:#ad4733}
+html.bmh-v60 .v72-review p.warn{color:#835d24}
+html.bmh-v60 .v72-review small{display:block;font-size:12px;color:#65756b;line-height:1.5;margin-top:11px}
+html.bmh-v60 .v72-room-list{margin:12px 0 16px}
+html.bmh-v60 .v72-room-list summary{cursor:pointer;font-size:14px;font-weight:750;padding:10px 0;color:#275e45}
+html.bmh-v60 .v72-room-list .v6-room-list{margin:0}
+html.bmh-v60 .v6-s5 .v6-inspector>.v6-secondary{min-height:45px;font-size:13px}
+
+/* Site status remains legible while external map and weather services load. */
+html.bmh-v60 .v67-site .v6-map-toolbar>span{font-size:12px}
+html.bmh-v60 .v67-site .v6-climate-tip b{font-size:14px}
+html.bmh-v60 .v67-site .v6-climate-tip span{font-size:12px;line-height:1.5}
+html.bmh-v60 .v67-site .v6-climate-grid small{font-size:11px}
+html.bmh-v60 .v67-site .v6-climate-grid b{font-size:14px}
+html.bmh-v60 .v67-site .v67-weather-source{font-size:12px;line-height:1.5}
+
+@media(max-width:1000px){
+  html.bmh-v60 .v6-s5,html.bmh-v60 .v6-s5.v68-has-empty{grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "empty" "plan" "tools" "inspector"}
+  html.bmh-v60 .v6-s5:not(.v68-has-empty){grid-template-areas:"head" "plan" "tools" "inspector"}
+  html.bmh-v60 .v6-s5 .v6-plan-head{grid-template-columns:1fr}
+  html.bmh-v60 .v6-s5 .v6-plan-tools{display:block}
+  html.bmh-v60 .v6-s5 .v6-plan-canvas{height:620px}
+}
+@media(max-width:640px){
+  html.bmh-v60 .v6-s5{gap:12px}
+  html.bmh-v60 .v6-s5 .v6-plan-head,
+  html.bmh-v60 .v6-s5 .v6-plan-tools,
+  html.bmh-v60 .v6-s5 .v6-inspector{padding:18px}
+  html.bmh-v60 .v6-s5 .v6-plan-main{padding:13px}
+  html.bmh-v60 .v72-plan-intro{align-items:start;flex-direction:column;gap:6px}
+  html.bmh-v60 .v72-plan-intro>span{white-space:normal}
+  html.bmh-v60 .v6-s5 .v6-plan-toolbar button{font-size:12px;min-height:40px;padding:0 10px}
+  html.bmh-v60 .v6-s5 .v6-plan-canvas{height:500px;overflow:auto}
+  html.bmh-v60 .v6-s5 .v6-plan-canvas .planner-svg{min-width:620px}
+  html.bmh-v60 .v6-s5 #placementHint{position:absolute;left:auto;right:8px;top:auto;bottom:8px;margin:0;z-index:9;max-width:270px}
+  html.bmh-v60 .v6-s5 .v6-room-types{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  html.bmh-v60 .v6-s5 .v6-room-types button{height:74px}
+  html.bmh-v60 .v6-s5 .v6-room-types span{font-size:11px}
+  html.bmh-v60 .v6-s5 .v6-plan-legend b{margin:0}
+  html.bmh-v60 .v72-review>b{font-size:15px}
+}
