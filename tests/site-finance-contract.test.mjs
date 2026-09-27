@@ -95,6 +95,8 @@ test('planning prices never inherit the build date as a supplier source date',()
   assert.match(baseline.reference,/chưa xác nhận giá mua/);
   assert.match(BMH.materialSourceLabel({id:'floor-sample'}),/Giá hiển thị mẫu/);
   BMH.state.project.dataEngine.quote={name:'Nhà cung cấp A',date:'2026-09-25'};
+  assert.equal(BMH.dataCostBasis().sourceDate,'');
+  BMH.state.project.dataEngine.costSources={shellPerM2:{name:'Nhà cung cấp A',date:'2026-09-25'}};
   assert.equal(BMH.dataCostBasis().sourceDate,'2026-09-25');
 });
 

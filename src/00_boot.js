@@ -207,6 +207,22 @@ BMH.polygonPerimeterMeters = points => {
   for(let i=0;i<points.length;i++)total+=BMH.haversineKm(points[i],points[(i+1)%points.length])*1000;
   return total;
 };
+BMH.polygonIsSimple = points => {
+  if(!Array.isArray(points)||points.length<3)return false;
+  const origin=points.reduce((a,p)=>({lat:a.lat+Number(p.lat)/points.length,lng:a.lng+Number(p.lng)/points.length}),{lat:0,lng:0});
+  const xy=points.map(p=>BMH.localMeters(p,origin)),n=xy.length,eps=1e-8;
+  const cross=(a,b,c)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
+  const on=(a,b,c)=>Math.abs(cross(a,b,c))<=eps&&c.x>=Math.min(a.x,b.x)-eps&&c.x<=Math.max(a.x,b.x)+eps&&c.y>=Math.min(a.y,b.y)-eps&&c.y<=Math.max(a.y,b.y)+eps;
+  for(let i=0;i<n;i++){
+    const a=xy[i],b=xy[(i+1)%n];if(Math.hypot(b.x-a.x,b.y-a.y)<.01)return false;
+    for(let j=i+1;j<n;j++){
+      if(j===i+1||(i===0&&j===n-1))continue;
+      const c=xy[j],d=xy[(j+1)%n],abC=cross(a,b,c),abD=cross(a,b,d),cdA=cross(c,d,a),cdB=cross(c,d,b);
+      if((abC*abD<0&&cdA*cdB<0)||on(a,b,c)||on(a,b,d)||on(c,d,a)||on(c,d,b))return false;
+    }
+  }
+  return true;
+};
 BMH.siteParcelStats = (site=BMH.state?.project?.site||{}) => {
   const custom=site.lotMode==='custom'&&Array.isArray(site.lotPoints)&&site.lotPoints.length>=3;
   const points=custom?site.lotPoints:[];

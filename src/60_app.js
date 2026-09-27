@@ -174,6 +174,7 @@ BMH.handleMapClick = (lat,lng,source='Chọn trên bản đồ') => {
 };
 BMH.finishLotDraw = () => {
   const s=BMH.state.project.site,pts=s.lotPoints||[];if(pts.length<3)return BMH.toast('Cần ít nhất 3 điểm để hoàn tất ranh đất.');
+  if(!BMH.polygonIsSimple(pts))return BMH.toast('Ranh đất có cạnh cắt nhau hoặc đỉnh trùng. Hãy vẽ các góc liên tiếp quanh thửa đất.');
   const stats=BMH.siteParcelStats(s);if(!Number.isFinite(stats.area)||stats.area<5||stats.area>100_000)return BMH.toast('Diện tích ranh bất thường; hãy đặt lại các góc theo đúng thứ tự quanh lô đất.');
   const centroid=pts.reduce((a,p)=>({lat:a.lat+p.lat/pts.length,lng:a.lng+p.lng/pts.length}),{lat:0,lng:0});
   s.lat=centroid.lat;s.lng=centroid.lng;s.geoSource='Ranh đất vẽ trên bản đồ';s.pinAddressNeedsReview=true;s.lotMode='custom';s.lotSource='drawn';s.shape='Không đều';
@@ -191,6 +192,7 @@ BMH.importParcelGeoJSON = async file => {
   const points=ring.map(pair=>({lng:Number(pair?.[0]),lat:Number(pair?.[1])}));
   if(points.some(p=>!Number.isFinite(p.lat)||!Number.isFinite(p.lng)||p.lat<7||p.lat>24||p.lng<101||p.lng>118))throw new Error('Tọa độ WGS84 không nằm trong phạm vi Việt Nam.');
   if(Math.abs(points[0].lat-points.at(-1).lat)<1e-8&&Math.abs(points[0].lng-points.at(-1).lng)<1e-8)points.pop();
+  if(!BMH.polygonIsSimple(points))throw new Error('Polygon có cạnh cắt nhau hoặc đỉnh trùng; không thể dùng làm ranh đất.');
   const area=BMH.polygonAreaMeters(points);
   if(points.length<3||area<5||area>100_000)throw new Error('Diện tích polygon bất thường. Kiểm tra hệ tọa độ và thứ tự kinh độ, vĩ độ.');
   const center=points.reduce((a,p)=>({lat:a.lat+p.lat/points.length,lng:a.lng+p.lng/points.length}),{lat:0,lng:0}),s=BMH.state.project.site;
@@ -433,7 +435,7 @@ document.addEventListener('click',e=>{
   const alignFloor=e.target.closest('[data-align-floor]');if(alignFloor){BMH.alignCurrentFloor(alignFloor.dataset.alignFloor);return;}
   const addRoom=e.target.closest('[data-add-room]');if(addRoom){BMH.addRoom(addRoom.dataset.addRoom);return;}
   const opening=e.target.closest('[data-add-opening]');if(opening){BMH.addOpening(opening.dataset.addOpening);return;}
-  const openingDelete=e.target.closest('[data-opening-delete]');if(openingDelete){BMH.pushPlanHistory();BMH.state.project.plan.openings=BMH.state.project.plan.openings.filter(o=>o.id!==openingDelete.dataset.openingDelete);BMH.save();BMH.render();return;}
+  const openingDelete=e.target.closest('[data-opening-delete]');if(openingDelete){const item=BMH.state.project.plan.openings.find(o=>o.id===openingDelete.dataset.openingDelete);if(!item)return;if(BMH.isRoomLocked(item.roomId))return BMH.toast('Phòng hoặc tầng đang khóa.');BMH.pushPlanHistory();BMH.state.project.plan.openings=BMH.state.project.plan.openings.filter(o=>o.id!==item.id);BMH.save();BMH.render();return;}
   if(e.target.closest('[data-room-delete]')){const id=BMH.state.ui.planner.selected;if(BMH.isRoomLocked(id))return BMH.toast('Phòng hoặc tầng đang khóa.');BMH.pushPlanHistory();BMH.state.project.plan.rooms=BMH.state.project.plan.rooms.filter(r=>r.id!==id);BMH.state.project.plan.openings=BMH.state.project.plan.openings.filter(o=>o.roomId!==id);BMH.state.ui.planner.selected=BMH.floorRooms()[0]?.id||null;BMH.save();BMH.render();return;}
   if(e.target.closest('[data-plan-undo]')){BMH.undoPlan();return;}
   if(e.target.closest('[data-plan-redo]')){BMH.redoPlan();return;}
@@ -482,6 +484,9 @@ document.addEventListener('change',e=>{
   if(t?.id==='parcelGeoJSONUpload'){if(t.files?.[0])BMH.importParcelGeoJSON(t.files[0]).catch(err=>BMH.toast(err.message||'Không đọc được GeoJSON.'));t.value='';return;}
   if(!t.closest?.('#app'))return;
   if(t.dataset.path){let v=t.type==='checkbox'?t.checked:(t.type==='number'?Number(t.value)*(Number(t.dataset.scale)||1):t.value);const path=t.dataset.path;if(path==='project.dossier.progress')v=BMH.clamp(Number(v)||0,0,100);if(path==='project.site.province'){const r=BMH.REGIONS[v];BMH.state.project.site.province=v;if(r){const pt=BMH.regionPoint(v,r.defaultDistrict);Object.assign(BMH.state.project.site,{district:pt.district,lat:pt.lat,lng:pt.lng,geoSource:'Dữ liệu vùng',pinAddressNeedsReview:false});}BMH.liveWeather=null;BMH.save();BMH.render();return;}if(path==='project.site.district'){BMH.state.project.site.district=v;const pt=BMH.regionPoint(BMH.state.project.site.province,v);BMH.state.project.site.lat=pt.lat;BMH.state.project.site.lng=pt.lng;BMH.state.project.site.geoSource='Dữ liệu vùng';BMH.state.project.site.pinAddressNeedsReview=false;BMH.liveWeather=null;BMH.save();BMH.render();return;}if(['project.finance.cash','project.finance.reserve','project.finance.loan'].includes(path))BMH.state.project.finance.targetBudget=0;
+if(/^project\.dataEngine\.cost\.(shellPerM2|finishPerM2|prepPerM2)$/.test(path)){
+  const key=path.split('.').at(-1),de=BMH.dataEngineState();de.costSources=de.costSources||{};de.costSources[key]={kind:'manual',name:'Người dùng chỉnh tay',date:'',updatedAt:new Date().toISOString()};
+}
 if(['project.finance.introRate','project.finance.postRate','project.finance.promoMonths'].includes(path)){
   const m=BMH.state.project.finance.rateMeta||{};
   BMH.state.project.finance.rateMeta={...m,status:'manual',verified:false,note:'Lãi suất đã được người dùng chỉnh tay sau lần cập nhật AI.'};
@@ -489,8 +494,8 @@ if(['project.finance.introRate','project.finance.postRate','project.finance.prom
 BMH.set(path,v);return;}
   if(t.dataset.person){const h=BMH.state.project.household,list=t.dataset.person==='child'?h.children:h.relatives,p=list.find(x=>x.id===t.dataset.id);if(p){p[t.dataset.key]=t.type==='number'?Number(t.value):t.value;BMH.save();BMH.render();}return;}
   if(t.dataset.planner){const ui=BMH.state.ui.planner;if(t.dataset.planner==='snap')ui.snap=Number(t.value);if(t.dataset.planner==='furniture')ui.showFurniture=t.checked;if(t.dataset.planner==='dimensions')ui.showDimensions=t.checked;if(t.dataset.planner==='feng')ui.showFeng=t.checked;if(t.dataset.planner==='below')ui.showBelow=t.checked;if(t.dataset.planner==='structure')ui.showStructure=t.checked;if(t.dataset.planner==='environment')ui.showEnvironment=t.checked;if(t.dataset.planner==='circulation')ui.showCirculation=t.checked;if(t.dataset.planner==='sectionLine')ui.showSectionLine=t.checked;if(t.dataset.planner==='climate')ui.showClimate=t.checked;if(t.dataset.planner==='envelope')ui.showEnvelope=t.checked;BMH.save();BMH.render();return;}
-  if(t.dataset.roomField){const r=BMH.selectedRoom();if(!r)return;BMH.pushPlanHistory();const key=t.dataset.roomField,old={...r};r[key]=['x','y','w','h'].includes(key)?Number(t.value):t.value;if(['x','y','w','h'].includes(key)){r[key]=BMH.roundTo(r[key],BMH.state.ui.planner.snap);if(!BMH.roomValid(r)){Object.assign(r,old);BMH.toast('Giá trị mới gây chồng phòng hoặc vượt ranh.');}}BMH.save();BMH.render();return;}
-  if(t.dataset.openingField){const o=BMH.state.project.plan.openings.find(x=>x.id===t.dataset.openingId);if(o){const old={...o};BMH.pushPlanHistory();o[t.dataset.openingField]=['width','offset'].includes(t.dataset.openingField)?Number(t.value):t.value;if(!BMH.openingFits(o,o.id)){Object.assign(o,old);BMH.planHistory.undo.pop();BMH.toast('Kích thước/vị trí ô mở đang trùng hoặc vượt chiều dài tường.');}BMH.save();BMH.render();}return;}
+  if(t.dataset.roomField){const r=BMH.selectedRoom();if(!r)return;if(BMH.isRoomLocked(r.id))return BMH.toast('Phòng hoặc tầng đang khóa.');BMH.pushPlanHistory();const key=t.dataset.roomField,old={...r};r[key]=['x','y','w','h'].includes(key)?Number(t.value):t.value;if(['x','y','w','h'].includes(key)){r[key]=BMH.roundTo(r[key],BMH.state.ui.planner.snap);if(!BMH.roomValid(r)){Object.assign(r,old);BMH.planHistory.undo.pop();BMH.toast('Giá trị mới gây chồng phòng hoặc vượt ranh.');}}BMH.save();BMH.render();return;}
+  if(t.dataset.openingField){const o=BMH.state.project.plan.openings.find(x=>x.id===t.dataset.openingId);if(o){if(BMH.isRoomLocked(o.roomId))return BMH.toast('Phòng hoặc tầng đang khóa.');const old={...o};BMH.pushPlanHistory();o[t.dataset.openingField]=['width','offset'].includes(t.dataset.openingField)?Number(t.value):t.value;if(!BMH.openingFits(o,o.id)){Object.assign(o,old);BMH.planHistory.undo.pop();BMH.toast('Kích thước/vị trí ô mở đang trùng hoặc vượt chiều dài tường.');}BMH.save();BMH.render();}return;}
   if(t.matches('[data-scene-focus]')){BMH.state.ui.sceneFocus=t.value;BMH.save();BMH.render();return;}
   if(t.dataset.check){BMH.state.project.checklist[t.dataset.check]=t.checked;BMH.save();BMH.render({preserveScroll:true});return;}
 });

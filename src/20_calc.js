@@ -91,7 +91,7 @@ BMH.fengIdentity = (birth,gender) => {
 BMH.fengProfile = () => {
   const h=BMH.state.project.household||{}, labels=['Sinh Khí','Thiên Y','Diên Niên','Phục Vị'];
   const owner=BMH.kua(h.ownerBirth,h.ownerGender);
-  const partner=(h.partnerEnabled===false||!Number(h.partnerBirth))?null:BMH.kua(h.partnerBirth,h.partnerGender||'Nữ');
+  const partner=(h.partnerEnabled===false||!Number(h.partnerBirth))?null:BMH.kua(h.partnerBirth,h.partnerGender);
   const directions=['Bắc','Đông Bắc','Đông','Đông Nam','Nam','Tây Nam','Tây','Tây Bắc'];
   const ownerWeight=new Map((owner?.dirs||[]).map((d,i)=>[d,4-i]));
   const partnerWeight=new Map((partner?.dirs||[]).map((d,i)=>[d,4-i]));

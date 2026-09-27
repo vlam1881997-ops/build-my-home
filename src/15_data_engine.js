@@ -53,7 +53,8 @@ BMH.REGION_COST_FACTORS = {
 BMH.defaultDataEngineState = () => ({
   pricingMode:'regional',
   cost:{shellPerM2:3600000,finishPerM2:2350000,prepPerM2:280000,marketAdjustmentPct:0},
-  quote:{name:'',date:'',reference:'',importedAt:null},
+  quote:{name:'',date:'',reference:'',costKeys:[],materialIds:[],importedAt:null},
+  costSources:{},
   materialOverrides:{},
   lastRefreshAt:null,
   lastImportAt:null,
@@ -80,17 +81,21 @@ BMH.dataCostBasis = () => {
   const laborMid=BMH.rangeAverage?.(profile.labor)||500000;
   const laborFactor=BMH.clamp(.92+.08*(laborMid/500000),.94,1.08);
   const market=BMH.clamp(1+(Number(cost.marketAdjustmentPct)||0)/100,.75,1.5);
-  const supplier=!!(de.quote?.name&&de.quote?.date);
+  const costNames={shellPerM2:'phần thô',finishPerM2:'hoàn thiện',prepPerM2:'chuẩn bị'};
+  const sourced=Object.entries(de.costSources||{}).filter(([key,x])=>costNames[key]&&x?.name&&x?.date);
+  const manual=Object.entries(de.costSources||{}).filter(([key,x])=>costNames[key]&&x?.kind==='manual');
+  const supplier=sourced.length>0;
   const mode=de.pricingMode||'regional';
   const locationFactor=mode==='baseline'?1:regional*laborFactor;
-  const shellPerM2=Math.round((Number(cost.shellPerM2)||3600000)*locationFactor*market);
-  const finishPerM2=Math.round((Number(cost.finishPerM2)||2350000)*locationFactor*market);
-  const prepPerM2=Math.round((Number(cost.prepPerM2)||280000)*locationFactor*market);
+  const priced=(key,fallback)=>Math.round((Number(cost[key])||fallback)*((de.costSources?.[key]?.name)?1:locationFactor*market));
+  const shellPerM2=priced('shellPerM2',3600000);
+  const finishPerM2=priced('finishPerM2',2350000);
+  const prepPerM2=priced('prepPerM2',280000);
   return {
     shellPerM2,finishPerM2,prepPerM2,regionalFactor:regional,laborFactor,marketFactor:market,laborMid,mode,supplier,
-    sourceLabel:supplier?`Báo giá nhập: ${de.quote.name}`:'Baseline BMH + hệ số vùng/nhân công',
-    sourceDate:supplier?de.quote.date:'',
-    reference:supplier?(de.quote.reference||'Báo giá do người dùng nhập'):'Đơn giá lập kế hoạch nội bộ; QĐ 425/QĐ-BXD và TT 37/2026/TT-BXD chỉ tham chiếu phương pháp, chưa xác nhận giá mua tại khu đất.'
+    sourceLabel:[supplier?`Báo giá: ${sourced.map(([key])=>costNames[key]).join(', ')}`:'',manual.length?`Người dùng chỉnh tay: ${manual.map(([key])=>costNames[key]).join(', ')}`:'',sourced.length+manual.length<3?'Các mục chưa gắn nguồn dùng baseline BMH + hệ số vùng/nhân công':''].filter(Boolean).join('; '),
+    sourceDate:supplier?[...new Set(sourced.map(([,x])=>x.date))].join(', '):'',
+    reference:supplier?sourced.map(([key,x])=>`${costNames[key]}: ${x.name} · ${x.date}${x.reference?' · '+x.reference:''}`).join('; '):manual.length?'Người dùng đã chỉnh đơn giá thủ công; mục khác còn là giả định lập kế hoạch.':'Đơn giá lập kế hoạch nội bộ; QĐ 425/QĐ-BXD và TT 37/2026/TT-BXD chỉ tham chiếu phương pháp, chưa xác nhận giá mua tại khu đất.'
   };
 };
 
@@ -109,18 +114,19 @@ BMH.costSnapshot = () => {
   de.snapshots=[row,...(de.snapshots||[])].slice(0,12);BMH.save();BMH.render();BMH.toast('Đã chốt snapshot dự toán cùng nguồn và thời điểm.');return row;
 };
 BMH.resetPricingBaseline = () => {
-  const de=BMH.dataEngineState(),fresh=BMH.defaultDataEngineState();de.pricingMode=fresh.pricingMode;de.cost=fresh.cost;de.quote=fresh.quote;de.materialOverrides={};de.status.pricing='planning';BMH.save();BMH.render();BMH.toast('Đã trở về baseline V4.8; các snapshot cũ vẫn được giữ.');
+  const de=BMH.dataEngineState(),fresh=BMH.defaultDataEngineState();de.pricingMode=fresh.pricingMode;de.cost=fresh.cost;de.quote=fresh.quote;de.costSources={};de.materialOverrides={};de.status.pricing='planning';BMH.save();BMH.render();BMH.toast('Đã trở về baseline V4.8; các snapshot cũ vẫn được giữ.');
 };
 
 BMH.parseCsvLine = line => {
   const out=[];let cur='',quoted=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(quoted&&line[i+1]==='"'){cur+='"';i++;}else quoted=!quoted;}else if(c===','&&!quoted){out.push(cur.trim());cur='';}else cur+=c;}out.push(cur.trim());return out;
 };
+BMH.quoteValue = value => typeof value==='number'?value:Number(String(value||'').replace(/[^0-9-]/g,''));
 BMH.importPriceQuote = async file => {
   if(!file)return;if(file.size>2_000_000)throw new Error('Báo giá cần nhỏ hơn 2 MB.');const text=await file.text();let payload=null;
   try{if(file.name.toLowerCase().endsWith('.json'))payload=JSON.parse(text);}catch(_){payload=null;}
   if(!payload){
     const lines=text.split(/\r?\n/).filter(x=>x.trim());const rows=lines.map(BMH.parseCsvLine);const head=(rows.shift()||[]).map(x=>x.toLowerCase());payload={materials:{}};
-    for(const r of rows){const obj=Object.fromEntries(head.map((h,i)=>[h,r[i]??''])),key=obj.key||obj.id||obj.item,value=Number(String(obj.value||obj.price||'').replace(/[^0-9.-]/g,''));if(!key||!Number.isFinite(value))continue;
+    for(const r of rows){const obj=Object.fromEntries(head.map((h,i)=>[h,r[i]??''])),key=obj.key||obj.id||obj.item,value=BMH.quoteValue(obj.value||obj.price);if(!key||!Number.isFinite(value)||value<=0)continue;
       if(['shellperm2','shell_per_m2'].includes(key.toLowerCase()))payload.shellPerM2=value;
       else if(['finishperm2','finish_per_m2'].includes(key.toLowerCase()))payload.finishPerM2=value;
       else if(['prepperm2','prep_per_m2'].includes(key.toLowerCase()))payload.prepPerM2=value;
@@ -130,14 +136,31 @@ BMH.importPriceQuote = async file => {
   }
   if(!payload||typeof payload!=='object')throw new Error('Không đọc được báo giá JSON/CSV.');
   const source=String(payload.source||payload.supplier||'').trim(),date=String(payload.date||'').trim();
-  if(!source||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date)))throw new Error('Báo giá cần tên nhà cung cấp và ngày theo YYYY-MM-DD. Không tự điền ngày hôm nay.');
-  const de=BMH.dataEngineState(),cost=de.cost||{};
-  const shell=Number(payload.shellPerM2??payload.cost?.shellPerM2),finish=Number(payload.finishPerM2??payload.cost?.finishPerM2),prep=Number(payload.prepPerM2??payload.cost?.prepPerM2);
-  if(Number.isFinite(shell)&&shell>0)cost.shellPerM2=shell;if(Number.isFinite(finish)&&finish>0)cost.finishPerM2=finish;if(Number.isFinite(prep)&&prep>0)cost.prepPerM2=prep;
+  const validQuoteDate=x=>/^\d{4}-\d{2}-\d{2}$/.test(x)&&Number.isFinite(Date.parse(x))&&new Date(x).toISOString().slice(0,10)===x;
+  if(!source||!validQuoteDate(date))throw new Error('Báo giá cần tên nhà cung cấp và ngày theo YYYY-MM-DD. Không tự điền ngày hôm nay.');
+  const de=BMH.dataEngineState(),cost={...(de.cost||{})},costKeys=[];
+  for(const key of ['shellPerM2','finishPerM2','prepPerM2']){
+    const value=BMH.quoteValue(payload[key]??payload.cost?.[key]);
+    if(Number.isFinite(value)&&value>0){cost[key]=value;costKeys.push(key);}
+  }
+  const mats=payload.materials&&typeof payload.materials==='object'&&!Array.isArray(payload.materials)?payload.materials:{};
+  const known=new Set(Object.values(BMH.MATERIALS||{}).flat().map(item=>item.id));
+  const materialOverrides={...(de.materialOverrides||{})},materialIds=[];
+  for(const [id,v] of Object.entries(mats)){
+    const value=BMH.quoteValue(v?.value);
+    if(!Number.isFinite(value)||value<=0)continue;
+    if(!known.has(id))throw new Error(`Mã vật liệu ${id} chưa có trong showroom; chưa thể áp dụng báo giá.`);
+    const itemDate=String(v.date||date),itemSource=String(v.source||source).trim();
+    if(!itemSource||!validQuoteDate(itemDate))throw new Error(`Nguồn hoặc ngày của vật liệu ${id} không hợp lệ.`);
+    materialOverrides[id]={value,unit:String(v.unit||'đv'),source:itemSource,date:itemDate};
+    materialIds.push(id);
+  }
+  if(!costKeys.length&&!materialIds.length)throw new Error('Báo giá không có đơn giá hợp lệ áp dụng cho dự toán hoặc vật liệu trong showroom.');
   if(Number.isFinite(Number(payload.marketAdjustmentPct)))cost.marketAdjustmentPct=Number(payload.marketAdjustmentPct);
-  de.cost=cost;de.quote={name:source,date,reference:String(payload.reference||''),importedAt:new Date().toISOString()};
-  const mats=payload.materials||{};de.materialOverrides={...(de.materialOverrides||{})};for(const [id,v] of Object.entries(mats)){if(v&&Number(v.value)>0)de.materialOverrides[id]={value:Number(v.value),unit:String(v.unit||'đv'),source:String(v.source||de.quote.name),date:String(v.date||de.quote.date)};}
-  de.lastImportAt=new Date().toISOString();de.lastImportName=file.name;de.status.pricing='quote';BMH.save();BMH.render();BMH.toast(`Đã nhập báo giá ${file.name}. Dự toán đã gắn nguồn và ngày báo giá.`);
+  de.cost=cost;de.costSources={...(de.costSources||{})};for(const key of costKeys)de.costSources[key]={name:source,date,reference:String(payload.reference||'')};
+  de.quote={name:source,date,reference:String(payload.reference||''),costKeys,materialIds,importedAt:new Date().toISOString()};
+  de.materialOverrides=materialOverrides;
+  de.lastImportAt=new Date().toISOString();de.lastImportName=file.name;de.status.pricing='quote';BMH.save();BMH.render();BMH.toast(costKeys.length?`Đã nhập ${file.name}: đơn giá dự toán đã đổi theo báo giá có ngày.`:`Đã nhập ${file.name}: giá vật liệu có nguồn; dự toán toàn nhà cần đơn giá m² hoặc bóc khối lượng để đổi.`);
 };
 
 BMH.loadClimateHistory = async (force=false) => {

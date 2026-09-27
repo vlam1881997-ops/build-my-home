@@ -9,6 +9,7 @@ export default function handler(req,res){
   send(res,200,{
     ok:true,
     aiConfigured:!!gemini.key||openai,
+    geminiConfigured:!!gemini.key,
     aiProvider:gemini.key?'Gemini':openai?'OpenAI':'Chưa cấu hình',
     aiModel:gemini.key?gemini.primary:openai?String(process.env.OPENAI_MODEL||'gpt-5.6-terra'):'',
     cloudConfigured:!!(supabase.url&&supabase.publishable&&supabase.secret),

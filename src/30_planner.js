@@ -2,7 +2,7 @@ BMH.roomColor = type => ({living:'#f4f7f1',kitchen:'#fff9ef',bed:'#f4f7fb',bath:
 BMH.floorRooms = (floor=BMH.state.ui.planner.floor) => BMH.state.project.plan.rooms.filter(r=>r.floor===floor);
 BMH.selectedRoom = () => BMH.state.project.plan.rooms.find(r=>r.id===BMH.state.ui.planner.selected)||null;
 BMH.roomsOverlap = (a,b) => a.floor===b.floor && a.id!==b.id && a.x < b.x+b.w-.001 && a.x+a.w > b.x+.001 && a.y < b.y+b.h-.001 && a.y+a.h > b.y+.001;
-BMH.roomValid = room => room.x>=0 && room.y>=0 && room.x+room.w<=BMH.state.project.site.width+.001 && room.y+room.h<=BMH.state.project.site.depth+.001 && !BMH.state.project.plan.rooms.some(r=>BMH.roomsOverlap(room,r));
+BMH.roomValid = room => [room.x,room.y,room.w,room.h].every(Number.isFinite) && room.w>=.6 && room.h>=.6 && room.x>=0 && room.y>=0 && room.x+room.w<=BMH.state.project.site.width+.001 && room.y+room.h<=BMH.state.project.site.depth+.001 && !BMH.state.project.plan.rooms.some(r=>BMH.roomsOverlap(room,r));
 
 BMH.plannerIssues = () => {
   const p=BMH.state.project, issues=[];
@@ -266,21 +266,25 @@ BMH.pushPlanHistory = () => {
   BMH.planHistory.redo.length=0;
 };
 BMH.undoPlan = () => {
+  if(BMH.planHasLocks())return BMH.toast('Mở khóa phòng/tầng trước khi hoàn tác mặt bằng.');
   const snap=BMH.planHistory.undo.pop(); if(!snap)return BMH.toast('Chưa có thao tác để hoàn tác.');
   BMH.planHistory.redo.push(BMH.planSnapshot()); BMH.state.project.plan=structuredClone(snap); BMH.normalizeState(); BMH.save(); BMH.render();
 };
 BMH.redoPlan = () => {
+  if(BMH.planHasLocks())return BMH.toast('Mở khóa phòng/tầng trước khi làm lại mặt bằng.');
   const snap=BMH.planHistory.redo.pop(); if(!snap)return BMH.toast('Chưa có thao tác để làm lại.');
   BMH.planHistory.undo.push(BMH.planSnapshot()); BMH.state.project.plan=structuredClone(snap); BMH.normalizeState(); BMH.save(); BMH.render();
 };
 BMH.isRoomLocked = id => (BMH.state.project.plan.lockedRoomIds||[]).includes(id)||(BMH.state.project.plan.lockedFloors||[]).includes(BMH.state.project.plan.rooms.find(r=>r.id===id)?.floor);
 BMH.isFloorLocked = floor => (BMH.state.project.plan.lockedFloors||[]).includes(Number(floor));
+BMH.planHasLocks = () => !!((BMH.state.project.plan.lockedRoomIds||[]).length||(BMH.state.project.plan.lockedFloors||[]).length);
 BMH.toggleFloorLock = floor => {
   const list=BMH.state.project.plan.lockedFloors||(BMH.state.project.plan.lockedFloors=[]),f=Number(floor),i=list.indexOf(f);
   if(i>=0)list.splice(i,1);else list.push(f);
   BMH.save();BMH.render({preserveScroll:true});BMH.toast(i>=0?'Đã mở khóa tầng.':'Đã khóa tầng để tránh sửa nhầm.');
 };
 BMH.toggleRoomLock = id => {
+  const room=BMH.state.project.plan.rooms.find(r=>r.id===id);if(room&&BMH.isFloorLocked(room.floor))return BMH.toast('Tầng đang khóa; hãy mở tầng trước.');
   const list=BMH.state.project.plan.lockedRoomIds||(BMH.state.project.plan.lockedRoomIds=[]),i=list.indexOf(id);
   if(i>=0)list.splice(i,1);else list.push(id);
   BMH.save();BMH.render({preserveScroll:true});
@@ -339,11 +343,13 @@ BMH.capturePlanVersion = label => {
   if(versions.length>6)versions.length=6;BMH.save();BMH.render({preserveScroll:true});BMH.toast('Đã lưu mốc phương án.');
 };
 BMH.restorePlanVersion = id => {
+  if(BMH.planHasLocks())return BMH.toast('Mở khóa phòng/tầng trước khi khôi phục phương án.');
   const v=(BMH.state.project.planVersions||[]).find(x=>x.id===id);if(!v)return;
   BMH.pushPlanHistory();BMH.state.project.plan=structuredClone(v.plan);BMH.normalizeState();BMH.save();BMH.render({preserveScroll:true});BMH.toast(`Đã khôi phục ${v.label}.`);
 };
 BMH.deletePlanVersion = id => {BMH.state.project.planVersions=(BMH.state.project.planVersions||[]).filter(x=>x.id!==id);BMH.save();BMH.render({preserveScroll:true});};
 BMH.generateAutoPlanSnapshot = strategy => {
+  if(BMH.planHasLocks())return null;
   const oldPlan=BMH.planSnapshot(),oldUi=structuredClone(BMH.state.ui.planner),oldStrategy=BMH.state.project.site.designStrategy,oldUndo=BMH.planHistory.undo.slice(),oldRedo=BMH.planHistory.redo.slice();
   const save=BMH.save,render=BMH.render,toast=BMH.toast,push=BMH.pushPlanHistory;let result=null;
   BMH.save=()=>{};BMH.render=()=>{};BMH.toast=()=>{};BMH.pushPlanHistory=()=>{};
@@ -352,11 +358,13 @@ BMH.generateAutoPlanSnapshot = strategy => {
   return result;
 };
 BMH.generatePlanVariants = () => {
+  if(BMH.planHasLocks())return BMH.toast('Mở khóa phòng/tầng trước khi tạo phương án khác.');
   const defs=[['A','climate','Ưu tiên khí hậu'],['B','balanced','Cân bằng'],['C','budget','Gọn chi phí']],variants=[];
   for(const [code,strategy,label] of defs){const plan=BMH.generateAutoPlanSnapshot(strategy);if(!plan)continue;const metrics=BMH.planMetrics(plan);variants.push({id:`variant-${code}`,code,strategy,label,metrics,plan});}
   BMH.state.project.planVariants=variants;BMH.save();BMH.render({preserveScroll:true});BMH.toast(variants.length===3?'Đã tạo 3 phương án A/B/C để so sánh.':'Đã tạo các phương án khả dụng.');
 };
 BMH.applyPlanVariant = id => {
+  if(BMH.planHasLocks())return BMH.toast('Mở khóa phòng/tầng trước khi thay phương án.');
   const v=(BMH.state.project.planVariants||[]).find(x=>x.id===id);if(!v)return;
   BMH.pushPlanHistory();BMH.state.project.plan=structuredClone(v.plan);BMH.state.project.site.designStrategy=v.strategy;BMH.normalizeState();BMH.save();BMH.render({preserveScroll:true});BMH.toast(`Đã áp dụng phương án ${v.code} · ${v.label}.`);
 };
@@ -377,6 +385,7 @@ BMH.buildableEnvelopeSvg = floor => {
   return `<g class="buildable-envelope"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx=".08"/><text x="${x+.16}" y="${y+.34}">KHUNG XÂY DỰNG MỤC TIÊU · ${Math.round(e.coverage*100)}%</text><text class="setback-label front" x="${s.width/2}" y="${Math.max(.18,y-.14)}">LÙI TRƯỚC ${BMH.num(e.front,1)}m</text><text class="setback-label rear" x="${s.width/2}" y="${Math.min(s.depth-.12,y+h+.34)}">LÙI SAU ${BMH.num(e.rear,1)}m</text></g>`;
 };
 BMH.autoPlanConcept = (strategy=BMH.state.project.site.designStrategy||'climate') => {
+  if(BMH.planHasLocks())return BMH.toast('Mở khóa phòng/tầng trước khi tạo lại mặt bằng.');
   const p=BMH.state.project,s=p.site,h=p.household,e=BMH.buildableEnvelope(s),W=e.buildWidth,D=e.buildDepth,x0=e.side,y0=e.front,floors=Math.max(1,Number(s.floors)||1);
   if(W<3||D<7)return BMH.toast('Khung xây dựng hiện quá nhỏ để tự bố trí. Hãy giảm khoảng lùi hoặc điều chỉnh kích thước đất.');
   const oldPlan=BMH.planSnapshot(); BMH.pushPlanHistory();
@@ -429,6 +438,7 @@ BMH.sharedWallNeighbors = (rooms,room,side) => {
 BMH.edgeMoveCandidate = (originalRooms,id,side,delta) => {
   const rooms=structuredClone(originalRooms),r=rooms.find(x=>x.id===id); if(!r)return null;
   const ns=BMH.sharedWallNeighbors(rooms,r,side);
+  if(BMH.isRoomLocked(id)||ns.some(n=>BMH.isRoomLocked(n.id)))return null;
   if(side==='east'){r.w+=delta;ns.forEach(n=>{n.x+=delta;n.w-=delta;});}
   if(side==='west'){r.x+=delta;r.w-=delta;ns.forEach(n=>{n.w+=delta;});}
   if(side==='south'){r.h+=delta;ns.forEach(n=>{n.y+=delta;n.h-=delta;});}
