@@ -131,7 +131,7 @@ BMH.mountStudio3D = async () => {
 BMH.resetStudio3D = () => {const s=BMH.studio3d;if(!s)return;s.state.yaw=-2.5;s.state.pitch=.52;s.state.dist=(BMH.state.ui.sceneFocus||'all').startsWith('room:')?8:Math.max(18,(Number(BMH.state.project.site.depth)||20)*.92);};
 BMH.cinematicSignature = () => {
   const p=BMH.state.project;
-  return JSON.stringify({style:p.style,site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,frontDirection:p.site.frontDirection},materials:p.materials?.choices||{},tier:p.materials?.tier,rooms:p.plan.rooms.map(r=>[r.floor,r.name,r.type,r.x,r.y,r.w,r.h])});
+  return JSON.stringify({style:p.style,site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,frontDirection:p.site.frontDirection},materials:p.materials?.choices||{},productCodes:Object.values(p.materials?.choices||{}).map(id=>[id,p.dataEngine?.materialOverrides?.[id]?.sku||'']),tier:p.materials?.tier,rooms:p.plan.rooms.map(r=>[r.floor,r.name,r.type,r.x,r.y,r.w,r.h])});
 };
 BMH.generateCinematicRender = async () => {
   if(BMH.cinematicRender.loading)return;
@@ -140,7 +140,7 @@ BMH.generateCinematicRender = async () => {
   let screenshot;
   try{screenshot=scene.renderer.domElement.toDataURL('image/jpeg',.8);}catch{BMH.toast('Không chụp được mô hình 3D trên thiết bị này.');return;}
   const signature=BMH.cinematicSignature(),p=BMH.state.project;
-  const selectedMaterials=Object.fromEntries(Object.entries(p.materials.choices||{}).map(([cat,id])=>[cat,(BMH.MATERIALS[cat]||[]).find(x=>x.id===id)?.name||id]));
+  const selectedMaterials=Object.fromEntries(Object.entries(p.materials.choices||{}).map(([cat,id])=>{const name=(BMH.MATERIALS[cat]||[]).find(x=>x.id===id)?.name||id,sku=p.dataEngine?.materialOverrides?.[id]?.sku;return [cat,sku?`${name} · SKU ${sku}`:name];}));
   const payload={image:screenshot,project:{style:p.style,site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,frontDirection:p.site.frontDirection},materials:{choices:selectedMaterials},rooms:p.plan.rooms.map(r=>({name:r.name,type:r.type,floor:r.floor,w:r.w,h:r.h}))}};
   BMH.cinematicRender.loading=true;BMH.cinematicRender.error='';BMH.render({preserveScroll:true});
   try{
