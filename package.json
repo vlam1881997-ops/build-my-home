@@ -1,8 +1,8 @@
 {
   "name": "build-my-home-official",
-  "version": "6.1.9",
+  "version": "6.2.0",
   "private": true,
-  "description": "Build My Home V6.1.9 readability and sharpness pass: larger onboarding typography, clearer controls, and sharper architectural visuals",
+  "description": "Build My Home V6.2.0 connected site, plan, material, finance and handover preview",
   "engines": {
     "node": "22.x"
   },

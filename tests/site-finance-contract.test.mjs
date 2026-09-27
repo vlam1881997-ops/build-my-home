@@ -117,6 +117,9 @@ test('image render accepts only a bounded image and keeps plan details in the pr
   assert.match(request.prompt,/2 floors/);
   assert.match(request.prompt,/Gạch nhám/);
   assert.match(request.prompt,/Phòng khách/);
+  const classical=renderRequestPayload({image,project:{site:{floors:2,width:13,depth:6},style:'Tân cổ điển'}});
+  assert.match(classical.prompt,/dark tiled hip roof/);
+  assert.match(classical.prompt,/13m x 6m/);
   assert.equal(request.mimeType,'image/jpeg');
   assert.throws(()=>renderRequestPayload({image:'data:text/html;base64,'+'A'.repeat(128)}),/ảnh chụp mô hình/);
   assert.throws(()=>renderRequestPayload({image:'data:image/png;base64,'+'A'.repeat(1_500_001)}),/ảnh chụp mô hình/);
@@ -132,11 +135,15 @@ test('image endpoint is opt-in and returns the Gemini image with a server-only k
     const disabled=res();await renderHandler(req,disabled);assert.equal(disabled.code,503);
     process.env.GEMINI_IMAGE_ENABLED='true';process.env.GEMINI_API_KEY='server-test-key';
     let upstream=null;
-    globalThis.fetch=async(url,options)=>{upstream={url,options};return {ok:true,json:async()=>({candidates:[{content:{parts:[{inlineData:{mimeType:'image/png',data:'B'.repeat(128)}}]}}]})};};
+    globalThis.fetch=async(url,options)=>{upstream={url,options};return {ok:true,json:async()=>({status:'completed',steps:[{type:'model_output',content:[{type:'image',mime_type:'image/png',data:'B'.repeat(128)}]}]})};};
     const enabled=res();await renderHandler(req,enabled);
     assert.equal(enabled.code,200);
     assert.equal(enabled.body.mimeType,'image/png');
-    assert.match(upstream.url,/gemini-3\.1-flash-lite-image:generateContent$/);
+    assert.match(upstream.url,/\/v1beta\/interactions$/);
+    const body=JSON.parse(upstream.options.body);
+    assert.equal(body.model,'gemini-3.1-flash-lite-image');
+    assert.equal(body.input[1].type,'image');
+    assert.equal(body.response_format.image_size,'1K');
     assert.equal(upstream.options.headers['x-goog-api-key'],'server-test-key');
     assert.equal(enabled.body.image.length,128);
   }finally{

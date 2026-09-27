@@ -408,6 +408,13 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-site-intel-refresh]')){if(!BMH.sitePinConfirmed())BMH.toast('Hãy bấm vào bản đồ để ghim khu đất trước khi quét.');else BMH.loadSiteIntelligence?.(true);return;}
   if(e.target.closest('[data-data-refresh]')){BMH.refreshRealData();return;}
   if(e.target.closest('[data-price-import]')){BMH.$('#priceQuoteUpload')?.click();return;}
+  const productSave=e.target.closest('[data-product-save]');if(productSave){
+    const id=productSave.dataset.productSave,card=productSave.closest('[data-product-card]'),fields=Object.fromEntries([...card.querySelectorAll('[data-product-field]')].map(input=>[input.dataset.productField,input.value.trim()]));
+    if(!fields.sku||!fields.productUrl||!fields.imageUrl||!fields.value||!fields.source||!fields.date)return BMH.toast('Cần mã hàng, trang sản phẩm, ảnh, giá, nguồn và ngày để gắn ảnh đúng sản phẩm.');
+    const json=JSON.stringify({source:fields.source,date:fields.date,materials:{[id]:fields}});
+    BMH.importPriceQuote({name:'san-pham-'+id+'.json',size:new Blob([json]).size,text:async()=>json}).catch(err=>BMH.toast(err.message||'Không lưu được sản phẩm.'));
+    return;
+  }
   if(e.target.closest('[data-project-import]')){BMH.$('#projectJsonUpload')?.click();return;}
   if(e.target.closest('[data-fund-gap]')){const total=BMH.estimate().total,needed=BMH.fundingNeed(total).needed;BMH.state.project.finance.loan=needed;BMH.state.project.finance.targetBudget=0;BMH.save();BMH.render({preserveScroll:true});BMH.toast('Đã đặt khoản vay thử theo phần vốn còn thiếu. Hãy kiểm tra DTI và lãi suất trước khi quyết định.');return;}
   if(e.target.closest('[data-cost-snapshot]')){BMH.costSnapshot();return;}
@@ -446,6 +453,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-plan-undo]')){BMH.undoPlan();return;}
   if(e.target.closest('[data-plan-redo]')){BMH.redoPlan();return;}
   const zoomBtn=e.target.closest('[data-planner-zoom]');if(zoomBtn){const ui=BMH.state.ui.planner;ui.zoom=BMH.clamp(ui.zoom+(zoomBtn.dataset.plannerZoom==='in'?.15:-.15),.75,2.5);BMH.save();BMH.render();return;}
+  if(e.target.closest('[data-plan-clean]')){const ui=BMH.state.ui.planner;for(const key of ['showFeng','showBelow','showStructure','showEnvironment','showCirculation','showSectionLine','showClimate','showEnvelope'])ui[key]=false;ui.showFurniture=true;ui.showDimensions=true;ui.zoom=1;BMH.save();BMH.render();BMH.toast('Đã hiển thị bản vẽ kỹ thuật sạch với kích thước, tường và nội thất.');return;}
   if(e.target.closest('[data-planner-fit]')){BMH.state.ui.planner.zoom=1;BMH.save();BMH.render();return;}
   if(e.target.closest('[data-planner-layout]')){const ui=BMH.state.ui.planner;ui.layout=ui.layout==='wide'?'compact':'wide';if(ui.layout==='wide'){ui.toolsOpen=false;ui.inspectorOpen=false;}BMH.save();BMH.render();return;}
   const plannerPanel=e.target.closest('[data-planner-panel]');if(plannerPanel){const ui=BMH.state.ui.planner,key=plannerPanel.dataset.plannerPanel==='tools'?'toolsOpen':'inspectorOpen';ui[key]=!ui[key];if(ui[key]&&ui.layout==='wide'){const other=key==='toolsOpen'?'inspectorOpen':'toolsOpen';ui[other]=false;}BMH.save();BMH.render({preserveScroll:true});return;}
@@ -463,6 +471,7 @@ document.addEventListener('click',e=>{
   const focusBtn=e.target.closest('[data-scene-focus-btn]');if(focusBtn){BMH.state.ui.sceneFocus=focusBtn.dataset.sceneFocusBtn||'all';BMH.save();BMH.render();return;}
   if(e.target.closest('[data-studio3d-reset]')){BMH.resetStudio3D?.();return;}
   if(e.target.closest('[data-cinematic-render]')){BMH.generateCinematicRender?.();return;}
+  if(e.target.closest('[data-render-download]')){const url=BMH.cinematicRender?.dataUrl;if(!url)return BMH.toast('Chưa có ảnh phối cảnh của phương án này.');const a=document.createElement('a');a.href=url;a.download='Build-My-Home-phoi-canh.jpg';document.body.append(a);a.click();a.remove();return;}
   const wear=e.target.closest('[data-wear]');if(wear){BMH.state.project.wearYear=Number(wear.dataset.wear);BMH.save();BMH.render();return;}
   const copy=e.target.closest('[data-copy]');if(copy){navigator.clipboard?.writeText(copy.dataset.copy).then(()=>BMH.toast('Đã sao chép.')).catch(()=>BMH.toast('Không thể sao chép tự động.'));return;}
   if(e.target.closest('[data-dev-pay]')&&BMH.DEV){BMH.state.access.paid=!BMH.state.access.paid;BMH.state.access.source=BMH.state.access.paid?'dev-local':'none';BMH.state.access.paidAt=BMH.state.access.paid?new Date().toISOString():null;BMH.state.access.verifiedAt=BMH.state.access.paid?new Date().toISOString():null;BMH.save();BMH.render();return;}

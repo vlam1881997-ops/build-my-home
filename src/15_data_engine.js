@@ -130,7 +130,7 @@ BMH.importPriceQuote = async file => {
       if(['shellperm2','shell_per_m2'].includes(key.toLowerCase()))payload.shellPerM2=value;
       else if(['finishperm2','finish_per_m2'].includes(key.toLowerCase()))payload.finishPerM2=value;
       else if(['prepperm2','prep_per_m2'].includes(key.toLowerCase()))payload.prepPerM2=value;
-      else payload.materials[key]={value,unit:obj.unit||'đv',source:obj.source||'',date:obj.date||''};
+      else payload.materials[key]={value,unit:obj.unit||'đv',source:obj.source||'',date:obj.date||'',sku:obj.sku||'',productUrl:obj.producturl||obj.product_url||'',imageUrl:obj.imageurl||obj.image_url||''};
       payload.source=payload.source||obj.source;payload.date=payload.date||obj.date;payload.reference=payload.reference||obj.reference;
     }
   }
@@ -146,13 +146,17 @@ BMH.importPriceQuote = async file => {
   const mats=payload.materials&&typeof payload.materials==='object'&&!Array.isArray(payload.materials)?payload.materials:{};
   const known=new Set(Object.values(BMH.MATERIALS||{}).flat().map(item=>item.id));
   const materialOverrides={...(de.materialOverrides||{})},materialIds=[];
+  const safeHttpsUrl=value=>{try{const u=new URL(String(value||''));return u.protocol==='https:'&&u.username===''&&u.password===''&&u.href.length<=500?u.href:'';}catch{return '';}};
   for(const [id,v] of Object.entries(mats)){
     const value=BMH.quoteValue(v?.value);
     if(!Number.isFinite(value)||value<=0)continue;
     if(!known.has(id))throw new Error(`Mã vật liệu ${id} chưa có trong showroom; chưa thể áp dụng báo giá.`);
     const itemDate=String(v.date||date),itemSource=String(v.source||source).trim();
     if(!itemSource||!validQuoteDate(itemDate))throw new Error(`Nguồn hoặc ngày của vật liệu ${id} không hợp lệ.`);
-    materialOverrides[id]={value,unit:String(v.unit||'đv'),source:itemSource,date:itemDate};
+    const sku=String(v.sku||'').trim().slice(0,100),productUrl=safeHttpsUrl(v.productUrl||v.product_url),imageUrl=safeHttpsUrl(v.imageUrl||v.image_url);
+    if((v.productUrl||v.product_url)&&!productUrl||((v.imageUrl||v.image_url)&&!imageUrl))throw new Error(`Liên kết sản phẩm/ảnh của ${id} cần HTTPS hợp lệ.`);
+    if(imageUrl&&(!sku||!productUrl))throw new Error(`Ảnh của ${id} cần mã sản phẩm và liên kết trang sản phẩm để đối chiếu.`);
+    materialOverrides[id]={value,unit:String(v.unit||'đv'),source:itemSource,date:itemDate,sku,productUrl,imageUrl};
     materialIds.push(id);
   }
   if(!costKeys.length&&!materialIds.length)throw new Error('Báo giá không có đơn giá hợp lệ áp dụng cho dự toán hoặc vật liệu trong showroom.');

@@ -85,6 +85,19 @@ test('a dated supplier quote must contain a usable price and keeps provenance pe
   assert.equal(state.project.dataEngine.materialOverrides['tile-a'].source,'Nhà cung cấp B');
 });
 
+test('a product photo is attached only with a specific SKU and HTTPS product page',async()=>{
+  const state={project:{dataEngine:{cost:{},quote:{},costSources:{},materialOverrides:{},status:{}}}};
+  const BMH={state,MATERIALS:{floor:[{id:'tile-a'}]},dataEngineState:()=>state.project.dataEngine,save(){},render(){},toast(){}};
+  vm.runInNewContext(fs.readFileSync(new URL('../src/15_data_engine.js',import.meta.url),'utf8'),{BMH,Date,Math,Number,String,Intl,Set,URL});
+  const quote=v=>{const content=JSON.stringify({source:'Đại lý Đồng Tâm',date:'2026-09-26',materials:{'tile-a':v}});return {name:'product.json',size:content.length,text:async()=>content};};
+  await assert.rejects(BMH.importPriceQuote(quote({value:280000,unit:'m²',imageUrl:'https://example.com/tile.jpg'})),/mã sản phẩm/);
+  await assert.rejects(BMH.importPriceQuote(quote({value:280000,unit:'m²',sku:'6060TAMDAO006',productUrl:'http://example.com/product',imageUrl:'https://example.com/tile.jpg'})),/HTTPS/);
+  assert.equal(state.project.dataEngine.materialOverrides['tile-a'],undefined);
+  await BMH.importPriceQuote(quote({value:280000,unit:'m²',sku:'6060TAMDAO006',productUrl:'https://dongtam.com.vn/san-pham/bst-6060tamdao/6060tamdao006/',imageUrl:'https://dongtam.com.vn/images/tile.jpg'}));
+  assert.equal(state.project.dataEngine.materialOverrides['tile-a'].sku,'6060TAMDAO006');
+  assert.match(state.project.dataEngine.materialOverrides['tile-a'].productUrl,/dongtam\.com\.vn/);
+});
+
 test('a dated m² quote flows through material choice, estimate, BOQ, funding and handover',async()=>{
   const rooms=[0,1].flatMap(floor=>[{id:`a${floor}`,floor,x:0,y:0,w:5,h:10,type:'living'},{id:`b${floor}`,floor,x:5,y:0,w:5,h:10,type:'bed'}]);
   const BMH={state:{project:{site:{width:10,depth:20,floors:2,lat:10,lng:106,road:4,province:'TP. Hồ Chí Minh',geoSource:'Ghim bản đồ'},plan:{rooms,openings:[]},materials:{tier:'standard',climatePackage:'basic',choices:{floor:'viglacera',paint:'dulux',door:'xingfa'}},finance:{cash:800000000,reserve:100000000,loan:0,targetBudget:0,income:25000000,living:8000000,existingDebt:0,years:15,promoMonths:12,introRate:7,postRate:11},dossier:{progress:0,actualCosts:{},evidence:[]},checklist:{},dataEngine:{cost:{shellPerM2:3600000,finishPerM2:2350000,prepPerM2:280000,marketAdjustmentPct:0},costSources:{},materialOverrides:{},quote:{},status:{}}}},

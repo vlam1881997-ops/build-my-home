@@ -1,6 +1,6 @@
 BMH.defaultState = () => ({
   version: BMH.VERSION,
-  ui: {step:1, onboardingComplete:false, onboardingStep:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', location:{drawingLot:false}, planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',layout:'wide',textSize:'large',toolsOpen:false,inspectorOpen:false,legendOpen:true,showFurniture:true,showDimensions:true,showFeng:true,showBelow:false,showStructure:true,showEnvironment:true,showCirculation:true,showSectionLine:true,showClimate:true,showEnvelope:true}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
+  ui: {step:1, onboardingComplete:false, onboardingStep:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', location:{drawingLot:false}, planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',layout:'wide',textSize:'large',toolsOpen:false,inspectorOpen:false,legendOpen:true,showFurniture:true,showDimensions:true,showFeng:false,showBelow:false,showStructure:false,showEnvironment:false,showCirculation:false,showSectionLine:false,showClimate:false,showEnvelope:false}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
   access: {paid:false, source:'none', paidAt:null, verifiedAt:null, orderCode:null},
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại', briefIdea:'',
