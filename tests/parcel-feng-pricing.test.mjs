@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import configHandler from '../api/config.mjs';
+import {geminiGenerate} from '../server/_gemini.mjs';
 
 const response=()=>({status(code){this.code=code;return this;},setHeader(){return this;},end(body){this.body=JSON.parse(body);}});
 
@@ -17,6 +18,17 @@ test('public AI capability endpoint reports configured provider without leaking 
     assert.equal(res.body.aiProvider,'Gemini');
     assert.ok(!JSON.stringify(res.body).includes('secret-test-key'));
   }finally{if(old===undefined)delete process.env.GEMINI_API_KEY;else process.env.GEMINI_API_KEY=old;}
+});
+
+test('Gemini permission failures stop before retrying other models',async()=>{
+  const oldKey=process.env.GEMINI_API_KEY,oldFetch=globalThis.fetch;
+  let calls=0;
+  try{
+    process.env.GEMINI_API_KEY='test-only-key';
+    globalThis.fetch=async()=>{calls++;return {ok:false,status:403,text:async()=>JSON.stringify({error:{message:'Grounding is not available for this project'}})};};
+    await assert.rejects(geminiGenerate({parts:[{text:'Research'}],tools:[{type:'google_search'}]}),e=>e.statusCode===403);
+    assert.equal(calls,1);
+  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.GEMINI_API_KEY;else process.env.GEMINI_API_KEY=oldKey;}
 });
 
 test('cloud sign-in works with a publishable key while payment needs a server secret',()=>{

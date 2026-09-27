@@ -112,6 +112,9 @@ export async function geminiGenerate({parts,input,systemInstruction='',schema,ma
       return {result,model,apiVersion,usage:data?.usage||data?.usage_metadata||data?.usageMetadata||null,citations,raw:data};
     }catch(err){
       lastErr=err?.name==='AbortError'?Object.assign(new Error('Gemini xử lý quá thời gian cho phép.'),{statusCode:504,model,apiVersion}):err;
+      // A key/project permission error cannot be fixed by trying another
+      // model or API version. Stop before making several identical requests.
+      if([401,403].includes(Number(lastErr?.statusCode)))throw lastErr;
       if(i===combos.length-1)throw lastErr;
     }finally{clearTimeout(timer);}
   }

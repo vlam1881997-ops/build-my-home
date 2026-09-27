@@ -160,6 +160,9 @@ export default async function handler(req,res){
         });
         return send(res,200,{ok:true,provider:'gemini',model,apiVersion,autoUpgrade:geminiEnv().auto,usage,result,citations:citations||[],grounded});
       }catch(gemErr){
+        if(action==='fengshui'&&[401,403].includes(Number(gemErr?.statusCode))){
+          throw Object.assign(new Error('Gemini Search grounding bị từ chối bởi API key hoặc dự án. Hãy kiểm tra quyền, gói sử dụng và hạn mức trong Google AI Studio; phần công thức gia đình vẫn xem được mà không cần AI web.'),{statusCode:503,details:{code:'grounding_access_denied'}});
+        }
         if(action!=='fengshui'&&recoverableAIError(gemErr)&&String(process.env.OPENAI_API_KEY||'').trim()){
           try{
             const out=await openAIFallback({action,prompt,project,image});
