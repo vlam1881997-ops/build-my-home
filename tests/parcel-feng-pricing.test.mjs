@@ -19,6 +19,18 @@ test('public AI capability endpoint reports configured provider without leaking 
   }finally{if(old===undefined)delete process.env.GEMINI_API_KEY;else process.env.GEMINI_API_KEY=old;}
 });
 
+test('cloud sign-in works with a publishable key while payment needs a server secret',()=>{
+  const keys=['SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','SUPABASE_SECRET_KEY','SUPABASE_SERVICE_ROLE_KEY','PAYOS_CLIENT_ID','PAYOS_API_KEY','PAYOS_CHECKSUM_KEY'];
+  const old=Object.fromEntries(keys.map(k=>[k,process.env[k]]));
+  try{
+    Object.assign(process.env,{SUPABASE_URL:'https://example.supabase.co',SUPABASE_PUBLISHABLE_KEY:'test-publishable',PAYOS_CLIENT_ID:'id',PAYOS_API_KEY:'test-api',PAYOS_CHECKSUM_KEY:'test-checksum'});
+    delete process.env.SUPABASE_SECRET_KEY;delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const res=response();configHandler({method:'GET'},res);
+    assert.equal(res.body.cloudConfigured,true);
+    assert.equal(res.body.paymentConfigured,false);
+  }finally{for(const k of keys)if(old[k]===undefined)delete process.env[k];else process.env[k]=old[k];}
+});
+
 test('family identities change by birth year and gender and remain unknown without gender',()=>{
   const BMH={clamp:(n,a,b)=>Math.max(a,Math.min(b,n))};
   vm.runInNewContext(fs.readFileSync(new URL('../src/20_calc.js',import.meta.url),'utf8'),{BMH,Date,Math,Number,String,Intl});
@@ -49,6 +61,7 @@ test('a dated supplier quote must contain a usable price and keeps provenance pe
   vm.runInNewContext(fs.readFileSync(new URL('../src/15_data_engine.js',import.meta.url),'utf8'),{BMH,Date,Math,Number,String,Intl,Set});
   const file=(name,body)=>({name,size:body.length,text:async()=>body});
   await assert.rejects(BMH.importPriceQuote(file('empty.json',JSON.stringify({source:'A',date:'2026-09-25',materials:{}}))),/không có đơn giá hợp lệ/);
+  await assert.rejects(BMH.importPriceQuote(file('bad-date.json',JSON.stringify({source:'A',date:'2025-02-31',shellPerM2:3800000}))),/ngày theo YYYY-MM-DD/);
   await assert.rejects(BMH.importPriceQuote(file('unknown.json',JSON.stringify({source:'A',date:'2026-09-25',materials:{unlisted:{value:200000}}}))),/chưa có trong showroom/);
   assert.equal(state.project.dataEngine.cost.shellPerM2,3600000);
   await BMH.importPriceQuote(file('shell.csv','key,value,unit,source,date\nshellPerM2,3.800.000,m2,Nhà cung cấp A,2026-09-25\n'));

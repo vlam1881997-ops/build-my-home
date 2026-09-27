@@ -12,7 +12,7 @@ export default function handler(req,res){
     geminiConfigured:!!gemini.key,
     aiProvider:gemini.key?'Gemini':openai?'OpenAI':'Chưa cấu hình',
     aiModel:gemini.key?gemini.primary:openai?String(process.env.OPENAI_MODEL||'gpt-5.6-terra'):'',
-    cloudConfigured:!!(supabase.url&&supabase.publishable&&supabase.secret),
-    paymentConfigured:!!(payos.clientId&&payos.apiKey&&payos.checksumKey)
+    cloudConfigured:!!(supabase.url&&supabase.publishable),
+    paymentConfigured:!!(supabase.url&&supabase.publishable&&supabase.secret&&payos.clientId&&payos.apiKey&&payos.checksumKey)
   });
 }

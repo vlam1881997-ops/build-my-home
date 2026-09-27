@@ -929,7 +929,7 @@ document.addEventListener('change',e=>{
       if(key==='name'&&!next){BMH.toast('Hãy nhập tên phòng.');BMH.render({preserveScroll:true});return;}
       const candidate=structuredClone(BMH.state.project.plan.rooms),changed=candidate.find(x=>x.id===id);
       changed[key]=next;
-      if(!BMH.layoutValid(candidate)){BMH.toast('Kích thước làm phòng chồng nhau, quá ranh hoặc nhỏ hơn 0,6 m.');BMH.render({preserveScroll:true});return;}
+      if(key!=='name'&&!BMH.layoutValid(candidate)){BMH.toast('Kích thước làm phòng chồng nhau, quá ranh hoặc nhỏ hơn 0,6 m.');BMH.render({preserveScroll:true});return;}
       BMH.pushPlanHistory();BMH.state.project.plan.rooms=candidate;BMH.save();BMH.render({preserveScroll:true});
     }
   }

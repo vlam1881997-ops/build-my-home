@@ -116,7 +116,7 @@ BMH.normalizeState = () => {
   if(!Array.isArray(BMH.state.project.plan.lockedRoomIds))BMH.state.project.plan.lockedRoomIds=[];
   BMH.state.project.plan.lockedRoomIds=BMH.state.project.plan.lockedRoomIds.filter(id=>BMH.state.project.plan.rooms.some(r=>r.id===id));
   if(!Array.isArray(BMH.state.project.plan.lockedFloors))BMH.state.project.plan.lockedFloors=[];
-  BMH.state.project.plan.lockedFloors=BMH.state.project.plan.lockedFloors.filter(f=>Number.isInteger(f)&&f>=0&&f<Number(s.floors));
+  BMH.state.project.plan.lockedFloors=BMH.state.project.plan.lockedFloors.filter(f=>Number.isInteger(f)&&f>=0&&f<Number(BMH.state.project.site?.floors));
   if(!Array.isArray(BMH.state.project.planVariants))BMH.state.project.planVariants=[];
   if(!Array.isArray(BMH.state.project.planVersions))BMH.state.project.planVersions=[];
   BMH.state.project.planVariants=BMH.state.project.planVariants.slice(0,3);

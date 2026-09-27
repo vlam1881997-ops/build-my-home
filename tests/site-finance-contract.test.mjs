@@ -40,6 +40,15 @@ test('an old saved pin without the new flag migrates to address review',()=>{
   assert.equal(site.lat,21.0321);
 });
 
+test('locked floors survive a saved project reload',()=>{
+  const {BMH}=stateEngine();
+  BMH.state.project.plan.lockedFloors=[1];
+  BMH.save();
+  const restored=stateEngine(BMH.state).BMH;
+  restored.normalizeState();
+  assert.deepEqual([...restored.state.project.plan.lockedFloors],[1]);
+});
+
 test('AI sees the pin and only the Site Intelligence scan matching that pin',()=>{
   const p={site:{lat:21.0321,lng:105.8546,road:3.5,province:'TP. Hồ Chí Minh',district:'Phường cũ',pinAddressNeedsReview:true,geoSource:'Ghim bản đồ'},
     siteIntelligence:{status:'ready',key:'21.0321,105.8546:3.5',elevation_m:null,fetchedAt:'2026-09-26T00:00:00Z',flood:{level:'Chưa đủ dữ liệu'},transport:{surchargePct:8}},
