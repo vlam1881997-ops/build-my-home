@@ -28,7 +28,7 @@ fs.cpSync(leafletDist,path.join(dist,'vendor','leaflet'),{recursive:true});
 let html=fs.readFileSync(path.join(src,'index.html'),'utf8');
 if(!html.includes('<!-- BMH_APP_INLINE -->'))throw Error('Missing BMH_APP_INLINE marker');
 const safeJs=js.replace(/<\/script/gi,'<\\/script');
-html=html.replace('<!-- BMH_APP_INLINE -->',`<script id="bmh-inline-app">${safeJs}</script>`);
+html=html.replace('<!-- BMH_APP_INLINE -->',()=>`<script id="bmh-inline-app">${safeJs}</script>`);
 fs.writeFileSync(path.join(dist,'index.html'),html);
 fs.copyFileSync(path.join(src,'sw.js'),path.join(dist,'sw.js'));
 fs.copyFileSync(path.join(src,'manifest.webmanifest'),path.join(dist,'manifest.webmanifest'));
