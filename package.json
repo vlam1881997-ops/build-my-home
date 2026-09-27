@@ -6,9 +6,12 @@
   "engines": {
     "node": "22.x"
   },
+  "dependencies": {
+    "leaflet": "1.9.4"
+  },
   "scripts": {
     "build": "node scripts/build.cjs",
     "build:vercel": "node scripts/build.cjs && node scripts/prepare-vercel.cjs",
-    "test": "node scripts/build.cjs && node --check dist/app.js && node --test tests/step1-contract.test.cjs tests/step1-ai.test.mjs tests/setup-flow.test.cjs"
+    "test": "node scripts/build.cjs && node --check dist/app.js && node --test tests/step1-contract.test.cjs tests/step1-ai.test.mjs tests/setup-flow.test.cjs tests/site-finance-contract.test.mjs"
   }
 }

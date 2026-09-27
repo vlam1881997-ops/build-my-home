@@ -23,6 +23,18 @@ const cache=globalThis.__BMH_BANK_RATE_CACHE__||(globalThis.__BMH_BANK_RATE_CACH
 
 function safe(v,n=180){return String(v||'').replace(/[\u0000-\u001f]/g,' ').trim().slice(0,n);}
 function saneRate(n){n=Number(n)||0;return n>=0&&n<=30?n:0;}
+export function verifyRateEvidence(result,citations,bank,now=new Date()){
+  const links=(Array.isArray(citations)?citations:[]).filter(x=>{try{return new URL(x?.url).protocol==='https:';}catch{return false;}});
+  const date=String(result?.source_date||''),published=/^\d{4}-\d{2}-\d{2}$/.test(date)?Date.parse(date+'T00:00:00Z'):NaN;
+  const age=now.getTime()-published,dated=Number.isFinite(published)&&age>=0&&age<=180*24*60*60*1000;
+  const norm=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const claimed=norm(result?.bank_name),names=[norm(bank?.name),norm(bank?.fullName)].filter(x=>x.length>=3);
+  const matchingBank=names.some(x=>claimed.includes(x)||x.includes(claimed)&&claimed.length>=5);
+  const matchingSource=links.some(x=>names.some(name=>norm(x.title+' '+new URL(x.url).hostname).includes(name)));
+  return result?.verified===true&&matchingSource&&dated&&matchingBank&&safe(result?.product).length>0
+    &&['home_loan','construction_loan','repair_loan','mixed_home_loan'].includes(result?.rate_kind)
+    &&saneRate(result?.intro_rate_pct)>0&&saneRate(result?.post_rate_pct)>0;
+}
 
 export default async function handler(req,res){
   try{
@@ -54,7 +66,7 @@ export default async function handler(req,res){
       '4. Lãi sau ưu đãi chỉ điền khi nguồn công khai nêu rõ hoặc có công thức/mức tham chiếu đủ cụ thể. Nếu không có, trả 0 và giải thích.',
       '5. source_date là ngày công bố/cập nhật của nguồn nếu nhìn thấy, định dạng YYYY-MM-DD; nếu nguồn không ghi ngày thì để chuỗi rỗng.',
       '6. as_of là ngày hôm nay.',
-      '7. verified=true chỉ khi tìm được ít nhất một nguồn công khai phù hợp và thông tin đúng loại vay nhà/xây/sửa nhà. Nếu không đủ bằng chứng, verified=false và các số không chắc chắn phải là 0.',
+      '7. verified=true chỉ khi tìm được nguồn công khai gọi rõ tên ngân hàng, có ngày cập nhật, sản phẩm vay nhà/xây/sửa nhà và cả lãi ưu đãi lẫn lãi sau ưu đãi. Nếu không đủ bằng chứng, verified=false và các số không chắc chắn phải là 0.',
       '8. Không bịa số liệu, không suy đoán từ ngân hàng khác.'
     ].filter(Boolean).join('\n');
 
@@ -71,13 +83,15 @@ export default async function handler(req,res){
     result.intro_rate_pct=saneRate(result.intro_rate_pct);
     result.post_rate_pct=saneRate(result.post_rate_pct);
     result.intro_months=Math.max(0,Math.min(120,Number(result.intro_months)||0));
-    if(result.verified&&!result.intro_rate_pct&&!result.post_rate_pct)result.verified=false;
+    const validCitations=(citations||[]).filter(x=>{try{return new URL(x?.url).protocol==='https:';}catch{return false;}}).slice(0,8);
+    result.verified=verifyRateEvidence(result,validCitations,bank);
+    if(!result.verified){result.intro_rate_pct=0;result.post_rate_pct=0;result.intro_months=0;result.note=safe(result.note||'Thiếu nguồn có ngày cập nhật và đủ hai mức lãi suất cho đúng sản phẩm vay; vui lòng hỏi ngân hàng.',400);}
 
     const payload={
       provider:'gemini',model,apiVersion,grounded:true,
       fetched_at:new Date().toISOString(),
       result,
-      citations:(citations||[]).slice(0,8)
+      citations:validCitations
     };
     cache.set(key,{at:now,payload});
     return send(res,200,{ok:true,cached:false,...payload});

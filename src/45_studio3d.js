@@ -6,11 +6,11 @@ BMH.ensureThree = () => {
   if(window.THREE)return Promise.resolve(window.THREE);
   if(BMH.threePromise)return BMH.threePromise;
   const urls=[
-    'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js',
-    'https://unpkg.com/three@0.160.1/build/three.min.js'
+    'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js',
+    'https://unpkg.com/three@0.160.1/build/three.module.js'
   ];
   BMH.threePromise=(async()=>{
-    for(const url of urls){try{await BMH.loadExternalScript(url,9000);if(window.THREE)return window.THREE;}catch(_){} }
+    for(const url of urls){try{const module=await import(url);if(module.Scene&&module.WebGLRenderer)return module;}catch(_){} }
     return null;
   })();
   return BMH.threePromise;
@@ -58,14 +58,16 @@ BMH.studio3DHtml = () => {
 };
 BMH.disposeStudio3D = () => {
   const s=BMH.studio3d;if(!s)return;
-  try{s.raf&&cancelAnimationFrame(s.raf);s.renderer?.dispose?.();s.renderer?.domElement?.removeEventListener?.('pointerdown',s.onDown);window.removeEventListener('pointermove',s.onMove);window.removeEventListener('pointerup',s.onUp);s.renderer?.domElement?.removeEventListener?.('wheel',s.onWheel);}catch(_){}
+  try{s.raf&&cancelAnimationFrame(s.raf);s.ro?.disconnect?.();s.renderer?.dispose?.();s.renderer?.domElement?.removeEventListener?.('pointerdown',s.onDown);window.removeEventListener('pointermove',s.onMove);window.removeEventListener('pointerup',s.onUp);s.renderer?.domElement?.removeEventListener?.('wheel',s.onWheel);}catch(_){}
   BMH.studio3d=null;
 };
 BMH.mountStudio3D = async () => {
   const canvas=BMH.$('#studio3dCanvas'),stage=BMH.$('#studio3dStage');if(!canvas||!stage)return;
-  BMH.disposeStudio3D();const THREE=await BMH.ensureThree();if(!THREE){stage.classList.add('three-failed');BMH.$('#studio3dLoading')?.remove();return;}
+  BMH.disposeStudio3D();const THREE=await BMH.ensureThree();if(BMH.$('#studio3dCanvas')!==canvas)return;if(!THREE){stage.classList.add('three-failed');BMH.$('#studio3dLoading')?.remove();return;}
   const palette=BMH.scenePalette(),scene=new THREE.Scene();scene.background=new THREE.Color(BMH.state.ui.sceneTheme==='night'?0x12171d:0xe9e3d8);scene.fog=new THREE.Fog(scene.background,30,85);
-  const camera=new THREE.PerspectiveCamera(42,1,.1,140),renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;
+  const camera=new THREE.PerspectiveCamera(42,1,.1,140);let renderer;
+  try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,preserveDrawingBuffer:true});}catch{stage.classList.add('three-failed');BMH.$('#studio3dLoading')?.remove();return;}
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;
   const hemi=new THREE.HemisphereLight(BMH.state.ui.sceneTheme==='night'?0x6a7da8:0xfff7e6,0x6d685e,BMH.state.ui.sceneTheme==='night'?.75:1.65);scene.add(hemi);
   const sun=new THREE.DirectionalLight(BMH.state.ui.sceneTheme==='night'?0xb8c7ff:0xffe2b1,BMH.state.ui.sceneTheme==='night'?1.25:2.35);sun.position.set(-12,22,10);sun.castShadow=true;sun.shadow.mapSize.set(1536,1536);sun.shadow.camera.left=-25;sun.shadow.camera.right=25;sun.shadow.camera.top=30;sun.shadow.camera.bottom=-20;scene.add(sun);
   const warm=new THREE.PointLight(0xffb66a,BMH.state.ui.sceneTheme==='night'?8:0,24,2);warm.position.set(0,4,1);scene.add(warm);
@@ -111,13 +113,24 @@ BMH.mountStudio3D = async () => {
   BMH.studio3d={scene,camera,renderer,state,ro,onDown,onMove,onUp,onWheel,raf:0};animate();stage.classList.add('three-ready');BMH.$('#studio3dLoading')?.remove();
 };
 BMH.resetStudio3D = () => {const s=BMH.studio3d;if(!s)return;s.state.yaw=-.68;s.state.pitch=.52;s.state.dist=(BMH.state.ui.sceneFocus||'all').startsWith('room:')?8:Math.max(18,(Number(BMH.state.project.site.depth)||20)*.92);};
+BMH.cinematicSignature = () => {
+  const p=BMH.state.project;
+  return JSON.stringify({style:p.style,site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,frontDirection:p.site.frontDirection},materials:p.materials?.choices||{},tier:p.materials?.tier,rooms:p.plan.rooms.map(r=>[r.floor,r.name,r.type,r.x,r.y,r.w,r.h])});
+};
 BMH.generateCinematicRender = async () => {
-  const canvas=BMH.$('#studio3dCanvas');if(!canvas||!BMH.studio3d){BMH.toast('Mô hình 3D chưa sẵn sàng để render.');return;}
+  if(BMH.cinematicRender.loading)return;
+  const canvas=BMH.$('#studio3dCanvas'),scene=BMH.studio3d;
+  if(!canvas||!scene){BMH.toast('Mô hình 3D chưa sẵn sàng để render.');return;}
+  let screenshot;
+  try{screenshot=scene.renderer.domElement.toDataURL('image/jpeg',.8);}catch{BMH.toast('Không chụp được mô hình 3D trên thiết bị này.');return;}
+  const signature=BMH.cinematicSignature(),p=BMH.state.project;
+  const selectedMaterials=Object.fromEntries(Object.entries(p.materials.choices||{}).map(([cat,id])=>[cat,(BMH.MATERIALS[cat]||[]).find(x=>x.id===id)?.name||id]));
+  const payload={image:screenshot,project:{style:p.style,site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,frontDirection:p.site.frontDirection},materials:{choices:selectedMaterials},rooms:p.plan.rooms.map(r=>({name:r.name,type:r.type,floor:r.floor,w:r.w,h:r.h}))}};
   BMH.cinematicRender.loading=true;BMH.cinematicRender.error='';BMH.render({preserveScroll:true});
   try{
-    const screenshot=BMH.studio3d?.renderer?.domElement?.toDataURL('image/jpeg',.86);if(!screenshot)throw new Error('Không chụp được mô hình 3D.');
-    const p=BMH.state.project, payload={image:screenshot,project:{style:p.style,site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,frontDirection:p.site.frontDirection,province:p.site.province},materials:p.materials,rooms:p.plan.rooms.map(r=>({name:r.name,type:r.type,floor:r.floor,w:r.w,h:r.h}))}};
     const r=await fetch('/api/gemini-render',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||`Render HTTP ${r.status}`);if(!data.image)throw new Error('Gemini không trả về ảnh render.');
-    BMH.cinematicRender.dataUrl=`data:${data.mimeType||'image/jpeg'};base64,${data.image}`;BMH.cinematicRender.generatedAt=new Date().toISOString();BMH.cinematicRender.error='';
-  }catch(err){BMH.cinematicRender.error=err.message||String(err);}finally{BMH.cinematicRender.loading=false;BMH.render({preserveScroll:true});}
+    if(signature!==BMH.cinematicSignature()){BMH.toast('Thiết kế đã đổi khi đang render. Hãy tạo lại phối cảnh cho phương án mới.');return;}
+    const mime=['image/jpeg','image/png','image/webp'].includes(data.mimeType)?data.mimeType:'image/jpeg';
+    BMH.cinematicRender.dataUrl=`data:${mime};base64,${data.image}`;BMH.cinematicRender.signature=signature;BMH.cinematicRender.generatedAt=data.generatedAt||new Date().toISOString();BMH.cinematicRender.error='';
+  }catch(err){BMH.cinematicRender.error=err.message||String(err);BMH.toast(BMH.cinematicRender.error);}finally{BMH.cinematicRender.loading=false;BMH.render({preserveScroll:true});}
 };

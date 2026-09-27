@@ -89,8 +89,8 @@ BMH.dataCostBasis = () => {
   return {
     shellPerM2,finishPerM2,prepPerM2,regionalFactor:regional,laborFactor,marketFactor:market,laborMid,mode,supplier,
     sourceLabel:supplier?`Báo giá nhập: ${de.quote.name}`:'Baseline BMH + hệ số vùng/nhân công',
-    sourceDate:supplier?de.quote.date:BMH.BUILD_DATE,
-    reference:supplier?(de.quote.reference||'Báo giá do người dùng nhập'):'QĐ 425/QĐ-BXD + TT 37/2026/TT-BXD dùng làm nguồn tham chiếu phương pháp/benchmark'
+    sourceDate:supplier?de.quote.date:'',
+    reference:supplier?(de.quote.reference||'Báo giá do người dùng nhập'):'Đơn giá lập kế hoạch nội bộ; QĐ 425/QĐ-BXD và TT 37/2026/TT-BXD chỉ tham chiếu phương pháp, chưa xác nhận giá mua tại khu đất.'
   };
 };
 
