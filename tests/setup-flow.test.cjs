@@ -2,6 +2,13 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const root=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 
+test('deployed inline application preserves the built JavaScript exactly',()=>{
+  const html=read('dist/index.html');
+  const inline=html.match(/<script id="bmh-inline-app">([\s\S]*?)<\/script>/);
+  assert.ok(inline,'inline application script is present');
+  assert.equal(inline[1],read('dist/app.js').replace(/<\/script/gi,'<\\/script'));
+});
+
 test('pre-Studio onboarding is Location -> Finance -> Family before Step 1',()=>{
   const js=read('dist/app.js');
   assert.match(js,/onboardingComplete:false,\s*onboardingStep:1/);
