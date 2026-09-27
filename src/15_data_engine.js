@@ -116,7 +116,7 @@ BMH.parseCsvLine = line => {
   const out=[];let cur='',quoted=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(quoted&&line[i+1]==='"'){cur+='"';i++;}else quoted=!quoted;}else if(c===','&&!quoted){out.push(cur.trim());cur='';}else cur+=c;}out.push(cur.trim());return out;
 };
 BMH.importPriceQuote = async file => {
-  if(!file)return;const text=await file.text();let payload=null;
+  if(!file)return;if(file.size>2_000_000)throw new Error('Báo giá cần nhỏ hơn 2 MB.');const text=await file.text();let payload=null;
   try{if(file.name.toLowerCase().endsWith('.json'))payload=JSON.parse(text);}catch(_){payload=null;}
   if(!payload){
     const lines=text.split(/\r?\n/).filter(x=>x.trim());const rows=lines.map(BMH.parseCsvLine);const head=(rows.shift()||[]).map(x=>x.toLowerCase());payload={materials:{}};
@@ -128,11 +128,14 @@ BMH.importPriceQuote = async file => {
       payload.source=payload.source||obj.source;payload.date=payload.date||obj.date;payload.reference=payload.reference||obj.reference;
     }
   }
+  if(!payload||typeof payload!=='object')throw new Error('Không đọc được báo giá JSON/CSV.');
+  const source=String(payload.source||payload.supplier||'').trim(),date=String(payload.date||'').trim();
+  if(!source||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date)))throw new Error('Báo giá cần tên nhà cung cấp và ngày theo YYYY-MM-DD. Không tự điền ngày hôm nay.');
   const de=BMH.dataEngineState(),cost=de.cost||{};
   const shell=Number(payload.shellPerM2??payload.cost?.shellPerM2),finish=Number(payload.finishPerM2??payload.cost?.finishPerM2),prep=Number(payload.prepPerM2??payload.cost?.prepPerM2);
   if(Number.isFinite(shell)&&shell>0)cost.shellPerM2=shell;if(Number.isFinite(finish)&&finish>0)cost.finishPerM2=finish;if(Number.isFinite(prep)&&prep>0)cost.prepPerM2=prep;
   if(Number.isFinite(Number(payload.marketAdjustmentPct)))cost.marketAdjustmentPct=Number(payload.marketAdjustmentPct);
-  de.cost=cost;de.quote={name:String(payload.source||payload.supplier||file.name),date:String(payload.date||new Date().toISOString().slice(0,10)),reference:String(payload.reference||''),importedAt:new Date().toISOString()};
+  de.cost=cost;de.quote={name:source,date,reference:String(payload.reference||''),importedAt:new Date().toISOString()};
   const mats=payload.materials||{};de.materialOverrides={...(de.materialOverrides||{})};for(const [id,v] of Object.entries(mats)){if(v&&Number(v.value)>0)de.materialOverrides[id]={value:Number(v.value),unit:String(v.unit||'đv'),source:String(v.source||de.quote.name),date:String(v.date||de.quote.date)};}
   de.lastImportAt=new Date().toISOString();de.lastImportName=file.name;de.status.pricing='quote';BMH.save();BMH.render();BMH.toast(`Đã nhập báo giá ${file.name}. Dự toán đã gắn nguồn và ngày báo giá.`);
 };

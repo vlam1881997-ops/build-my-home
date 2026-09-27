@@ -13,7 +13,7 @@ BMH.render = ({preserveScroll=false}={}) => {
   try{const appRoot=BMH.root();if(!appRoot)throw new Error('Missing #app root');appRoot.innerHTML=`${BMH.header()}<main class="studio-main demo-main step-${step} ${step===4?'planner-page':''} ${step===6?'house-studio-page':''}">${BMH.stepper()}<div class="studio-screen demo-screen">${body}</div>${BMH.footer()}</main>${BMH.cloudOverlay?BMH.cloudOverlay():''}${BMH.ai?.open&&BMH.aiDock?BMH.aiDock():''}`;}catch(err){console.error('Build My Home shell render error',err);const appRoot=BMH.root();if(appRoot)appRoot.innerHTML=BMH.runtimeError(step,err);}
   document.documentElement.dataset.version=BMH.VERSION;document.title=`Build My Home · ${BMH.STEPS[step-1][1]}`;if(preserveScroll)window.scrollTo(0,sy);requestAnimationFrame(BMH.afterRender);
 };
-BMH.navigateTo = step => {step=BMH.clamp(Number(step)||1,1,10);BMH.state.ui.step=step;if(step!==5){BMH.drag=null;BMH.state.ui.planner.tool='select';}BMH.save();BMH.render();window.scrollTo({top:0,behavior:'smooth'});return true;};
+BMH.navigateTo = step => {step=BMH.clamp(Number(step)||1,1,10);BMH.state.ui.step=step;if(step!==4){BMH.drag=null;BMH.state.ui.planner.tool='select';}BMH.save();BMH.render();window.scrollTo({top:0,behavior:'smooth'});return true;};
 BMH.openPaywall = () => {BMH.navigateTo(7);BMH.toast('Thanh toán đang tạm tắt để hoàn thiện sản phẩm. Toàn bộ hồ sơ hiện được mở để kiểm thử.');};
 BMH.amountBar = () => BMH.decisionCards?.()||'';
 BMH.loadExternalScript = (url, timeout=6000) => new Promise((resolve,reject)=>{
@@ -98,8 +98,8 @@ BMH.installFallbackPinCapture=()=>{
   const commit=(x,y,source)=>{
     const ll=BMH.fallbackPoint(map,x,y);
     if(!Number.isFinite(ll.lat)||!Number.isFinite(ll.lng))return;
-    BMH.applyCoordinates(ll.lat,ll.lng,source);
-    frame.src=BMH.mapEmbedUrl(BMH.state.project.site);
+    BMH.handleMapClick(ll.lat,ll.lng,source);
+    if(!BMH.state.ui.location?.drawingLot)frame.src=BMH.mapEmbedUrl(BMH.state.project.site);
     if(pin){pin.style.left='50%';pin.style.top='50%';}
   };
   layer.addEventListener('pointerdown',ev=>{
@@ -140,7 +140,7 @@ BMH.lotCorners = (site=BMH.state.project.site) => {
   const v=(ang,len)=>({e:Math.sin(ang)*len,n:Math.cos(ang)*len}),w=v(right,hw),d=v(back,hd),c={lat:Number(site.lat),lng:Number(site.lng)};
   return [[w.e+d.e,w.n+d.n],[-w.e+d.e,-w.n+d.n],[-w.e-d.e,-w.n-d.n],[w.e-d.e,w.n-d.n]].map(([e,n])=>BMH.meterOffset(c.lat,c.lng,e,n));
 };
-BMH.lotPath = (site=BMH.state.project.site) => site.lotMode==='custom'&&Array.isArray(site.lotPoints)&&site.lotPoints.length>=2?site.lotPoints:BMH.lotCorners(site);
+BMH.lotPath = (site=BMH.state.project.site) => site.lotMode==='custom'?Array.isArray(site.lotPoints)?site.lotPoints:[]:BMH.lotCorners(site);
 BMH.syncMapHud = (zoom) => {const z=BMH.$('#mapHudZoom');if(z)z.textContent=`Zoom ${Math.round(Number(zoom)||BMH.state.project.site.mapZoom||17)}`;};
 BMH.clearMapExtras = () => {
   if(BMH.mapEngine==='leaflet'&&BMH.map){(BMH.mapContext||[]).forEach(x=>{try{BMH.map.removeLayer(x)}catch(_){}});(BMH.mapLotPoints||[]).forEach(x=>{try{BMH.map.removeLayer(x)}catch(_){}});}
@@ -154,8 +154,8 @@ BMH.updateMapContext = () => {
     if(BMH.mapEngine==='google'&&window.google?.maps&&BMH.map){[250,500].forEach((r,i)=>BMH.mapContext.push(new google.maps.Circle({center:{lat:s.lat,lng:s.lng},radius:r,strokeColor:i?'#6b8068':'#7b8ea1',strokeOpacity:.55,strokeWeight:1,fillOpacity:.01,map:BMH.map,clickable:false})));}
   }
   if(s.lotMode==='custom'&&Array.isArray(s.lotPoints)){
-    if(BMH.mapEngine==='leaflet'&&window.L&&BMH.map)s.lotPoints.forEach((pt,i)=>BMH.mapLotPoints.push(L.circleMarker([pt.lat,pt.lng],{radius:5,color:'#fff',weight:2,fillColor:i===0?'#b95f43':'#53735a',fillOpacity:1,interactive:false}).addTo(BMH.map)));
-    if(BMH.mapEngine==='google'&&window.google?.maps&&BMH.map)s.lotPoints.forEach((pt,i)=>BMH.mapLotPoints.push(new google.maps.Marker({position:pt,map:BMH.map,label:{text:String(i+1),color:'#fff',fontSize:'10px'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:7,fillColor:i===0?'#b95f43':'#53735a',fillOpacity:1,strokeColor:'#fff',strokeWeight:2},clickable:false})));
+    if(BMH.mapEngine==='leaflet'&&window.L&&BMH.map)s.lotPoints.slice(0,12).forEach((pt,i)=>BMH.mapLotPoints.push(L.circleMarker([pt.lat,pt.lng],{radius:5,color:'#fff',weight:2,fillColor:i===0?'#b95f43':'#53735a',fillOpacity:1,interactive:false}).addTo(BMH.map)));
+    if(BMH.mapEngine==='google'&&window.google?.maps&&BMH.map)s.lotPoints.slice(0,12).forEach((pt,i)=>BMH.mapLotPoints.push(new google.maps.Marker({position:pt,map:BMH.map,label:{text:String(i+1),color:'#fff',fontSize:'10px'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:7,fillColor:i===0?'#b95f43':'#53735a',fillOpacity:1,strokeColor:'#fff',strokeWeight:2},clickable:false})));
   }
 };
 BMH.updateLotOverlay = () => {
@@ -167,19 +167,38 @@ BMH.updateLotOverlay = () => {
 BMH.updateLotDrawStatus = () => {
   const n=BMH.state.project.site.lotPoints?.length||0,el=BMH.$('#lotDrawStatus');if(el)el.textContent=BMH.state.ui.location?.drawingLot?`Đang vẽ · ${n} điểm · cần tối thiểu 3 điểm`:(BMH.state.project.site.lotMode==='custom'?`Ranh tùy chỉnh · ${n} điểm`:'Lô chữ nhật theo kích thước');
 };
-BMH.startLotDraw = () => {const s=BMH.state.project.site;s.lotMode='custom';s.lotPoints=[];BMH.state.ui.location.drawingLot=true;s.showLotOverlay=true;BMH.save();BMH.render();BMH.toast('Chế độ vẽ ranh đất: bấm lần lượt các góc lô đất trên bản đồ.');};
+BMH.startLotDraw = () => {if(!['leaflet','google'].includes(BMH.mapEngine)){BMH.toast('Cần bản đồ tương tác để vẽ ranh; bản nhúng dự phòng không đủ chính xác. Hãy thử tải lại bản đồ.');return;}const s=BMH.state.project.site;s.lotMode='custom';s.lotPoints=[];BMH.state.ui.location.drawingLot=true;s.showLotOverlay=true;BMH.save();BMH.render();BMH.toast('Chế độ vẽ ranh tham khảo: bấm lần lượt các góc lô đất trên bản đồ.');};
 BMH.handleMapClick = (lat,lng,source='Chọn trên bản đồ') => {
   if(BMH.state.ui.location?.drawingLot){const s=BMH.state.project.site;if((s.lotPoints?.length||0)>=12){BMH.toast('Tối đa 12 điểm cho ranh đất sơ bộ.');return;}s.lotMode='custom';s.lotPoints=[...(s.lotPoints||[]),{lat:Number(lat),lng:Number(lng)}];BMH.save();BMH.updateLotOverlay();BMH.updateLotDrawStatus();return;}
   BMH.applyCoordinates(lat,lng,source);
 };
 BMH.finishLotDraw = () => {
   const s=BMH.state.project.site,pts=s.lotPoints||[];if(pts.length<3)return BMH.toast('Cần ít nhất 3 điểm để hoàn tất ranh đất.');
-  const stats=BMH.siteParcelStats(s),centroid=pts.reduce((a,p)=>({lat:a.lat+p.lat/pts.length,lng:a.lng+p.lng/pts.length}),{lat:0,lng:0});
-  s.lat=centroid.lat;s.lng=centroid.lng;s.geoSource='Ranh đất vẽ trên bản đồ';s.pinAddressNeedsReview=true;s.lotMode='custom';s.shape=pts.length===4?'Không đều':'Không đều';
-  if(stats.frontage>=2&&stats.frontage<=60)s.width=+stats.frontage.toFixed(2);if(stats.approxDepth>=4&&stats.approxDepth<=100)s.depth=+stats.approxDepth.toFixed(2);
-  BMH.state.ui.location.drawingLot=false;BMH.liveWeather=null;BMH.save();BMH.render();BMH.toast(`Đã chốt ranh đất khoảng ${Math.round(stats.area)} m² và đồng bộ kích thước sơ bộ.`);
+  const stats=BMH.siteParcelStats(s);if(!Number.isFinite(stats.area)||stats.area<5||stats.area>100_000)return BMH.toast('Diện tích ranh bất thường; hãy đặt lại các góc theo đúng thứ tự quanh lô đất.');
+  const centroid=pts.reduce((a,p)=>({lat:a.lat+p.lat/pts.length,lng:a.lng+p.lng/pts.length}),{lat:0,lng:0});
+  s.lat=centroid.lat;s.lng=centroid.lng;s.geoSource='Ranh đất vẽ trên bản đồ';s.pinAddressNeedsReview=true;s.lotMode='custom';s.lotSource='drawn';s.shape='Không đều';
+  BMH.state.ui.location.drawingLot=false;BMH.liveWeather=null;BMH.save();BMH.render();BMH.loadSiteIntelligence?.(true);BMH.toast(`Ranh vẽ ước tính ${Math.round(stats.area)} m². Kích thước thiết kế chưa thay đổi; cần đối chiếu hồ sơ địa chính.`);
 };
-BMH.clearCustomLot = () => {const s=BMH.state.project.site;s.lotMode='rect';s.lotPoints=[];BMH.state.ui.location.drawingLot=false;BMH.save();BMH.render();BMH.toast('Đã trở lại lô chữ nhật theo mặt tiền × chiều sâu.');};
+BMH.clearCustomLot = () => {const s=BMH.state.project.site;s.lotMode='rect';s.lotPoints=[];s.lotSource='dimensions';BMH.state.ui.location.drawingLot=false;BMH.save();BMH.render();BMH.toast('Đã trở lại lô chữ nhật theo mặt tiền × chiều sâu.');};
+BMH.importParcelGeoJSON = async file => {
+  if(!file||file.size>2_000_000)throw new Error('Tệp GeoJSON cần nhỏ hơn 2 MB.');
+  const data=JSON.parse(await file.text());
+  const feature=data.type==='FeatureCollection'?data.features?.find(x=>x.geometry?.type==='Polygon'):data.type==='Feature'?data:data;
+  const geometry=feature?.geometry||feature;
+  if(geometry?.type!=='Polygon'||!Array.isArray(geometry.coordinates?.[0]))throw new Error('Chỉ nhận một polygon GeoJSON theo WGS84 (kinh độ, vĩ độ).');
+  const ring=geometry.coordinates[0];
+  if(ring.length<4||ring.length>257)throw new Error('Ranh đất cần từ 3 đến 256 đỉnh.');
+  const points=ring.map(pair=>({lng:Number(pair?.[0]),lat:Number(pair?.[1])}));
+  if(points.some(p=>!Number.isFinite(p.lat)||!Number.isFinite(p.lng)||p.lat<7||p.lat>24||p.lng<101||p.lng>118))throw new Error('Tọa độ WGS84 không nằm trong phạm vi Việt Nam.');
+  if(Math.abs(points[0].lat-points.at(-1).lat)<1e-8&&Math.abs(points[0].lng-points.at(-1).lng)<1e-8)points.pop();
+  const area=BMH.polygonAreaMeters(points);
+  if(points.length<3||area<5||area>100_000)throw new Error('Diện tích polygon bất thường. Kiểm tra hệ tọa độ và thứ tự kinh độ, vĩ độ.');
+  const center=points.reduce((a,p)=>({lat:a.lat+p.lat/points.length,lng:a.lng+p.lng/points.length}),{lat:0,lng:0}),s=BMH.state.project.site;
+  Object.assign(s,{lotMode:'custom',lotPoints:points,lotSource:'geojson-user',showLotOverlay:true,shape:'Không đều'});
+  BMH.state.ui.location.drawingLot=false;
+  BMH.applyCoordinates(center.lat,center.lng,'Ranh GeoJSON do người dùng cung cấp',{render:true});
+  BMH.toast(`Đã nhập polygon ~${Math.round(area)} m². Cần đối chiếu bản trích lục có giá trị pháp lý.`);
+};
 BMH.applyCoordinates = (lat,lng,source='Tọa độ tùy chỉnh',{snapRegion=false,render=false}={}) => {
   lat=Number(lat);lng=Number(lng);if(!Number.isFinite(lat)||!Number.isFinite(lng))return false;
   const s=BMH.state.project.site; s.lat=lat;s.lng=lng;s.geoSource=source;
@@ -242,7 +261,7 @@ BMH.afterRender = () => {
   if(BMH.state.ui.step===6)BMH.mountStudio3D?.();
 };
 BMH.mapTileConfig = style => ({
-  roadmap:[['https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png','© OpenStreetMap contributors © CARTO'],['https://tile.openstreetmap.org/{z}/{x}/{y}.png','© OpenStreetMap contributors']],
+  roadmap:[['https://tile.openstreetmap.org/{z}/{x}/{y}.png','© OpenStreetMap contributors']],
   satellite:[['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}','Tiles © Esri']],
   hybrid:[['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}','Tiles © Esri']],
   terrain:[['https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png','Map data © OpenStreetMap contributors · SRTM · OpenTopoMap']]
@@ -301,7 +320,7 @@ BMH.initLeafletMap = async (initId) => {
 const sources=BMH.mapTileConfig(s.mapStyle);let sourceIndex=0,activeLayer=null,tileErrors=0,loaded=false,labelLayer=null,stallTimer=null;
 const clearStall=()=>{if(stallTimer){clearTimeout(stallTimer);stallTimer=null;}};
 const setLoaded=()=>{loaded=true;clearStall();el.classList.remove('map-loading','fallback-only');};
-const loadTiles=()=>{clearStall();if(activeLayer)BMH.map.removeLayer(activeLayer);if(labelLayer)BMH.map.removeLayer(labelLayer);const [url,attr]=sources[sourceIndex]||BMH.mapTileConfig('roadmap')[0];tileErrors=0;activeLayer=L.tileLayer(url,{maxZoom:s.mapStyle==='terrain'?17:20,attribution:attr,keepBuffer:4,updateWhenIdle:false,crossOrigin:true}).addTo(BMH.map);if(s.mapStyle==='hybrid'){labelLayer=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Labels © Esri',opacity:.9}).addTo(BMH.map);}activeLayer.on('load',setLoaded);activeLayer.on('tileerror',()=>{tileErrors++;if(tileErrors>=4){if(sourceIndex<sources.length-1){sourceIndex++;loadTiles();}else if(!loaded){BMH.renderMapIframeFallback('Không tải được lớp bản đồ nền trực tuyến. Hãy nhập địa chỉ/GPS hoặc thử tải lại bản đồ tương tác.');}}});stallTimer=setTimeout(()=>{if(!loaded){el.classList.remove('map-loading');BMH.map?.invalidateSize?.(true);}},5000);};loadTiles();
+const loadTiles=()=>{clearStall();if(activeLayer)BMH.map.removeLayer(activeLayer);if(labelLayer)BMH.map.removeLayer(labelLayer);const [url,attr]=sources[sourceIndex]||BMH.mapTileConfig('roadmap')[0];tileErrors=0;activeLayer=L.tileLayer(url,{maxZoom:s.mapStyle==='terrain'?17:20,maxNativeZoom:s.mapStyle==='roadmap'?19:undefined,attribution:attr,keepBuffer:4,updateWhenIdle:false,crossOrigin:true}).addTo(BMH.map);if(s.mapStyle==='hybrid'){labelLayer=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Labels © Esri',opacity:.9}).addTo(BMH.map);}activeLayer.on('load',setLoaded);activeLayer.on('tileerror',()=>{tileErrors++;if(tileErrors>=4){if(sourceIndex<sources.length-1){sourceIndex++;loadTiles();}else if(!loaded){BMH.renderMapIframeFallback('Không tải được lớp bản đồ nền trực tuyến. Hãy nhập địa chỉ/GPS hoặc thử tải lại bản đồ tương tác.');}}});stallTimer=setTimeout(()=>{if(!loaded){el.classList.remove('map-loading');BMH.map?.invalidateSize?.(true);}},5000);};loadTiles();
   BMH.mapMarker=L.marker([s.lat,s.lng],{draggable:true,autoPan:true,icon:BMH.sitePinLeafletIcon(L),zIndexOffset:1000}).addTo(BMH.map).bindPopup('<b>Vị trí khu đất</b><br>'+BMH.esc(s.district||'')+' · '+BMH.esc(s.province));
   BMH.mapMarker.on('dragend',ev=>{const ll=ev.target.getLatLng();BMH.applyCoordinates(ll.lat,ll.lng,'Ghim bản đồ');});
   BMH.map.on('click',ev=>BMH.handleMapClick(ev.latlng.lat,ev.latlng.lng,'Chọn trên bản đồ'));
@@ -373,6 +392,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-map-climate]')){BMH.state.project.site.showClimateMap=!BMH.state.project.site.showClimateMap;BMH.save();BMH.render();return;}
   if(e.target.closest('[data-map-context]')){BMH.state.project.site.showContextRings=!BMH.state.project.site.showContextRings;BMH.save();BMH.render();return;}
   if(e.target.closest('[data-map-draw-lot]')){BMH.startLotDraw();return;}
+  if(e.target.closest('[data-parcel-import]')){BMH.$('#parcelGeoJSONUpload')?.click();return;}
   if(e.target.closest('[data-map-finish-lot]')){BMH.finishLotDraw();return;}
   if(e.target.closest('[data-map-clear-lot]')){BMH.clearCustomLot();return;}
   if(e.target.closest('[data-map-fullscreen]')){const el=BMH.$('.maps-studio');if(el?.requestFullscreen)el.requestFullscreen().then(()=>setTimeout(BMH.mapResize,120)).catch(()=>BMH.toast('Trình duyệt không cho phép toàn màn hình.'));return;}
@@ -406,6 +426,7 @@ document.addEventListener('click',e=>{
   const pview=e.target.closest('[data-plan-view]');if(pview){BMH.state.ui.planner.view=pview.dataset.planView;BMH.state.ui.planner.tool='select';BMH.save();BMH.render();return;}
   const mview=e.target.closest('[data-material-view]');if(mview&&!mview.disabled){BMH.state.ui.materialCategory=mview.dataset.materialView;BMH.save();BMH.render();return;}
   const floor=e.target.closest('[data-floor]');if(floor){BMH.state.ui.planner.view='plan';BMH.state.ui.planner.floor=Number(floor.dataset.floor);const first=BMH.floorRooms()[0];BMH.state.ui.planner.selected=first?.id||null;BMH.save();BMH.render();return;}
+  const floorLock=e.target.closest('[data-floor-lock]');if(floorLock){BMH.toggleFloorLock(floorLock.dataset.floorLock);return;}
   const room=e.target.closest('[data-room-select]');if(room){BMH.state.ui.planner.selected=room.dataset.roomSelect;BMH.state.ui.planner.tool='select';BMH.save();BMH.render();return;}
   const wallPlace=e.target.closest('[data-wall-place]');if(wallPlace&&BMH.state.ui.planner.tool!=='select'){const svg=BMH.$('#plannerSvg');if(svg){BMH.placeOpeningAt(BMH.state.ui.planner.tool,wallPlace.dataset.room,wallPlace.dataset.side,BMH.svgPoint(e,svg));}return;}
   const planTool=e.target.closest('[data-plan-tool]');if(planTool){BMH.state.ui.planner.tool=planTool.dataset.planTool;BMH.save();BMH.render();return;}
@@ -413,7 +434,7 @@ document.addEventListener('click',e=>{
   const addRoom=e.target.closest('[data-add-room]');if(addRoom){BMH.addRoom(addRoom.dataset.addRoom);return;}
   const opening=e.target.closest('[data-add-opening]');if(opening){BMH.addOpening(opening.dataset.addOpening);return;}
   const openingDelete=e.target.closest('[data-opening-delete]');if(openingDelete){BMH.pushPlanHistory();BMH.state.project.plan.openings=BMH.state.project.plan.openings.filter(o=>o.id!==openingDelete.dataset.openingDelete);BMH.save();BMH.render();return;}
-  if(e.target.closest('[data-room-delete]')){BMH.pushPlanHistory();const id=BMH.state.ui.planner.selected;BMH.state.project.plan.rooms=BMH.state.project.plan.rooms.filter(r=>r.id!==id);BMH.state.project.plan.openings=BMH.state.project.plan.openings.filter(o=>o.roomId!==id);BMH.state.ui.planner.selected=BMH.floorRooms()[0]?.id||null;BMH.save();BMH.render();return;}
+  if(e.target.closest('[data-room-delete]')){const id=BMH.state.ui.planner.selected;if(BMH.isRoomLocked(id))return BMH.toast('Phòng hoặc tầng đang khóa.');BMH.pushPlanHistory();BMH.state.project.plan.rooms=BMH.state.project.plan.rooms.filter(r=>r.id!==id);BMH.state.project.plan.openings=BMH.state.project.plan.openings.filter(o=>o.roomId!==id);BMH.state.ui.planner.selected=BMH.floorRooms()[0]?.id||null;BMH.save();BMH.render();return;}
   if(e.target.closest('[data-plan-undo]')){BMH.undoPlan();return;}
   if(e.target.closest('[data-plan-redo]')){BMH.redoPlan();return;}
   const zoomBtn=e.target.closest('[data-planner-zoom]');if(zoomBtn){const ui=BMH.state.ui.planner;ui.zoom=BMH.clamp(ui.zoom+(zoomBtn.dataset.plannerZoom==='in'?.15:-.15),.75,2.5);BMH.save();BMH.render();return;}
@@ -458,6 +479,7 @@ document.addEventListener('change',e=>{
   if(t?.id==='uploadPhoto'){if(t.files?.[0]){BMH.toast('Đã nhận ảnh tham khảo. Tiếp tục nhập thông tin dự án.');BMH.navigateTo(2);}t.value='';return;}
   if(t?.id==='uploadPlan'){if(t.files?.[0]){BMH.toast('Đã nhận bản vẽ tham chiếu. Bạn có thể đối chiếu ở Bước 4.');BMH.navigateTo(2);}t.value='';return;}
   if(t?.id==='priceQuoteUpload'){if(t.files?.[0])BMH.importPriceQuote(t.files[0]).catch(()=>BMH.toast('Không đọc được file báo giá. Dùng JSON hoặc CSV theo mẫu V4.8.'));t.value='';return;}
+  if(t?.id==='parcelGeoJSONUpload'){if(t.files?.[0])BMH.importParcelGeoJSON(t.files[0]).catch(err=>BMH.toast(err.message||'Không đọc được GeoJSON.'));t.value='';return;}
   if(!t.closest?.('#app'))return;
   if(t.dataset.path){let v=t.type==='checkbox'?t.checked:(t.type==='number'?Number(t.value)*(Number(t.dataset.scale)||1):t.value);const path=t.dataset.path;if(path==='project.dossier.progress')v=BMH.clamp(Number(v)||0,0,100);if(path==='project.site.province'){const r=BMH.REGIONS[v];BMH.state.project.site.province=v;if(r){const pt=BMH.regionPoint(v,r.defaultDistrict);Object.assign(BMH.state.project.site,{district:pt.district,lat:pt.lat,lng:pt.lng,geoSource:'Dữ liệu vùng',pinAddressNeedsReview:false});}BMH.liveWeather=null;BMH.save();BMH.render();return;}if(path==='project.site.district'){BMH.state.project.site.district=v;const pt=BMH.regionPoint(BMH.state.project.site.province,v);BMH.state.project.site.lat=pt.lat;BMH.state.project.site.lng=pt.lng;BMH.state.project.site.geoSource='Dữ liệu vùng';BMH.state.project.site.pinAddressNeedsReview=false;BMH.liveWeather=null;BMH.save();BMH.render();return;}if(['project.finance.cash','project.finance.reserve','project.finance.loan'].includes(path))BMH.state.project.finance.targetBudget=0;
 if(['project.finance.introRate','project.finance.postRate','project.finance.promoMonths'].includes(path)){
@@ -497,13 +519,13 @@ BMH.paintRoomDragPreview = candidate => {
 BMH.clearRoomDragPreview = () => {document.querySelectorAll('#plannerSvg .drag-preview').forEach(g=>{g.removeAttribute('transform');g.classList.remove('drag-preview');});};
 
 document.addEventListener('wheel',e=>{
-  if(BMH.state.ui.step!==5||!e.target.closest?.('.planner-canvas-stage')||!BMH.$('#plannerSvg'))return;
+  if(BMH.state.ui.step!==4||!e.target.closest?.('.v6-plan-canvas, .planner-canvas-stage')||!BMH.$('#plannerSvg'))return;
   e.preventDefault();const ui=BMH.state.ui.planner,delta=e.deltaY>0?-.1:.1,next=BMH.clamp(Math.round(((ui.zoom||1)+delta)*10)/10,.75,2.5);if(next===ui.zoom)return;ui.zoom=next;BMH.save();BMH.render({preserveScroll:true});
 },{passive:false});
 
 document.addEventListener('pointerdown',e=>{
   if(!e.target.closest?.('#app'))return;
-  if(BMH.state.ui.step!==5||BMH.state.ui.planner.tool!=='select')return;
+  if(BMH.state.ui.step!==4||BMH.state.ui.planner.tool!=='select')return;
   const edge=e.target.closest('[data-edge-id]'),handle=e.target.closest('[data-resize-id]'),group=e.target.closest('[data-room-id]');
   const id=edge?.dataset.edgeId||handle?.dataset.resizeId||group?.dataset.roomId;if(!id)return;
   const r=BMH.state.project.plan.rooms.find(x=>x.id===id);if(!r)return;if(BMH.isRoomLocked(id)){BMH.state.ui.planner.selected=id;BMH.save();BMH.render({preserveScroll:true});BMH.toast('Phòng này đang khóa. Mở khóa trong bảng thuộc tính nếu muốn di chuyển.');return;}const svg=BMH.$('#plannerSvg');if(!svg)return;
@@ -530,7 +552,7 @@ window.addEventListener('pointerup',BMH.finishRoomDrag);
 window.addEventListener('pointercancel',BMH.finishRoomDrag);
 
 document.addEventListener('keydown',e=>{
-  if(BMH.state.ui.step!==5)return;
+  if(BMH.state.ui.step!==4)return;
   const tag=(e.target?.tagName||'').toLowerCase();if(tag==='input'||tag==='select'||tag==='textarea')return;
   if(e.key==='Escape'&&BMH.state.ui.planner.tool!=='select'){BMH.state.ui.planner.tool='select';BMH.save();BMH.render();BMH.toast('Đã trở về công cụ chọn.');return;}
   if(!e.ctrlKey&&!e.metaKey&&e.key.toLowerCase()==='d'){BMH.state.ui.planner.tool='door';BMH.save();BMH.render();BMH.toast('Công cụ cửa đi · nhấp lên cạnh tường.');return;}

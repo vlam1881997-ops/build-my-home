@@ -6,7 +6,7 @@ BMH.defaultState = () => ({
     name:'Nhà của mình', source:'suggest', style:'Hiện đại', briefIdea:'',
     brief:{provider:'',model:'',notice:'',updatedAt:'',result:{},aiSuggestions:{},userRequirements:{}},
     sourceRefs:[],
-    site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',pinAddressNeedsReview:false,mapEngine:'free',mapStyle:'hybrid',mapZoom:17,showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotPoints:[],frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
+    site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',pinAddressNeedsReview:false,mapEngine:'free',mapStyle:'hybrid',mapZoom:17,showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotSource:'dimensions',lotPoints:[],deedArea:0,deedReference:'',frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
     siteIntelligence:{key:'',status:'idle',fetchedAt:'',elevation_m:null,flood:{level:'Chưa đánh giá',score:0,note:'',waterwayDistanceKm:null,riverSignal:null},access:{level:'Chưa đánh giá',score:0,note:'',majorRoadDistanceKm:null,majorRoadName:'',majorRoadType:''},transport:{level:'Chưa đánh giá',surchargePct:0,note:''},suppliers:[],builders:[],webSuppliers:[],webBuilders:[],citations:[],sources:[],aiSummary:'',warnings:[]},
     finance:{cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,targetBudget:0,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12,rateMeta:{bankId:'VCB',status:'preset',verified:false,product:'',sourceDate:'',fetchedAt:'',provider:'',model:'',introRate:0,postRate:0,promoMonths:0,citations:[],note:''}},
     household:{ownerBirth:1988,ownerGender:'Nam',partnerEnabled:true,partnerBirth:1990,partnerGender:'Nữ',requestedSize:0,children:[{id:'c1',name:'Con 1',birth:2012,room:'Riêng'}],relatives:[{id:'p1',name:'Ba',birth:1962,mobility:'Hạn chế nhẹ'},{id:'p2',name:'Mẹ',birth:1964,mobility:'Bình thường'}]},
@@ -25,7 +25,7 @@ BMH.defaultState = () => ({
       {id:'o2',floor:0,roomId:'r1',kind:'window',side:'east',offset:.35,width:1.6},
       {id:'o3',floor:0,roomId:'r3',kind:'door',side:'east',offset:.25,width:.8},
       {id:'o4',floor:1,roomId:'r6',kind:'window',side:'east',offset:.4,width:1.6}
-    ], lockedRoomIds:[]},
+    ], lockedRoomIds:[],lockedFloors:[]},
     planVariants:[],
     planVersions:[],
     materials:{tier:'standard',climatePackage:'recommended',choices:{floor:'viglacera',paint:'dulux',door:'xingfa'},lastDelta:0},
@@ -115,6 +115,8 @@ BMH.normalizeState = () => {
   if(!Array.isArray(BMH.state.project.plan.openings))BMH.state.project.plan.openings=structuredClone(base.project.plan.openings);
   if(!Array.isArray(BMH.state.project.plan.lockedRoomIds))BMH.state.project.plan.lockedRoomIds=[];
   BMH.state.project.plan.lockedRoomIds=BMH.state.project.plan.lockedRoomIds.filter(id=>BMH.state.project.plan.rooms.some(r=>r.id===id));
+  if(!Array.isArray(BMH.state.project.plan.lockedFloors))BMH.state.project.plan.lockedFloors=[];
+  BMH.state.project.plan.lockedFloors=BMH.state.project.plan.lockedFloors.filter(f=>Number.isInteger(f)&&f>=0&&f<Number(s.floors));
   if(!Array.isArray(BMH.state.project.planVariants))BMH.state.project.planVariants=[];
   if(!Array.isArray(BMH.state.project.planVersions))BMH.state.project.planVersions=[];
   BMH.state.project.planVariants=BMH.state.project.planVariants.slice(0,3);
@@ -159,7 +161,10 @@ BMH.normalizeState = () => {
   if(typeof s.showContextRings!=='boolean')s.showContextRings=true;
   if(!['rect','custom'].includes(s.lotMode))s.lotMode='rect';
   if(!Array.isArray(s.lotPoints))s.lotPoints=[];
-  s.lotPoints=s.lotPoints.filter(p=>p&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng))).slice(0,12).map(p=>({lat:Number(p.lat),lng:Number(p.lng)}));
+  s.lotPoints=s.lotPoints.filter(p=>p&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng))).slice(0,256).map(p=>({lat:Number(p.lat),lng:Number(p.lng)}));
+  if(!['dimensions','drawn','geojson-user'].includes(s.lotSource))s.lotSource=s.lotMode==='custom'?'drawn':'dimensions';
+  s.deedArea=BMH.clamp(Number(s.deedArea)||0,0,100000);
+  s.deedReference=String(s.deedReference||'').slice(0,160);
   s.targetCoverage=BMH.clamp(Number(s.targetCoverage)||.68,.45,.90);
   s.setbackFront=BMH.clamp(Number(s.setbackFront)||0,0,Math.max(0,Number(s.depth)||20)*.45);
   s.setbackRear=BMH.clamp(Number(s.setbackRear)||0,0,Math.max(0,Number(s.depth)||20)*.35);

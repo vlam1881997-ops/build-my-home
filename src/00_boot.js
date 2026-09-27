@@ -220,8 +220,10 @@ BMH.buildableEnvelope = (site=BMH.state?.project?.site||{}) => {
   const width=Math.max(.1,Number(site.width)||5),depth=Math.max(.1,Number(site.depth)||20),plot=BMH.siteParcelStats(site);
   const front=BMH.clamp(Number(site.setbackFront)||0,0,depth*.45),rear=BMH.clamp(Number(site.setbackRear)||0,0,depth*.35),side=BMH.clamp(Number(site.setbackSide)||0,0,width*.25);
   const buildWidth=Math.max(.1,width-side*2),buildDepth=Math.max(.1,depth-front-rear),envelopeArea=buildWidth*buildDepth,coverage=BMH.clamp(Number(site.targetCoverage)||.68,.45,.90);
-  const targetPlate=Math.min(envelopeArea,Math.max(0,plot.area)*coverage),floors=Math.max(1,Number(site.floors)||1),gfa=targetPlate*floors;
-  return {plotArea:plot.area,width,depth,front,rear,side,buildWidth,buildDepth,envelopeArea,coverage,targetPlate,gfa,openArea:Math.max(0,plot.area-targetPlate)};
+  // A drawn/user-imported polygon is not a cadastral or planning determination.
+  // Keep the design scenario tied to the declared width/depth until it is verified.
+  const designArea=width*depth,targetPlate=Math.min(envelopeArea,designArea*coverage),floors=Math.max(1,Number(site.floors)||1),gfa=targetPlate*floors;
+  return {plotArea:plot.area,designArea,legalVerified:false,width,depth,front,rear,side,buildWidth,buildDepth,envelopeArea,coverage,targetPlate,gfa,openArea:Math.max(0,designArea-targetPlate)};
 };
 BMH.siteFeasibility = (site=BMH.state?.project?.site||{}) => {
   const env=BMH.buildableEnvelope(site),h=BMH.state?.project?.household||{},children=Array.isArray(h.children)?h.children.length:0,relatives=Array.isArray(h.relatives)?h.relatives.length:0,people=2+children+relatives;

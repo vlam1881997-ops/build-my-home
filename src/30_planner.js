@@ -205,6 +205,7 @@ BMH.coordinationIssues = floor => {
 BMH.alignCurrentFloor = type => {
   const floor=BMH.state.ui.planner.floor;if(floor<=0)return BMH.toast('Tầng 1 không có tầng dưới để căn.');
   const below=BMH.floorRooms(floor-1).find(r=>r.type===type),cur=BMH.floorRooms(floor).find(r=>r.type===type);if(!below||!cur)return BMH.toast(`Chưa có ${type==='stairs'?'cầu thang':'WC'} ở cả hai tầng.`);
+  if(BMH.isRoomLocked(cur.id))return BMH.toast('Tầng hoặc phòng đang khóa.');
   const rooms=structuredClone(BMH.state.project.plan.rooms),r=rooms.find(x=>x.id===cur.id);const old={...r};Object.assign(r,{x:below.x,y:below.y,w:Math.min(r.w,below.w),h:Math.min(r.h,below.h)});if(!BMH.layoutValid(rooms)){Object.assign(r,old);return BMH.toast('Không thể căn tự động vì sẽ chồng lên không gian khác.');}
   BMH.pushPlanHistory();BMH.state.project.plan.rooms=rooms;BMH.save();BMH.render();BMH.toast(type==='stairs'?'Đã căn cầu thang theo tầng dưới.':'Đã căn khu WC theo tầng dưới.');
 };
@@ -272,7 +273,13 @@ BMH.redoPlan = () => {
   const snap=BMH.planHistory.redo.pop(); if(!snap)return BMH.toast('Chưa có thao tác để làm lại.');
   BMH.planHistory.undo.push(BMH.planSnapshot()); BMH.state.project.plan=structuredClone(snap); BMH.normalizeState(); BMH.save(); BMH.render();
 };
-BMH.isRoomLocked = id => (BMH.state.project.plan.lockedRoomIds||[]).includes(id);
+BMH.isRoomLocked = id => (BMH.state.project.plan.lockedRoomIds||[]).includes(id)||(BMH.state.project.plan.lockedFloors||[]).includes(BMH.state.project.plan.rooms.find(r=>r.id===id)?.floor);
+BMH.isFloorLocked = floor => (BMH.state.project.plan.lockedFloors||[]).includes(Number(floor));
+BMH.toggleFloorLock = floor => {
+  const list=BMH.state.project.plan.lockedFloors||(BMH.state.project.plan.lockedFloors=[]),f=Number(floor),i=list.indexOf(f);
+  if(i>=0)list.splice(i,1);else list.push(f);
+  BMH.save();BMH.render({preserveScroll:true});BMH.toast(i>=0?'Đã mở khóa tầng.':'Đã khóa tầng để tránh sửa nhầm.');
+};
 BMH.toggleRoomLock = id => {
   const list=BMH.state.project.plan.lockedRoomIds||(BMH.state.project.plan.lockedRoomIds=[]),i=list.indexOf(id);
   if(i>=0)list.splice(i,1);else list.push(id);
@@ -316,7 +323,7 @@ BMH.applyRoomSuggestion = (id,x,y) => {
   BMH.save();BMH.render({preserveScroll:true});const rev=BMH.roomPlacementReview(r);BMH.toast(`${r.name}: ${rev.status} ${rev.score}/100.`);
 };
 BMH.autoImprovePlan = () => {
-  const locked=new Set(BMH.state.project.plan.lockedRoomIds||[]),candidates=BMH.state.project.plan.rooms.filter(r=>!locked.has(r.id)).map(r=>({r,rev:BMH.roomPlacementReview(r)})).sort((a,b)=>a.rev.score-b.rev.score);
+  const candidates=BMH.state.project.plan.rooms.filter(r=>!BMH.isRoomLocked(r.id)).map(r=>({r,rev:BMH.roomPlacementReview(r)})).sort((a,b)=>a.rev.score-b.rev.score);
   if(!candidates.length)return BMH.toast('Tất cả phòng đang khóa.');
   BMH.pushPlanHistory();let moved=0;
   for(const item of candidates.slice(0,5)){
@@ -411,7 +418,7 @@ BMH.autoPlanConcept = (strategy=BMH.state.project.site.designStrategy||'climate'
 };
 BMH.layoutValid = rooms => {
   const site=BMH.state.project.site,min=.6;
-  for(const r of rooms){if(r.w<min||r.h<min||r.x<-.001||r.y<-.001||r.x+r.w>site.width+.001||r.y+r.h>site.depth+.001)return false;}
+  for(const r of rooms){if(![r.w,r.h,r.x,r.y].every(Number.isFinite)||r.w<min||r.h<min||r.x<-.001||r.y<-.001||r.x+r.w>site.width+.001||r.y+r.h>site.depth+.001)return false;}
   for(let i=0;i<rooms.length;i++)for(let j=i+1;j<rooms.length;j++){const a=rooms[i],b=rooms[j];if(a.floor!==b.floor)continue;if(a.x<b.x+b.w-.001&&a.x+a.w>b.x+.001&&a.y<b.y+b.h-.001&&a.y+a.h>b.y+.001)return false;}
   return true;
 };
@@ -440,6 +447,7 @@ BMH.openingFits = (candidate,ignoreId=null) => {
 };
 BMH.placeOpeningAt = (kind,roomId,side,point) => {
   const r=BMH.state.project.plan.rooms.find(x=>x.id===roomId);if(!r)return;const width=kind==='door'?.9:1.4;let offset=.5;
+  if(BMH.isRoomLocked(roomId))return BMH.toast('Phòng hoặc tầng đang khóa.');
   if(side==='north'||side==='south'){const span=Math.max(.01,r.w-width);offset=BMH.clamp((point.x-r.x-width/2)/span,0,1);}else{const span=Math.max(.01,r.h-width);offset=BMH.clamp((point.y-r.y-width/2)/span,0,1);}
   const candidate={id:BMH.uid('o'),floor:r.floor,roomId:r.id,kind,side,offset:+offset.toFixed(3),width};if(!BMH.openingFits(candidate))return BMH.toast('Vị trí này không đủ khoảng trống hoặc đang trùng một ô mở khác.');
   BMH.pushPlanHistory();BMH.state.project.plan.openings.push(candidate);BMH.state.ui.planner.selected=r.id;BMH.save();BMH.render();BMH.toast(`${kind==='door'?'Cửa đi':'Cửa sổ'} đã được đặt lên tường. Nhấn Esc để thoát công cụ.`);
@@ -473,7 +481,7 @@ BMH.planSvg = ({interactive=true, floor=BMH.state.ui.planner.floor}={}) => {
 };
 
 BMH.findFreeSpot = (w,h,floor) => { const s=BMH.state.ui.planner.snap, site=BMH.state.project.site; for(let y=0;y<=site.depth-h+.001;y+=s)for(let x=0;x<=site.width-w+.001;x+=s){const r={id:'temp',floor,x:+x.toFixed(2),y:+y.toFixed(2),w,h};if(BMH.roomValid(r))return {x:r.x,y:r.y};} return null; };
-BMH.addRoom = type => { const defs={living:['Phòng khách',4,4],kitchen:['Bếp + ăn',4,4],bed:['Phòng ngủ',3.2,4],bath:['WC',1.8,2.2],stairs:['Cầu thang',2,4],garage:['Gara',3,5],corridor:['Hành lang',1.2,4],balcony:['Ban công',1.5,3]}; const d=defs[type]||defs.bed, floor=BMH.state.ui.planner.floor, pos=BMH.findFreeSpot(Math.min(d[1],BMH.state.project.site.width),Math.min(d[2],BMH.state.project.site.depth),floor); if(!pos)return BMH.toast('Không còn vùng trống đủ cho không gian mẫu.'); BMH.pushPlanHistory(); const r={id:BMH.uid('r'),floor,name:d[0],type,x:pos.x,y:pos.y,w:Math.min(d[1],BMH.state.project.site.width),h:Math.min(d[2],BMH.state.project.site.depth)}; BMH.state.project.plan.rooms.push(r); BMH.state.ui.planner.selected=r.id; BMH.state.ui.planner.tool='select'; BMH.save(); BMH.render(); };
+BMH.addRoom = type => { const defs={living:['Phòng khách',4,4],kitchen:['Bếp + ăn',4,4],bed:['Phòng ngủ',3.2,4],bath:['WC',1.8,2.2],stairs:['Cầu thang',2,4],garage:['Gara',3,5],corridor:['Hành lang',1.2,4],balcony:['Ban công',1.5,3]}; const d=defs[type]||defs.bed, floor=BMH.state.ui.planner.floor;if(BMH.isFloorLocked(floor))return BMH.toast('Tầng đang khóa.'); const pos=BMH.findFreeSpot(Math.min(d[1],BMH.state.project.site.width),Math.min(d[2],BMH.state.project.site.depth),floor); if(!pos)return BMH.toast('Không còn vùng trống đủ cho không gian mẫu.'); BMH.pushPlanHistory(); const r={id:BMH.uid('r'),floor,name:d[0],type,x:pos.x,y:pos.y,w:Math.min(d[1],BMH.state.project.site.width),h:Math.min(d[2],BMH.state.project.site.depth)}; BMH.state.project.plan.rooms.push(r); BMH.state.ui.planner.selected=r.id; BMH.state.ui.planner.tool='select'; BMH.save(); BMH.render(); };
 BMH.addOpening = kind => { const r=BMH.selectedRoom(); if(!r)return BMH.toast('Hãy chọn phòng trước.'); BMH.state.ui.planner.tool=kind; BMH.save(); BMH.render(); BMH.toast(`Đang dùng công cụ ${kind==='door'?'Cửa đi':'Cửa sổ'} — nhấp trực tiếp lên cạnh tường để đặt.`); };
 
 /* ===== V3.5 architectural documentation helpers ===== */

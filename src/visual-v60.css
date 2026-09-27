@@ -1857,3 +1857,59 @@ html.bmh-v60 .v6-s7 .v69-render-error{color:#a04437}
   html.bmh-v60 .v68-build-inputs{grid-template-columns:1fr}
 }
 @media(max-width:1180px){html.bmh-v60 .v6-s9{grid-template-columns:1fr;grid-template-areas:none}html.bmh-v60 .v6-s9>*{grid-area:auto}}
+
+/* Parcel provenance, household method and supplier quote workflow. */
+html.bmh-v60 .v67-site>.v6-location-form{order:1}
+html.bmh-v60 .v67-site>.v6-map-panel{order:2}
+html.bmh-v60 .v67-site>.v6-climate{order:3}
+html.bmh-v60 .v67-site>.v70-parcel{order:4;grid-column:1/-1;padding:22px}
+html.bmh-v60 .v67-site>.v67-intelligence{order:5}
+html.bmh-v60 .v70-parcel-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:17px 0}
+html.bmh-v60 .v70-parcel-stats article{padding:16px;border:1px solid #e0e9df;background:#f7faf6;border-radius:14px}
+html.bmh-v60 .v70-parcel-stats small,html.bmh-v60 .v70-parcel-stats b,html.bmh-v60 .v70-parcel-stats span{display:block}
+html.bmh-v60 .v70-parcel-stats small{font-size:12px;color:#607468;font-weight:800}
+html.bmh-v60 .v70-parcel-stats b{font-size:20px;margin:5px 0;color:#225b43}
+html.bmh-v60 .v70-parcel-stats span{font-size:12px;line-height:1.45;color:#5f6c65}
+html.bmh-v60 .v70-parcel-tools,html.bmh-v60 .v70-parcel-links,html.bmh-v60 .v70-plan-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+html.bmh-v60 .v70-parcel-tools button,html.bmh-v60 .v70-plan-actions button{min-height:42px;border:1px solid #bad1c1;background:#f2f8f3;border-radius:9px;padding:0 13px;font-size:13px;font-weight:800;color:#245e44;cursor:pointer}
+html.bmh-v60 .v70-parcel-tools button:disabled,html.bmh-v60 .v70-plan-actions button:disabled{opacity:.5;cursor:not-allowed}
+html.bmh-v60 .v70-parcel-tools>span{font-size:12px;color:#6b756f}
+html.bmh-v60 .v70-parcel-fields{display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-top:16px}
+html.bmh-v60 .v70-parcel-fields label{font-size:12px;font-weight:750;display:grid;gap:7px;color:#496151}
+html.bmh-v60 .v70-parcel-fields input{height:44px;border:1px solid #d9e3d9;border-radius:9px;padding:0 12px;font-size:14px;min-width:0}
+html.bmh-v60 .v70-parcel-note,html.bmh-v60 .v70-parcel-alert{font-size:13px;line-height:1.55;margin:14px 0;color:#536459}
+html.bmh-v60 .v70-parcel-alert{padding:10px 13px;border-radius:9px;background:#fff4e6;color:#8d512e}
+html.bmh-v60 .v70-parcel-links a{font-size:13px;font-weight:800;color:#216248;text-decoration:none}
+html.bmh-v60 .v70-feng-family{margin:14px 0;padding:15px;border-radius:13px;background:#f5f8f3;border:1px solid #dce8da}
+html.bmh-v60 .v70-feng-family h3{font-size:18px;margin:0 0 8px;color:#214c39}
+html.bmh-v60 .v70-feng-family p,html.bmh-v60 .v70-feng-family details{font-size:13px;line-height:1.55;color:#526456}
+html.bmh-v60 .v70-feng-table{overflow:auto;max-width:100%}
+html.bmh-v60 .v70-feng-family table{width:100%;border-collapse:collapse;text-align:left;min-width:580px}
+html.bmh-v60 .v70-feng-family th,html.bmh-v60 .v70-feng-family td{font-size:12px;padding:10px 7px;border-bottom:1px solid #dce7dd;vertical-align:top}
+html.bmh-v60 .v70-feng-family thead th{color:#4c6957;background:#edf4ec}
+html.bmh-v60 .v70-feng-family td small,html.bmh-v60 .v70-feng-family th small{display:block;color:#697d6e;font-size:11px;line-height:1.45}
+html.bmh-v60 .v70-feng-family summary{font-weight:850;cursor:pointer;margin-top:12px;color:#245c42}
+html.bmh-v60 .v70-feng-family details a,html.bmh-v60 .v70-feng-family details small{display:block;margin-top:7px;font-size:12px;line-height:1.45}
+html.bmh-v60 .v70-feng-family details a{color:#28654a}
+html.bmh-v60 .v70-plan-actions{padding:10px 8px;min-height:54px}
+html.bmh-v60 .v70-plan-actions span{font-size:12px;color:#607068;line-height:1.45}
+html.bmh-v60 .v6-plan-canvas svg{touch-action:none}
+html.bmh-v60 .v6-plan-toolbar{height:auto;min-height:48px;flex-wrap:wrap;padding:7px 3px}
+html.bmh-v60 .v6-plan-toolbar>div{flex-wrap:wrap}
+html.bmh-v60 .v6-plan-toolbar button{font-size:12px;min-height:38px}
+html.bmh-v60 .v70-mat-empty{padding:24px;border:1px dashed #b9cbbb;background:#f5f8f2;border-radius:12px;margin-top:13px}
+html.bmh-v60 .v70-mat-empty b,html.bmh-v60 .v70-mat-empty span{display:block}
+html.bmh-v60 .v70-mat-empty b{font-size:17px}.v70-mat-empty span{font-size:13px;margin-top:7px;line-height:1.5}
+html.bmh-v60 .v70-quote-panel{display:flex;align-items:center;justify-content:space-between;gap:15px;background:#edf6ef;border:1px solid #bcd6c3;padding:16px;border-radius:13px;margin-top:14px}
+html.bmh-v60 .v70-quote-panel small,html.bmh-v60 .v70-quote-panel b,html.bmh-v60 .v70-quote-panel span{display:block}
+html.bmh-v60 .v70-quote-panel small{font-size:11px;color:#54765d;font-weight:800}
+html.bmh-v60 .v70-quote-panel b{font-size:16px;margin:3px 0}.v70-quote-panel span{font-size:12px;line-height:1.45}
+html.bmh-v60 .v70-quote-panel button{min-height:44px;border:0;border-radius:9px;background:#246448;color:#fff;padding:0 16px;font-size:13px;font-weight:850;white-space:nowrap;cursor:pointer}
+html.bmh-v60 .v70-quote-sources{display:grid;gap:7px;margin:14px 0;font-size:13px}
+html.bmh-v60 .v70-quote-sources a{color:#256449;text-decoration:none;font-size:13px}
+@media(max-width:760px){
+  html.bmh-v60 .v67-site>.v70-parcel{grid-column:auto;padding:16px}
+  html.bmh-v60 .v70-parcel-stats,html.bmh-v60 .v70-parcel-fields{grid-template-columns:1fr}
+  html.bmh-v60 .v70-quote-panel{align-items:stretch;flex-direction:column}
+  html.bmh-v60 .v70-parcel-stats b{font-size:19px}
+}

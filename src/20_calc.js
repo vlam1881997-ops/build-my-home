@@ -74,10 +74,19 @@ BMH.estimate = () => {
   return {area,planArea,areaSource,shell,finish,transport,climatePrep,climatePackage,performanceUpgrade,performance,adaptation:adapt,basis,prep,contingency,total,budget:BMH.financeSummary().available,gap:BMH.financeSummary().available-total};
 };
 BMH.kua = (birth,gender='Nam') => {
+  if(!['Nam','Nữ'].includes(gender))return null;
   let y=String(Math.round(Number(birth)||0)); if(y.length!==4) return null; let sum=[...y].reduce((s,d)=>s+Number(d),0); while(sum>9)sum=[...String(sum)].reduce((s,d)=>s+Number(d),0);
   let k=gender==='Nữ'?(Number(birth)>=2000?6:5)+sum:(Number(birth)>=2000?9:10)-sum; while(k>9)k-=9; while(k<=0)k+=9; if(k===5)k=gender==='Nữ'?8:2;
   const east=[1,3,4,9], dirs=east.includes(k)?['Đông Nam','Đông','Nam','Bắc']:['Tây Nam','Tây','Tây Bắc','Đông Bắc'];
   return {number:k,group:east.includes(k)?'Đông tứ mệnh':'Tây tứ mệnh',dirs};
+};
+BMH.fengIdentity = (birth,gender) => {
+  const year=Number(birth),kua=year>=1900&&year<=new Date().getFullYear()?BMH.kua(year,gender):null;
+  if(!kua)return null;
+  const stems=['Giáp','Ất','Bính','Đinh','Mậu','Kỷ','Canh','Tân','Nhâm','Quý'];
+  const branches=['Tý','Sửu','Dần','Mão','Thìn','Tỵ','Ngọ','Mùi','Thân','Dậu','Tuất','Hợi'];
+  const idx=(year-1984),element={1:'Thủy',2:'Thổ',3:'Mộc',4:'Mộc',6:'Kim',7:'Kim',8:'Thổ',9:'Hỏa'}[kua.number];
+  return {year,canChi:stems[(idx%10+10)%10]+' '+branches[(idx%12+12)%12],kua:kua.number,element,group:kua.group,dirs:kua.dirs};
 };
 BMH.fengProfile = () => {
   const h=BMH.state.project.household||{}, labels=['Sinh Khí','Thiên Y','Diên Niên','Phục Vị'];

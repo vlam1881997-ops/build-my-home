@@ -64,12 +64,14 @@ BMH.disposeStudio3D = () => {
 BMH.mountStudio3D = async () => {
   const canvas=BMH.$('#studio3dCanvas'),stage=BMH.$('#studio3dStage');if(!canvas||!stage)return;
   BMH.disposeStudio3D();const THREE=await BMH.ensureThree();if(BMH.$('#studio3dCanvas')!==canvas)return;if(!THREE){stage.classList.add('three-failed');BMH.$('#studio3dLoading')?.remove();return;}
-  const palette=BMH.scenePalette(),scene=new THREE.Scene();scene.background=new THREE.Color(BMH.state.ui.sceneTheme==='night'?0x12171d:0xe9e3d8);scene.fog=new THREE.Fog(scene.background,30,85);
+  const palette=BMH.scenePalette(),scene=new THREE.Scene();scene.background=new THREE.Color(BMH.state.ui.sceneTheme==='night'?0x18222e:0xeaf3f5);scene.fog=new THREE.Fog(scene.background,45,110);
   const camera=new THREE.PerspectiveCamera(42,1,.1,140);let renderer;
   try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,preserveDrawingBuffer:true});}catch{stage.classList.add('three-failed');BMH.$('#studio3dLoading')?.remove();return;}
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;
-  const hemi=new THREE.HemisphereLight(BMH.state.ui.sceneTheme==='night'?0x6a7da8:0xfff7e6,0x6d685e,BMH.state.ui.sceneTheme==='night'?.75:1.65);scene.add(hemi);
-  const sun=new THREE.DirectionalLight(BMH.state.ui.sceneTheme==='night'?0xb8c7ff:0xffe2b1,BMH.state.ui.sceneTheme==='night'?1.25:2.35);sun.position.set(-12,22,10);sun.castShadow=true;sun.shadow.mapSize.set(1536,1536);sun.shadow.camera.left=-25;sun.shadow.camera.right=25;sun.shadow.camera.top=30;sun.shadow.camera.bottom=-20;scene.add(sun);
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=BMH.state.ui.sceneTheme==='night'?1.25:1.45;
+  const hemi=new THREE.HemisphereLight(BMH.state.ui.sceneTheme==='night'?0x8da4cf:0xffffff,0x9ba49b,BMH.state.ui.sceneTheme==='night'?1.1:2.15);scene.add(hemi);
+  const sun=new THREE.DirectionalLight(BMH.state.ui.sceneTheme==='night'?0xb8c7ff:0xfff0d5,BMH.state.ui.sceneTheme==='night'?1.6:2.85);sun.position.set(-12,22,10);sun.castShadow=true;sun.shadow.mapSize.set(1536,1536);sun.shadow.bias=-.0002;sun.shadow.camera.left=-25;sun.shadow.camera.right=25;sun.shadow.camera.top=30;sun.shadow.camera.bottom=-20;scene.add(sun);
+  const fill=new THREE.DirectionalLight(0xe5f4ff,BMH.state.ui.sceneTheme==='night'?.4:.9);fill.position.set(12,10,-8);scene.add(fill);
   const warm=new THREE.PointLight(0xffb66a,BMH.state.ui.sceneTheme==='night'?8:0,24,2);warm.position.set(0,4,1);scene.add(warm);
   const mat=(color,rough=.75,metal=.02,opacity=1)=>new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal,transparent:opacity<1,opacity});
   const mats={wall:mat(palette.wall,.82),slab:mat(0xd8d0c4,.88),frame:mat(palette.frame,.45,.22),glass:new THREE.MeshPhysicalMaterial({color:palette.glass,roughness:.08,metalness:.05,transmission:.3,transparent:true,opacity:.62}),floor:mat(palette.floor,.62),accent:mat(palette.accent,.65),ground:mat(palette.ground,1),green:mat(palette.green,.95),dark:mat(0x4a4f4b,.75)};
