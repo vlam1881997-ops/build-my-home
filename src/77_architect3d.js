@@ -13,6 +13,7 @@ BMH.architectDocument=()=>{
   // Bounding-box pitched roofs are unsuitable for concave footprints; omit until designed.
   return {floorplan:levels[0].floorplan,items:levels[0].items,levels:levels.map((v,i)=>i?v:{name:v.name,height:v.height})};
 };
+BMH.syncArchitectRoomNames=model=>{model.levels.forEach((level,f)=>{for(const room of level.floorplan.getRooms()){const xs=room.corners.map(c=>c.x/100),ys=room.corners.map(c=>c.y/100),x=Math.min(...xs),y=Math.min(...ys),w=Math.max(...xs)-x,h=Math.max(...ys)-y;const source=BMH.floorRooms(f).find(r=>Math.abs(r.x-x)<.01&&Math.abs(r.y-y)<.01&&Math.abs(r.w-w)<.01&&Math.abs(r.h-h)<.01);if(source){room.name=source.name;room.type=source.type;}}});};
 let architect3dLoading;
 BMH.ensureArchitect3D=()=>{if(window.BP3DJS)return Promise.resolve(window.BP3DJS);if(!architect3dLoading)architect3dLoading=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='assets/architect3d/architect3d.js';script.onload=()=>resolve(window.BP3DJS);script.onerror=()=>{architect3dLoading=null;script.remove();reject(new Error('Không tải được Architect3D.'));};document.head.appendChild(script);});return architect3dLoading;};
 const architectureMount=BMH.mountStudio3D,architectureDispose=BMH.disposeStudio3D,architectureReset=BMH.resetStudio3D;
@@ -26,7 +27,7 @@ BMH.mountStudio3D=async()=>{
     const doc=BMH.architectDocument(),parsed=A.DesignDocument.parse(JSON.stringify(doc));if(!parsed.ok)throw new Error(parsed.errors.map(e=>e.path+': '+e.message).join('; '));
     const host=document.createElement('div');host.className='architect3d-host';stage.appendChild(host);
     const viewer=new A.BlueprintJS({threeElement:host,widget:true,assets:new A.AssetResolver({base:'assets/architect3d/'}),configuration:new A.Configuration({wallHeight:(BMH.projectLevels().floorHeight-BMH.projectLevels().slab)*100})});BMH.architectViewer=viewer;
-    viewer.model.loadSerialized(JSON.stringify(doc));viewer.three.centerCamera();
+    viewer.model.loadSerialized(JSON.stringify(doc));BMH.syncArchitectRoomNames(viewer.model);viewer.three.centerCamera();
     stage.classList.add('three-ready','architect3d-active');BMH.$('#studio3dLoading')?.remove();BMH.$('#studio3dCanvas').style.display='none';
     const tip=stage.querySelector('.v61-3d-tip');if(tip)tip.textContent='Architect3D · xoay / zoom · kích thước từ mặt bằng · nội thất tham khảo Kenney CC0';
   }catch(err){BMH.disposeStudio3D();stage.classList.add('three-failed');BMH.$('#studio3dLoading')?.remove();const tip=stage.querySelector('.v61-3d-tip');if(tip)tip.textContent='Architect3D chưa dựng được: '+String(err.message||err);console.error('Architect3D',err);}
