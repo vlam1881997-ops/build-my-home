@@ -261,7 +261,8 @@ BMH.planConnections = (floor=BMH.state.ui.planner.floor) => BMH.state.project.pl
 BMH.circulationAnalysis = (floor=BMH.state.ui.planner.floor) => {
   const rooms=BMH.floorRooms(floor), conns=BMH.planConnections(floor), graph=new Map(rooms.map(r=>[r.id,new Set()]));
   conns.forEach(c=>{if(c.to){graph.get(c.from.id)?.add(c.to.id);graph.get(c.to.id)?.add(c.from.id);}});
-  const entries=conns.filter(c=>c.external).map(c=>c.from.id), fallback=rooms.find(r=>r.type==='living')?.id||rooms[0]?.id, starts=entries.length?[...new Set(entries)]:fallback?[fallback]:[];
+  const stairs=rooms.filter(r=>r.type==='stairs'&&floor>0&&BMH.floorRooms(floor-1).some(b=>b.type==='stairs'&&Math.abs(b.x-r.x)<.03&&Math.abs(b.y-r.y)<.03&&Math.abs(b.w-r.w)<.03&&Math.abs(b.h-r.h)<.03));
+  const entries=[...conns.filter(c=>c.external).map(c=>c.from.id),...stairs.map(r=>r.id)], fallback=rooms.find(r=>r.type==='living')?.id||rooms[0]?.id, starts=entries.length?[...new Set(entries)]:fallback?[fallback]:[];
   const reached=new Set(starts),q=[...starts]; while(q.length){const id=q.shift();for(const n of graph.get(id)||[])if(!reached.has(n)){reached.add(n);q.push(n);}}
   const unreachable=rooms.filter(r=>!reached.has(r.id));
   const narrow=rooms.filter(r=>r.type==='corridor'&&Math.min(r.w,r.h)<.9);
@@ -412,40 +413,40 @@ BMH.autoPlanConcept = (strategy=BMH.state.project.site.designStrategy||'climate'
   if(BMH.planHasLocks())return BMH.toast('Mở khóa phòng/tầng trước khi tạo lại mặt bằng.');
   const p=BMH.state.project,s=p.site,h=p.household,e=BMH.buildableEnvelope(s),W=e.buildWidth,D=e.buildDepth,x0=e.originX??e.side,y0=e.originY??e.front,floors=Math.max(1,Number(s.floors)||1);
   if(W<3||D<7)return BMH.toast('Khung xây dựng hiện quá nhỏ để tự bố trí. Hãy giảm khoảng lùi hoặc điều chỉnh kích thước đất.');
-  const oldPlan=BMH.planSnapshot(); BMH.pushPlanHistory();
-  const rooms=[], openings=[]; let rid=0,oid=0;
-  const snap=n=>+BMH.roundTo(n,.1).toFixed(2), add=(floor,name,type,x,y,w,hh)=>{const r={id:`auto-r${++rid}`,floor,name,type,x:snap(x),y:snap(y),w:snap(w),h:snap(hh)};rooms.push(r);return r;};
-  const door=(r,side='north',offset=.5,width=.9)=>openings.push({id:`auto-o${++oid}`,floor:r.floor,roomId:r.id,kind:'door',side,offset,width:Math.min(width,(side==='north'||side==='south'?r.w:r.h)-.12)});
-  const win=(r,side='east',offset=.5,width=1.4)=>{const len=side==='north'||side==='south'?r.w:r.h;if(len>.8)openings.push({id:`auto-o${++oid}`,floor:r.floor,roomId:r.id,kind:'window',side,offset,width:Math.min(width,len-.18)});};
+  const hasRelative=(h.relatives||[]).length>0, oneFloor=floors===1;
   const childNames=(h.children||[]).map((c,i)=>c.name||`Con ${i+1}`), upperBeds=['Phòng ngủ chính',...childNames.map(n=>`Phòng ${n}`)];
-  const bedroomTarget=BMH.householdNeeds?.().bedrooms||upperBeds.length;
-  while(upperBeds.length+(h.relatives?.length?1:0)<bedroomTarget)upperBeds.push(`Phòng ngủ ${upperBeds.length+1}`);
-  const serviceD=BMH.clamp(D*.19,2.8,3.8), serviceY=y0+D-serviceD, stairW=BMH.clamp(W*.42,1.7,2.35), bathW=W-stairW;
-  const addService=(floor)=>{const bath=add(floor,`WC tầng ${floor+1}`,'bath',x0,serviceY,bathW,serviceD),stairs=add(floor,'Cầu thang','stairs',x0+bathW,serviceY,stairW,serviceD);door(bath,'north',.4,.75);door(stairs,'north',.55,.9);win(bath,'west',.5,.7);return {bath,stairs};};
-  const hasRelative=(h.relatives||[]).length>0, oneFloor=floors===1, mainD=D-serviceD, weights=oneFloor?(hasRelative?[.24,.22,.27,.27]:[.32,.30,.38]):(hasRelative?[.34,.31,.35]:[.52,.48]), ys=[],depths=[];let acc=y0;
-  weights.forEach((w,i)=>{ys.push(snap(acc));const d=i===weights.length-1?snap(y0+mainD-acc):snap(mainD*w);depths.push(Math.max(.6,d));acc+=depths.at(-1);});
-  const living=add(0,'Phòng khách','living',x0,ys[0],W,depths[0]);door(living,'north',.5,1.1);win(living,strategy==='climate'?'east':'west',.42,Math.min(1.8,W*.38));
-  const kitchen=add(0,'Bếp + ăn','kitchen',x0,ys[1],W,depths[1]);door(living,'south',.5,.9);win(kitchen,'east',.58,Math.min(1.6,W*.34));
-  let groundLast=kitchen;
-  if(hasRelative){const elder=add(0,'Phòng ông bà','bed',x0,ys[2],W,depths[2]);door(kitchen,'south',.5,.9);win(elder,strategy==='climate'?'east':'west',.5,Math.min(1.5,W*.32));groundLast=elder;}
-  if(oneFloor){const idx=hasRelative?3:2,master=add(0,'Phòng ngủ chính','bed',x0,ys[idx],W,depths[idx]);door(groundLast,'south',.5,.85);door(master,'south',.72,.85);win(master,strategy==='climate'?'east':'west',.5,Math.min(1.5,W*.32));}
-  else door(groundLast,'south',.72,.85);
-  addService(0);
+  const bedroomTarget=Math.max(1,BMH.householdNeeds?.().bedrooms||upperBeds.length);
+  while(upperBeds.length+(hasRelative?1:0)<bedroomTarget)upperBeds.push(`Phòng ngủ ${upperBeds.length+1}`);
+  const hallW=1.2, roomW=W-hallW, stairD=3.2,bathD=1.8,mainD=D-stairD-bathD;
+  const groundNames=[['Phòng khách','living'],['Bếp + ăn','kitchen'],...(hasRelative?[['Phòng ông bà','bed']]:[]),...(oneFloor?upperBeds.map(n=>[n,'bed']):[])];
+  const maxUpperCount=oneFloor?0:Math.ceil(upperBeds.length/(floors-1));
+  if(roomW<2.2||mainD<Math.max(groundNames.length,maxUpperCount)*2.4)return BMH.toast('Khung đất chưa đủ cho các phòng và hành lang 1,2m. Hãy tăng số tầng, điều chỉnh nhu cầu hoặc bố trí thủ công.');
+  const oldPlan=BMH.planSnapshot(); BMH.pushPlanHistory();
+  const rooms=[],openings=[];let rid=0,oid=0;
+  // Retain exact parcel coordinates: rounding individual room edges can cross a setback.
+  const add=(floor,name,type,x,y,w,hh)=>{const r={id:`auto-r${++rid}`,floor,name,type,x,y,w,h:hh};rooms.push(r);return r;};
+  const door=(r,side='east',offset=.5,width=.9)=>openings.push({id:`auto-o${++oid}`,floor:r.floor,roomId:r.id,kind:'door',side,offset,width,height:2.1,sill:0});
+  const win=(r,side='west',offset=.5,width=1.4)=>{const len=side==='north'||side==='south'?r.w:r.h;if(len>.8)openings.push({id:`auto-o${++oid}`,floor:r.floor,roomId:r.id,kind:'window',side,offset,width:Math.min(width,len-.3),height:1.4,sill:.9});};
+  const addService=f=>{
+    const hall=add(f,`Hành lang tầng ${f+1}`,'corridor',x0+roomW,y0,hallW,D);
+    if(f===0)door(hall,'north',.5,1.0);
+    const bath=add(f,`WC tầng ${f+1}`,'bath',x0,y0+mainD,roomW,bathD);
+    const stairs=add(f,'Cầu thang','stairs',x0,y0+mainD+bathD,roomW,stairD);
+    door(bath);door(stairs);win(bath,'west',.5,.7);
+  };
   let bedIndex=0;
-  for(let f=1;f<floors;f++){
-    const remainingFloors=floors-f, remainingBeds=upperBeds.length-bedIndex, count=Math.max(1,Math.ceil(remainingBeds/remainingFloors)), zoneD=mainD/count;
-    for(let i=0;i<count;i++){
-      const name=upperBeds[bedIndex++]||((f===floors-1&&i===count-1)?'Phòng đa năng':`Phòng linh hoạt ${i+1}`),r=add(f,name,'bed',x0,y0+i*zoneD,W,zoneD);
-      if(i===0)door(r,'north',.5,.85);win(r,strategy==='climate'?(i%2?'west':'east'):'east',.45,Math.min(1.6,W*.34));
-      if(i>0){const prev=rooms.filter(x=>x.floor===f&&x.type==='bed')[i-1];door(prev,'south',.5,.85);}
-    }
-    const last=rooms.filter(x=>x.floor===f&&x.type==='bed').at(-1);if(last)door(last,'south',.72,.85);addService(f);
+  for(let f=0;f<floors;f++){
+    const count=f===0?groundNames.length:Math.max(1,Math.ceil((upperBeds.length-bedIndex)/(floors-f)));
+    const names=f===0?groundNames:Array.from({length:count},()=>[upperBeds[bedIndex++]||'Phòng đa năng','bed']);
+    names.forEach(([name,type],i)=>{const start=y0+mainD*i/count,end=y0+mainD*(i+1)/count,r=add(f,name,type,x0,start,roomW,end-start);door(r);win(r,'west',.5,type==='living'?1.8:1.4);});
+    addService(f);
   }
   // Window pass: add a second opening when climate strategy needs cross-ventilation and the side is externally available.
   p.plan={rooms,openings,lockedRoomIds:[]};
   if(strategy==='climate'){
     for(const r of rooms.filter(r=>['living','kitchen','bed'].includes(r.type))){const ext=BMH.externalSides(r);const current=new Set(openings.filter(o=>o.roomId===r.id&&o.kind==='window').map(o=>o.side));const alt=ext.find(side=>!current.has(side)&&side!=='west')||ext.find(side=>!current.has(side));if(alt)win(r,alt,.6,Math.min(1.2,(alt==='north'||alt==='south'?r.w:r.h)*.38));}
   }
+  for(const o of openings.filter(o=>o.kind==='window')){const proposal=BMH.suggestOpeningPosition?.(o);if(proposal)Object.assign(o,proposal.candidate);}
   if(!BMH.layoutValid(rooms)){p.plan=oldPlan;BMH.planHistory.undo.pop();BMH.toast('Không thể tạo phương án hợp lệ với kích thước hiện tại.');return;}
   s.designStrategy=strategy;BMH.state.ui.planner.floor=0;BMH.state.ui.planner.selected=rooms[0]?.id||null;BMH.state.ui.planner.tool='select';BMH.state.ui.planner.view='plan';BMH.save();BMH.render();BMH.toast(`Đã tạo phương án ${strategy==='climate'?'ưu tiên khí hậu':strategy==='budget'?'tối ưu diện tích':'cân bằng'} từ khu đất + gia đình.`);
 };

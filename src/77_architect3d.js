@@ -17,7 +17,7 @@ BMH.syncArchitectRoomNames=model=>{model.levels.forEach((level,f)=>{for(const ro
 let architect3dLoading;
 BMH.ensureArchitect3D=()=>{if(window.BP3DJS)return Promise.resolve(window.BP3DJS);if(!architect3dLoading)architect3dLoading=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='assets/architect3d/architect3d.js';script.onload=()=>resolve(window.BP3DJS);script.onerror=()=>{architect3dLoading=null;script.remove();reject(new Error('Không tải được Architect3D.'));};document.head.appendChild(script);});return architect3dLoading;};
 const architectureMount=BMH.mountStudio3D,architectureDispose=BMH.disposeStudio3D,architectureReset=BMH.resetStudio3D;
-BMH.disposeStudio3D=()=>{if(BMH.architectViewer){BMH.architectViewer.dispose();BMH.architectViewer=null;}BMH.$('.architect3d-host')?.remove();architectureDispose();};
+BMH.disposeStudio3D=()=>{BMH.architectCleanup?.();BMH.architectCleanup=null;BMH.$('.architect3d-controls')?.remove();if(BMH.architectViewer){BMH.architectViewer.dispose();BMH.architectViewer=null;}BMH.$('.architect3d-host')?.remove();architectureDispose();};
 BMH.resetStudio3D=()=>{if(BMH.architectViewer)BMH.architectViewer.three.centerCamera();else architectureReset();};
 BMH.mountStudio3D=async()=>{
   if(BMH.state.ui.architectureEngine!=='architect3d')return architectureMount();
@@ -27,8 +27,18 @@ BMH.mountStudio3D=async()=>{
     const doc=BMH.architectDocument(),parsed=A.DesignDocument.parse(JSON.stringify(doc));if(!parsed.ok)throw new Error(parsed.errors.map(e=>e.path+': '+e.message).join('; '));
     const host=document.createElement('div');host.className='architect3d-host';stage.appendChild(host);
     const viewer=new A.BlueprintJS({threeElement:host,widget:true,assets:new A.AssetResolver({base:'assets/architect3d/'}),configuration:new A.Configuration({wallHeight:(BMH.projectLevels().floorHeight-BMH.projectLevels().slab)*100})});BMH.architectViewer=viewer;
-    viewer.model.loadSerialized(JSON.stringify(doc));BMH.syncArchitectRoomNames(viewer.model);viewer.three.centerCamera();
-    stage.classList.add('three-ready','architect3d-active');BMH.$('#studio3dLoading')?.remove();BMH.$('#studio3dCanvas').style.display='none';
+    const controls=document.createElement('div');controls.className='architect3d-controls';
+    controls.innerHTML='<label>Xem tầng <select data-architect-level><option value="all">Toàn bộ nhà</option>'+doc.levels.map((l,i)=>'<option value="'+i+'">Tầng '+(i+1)+'</option>').join('')+'</select></label><button type="button" data-architect-reset>Đặt lại góc nhìn</button><button type="button" data-architect-export>Tải mô hình JSON</button><span role="status" data-architect-status></span>';
+    stage.appendChild(controls);
+    const status=controls.querySelector('[data-architect-status]');let pending=0,failures=0;
+    const loading=()=>{pending++;status.textContent='Đang tải nội thất…';};
+    const loaded=e=>{pending=Math.max(0,pending-1);if(!e.item&&!e.stale)failures++;status.textContent=failures?'Thiếu '+failures+' mô hình nội thất':pending?'Đang tải nội thất…':'Mô hình đã tải';};
+    viewer.model.scene.addEventListener(A.EVENT_ITEM_LOADING,loading);viewer.model.scene.addEventListener(A.EVENT_ITEM_LOADED,loaded);
+    BMH.architectCleanup=()=>{viewer.model.scene.removeEventListener(A.EVENT_ITEM_LOADING,loading);viewer.model.scene.removeEventListener(A.EVENT_ITEM_LOADED,loaded);};
+    controls.addEventListener('change',e=>{if(!e.target.matches('[data-architect-level]'))return;if(e.target.value==='all')viewer.three.showExterior();else{viewer.model.setActiveLevel(Number(e.target.value));viewer.three.showStoreys(false);viewer.three.centerCamera();}});
+    controls.addEventListener('click',e=>{if(e.target.closest('[data-architect-reset]')){if(controls.querySelector('select').value==='all')viewer.three.showExterior();else viewer.three.centerCamera();}if(e.target.closest('[data-architect-export]'))BMH.download('BMH-Architect3D.json',JSON.stringify(doc,null,2),'application/json');});
+    viewer.model.loadSerialized(JSON.stringify(doc));BMH.syncArchitectRoomNames(viewer.model);viewer.three.showExterior();
+    stage.classList.add('three-ready','architect3d-active');BMH.$('#studio3dLoading')?.remove();const canvas=BMH.$('#studio3dCanvas');if(canvas)canvas.style.display='none';
     const tip=stage.querySelector('.v61-3d-tip');if(tip)tip.textContent='Architect3D · xoay / zoom · kích thước từ mặt bằng · nội thất tham khảo Kenney CC0';
   }catch(err){BMH.disposeStudio3D();stage.classList.add('three-failed');BMH.$('#studio3dLoading')?.remove();const tip=stage.querySelector('.v61-3d-tip');if(tip)tip.textContent='Architect3D chưa dựng được: '+String(err.message||err);console.error('Architect3D',err);}
 };
