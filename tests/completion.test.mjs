@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import {pageMetadata,publicHttps} from '../server/_public_web.mjs';
 import {geminiGenerate} from '../api/_gemini.mjs';
 import scan from '../api/gemini-scan.mjs';
-import health from '../api/ai-health.mjs';
+import health from '../server/_ai_health_handler.mjs';
 import {extractRenderedImage,renderRequestPayload} from '../api/gemini-render.mjs';
 const res=()=>({status(n){this.code=n;return this;},setHeader(){},end(s){this.body=JSON.parse(s);}});
 test('product metadata does not turn missing photos into the product page URL',()=>{

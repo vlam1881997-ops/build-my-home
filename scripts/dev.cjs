@@ -7,7 +7,7 @@ http.createServer(async(req,res)=>{
   res.status=n=>{res.statusCode=n;return res;};
   try{
     if(/^\/api\/[a-z][a-z0-9-]*$/.test(route)){
-      const file=path.join(root,route+'.mjs');if(!fs.existsSync(file)){res.writeHead(404);return res.end('Not found');}
+      const file=path.join(root,(['/api/ai-health','/api/material-catalog','/api/material-search'].includes(route)?'/api/ai':route)+'.mjs');if(!fs.existsSync(file)){res.writeHead(404);return res.end('Not found');}
       const mod=await import(pathToFileURL(file));return await mod.default(req,res);
     }
     const file=path.resolve(dist,'.'+decodeURIComponent(route==='/'?'/index.html':route));
