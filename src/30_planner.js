@@ -470,7 +470,7 @@ BMH.edgeMoveCandidate = (originalRooms,id,side,delta) => {
   return BMH.layoutValid(rooms)?rooms:null;
 };
 BMH.svgPoint = (e,svg) => {
-  try{const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const ctm=svg.getScreenCTM();if(ctm)return pt.matrixTransform(ctm.inverse());}catch(_){}
+  try{const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const ctm=(svg.querySelector?.('#planDrawing')||svg).getScreenCTM();if(ctm)return pt.matrixTransform(ctm.inverse());}catch(_){}
   const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;return {x:vb.x+(e.clientX-r.left)*vb.width/Math.max(1,r.width),y:vb.y+(e.clientY-r.top)*vb.height/Math.max(1,r.height)};
 };
 BMH.openingFits = (candidate,ignoreId=null) => {

@@ -9,6 +9,9 @@ export default function handler(req,res){
     ok:true,
     aiConfigured:!!gemini.key||openai,
     geminiConfigured:!!gemini.key,
+    mediaScanConfigured:!!gemini.key,
+    imageConfigured:!!gemini.key&&process.env.GEMINI_IMAGE_ENABLED!=='false',
+    placesConfigured:!!String(process.env.BMH_GOOGLE_PLACES_API_KEY||'').trim(),
     aiProvider:gemini.key?'Gemini':openai?'OpenAI':'Chưa cấu hình',
     aiModel:gemini.key?gemini.primary:openai?String(process.env.OPENAI_MODEL||'gpt-5.6-terra'):'',
     // Account and payment routes are not deployed in this build. Do not claim

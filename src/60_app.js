@@ -161,7 +161,7 @@ BMH.updateMapContext = () => {
 };
 BMH.updateLotOverlay = () => {
   const s=BMH.state.project.site,path=BMH.lotPath(s),drawing=BMH.state.ui.location?.drawingLot;
-  if(BMH.mapEngine==='leaflet'&&window.L&&BMH.map){if(BMH.mapLot)BMH.map.removeLayer(BMH.mapLot);BMH.mapLot=null;if(s.showLotOverlay&&path.length>=2){BMH.mapLot=path.length>=3?L.polygon(path.map(x=>[x.lat,x.lng]),{color:drawing?'#d25d3f':'#c16f50',weight:drawing?3:2,fillColor:'#d99070',fillOpacity:path.length>=3?.18:0,dashArray:drawing?'4 4':'7 5'}).addTo(BMH.map):L.polyline(path.map(x=>[x.lat,x.lng]),{color:'#d25d3f',weight:3,dashArray:'4 4'}).addTo(BMH.map);}}
+  if(BMH.mapEngine==='leaflet'&&window.L&&BMH.map){if(BMH.mapLot)BMH.map.removeLayer(BMH.mapLot);BMH.mapLot=null;if(s.showLotOverlay&&path.length>=2){BMH.mapLot=path.length>=3?L.polygon(path.map(x=>[x.lat,x.lng]),{color:drawing?'#d25d3f':'#c16f50',weight:drawing?3:2,interactive:false,fillColor:'#d99070',fillOpacity:path.length>=3?.18:0,dashArray:drawing?'4 4':'7 5'}).addTo(BMH.map):L.polyline(path.map(x=>[x.lat,x.lng]),{color:'#d25d3f',weight:3,dashArray:'4 4'}).addTo(BMH.map);}}
   if(BMH.mapEngine==='google'&&window.google?.maps&&BMH.map){BMH.mapLot?.setMap?.(null);BMH.mapLot=null;if(s.showLotOverlay&&path.length>=2){if(path.length>=3)BMH.mapLot=new google.maps.Polygon({paths:path,strokeColor:drawing?'#d25d3f':'#b76246',strokeOpacity:1,strokeWeight:drawing?3:2,fillColor:'#d98d70',fillOpacity:.2,map:BMH.map,clickable:false});else BMH.mapLot=new google.maps.Polyline({path:path,strokeColor:'#d25d3f',strokeOpacity:1,strokeWeight:3,map:BMH.map,clickable:false});}}
   BMH.updateMapContext();
 };
@@ -204,7 +204,7 @@ BMH.importParcelGeoJSON = async file => {
 };
 BMH.applyCoordinates = (lat,lng,source='Tọa độ tùy chỉnh',{snapRegion=false,render=false}={}) => {
   lat=Number(lat);lng=Number(lng);if(!Number.isFinite(lat)||!Number.isFinite(lng))return false;
-  const s=BMH.state.project.site; s.lat=lat;s.lng=lng;s.geoSource=source;
+  const s=BMH.state.project.site; s.lat=lat;s.lng=lng;s.geoSource=source;s.mapCenter={lat,lng};
   s.pinAddressNeedsReview=!/^(Địa chỉ ·|Dữ liệu vùng)/.test(source);
   BMH.siteIntelScanId=(BMH.siteIntelScanId||0)+1;
   BMH.siteIntelController?.abort();BMH.siteIntelController=null;BMH.siteIntelLoading=false;
@@ -320,13 +320,14 @@ BMH.renderSiteIntelMarkers=()=>{
 BMH.initLeafletMap = async (initId) => {
   const s=BMH.state.project.site;if(!BMH.$('#map'))return false;const L=await BMH.ensureLeaflet();
   const el=BMH.$('#map');if(!L||!el||BMH.state.ui.step!==2||initId!==BMH.mapInitId)return false;
-  BMH.destroyMap();BMH.mapEngine='leaflet';BMH.map=L.map(el,{zoomControl:true,preferCanvas:true,attributionControl:true,scrollWheelZoom:true,doubleClickZoom:true}).setView([s.lat,s.lng],s.mapZoom||17);
+  BMH.destroyMap();BMH.mapEngine='leaflet';BMH.map=L.map(el,{zoomControl:true,preferCanvas:true,attributionControl:true,scrollWheelZoom:true,doubleClickZoom:true,maxZoom:22,wheelDebounceTime:80,wheelPxPerZoomLevel:120}).setView([s.mapCenter?.lat??s.lat,s.mapCenter?.lng??s.lng],s.mapZoom||17);
   el.querySelector('.bmh-pin-capture')?.remove();
   el.classList.remove('fallback-only');
+BMH.map.on('moveend',()=>{const c=BMH.map.getCenter();s.mapCenter={lat:c.lat,lng:c.lng};});
 const sources=BMH.mapTileConfig(s.mapStyle);let sourceIndex=0,activeLayer=null,tileErrors=0,loaded=false,labelLayer=null,stallTimer=null;
 const clearStall=()=>{if(stallTimer){clearTimeout(stallTimer);stallTimer=null;}};
 const setLoaded=()=>{loaded=true;clearStall();el.classList.remove('map-loading','fallback-only');};
-const loadTiles=()=>{clearStall();if(activeLayer)BMH.map.removeLayer(activeLayer);if(labelLayer){BMH.map.removeLayer(labelLayer);labelLayer=null;}const [url,attr]=sources[sourceIndex]||BMH.mapTileConfig('roadmap')[0];tileErrors=0;loaded=false;const layer=L.tileLayer(url,{maxZoom:20,maxNativeZoom:s.mapStyle==='terrain'&&sourceIndex===0?17:sourceIndex>0||s.mapStyle==='roadmap'?19:undefined,attribution:attr,keepBuffer:4,updateWhenIdle:false,crossOrigin:true}).addTo(BMH.map);activeLayer=layer;if(s.mapStyle==='hybrid'&&sourceIndex===0){labelLayer=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Labels © Esri',opacity:.9}).addTo(BMH.map);}const fail=()=>{if(activeLayer!==layer)return;if(sourceIndex<sources.length-1){sourceIndex++;loadTiles();BMH.toast('Ảnh vệ tinh/địa hình chưa tải được; đang dùng bản đồ đường phố.');}else {activeLayer=null;BMH.map.removeLayer(layer);if(labelLayer){BMH.map.removeLayer(labelLayer);labelLayer=null;}BMH.renderMapIframeFallback('Không tải được lớp bản đồ nền trực tuyến. Bạn vẫn có thể đặt ghim và nhập địa chỉ/GPS.');}};layer.on('load',()=>{if(activeLayer===layer)setLoaded();});layer.on('tileerror',()=>{if(activeLayer!==layer)return;tileErrors++;if(tileErrors>=4)fail();});stallTimer=setTimeout(()=>{if(activeLayer===layer&&!loaded)fail();},6500);};loadTiles();
+const loadTiles=()=>{clearStall();if(activeLayer)BMH.map.removeLayer(activeLayer);if(labelLayer){BMH.map.removeLayer(labelLayer);labelLayer=null;}const [url,attr]=sources[sourceIndex]||BMH.mapTileConfig('roadmap')[0];tileErrors=0;loaded=false;const layer=L.tileLayer(url,{maxZoom:22,maxNativeZoom:s.mapStyle==='terrain'&&sourceIndex===0?17:19,attribution:attr,keepBuffer:4,updateWhenIdle:false,crossOrigin:true}).addTo(BMH.map);activeLayer=layer;if(s.mapStyle==='hybrid'&&sourceIndex===0){labelLayer=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:22,maxNativeZoom:19,attribution:'Labels © Esri',opacity:.9}).addTo(BMH.map);}const fail=()=>{if(activeLayer!==layer)return;if(sourceIndex<sources.length-1){sourceIndex++;loadTiles();BMH.toast('Ảnh vệ tinh/địa hình chưa tải được; đang dùng bản đồ đường phố.');}else {activeLayer=null;BMH.map.removeLayer(layer);if(labelLayer){BMH.map.removeLayer(labelLayer);labelLayer=null;}BMH.renderMapIframeFallback('Không tải được lớp bản đồ nền trực tuyến. Bạn vẫn có thể đặt ghim và nhập địa chỉ/GPS.');}};layer.on('load',()=>{if(activeLayer===layer)setLoaded();});layer.on('tileerror',()=>{if(activeLayer!==layer)return;tileErrors++;if(tileErrors>=4)fail();});stallTimer=setTimeout(()=>{if(activeLayer===layer&&!loaded)fail();},6500);};loadTiles();
   BMH.mapMarker=L.marker([s.lat,s.lng],{draggable:true,autoPan:true,icon:BMH.sitePinLeafletIcon(L),zIndexOffset:1000}).addTo(BMH.map).bindPopup('<b>Vị trí khu đất</b><br>'+BMH.esc(s.district||'')+' · '+BMH.esc(s.province));
   BMH.mapMarker.on('dragend',ev=>{const ll=ev.target.getLatLng();BMH.applyCoordinates(ll.lat,ll.lng,'Ghim bản đồ');});
   BMH.map.on('click',ev=>BMH.handleMapClick(ev.latlng.lat,ev.latlng.lng,'Chọn trên bản đồ'));
@@ -452,9 +453,9 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-room-delete]')){const id=BMH.state.ui.planner.selected;if(BMH.isRoomLocked(id))return BMH.toast('Phòng hoặc tầng đang khóa.');BMH.pushPlanHistory();BMH.state.project.plan.rooms=BMH.state.project.plan.rooms.filter(r=>r.id!==id);BMH.state.project.plan.openings=BMH.state.project.plan.openings.filter(o=>o.roomId!==id);BMH.state.ui.planner.selected=BMH.floorRooms()[0]?.id||null;BMH.save();BMH.render();return;}
   if(e.target.closest('[data-plan-undo]')){BMH.undoPlan();return;}
   if(e.target.closest('[data-plan-redo]')){BMH.redoPlan();return;}
-  const zoomBtn=e.target.closest('[data-planner-zoom]');if(zoomBtn){const ui=BMH.state.ui.planner;ui.zoom=BMH.clamp(ui.zoom+(zoomBtn.dataset.plannerZoom==='in'?.15:-.15),.75,2.5);BMH.save();BMH.render();return;}
+  const zoomBtn=e.target.closest('[data-planner-zoom]');if(zoomBtn){const ui=BMH.state.ui.planner;BMH.zoomPlanner?.(zoomBtn.dataset.plannerZoom==='in'?1.15:1/1.15);return;}
   if(e.target.closest('[data-plan-clean]')){const ui=BMH.state.ui.planner;for(const key of ['showFeng','showBelow','showStructure','showEnvironment','showCirculation','showSectionLine','showClimate','showEnvelope'])ui[key]=false;ui.showFurniture=true;ui.showDimensions=true;ui.zoom=1;BMH.save();BMH.render();BMH.toast('Đã hiển thị bản vẽ kỹ thuật sạch với kích thước, tường và nội thất.');return;}
-  if(e.target.closest('[data-planner-fit]')){BMH.state.ui.planner.zoom=1;BMH.save();BMH.render();return;}
+  if(e.target.closest('[data-planner-fit]')){BMH.fitPlanner?.();return;}
   if(e.target.closest('[data-planner-layout]')){const ui=BMH.state.ui.planner;ui.layout=ui.layout==='wide'?'compact':'wide';if(ui.layout==='wide'){ui.toolsOpen=false;ui.inspectorOpen=false;}BMH.save();BMH.render();return;}
   const plannerPanel=e.target.closest('[data-planner-panel]');if(plannerPanel){const ui=BMH.state.ui.planner,key=plannerPanel.dataset.plannerPanel==='tools'?'toolsOpen':'inspectorOpen';ui[key]=!ui[key];if(ui[key]&&ui.layout==='wide'){const other=key==='toolsOpen'?'inspectorOpen':'toolsOpen';ui[other]=false;}BMH.save();BMH.render({preserveScroll:true});return;}
   if(e.target.closest('[data-planner-legend]')){const ui=BMH.state.ui.planner;ui.legendOpen=!ui.legendOpen;BMH.save();BMH.render({preserveScroll:true});return;}
@@ -541,7 +542,7 @@ BMH.clearRoomDragPreview = () => {document.querySelectorAll('#plannerSvg .drag-p
 
 document.addEventListener('wheel',e=>{
   if(BMH.state.ui.step!==4||!e.target.closest?.('.v6-plan-canvas, .planner-canvas-stage')||!BMH.$('#plannerSvg'))return;
-  e.preventDefault();const ui=BMH.state.ui.planner,delta=e.deltaY>0?-.1:.1,next=BMH.clamp(Math.round(((ui.zoom||1)+delta)*10)/10,.75,2.5);if(next===ui.zoom)return;ui.zoom=next;BMH.save();BMH.render({preserveScroll:true});
+  e.preventDefault();BMH.zoomPlanner?.(Math.exp(-BMH.clamp(e.deltaY,-100,100)*.002),e);
 },{passive:false});
 
 document.addEventListener('pointerdown',e=>{

@@ -1,5 +1,6 @@
+require('./load-env.cjs')();
 const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..'),src=path.join(root,'src'),dist=path.join(root,'dist');
-const jsFiles=['00_boot.js','01_vn34_catalog.js','15_data_engine.js','10_state.js','17_cloud_payment.js','18_ai_copilot.js','19_gemini_scan.js','20_calc.js','30_planner.js','35_dossier.js','40_exports.js','44_house_styles.js','45_studio3d.js','50_screens.js','60_app.js','70_v60_product_ui.js'];
+const jsFiles=['00_boot.js','01_vn34_catalog.js','15_data_engine.js','10_state.js','17_cloud_payment.js','18_ai_copilot.js','19_gemini_scan.js','20_calc.js','30_planner.js','35_dossier.js','40_exports.js','44_house_styles.js','45_studio3d.js','50_screens.js','60_app.js','70_v60_product_ui.js','75_completion.js'];
 const banner=`/* Build My Home Official V6.2.0 Connected Project Preview
  * Existing calculation, Gemini, planner, 3D and dossier engines are retained.
  * V6.1 fixes the production gaps found in the screen recording: blank map, portrait planner fit, image-only 3D, tiny text and broken bank logos.

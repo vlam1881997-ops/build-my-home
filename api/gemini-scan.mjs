@@ -1,10 +1,12 @@
-import {send,jsonBody,apiError} from '../server/_lib.mjs';
-import {geminiGenerate,geminiDeleteFile,geminiEnv,geminiRateLimit,validGeminiFileUri} from '../server/_gemini.mjs';
+import {send,jsonBody,apiError} from './_lib.mjs';
+import {geminiGenerate,geminiDeleteFile,geminiEnv,geminiRateLimit,validGeminiFileUri} from './_gemini.mjs';
 
-const SCAN_SCHEMA={
+export const maxDuration=180;
+export const SCAN_SCHEMA={
   type:'object',additionalProperties:false,
   properties:{
     headline:{type:'string'},summary:{type:'string'},confidence:{type:'integer',minimum:0,maximum:100},
+    drawing_dimensions:{type:'array',maxItems:32,items:{type:'object',properties:{label:{type:'string'},value_m:{type:'number'},evidence:{type:'string'},confidence:{type:'integer'}},required:['label','value_m','evidence','confidence']}},
     source_type:{type:'string',enum:['image','video','drawing','document','unknown']},
     location_hint:{type:'string'},
     building:{type:'object',additionalProperties:false,properties:{
@@ -36,7 +38,7 @@ export default async function handler(req,res){
     const userIntent=String(body.intent||'reference').slice(0,30);
     const project=cleanProject(body.project||{});
     const mediaPart={file_data:{file_uri:fileUri,mime_type:mime}};
-    if(isVideo)mediaPart.media_processing='AGENTIC';
+    if(isVideo)mediaPart.media_processing={type:'static',fps:1};
     const prompt=`Phân tích tệp này cho Build My Home, một ứng dụng hỗ trợ chủ nhà Việt Nam lập phương án xây nhà. Mục đích người dùng: ${userIntent==='my_home'?'đây là nhà/khu đất của họ cần bóc tách dữ liệu':'đây là nhà/bản vẽ tham khảo để lấy ý tưởng'}.
 
 YÊU CẦU BẮT BUỘC:
@@ -45,11 +47,12 @@ YÊU CẦU BẮT BUỘC:
 3) Không bịa kích thước khi không có tỷ lệ. Nếu chỉ ước lượng, confidence thấp và ghi assumptions.
 4) Không kết luận kích thước móng/cọc, thép, kết cấu chịu lực hay an toàn thi công từ video/ảnh. Chỉ nêu điều cần khảo sát/xác minh.
 5) Nếu nhận diện phong cách/vật liệu, mô tả ở mức đủ để engine 3D/vật liệu dùng làm brief.
-6) Trả JSON đúng schema, tiếng Việt.
+6) Với bản vẽ/PDF: đọc tên phòng, số tầng, chuỗi kích thước, đơn vị mm/m, số trang. drawing_dimensions chỉ chứa kích thước đọc được, đổi mm sang m; nếu không đọc được để rỗng. Không lấy kích thước dự án hiện tại để điền cho bản vẽ.
+7) Trả JSON đúng schema, tiếng Việt.
 
 Dữ liệu dự án hiện tại để đối chiếu, KHÔNG được coi là dữ kiện nhìn thấy trong media: ${JSON.stringify(project)}`;
-    const {result,model,apiVersion,usage}=await geminiGenerate({parts:[mediaPart,{text:prompt}],systemInstruction:'Bạn là Gemini Visual Scan Engine của Build My Home. Ưu tiên bằng chứng, mức tin cậy và sự an toàn kỹ thuật hơn sự tự tin giả.',schema:SCAN_SCHEMA,maxOutputTokens:3200,thinkingLevel:'medium',timeoutMs:isVideo?120000:70000});
-    return send(res,200,{ok:true,provider:'gemini',model,apiVersion,autoUpgrade:geminiEnv().auto,usage,result});
+    const {result,model,apiVersion,usage,interactionId}=await geminiGenerate({parts:[mediaPart,{text:prompt}],systemInstruction:'Bạn là Gemini Visual Scan Engine của Build My Home. Ưu tiên bằng chứng, mức tin cậy và sự an toàn kỹ thuật hơn sự tự tin giả.',schema:SCAN_SCHEMA,maxOutputTokens:3200,thinkingLevel:'medium',timeoutMs:isVideo?120000:70000});
+    return send(res,200,{ok:true,provider:'gemini',model,apiVersion,autoUpgrade:geminiEnv().auto,usage,interactionId,result});
   }catch(err){apiError(res,err);}
   finally{if(fileName&&geminiEnv().deleteUploads)await geminiDeleteFile(fileName);}
 }
