@@ -109,3 +109,9 @@ BMH.screen1=()=>completionScreen1().replace('<button class="step01-analyze ', '<
 BMH.SCREENS=[BMH.screen1,BMH.screen3,BMH.screen4,BMH.screen5,BMH.screen6,BMH.screen7,BMH.screen8,BMH.screen2,BMH.screen9,BMH.screen10];
 
 BMH.render({preserveScroll:true});
+
+// Keep the drawing toolbar available so fullscreen can be exited on touch devices.
+const completionScreen5=BMH.screen5;
+BMH.screen5=()=>completionScreen5()+'<style>.v6-plan-main:fullscreen{background:#fff;padding:16px;overflow:auto;border-radius:0;display:flex;flex-direction:column;height:100vh}.v6-plan-main:fullscreen .v72-plan-intro{display:none}.v6-plan-main:fullscreen .v6-plan-canvas{height:calc(100vh - 150px);min-height:0;flex:1}.v6-plan-main:fullscreen .planner-svg{height:100%;width:100%}</style>';
+BMH.SCREENS[3]=BMH.screen5;
+document.addEventListener('click',e=>{if(!e.target.closest('[data-planner-fullscreen]'))return;e.stopImmediatePropagation();if(document.fullscreenElement){document.exitFullscreen?.();return;}const card=document.querySelector('.v6-plan-main');card?.requestFullscreen?.().catch(()=>BMH.toast('Trình duyệt không cho phép toàn màn hình.'));},true);
