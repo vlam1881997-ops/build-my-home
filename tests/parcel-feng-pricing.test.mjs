@@ -239,6 +239,7 @@ test('planner shows the active tool, position controls and placement feedback',(
     floorRooms:()=>[room],designReview:()=>({overall:78}),planSvg:()=>'<svg id="plannerSvg"></svg>',plannerIssues:()=>[{sev:'warn',text:'Cần một lối đi'}],
     roomPlacementReview:()=>({code:'mid',status:'CÂN NHẮC',score:68,name:'Phòng ngủ',sector:'Đông',notes:['Kiểm tra cửa sổ']}),
     isFloorLocked:()=>false,isRoomLocked:()=>false,v6Title:()=>'',v6PanelTitle:()=>'',v6Kpi:()=>'',v6Esc:x=>String(x),num:n=>String(n)};
+  vm.runInNewContext(fs.readFileSync(new URL('../src/44_house_styles.js',import.meta.url),'utf8'),{BMH,document:{addEventListener(){}}});
   vm.runInNewContext(fragment,{BMH,Number,Array,Math});
   const html=BMH.screen5();
   assert.match(html,/data-plan-tool="select" class="active"/);

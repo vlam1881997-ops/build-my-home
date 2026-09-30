@@ -471,7 +471,7 @@ document.addEventListener('click',e=>{
   const focusBtn=e.target.closest('[data-scene-focus-btn]');if(focusBtn){BMH.state.ui.sceneFocus=focusBtn.dataset.sceneFocusBtn||'all';BMH.save();BMH.render();return;}
   if(e.target.closest('[data-studio3d-reset]')){BMH.resetStudio3D?.();return;}
   if(e.target.closest('[data-cinematic-render]')){BMH.generateCinematicRender?.();return;}
-  if(e.target.closest('[data-render-download]')){const url=BMH.cinematicRender?.dataUrl;if(!url)return BMH.toast('Chưa có ảnh phối cảnh của phương án này.');const a=document.createElement('a');a.href=url;a.download='Build-My-Home-phoi-canh.jpg';document.body.append(a);a.click();a.remove();return;}
+  if(e.target.closest('[data-render-download]')){const url=BMH.cinematicRender?.views?.[BMH.cinematicSignature()];if(!url)return BMH.toast('Chưa có ảnh phối cảnh của góc nhìn này.');const a=document.createElement('a');a.href=url;a.download='Build-My-Home-phoi-canh.jpg';document.body.append(a);a.click();a.remove();return;}
   const wear=e.target.closest('[data-wear]');if(wear){BMH.state.project.wearYear=Number(wear.dataset.wear);BMH.save();BMH.render();return;}
   const copy=e.target.closest('[data-copy]');if(copy){navigator.clipboard?.writeText(copy.dataset.copy).then(()=>BMH.toast('Đã sao chép.')).catch(()=>BMH.toast('Không thể sao chép tự động.'));return;}
   if(e.target.closest('[data-dev-pay]')&&BMH.DEV){BMH.state.access.paid=!BMH.state.access.paid;BMH.state.access.source=BMH.state.access.paid?'dev-local':'none';BMH.state.access.paidAt=BMH.state.access.paid?new Date().toISOString():null;BMH.state.access.verifiedAt=BMH.state.access.paid?new Date().toISOString():null;BMH.save();BMH.render();return;}

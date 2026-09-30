@@ -117,6 +117,9 @@ test('image render accepts only a bounded image and keeps plan details in the pr
   assert.match(request.prompt,/2 floors/);
   assert.match(request.prompt,/Gạch nhám/);
   assert.match(request.prompt,/Phòng khách/);
+  const interior=renderRequestPayload({image,project:{site:{floors:2},view:{kind:'room',roomName:'Phòng ngủ chính',floor:1},rooms:[{name:'Phòng ngủ chính',floor:1,x:0,y:4,w:4,h:5}]}});
+  assert.match(interior.prompt,/interior of Phòng ngủ chính/);
+  assert.match(interior.prompt,/4m x 5m/);
   const classical=renderRequestPayload({image,project:{site:{floors:2,width:13,depth:6},style:'Tân cổ điển'}});
   assert.match(classical.prompt,/dark tiled hip roof/);
   assert.match(classical.prompt,/13m x 6m/);
@@ -167,6 +170,15 @@ test('cinematic capture completes even when the loading view disposes WebGL',asy
   assert.equal(renderCount,2);
   assert.equal(BMH.cinematicRender.dataUrl,'data:image/png;base64,'+'B'.repeat(128));
   assert.equal(BMH.cinematicRender.signature,BMH.cinematicSignature());
+});
+
+test('3D plan shares adjoining walls and cuts the specified doorway',()=>{
+  const BMH={};
+  vm.runInNewContext(fs.readFileSync(new URL('../src/45_studio3d.js',import.meta.url),'utf8'),{BMH,window:{},JSON,Math,Number,Object,Date});
+  const plan={rooms:[{id:'a',floor:0,x:0,y:0,w:4,h:4},{id:'b',floor:0,x:4,y:0,w:3,h:4}],openings:[{roomId:'a',floor:0,side:'east',kind:'door',offset:.5,width:.9}]};
+  const shared=BMH.scenePlanGeometry(plan,0).walls.filter(w=>!w.horizontal&&w.axis===4);
+  assert.equal(shared.filter(w=>w.kind==='door').length,1);
+  assert.ok(Math.abs(shared.filter(w=>w.kind==='wall').reduce((sum,w)=>sum+w.b-w.a,0)-3.1)<.001);
 });
 
 test('a new construction dossier starts at zero and records actual spending by stage',()=>{
@@ -226,4 +238,23 @@ test('dossier ZIP contains the original construction evidence bytes',async()=>{
     cursor=start+size;
   }
   assert.equal(found,true);
+});
+
+
+test('house style survives reload, preserves plan and SKU, and invalidates the old render',()=>{
+  const {BMH}=stateEngine();
+  const context={BMH,document:{addEventListener(){}},window:{},console};
+  vm.runInNewContext(fs.readFileSync(new URL('../src/44_house_styles.js',import.meta.url),'utf8'),context);
+  vm.runInNewContext(fs.readFileSync(new URL('../src/45_studio3d.js',import.meta.url),'utf8'),context);
+  const plan=JSON.stringify(BMH.state.project.plan),materials=JSON.stringify(BMH.state.project.materials);
+  const before=BMH.cinematicSignature();
+  assert.equal(BMH.selectHouseStyle('indochine'),true);
+  assert.notEqual(BMH.cinematicSignature(),before);
+  assert.equal(JSON.stringify(BMH.state.project.plan),plan);
+  assert.equal(JSON.stringify(BMH.state.project.materials),materials);
+  assert.equal(stateEngine(BMH.state).BMH.state.project.style,'Đông Dương · Indochine');
+  assert.equal(BMH.selectHouseStyle('invalid'),false);
+  const payload=renderRequestPayload({image:'data:image/jpeg;base64,'+'A'.repeat(120),project:{style:BMH.state.project.style,styleDescription:BMH.houseStyle().description}});
+  assert.match(payload.prompt,/Đông Dương/);
+  assert.match(payload.prompt,/cửa chớp/);
 });

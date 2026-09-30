@@ -1,5 +1,5 @@
 const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..'),src=path.join(root,'src'),dist=path.join(root,'dist');
-const jsFiles=['00_boot.js','01_vn34_catalog.js','15_data_engine.js','10_state.js','17_cloud_payment.js','18_ai_copilot.js','19_gemini_scan.js','20_calc.js','30_planner.js','35_dossier.js','40_exports.js','45_studio3d.js','50_screens.js','60_app.js','70_v60_product_ui.js'];
+const jsFiles=['00_boot.js','01_vn34_catalog.js','15_data_engine.js','10_state.js','17_cloud_payment.js','18_ai_copilot.js','19_gemini_scan.js','20_calc.js','30_planner.js','35_dossier.js','40_exports.js','44_house_styles.js','45_studio3d.js','50_screens.js','60_app.js','70_v60_product_ui.js'];
 const banner=`/* Build My Home Official V6.2.0 Connected Project Preview
  * Existing calculation, Gemini, planner, 3D and dossier engines are retained.
  * V6.1 fixes the production gaps found in the screen recording: blank map, portrait planner fit, image-only 3D, tiny text and broken bank logos.
@@ -25,6 +25,10 @@ fs.writeFileSync(path.join(dist,'styles.css'),css);
 const leafletDist=path.join(root,'node_modules','leaflet','dist');
 if(!fs.existsSync(path.join(leafletDist,'leaflet.js')))throw Error('Leaflet 1.9.4 is required. Run npm install before building.');
 fs.cpSync(leafletDist,path.join(dist,'vendor','leaflet'),{recursive:true});
+const threeModule=path.join(root,'node_modules','three','build','three.module.js');
+if(!fs.existsSync(threeModule))throw Error('Three.js 0.160.1 is required. Run npm install before building.');
+fs.mkdirSync(path.join(dist,'vendor','three'),{recursive:true});
+fs.copyFileSync(threeModule,path.join(dist,'vendor','three','three.module.js'));
 let html=fs.readFileSync(path.join(src,'index.html'),'utf8');
 if(!html.includes('<!-- BMH_APP_INLINE -->'))throw Error('Missing BMH_APP_INLINE marker');
 const safeJs=js.replace(/<\/script/gi,'<\\/script');
