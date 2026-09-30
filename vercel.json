@@ -55,6 +55,10 @@
     {
       "source": "/api/material-search",
       "destination": "/api/ai?operation=materials"
+    },
+    {
+      "source": "/api/material-image",
+      "destination": "/api/ai?operation=material-image"
     }
   ]
 }

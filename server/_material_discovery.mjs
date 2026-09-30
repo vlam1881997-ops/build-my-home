@@ -24,6 +24,7 @@ export async function discoverOfficialMaterials(category){
  for(let start=0;start<urls.length;start+=6){result.push(...await Promise.all(urls.slice(start,start+6).map(async url=>{
   try{const p=pages.find(p=>p?.url===url)||await publicPage(url),m=pageMetadata(p.html,p.url),title=m.name.replace(/\s*[|–-]\s*(?:Dongtam Group|Jotun.*|Eurowindow.*)$/i,'').trim();if(!title||!m.imageUrl)return null;
    const sku=m.sku||(/dongtam/.test(url)?title.match(/\b\d{4}[A-Z0-9-]+\b/i)?.[0]||'':'');
+   if(category==='floor'&&!sku)return null;
    return {id:'source-'+createHash('sha256').update(p.url).digest('hex').slice(0,16),category,brand:/jotun/.test(url)?'Jotun':/eurowindow/.test(url)?'Eurowindow':'Đồng Tâm',sku,name:title,spec:m.description.slice(0,180),productUrl:p.url,imageUrl:m.imageUrl,price:m.price,unit:category==='floor'?'m²':category==='roof'?'viên':category==='door'?'m²':'theo quy cách',phone:'',supplier:/jotun/.test(url)?'Jotun':/eurowindow/.test(url)?'Eurowindow':'Đồng Tâm',address:'',priceDate:'',verifiedAt:new Date().toISOString(),photoEvidence:'source-page',source:p.url,priceStatus:m.price?'public-listed':'request-quote'};
   }catch{return null;}
  })));}return result.filter(Boolean);

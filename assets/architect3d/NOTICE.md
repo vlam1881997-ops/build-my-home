@@ -7,3 +7,5 @@ Selected models only; dimensions use upstream verified scale 200 cm/unit.
 Wood/wall textures: generated in Build My Home.
 Draco decoder: upstream public/draco/README.md retains its attribution.
 Manual build: npm install --prefix /tmp/bmh-architect-build --ignore-scripts esbuild three@0.185.1 bezier-js@6.1.4; node scripts/vendor-architect3d.cjs /path/to/pinned/architect3d /tmp/bmh-architect-build/node_modules
+
+Additional stairStep.glb is generated unit geometry by Build My Home, used for parametric bậc and chiếu nghỉ; not part of Kenney assets.

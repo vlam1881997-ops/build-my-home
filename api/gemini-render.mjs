@@ -23,7 +23,7 @@ export function renderRequestPayload(body={}){
   const project=body.project&&typeof body.project==='object'?body.project:{},site=project.site||{},materials=project.materials||{};
   const floors=Math.max(1,Math.min(8,Math.round(Number(site.floors)||1))),width=Math.max(2,Math.min(30,Number(site.width)||5)),depth=Math.max(4,Math.min(80,Number(site.depth)||20));
   const selected=Object.entries(materials.choices||{}).slice(0,16).map(([type,id])=>`${cut(type,30)}: ${cut(id,60)}`);
-  const rooms=(Array.isArray(project.rooms)?project.rooms:[]).slice(0,40).map(x=>`${cut(x.name,40)} tầng ${Math.max(1,Math.min(floors,(Number(x.floor)||0)+1))}, vị trí (${Number(x.x)||0},${Number(x.y)||0}), ${Number(x.w)||0}m x ${Number(x.h)||0}m`).join('; ');
+  const rooms=(Array.isArray(project.rooms)?project.rooms:[]).slice(0,40).map(x=>`[${cut(x.id,40)}] ${cut(x.name,40)} tầng ${Math.max(1,Math.min(floors,(Number(x.floor)||0)+1))}, vị trí (${Number(x.x)||0},${Number(x.y)||0}), ${Number(x.w)||0}m x ${Number(x.h)||0}m`).join('; ');
   const openings=(project.openings||[]).slice(0,80).map(o=>`${cut(o.roomId,40)}: ${cut(o.kind,12)} ${cut(o.side,12)}, vị trí ${Number(o.offset)||0}, rộng ${Number(o.width)||0}m, cao ${Number(o.height)||2.1}m`).join('; ');
   const style=cut(project.style,100)||'modern';
   const classical=/tân cổ điển|tan co dien|neoclassic|classical|cổ điển|co dien/i.test(style);

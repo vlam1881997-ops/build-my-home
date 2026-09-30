@@ -27,7 +27,7 @@ export function pageMetadata(html,url,sku=''){
   const p=products.find(x=>String(x.sku||x.name||'').toLowerCase().includes(sku.toLowerCase()))||products[0]||{},image=Array.isArray(p.image)?p.image[0]:typeof p.image==='object'?p.image?.url:p.image;
   let img=image||meta['og:image']||'';
   // A product-specific inline image is preferred over generic site branding.
-  if(!img||/logo|productholder|default|favicon/i.test(img)){
+  if(sku||!img||/logo|productholder|default|favicon/i.test(img)){
     const matching=(html.match(/<img\b[^>]*>/gi)||[]).find(tag=>sku&&tag.toLowerCase().includes(sku.toLowerCase())&&!/logo|drawing|ban-ve|bản vẽ/i.test(tag));
     const m=matching?.match(/(?:data-src|src)=["']([^"']+)["']/i);if(m)img=unescapeHtml(m[1]);
   }
