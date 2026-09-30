@@ -1,12 +1,12 @@
 BMH.defaultState = () => ({
   version: BMH.VERSION,
-  ui: {step:1, onboardingComplete:false, onboardingStep:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', location:{drawingLot:false}, planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',layout:'wide',textSize:'large',toolsOpen:false,inspectorOpen:false,legendOpen:true,showFurniture:true,showDimensions:true,showFeng:false,showBelow:false,showStructure:false,showEnvironment:false,showCirculation:false,showSectionLine:false,showClimate:false,showEnvelope:false}, sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
+  ui: {step:1, onboardingComplete:false, onboardingStep:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', materialSearchLocal:false, location:{drawingLot:false}, planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',layout:'wide',textSize:'large',toolsOpen:false,inspectorOpen:false,legendOpen:true,showFurniture:true,showDimensions:true,showFeng:false,showBelow:false,showStructure:false,showEnvironment:false,showCirculation:false,showSectionLine:false,showClimate:false,showEnvelope:false}, architectureEngine:'existing', sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
   access: {paid:false, source:'none', paidAt:null, verifiedAt:null, orderCode:null},
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại', briefIdea:'',
     brief:{provider:'',model:'',notice:'',updatedAt:'',result:{},aiSuggestions:{},userRequirements:{}},
     sourceRefs:[],
-    site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',pinAddressNeedsReview:false,mapEngine:'free',mapStyle:'hybrid',mapZoom:17,showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotSource:'dimensions',lotPoints:[],deedArea:0,deedReference:'',frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
+    site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',pinAddressNeedsReview:false,mapEngine:'free',mapStyle:'hybrid',mapZoom:17,mapCenter:{},showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotSource:'dimensions',lotPoints:[],useParcelGeometry:false,frontEdge:0,floorHeight:3.4,slabThickness:.14,ceilingDrop:.2,deedArea:0,deedReference:'',frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
     siteIntelligence:{key:'',status:'idle',fetchedAt:'',elevation_m:null,flood:{level:'Chưa đánh giá',score:0,note:'',waterwayDistanceKm:null,riverSignal:null},access:{level:'Chưa đánh giá',score:0,note:'',majorRoadDistanceKm:null,majorRoadName:'',majorRoadType:''},transport:{level:'Chưa đánh giá',surchargePct:0,note:''},suppliers:[],builders:[],webSuppliers:[],webBuilders:[],citations:[],sources:[],aiSummary:'',warnings:[]},
     finance:{cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,targetBudget:0,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12,rateMeta:{bankId:'VCB',status:'preset',verified:false,product:'',sourceDate:'',fetchedAt:'',provider:'',model:'',introRate:0,postRate:0,promoMonths:0,citations:[],note:''}},
     household:{ownerBirth:1988,ownerGender:'Nam',partnerEnabled:true,partnerBirth:1990,partnerGender:'Nữ',requestedSize:0,children:[{id:'c1',name:'Con 1',birth:2012,room:'Riêng'}],relatives:[{id:'p1',name:'Ba',birth:1962,mobility:'Hạn chế nhẹ'},{id:'p2',name:'Mẹ',birth:1964,mobility:'Bình thường'}]},
@@ -39,7 +39,7 @@ BMH.defaultState = () => ({
   meta:{savedAt:null}
 });
 
-BMH.DYNAMIC_STATE_PATHS=new Set(['project.aiScan.result','project.dataEngine.materialOverrides','project.dataEngine.costSources','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence']);
+BMH.DYNAMIC_STATE_PATHS=new Set(['project.site.mapCenter','project.aiScan.result','project.dataEngine.materialOverrides','project.dataEngine.costSources','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence']);
 BMH.mergeState = (base, incoming) => {
   const isPlain=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
   if(!isPlain(incoming)) return structuredClone(base);
@@ -155,11 +155,14 @@ BMH.normalizeState = () => {
   if(typeof s.pinAddressNeedsReview!=='boolean')s.pinAddressNeedsReview=!/^(Địa chỉ ·|Dữ liệu vùng)/.test(s.geoSource);
   if(!['free','google'].includes(s.mapEngine))s.mapEngine='free';
   if(!['roadmap','satellite','hybrid','terrain'].includes(s.mapStyle))s.mapStyle='hybrid';
-  s.mapZoom=BMH.clamp(Number(s.mapZoom)||17,3,21);
+  s.mapZoom=BMH.clamp(Number(s.mapZoom)||17,3,22);
   if(typeof s.showLotOverlay!=='boolean')s.showLotOverlay=true;
   if(typeof s.showClimateMap!=='boolean')s.showClimateMap=true;
   if(typeof s.showContextRings!=='boolean')s.showContextRings=true;
   if(!['rect','custom'].includes(s.lotMode))s.lotMode='rect';
+  s.useParcelGeometry=s.useParcelGeometry===true;s.frontEdge=Math.max(0,Math.floor(Number(s.frontEdge)||0));
+  s.floorHeight=BMH.clamp(Number(s.floorHeight)||3.4,2.4,6);s.slabThickness=BMH.clamp(Number(s.slabThickness)||.14,.08,.5);s.ceilingDrop=BMH.clamp(Number(s.ceilingDrop)||0,0,1);if(s.floorHeight-s.slabThickness-s.ceilingDrop<2.1)s.ceilingDrop=Math.max(0,s.floorHeight-s.slabThickness-2.1);
+  if(!['existing','architect3d'].includes(BMH.state.ui.architectureEngine))BMH.state.ui.architectureEngine='existing';
   if(!Array.isArray(s.lotPoints))s.lotPoints=[];
   s.lotPoints=s.lotPoints.filter(p=>p&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng))).slice(0,256).map(p=>({lat:Number(p.lat),lng:Number(p.lng)}));
   if(!['dimensions','drawn','geojson-user'].includes(s.lotSource))s.lotSource=s.lotMode==='custom'?'drawn':'dimensions';

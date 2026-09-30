@@ -9,7 +9,7 @@ BMH.scanState=()=>BMH.state.project.aiScan||(BMH.state.project.aiScan={sourceNam
 BMH.scanExisting=()=>{const a=BMH.scanState();return BMH.scan.result&&Object.keys(BMH.scan.result).length?BMH.scan.result:a.result&&Object.keys(a.result).length?a.result:null;};
 BMH.scanSetStage=(stage,progress)=>{BMH.scan.stage=stage;BMH.scan.progress=progress;BMH.render({preserveScroll:true});};
 BMH.scanFetchJson=async(url,opts={})=>{const r=await fetch(url,opts);let data={};try{data=await r.json();}catch(_){}if(!r.ok)throw new Error(data?.error||`HTTP ${r.status}`);return data;};
-BMH.geminiFileState=file=>String(file?.state?.name||file?.state||'ACTIVE').toUpperCase();
+BMH.geminiFileState=file=>String(file?.state?.name||file?.state||'UNKNOWN').toUpperCase();
 
 BMH.geminiUploadFile=async file=>{
   const start=await BMH.scanFetchJson('/api/gemini-upload-start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:file.name,mime_type:file.type,size:file.size})});
@@ -26,12 +26,15 @@ BMH.geminiUploadFile=async file=>{
     gfile=st.file||gfile;state=BMH.geminiFileState(gfile);tries++;
   }
   if(state==='FAILED')throw new Error('Gemini không xử lý được tệp này. Hãy thử MP4/JPG/PDF khác.');
+  if(state==='UNKNOWN')throw new Error('Gemini chưa xác nhận trạng thái tệp. Hãy quét lại.');
   if(state==='PROCESSING')throw new Error('Video vẫn đang xử lý quá lâu. Hãy thử lại sau hoặc giảm dung lượng video.');
   return gfile;
 };
 
 BMH.geminiScanFile=async(file,intent=BMH.scan.intent||'reference')=>{
   if(!file)return;
+  if(BMH.scan.busy){BMH.toast('Đang có một tệp được quét. Chờ hoàn tất rồi thử tệp tiếp theo.');return;}
+  await BMH.v6RefreshAIConfig?.({force:true,render:false});
   if(!BMH.geminiConfigured()){BMH.scan.error='Chưa có GEMINI_API_KEY. Hãy điền key ở .env.local/Vercel Environment Variables.';BMH.render({preserveScroll:true});return;}
   const ok=/^(image\/|video\/|application\/pdf$)/i.test(file.type||'');if(!ok){BMH.toast('Chỉ hỗ trợ ảnh, video và PDF.');return;}
   const maxBytes=file.type==='application/pdf'?50*1024*1024:250*1024*1024;if(file.size>maxBytes){BMH.toast(file.type==='application/pdf'?'PDF vượt 50MB. Hãy giảm dung lượng trước khi quét.':'Tệp vượt 250MB. Hãy nén video trước khi quét.');return;}
@@ -39,7 +42,7 @@ BMH.geminiScanFile=async(file,intent=BMH.scan.intent||'reference')=>{
   try{
     const gfile=await BMH.geminiUploadFile(file);BMH.scanSetStage('AI đang bóc tách phong cách, quy mô và bằng chứng…',76);
     const data=await BMH.scanFetchJson('/api/gemini-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file_uri:gfile.uri,file_name:gfile.name,mime_type:gfile.mimeType||file.type,intent,project:BMH.aiContext?BMH.aiContext():BMH.state.project})});
-    BMH.scan.result=data.result||{};BMH.scan.model=data.model||'';BMH.scanSetStage('Đã phân tích xong.',100);
+    BMH.scan.result=data.result||{};BMH.scan.model=data.model||'';BMH.scan.interactionId=data.interactionId||'';BMH.scanSetStage('Đã phân tích xong.',100);
     const a=BMH.scanState();Object.assign(a,{sourceName:file.name,mimeType:file.type,scannedAt:new Date().toISOString(),model:data.model||'',provider:'Gemini',intent,appliedAt:'',result:structuredClone(data.result||{})});
     BMH.state.project.source='scan';BMH.save();BMH.toast('Gemini đã quét xong. Hãy kiểm tra mức tin cậy rồi áp dụng dữ liệu phù hợp.');
   }catch(err){BMH.scan.error=err.message||String(err);BMH.scan.stage='Quét chưa hoàn tất';BMH.scan.progress=0;}
