@@ -1,3 +1,4 @@
+import {discoverOfficialMaterials} from './_material_discovery.mjs';
 import {publicPage,pageMetadata} from './_public_web.mjs';
 const rows=[
  ['floor','Đồng Tâm','6060TAMDAO006','Gạch granite Tam Đảo','60 × 60 cm · vân đá xám','m²','https://dongtam.com.vn/san-pham/bst-6060tamdao/6060tamdao006/'],
@@ -19,5 +20,6 @@ export async function officialMaterials(category='floor'){
   const base={id:'official-'+sku.toLowerCase(),category,brand,sku,name,spec,unit,productUrl,supplier:brand,address:'',phone:'',price:0,priceDate:'',imageUrl:'',verifiedAt:'',photoEvidence:'missing'};
   try{const p=await publicPage(productUrl),m=pageMetadata(p.html,p.url,sku);if(!m.text.toLowerCase().includes(sku.toLowerCase()))return null;return {...base,productUrl:p.url,imageUrl:m.imageUrl,price:m.price,phone:brand==='INAX'&&m.text.replace(/\D/g,'').includes('18006633')?'1800 6633':'',verifiedAt:new Date().toISOString(),photoEvidence:m.imageUrl?'source-page':'missing'};}catch{return {...base,sourceStatus:'unavailable'};}
  }));
- const data={products:products.filter(Boolean),summary:'Danh mục chính hãng theo mã hàng. Giá chưa công bố hoặc trang chưa truy cập được sẽ hiển thị Liên hệ báo giá; tìm trên web để mở rộng hãng và đại lý.'};cache.set(key,{at:Date.now(),data});return data;
+ const discovered=await discoverOfficialMaterials(key);const combined=[...new Map([...products.filter(Boolean),...discovered].map(p=>[p.productUrl,p])).values()];
+ const data={products:combined,summary:'Danh mục chính hãng theo mã hàng. Giá chưa công bố hoặc trang chưa truy cập được sẽ hiển thị Liên hệ báo giá; tìm trên web để mở rộng hãng và đại lý.'};cache.set(key,{at:Date.now(),data});return data;
 }

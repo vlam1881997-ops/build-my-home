@@ -23,7 +23,7 @@ test('Gemini gateway keeps a low-cost fallback candidate',()=>{
   const models=geminiModelCandidates();
   if(oldModel===undefined)delete process.env.GEMINI_MODEL;else process.env.GEMINI_MODEL=oldModel;
   if(oldFallback===undefined)delete process.env.GEMINI_FALLBACK_MODEL;else process.env.GEMINI_FALLBACK_MODEL=oldFallback;
-  assert.ok(models.includes('gemini-3.5-flash-lite'));
+  assert.ok(models.includes('gemini-flash-lite-latest'));
 });
 
 
@@ -40,4 +40,13 @@ test('Step 1 brief endpoint degrades to local parser when cloud AI is unavailabl
   assert.equal(payload.provider,'local-fallback');
   assert.equal(payload.result.brief.household_size,5);
   assert.equal(payload.result.brief.budget_vnd,1200000000);
+});
+
+test('model discovery prefers stable Flash and removes retired and non-text models',async()=>{const {rankGeminiModels}=await import('../server/_gemini_models.mjs');const models=['gemini-9-flash','gemini-10-pro','gemini-10-flash-preview','gemini-9-flash-image','gemini-flash-latest'].map(name=>({name:'models/'+name,supportedGenerationMethods:['generateContent']}));const ranked=rankGeminiModels(models,{configured:'gemini-retired',auto:true});assert.equal(ranked[0],'gemini-flash-latest');assert.ok(ranked.includes('gemini-9-flash'));assert.ok(!ranked.includes('gemini-retired'));assert.ok(!ranked.includes('gemini-10-pro'));assert.ok(!ranked.includes('gemini-9-flash-image'));assert.deepEqual(rankGeminiModels(models,{kind:'image'}),['gemini-9-flash-image']);});
+
+test('gateway uses generateContent when the advertised model rejects Interactions',async()=>{
+ const {geminiGenerate}=await import('../server/_gemini.mjs'),previous=global.fetch,env={...process.env},calls=[];
+ process.env.GEMINI_API_KEY='test-gateway-standard-unique';process.env.GEMINI_AUTO_UPGRADE='true';
+ global.fetch=async(url)=>{calls.push(String(url));const list=String(url).includes('/models?'),interaction=String(url).endsWith('/interactions');const body=list?{models:[{name:'models/gemini-9-flash',supportedGenerationMethods:['generateContent']}]}:interaction?{error:{message:'Interactions unavailable'}}:{candidates:[{content:{parts:[{text:'{"answer":"ok"}'}]},groundingMetadata:{groundingChunks:[{web:{uri:'https://example.com/product',title:'Source'}}]}}]};return {ok:!interaction,status:interaction?404:200,text:async()=>JSON.stringify(body)};};
+ try{const result=await geminiGenerate({parts:[{text:'Test'}],schema:{type:'object',properties:{answer:{type:'string'}}}});assert.equal(result.result.answer,'ok');assert.equal(result.model,'gemini-9-flash');assert.equal(result.citations[0].url,'https://example.com/product');assert.ok(calls.some(x=>x.endsWith(':generateContent')));}finally{global.fetch=previous;for(const k of ['GEMINI_API_KEY','GEMINI_AUTO_UPGRADE'])if(env[k]===undefined)delete process.env[k];else process.env[k]=env[k];}
 });

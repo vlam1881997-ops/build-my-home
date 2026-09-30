@@ -1,11 +1,12 @@
+import {resolveGeminiModels} from './_gemini_models.mjs';
 const GEMINI_BASE='https://generativelanguage.googleapis.com';
 
 export function geminiEnv(){
   const key=String(process.env.GEMINI_API_KEY||'').trim();
   const auto=String(process.env.GEMINI_AUTO_UPGRADE??'true').toLowerCase()!=='false';
   const configured=String(process.env.GEMINI_MODEL||'').trim();
-  const primary=configured||(auto?'gemini-flash-latest':'gemini-3.8-flash');
-  const fallback=String(process.env.GEMINI_FALLBACK_MODEL||'gemini-3.5-flash-lite').trim();
+  const primary=configured||'gemini-flash-latest';
+  const fallback=String(process.env.GEMINI_FALLBACK_MODEL||'gemini-flash-lite-latest').trim();
   const apiVersion=String(process.env.GEMINI_API_VERSION||'auto').trim().toLowerCase();
   return {key,auto,primary,fallback,apiVersion,deleteUploads:String(process.env.GEMINI_DELETE_UPLOADS??'true').toLowerCase()!=='false'};
 }
@@ -13,7 +14,7 @@ export function geminiEnv(){
 export function geminiModelCandidates(){
   const e=geminiEnv(),list=[e.primary];
   if(e.fallback&&e.fallback!==e.primary)list.push(e.fallback);
-  if(!list.includes('gemini-3.5-flash-lite'))list.push('gemini-3.5-flash-lite');
+
   return [...new Set(list.filter(Boolean))];
 }
 
@@ -76,12 +77,23 @@ async function postInteraction(apiVersion,model,payload,key,signal){
   return {r,data};
 }
 
+async function postGenerateContent(model,{normalized,systemInstruction,schema,maxOutputTokens,tools},key,signal){
+  const parts=normalized.map(p=>p.type==='text'?{text:p.text}:p.data?{inlineData:{mimeType:p.mime_type,data:p.data}}:{fileData:{mimeType:p.mime_type,fileUri:p.uri}});
+  const body={contents:[{role:'user',parts}],generationConfig:{maxOutputTokens,...(schema?{responseMimeType:'application/json',responseJsonSchema:schema}:{})}};
+  if(systemInstruction)body.systemInstruction={parts:[{text:systemInstruction}]};
+  if(tools?.some(t=>t.type==='google_search'||t.google_search))body.tools=[{googleSearch:{}}];
+  const r=await fetch(`${GEMINI_BASE}/v1beta/models/${model}:generateContent`,{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify(body)});
+  const data=JSON.parse(await r.text()||'{}');
+  data.output_text=(data.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
+  return {r,data};
+}
+
 export async function geminiGenerate({parts,input,systemInstruction='',schema,maxOutputTokens=2200,thinkingLevel='low',timeoutMs=60000,tools=[]}){
   const env=geminiEnv();
   if(!env.key)throw Object.assign(new Error('Gemini chưa cấu hình GEMINI_API_KEY trên server.'),{statusCode:503});
   const normalized=Array.isArray(input)?input:normalizeInput(parts);
   if(!normalized.length)throw Object.assign(new Error('Gemini không có dữ liệu đầu vào.'),{statusCode:400});
-  const combos=[];for(const model of geminiModelCandidates())for(const apiVersion of apiVersions())combos.push({model,apiVersion});
+  const combos=[];for(const model of await resolveGeminiModels(env))for(const apiVersion of apiVersions())combos.push({model,apiVersion});
   let lastErr=null,quotaModel='',deadline=Date.now()+timeoutMs;
   for(let i=0;i<combos.length;i++){
     const {model,apiVersion}=combos[i];
@@ -97,7 +109,8 @@ export async function geminiGenerate({parts,input,systemInstruction='',schema,ma
     const remaining=deadline-Date.now();if(remaining<1500)throw Object.assign(new Error('Gemini xử lý quá thời gian cho phép.'),{statusCode:504});
     const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),remaining);
     try{
-      const {r,data}=await postInteraction(apiVersion,model,payload,env.key,ctl.signal);
+      let {r,data}=await postInteraction(apiVersion,model,payload,env.key,ctl.signal);
+      if([400,404].includes(r.status))({r,data}=await postGenerateContent(model,{normalized,systemInstruction,schema,maxOutputTokens,tools},env.key,ctl.signal));
       if(!r.ok){
         const err=Object.assign(new Error(data?.error?.message||`Gemini HTTP ${r.status}`),{statusCode:r.status>=400&&r.status<500?r.status:502,details:data,model,apiVersion});
         const msg=String(data?.error?.message||'').toLowerCase(),more=i<combos.length-1;
@@ -108,8 +121,9 @@ export async function geminiGenerate({parts,input,systemInstruction='',schema,ma
       const text=extractInteractionText(data);if(!text)throw Object.assign(new Error('Gemini không trả về nội dung có thể đọc.'),{statusCode:502,model,apiVersion});
       let result;try{result=schema?JSON.parse(text):text;}catch{throw Object.assign(new Error('Gemini trả về dữ liệu không đúng JSON.'),{statusCode:502,model,apiVersion});}
       const citations=[];const seen=new Set();
-      const walk=v=>{if(!v||typeof v!=='object')return;if(Array.isArray(v)){for(const x of v)walk(x);return;}if(v.type==='url_citation'&&v.url){const url=String(v.url),title=String(v.title||'Nguồn web');if(!seen.has(url)){seen.add(url);citations.push({url,title});}}for(const x of Object.values(v))walk(x);};
+      const walk=v=>{if(!v||typeof v!=='object')return;if(Array.isArray(v)){for(const x of v)walk(x);return;}if((v.type==='url_citation'||v.type==='urlCitation')&&v.url){const url=String(v.url),title=String(v.title||'Nguồn web');if(!seen.has(url)){seen.add(url);citations.push({url,title});}}for(const x of Object.values(v))walk(x);};
       walk(data);
+      for(const chunk of data.candidates?.[0]?.groundingMetadata?.groundingChunks||[]){const web=chunk.web;if(web?.uri&&!seen.has(web.uri)){seen.add(web.uri);citations.push({url:web.uri,title:web.title||'Nguồn web'});}}
       return {result,model,apiVersion,interactionId:data?.id||'',usage:data?.usage||data?.usage_metadata||data?.usageMetadata||null,citations,raw:data};
     }catch(err){
       lastErr=err?.name==='AbortError'?Object.assign(new Error('Gemini xử lý quá thời gian cho phép.'),{statusCode:504,model,apiVersion}):err;

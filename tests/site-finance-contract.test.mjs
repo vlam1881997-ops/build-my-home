@@ -138,13 +138,13 @@ test('image endpoint honors explicit disable and returns the Gemini image with a
     const disabled=res();await renderHandler(req,disabled);assert.equal(disabled.code,503);
     process.env.GEMINI_IMAGE_ENABLED='true';process.env.GEMINI_API_KEY='server-test-key';
     let upstream=null;
-    globalThis.fetch=async(url,options)=>{upstream={url,options};return {ok:true,json:async()=>({status:'completed',steps:[{type:'model_output',content:[{type:'image',mime_type:'image/png',data:'B'.repeat(128)}]}]})};};
+    globalThis.fetch=async(url,options)=>{if(String(url).includes('/models?'))return {ok:true,text:async()=>JSON.stringify({models:[{name:'models/gemini-9-flash-image',supportedGenerationMethods:['generateContent']}]})};upstream={url,options};return {ok:true,json:async()=>({status:'completed',steps:[{type:'model_output',content:[{type:'image',mime_type:'image/png',data:'B'.repeat(128)}]}]})};};
     const enabled=res();await renderHandler(req,enabled);
     assert.equal(enabled.code,200);
     assert.equal(enabled.body.mimeType,'image/png');
     assert.match(upstream.url,/\/v1beta\/interactions$/);
     const body=JSON.parse(upstream.options.body);
-    assert.equal(body.model,'gemini-3.1-flash-image');
+    assert.equal(body.model,'gemini-9-flash-image');
     assert.equal(body.input[1].type,'image');
     assert.equal(body.response_format.image_size,'1K');
     assert.equal(upstream.options.headers['x-goog-api-key'],'server-test-key');
