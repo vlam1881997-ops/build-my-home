@@ -410,7 +410,7 @@ BMH.buildableEnvelopeSvg = floor => {
 };
 BMH.autoPlanConcept = (strategy=BMH.state.project.site.designStrategy||'climate') => {
   if(BMH.planHasLocks())return BMH.toast('Mở khóa phòng/tầng trước khi tạo lại mặt bằng.');
-  const p=BMH.state.project,s=p.site,h=p.household,e=BMH.buildableEnvelope(s),W=e.buildWidth,D=e.buildDepth,x0=e.side,y0=e.front,floors=Math.max(1,Number(s.floors)||1);
+  const p=BMH.state.project,s=p.site,h=p.household,e=BMH.buildableEnvelope(s),W=e.buildWidth,D=e.buildDepth,x0=e.originX??e.side,y0=e.originY??e.front,floors=Math.max(1,Number(s.floors)||1);
   if(W<3||D<7)return BMH.toast('Khung xây dựng hiện quá nhỏ để tự bố trí. Hãy giảm khoảng lùi hoặc điều chỉnh kích thước đất.');
   const oldPlan=BMH.planSnapshot(); BMH.pushPlanHistory();
   const rooms=[], openings=[]; let rid=0,oid=0;
