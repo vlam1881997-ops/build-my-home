@@ -102,3 +102,10 @@ BMH.technicalProjection=(kind='elevation')=>{
  return '<svg class="technical-view-svg" viewBox="-2 -1 '+(span+4)+' '+(total+3)+'" aria-label="'+(kind==='elevation'?'Mặt đứng từ ô mở thực tế':'Mặt cắt giữa khu đất')+'"><style>text{font-family:Arial;font-size:.22px;fill:#364332;text-anchor:middle}</style><rect x="-2" y="-1" width="'+(span+4)+'" height="'+(total+3)+'" fill="#fff"/>'+marks+'<text x="'+(span/2)+'" y="'+(total+1)+'">'+(kind==='elevation'?'MẶT ĐỨNG PHÍA TRƯỚC':'MẶT CẮT A–A · x = '+cut+' m')+' · KIẾN TRÚC SƠ BỘ</text><text x="'+(span/2)+'" y="'+(total+1.45)+'">'+span+' m · '+p.site.floors+' tầng · cao tầng '+fh+' m</text></svg>';
 };
 BMH.elevationSvg=()=>BMH.technicalProjection('elevation');BMH.sectionSvg=()=>BMH.technicalProjection('section');
+
+// Studio renders from this registry; replacing a function alone leaves stale screens.
+const completionScreen1=BMH.screen1;
+BMH.screen1=()=>completionScreen1().replace('<button class="step01-analyze ', '<div class="ai-health-check"><button data-ai-health '+(BMH.aiHealth.busy?'disabled':'')+'>'+(BMH.aiHealth.busy?'Đang kiểm tra kết nối…':'Kiểm tra kết nối Gemini')+'</button><span>'+BMH.v6Esc(BMH.aiHealth.message||'')+'</span></div><button class="step01-analyze ');
+BMH.SCREENS=[BMH.screen1,BMH.screen3,BMH.screen4,BMH.screen5,BMH.screen6,BMH.screen7,BMH.screen8,BMH.screen2,BMH.screen9,BMH.screen10];
+
+BMH.render({preserveScroll:true});

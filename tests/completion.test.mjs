@@ -8,6 +8,14 @@ import scan from '../api/gemini-scan.mjs';
 import health from '../server/_ai_health_handler.mjs';
 import {extractRenderedImage,renderRequestPayload} from '../api/gemini-render.mjs';
 const res=()=>({status(n){this.code=n;return this;},setHeader(){},end(s){this.body=JSON.parse(s);}});
+test('Studio registry exposes parcel presets, real product research and Gemini diagnostics',()=>{
+ const source=fs.readFileSync('src/75_completion.js','utf8'),noop=()=>'',BMH={HOUSE_STYLES:[],houseStylePanel:noop,planSvg:noop,screen1:()=>'<button class="step01-analyze ready">Concept</button>',screen3:()=>'<div class="v70-parcel-tools"></div>',screen6:()=>'<section class="v6-card v6-showroom"></section>',screen2:noop,screen4:noop,screen5:noop,screen7:noop,screen8:noop,screen9:noop,screen10:noop,scanDropHtml:noop,updateMapContext:noop,v67PlaceCard:noop,dataEngineState:()=>({materialOverrides:{}}),state:{ui:{materialCategory:'floor'}},v6Esc:String,render(){}};
+ BMH.SCREENS=[BMH.screen1,BMH.screen3,BMH.screen4,BMH.screen5,BMH.screen6];
+ vm.runInNewContext(source,{BMH,document:{addEventListener(){}},queueMicrotask(){}});
+ assert.match(BMH.SCREENS[0](),/data-ai-health/);
+ assert.match(BMH.SCREENS[1](),/data-parcel-preset="l"/);
+ assert.match(BMH.SCREENS[4](),/Tên hãng, mã gạch/);
+});
 test('product metadata does not turn missing photos into the product page URL',()=>{
  assert.equal(pageMetadata('<h1>SKU123</h1>','https://shop.example/item','SKU123').imageUrl,'');
  const p=pageMetadata('<meta property="og:image" content="/sku123.jpg"><script type="application/ld+json">{"@type":"Product","sku":"SKU123","offers":{"price":120000,"priceCurrency":"VND"}}</script><p>SKU123</p>','https://shop.example/item','SKU123');assert.equal(p.imageUrl,'https://shop.example/sku123.jpg');assert.equal(p.price,120000);assert.equal(p.text.includes('priceCurrency'),false);
@@ -38,7 +46,7 @@ test('roof bounds follow shifted rooms and reject a rectangular roof over an L-s
  const s=fs.readFileSync('src/75_completion.js','utf8'),BMH={};vm.runInNewContext(s.slice(s.indexOf('BMH.sceneFootprintBounds='),s.indexOf('BMH.technicalProjection=')),{BMH});const b=BMH.sceneFootprintBounds([{x:2,y:3,w:4,h:5}]);assert.equal(b.cx,4);assert.equal(b.cy,5.5);assert.equal(b.rectangular,true);assert.equal(BMH.sceneFootprintBounds([{x:0,y:0,w:2,h:4},{x:2,y:0,w:2,h:2}]).rectangular,false);assert.equal(BMH.sceneFootprintBounds([]),null);
 });
 test('elevation uses actual opening offsets and section intersects actual rooms',()=>{
- const s=fs.readFileSync('src/75_completion.js','utf8'),rooms=[{id:'a',name:'Khách',x:0,y:0,w:5,h:4,floor:0},{id:'b',name:'Bếp',x:0,y:4,w:5,h:4,floor:0}],BMH={state:{project:{site:{width:5,depth:8,floors:1},plan:{openings:[{id:'d',floor:0,roomId:'a',side:'north',kind:'door',width:1,offset:.25}]}}},floorRooms:()=>rooms,projectLevels:()=>({floorHeight:3.4}),esc:String,clamp:(n,a,b)=>Math.min(b,Math.max(a,n))};vm.runInNewContext(s.slice(s.indexOf('BMH.technicalProjection=')),{BMH});const elevation=BMH.elevationSvg();assert.match(elevation,/data-opening-id="d" x="1"/);const section=BMH.sectionSvg();assert.match(section,/Khách/);assert.match(section,/Bếp/);assert.match(section,/x="4".*width="4"/);
+ const s=fs.readFileSync('src/75_completion.js','utf8'),rooms=[{id:'a',name:'Khách',x:0,y:0,w:5,h:4,floor:0},{id:'b',name:'Bếp',x:0,y:4,w:5,h:4,floor:0}],BMH={state:{project:{site:{width:5,depth:8,floors:1},plan:{openings:[{id:'d',floor:0,roomId:'a',side:'north',kind:'door',width:1,offset:.25}]}}},floorRooms:()=>rooms,projectLevels:()=>({floorHeight:3.4}),esc:String,clamp:(n,a,b)=>Math.min(b,Math.max(a,n))};vm.runInNewContext(s.slice(s.indexOf('BMH.technicalProjection='),s.indexOf('// Studio renders from this registry')),{BMH});const elevation=BMH.elevationSvg();assert.match(elevation,/data-opening-id="d" x="1"/);const section=BMH.sectionSvg();assert.match(section,/Khách/);assert.match(section,/Bếp/);assert.match(section,/x="4".*width="4"/);
 });
 test('actual Three scene mounts with framed openings, ceiling slabs and a camera facing the entrance',async()=>{
  const THREE=await import('three'),source=fs.readFileSync('src/45_studio3d.js','utf8'),bounds=fs.readFileSync('src/75_completion.js','utf8'),events={},stage={classList:{add(){}},getBoundingClientRect:()=>({width:1200,height:600}),appendChild(){}},ctx={fillRect(){},strokeRect(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},bezierCurveTo(){}},canvas={addEventListener:(k,fn)=>events[k]=fn,removeEventListener(){}};
