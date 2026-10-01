@@ -30,6 +30,12 @@ const threeModule=path.join(root,'node_modules','three','build','three.module.js
 if(!fs.existsSync(threeModule))throw Error('Three.js 0.160.1 is required. Run npm install before building.');
 fs.mkdirSync(path.join(dist,'vendor','three'),{recursive:true});
 fs.copyFileSync(threeModule,path.join(dist,'vendor','three','three.module.js'));
+// Keep loaders local and on the same Three revision as the renderer.
+for(const file of ['loaders/GLTFLoader.js','loaders/DRACOLoader.js','utils/BufferGeometryUtils.js']){
+  const target=path.join(dist,'vendor','three',file);fs.mkdirSync(path.dirname(target),{recursive:true});
+  const source=fs.readFileSync(path.join(root,'node_modules','three','examples','jsm',file),'utf8').replaceAll("from 'three'","from '../three.module.js'");
+  fs.writeFileSync(target,source);
+}
 let html=fs.readFileSync(path.join(src,'index.html'),'utf8');
 if(!html.includes('<!-- BMH_APP_INLINE -->'))throw Error('Missing BMH_APP_INLINE marker');
 const safeJs=js.replace(/<\/script/gi,'<\\/script');

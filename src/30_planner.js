@@ -474,8 +474,9 @@ BMH.svgPoint = (e,svg) => {
   try{const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const ctm=(svg.querySelector?.('#planDrawing')||svg).getScreenCTM();if(ctm)return pt.matrixTransform(ctm.inverse());}catch(_){}
   const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;return {x:vb.x+(e.clientX-r.left)*vb.width/Math.max(1,r.width),y:vb.y+(e.clientY-r.top)*vb.height/Math.max(1,r.height)};
 };
-BMH.openingFits = (candidate,ignoreId=null) => {
+BMH.openingFits = (candidate,ignoreId=candidate?.id) => {
   const r=BMH.state.project.plan.rooms.find(x=>x.id===candidate.roomId);if(!r)return false;
+  if(!['north','south','east','west'].includes(candidate.side)||!Number.isFinite(Number(candidate.offset))||Number(candidate.offset)<0||Number(candidate.offset)>1||Number(candidate.floor)!==Number(r.floor))return false;
   const len=(candidate.side==='north'||candidate.side==='south')?r.w:r.h,w=Number(candidate.width)||0;if(w<.5||w>len-.08)return false;
   const span=BMH.openingWallSpan(candidate);if(!span)return false;
   return !BMH.state.project.plan.openings.some(o=>{
@@ -554,4 +555,4 @@ BMH.sectionSvg = () => {
   return `<svg class="technical-view-svg section-svg" viewBox="0 0 960 520" aria-label="Mặt cắt kiến trúc sơ bộ"><rect width="960" height="520" class="section-bg"/><path d="M80 438H900" class="ground-line"/><g class="foundation"><path d="M135 438v30h-28l16 22h44l16-22h-28v-30M795 438v30h-28l16 22h44l16-22h-28v-30"/></g>${floorsSvg}<g class="section-stairs">${stairs}<path d="M${left+span*.58} ${baseY-14}L${left+span*.58+162} ${baseY-78}"/></g><g class="section-roof"><path d="M${left-14} ${baseY-floors*fh}H${right+14}l-16-18H${left+16}z"/></g>${levels}<g class="section-height"><line x1="880" y1="${baseY}" x2="880" y2="${baseY-floors*fh-18}"/><line x1="870" y1="${baseY}" x2="890" y2="${baseY}"/><line x1="870" y1="${baseY-floors*fh-18}" x2="890" y2="${baseY-floors*fh-18}"/><text x="895" y="${baseY-floors*fh/2}" transform="rotate(-90 895 ${baseY-floors*fh/2})">CHIỀU CAO TẦNG ${floorHeight.toFixed(1)}m</text></g><g class="doc-title"><text x="70" y="500">MẶT CẮT A–A · SƠ BỘ</text><text x="520" y="500">Sàn ${Math.round(slab*1000)}mm · Cao tầng ${floorHeight.toFixed(1)}m · Móng minh họa</text></g></svg>`;
 };
 BMH.areaSchedule = () => BMH.state.project.plan.rooms.map(r=>{const t=BMH.roomTechnicalStats(r);return {floor:r.floor+1,name:r.name,area:t.area,perimeter:t.perimeter,type:r.type,doors:t.doors,windows:t.windows,daylight:t.daylight,ventilation:t.ventilation};});
-BMH.openingSchedule = () => BMH.state.project.plan.openings.map(o=>{const r=BMH.state.project.plan.rooms.find(x=>x.id===o.roomId),isDoor=o.kind==='door';return {code:BMH.openingCode(o),floor:o.floor+1,room:r?.name||'—',kind:o.kind,width:o.width||0,height:isDoor?2.2:1.5,sill:isDoor?0:.9,side:o.side};});
+BMH.openingSchedule = () => BMH.state.project.plan.openings.map(o=>{const r=BMH.state.project.plan.rooms.find(x=>x.id===o.roomId),v=BMH.openingReview(o);return {code:BMH.openingCode(o),floor:o.floor+1,room:r?.name||'—',kind:o.kind,width:o.width||0,height:v.height,sill:v.sill,side:o.side};});

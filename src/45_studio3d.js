@@ -94,7 +94,7 @@ BMH.studio3DHtml = () => {
 };
 BMH.disposeStudio3D = () => {
   const s=BMH.studio3d;if(!s)return;
-  try{s.raf&&cancelAnimationFrame(s.raf);s.ro?.disconnect?.();s.scene?.traverse?.(o=>{o.geometry?.dispose?.();if(Array.isArray(o.material))o.material.forEach(m=>m.dispose?.());else {o.material?.map?.dispose?.();o.material?.dispose?.();}});s.renderer?.dispose?.();s.renderer?.domElement?.removeEventListener?.('pointerdown',s.onDown);window.removeEventListener('pointermove',s.onMove);window.removeEventListener('pointerup',s.onUp);s.renderer?.domElement?.removeEventListener?.('wheel',s.onWheel);}catch(_){}
+  try{s.raf&&cancelAnimationFrame(s.raf);s.ro?.disconnect?.();s.scene?.traverse?.(o=>{o.geometry?.dispose?.();if(Array.isArray(o.material))o.material.forEach(m=>m.dispose?.());else {o.material?.map?.dispose?.();o.material?.dispose?.();}});s.renderer?.dispose?.();s.renderer?.domElement?.removeEventListener?.('pointerdown',s.onDown);window.removeEventListener('pointermove',s.onMove);window.removeEventListener('pointerup',s.onUp);window.removeEventListener('pointercancel',s.onUp);s.renderer?.domElement?.removeEventListener?.('wheel',s.onWheel);}catch(_){}
   BMH.studio3d=null;
 };
 BMH.mountStudio3D = async () => {
@@ -109,11 +109,11 @@ BMH.mountStudio3D = async () => {
   const fill=new THREE.DirectionalLight(0xe5f4ff,BMH.state.ui.sceneTheme==='night'?.3:.45);fill.position.set(12,10,-8);scene.add(fill);
   const warm=new THREE.PointLight(0xffb66a,BMH.state.ui.sceneTheme==='night'?8:0,24,2);warm.position.set(0,4,1);scene.add(warm);
   const mat=(color,rough=.75,metal=.02,opacity=1)=>new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal,transparent:opacity<1,opacity});
-  const mats={wall:mat(BMH.houseStyle?.()?.wall||palette.wall,.82),slab:mat(0xd8d0c4,.88),frame:mat(palette.frame,.45,.22),glass:new THREE.MeshPhysicalMaterial({color:palette.glass,roughness:.08,metalness:.05,transmission:.3,transparent:true,opacity:.62}),floor:mat(palette.floor,.62),accent:mat(palette.accent,.65),ground:mat(palette.ground,1),green:mat(palette.green,.95),dark:mat(0x4a4f4b,.75),roof:mat(0x303c48,.85),rail:mat(0x9a7b49,.37,.62)};
+  const mats={wall:mat(BMH.state.project.materials?.choices?.paint?palette.wall:BMH.houseStyle?.()?.wall||palette.wall,.82),slab:mat(0xd8d0c4,.88),frame:mat(palette.frame,.45,.22),glass:new THREE.MeshPhysicalMaterial({color:palette.glass,roughness:.08,metalness:.05,transmission:.3,transparent:true,opacity:.62}),floor:mat(palette.floor,.62),accent:mat(palette.accent,.65),ground:mat(palette.ground,1),green:mat(palette.green,.95),dark:mat(0x4a4f4b,.75),roof:mat(0x303c48,.85),rail:mat(0x9a7b49,.37,.62)};
   const makeTexture=(kind,color)=>{const c=document.createElement('canvas');c.width=c.height=256;const ctx=c.getContext('2d');ctx.fillStyle=color;ctx.fillRect(0,0,256,256);if(kind==='tile'){ctx.strokeStyle='#a99e8b';ctx.lineWidth=2;ctx.strokeRect(1,1,254,254);ctx.strokeStyle='#ffffff22';for(let i=0;i<12;i++){ctx.beginPath();ctx.moveTo(i*23,0);ctx.lineTo(i*17+30,256);ctx.stroke();}}else{for(let i=0;i<64;i++){ctx.strokeStyle=i%3?'#3b281814':'#ffffff18';ctx.beginPath();ctx.moveTo(0,i*4);ctx.bezierCurveTo(70,i*4+7,180,i*4-5,256,i*4);ctx.stroke();}}const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(kind==='tile'?3:2,kind==='tile'?3:2);return t;};
-  mats.floor.map=makeTexture('tile','#ddd2bc');mats.floor.color.set(0xffffff);mats.accent.map=makeTexture('wood','#947b5c');mats.accent.color.set(0xffffff);
+  mats.floor.map=makeTexture('tile',new THREE.Color(palette.floor).getStyle());mats.floor.color.set(0xffffff);mats.accent.map=makeTexture('wood',new THREE.Color(palette.accent).getStyle());mats.accent.color.set(0xffffff);
   const addBox=(w,h,d,x,y,z,material=mats.wall)=>{const g=new THREE.BoxGeometry(w,h,d),o=new THREE.Mesh(g,material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o;};
-  const site=BMH.state.project.site,W=Math.max(4,Number(site.width)||5),D=Math.max(8,Number(site.depth)||20),floors=Math.max(1,Number(site.floors)||1),fh=BMH.projectLevels().floorHeight,explode=BMH.state.ui.sceneExploded?1.25:0,focus=BMH.state.ui.sceneFocus||'all',classical=/tân cổ điển|tan co dien|neoclassic|classical|cổ điển|co dien/i.test(BMH.state.project.style||'');
+  const site=BMH.state.project.site,W=Number(site.width)||5,D=Number(site.depth)||20,floors=Math.max(1,Number(site.floors)||1),fh=BMH.projectLevels().floorHeight,explode=BMH.state.ui.sceneExploded?1.25:0,focus=BMH.state.ui.sceneFocus||'all',classical=/tân cổ điển|tan co dien|neoclassic|classical|cổ điển|co dien/i.test(BMH.state.project.style||'');
   // landscape
   const ground=new THREE.Mesh(new THREE.PlaneGeometry(Math.max(28,W+18),Math.max(42,D+18)),mats.ground);ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
   const lawn=new THREE.Mesh(new THREE.PlaneGeometry(Math.max(8,W+5),Math.max(14,D+5)),mats.green);lawn.rotation.x=-Math.PI/2;lawn.position.y=.012;lawn.receiveShadow=true;scene.add(lawn);
@@ -158,21 +158,27 @@ BMH.mountStudio3D = async () => {
   const roomFocus=focus.startsWith('room:')?BMH.state.project.plan.rooms.find(r=>r.id===focus.slice(5)):null;
   const floorFocus=focus.startsWith('floor:')?BMH.clamp(Number(focus.split(':')[1])||0,0,floors-1):null;
   const visibleFloors=roomFocus?[Number(roomFocus.floor)]:floorFocus!==null?[floorFocus]:Array.from({length:floors},(_,f)=>f);
-  const wallHeight=BMH.projectLevels().clearHeight,wallT=.15;
+  const wallHeight=fh-BMH.projectLevels().slab,wallT=.15;
   for(const f of visibleFloors){
     const geometry=BMH.scenePlanGeometry(roomFocus?{rooms:[roomFocus],openings:BMH.state.project.plan.openings}:BMH.state.project.plan,f);
     const base=roomFocus||floorFocus!==null?0:f*(fh+explode);
     for(const r of geometry.rooms){
       const cx=r.x+r.w/2-W/2,cz=r.y+r.h/2-D/2;
-      addBox(r.w,.13,r.h,cx,base+.065,cz,r.type==='bath'?mat(0xc8cfcb,.5):mats.floor);
-      roomFurniture(r,base+.13);
-      if(focus==='all')addBox(r.w,BMH.projectLevels().slab,r.h,cx,base+wallHeight+BMH.projectLevels().slab/2,cz,mats.slab);
+      const slab=BMH.projectLevels().slab,holes=BMH.stairFloorHoles?.(f)||[],panels=BMH.slabPanels?.(r,holes)||[{x:r.x,y:r.y,w:r.w,d:r.h}];
+      for(const panel of panels){const mesh=addBox(panel.w,slab,panel.d,panel.x+panel.w/2-W/2,base+slab/2,panel.y+panel.d/2-D/2,r.type==='bath'?mat(0xc8cfcb,.5):mats.floor);mesh.userData={kind:'floor-slab',roomId:r.id,floor:f};}
+      roomFurniture(r,base+slab);
+      if(focus==='all'&&(r.type!=='stairs'||f===floors-1)){
+        const nextHoles=BMH.stairFloorHoles?.(f+1)||[],ceilingPanels=BMH.slabPanels?.(r,nextHoles)||[{x:r.x,y:r.y,w:r.w,d:r.h}];
+        for(const panel of ceilingPanels){const mesh=addBox(panel.w,slab,panel.d,panel.x+panel.w/2-W/2,base+fh-slab/2,panel.y+panel.d/2-D/2,mats.slab);mesh.userData={kind:'ceiling-slab',roomId:r.id,floor:f};}
+      }
     }
     for(const w of geometry.walls){
       const len=w.b-w.a,mid=(w.a+w.b)/2;
       const x=w.horizontal?mid-W/2:w.axis-W/2;
       const z=w.horizontal?w.axis-D/2:mid-D/2;
       const segment=(h,cy,material=mats.wall)=>addBox(w.horizontal?len:wallT,h,w.horizontal?wallT:len,x,base+cy,z,material);
+      const near=(roomFocus||floorFocus!==null)&&(w.horizontal?w.axis<=Math.min(...geometry.rooms.map(r=>r.y))+.02:w.axis>=Math.max(...geometry.rooms.map(r=>r.x+r.w))-.02);
+      if(near){segment(.35,.175);continue;}
       if(w.kind==='door'){
         const oh=Math.min(w.height,wallHeight);segment(wallHeight-oh,oh+(wallHeight-oh)/2);
         const jamb=(v)=>addBox(w.horizontal?.055:wallT,oh,w.horizontal?wallT:.055,
@@ -186,8 +192,7 @@ BMH.mountStudio3D = async () => {
         addBox(w.horizontal?len:.045,.045,w.horizontal?.045:len,x,base+top,z,mats.frame);
       }else{
         // Cut away the near side in an isolated room so the interior stays visible.
-        const focusRooms=geometry.rooms,maxY=Math.max(...focusRooms.map(r=>r.y+r.h)),maxX=Math.max(...focusRooms.map(r=>r.x+r.w));const near=(roomFocus||floorFocus!==null)&&(w.horizontal?w.axis>=maxY-.02:w.axis>=maxX-.02);
-        segment(near?.72:wallHeight,(near?.72:wallHeight)/2);
+        segment(wallHeight,wallHeight/2);
       }
     }
   }
@@ -202,33 +207,48 @@ BMH.mountStudio3D = async () => {
     addBox(width,.12,roofDepth,cx,eave-.08,cz,mats.dark);
   }
   const centerRoom=roomFocus?new THREE.Vector3(roomFocus.x+roomFocus.w/2-W/2,1.12,roomFocus.y+roomFocus.h/2-D/2):null;
-  const state={yaw:Math.PI-.55,pitch:.42,dist:roomFocus?Math.max(4.2,Math.max(roomFocus.w,roomFocus.h)*1.45):Math.max(12,Math.max(W,D)*1.05),target:centerRoom||new THREE.Vector3(0,floorFocus!==null?1.2:floors*fh*.42,-D*.16),drag:false,lastX:0,lastY:0};
+  const focusedBounds=BMH.sceneFootprintBounds(visibleFloors.flatMap(f=>BMH.floorRooms(f))),defaultPitch=(roomFocus||floorFocus!==null)?.7:.42;
+  const state={yaw:Math.PI-.55,pitch:defaultPitch,dist:roomFocus?Math.max(4.2,Math.max(roomFocus.w,roomFocus.h)*1.65):Math.max(12,Math.max(W,D)*1.05),target:centerRoom||new THREE.Vector3(focusedBounds?focusedBounds.cx-W/2:0,floorFocus!==null?1.2:floors*fh*.42,focusedBounds?focusedBounds.cy-D/2:-D*.16),drag:false,lastX:0,lastY:0,defaultPitch};
   const updateCamera=()=>{const cp=Math.cos(state.pitch),sp=Math.sin(state.pitch),cy=Math.cos(state.yaw),sy=Math.sin(state.yaw);camera.position.set(state.target.x+state.dist*cp*sy,state.target.y+state.dist*sp,state.target.z+state.dist*cp*cy);camera.lookAt(state.target);const current=BMH.studio3d;if(current?.renderer===renderer&&!current.raf)current.raf=requestAnimationFrame(()=>{if(BMH.studio3d!==current)return;current.raf=0;renderer.render(scene,camera);});};updateCamera();
   const resize=()=>{const r=stage.getBoundingClientRect(),w=Math.max(280,Math.floor(r.width)),h=Math.max(360,Math.floor(r.height));renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();updateCamera();};resize();const ro=new ResizeObserver(resize);ro.observe(stage);
-  const onDown=e=>{state.pan=e.button===2||e.shiftKey;state.drag=true;state.lastX=e.clientX;state.lastY=e.clientY;canvas.setPointerCapture?.(e.pointerId);};const onMove=e=>{if(!state.drag)return;const dx=e.clientX-state.lastX,dy=e.clientY-state.lastY;state.lastX=e.clientX;state.lastY=e.clientY;if(state.pan){state.target.x-=dx*state.dist*.001;state.target.z-=dy*state.dist*.001;}else{state.yaw-=dx*.006;state.pitch=BMH.clamp(state.pitch-dy*.004,.12,1.12);}updateCamera();};const onUp=()=>{state.drag=false;};const onWheel=e=>{e.preventDefault();state.dist=BMH.clamp(state.dist*(1+Math.sign(e.deltaY)*.08),4,60);updateCamera();};canvas.oncontextmenu=e=>e.preventDefault();canvas.addEventListener('pointerdown',onDown);window.addEventListener('pointermove',onMove);window.addEventListener('pointerup',onUp);canvas.addEventListener('wheel',onWheel,{passive:false});
+  const pointers=new Map(),gesture=()=>{const [a,b]=[...pointers.values()];return b?{distance:Math.hypot(a.x-b.x,a.y-b.y),x:(a.x+b.x)/2,y:(a.y+b.y)/2}:null;};
+  const onDown=e=>{pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});state.pan=e.button===2||e.shiftKey;state.drag=true;state.lastX=e.clientX;state.lastY=e.clientY;state.gesture=gesture();canvas.setPointerCapture?.(e.pointerId);};
+  const onMove=e=>{
+    if(!pointers.has(e.pointerId))return;
+    pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});const next=gesture();
+    if(next&&state.gesture){const previous=state.gesture;if(next.distance>1)state.dist=BMH.clamp(state.dist*previous.distance/next.distance,4,60);state.target.x-=(next.x-previous.x)*state.dist*.001;state.target.z-=(next.y-previous.y)*state.dist*.001;}
+    else{const dx=e.clientX-state.lastX,dy=e.clientY-state.lastY;if(state.pan){state.target.x-=dx*state.dist*.001;state.target.z-=dy*state.dist*.001;}else{state.yaw-=dx*.006;state.pitch=BMH.clamp(state.pitch-dy*.004,.12,1.12);}}
+    state.lastX=e.clientX;state.lastY=e.clientY;state.gesture=next;updateCamera();
+  };
+  const onUp=e=>{pointers.delete(e.pointerId);state.drag=pointers.size>0;state.gesture=gesture();const remaining=[...pointers.values()][0];if(remaining){state.lastX=remaining.x;state.lastY=remaining.y;}};
+  const onWheel=e=>{e.preventDefault();state.dist=BMH.clamp(state.dist*(1+Math.sign(e.deltaY)*.08),4,60);updateCamera();};canvas.oncontextmenu=e=>e.preventDefault();canvas.addEventListener('pointerdown',onDown);window.addEventListener('pointermove',onMove);window.addEventListener('pointerup',onUp);window.addEventListener('pointercancel',onUp);canvas.addEventListener('wheel',onWheel,{passive:false});
   const animate=()=>{renderer.render(scene,camera);};
-  state.updateCamera=updateCamera;
-  BMH.studio3d={scene,camera,renderer,state,ro,onDown,onMove,onUp,onWheel,raf:0};animate();stage.classList.add('three-ready');BMH.$('#studio3dLoading')?.remove();if(!visibleFloors.some(f=>BMH.floorRooms(f).length)){const message=document.createElement('div');message.className='studio-empty-floor';message.textContent='Tầng này chưa có phòng trong mặt bằng. Bổ sung ở Bước 4 để dựng 3D.';stage.appendChild(message);}
+  state.updateCamera=updateCamera;state.defaultDist=state.dist;state.defaultTarget=state.target.clone();
+  BMH.studio3d={scene,camera,renderer,state,ro,onDown,onMove,onUp,onWheel,raf:0};animate();stage.classList.add('three-ready');BMH.$('#studio3dLoading')?.remove();
+  const furnitureLoads=scene.userData.furnitureLoads||[];
+  if(furnitureLoads.length){const status=document.createElement('div');status.className='studio-model-status';status.setAttribute('role','status');status.textContent='Đang tải '+furnitureLoads.length+' mô hình nội thất…';stage.appendChild(status);Promise.all(furnitureLoads).then(results=>{if(BMH.studio3d?.scene!==scene)return;const failed=results.filter(ok=>!ok).length;status.textContent=failed?failed+' món đang dùng mô hình đơn giản · thử tải lại để xem chi tiết':'Đã tải '+results.length+' mô hình nội thất';updateCamera();});}
+  if(!visibleFloors.some(f=>BMH.floorRooms(f).length)){const message=document.createElement('div');message.className='studio-empty-floor';message.textContent='Tầng này chưa có phòng trong mặt bằng. Bổ sung ở Bước 4 để dựng 3D.';stage.appendChild(message);}
 };
-BMH.resetStudio3D = () => {const s=BMH.studio3d;if(!s)return;s.state.yaw=Math.PI-.55;s.state.pitch=.42;const focus=BMH.state.ui.sceneFocus||'all',r=focus.startsWith('room:')?BMH.state.project.plan.rooms.find(x=>x.id===focus.slice(5)):null;s.state.dist=r?Math.max(4.2,Math.max(r.w,r.h)*1.45):Math.max(18,(Number(BMH.state.project.site.depth)||20)*1.15);s.state.updateCamera();};
-BMH.cinematicSignature = () => {
+BMH.resetStudio3D = () => {const s=BMH.studio3d;if(!s)return;s.state.yaw=Math.PI-.55;s.state.pitch=s.state.defaultPitch;s.state.dist=s.state.defaultDist;s.state.target.copy(s.state.defaultTarget);s.state.updateCamera();};
+BMH.cinematicSignature = (focus=BMH.state.ui?.sceneFocus||'all') => {
   const p=BMH.state.project;
-  return JSON.stringify({style:p.style,focus:BMH.state.ui?.sceneFocus||'all',site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,floorHeight:p.site.floorHeight,slabThickness:p.site.slabThickness,ceilingDrop:p.site.ceilingDrop,frontDirection:p.site.frontDirection},materials:p.materials?.choices||{},productCodes:Object.values(p.materials?.choices||{}).map(id=>[id,p.dataEngine?.materialOverrides?.[id]?.sku||'']),tier:p.materials?.tier,rooms:p.plan.rooms.map(r=>[r.id,r.floor,r.name,r.type,r.x,r.y,r.w,r.h,r.furnitureRotation,r.stairDirection]),openings:(p.plan.openings||[]).map(o=>[o.floor,o.roomId,o.kind,o.side,o.offset,o.width,o.height,o.sill])});
+  return JSON.stringify({style:p.style,focus,site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,floorHeight:p.site.floorHeight,slabThickness:p.site.slabThickness,ceilingDrop:p.site.ceilingDrop,frontDirection:p.site.frontDirection},materials:p.materials?.choices||{},productCodes:Object.values(p.materials?.choices||{}).map(id=>[id,p.dataEngine?.materialOverrides?.[id]?.sku||'']),tier:p.materials?.tier,rooms:p.plan.rooms.map(r=>[r.id,r.floor,r.name,r.type,r.x,r.y,r.w,r.h,r.furnitureRotation,r.stairDirection]),openings:(p.plan.openings||[]).map(o=>[o.floor,o.roomId,o.kind,o.side,o.offset,o.width,o.height,o.sill])});
 };
 BMH.generateCinematicRender = async () => {
   if(BMH.cinematicRender.loading)return;
-  const canvas=BMH.$('#studio3dCanvas'),scene=BMH.studio3d;
-  let screenshot;
-  try{screenshot=scene?scene.renderer.domElement.toDataURL('image/jpeg',.8):await BMH.capturePlanReference();}catch(err){BMH.toast(err.message||'Không tạo được ảnh tham chiếu.');return;}
-  const signature=BMH.cinematicSignature(),p=BMH.state.project;
+  BMH.cinematicRender.loading=true;
+  const scene=BMH.studio3d,viewer=BMH.architectViewer,architect=viewer?.three;
+  const signature=BMH.cinematicSignature();let screenshot;
+  try{if(scene?.scene?.userData?.furnitureLoads)await Promise.allSettled(scene.scene.userData.furnitureLoads);if(viewer?.furnitureReady)await viewer.furnitureReady;if(signature!==BMH.cinematicSignature()||(scene&&scene!==BMH.studio3d)||(viewer&&viewer!==BMH.architectViewer))throw new Error('Góc nhìn đã đổi. Hãy tạo lại phối cảnh.');if(scene?.scene)scene.renderer.render(scene.scene,scene.camera);architect?.render?.(true);screenshot=scene?scene.renderer.domElement.toDataURL('image/jpeg',.8):architect?.renderer?architect.renderer.domElement.toDataURL('image/jpeg',.8):await BMH.capturePlanReference();}catch(err){BMH.cinematicRender.loading=false;BMH.cinematicRender.error=err.message||'Không tạo được ảnh tham chiếu.';BMH.toast(BMH.cinematicRender.error);return;}
+  const p=BMH.state.project;
   const selectedMaterials=Object.fromEntries(Object.entries(p.materials.choices||{}).map(([cat,id])=>{const name=(BMH.MATERIALS[cat]||[]).find(x=>x.id===id)?.name||id,sku=p.dataEngine?.materialOverrides?.[id]?.sku;return [cat,sku?`${name} · SKU ${sku}`:name];}));
   const focus=BMH.state.ui?.sceneFocus||'all',focusedRoom=focus.startsWith('room:')?p.plan.rooms.find(r=>r.id===focus.slice(5)):null;
-  const payload={image:screenshot,project:{referenceKind:scene||BMH.lightPreviewSvg?'model':'drawing',style:p.style,styleDescription:BMH.houseStyle?.()?.description||'',view:{kind:focusedRoom?'room':focus.startsWith('floor:')?'floor':'house',roomName:focusedRoom?.name||'',roomType:focusedRoom?.type||'',floor:focusedRoom?.floor??(focus.startsWith('floor:')?Number(focus.slice(6)):0)},site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,floorHeight:p.site.floorHeight,slabThickness:p.site.slabThickness,ceilingDrop:p.site.ceilingDrop,frontDirection:p.site.frontDirection},materials:{choices:selectedMaterials},rooms:p.plan.rooms.map(r=>({id:r.id,furnitureRotation:r.furnitureRotation,stairDirection:r.stairDirection,furniture:BMH.roomFurnitureLayout?.(r)||[],name:r.name,type:r.type,floor:r.floor,x:r.x,y:r.y,w:r.w,h:r.h})),openings:(p.plan.openings||[]).map(o=>({roomId:o.roomId,kind:o.kind,side:o.side,offset:o.offset,width:o.width,height:o.height,sill:o.sill}))}};
+  const payload={image:screenshot,project:{referenceKind:scene||architect?.renderer||(BMH.lightPreviewSvg&&BMH.state.ui.step===6)?'model':'drawing',style:p.style,styleDescription:BMH.houseStyle?.()?.description||'',view:{kind:focusedRoom?'room':focus.startsWith('floor:')?'floor':'house',roomName:focusedRoom?.name||'',roomType:focusedRoom?.type||'',floor:focusedRoom?.floor??(focus.startsWith('floor:')?Number(focus.slice(6)):0)},site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,floorHeight:p.site.floorHeight,slabThickness:p.site.slabThickness,ceilingDrop:p.site.ceilingDrop,frontDirection:p.site.frontDirection},materials:{choices:selectedMaterials},rooms:p.plan.rooms.map(r=>({id:r.id,furnitureRotation:r.furnitureRotation,stairDirection:r.stairDirection,furniture:BMH.roomFurnitureLayout?.(r)||[],name:r.name,type:r.type,floor:r.floor,x:r.x,y:r.y,w:r.w,h:r.h})),openings:(p.plan.openings||[]).map(o=>({roomId:o.roomId,kind:o.kind,side:o.side,offset:o.offset,width:o.width,height:o.height,sill:o.sill}))}};
   BMH.cinematicRender.loading=true;BMH.cinematicRender.error='';BMH.render({preserveScroll:true});
   try{
     const r=await fetch('/api/gemini-render',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||`Render HTTP ${r.status}`);if(!data.image)throw new Error('Gemini không trả về ảnh render.');
     if(signature!==BMH.cinematicSignature()){BMH.toast('Thiết kế đã đổi khi đang render. Hãy tạo lại phối cảnh cho phương án mới.');BMH.cinematicRender.error='Thiết kế đã thay đổi; dừng tạo ảnh để tránh dùng sai phương án.';return;}
     const mime=['image/jpeg','image/png','image/webp'].includes(data.mimeType)?data.mimeType:'image/jpeg';
     BMH.cinematicRender.dataUrl=`data:${mime};base64,${data.image}`;BMH.cinematicRender.signature=signature;BMH.cinematicRender.views[signature]=BMH.cinematicRender.dataUrl;BMH.cinematicRender.generatedAt=data.generatedAt||new Date().toISOString();BMH.cinematicRender.error='';
-  }catch(err){BMH.cinematicRender.error=err.message||String(err);BMH.toast(BMH.cinematicRender.error);}finally{BMH.cinematicRender.loading=false;BMH.render({preserveScroll:true});}
+  }catch(err){BMH.cinematicRender.loading=false;BMH.cinematicRender.error=err.message||String(err);BMH.toast(BMH.cinematicRender.error);}finally{BMH.cinematicRender.loading=false;BMH.render({preserveScroll:true});}
 };
