@@ -956,7 +956,7 @@ document.addEventListener('change',e=>{
 
 BMH.renderStudio=BMH.render;
 BMH.render=(opts={})=>{
-  if(BMH.state?.ui?.onboardingComplete===false&&typeof BMH.v6SetupScreen==='function'){
+  if(BMH.state?.ui?.onboardingComplete===false&&!(BMH.state.ui.homeMode==='finish'&&BMH.state.ui.step===1)&&typeof BMH.v6SetupScreen==='function'){
     const sy=window.scrollY,appRoot=BMH.root();BMH.disposeStudio3D?.();
     if(appRoot)appRoot.innerHTML=BMH.v6SetupScreen();
     document.documentElement.dataset.version=BMH.VERSION;

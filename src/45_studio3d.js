@@ -20,7 +20,9 @@ BMH.scenePalette = () => {
   const frame=c.door==='premium-door'?0x292d2c:0x3f4543;
   const styleAccent=BMH.houseStyle?.()?.accent;
   const accent=styleAccent?parseInt(styleAccent.slice(1),16):tier==='premium'?0x7a604d:tier==='economy'?0x9a8a73:0x806a57;
-  return {floor,wall,frame,accent,glass:0xa9c8cf,green:0x6f8666,ground:0xd9d1c3};
+  const focus=BMH.state.ui.sceneFocus||'all',finish=BMH.finishPalette?.(focus.startsWith('room:')?focus.slice(5):null);
+  const color=(role,original)=>/^#[0-9a-f]{6}$/i.test(finish?.[role]||'')?parseInt(finish[role].slice(1),16):original;
+  return {floor:color('floor',floor),wall:color('wall',wall),frame,accent:color('accent',accent),glass:0xa9c8cf,green:0x6f8666,ground:0xd9d1c3};
 };
 // The plan and its openings are the only geometry source. Shared room edges are
 // merged before cutting openings so a neighbouring wall cannot cover a door.
@@ -50,8 +52,9 @@ BMH.scenePlanGeometry = (plan, floor) => {
       const a=points[i-1],b=points[i],mid=(a+b)/2;
       if(b-a<.015||!edge.ranges.some(([s,e])=>s<=mid&&e>=mid))continue;
       const opening=edge.openings.find(o=>o.a<=mid&&o.b>=mid);
-      const count=(plan.wallContext||rooms).filter(r=>Number(r.floor)===floor&&(edge.horizontal?((Math.abs(r.y-edge.axis)<.001||Math.abs(r.y+r.h-edge.axis)<.001)&&mid>r.x-.001&&mid<r.x+r.w+.001):((Math.abs(r.x-edge.axis)<.001||Math.abs(r.x+r.w-edge.axis)<.001)&&mid>r.y-.001&&mid<r.y+r.h+.001))).length;
-      walls.push({thickness:count>1?.12:.22,horizontal:edge.horizontal,axis:edge.axis,a,b,kind:opening?.kind||'wall',height:opening?.height,sill:opening?.sill});
+      const adjacent=(plan.wallContext||rooms).filter(r=>Number(r.floor)===floor&&(edge.horizontal?((Math.abs(r.y-edge.axis)<.001||Math.abs(r.y+r.h-edge.axis)<.001)&&mid>r.x-.001&&mid<r.x+r.w+.001):((Math.abs(r.x-edge.axis)<.001||Math.abs(r.x+r.w-edge.axis)<.001)&&mid>r.y-.001&&mid<r.y+r.h+.001)));
+      const count=adjacent.length;
+      walls.push({roomIds:adjacent.map(r=>r.id),thickness:count>1?.12:.22,horizontal:edge.horizontal,axis:edge.axis,a,b,kind:opening?.kind||'wall',height:opening?.height,sill:opening?.sill});
     }
   }
   return {rooms,walls};
@@ -108,6 +111,8 @@ BMH.mountStudio3D = async () => {
   const warm=new THREE.PointLight(0xffb66a,BMH.state.ui.sceneTheme==='night'?8:0,24,2);warm.position.set(0,4,1);scene.add(warm);
   const mat=(color,rough=.75,metal=.02,opacity=1)=>new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal,transparent:opacity<1,opacity});
   const mats={wall:mat(BMH.state.project.materials?.choices?.paint?palette.wall:BMH.houseStyle?.()?.wall||palette.wall,.82),slab:mat(0xd8d0c4,.88),frame:mat(palette.frame,.45,.22),glass:new THREE.MeshPhysicalMaterial({color:palette.glass,roughness:.08,metalness:.05,transmission:.3,transparent:true,opacity:.62}),floor:mat(palette.floor,.62),accent:mat(palette.accent,.65),ground:mat(palette.ground,1),green:mat(palette.green,.95),dark:mat(0x4a4f4b,.75),roof:mat(0x303c48,.85),rail:mat(0x9a7b49,.37,.62)};
+  const finishMaterials=new Map();
+  const roomMaterial=(role,id,fallback)=>{const hex=BMH.finishPalette?.(id)?.[role];if(!/^#[0-9a-f]{6}$/i.test(hex||''))return fallback;const key=role+hex;if(!finishMaterials.has(key)){const m=fallback.clone();m.color.set(hex);finishMaterials.set(key,m);}return finishMaterials.get(key);};
   const makeTexture=(kind,color)=>{const c=document.createElement('canvas');c.width=c.height=256;const ctx=c.getContext('2d');ctx.fillStyle=color;ctx.fillRect(0,0,256,256);if(kind==='tile'){ctx.strokeStyle='#a99e8b';ctx.lineWidth=2;ctx.strokeRect(1,1,254,254);ctx.strokeStyle='#ffffff22';for(let i=0;i<12;i++){ctx.beginPath();ctx.moveTo(i*23,0);ctx.lineTo(i*17+30,256);ctx.stroke();}}else{for(let i=0;i<64;i++){ctx.strokeStyle=i%3?'#3b281814':'#ffffff18';ctx.beginPath();ctx.moveTo(0,i*4);ctx.bezierCurveTo(70,i*4+7,180,i*4-5,256,i*4);ctx.stroke();}}const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(kind==='tile'?3:2,kind==='tile'?3:2);return t;};
   mats.floor.map=makeTexture('tile',new THREE.Color(palette.floor).getStyle());mats.floor.color.set(0xffffff);mats.accent.map=makeTexture('wood',new THREE.Color(palette.accent).getStyle());mats.accent.color.set(0xffffff);
   const addBox=(w,h,d,x,y,z,material=mats.wall)=>{const g=new THREE.BoxGeometry(w,h,d),o=new THREE.Mesh(g,material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o;};
@@ -119,7 +124,7 @@ BMH.mountStudio3D = async () => {
   const tree=(x,z,s=1)=>{addBox(.18*s,1.5*s,.18*s,x,.75*s,z,mat(0x6d523d,.95));const crown=new THREE.Mesh(new THREE.SphereGeometry(.72*s,16,12),mats.green);crown.position.set(x,1.85*s,z);crown.castShadow=true;scene.add(crown);};
   tree(-W/2-2,-D/2+3,.9);tree(W/2+2,D/2-3,1.05);tree(W/2+2,-D/2+6,.7);
   const roomFurniture=(r,y)=>{
-    if(BMH.addRoomSceneFurniture)return BMH.addRoomSceneFurniture(r,y,THREE,scene,mats,BMH.state.project.site);
+    if(BMH.addRoomSceneFurniture)return BMH.addRoomSceneFurniture(r,y,THREE,scene,{...mats,accent:roomMaterial('accent',r.id,mats.accent)},BMH.state.project.site);
     const cx=r.x+r.w/2-W/2,cz=r.y+r.h/2-D/2;
     if(r.type==='living'){
       addBox(Math.min(2.2,r.w*.58),.34,.78,cx,y+.28,cz+.32,mat(0xa78b76,.91));
@@ -163,7 +168,7 @@ BMH.mountStudio3D = async () => {
     for(const r of geometry.rooms){
       const cx=r.x+r.w/2-W/2,cz=r.y+r.h/2-D/2;
       const slab=BMH.projectLevels().slab,holes=BMH.stairFloorHoles?.(f)||[],panels=BMH.slabPanels?.(r,holes)||[{x:r.x,y:r.y,w:r.w,d:r.h}];
-      for(const panel of panels){const mesh=addBox(panel.w,slab,panel.d,panel.x+panel.w/2-W/2,base+slab/2,panel.y+panel.d/2-D/2,r.type==='bath'?mat(0xc8cfcb,.5):mats.floor);mesh.userData={kind:'floor-slab',roomId:r.id,floor:f};}
+      for(const panel of panels){const mesh=addBox(panel.w,slab,panel.d,panel.x+panel.w/2-W/2,base+slab/2,panel.y+panel.d/2-D/2,roomMaterial('floor',r.id,r.type==='bath'?mat(0xc8cfcb,.5):mats.floor));mesh.userData={kind:'floor-slab',roomId:r.id,floor:f};}
       roomFurniture(r,base+slab);
       if(focus==='all'&&(r.type!=='stairs'||f===floors-1)){
         const nextHoles=BMH.stairFloorHoles?.(f+1)||[],ceilingPanels=BMH.slabPanels?.(r,nextHoles)||[{x:r.x,y:r.y,w:r.w,d:r.h}];
@@ -174,7 +179,9 @@ BMH.mountStudio3D = async () => {
       const len=w.b-w.a,mid=(w.a+w.b)/2,wallT=w.thickness||.12;
       const x=w.horizontal?mid-W/2:w.axis-W/2;
       const z=w.horizontal?w.axis-D/2:mid-D/2;
-      const segment=(h,cy,material=mats.wall)=>addBox(w.horizontal?len:wallT,h,w.horizontal?wallT:len,x,base+cy,z,material);
+      const paintedRoom=roomFocus?.id||(w.roomIds||[]).find(id=>BMH.state.project.materials.finish?.rooms?.[id]);
+      const wallMaterial=roomMaterial('wall',paintedRoom,mats.wall);
+      const segment=(h,cy,material=wallMaterial)=>{const mesh=addBox(w.horizontal?len:wallT,h,w.horizontal?wallT:len,x,base+cy,z,material);mesh.userData={kind:'wall',roomIds:w.roomIds||[],floor:f};return mesh;};
       const near=(roomFocus||floorFocus!==null)&&(w.horizontal?w.axis<=Math.min(...geometry.rooms.map(r=>r.y))+.02:w.axis>=Math.max(...geometry.rooms.map(r=>r.x+r.w))-.02);
       if(near){segment(.35,.175);continue;}
       if(w.kind==='door'){
@@ -231,7 +238,7 @@ BMH.mountStudio3D = async () => {
 BMH.resetStudio3D = () => {const s=BMH.studio3d;if(!s)return;s.state.yaw=Math.PI-.55;s.state.pitch=s.state.defaultPitch;s.state.dist=s.state.defaultDist;s.state.target.copy(s.state.defaultTarget);s.state.updateCamera();};
 BMH.cinematicSignature = (focus=BMH.state.ui?.sceneFocus||'all') => {
   const p=BMH.state.project;
-  return JSON.stringify({style:p.style,focus,site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,floorHeight:p.site.floorHeight,slabThickness:p.site.slabThickness,ceilingDrop:p.site.ceilingDrop,frontDirection:p.site.frontDirection},materials:p.materials?.choices||{},productCodes:Object.values(p.materials?.choices||{}).map(id=>[id,p.dataEngine?.materialOverrides?.[id]?.sku||'']),tier:p.materials?.tier,rooms:p.plan.rooms.map(r=>[r.id,r.floor,r.name,r.type,r.x,r.y,r.w,r.h,r.furnitureRotation,r.stairDirection]),openings:(p.plan.openings||[]).map(o=>[o.floor,o.roomId,o.kind,o.side,o.offset,o.width,o.height,o.sill])});
+  return JSON.stringify({style:p.style,focus,finish:p.materials?.finish||{},site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,floorHeight:p.site.floorHeight,slabThickness:p.site.slabThickness,ceilingDrop:p.site.ceilingDrop,frontDirection:p.site.frontDirection},materials:p.materials?.choices||{},productCodes:Object.values(p.materials?.choices||{}).map(id=>[id,p.dataEngine?.materialOverrides?.[id]?.sku||'']),tier:p.materials?.tier,rooms:p.plan.rooms.map(r=>[r.id,r.floor,r.name,r.type,r.x,r.y,r.w,r.h,r.furnitureRotation,r.stairDirection]),openings:(p.plan.openings||[]).map(o=>[o.floor,o.roomId,o.kind,o.side,o.offset,o.width,o.height,o.sill])});
 };
 BMH.generateCinematicRender = async () => {
   if(BMH.cinematicRender.loading)return;
@@ -242,6 +249,7 @@ BMH.generateCinematicRender = async () => {
   const p=BMH.state.project;
   const selectedMaterials=Object.fromEntries(Object.entries(p.materials.choices||{}).map(([cat,id])=>{const name=(BMH.MATERIALS[cat]||[]).find(x=>x.id===id)?.name||id,sku=p.dataEngine?.materialOverrides?.[id]?.sku;return [cat,sku?`${name} · SKU ${sku}`:name];}));
   const focus=BMH.state.ui?.sceneFocus||'all',focusedRoom=focus.startsWith('room:')?p.plan.rooms.find(r=>r.id===focus.slice(5)):null;
+  selectedMaterials.finishPalette=JSON.stringify(BMH.finishPalette?.(focusedRoom?.id)||{});
   const payload={image:screenshot,project:{referenceKind:scene||architect?.renderer||(BMH.lightPreviewSvg&&BMH.state.ui.step===6)?'model':'drawing',style:p.style,styleDescription:BMH.houseStyle?.()?.description||'',view:{kind:focusedRoom?'room':focus.startsWith('floor:')?'floor':'house',roomName:focusedRoom?.name||'',roomType:focusedRoom?.type||'',floor:focusedRoom?.floor??(focus.startsWith('floor:')?Number(focus.slice(6)):0)},site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,floorHeight:p.site.floorHeight,slabThickness:p.site.slabThickness,ceilingDrop:p.site.ceilingDrop,frontDirection:p.site.frontDirection},materials:{choices:selectedMaterials},rooms:p.plan.rooms.map(r=>({id:r.id,furnitureRotation:r.furnitureRotation,stairDirection:r.stairDirection,furniture:BMH.roomFurnitureLayout?.(r)||[],name:r.name,type:r.type,floor:r.floor,x:r.x,y:r.y,w:r.w,h:r.h})),openings:(p.plan.openings||[]).map(o=>({roomId:o.roomId,kind:o.kind,side:o.side,offset:o.offset,width:o.width,height:o.height,sill:o.sill}))}};
   BMH.cinematicRender.loading=true;BMH.cinematicRender.error='';BMH.render({preserveScroll:true});
   try{

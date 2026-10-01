@@ -1,4 +1,5 @@
 import materialImageHandler from '../server/_material_image.mjs';
+import homeFinishHandler from '../server/_home_finish_handler.mjs';
 import aiHealthHandler from '../server/_ai_health_handler.mjs';
 import materialCatalogHandler from '../server/_material_catalog_handler.mjs';
 import materialSearchHandler from '../server/_material_search_handler.mjs';
@@ -143,6 +144,7 @@ export const maxDuration=180;
 export default async function handler(req,res){
   const url=new URL(req.url||'/', 'https://buildmyhome.local'),operation=req.query?.operation||url.searchParams.get('operation')||({'/api/ai-health':'health','/api/material-catalog':'catalog','/api/material-search':'materials','/api/material-image':'material-image'}[url.pathname]);
   if(operation==='material-image')return materialImageHandler(req,res);
+  if(operation==='home-finish')return homeFinishHandler(req,res);
   if(operation==='health')return aiHealthHandler(req,res);
   if(operation==='catalog')return materialCatalogHandler(req,res);
   if(operation==='materials')return materialSearchHandler(req,res);

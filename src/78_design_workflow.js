@@ -109,17 +109,18 @@ BMH.addRoomSceneFurniture=(r,base,THREE,scene,mats,site)=>{
 BMH.lightPreviewAngle=BMH.lightPreviewAngle??35;BMH.lightPreviewZoom=BMH.lightPreviewZoom??1;
 BMH.lightPreviewSvg=()=>{
  const p=BMH.state.project,l=BMH.projectLevels(),focus=BMH.state.ui.sceneFocus||'all',room=focus.startsWith('room:')?p.plan.rooms.find(r=>r.id===focus.slice(5)):null;
+ const finish=BMH.finishPalette?.(room?.id),wallColor=/^#[0-9a-f]{6}$/i.test(finish?.wall||'')?finish.wall:'#e9e6df';
  const floors=room?[room.floor]:focus.startsWith('floor:')?[Number(focus.slice(6))]:Array.from({length:l.floors},(_,i)=>i),a=BMH.lightPreviewAngle*Math.PI/180,c=Math.cos(a),s=Math.sin(a),faces=[],labels=[];
  const project=(x,y,h)=>{x-=p.site.width/2;y-=p.site.depth/2;const rx=x*c-y*s,ry=x*s+y*c;return {x:rx,y:ry*.52-h*.85,z:ry+h*.02};};
  const face=(ps,color)=>{const q=ps.map(v=>project(...v));faces.push({z:q.reduce((sum,v)=>sum+v.z,0)/q.length,color,points:q.map(v=>v.x.toFixed(4)+','+v.y.toFixed(4)).join(' ')});};
  const block=(x,y,w,d,base,height,color)=>{face([[x,y,base+height],[x+w,y,base+height],[x+w,y+d,base+height],[x,y+d,base+height]],color);face([[x,y+d,base],[x+w,y+d,base],[x+w,y+d,base+height],[x,y+d,base+height]],color);face([[x+w,y,base],[x+w,y+d,base],[x+w,y+d,base+height],[x+w,y,base+height]],color);};
  for(const f of floors){const rooms=BMH.floorRooms(f).filter(r=>!room||r.id===room.id),base=f*l.floorHeight;
-  for(const r of rooms){for(const panel of (BMH.slabPanels?.(r,BMH.stairFloorHoles?.(f)||[])||[{x:r.x,y:r.y,w:r.w,d:r.h}]))block(panel.x,panel.y,panel.w,panel.d,base,.12,'#ddd4c4');if(r.type==='garage'){const v=BMH.garageVehicle(r);if(v)block(v.x,v.y,v.w,v.d,base+.15,.8,'#567a86');}for(const i of BMH.roomFurnitureLayout(r))block(i.x,i.y,i.w,i.d,base+.12+i.base,i.h,/toilet|Sink|shower/.test(i.model)?'#f5f4ee':'#ab8d6d');if(r.type==='stairs'){for(const part of BMH.stairGeometry?.(r)||[])block(part.x,part.y,part.w,part.d,base+part.base,part.h,'#a18d74');}const pos=project(r.x+r.w/2,r.y+r.h/2,base+.25);labels.push('<text x="'+pos.x+'" y="'+pos.y+'" font-size=".22" text-anchor="middle">'+BMH.esc(r.name)+'</text>');}
+  for(const r of rooms){for(const panel of (BMH.slabPanels?.(r,BMH.stairFloorHoles?.(f)||[])||[{x:r.x,y:r.y,w:r.w,d:r.h}]))block(panel.x,panel.y,panel.w,panel.d,base,.12,BMH.finishPalette?.(r.id)?.floor||'#ddd4c4');if(r.type==='garage'){const v=BMH.garageVehicle(r);if(v)block(v.x,v.y,v.w,v.d,base+.15,.8,'#567a86');}for(const i of BMH.roomFurnitureLayout(r))block(i.x,i.y,i.w,i.d,base+.12+i.base,i.h,/toilet|Sink|shower/.test(i.model)?'#f5f4ee':'#ab8d6d');if(r.type==='stairs'){for(const part of BMH.stairGeometry?.(r)||[])block(part.x,part.y,part.w,part.d,base+part.base,part.h,'#a18d74');}const pos=project(r.x+r.w/2,r.y+r.h/2,base+.25);labels.push('<text x="'+pos.x+'" y="'+pos.y+'" font-size=".22" text-anchor="middle">'+BMH.esc(r.name)+'</text>');}
   const geometry=BMH.scenePlanGeometry({rooms,openings:p.plan.openings.filter(o=>!room||o.roomId===room.id),wallContext:p.plan.rooms},f);
   for(const w of geometry.walls){const length=w.b-w.a,t=w.thickness||.12,x=w.horizontal?w.a:w.axis-t/2,y=w.horizontal?w.axis-t/2:w.a,width=w.horizontal?length:t,depth=w.horizontal?t:length;
-   if(w.kind==='door')block(x,y,width,depth,base+w.height,Math.max(.02,l.clearHeight-w.height),'#e9e6df');
-   else if(w.kind==='window'){block(x,y,width,depth,base,w.sill,'#e9e6df');block(x,y,width,depth,base+w.sill,w.height,'#afc8ce');block(x,y,width,depth,base+w.sill+w.height,Math.max(.02,l.clearHeight-w.sill-w.height),'#e9e6df');}
-   else block(x,y,width,depth,base,Math.min(l.clearHeight,room?1.1:1.4),'#e9e6df');
+   if(w.kind==='door')block(x,y,width,depth,base+w.height,Math.max(.02,l.clearHeight-w.height),wallColor);
+   else if(w.kind==='window'){block(x,y,width,depth,base,w.sill,wallColor);block(x,y,width,depth,base+w.sill,w.height,'#afc8ce');block(x,y,width,depth,base+w.sill+w.height,Math.max(.02,l.clearHeight-w.sill-w.height),wallColor);}
+   else block(x,y,width,depth,base,Math.min(l.clearHeight,room?1.1:1.4),wallColor);
   }
  }
  faces.sort((x,y)=>x.z-y.z);const points=faces.flatMap(f=>f.points.split(' ').map(p=>p.split(',').map(Number)));if(!points.length)return '<p>Tầng này chưa có phòng. Thêm phòng ở Tab 4.</p>';
