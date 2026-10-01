@@ -94,6 +94,11 @@ BMH.openingSheetSvg=(floor=BMH.state.ui.planner.floor,page=0)=>{
  return BMH.sheetFrame({code:'KT-C'+(floor+1)+'-'+String(index+1).padStart(2,'0'),title:'BẢNG CỬA / Ô MỞ · TẦNG '+(floor+1),scale:0,content,page:index+1,pages,caption:'Đơn vị: mm. Cửa và kích thước được lấy trực tiếp từ phương án; quy cách sản phẩm cần xác nhận.'});
 };
 BMH.stairDrawingRooms=()=>BMH.state.project.plan.rooms.filter(r=>r.type==='stairs'&&r.floor<Number(BMH.state.project.site.floors)-1&&(BMH.stairGeometry?.(r)||[]).length).sort((a,b)=>a.floor-b.floor||a.x-b.x||a.y-b.y);
+BMH.stairDrawingSelection=(floor=BMH.state.ui.planner.floor)=>{
+ const rooms=BMH.stairDrawingRooms(),ui=BMH.state.ui.planner,outgoing=rooms.filter(r=>Number(r.floor)===Number(floor)),incoming=rooms.filter(r=>Number(r.floor)===Number(floor)-1),near=outgoing.length?outgoing:incoming;
+ const room=near.find(r=>r.id===ui.stairDrawingId)||near[0]||rooms.find(r=>r.id===ui.stairDrawingId)||rooms[0]||null;
+ return {rooms,room,index:room?rooms.findIndex(r=>r.id===room.id):-1};
+};
 BMH.stairDetailSheetSvg=(room,index=0)=>{
  const s=BMH.stairSpec(room),parts=BMH.stairGeometry(room),l=BMH.projectLevels(),run=s.alongX?room.w:room.h,scale=BMH.drawingScale(Math.max(room.w,run)+2.4,Math.max(room.h,s.rise)+2.2,148,193),font=scale*.0025,t=BMH.sheetText;
  const line=(x,y,a,b)=>'<line x1="'+x+'" y1="'+y+'" x2="'+a+'" y2="'+b+'" stroke="#536557" stroke-width=".02"/>',text=(x,y,value,extra='')=>'<text x="'+x+'" y="'+y+'" '+(extra.includes('text-anchor')?'':'text-anchor="middle" ')+extra+'>'+BMH.esc(value)+'</text>',rect=(x,y,w,h,fill='#f3f1e9')=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="#47574a" stroke-width=".025"/>',dim=(x,y,a,b,value)=>line(x,y,a,b)+line(x-.06,y+.06,x+.06,y-.06)+line(a-.06,b+.06,a+.06,b-.06)+text((x+a)/2,(y+b)/2-.12,value);
@@ -113,9 +118,13 @@ BMH.architecturalSheets=()=>{
 };
 BMH.architecturalPrintHtml=()=>'<html lang="vi"><head><meta charset="utf-8"><title>BMH · Bộ bản vẽ A3</title><style>@page{size:A3 landscape;margin:0}*{box-sizing:border-box}body{margin:0;background:#e9ece6;font-family:Arial,sans-serif}.drawing-print-toolbar{padding:18px;text-align:center;position:sticky;top:0;background:#fff;border-bottom:1px solid #ddd}.drawing-print-toolbar button{padding:12px 20px;border:0;border-radius:8px;background:#526449;color:#fff;font-size:16px;cursor:pointer}.drawing-print-page{width:420mm;height:297mm;margin:12px auto;page-break-after:always;background:white}.drawing-print-page:last-child{page-break-after:auto}.drawing-print-page>svg{display:block;width:420mm;height:297mm}@media print{body{background:white}.drawing-print-toolbar{display:none}.drawing-print-page{margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body><div class="drawing-print-toolbar"><button onclick="window.print()">In / Lưu bộ bản vẽ PDF</button><p>Khổ A3 ngang · tỷ lệ 100% · không bật vừa trang · tắt đầu/chân trang.</p></div>'+BMH.architecturalSheets().map(s=>'<section class="drawing-print-page">'+s.svg+'</section>').join('')+'</body></html>';
 BMH.printArchitecturalDrawings=()=>{const w=window.open('','_blank');if(!w)return BMH.toast('Cho phép mở cửa sổ để xem và in bộ bản vẽ.');w.document.write(BMH.architecturalPrintHtml());w.document.close();};
-BMH.currentDrawingSvg=()=>{const ui=BMH.state.ui.planner;return ui.view==='elevation'?BMH.elevationSvg():ui.view==='section'?BMH.sectionSvg():ui.view==='openings'?BMH.openingSheetSvg(ui.floor,ui.openingPage):BMH.drawingSheetSvg(ui.floor);};
+BMH.currentDrawingSvg=()=>{const ui=BMH.state.ui.planner;if(ui.view==='stairs'){const {room,index}=BMH.stairDrawingSelection();return room?BMH.stairDetailSheetSvg(room,index):null;}return ui.view==='elevation'?BMH.elevationSvg():ui.view==='section'?BMH.sectionSvg():ui.view==='openings'?BMH.openingSheetSvg(ui.floor,ui.openingPage):BMH.drawingSheetSvg(ui.floor);};
 BMH.exportPlanDxf=()=>BMH.download(`BMH-mat-bang-tang-${BMH.state.ui.planner.floor+1}-mm.dxf`,BMH.planDxf(),'application/dxf');
-BMH.exportPlanSvg=()=>{const ui=BMH.state.ui.planner,name=ui.view==='elevation'?'mat-dung':ui.view==='section'?'mat-cat-A-A':ui.view==='openings'?'bang-cua-tang-'+(ui.floor+1)+'-'+((ui.openingPage||0)+1):'mat-bang-tang-'+(ui.floor+1);BMH.download('BMH-'+name+'-A3.svg',BMH.currentDrawingSvg(),'image/svg+xml');};
+BMH.exportPlanSvg=()=>{
+ const ui=BMH.state.ui.planner,svg=BMH.currentDrawingSvg();if(!svg)return BMH.toast('Chưa có vế thang nối tầng để xuất. Thêm cầu thang vào mặt bằng trước.');
+ const name=ui.view==='elevation'?'mat-dung':ui.view==='section'?'mat-cat-A-A':ui.view==='openings'?'bang-cua-tang-'+(ui.floor+1)+'-'+((ui.openingPage||0)+1):ui.view==='stairs'?'chi-tiet-thang-'+(BMH.stairDrawingSelection().index+1):'mat-bang-tang-'+(ui.floor+1);
+ BMH.download('BMH-'+name+'-A3.svg',svg,'image/svg+xml');
+};
 
 BMH.exportProjectJson = () => BMH.download('BMH-project.json',JSON.stringify(BMH.state,null,2),'application/json');
 BMH.importProjectJson = async file => {

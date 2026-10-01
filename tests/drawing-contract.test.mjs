@@ -52,3 +52,19 @@ test('large opening schedules paginate every row without truncation',()=>{
  const sheets=[0,1,2].map(i=>b.openingSheetSvg(0,i));assert.deepEqual(sheets.map(s=>(s.match(/>D\d+<|>W\d+</g)||[]).length),[24,24,5]);assert.equal(new Set(sheets.flatMap(s=>s.match(/>D\d+<|>W\d+</g)||[])).size,53);assert.match(sheets[2],/Trang 3\/3/);assert.doesNotMatch(sheets.join(''),/NaN|undefined/);
 });
 test('drawing scale fits A3 with integer scale selection and a measurable known span',()=>{const b=client();for(const [w,h] of [[25,10],[12,18],[80,40]]){const s=b.drawingScale(w,h);assert.ok(Number.isInteger(s)&&s>0);assert.ok(w*1000/s<=308&&h*1000/s<=218);}});
+
+test('stair drawing selection follows the floor, survives a deleted flight and excludes the top-floor well',()=>{
+ const b=client();b.state.project.site.floors=3;b.projectLevels=()=>({floors:3,floorHeight:3.6,slab:.18,ceilingDrop:.2,clearHeight:3.22});
+ const stairs=[0,1,2].map(floor=>({id:'s'+floor,name:'Thang',type:'stairs',floor,x:0,y:4,w:4,h:4,stairDirection:0}));b.state.project.plan.rooms.push(...stairs);
+ b.state.ui.planner.stairDrawingId='s0';assert.equal(b.stairDrawingSelection(1).room.id,'s1');assert.equal(b.stairDrawingSelection(2).room.id,'s1');assert.equal(b.stairDrawingRooms().length,2);
+ b.state.project.plan.rooms=b.state.project.plan.rooms.filter(r=>r.id!=='s1');b.state.ui.planner.floor=1;b.state.ui.planner.stairDrawingId='deleted';assert.equal(b.stairDrawingSelection().room.id,'s0');
+ b.state.project.plan.rooms=b.state.project.plan.rooms.filter(r=>r.type!=='stairs');b.state.ui.planner.view='stairs';assert.equal(b.stairDrawingSelection().index,-1);assert.equal(b.currentDrawingSvg(),null);
+ let downloads=0,message='';b.download=()=>downloads++;b.toast=text=>message=text;b.exportPlanSvg();assert.equal(downloads,0);assert.match(message,/Chưa có vế thang/);
+});
+
+test('the active stair sheet and its download reflect the selected flight and measured edits',()=>{
+ const b=client(),stairs=[{id:'left',name:'Thang A',type:'stairs',floor:0,x:0,y:4,w:3,h:4,stairDirection:0},{id:'right',name:'Thang B',type:'stairs',floor:0,x:4,y:4,w:4,h:4,stairDirection:0}];b.state.project.plan.rooms.push(...stairs);
+ Object.assign(b.state.ui.planner,{view:'stairs',floor:0,stairDrawingId:'right'});const svg=b.currentDrawingSvg();assert.match(svg,/data-sheet-code="KT-CT-02"/);assert.match(svg,/Thang B/);
+ let download;b.download=(name,content,type)=>download={name,content,type};b.exportPlanSvg();assert.equal(download.name,'BMH-chi-tiet-thang-2-A3.svg');assert.equal(download.content,svg);assert.equal(download.type,'image/svg+xml');
+ b.state.ui.planner.zoom=2;assert.equal(b.currentDrawingSvg(),svg);const revision=b.drawingRevision();stairs[1].stairDirection=90;assert.notEqual(b.drawingRevision(),revision);assert.notEqual(b.currentDrawingSvg(),svg);assert.doesNotMatch(b.currentDrawingSvg(),/NaN|undefined/);
+});

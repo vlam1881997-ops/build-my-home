@@ -49,6 +49,15 @@ test('locked floors survive a saved project reload',()=>{
   assert.deepEqual([...restored.state.project.plan.lockedFloors],[1]);
 });
 
+test('active opening and stair drawings survive project reload with their selected sheet',()=>{
+  for(const view of ['openings','stairs']){
+    const {BMH}=stateEngine();
+    Object.assign(BMH.state.ui.planner,{view,floor:1,openingPage:2,stairDrawingId:'r5',sectionCutX:2.3});BMH.save();
+    const restored=stateEngine(BMH.state).BMH.state.ui.planner;
+    assert.equal(restored.view,view);assert.equal(restored.floor,1);assert.equal(restored.openingPage,2);assert.equal(restored.stairDrawingId,'r5');assert.equal(restored.sectionCutX,2.3);
+  }
+});
+
 test('AI sees the pin and only the Site Intelligence scan matching that pin',()=>{
   const p={site:{lat:21.0321,lng:105.8546,road:3.5,province:'TP. Hồ Chí Minh',district:'Phường cũ',pinAddressNeedsReview:true,geoSource:'Ghim bản đồ'},
     siteIntelligence:{status:'ready',key:'21.0321,105.8546:3.5',elevation_m:null,fetchedAt:'2026-09-26T00:00:00Z',flood:{level:'Chưa đủ dữ liệu'},transport:{surchargePct:8}},
