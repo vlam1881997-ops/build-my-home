@@ -417,7 +417,7 @@ BMH.autoPlanConcept = (strategy=BMH.state.project.site.designStrategy||'climate'
   const childNames=(h.children||[]).map((c,i)=>c.name||`Con ${i+1}`), upperBeds=['Phòng ngủ chính',...childNames.map(n=>`Phòng ${n}`)];
   const bedroomTarget=Math.max(1,BMH.householdNeeds?.().bedrooms||upperBeds.length);
   while(upperBeds.length+(hasRelative?1:0)<bedroomTarget)upperBeds.push(`Phòng ngủ ${upperBeds.length+1}`);
-  const hallW=1.2, roomW=W-hallW, stairD=3.2,bathD=1.8,mainD=D-stairD-bathD;
+  const hallW=1.2, roomW=W-hallW, stairD=oneFloor?0:3.2,bathD=1.8,mainD=D-stairD-bathD;
   const groundNames=[['Phòng khách','living'],['Bếp + ăn','kitchen'],...(hasRelative?[['Phòng ông bà','bed']]:[]),...(oneFloor?upperBeds.map(n=>[n,'bed']):[])];
   const maxUpperCount=oneFloor?0:Math.ceil(upperBeds.length/(floors-1));
   if(roomW<2.2||mainD<Math.max(groundNames.length,maxUpperCount)*2.4)return BMH.toast('Khung đất chưa đủ cho các phòng và hành lang 1,2m. Hãy tăng số tầng, điều chỉnh nhu cầu hoặc bố trí thủ công.');
@@ -431,8 +431,8 @@ BMH.autoPlanConcept = (strategy=BMH.state.project.site.designStrategy||'climate'
     const hall=add(f,`Hành lang tầng ${f+1}`,'corridor',x0+roomW,y0,hallW,D);
     if(f===0)door(hall,'north',.5,1.0);
     const bath=add(f,`WC tầng ${f+1}`,'bath',x0,y0+mainD,roomW,bathD);
-    const stairs=add(f,'Cầu thang','stairs',x0,y0+mainD+bathD,roomW,stairD);
-    door(bath);door(stairs);win(bath,'west',.5,.7);
+    door(bath);win(bath,'west',.5,.7);
+    if(!oneFloor){const stairs=add(f,'Cầu thang','stairs',x0,y0+mainD+bathD,roomW,stairD);door(stairs);}
   };
   let bedIndex=0;
   for(let f=0;f<floors;f++){

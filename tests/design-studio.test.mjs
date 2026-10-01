@@ -10,6 +10,10 @@ test('whole design proposals have different valid layouts without changing the c
 test('an impossible envelope does not masquerade as a generated design',()=>{
  const b=client(),before=JSON.stringify(b.state.project.plan);b.buildableEnvelope=()=>({buildWidth:2,buildDepth:6,side:0,front:0});assert.equal(b.generateAutoPlanSnapshot('balanced'),null);assert.equal(b.generateDesignKits(),false);assert.equal(JSON.stringify(b.state.project.plan),before);
 });
+test('single-storey proposals use the floor area for rooms without an unused staircase',()=>{
+ const b=client();b.state.project.site.floors=1;b.householdNeeds=()=>({bedrooms:2});b.state.project.household={children:[{name:'Con'}],relatives:[]};b.buildableEnvelope=()=>({buildWidth:4.6,buildDepth:12,originX:.2,originY:2});
+ assert.equal(b.generateDesignKits(),true);for(const kit of b.designState().kits){assert.equal(kit.plan.rooms.some(r=>r.type==='stairs'),false);assert.equal(kit.plan.rooms.filter(r=>r.type==='bed').length,2);assert.ok(kit.plan.rooms.every(r=>r.floor===0));assert.equal(b.layoutValid(kit.plan.rooms),true);}
+});
 test('selecting a kit coordinates geometry and all finishes while keeping product SKUs',()=>{
  const b=client(),before=JSON.stringify({plan:b.state.project.plan,style:b.state.project.style,finish:b.state.project.materials.finish});b.generateDesignKits();assert.equal(b.applyDesignKit('B'),true);const p=b.state.project;assert.equal(p.style,'Japandi');assert.equal(p.materials.choices.paint,'my-sku');assert.ok(p.plan.rooms.every(r=>p.materials.finish.rooms[r.id].wall==='#eee6d9'));assert.equal(b.designState().appliedSignature,b.designAppliedKey());assert.equal(b.state.ui.sceneFocus,'all');
  assert.equal(b.restoreDesignKit(),true);assert.equal(JSON.stringify({plan:p.plan,style:p.style,finish:p.materials.finish}),before);assert.equal(p.site.designStrategy,'balanced');

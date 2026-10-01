@@ -44,12 +44,27 @@ BMH.roomFurnitureLayout=r=>{
   if(item.x<r.x+.08||item.y<r.y+.08||item.x+item.w>r.x+r.w-.08||item.y+item.d>r.y+r.h-.08)return;
   if(items.some(o=>o.base+o.h>base+.05&&base+dim.h>o.base+.05&&item.x<o.x+o.w+.05&&item.x+item.w>o.x-.05&&item.y<o.y+o.d+.05&&item.y+item.d>o.y-.05))return;
   const blocked=BMH.state.project.plan.openings.filter(o=>o.roomId===r.id&&o.kind==='door').some(o=>{const g=BMH.openingGeometry(o);if(!g)return false;const c={x:g.x-.45,y:g.y-.45,w:.9,d:.9};return item.x<c.x+c.w&&item.x+item.w>c.x&&item.y<c.y+c.d&&item.y+item.d>c.y;});if(blocked)return;
-  items.push(item);
+  items.push(item);return true;
  };
  if(r.type==='living'){add('loungeDesignSofa',W/2,.58,180);add('tableCoffee',W/2,1.8);add('cabinetTelevision',W/2,D-.38);add('televisionModern',W/2,D-.38,0,.64);add('loungeChair',.65,D/2,90);add('pottedPlant',W-.4,D-.4);}
  if(r.type==='bed'){const model=W>=2.7?'bedDouble':'bedSingle';add(model,W/2,1.26);add('cabinetBed',.4,.4);add('bookcaseClosedWide',W/2,D-.42);add('desk',.8,D/2,90);add('chairDesk',1.7,D/2,90);}
  if(r.type==='kitchen'){add('kitchenSink',.55,.62);add('kitchenStove',1.55,.62);add('kitchenFridge',W-.6,.5);add('table',W/2,D*.65);add('chair',W/2-1.1,D*.65,90);add('chair',W/2+1.1,D*.65,270);add('chair',W/2,D*.65+.8,180);}
- if(r.type==='bath'){add('toilet',.48,.63);add('bathroomSink',W-.48,.44);add('shower',W/2,D-.7);}
+ if(r.type==='bath'){
+  const toilets=[[.48,.63,0],[.60,.45,90],[W-.60,.45,270],[.48,D-.63,180],[W-.48,D-.63,180],[.60,D/2,90],[W-.60,D/2,270]];
+  const showers=[[W/2,D-.7,0],[.68,D-.68,0],[W-.68,D-.68,0],[W/2,.7,180]];
+  const sinks=[[W-.48,.44,0],[W-.48,D-.44,180],[.48,D-.44,180],[W/2,.44,0],[W/2,D-.44,180],[.44,D/2,90],[W-.44,D/2,270],[.44,D*.25,90],[W-.44,D*.25,270],[.44,D*.75,90],[W-.44,D*.75,270]];
+  let best=[];
+  for(const toilet of toilets){
+   for(const shower of showers){
+    items.length=0;add('toilet',...toilet);add('shower',...shower);
+    for(const sink of sinks)if(add('bathroomSink',...sink))break;
+    if(items.length>best.length)best=items.map(i=>({...i}));
+    if(best.length===3)break;
+   }
+   if(best.length===3)break;
+  }
+  items.splice(0,items.length,...best);
+ }
  if(r.type==='balcony'){add('chair',.4,.4);add('pottedPlant',W-.4,D-.4);}
  // Corridors stay clear; stairs use their actual rise in the shared stair model.
  return items;
@@ -85,8 +100,10 @@ BMH.replaceSceneFurniture=(group,model,THREE,scene)=>{
 BMH.addRoomSceneFurniture=(r,base,THREE,scene,mats,site)=>{
  const material=(color,roughness=.75)=>new THREE.MeshStandardMaterial({color,roughness});
  const wood=mats.accent,cloth=material(0xd4c8b8,.96),white=material(0xf4f1e9,.35),dark=mats.dark;
- for(const i of BMH.roomFurnitureLayout(r)){
+ for(const [index,i] of BMH.roomFurnitureLayout(r).entries()){
   const d=BMH.FURNITURE_DIMENSIONS[i.model],g=new THREE.Group();g.position.set(i.x+i.w/2-site.width/2,base+i.base,i.y+i.d/2-site.depth/2);g.rotation.y=-i.rotation*Math.PI/180;
+  const detailed=BMH.createRoomAsset?.(i.model,d,THREE,BMH.sceneAssetMaterials?.(THREE,scene,BMH.finishPalette?.(r.id)||{})||{});
+  if(detailed){g.add(detailed);g.name='furniture-'+r.id+'-'+index;g.userData={id:g.name,kind:'furniture',roomId:r.id,floor:r.floor,model:i.model,source:'parametric',placement:{...i},generic:true};scene.add(g);BMH.addFurnitureContact(THREE,scene,i,base,site);continue;}
   const box=(w,h,depth,x,y,z,m=wood)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,depth),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;g.add(o);return o;};
   const legs=(top,w=d.w,depth=d.d)=>{for(const x of [-w/2+.08,w/2-.08])for(const z of [-depth/2+.08,depth/2-.08])box(.045,top,.045,x,top/2,z,dark);};
   if(/bedDouble|bedSingle/.test(i.model)){box(d.w,.22,d.d,0,.2,0);box(d.w,.13,d.d-.08,0,.38,0,white);box(d.w,.07,d.d*.65,0,.49,d.d*.15,cloth);box(d.w,d.h,.10,0,d.h/2,-d.d/2+.05);for(const x of [-d.w*.24,d.w*.24])box(d.w*.38,.1,.4,x,.49,-d.d*.32,white);}
