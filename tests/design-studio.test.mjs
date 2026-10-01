@@ -26,3 +26,15 @@ test('saved kits and a manually edited plan survive project reload',()=>{
 });
 
 test('standalone drawing previews keep the SVG namespace for all drawing types',()=>{const b=client();b.elevationSvg=()=>'<svg viewBox="0 0 10 10"><rect width="10" height="10"/></svg>';b.sectionSvg=b.elevationSvg;b.drawingSheetSvg=()=>'<svg xmlns="http://www.w3.org/2000/svg"><text>Plan</text></svg>';for(const type of ['plan','elevation','section'])assert.equal((b.designDrawingSvg(type,0).match(/xmlns=/g)||[]).length,1);});
+
+test('design satisfaction persists without granting paid access and expires after edits',()=>{
+ const b=client();b.state.access={paid:false,source:'none'};b.generateDesignKits();b.applyDesignKit('B');assert.equal(b.designSatisfied(),false);assert.equal(b.acceptDesign(),true);const access=JSON.stringify(b.state.access),saved=JSON.parse(JSON.stringify(b.state));assert.equal(b.designSatisfied(),true);
+ const next=client();next.state=saved;assert.equal(next.designSatisfied(),true);assert.equal(JSON.stringify(next.state.access),access);
+ for(const edit of [()=>b.state.project.plan.rooms[0].w-=.1,()=>b.state.project.materials.finish.exterior.wall='#eeeeee',()=>b.state.project.materials.choices.paint='another-sku',()=>b.state.project.household.children[0].name='Khác',()=>{b.state.project.dataEngine={materialOverrides:{[b.state.project.materials.choices.paint]:{sku:'NEW-001'}}};}]){edit();assert.equal(b.designSatisfied(),false);assert.equal(b.acceptDesign(),true);assert.equal(JSON.stringify(b.state.access),access);}
+ assert.match(b.designDecisionHtml(),/data-design-service/);
+ b.state.project.plan.rooms[0].x=-1;assert.equal(b.designSatisfied(),false);assert.equal(b.acceptDesign(),false);assert.doesNotMatch(b.designDecisionHtml(),/data-design-service/);assert.equal(JSON.stringify(b.state.access),access);
+});
+
+test('an empty or partial multi-storey plan cannot be accepted as a complete design',()=>{
+ const b=client();b.state.project.plan.rooms=[];assert.equal(b.acceptDesign(),false);b.state.project.plan.rooms=[{id:'r',floor:0,type:'living',x:0,y:0,w:4,h:4}];assert.equal(b.acceptDesign(),false);b.state.project.site.floors=1;assert.equal(b.acceptDesign(),true);b.state.project.plan.rooms[0].floor=1;assert.equal(b.acceptDesign(),false);
+});
