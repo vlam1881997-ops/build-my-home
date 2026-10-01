@@ -53,6 +53,15 @@ BMH.openingCode = o => {
   return `${o.kind==='door'?'D':'W'}${Math.max(1,list.findIndex(x=>x.id===o.id)+1)}`;
 };
 
+// The same hinge and swing endpoints drive the SVG, DXF and 3D door leaf.
+BMH.doorLeafGeometry = o => {
+ const span=BMH.openingWallSpan(o);if(!span||o.kind!=='door')return null;
+ const horizontal=span.o==='h',right=o.hinge==='right',width=span.b-span.a;
+ const point=a=>horizontal?{x:a,y:span.c}:{x:span.c,y:a};
+ const hinge=point(right?span.b:span.a),closed=point(right?span.a:span.b),normals={north:[0,1],south:[0,-1],west:[1,0],east:[-1,0]},normal=normals[o.side],sign=o.swing==='out'?-1:1;
+ const open={x:hinge.x+normal[0]*sign*width,y:hinge.y+normal[1]*sign*width};
+ return {horizontal,width,hinge,closed,open,sweep:(closed.x-hinge.x)*(open.y-hinge.y)-(closed.y-hinge.y)*(open.x-hinge.x)>0?1:0};
+};
 BMH.openingSvg = o => {
   const r=BMH.state.project.plan.rooms.find(x=>x.id===o.roomId); if(!r)return'';
   const w=Math.min(o.width||.9, o.side==='north'||o.side==='south'?r.w:r.h), off=BMH.clamp(o.offset??.3,0,1), code=BMH.openingCode(o);
@@ -62,11 +71,8 @@ BMH.openingSvg = o => {
     if(o.side==='north'||o.side==='south') return `<g class="opening window"><line class="opening-cut" x1="${x}" y1="${y}" x2="${x+w}" y2="${y}"/><line x1="${x}" y1="${y-.06}" x2="${x+w}" y2="${y-.06}"/><line x1="${x}" y1="${y+.06}" x2="${x+w}" y2="${y+.06}"/>${tag(x+w/2,y+(o.side==='north'?-.18:.18))}</g>`;
     return `<g class="opening window"><line class="opening-cut" x1="${x}" y1="${y}" x2="${x}" y2="${y+w}"/><line x1="${x-.06}" y1="${y}" x2="${x-.06}" y2="${y+w}"/><line x1="${x+.06}" y1="${y}" x2="${x+.06}" y2="${y+w}"/>${tag(x+(o.side==='west'?-.18:.18),y+w/2)}</g>`;
   }
-  const rr=w;
-  if(o.side==='north')return `<g class="opening door"><line class="opening-cut" x1="${x}" y1="${y}" x2="${x+rr}" y2="${y}"/><line class="door-leaf" x1="${x}" y1="${y}" x2="${x}" y2="${y+rr}"/><path d="M${x+rr} ${y} A${rr} ${rr} 0 0 0 ${x} ${y+rr}"/>${tag(x+rr/2,y-.20)}</g>`;
-  if(o.side==='south')return `<g class="opening door"><line class="opening-cut" x1="${x}" y1="${y}" x2="${x+rr}" y2="${y}"/><line class="door-leaf" x1="${x}" y1="${y}" x2="${x}" y2="${y-rr}"/><path d="M${x+rr} ${y} A${rr} ${rr} 0 0 1 ${x} ${y-rr}"/>${tag(x+rr/2,y+.20)}</g>`;
-  if(o.side==='west')return `<g class="opening door"><line class="opening-cut" x1="${x}" y1="${y}" x2="${x}" y2="${y+rr}"/><line class="door-leaf" x1="${x}" y1="${y}" x2="${x+rr}" y2="${y}"/><path d="M${x} ${y+rr} A${rr} ${rr} 0 0 1 ${x+rr} ${y}"/>${tag(x-.20,y+rr/2)}</g>`;
-  return `<g class="opening door"><line class="opening-cut" x1="${x}" y1="${y}" x2="${x}" y2="${y+rr}"/><line class="door-leaf" x1="${x}" y1="${y}" x2="${x-rr}" y2="${y}"/><path d="M${x} ${y+rr} A${rr} ${rr} 0 0 0 ${x-rr} ${y}"/>${tag(x+.20,y+rr/2)}</g>`;
+  const leaf=BMH.doorLeafGeometry(o);if(!leaf)return '';
+  return `<g class="opening door" data-opening-id="${BMH.esc(o.id)}"><line class="opening-cut" x1="${x}" y1="${y}" x2="${x+(leaf.horizontal?w:0)}" y2="${y+(leaf.horizontal?0:w)}"/><line class="door-leaf" x1="${leaf.hinge.x}" y1="${leaf.hinge.y}" x2="${leaf.open.x}" y2="${leaf.open.y}"/><path d="M${leaf.closed.x} ${leaf.closed.y} A${w} ${w} 0 0 ${leaf.sweep} ${leaf.open.x} ${leaf.open.y}"/>${tag(x+(leaf.horizontal?w/2:(o.side==='west'?-.25:.25)),y+(leaf.horizontal?(o.side==='north'?-.25:.25):w/2))}</g>`;
 };
 
 BMH.wallSegments = (floor=BMH.state.ui.planner.floor) => {
@@ -278,10 +284,14 @@ BMH.circulationSvg = floor => {
   const bad=a.unreachable.map(r=>`<rect class="unreachable-room" x="${r.x+.08}" y="${r.y+.08}" width="${Math.max(.1,r.w-.16)}" height="${Math.max(.1,r.h-.16)}" rx=".08"/>`).join('');
   return `<g class="circulation-layer">${lines}${entries}${bad}</g>`;
 };
-BMH.sectionLineSvg = (floor,Hview) => {
-  const rooms=BMH.floorRooms(floor), stair=rooms.find(r=>r.type==='stairs'), y=stair?stair.y+stair.h/2:Math.min(Hview-.7,Math.max(.7,(Math.max(...rooms.map(r=>r.y+r.h),6))/2));
-  const W=BMH.state.project.site.width;return `<g class="section-cut-line"><line x1="-.42" y1="${y}" x2="${W+.42}" y2="${y}"/><circle cx="-.62" cy="${y}" r=".18"/><circle cx="${W+.62}" cy="${y}" r=".18"/><text x="-.62" y="${y+.05}">A</text><text x="${W+.62}" y="${y+.05}">A</text><path d="M-.44 ${y}l.18-.10v.20z"/><path d="M${W+.44} ${y}l-.18-.10v.20z"/></g>`;
+BMH.sectionCutX = () => {
+ const p=BMH.state.project,manual=Number(BMH.state.ui.planner.sectionCutX),stairs=p.plan.rooms.find(r=>r.floor===0&&r.type==='stairs'),flight=stairs?(BMH.stairGeometry?.(stairs)||[]).filter(q=>q.base===0):[],step=flight[Math.floor(flight.length/2)];
+ return BMH.clamp(BMH.state.ui.planner.sectionCutX!=null&&Number.isFinite(manual)?manual:step?step.x+step.w/2:stairs?stairs.x+stairs.w/2:Number(p.site.width)/2,0,Number(p.site.width));
 };
+BMH.sectionLineSvg = (floor,Hview) => {
+ const x=BMH.sectionCutX();return `<g class="section-line" fill="none" stroke="#6b766e" stroke-width=".035"><path stroke-dasharray=".35 .12 .08 .12" d="M${x} -.4V${Hview+.4}"/><path d="M${x} -.4l.25 .14-.25 .14zM${x} ${Hview+.4}l.25-.14-.25-.14z" fill="#4c5b51"/><text x="${x+.35}" y="-.35" stroke="none">A</text><text x="${x+.35}" y="${Hview+.5}" stroke="none">A</text></g>`;
+};
+
 BMH.roomTechnicalStats = r => {const os=BMH.state.project.plan.openings.filter(o=>o.roomId===r.id),env=BMH.roomEnvironment?BMH.roomEnvironment(r):{daylight:0,ventilation:0};return {area:r.w*r.h,perimeter:2*(r.w+r.h),doors:os.filter(o=>o.kind==='door').length,windows:os.filter(o=>o.kind==='window').length,daylight:env.daylight,ventilation:env.ventilation};};
 
 BMH.planSnapshot = () => structuredClone(BMH.state.project.plan);

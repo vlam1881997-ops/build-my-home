@@ -30,7 +30,12 @@ BMH.slabPanels=(r,holes=[])=>{
 };
 BMH.stairFloorHoles=floor=>BMH.floorRooms(floor-1).filter(r=>r.type==='stairs').map(r=>({x:r.x+.1,y:r.y+.1,w:r.w-.2,h:r.h-.2})).filter(h=>h.w>0&&h.h>0);
 const stairFurnitureSvg=BMH.furnitureSvg;
-BMH.furnitureSvg=r=>r.type!=='stairs'?stairFurnitureSvg(r):'<g class="furniture stairs-symbol" stroke="#697d70" stroke-width=".025" fill="#dedbd1">'+BMH.stairGeometry(r).map(p=>'<rect x="'+p.x+'" y="'+p.y+'" width="'+p.w+'" height="'+p.d+'"/>').join('')+'<text x="'+(r.x+r.w/2)+'" y="'+(r.y+r.h/2)+'" font-size=".22" text-anchor="middle">'+(Number(r.floor)>=BMH.projectLevels().floors-1?'Ô THANG TỪ TẦNG DƯỚI':BMH.stairSpec(r).shape==='u'?'THANG U · CHIẾU NGHỈ':'THANG THẲNG')+'</text><title>'+BMH.esc('Cao bậc '+BMH.stairSpec(r).riser.toFixed(3)+' m · mặt bậc '+BMH.stairSpec(r).tread.toFixed(3)+' m · '+BMH.stairSpec(r).warning)+'</title></g>';
+BMH.furnitureSvg=r=>{
+ if(r.type!=='stairs')return stairFurnitureSvg(r);const parts=BMH.stairGeometry(r),spec=BMH.stairSpec(r),centers=parts.map(p=>({x:p.x+p.w/2,y:p.y+p.d/2})),selected=spec.shape==='u'?[0,spec.first-2,spec.first-1,spec.first,parts.length-1]:[0,parts.length-1],points=selected.map(i=>centers[i]).filter(Boolean),last=points.at(-1),before=points.at(-2);let arrow='';
+ if(last&&before){const a=Math.atan2(last.y-before.y,last.x-before.x),dx=Math.cos(a),dy=Math.sin(a);arrow='<polyline points="'+points.map(p=>p.x+','+p.y).join(' ')+'" fill="none" stroke="#425a49" stroke-width=".04"/><path d="M'+last.x+' '+last.y+'l'+(-dx*.18+dy*.09)+' '+(-dy*.18-dx*.09)+'l'+(-dy*.18)+' '+(dx*.18)+'z" fill="#425a49"/>';}
+ return '<g class="furniture stairs-symbol" stroke="#697d70" stroke-width=".025" fill="#efede5">'+parts.map((p,i)=>'<rect x="'+p.x+'" y="'+p.y+'" width="'+p.w+'" height="'+p.d+'"/>'+([0,parts.length-1,spec.first-1].includes(i)?'<text data-step-number="'+(i+1)+'" x="'+(p.x+p.w*.72)+'" y="'+(p.y+p.d*.60)+'" font-size=".17" fill="#425a49" stroke="none" text-anchor="middle">'+(i+1)+'</text>':'')).join('')+arrow+(parts.length?'':'<rect x="'+(r.x+.1)+'" y="'+(r.y+.1)+'" width="'+(r.w-.2)+'" height="'+(r.h-.2)+'" fill="none" stroke-dasharray=".12 .08"/><text x="'+(r.x+r.w/2)+'" y="'+(r.y+r.h/2)+'" font-size=".18" text-anchor="middle">Ô THANG TỪ TẦNG DƯỚI</text>')+'<title>'+BMH.esc('Cao bậc '+spec.riser.toFixed(3)+' m · mặt bậc '+spec.tread.toFixed(3)+' m · '+spec.warning)+'</title></g>';
+};
+
 const stairSceneFurniture=BMH.addRoomSceneFurniture;
 BMH.addRoomSceneFurniture=(r,base,THREE,scene,mats,site)=>{
  if(r.type!=='stairs')return stairSceneFurniture(r,base,THREE,scene,mats,site);

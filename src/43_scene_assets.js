@@ -1,50 +1,36 @@
 /* Detailed generic furniture in metres. These are visual assets, not product SKUs. */
-BMH.sceneSurfaceTexture = (THREE, kind) => {
-  if (typeof document === 'undefined' || typeof document.createElement !== 'function') return null;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 256;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return null;
-  const pixels = ctx.createImageData(256, 256);
-  for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
-    const noise = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
-    const n = noise - Math.floor(noise);
-    let value = 248;
-    if (kind === 'wood') {
-      const grain = Math.sin(y * .27 + Math.sin(x * .013) * 3 + Math.sin(x * .07) * .7);
-      value = 245 + grain * 4 + n * 3;
-    } else if (kind === 'fabric') {
-      value = 227 + (x % 4 < 2 ? 11 : 0) + (y % 4 < 2 ? 10 : 0) + n * 5;
-    } else if (kind === 'tile') {
-      value = x < 2 || y < 2 ? 196 : 247 + Math.sin(x * .07 + Math.sin(y * .02) * 3) * 3 + n * 3;
-    } else if (kind === 'plaster') value = 245 + n * 10;
-    const offset = (y * 256 + x) * 4;
-    pixels.data[offset] = pixels.data[offset + 1] = pixels.data[offset + 2] = value;
-    pixels.data[offset + 3] = 255;
-  }
-  ctx.putImageData(pixels, 0, 0);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  texture.anisotropy = 4;
-  return texture;
+BMH.roomSurfaceStyle=id=>{
+ const p=BMH.state.project,r=p.plan.rooms.find(r=>r.id===id),surface=BMH.finishPalette?.(id)?.surface;
+ return ['wood','tile','stone'].includes(surface)?surface:/Japandi/i.test(p.style||'')&&['living','bed'].includes(r?.type)?'wood':'tile';
+};
+BMH.sceneSurfaceTexture = (THREE, kind, channel='color') => {
+ if(typeof document==='undefined'||typeof document.createElement!=='function')return null;
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=256;const ctx=canvas.getContext('2d');if(!ctx)return null;
+ const pixels=ctx.createImageData(256,256);
+ for(let y=0;y<256;y++)for(let x=0;x<256;x++){
+  const raw=Math.sin(x*12.9898+y*78.233)*43758.5453,n=raw-Math.floor(raw),grain=Math.sin(y*.20+Math.sin(x*.018)*2+Math.sin(x*.067)*.5);let value=248,height=.5,rough=.85;
+  if(kind==='wood'||kind==='plank'||kind==='woodVertical'){const cross=kind==='woodVertical'?x:y,along=kind==='woodVertical'?y:x,vein=Math.sin(cross*.20+Math.sin(along*.024)*2+Math.sin(along*.071)*.65),ring=Math.sin(cross*.72+Math.sin(along*.017)*5);height=.5+vein*.06+n*.025;value=240+vein*5+ring*1.2+n*3;rough=.75+n*.055;if(kind==='plank'&&y<2){value=205;height=.1;rough=.95;}}
+  else if(kind==='fabric'){const weave=(x%4<2?1:0)+(y%4<2?1:0);value=222+weave*12+n*5;height=.3+weave*.22+n*.08;rough=.95;}
+  else if(kind==='tile'||kind==='stone'){const vein=Math.sin(x*.033+Math.sin(y*.023)*3),seam=kind==='tile'&&(x<2||y<2);value=seam?190:245+vein*6+n*3;height=seam?.08:.55+n*.02;rough=seam?.95:kind==='stone'?.78:.65;}
+  else{value=244+n*10;height=.35+n*.35;rough=.86+n*.08;}
+  if(channel==='height')value=height*255;else if(channel==='roughness')value=rough*255;
+  const i=(y*256+x)*4;pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=value;pixels.data[i+3]=255;
+ }
+ ctx.putImageData(pixels,0,0);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=channel==='color'?THREE.SRGBColorSpace:THREE.NoColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.anisotropy=4;texture.userData={generic:true,kind,channel};return texture;
 };
 
 BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
   const cache = scene.userData.finishMaterials ||= new Map();
-  const key = JSON.stringify([finish.wall, finish.floor, finish.accent, finish.fabric]);
+  const key = JSON.stringify([finish.wall, finish.floor, finish.accent, finish.fabric, finish.surface]);
   if (cache.has(key)) return cache.get(key);
   const textures = scene.userData.surfaceTextures ||= new Map();
-  const texture = kind => {
-    if (!textures.has(kind)) textures.set(kind, BMH.sceneSurfaceTexture(THREE, kind));
-    return textures.get(kind);
-  };
+  const texture = (kind,channel='color') => {const key=kind+':'+channel;if(!textures.has(key))textures.set(key,BMH.sceneSurfaceTexture(THREE,kind,channel));return textures.get(key);};
   const make = (color, roughness, kind, scale) => {
     const m = new THREE.MeshStandardMaterial({color, roughness});
     if (kind) {
       m.map = texture(kind);
       if (m.map) {
-        m.bumpMap = m.map;
+        m.bumpMap = texture(kind,'height');m.roughnessMap=texture(kind,'roughness');
         m.bumpScale = kind === 'fabric' ? .0012 : kind === 'wood' ? .0006 : .0003;
       }
       m.userData.surfaceScale = scale;
@@ -54,11 +40,14 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
   const wood = finish.accent || '#98785a';
   const materials = {
     wood: make(wood, .58, 'wood', [.65, .38]),
+    slattedWood: make(wood, .7, 'woodVertical', [.22, 2.4]),
     fabric: make(finish.fabric || '#d1c7b6', .96, 'fabric', [.18, .18]),
     linen: make('#f5f1e6', .98, 'fabric', [.18, .18]),
     pillow: make(finish.accent || '#7b8469', .97, 'fabric', [.18, .18]),
     wall: make(finish.wall || '#eee8dd', .9, 'plaster', [.35, .35]),
-    tile: make(finish.floor || '#d8d1c3', .48, 'tile', [.6, .6]),
+    tile: make(finish.floor || '#d8d1c3', .6, 'tile', [.6, .6]),
+    plank: make(finish.floor || '#d3b998', .62, 'plank', [1.6,.18]),
+    floorStone: make(finish.floor || '#d8d1c3', .72, 'stone', [.8,.8]),
     rug: make('#d4ccba', .99, 'fabric', [.2, .2]),
     stone: make('#e7e1d6', .38, 'plaster', [.5, .5]),
     white: make('#f4f2e9', .28),
@@ -69,6 +58,7 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
     glass: new THREE.MeshPhysicalMaterial({color:'#dce5df', roughness:.06, transparent:true, opacity:.25, metalness:.08}),
     screen: new THREE.MeshPhysicalMaterial({color:'#26383a', roughness:.15, clearcoat:.9}),
   };
+  materials.floor=finish.surface==='wood'?materials.plank:finish.surface==='stone'?materials.floorStone:materials.tile;
   for (const material of Object.values(materials)) material.envMapIntensity = BMH.state?.ui?.sceneTheme === 'night' ? .15 : .4;
   cache.set(key, materials);
   return materials;
@@ -86,6 +76,20 @@ BMH.sceneSurfaceUvs = (geometry, material, origin = {x:0,y:0,z:0}) => {
   }
   uv.needsUpdate = true;
   return geometry;
+};
+
+// Soft window treatments stay inside the measured room and attach to its actual opening.
+BMH.addWindowDrapery=(THREE,scene,r,base,site,overview=false)=>{
+ if(!['living','bed'].includes(r.type))return;
+ const levels=BMH.projectLevels(),materials=BMH.sceneAssetMaterials(THREE,scene,BMH.finishPalette?.(r.id)||{});
+ for(const o of BMH.state.project.plan.openings.filter(o=>o.roomId===r.id&&o.kind==='window')){
+  const span=BMH.openingWallSpan(o);if(!span)continue;const horizontal=span.o==='h',inward={north:1,south:-1,west:1,east:-1}[o.side],top=Math.min(levels.slab+levels.clearHeight,levels.slab+(o.sill??.9)+(o.height||1.4)+.15),bottom=levels.slab+.06,width=Math.min(.32,(span.b-span.a)*.20),near=overview&&['north','east'].includes(o.side);
+  const material=materials.linen.clone();material.side=THREE.DoubleSide;if(near)material.clippingPlanes=[new THREE.Plane(new THREE.Vector3(0,-1,0),base+.85)];
+  for(const start of [span.a+.02,span.b-width-.02]){
+   const geometry=new THREE.PlaneGeometry(width,top-bottom,20,2),positions=geometry.attributes.position;
+   for(let i=0;i<positions.count;i++){const along=positions.getX(i)+width/2+start,h=positions.getY(i)+(top+bottom)/2,z=.05+Math.sin((along-start)/width*Math.PI*10)*.018;positions.setXYZ(i,horizontal?along-site.width/2:span.c+inward*z-site.width/2,base+h,horizontal?span.c+inward*z-site.depth/2:along-site.depth/2);}geometry.computeVertexNormals();BMH.sceneSurfaceUvs(geometry,material);const curtain=new THREE.Mesh(geometry,material);curtain.name='drapery-'+o.id+'-'+start;curtain.userData={kind:'window-drapery',roomId:r.id,openingId:o.id,floor:r.floor,generic:true};curtain.castShadow=curtain.receiveShadow=true;scene.add(curtain);
+  }
+ }
 };
 
 BMH.roomInteriorCamera = (room, items = BMH.roomFurnitureLayout(room)) => {

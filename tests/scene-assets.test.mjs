@@ -50,6 +50,14 @@ test('surface texture scale remains in metres across differently sized adjoining
   const a=left.find(p=>p.x===2&&p.z===0),c=right.find(p=>p.x===2&&p.z===0);assert.ok(a&&c);assert.equal(a.u,c.u);assert.equal(a.v,c.v);
 });
 
+test('surface channels keep colour separate from relief and roughness across finish changes',()=>{
+ const {b,context}=client();context.document.createElement=()=>{const canvas={};canvas.getContext=()=>({createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData:p=>{canvas.pixels=p.data;}});return canvas;};
+ const scene=new THREE.Scene(),wood=b.sceneAssetMaterials(THREE,scene,{surface:'wood'}),stone=b.sceneAssetMaterials(THREE,scene,{surface:'stone'});
+ assert.equal(wood.floor,wood.plank);assert.equal(stone.floor,stone.floorStone);assert.notEqual(wood,stone);assert.equal(wood.plank.map,stone.plank.map);
+ for(const m of [wood.plank,wood.slattedWood,stone.floorStone,wood.fabric]){assert.equal(m.map.colorSpace,THREE.SRGBColorSpace);assert.equal(m.bumpMap.colorSpace,THREE.NoColorSpace);assert.equal(m.roughnessMap.colorSpace,THREE.NoColorSpace);assert.notEqual(m.map,m.bumpMap);assert.notEqual(m.bumpMap,m.roughnessMap);assert.notDeepEqual(m.map.image.pixels,m.roughnessMap.image.pixels);assert.notDeepEqual(m.bumpMap.image.pixels,m.roughnessMap.image.pixels);}
+ assert.deepEqual(Array.from(wood.plank.userData.surfaceScale),[1.6,.18]);assert.deepEqual(Array.from(stone.floorStone.userData.surfaceScale),[.8,.8]);
+});
+
 test('room camera selects clear space inside the room for all furniture orientations',()=>{
   const {b}=client();
   for(const type of ['living','bed','kitchen','bath'])for(const rotation of [0,90,180,270]){

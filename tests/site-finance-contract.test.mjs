@@ -216,13 +216,13 @@ test('dossier ZIP contains the original construction evidence bytes',async()=>{
   let downloaded=null;
   const bytes=new Uint8Array([0x25,0x50,0x44,0x46,0x00,0xff]);
   const BMH={
-    state:{project:{site:{floors:1}}},isUnlocked:()=>true,
+    state:{project:{site:{floors:1},plan:{rooms:[],openings:[]}}},isUnlocked:()=>true,
     createDossierSnapshot:()=>({evidence:[{id:'evidence-1',stage:'mep',name:'kiem-tra.pdf',type:'application/pdf',size:bytes.length,addedAt:'2026-09-26T00:00:00Z'}],boq:[],materials:[],cashflow:[],mep:[]}),
     evidenceGet:async()=>new Blob([bytes]),planSvg:()=>'<svg/>',elevationSvg:()=>'<svg/>',sectionSvg:()=>'<svg/>',realDataExport:()=>({}),
     download:(name,blob)=>{downloaded={name,blob};},toast:()=>{}
   };
   vm.runInNewContext(fs.readFileSync(new URL('../src/40_exports.js',import.meta.url),'utf8'),{BMH,TextEncoder,Uint8Array,Blob,JSON,Math,Number,String,Intl});
-  BMH.drawingSheetSvg=()=>'<svg/>';BMH.planDxf=()=> '0\r\nEOF\r\n';
+  BMH.drawingSheetSvg=()=>'<svg/>';BMH.openingSheetSvg=()=>'<svg/>';BMH.planDxf=()=> '0\r\nEOF\r\n';
   BMH.dossierWorkbook=()=>'<Workbook/>';
   BMH.dossierPrintHtml=()=>'<html/>';
   await BMH.exportDossierBundle();
