@@ -16,6 +16,7 @@ const tail=`
 })();
 `;
 let js=banner+jsFiles.map(f=>`\n/* ---- ${f} ---- */\n`+fs.readFileSync(path.join(src,f),'utf8')).join('\n')+tail;
+js=js.replace("'use strict';","'use strict';\nconst BMH_CATALOG_DATA="+JSON.stringify(JSON.parse(fs.readFileSync(path.join(root,'assets/materials/official-catalog.json'),'utf8')))+";");
 const googleMapsKey=String(process.env.BMH_GOOGLE_MAPS_API_KEY||'').replace(/[^A-Za-z0-9_\-]/g,'');
 js=js.replaceAll('__BMH_GOOGLE_MAPS_API_KEY__',googleMapsKey);
 fs.rmSync(dist,{recursive:true,force:true});fs.mkdirSync(dist,{recursive:true});

@@ -2,7 +2,7 @@ import {lookup} from 'node:dns/promises';
 import {isIP} from 'node:net';
 import {publicHttps} from './_public_web.mjs';
 import {apiError} from './_lib.mjs';
-const allowed=['dongtam.com.vn','jotun.com','eurowindow.biz','inax.com.vn','rangdong.com.vn'];
+const allowed=['dongtam.com.vn','jotun.com','eurowindow.biz','inax.com.vn','rangdong.com.vn','ancuong.com','vinhtuong.com','cadivi.vn','binhminhplastic.com.vn','ximanghatienkiengiang.vn','hoaphat.com.vn','hoasengroup.vn','sika.com','sika.scene7.com','storage.sudospaces.com'];
 const cache=new Map();
 export function officialImageUrl(value){const url=publicHttps(value);if(!url)return '';const u=new URL(url);return allowed.some(d=>u.hostname===d||u.hostname.endsWith('.'+d))&&!/\.svg(?:$|\?)/i.test(u.pathname)?url:'';}
 const privateIP=ip=>isIP(ip)===6?/^::1$|^::ffff:|^f[cd]|^fe[89ab]/i.test(ip):/^(0|10|127|169\.254|192\.168|172\.(1[6-9]|2\d|3[01])|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7]))\./.test(ip);
@@ -20,7 +20,7 @@ export default async function materialImageHandler(req,res){
      if([301,302,303,307,308].includes(r.status)){current=officialImageUrl(new URL(r.headers.get('location')||'',current).href);if(!current)throw Error('Nguồn ảnh chuyển hướng không hợp lệ.');continue;}
      const type=(r.headers.get('content-type')||'').split(';')[0];if(!r.ok||!['image/jpeg','image/png','image/webp'].includes(type))throw Error('Nguồn chưa trả ảnh sản phẩm hợp lệ.');
      let size=0,chunks=[];for await(const chunk of r.body){size+=chunk.length;if(size>1500000)throw Error('Ảnh nguồn quá lớn.');chunks.push(Buffer.from(chunk));}
-     const bytes=Buffer.concat(chunks);if(bytes.length<20)throw Error('Ảnh nguồn rỗng.');row={bytes,type,at:Date.now()};if(cache.size>=20)cache.delete(cache.keys().next().value);cache.set(url,row);break;
+     const bytes=Buffer.concat(chunks);if(bytes.length<20)throw Error('Ảnh nguồn rỗng.');row={bytes,type,at:Date.now()};if(cache.size>=100)cache.delete(cache.keys().next().value);cache.set(url,row);break;
     }
    }finally{clearTimeout(timer);}
   }

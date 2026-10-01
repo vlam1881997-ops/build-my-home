@@ -39,7 +39,7 @@ BMH.defaultState = () => ({
   meta:{savedAt:null}
 });
 
-BMH.DYNAMIC_STATE_PATHS=new Set(['project.site.mapCenter','project.aiScan.result','project.dataEngine.materialOverrides','project.dataEngine.costSources','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence']);
+BMH.DYNAMIC_STATE_PATHS=new Set(['project.materials.choices','project.site.mapCenter','project.aiScan.result','project.dataEngine.materialOverrides','project.dataEngine.costSources','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence']);
 BMH.mergeState = (base, incoming) => {
   const isPlain=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
   if(!isPlain(incoming)) return structuredClone(base);
@@ -124,6 +124,8 @@ BMH.normalizeState = () => {
   if(!BMH.state.project.materials||typeof BMH.state.project.materials!=='object')BMH.state.project.materials=structuredClone(base.project.materials);
   if(!BMH.state.project.aiScan||typeof BMH.state.project.aiScan!=='object')BMH.state.project.aiScan=structuredClone(base.project.aiScan);
   else {const a=BMH.state.project.aiScan,b=base.project.aiScan;for(const [k,v] of Object.entries(b))if(!(k in a))a[k]=structuredClone(v);if(!a.result||typeof a.result!=='object'||Array.isArray(a.result))a.result={};if(!['reference','my_home'].includes(a.intent))a.intent='reference';}
+  const materialCategories=new Set(['floor','cement','steel','waterproof','paint','mep','door','sanitary','roof','insulation','lighting','cabinetry']);
+  BMH.state.project.materials.choices={...base.project.materials.choices,...Object.fromEntries(Object.entries(BMH.state.project.materials.choices||{}).filter(([k,v])=>materialCategories.has(k)&&typeof v==='string'&&v.length<=120))};
   if(!['basic','recommended','robust'].includes(BMH.state.project.materials.climatePackage))BMH.state.project.materials.climatePackage='recommended';
   if(!BMH.state.project.performance||typeof BMH.state.project.performance!=='object')BMH.state.project.performance=structuredClone(base.project.performance);
   if(!BMH.state.project.checklist||typeof BMH.state.project.checklist!=='object')BMH.state.project.checklist=structuredClone(base.project.checklist);
@@ -162,7 +164,7 @@ BMH.normalizeState = () => {
   if(!['rect','custom'].includes(s.lotMode))s.lotMode='rect';
   s.useParcelGeometry=s.useParcelGeometry===true;s.frontEdge=Math.max(0,Math.floor(Number(s.frontEdge)||0));
   s.floorHeight=BMH.clamp(Number(s.floorHeight)||3.4,2.4,6);s.slabThickness=BMH.clamp(Number(s.slabThickness)||.14,.08,.5);s.ceilingDrop=BMH.clamp(Number(s.ceilingDrop)||0,0,1);if(s.floorHeight-s.slabThickness-s.ceilingDrop<2.1)s.ceilingDrop=Math.max(0,s.floorHeight-s.slabThickness-2.1);
-  if(!['existing','architect3d'].includes(BMH.state.ui.architectureEngine))BMH.state.ui.architectureEngine='existing';
+  BMH.state.ui.architectureEngine='existing'; // Migrate saved experimental viewers to the supported renderer.
   if(!Array.isArray(s.lotPoints))s.lotPoints=[];
   s.lotPoints=s.lotPoints.filter(p=>p&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng))).slice(0,256).map(p=>({lat:Number(p.lat),lng:Number(p.lng)}));
   if(!['dimensions','drawn','geojson-user'].includes(s.lotSource))s.lotSource=s.lotMode==='custom'?'drawn':'dimensions';

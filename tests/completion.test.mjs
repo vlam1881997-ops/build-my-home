@@ -14,7 +14,7 @@ test('Studio registry exposes parcel presets, real product research and Gemini d
  vm.runInNewContext(source,{BMH,document:{addEventListener(){}},queueMicrotask(){}});
  assert.match(BMH.SCREENS[0](),/data-ai-health/);
  assert.match(BMH.SCREENS[1](),/data-parcel-preset="l"/);
- assert.match(BMH.SCREENS[4](),/Tên hãng, mã gạch/);
+ assert.match(BMH.materialCatalogHtml('floor'),/data-material-filter/);
 });
 test('product metadata does not turn missing photos into the product page URL',()=>{
  assert.equal(pageMetadata('<h1>SKU123</h1>','https://shop.example/item','SKU123').imageUrl,'');
@@ -37,7 +37,7 @@ test('planner zoom edits the existing SVG without rendering and preserves pointe
  const BMH={state:{ui:{planner:{zoom:1}}},clamp:(n,a,b)=>Math.min(b,Math.max(a,n)),save:()=>saves++};vm.runInNewContext(snippet,{BMH,document:{querySelector:()=>svg},setTimeout:()=>0,clearTimeout(){}});BMH.zoomPlanner(2);assert.equal(attrs.viewBox,'5 2.5 10 5');assert.equal(BMH.state.ui.planner.zoom,2);BMH.fitPlanner();assert.equal(attrs.viewBox,'0 0 20 10');assert.equal(BMH.state.ui.planner.zoom,1);assert.equal(saves,1);
 });
 test('real product selection stores SKU and unit through the existing persistence container',()=>{
- const source=fs.readFileSync('src/75_completion.js','utf8'),snippet=source.slice(source.indexOf('BMH.restoreWebMaterials='),source.indexOf('BMH.searchMaterials='));const state={project:{materials:{choices:{}},dataEngine:{materialOverrides:{}}}},BMH={state,v6MatMeta:{sanitary:['x','x']},MATERIALS:{},dataEngineState:()=>state.project.dataEngine,save(){},render(){}};vm.runInNewContext(snippet,{BMH});BMH.adoptWebMaterial({id:'actual-sku',category:'sanitary',sku:'AC-959VAN',name:'INAX',price:8690000,unit:'bộ',productUrl:'https://www.inax.com.vn/products/toilet/ac-959van/'});assert.equal(state.project.materials.choices.sanitary,'actual-sku');assert.equal(state.project.dataEngine.materialOverrides['actual-sku'].unit,'bộ');assert.equal(BMH.MATERIALS.sanitary[0].price,0); // No silent conversion from per-unit to per-square-metre pricing.
+ const source=fs.readFileSync('src/75_completion.js','utf8'),snippet=source.slice(source.indexOf('BMH.restoreWebMaterials='),source.indexOf('BMH.searchMaterials='));const state={project:{materials:{choices:{}},dataEngine:{materialOverrides:{}}}},BMH={state,v6MatMeta:{sanitary:['x','x']},MATERIALS:{},dataEngineState:()=>state.project.dataEngine,save(){},render(){},toast(){}};vm.runInNewContext(snippet,{BMH});BMH.adoptWebMaterial({id:'actual-sku',category:'sanitary',sku:'AC-959VAN',name:'INAX',price:8690000,unit:'bộ',productUrl:'https://www.inax.com.vn/products/toilet/ac-959van/'});assert.equal(state.project.materials.choices.sanitary,'actual-sku');assert.equal(state.project.dataEngine.materialOverrides['actual-sku'].unit,'bộ');assert.equal(BMH.MATERIALS.sanitary[0].price,0); // No silent conversion from per-unit to per-square-metre pricing.
 });
 test('render accepts current Interactions image outputs and plan reference instructions',()=>{
  assert.equal(extractRenderedImage({outputs:[{type:'image',mime_type:'image/png',data:'A'.repeat(128)}]}).mimeType,'image/png');assert.match(renderRequestPayload({image:'data:image/png;base64,'+'A'.repeat(128),project:{referenceKind:'drawing'}}).prompt,/floor plan as a layout guide/);
@@ -58,3 +58,9 @@ test('actual Three scene mounts with framed openings, ceiling slabs and a camera
 });
 test('official image endpoint rejects arbitrary hosts, credentials and SVG sources',async()=>{const {officialImageUrl}=await import('../server/_material_image.mjs');assert.ok(officialImageUrl('https://dongtam.com.vn/wp-content/uploads/test.jpg'));for(const url of ['https://dongtam.com.vn.evil.test/photo.jpg','https://user:pass@dongtam.com.vn/x.jpg','http://dongtam.com.vn/x.jpg','https://127.0.0.1/x.jpg','https://dongtam.com.vn/x.svg'])assert.equal(officialImageUrl(url),'');});
 test('product photo uses the matching SKU image over an unrelated social preview',()=>{const m=pageMetadata('<meta property="og:image" content="https://dongtam.com.vn/wrong.jpg"><img alt="6060MARMOL002" src="https://dongtam.com.vn/6060MARMOL002.jpg">','https://dongtam.com.vn/san-pham/product/','6060MARMOL002');assert.equal(m.imageUrl,'https://dongtam.com.vn/6060MARMOL002.jpg');});
+
+test('all twelve catalog groups have several sourced choices with stable IDs and no invented prices',async()=>{
+ const {officialMaterials}=await import('../server/_material_catalog.mjs'),catalog=JSON.parse(fs.readFileSync('assets/materials/official-catalog.json','utf8')),ids=new Set();
+ for(const c of ['floor','cement','steel','waterproof','paint','mep','door','sanitary','roof','insulation','lighting','cabinetry']){const data=await officialMaterials(c);assert.ok(data.products.length>=4,c);for(const x of data.products){assert.equal(ids.has(x.id),false);ids.add(x.id);assert.ok(publicHttps(x.productUrl));assert.equal(x.price,0);if(x.imageUrl){assert.ok(publicHttps(x.imageUrl));assert.equal(x.photoEvidence,'source-page');}}}
+ assert.equal(ids.size,catalog.products.length);
+});

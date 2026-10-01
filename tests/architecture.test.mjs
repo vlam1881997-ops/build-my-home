@@ -49,3 +49,10 @@ test('room gallery uses the image belonging to each room signature',()=>{
  const B=workflow();B.state.project.plan.rooms=[{id:'a',floor:0,type:'bed',name:'Ngủ',x:1,y:1,w:4,h:4},{id:'b',floor:1,type:'bath',name:'WC',x:1,y:1,w:3,h:3}];B.cinematicSignature=focus=>focus||'all';B.cinematicRender={views:{'room:a':'data:image/png;base64,AAAA'}};['all','room:a','room:b'].forEach(k=>B.restoringRenderKeys.add(k));
  const html=B.roomGalleryHtml();assert.equal((html.match(/<img /g)||[]).length,1);assert.match(html,/alt="Phối cảnh Gemini · Ngủ"/);assert.equal(html.includes('alt="Phối cảnh Gemini · WC"'),false);
 });
+
+test('garage drawing uses a bounded vehicle and never an unscaled text label',()=>{
+ const B=workflow();for(const [w,h,kind] of [[1.8,2.8,'motorcycle'],[3,5,'car'],[5,3,'car'],[.6,1,null]]){const r={id:'g',floor:0,name:'Gara',type:'garage',x:1,y:2,w,h},v=B.garageVehicle(r);assert.equal(v?.kind||null,kind);if(v){assert.ok(v.x>=r.x&&v.y>=r.y&&v.x+v.w<=r.x+w&&v.y+v.d<=r.y+h);}assert.equal(B.furnitureSvg(r).includes('<text'),false);}
+});
+test('wide doors retain their actual leaf width instead of the former 0.9m cap',()=>{
+ const B=workflow();B.state.project.plan.rooms=[{id:'r',floor:0,name:'Khách',type:'living',x:0,y:0,w:4,h:4}];const o={id:'d',roomId:'r',floor:0,side:'north',kind:'door',width:1.8,offset:0};B.state.project.plan.openings=[o];assert.match(B.openingSvg(o),/y2="1.8"/);assert.equal(B.openingWallSpan(o).b,1.8);
+});

@@ -222,6 +222,7 @@ test('dossier ZIP contains the original construction evidence bytes',async()=>{
     download:(name,blob)=>{downloaded={name,blob};},toast:()=>{}
   };
   vm.runInNewContext(fs.readFileSync(new URL('../src/40_exports.js',import.meta.url),'utf8'),{BMH,TextEncoder,Uint8Array,Blob,JSON,Math,Number,String,Intl});
+  BMH.drawingSheetSvg=()=>'<svg/>';BMH.planDxf=()=> '0\r\nEOF\r\n';
   BMH.dossierWorkbook=()=>'<Workbook/>';
   BMH.dossierPrintHtml=()=>'<html/>';
   await BMH.exportDossierBundle();
@@ -257,4 +258,8 @@ test('house style survives reload, preserves plan and SKU, and invalidates the o
   const payload=renderRequestPayload({image:'data:image/jpeg;base64,'+'A'.repeat(120),project:{style:BMH.state.project.style,styleDescription:BMH.houseStyle().description}});
   assert.match(payload.prompt,/Đông Dương/);
   assert.match(payload.prompt,/cửa chớp/);
+});
+
+test('new material categories retain their selected products after state reload',()=>{
+ const {BMH}=stateEngine();BMH.state.project.materials.choices.cabinetry='catalog-wood';BMH.state.project.materials.choices.mep='catalog-wire';BMH.save();const restored=stateEngine(BMH.state).BMH.state.project.materials.choices;assert.equal(restored.cabinetry,'catalog-wood');assert.equal(restored.mep,'catalog-wire');assert.equal(restored.floor,BMH.state.project.materials.choices.floor);
 });

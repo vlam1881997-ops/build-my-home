@@ -478,7 +478,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-dev-pay]')&&BMH.DEV){BMH.state.access.paid=!BMH.state.access.paid;BMH.state.access.source=BMH.state.access.paid?'dev-local':'none';BMH.state.access.paidAt=BMH.state.access.paid?new Date().toISOString():null;BMH.state.access.verifiedAt=BMH.state.access.paid?new Date().toISOString():null;BMH.save();BMH.render();return;}
   const exp=e.target.closest('[data-export]');if(exp){
     e.preventDefault();e.stopPropagation();
-    const actions={loan:BMH.exportLoan,estimate:BMH.exportEstimate,plan:BMH.exportPlanSvg,json:BMH.exportProjectJson,bundle:BMH.exportDossierBundle||BMH.exportBundle,'dossier-pdf':()=>BMH.printDossier(),'mep-pdf':()=>BMH.printDossier({mepOnly:true}),'dossier-excel':BMH.exportDossierExcel,drawings:BMH.exportDrawingsBundle};
+    const actions={loan:BMH.exportLoan,estimate:BMH.exportEstimate,plan:BMH.exportPlanSvg,'plan-dxf':BMH.exportPlanDxf,json:BMH.exportProjectJson,bundle:BMH.exportDossierBundle||BMH.exportBundle,'dossier-pdf':()=>BMH.printDossier(),'mep-pdf':()=>BMH.printDossier({mepOnly:true}),'dossier-excel':BMH.exportDossierExcel,drawings:BMH.exportDrawingsBundle};
     const fn=actions[exp.dataset.export];
     if(typeof fn!=='function'){BMH.toast('Chức năng tải tài liệu này chưa sẵn sàng.');return;}
     exp.classList.add('is-working');exp.setAttribute('aria-busy','true');
