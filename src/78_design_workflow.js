@@ -76,7 +76,7 @@ BMH.loadFurnitureModel=model=>{
 BMH.replaceSceneFurniture=(group,model,THREE,scene)=>{
  const task=BMH.loadFurnitureModel(model).then(source=>{
   if(BMH.studio3d?.scene!==scene)return false;
-  const root=source.clone(true);root.traverse(o=>{if(!o.isMesh)return;o.geometry=o.geometry.clone();const copy=m=>{const next=m.clone();for(const k of ['map','normalMap','roughnessMap','metalnessMap','emissiveMap','aoMap'])if(next[k])next[k]=next[k].clone();return next;};o.material=Array.isArray(o.material)?o.material.map(copy):copy(o.material);o.castShadow=true;o.receiveShadow=true;});
+  const finish=BMH.finishPalette?.(group.userData.roomId)||{},root=source.clone(true);root.traverse(o=>{if(!o.isMesh)return;o.geometry=o.geometry.clone();const copy=m=>{const next=m.clone();for(const k of ['map','normalMap','roughnessMap','metalnessMap','emissiveMap','aoMap'])if(next[k])next[k]=next[k].clone();const name=m.name||'';if(/carpetWhite/i.test(name)){next.color.set('#f4f0e6');next.roughness=.95;}else if(/carpet/i.test(name)){next.color.set(finish.fabric||'#ccc2af');next.roughness=.96;}else if(/wood/i.test(name)){next.color.set(finish.accent||'#8f7658');next.roughness=.72;}else if(/^metal$/i.test(name)){next.color.set('#77776b');next.roughness=.4;}return next;};o.material=Array.isArray(o.material)?o.material.map(copy):copy(o.material);o.castShadow=true;o.receiveShadow=true;});
   root.scale.setScalar(2);root.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(root),center=box.getCenter(new THREE.Vector3());root.position.set(-center.x,-box.min.y,-center.z);
   group.traverse(o=>o.geometry?.dispose());group.clear();group.add(root);group.userData.source='glb';BMH.studio3d.state.updateCamera();return true;
  }).catch(()=>false);

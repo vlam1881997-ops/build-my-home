@@ -1,0 +1,117 @@
+/* A coordinated design kit is a proposal; only explicit selection replaces a plan. */
+BMH.designState=()=>{const p=BMH.state.project;const s=p.designStudio||(p.designStudio={});if(!Array.isArray(s.kits))s.kits=[];return s;};
+BMH.designInputKey=()=>{const s=BMH.state.project.site;return JSON.stringify({site:Object.fromEntries(['width','depth','floors','floorHeight','slabThickness','ceilingDrop','frontDirection','setbackFront','setbackRear','setbackSide','targetCoverage','province','district','useParcelGeometry','lotPoints','frontEdge'].map(k=>[k,s[k]])),household:BMH.state.project.household});};
+BMH.designAppliedKey=()=>JSON.stringify({plan:BMH.state.project.plan,finish:BMH.state.project.materials.finish,style:BMH.state.project.style});
+BMH.DESIGN_KITS=[
+ {id:'A',strategy:'climate',name:'Nhà đón sáng',style:'Nhiệt đới',subtitle:'Thoáng, xanh và dịu mát',wall:'#eee9dd',floor:'#dfd2bd',accent:'#536855',fabric:'#d9d4c5',exterior:'Sơn sáng, nhịp lam màu xanh trầm tại mảng tường đặc và cây trong khoảng sân đã khai báo.',interior:'Gỗ sáng, vải màu cát, phòng khách được ưu tiên diện tích và các ô mở bổ sung ở cạnh phù hợp.',lighting:'Ánh sáng ấm, tập trung tại bàn ăn và đầu giường; giữ cửa sổ lấy sáng tự nhiên.'},
+ {id:'B',strategy:'balanced',name:'Tổ ấm Japandi',style:'Japandi',subtitle:'Gọn gàng, ấm và cân bằng',wall:'#eee6d9',floor:'#d3b998',accent:'#8f7052',fabric:'#cfc5b8',exterior:'Tường kem, chi tiết gỗ ấm và khung cửa tối; đường nét thống nhất với vị trí cửa trên mặt bằng.',interior:'Bếp và bàn ăn được ưu tiên; nội thất thấp, bảng màu trung tính, lưu trữ kín và lối đi rõ ràng.',lighting:'Đèn màu ấm tại khu sinh hoạt; ánh sáng đọc riêng ở mỗi phòng ngủ.'},
+ {id:'C',strategy:'budget',name:'Tinh giản hiện đại',style:'Tối giản',subtitle:'Ít chi tiết, dễ hoàn thiện',wall:'#f2efe8',floor:'#d7d1c7',accent:'#5a605c',fabric:'#c8c9c3',exterior:'Sơn trắng ấm, khung cửa màu than, tiết chế lớp trang trí và dùng bề mặt dễ bảo trì.',interior:'Chia diện tích đều hơn, đồ đạc vừa kích thước phòng; ưu tiên món cần thiết trước khi thêm trang trí.',lighting:'Đèn tổng thể kết hợp đèn bàn; hạn chế chi tiết trần phức tạp.'}
+];
+BMH.generateDesignKits=()=>{
+ if(BMH.planHasLocks())return BMH.toast('Có phòng hoặc tầng đã khóa. Mở khóa nếu bạn muốn tạo bố trí mới.');
+ const s=BMH.designState(),kits=[];
+ for(const def of BMH.DESIGN_KITS){const plan=BMH.generateAutoPlanSnapshot(def.strategy);if(!plan||!BMH.layoutValid(plan.rooms))continue;const metrics=BMH.planMetrics(plan);kits.push({...def,plan,metrics});}
+ if(!kits.length){BMH.toast('Khu đất chưa đủ cho nhu cầu hiện tại. Kiểm tra số phòng, số tầng và khoảng lùi để gợi ý bố trí phù hợp.');return false;}
+ s.kits=kits;s.inputSignature=BMH.designInputKey();s.notice='Chọn một bộ để áp dụng đồng thời mặt bằng, cửa, cầu thang và bảng hoàn thiện. Mọi phần đều chỉnh tiếp được.';BMH.save();BMH.render({preserveScroll:true});return true;
+};
+BMH.applyDesignKit=id=>{
+ const s=BMH.designState(),kit=s.kits.find(k=>k.id===id),p=BMH.state.project;
+ if(!kit||BMH.planHasLocks())return false;
+ if(s.inputSignature!==BMH.designInputKey()){BMH.toast('Đầu vào đã đổi. Tạo lại các phương án để khớp khu đất và gia đình.');return false;}
+ s.previous={plan:BMH.planSnapshot(),style:p.style,designStrategy:p.site.designStrategy,finish:structuredClone(p.materials.finish||{exterior:null,rooms:{}})};
+ BMH.pushPlanHistory();p.plan=structuredClone(kit.plan);p.style=kit.style;
+ const colors={wall:kit.wall,floor:kit.floor,accent:kit.accent,fabric:kit.fabric,name:kit.name};p.materials.finish={exterior:{...colors},rooms:Object.fromEntries(p.plan.rooms.map(r=>[r.id,{...colors,...(r.type==='bath'?{floor:'#d8d9d2'}:{})}]))};
+ p.site.designStrategy=kit.strategy;s.inputSignature=BMH.designInputKey();s.activeKit=id;s.appliedSignature=BMH.designAppliedKey();s.notice='Đã áp dụng '+kit.name+'. Bạn có thể chỉnh từng phòng, cửa, vật liệu và màu theo ý mình.';
+ BMH.state.ui.sceneFocus='all';BMH.state.ui.sceneExploded=false;BMH.state.ui.architectureEngine='existing';BMH.state.ui.designView='exterior';BMH.finishInvalidate?.();BMH.normalizeState();s.appliedSignature=BMH.designAppliedKey();s.inputSignature=BMH.designInputKey();BMH.save();BMH.render({preserveScroll:true});return true;
+};
+BMH.restoreDesignKit=()=>{const s=BMH.designState(),p=BMH.state.project;if(!s.previous||BMH.planHasLocks())return false;const previous=s.previous;BMH.pushPlanHistory();p.plan=structuredClone(previous.plan);p.style=previous.style;if('designStrategy'in previous)p.site.designStrategy=previous.designStrategy;p.materials.finish=structuredClone(previous.finish);delete s.previous;s.activeKit='';s.appliedSignature='';BMH.finishInvalidate?.();BMH.save();BMH.render({preserveScroll:true});return true;};
+BMH.designPlanPreview=(plan,floor=0)=>{
+ const rooms=plan.rooms.filter(r=>r.floor===floor),s=BMH.state.project.site,one=rooms.length===1?rooms[0]:null,W=one?.w||Number(s.width),D=one?.h||Number(s.depth),ox=one?.x||0,oy=one?.y||0,esc=BMH.esc;
+ const colors={living:'#e7d9c7',kitchen:'#e0d4bf',bed:'#dfdfd1',bath:'#d8e1dd',stairs:'#c4b89d',corridor:'#f2eee6',balcony:'#d1d9c2'};
+ const openings=(plan.openings||[]).filter(o=>o.floor===floor).map(o=>{const r=rooms.find(r=>r.id===o.roomId);if(!r)return '';const h=['north','south'].includes(o.side),span=h?r.w:r.h,w=Math.min(span,o.width),a=(h?r.x:r.y)+(span-w)*o.offset,axis=h?(o.side==='north'?r.y:r.y+r.h):(o.side==='west'?r.x:r.x+r.w);return '<line x1="'+(h?a:axis)+'" y1="'+(h?axis:a)+'" x2="'+(h?a+w:axis)+'" y2="'+(h?axis:a+w)+'" stroke="'+(o.kind==='door'?'#aa8159':'#89b1b4')+'" stroke-width=".12"/>';}).join('');
+ const furniture=BMH.withPlan(plan,()=>rooms.flatMap(r=>BMH.roomFurnitureLayout(r))).map(i=>'<rect data-preview-furniture="'+esc(i.model)+'" x="'+i.x+'" y="'+i.y+'" width="'+i.w+'" height="'+i.d+'" rx=".04" fill="'+(/bed|Sofa|Chair/.test(i.model)?'#faf7ee':/toilet|Sink|shower/.test(i.model)?'#f8faf8':'#ad9272')+'" stroke="#86745f" stroke-width=".025"/>').join('');
+ const stairs=rooms.filter(r=>r.type==='stairs').flatMap(r=>BMH.stairGeometry(r)).map(i=>'<rect x="'+i.x+'" y="'+i.y+'" width="'+i.w+'" height="'+i.d+'" fill="none" stroke="#84765c" stroke-width=".025"/>').join('');
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-.35 -.35 '+(D+.7)+' '+(W+.7)+'" role="img" aria-label="Mặt bằng tầng '+(floor+1)+'"><g transform="translate('+(D+oy)+' '+(-ox)+') rotate(90)"><rect x="'+ox+'" y="'+oy+'" width="'+W+'" height="'+D+'" fill="#f6f3eb" stroke="#d6d0c4" stroke-width=".035"/>'+rooms.map(r=>'<rect x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.h+'" fill="'+(colors[r.type]||'#e5dfd2')+'" stroke="#667064" stroke-width=".075"><title>'+esc(r.name)+' · '+r.w.toFixed(2)+' × '+r.h.toFixed(2)+' m</title></rect>').join('')+furniture+stairs+openings+'</g></svg>';
+};
+BMH.designWelcomeHtml=()=>'<section class="design-welcome"><div><span>THIẾT KẾ TOÀN BỘ NGÔI NHÀ</span><h2>Một phương án hoàn chỉnh. Rồi chỉnh theo ý bạn.</h2><p>Từ khu đất và gia đình: gợi ý mặt bằng, cửa, cầu thang, ngoại thất, nội thất và bảng vật liệu trong cùng một bộ thiết kế.</p></div><button data-design-start>Gợi ý thiết kế cho nhà tôi <span>↗</span></button></section>';
+BMH.designDrawingSvg=(type,floor)=>{const svg=type==='elevation'?BMH.elevationSvg():type==='section'?BMH.sectionSvg():BMH.drawingSheetSvg(floor);return svg.replace(/<svg(?![^>]*xmlns=)/,'<svg xmlns="http://www.w3.org/2000/svg"');};
+const designHome=BMH.screen1;BMH.screen1=()=>BMH.state.ui.homeMode==='finish'?designHome():BMH.designWelcomeHtml()+designHome();BMH.SCREENS[0]=BMH.screen1;
+BMH.designKitsHtml=()=>{const s=BMH.designState(),stale=s.inputSignature!==BMH.designInputKey();return '<section class="design-proposals"><div class="design-section-head"><div><span>01 / KHÁM PHÁ PHƯƠNG ÁN</span><h2>Chọn cách ngôi nhà sẽ trở thành tổ ấm.</h2><p>Mỗi bộ gồm bố trí, cửa, thang, màu và gợi ý hoàn thiện. Chọn xong vẫn sửa được từng phần.</p></div><button data-design-generate>↻ '+(s.kits.length?'Gợi ý lại toàn bộ':'Gợi ý ba bộ thiết kế')+'</button></div>'+(s.kits.length?'<div class="design-kit-grid">'+s.kits.map(k=>'<article class="design-kit '+(s.activeKit===k.id?'selected':'')+'"><div class="design-kit-plan">'+BMH.designPlanPreview(k.plan)+'<span>MẶT BẰNG TẦNG 1</span></div><div class="design-kit-content"><span>PHƯƠNG ÁN '+k.id+' · '+BMH.esc(k.style)+'</span><h3>'+BMH.esc(k.name)+'</h3><p>'+BMH.esc(k.subtitle)+'</p><div class="design-kit-colors">'+[k.wall,k.floor,k.accent,k.fabric].map(c=>'<i style="background:'+c+'"></i>').join('')+'<small>Bảng màu & chất liệu</small></div><p class="design-kit-summary">'+k.plan.rooms.filter(r=>r.type==='bed').length+' phòng ngủ · '+k.plan.rooms.filter(r=>r.type==='bath').length+' WC · '+BMH.num(k.metrics.area,1)+' m²</p><button data-design-kit="'+k.id+'" '+(stale?'disabled':'')+'>'+(s.activeKit===k.id?'Áp dụng lại bộ này':'Chọn toàn bộ phương án '+k.id)+' →</button></div></article>').join('')+'</div>':'<div class="design-kit-empty"><b>BMH sẽ chuẩn bị bố trí và cách hoàn thiện cùng lúc.</b><p>Bấm gợi ý để nhận các bộ thiết kế theo hồ sơ hiện tại. Phương án đang chỉnh được giữ đến khi bạn chọn một bộ mới.</p></div>')+(stale&&s.kits.length?'<p class="design-notice">Khu đất hoặc gia đình đã đổi. Gợi ý lại trước khi chọn một bộ thiết kế.</p>':'')+'</section>';};
+BMH.screen7=()=>{
+ const p=BMH.state.project,s=BMH.designState(),ui=BMH.state.ui,esc=BMH.esc,focus=ui.sceneFocus||'all',room=p.plan.rooms.find(r=>'room:'+r.id===focus),floor=room?.floor??(focus.startsWith('floor:')?Number(focus.slice(6)):0),view=focus==='all'?'exterior':room?'room':ui.designView==='drawing'?'drawing':'layout';
+ const kit=s.kits.find(k=>k.id===s.activeKit),changed=s.activeKit&&s.appliedSignature!==BMH.designAppliedKey(),image=BMH.cinematicRender.views[BMH.cinematicSignature()]||'';BMH.restoreRoomRender?.(BMH.cinematicSignature());
+ const brief=kit||BMH.DESIGN_KITS.find(k=>k.style===p.style)||BMH.DESIGN_KITS[1],levelOptions=Array.from({length:p.site.floors},(_,f)=>'<option value="'+f+'" '+(floor===f?'selected':'')+'>Tầng '+(f+1)+'</option>').join('');
+ const rooms=p.plan.rooms.filter(r=>r.floor===floor);
+ const drawingType=['plan','elevation','section'].includes(ui.designDrawing)?ui.designDrawing:'plan';
+ const controls='<div class="design-view-controls">'+(view==='drawing'?'<select data-design-drawing aria-label="Loại bản vẽ">'+[['plan','Mặt bằng'],['elevation','Mặt đứng'],['section','Mặt cắt A–A']].map(([id,name])=>'<option value="'+id+'" '+(drawingType===id?'selected':'')+'>'+name+'</option>').join('')+'</select>':'')+(view==='room'?'<select data-scene-focus aria-label="Chọn phòng">'+p.plan.rooms.map(r=>'<option value="room:'+r.id+'" '+(room?.id===r.id?'selected':'')+'>T'+(r.floor+1)+' · '+esc(r.name)+'</option>').join('')+'</select>':view!=='exterior'?'<select data-design-floor aria-label="Chọn tầng">'+levelOptions+'</select>':'')+'<button data-scene-theme>'+(ui.sceneTheme==='night'?'☾ Ban đêm':'☀ Ban ngày')+'</button><button data-studio3d-reset>↺ Đặt lại góc</button><button data-scene-explode class="'+(ui.sceneExploded?'active':'')+'">'+(ui.sceneExploded?'Ghép tầng':'Tách tầng')+'</button></div>';
+ const drawing=view==='drawing'?'<div class="design-drawing"><img src="data:image/svg+xml;charset=utf-8,'+encodeURIComponent(BMH.designDrawingSvg(drawingType,floor))+'" alt="'+(drawingType==='plan'?'Mặt bằng có kích thước tầng '+(floor+1):drawingType==='elevation'?'Mặt đứng theo cửa trên bản vẽ':'Mặt cắt A–A theo số đo thiết kế')+'"><button data-nav="4">Mở bản vẽ để chỉnh phòng, cửa & cầu thang →</button></div>':'';
+ return '<div class="design-studio"><header class="design-heading"><div><span>BUILD MY HOME / DESIGN STUDIO</span><h1>Ngôi nhà của bạn,<br><em>được thiết kế cùng nhau.</em></h1><p>'+esc(p.site.width+' × '+p.site.depth+' m · '+p.site.floors+' tầng · '+p.style)+' · '+(kit?esc(kit.name)+(changed?' · Đã chỉnh riêng':''):'Phương án hiện tại')+'</p></div><div class="design-heading-actions"><button data-design-generate>✦ Gợi ý thiết kế toàn bộ</button><button data-nav="4">Chỉnh thiết kế ↗</button></div></header><nav class="design-view-tabs" aria-label="Cách xem thiết kế">'+[['exterior','Ngoại thất'],['layout','Bố trí từng tầng'],['room','Nội thất từng phòng'],['drawing','Bản vẽ & số đo']].map(([id,name])=>'<button data-design-view="'+id+'" aria-pressed="'+(view===id)+'" class="'+(view===id?'active':'')+'">'+name+'</button>').join('')+'</nav><div class="design-workspace"><section class="design-model"><div class="design-model-top"><div><b>'+esc(view==='exterior'?'Ngoại thất theo mặt bằng':view==='room'?room?.name||'Nội thất':view==='drawing'?'Bản vẽ có kích thước':'Mặt bằng nội thất · tầng '+(floor+1))+'</b><span>'+ (view==='layout'?'Cắt lớp tường để xem bố trí; số đo gốc được giữ nguyên.':'Phòng, cửa và cầu thang dùng chung dữ liệu với bản vẽ.')+'</span></div>'+controls+'</div>'+(drawing||'<div class="design-canvas" id="studio3dStage"><canvas id="studio3dCanvas" aria-label="Mô hình 3D ngôi nhà đang thiết kế"></canvas><div id="studio3dLoading" class="design-loading">Đang dựng ngôi nhà từ mặt bằng…</div><div class="design-model-caption"><span>3D TỪ THIẾT KẾ CỦA BẠN</span><b>Kéo để xoay · Cuộn / chụm để phóng to</b></div></div>')+'<div class="design-model-footer"><span><b>'+BMH.num(BMH.planArea(),1)+' m²</b> diện tích phòng</span><span><b>'+p.plan.rooms.filter(r=>r.type==='bed').length+'</b> phòng ngủ</span><button data-finish-open>Hoàn thiện từ ảnh nhà đang xây →</button></div></section><aside class="design-brief"><span>BẢN THIẾT KẾ ĐỒNG BỘ</span><h2>'+esc(kit?.name||p.style)+'</h2><p>'+esc(brief.subtitle)+'</p><div class="design-brief-colors">'+['wall','floor','accent'].map(role=>{const colors=BMH.finishPalette?.(room?.id)||{wall:brief.wall,floor:brief.floor,accent:brief.accent};return '<label><input type="color" data-design-color="'+role+'" value="'+esc(colors[role]||brief[role])+'"><span>'+({wall:'Sơn tường',floor:'Sàn',accent:'Điểm nhấn'}[role])+'</span></label>';}).join('')+'</div><details open><summary>Ngoại thất</summary><p>'+esc(brief.exterior)+'</p></details><details open><summary>Nội thất & bố trí</summary><p>'+esc(brief.interior)+'</p></details><details><summary>Ánh sáng & vật liệu</summary><p>'+esc(brief.lighting)+'</p><p>Bảng màu là vật liệu minh họa. Chọn sản phẩm và báo giá thật tại showroom.</p><button data-nav="5">Chọn vật liệu & sản phẩm →</button></details><button class="design-ai-button" data-cinematic-render '+(BMH.cinematicRender.loading?'disabled':'')+'>'+(BMH.cinematicRender.loading?'Đang tạo phối cảnh…':'Tạo phối cảnh đẹp từ thiết kế này ↗')+'</button><small>Phối cảnh Gemini là ảnh minh họa từ mô hình hiện tại.</small>'+(BMH.cinematicRender.error?'<p class="design-error" role="alert">'+esc(BMH.cinematicRender.error)+'</p>':'')+(s.previous?'<button class="design-restore" data-design-restore>↶ Trở về thiết kế trước</button>':'')+'</aside></div>'+(s.notice?'<p class="design-notice" role="status">'+esc(s.notice)+'</p>':'')+(image?'<section class="design-render"><img src="'+esc(image)+'" alt="Phối cảnh Gemini của thiết kế đang chọn"><div><h2>Phối cảnh của phương án hiện tại</h2><p>Đối chiếu với bản vẽ trước khi chốt. Bạn có thể chỉnh và tạo lại.</p><button data-render-download>Tải phối cảnh ↓</button></div></section>':'')+BMH.designKitsHtml()+'<section class="design-room-list"><div class="design-section-head"><div><span>02 / TỪNG KHÔNG GIAN</span><h2>Đi qua từng phòng của bạn.</h2></div><button data-room-review>Gemini phân tích bản vẽ & tất cả phòng</button></div><div class="design-room-grid">'+rooms.map(r=>{const key=BMH.cinematicSignature('room:'+r.id);BMH.restoreRoomRender?.(key);const img=BMH.cinematicRender.views[key];return '<button data-design-room="'+esc(r.id)+'"><div>'+(img?'<img src="'+esc(img)+'" alt="Phối cảnh '+esc(r.name)+'">':BMH.designPlanPreview({rooms:[r],openings:p.plan.openings},floor))+'</div><span>'+esc(r.name)+'</span><small>'+r.w.toFixed(2)+' × '+r.h.toFixed(2)+' m · '+BMH.roomFurnitureLayout(r).length+' món</small></button>';}).join('')+'</div><div class="design-room-actions"><button data-render-all>Tạo phối cảnh Gemini cho tất cả phòng</button><button data-nav="4">Chỉnh mặt bằng</button><button data-nav="5">Chọn vật liệu</button></div></section></div>';
+};BMH.SCREENS[5]=BMH.screen7;
+document.addEventListener('click',e=>{
+ const t=e.target.closest?.('[data-design-start],[data-design-generate],[data-design-kit],[data-design-view],[data-design-room],[data-design-restore]');if(!t)return;const d=t.dataset;
+ if('designStart'in d){if(BMH.state.ui.onboardingComplete===false){BMH.designState().openRequested=true;BMH.navigateTo(6);}else{BMH.generateDesignKits();BMH.navigateTo(6);}return;}
+ if('designGenerate'in d){BMH.generateDesignKits();return;}
+ if(d.designKit)return void BMH.applyDesignKit(d.designKit);
+ if('designRestore'in d)return void BMH.restoreDesignKit();
+ if(d.designView||d.designRoom){const v=d.designRoom?'room':d.designView,rooms=BMH.state.project.plan.rooms;BMH.state.ui.designView=v;BMH.state.ui.sceneFocus=v==='exterior'?'all':v==='room'?'room:'+(d.designRoom||rooms.find(r=>r.type==='living')?.id||rooms[0]?.id):'floor:0';BMH.state.ui.sceneExploded=false;BMH.save();BMH.render({preserveScroll:true});}
+});
+document.addEventListener('click',e=>{if(!e.target.closest?.('[data-setup-finish]')||BMH.state.ui.onboardingComplete===false||!BMH.designState().openRequested)return;BMH.designState().openRequested=false;BMH.generateDesignKits();BMH.navigateTo(6);});
+document.addEventListener('change',e=>{
+ const t=e.target;if(t.hasAttribute?.('data-design-drawing')&&['plan','elevation','section'].includes(t.value)){BMH.state.ui.designDrawing=t.value;BMH.save();BMH.render({preserveScroll:true});}
+ if(t.hasAttribute?.('data-design-floor')){BMH.state.ui.sceneFocus='floor:'+Number(t.value);BMH.save();BMH.render({preserveScroll:true});}
+ if(t.dataset?.designColor&&/^#[0-9a-f]{6}$/i.test(t.value)){const p=BMH.state.project,focus=BMH.state.ui.sceneFocus||'all',f=p.materials.finish||(p.materials.finish={exterior:null,rooms:{}});f.rooms??={};const role=t.dataset.designColor;if(focus.startsWith('room:')){const id=focus.slice(5);f.rooms[id]={...(BMH.finishPalette(id)||{}),[role]:t.value};}else{f.exterior={...(f.exterior||{}),[role]:t.value};for(const id of Object.keys(f.rooms))f.rooms[id][role]=t.value;}BMH.finishInvalidate?.();BMH.save();BMH.render({preserveScroll:true});}
+});
+queueMicrotask(()=>BMH.render({preserveScroll:true}));
+// Visible finish details follow existing walls and room bounds. Cutaway is presentation only.
+BMH.decorateStudioScene=({THREE,scene,mats,addBox,mat,roomMaterial,visibleFloors,roomFocus,floorFocus,W,D,fh,explode,focus})=>{
+ const levels=BMH.projectLevels(),p=BMH.state.project;
+ const detail=(mesh,roomId)=>{mesh.userData={kind:'finish-detail',roomId};return mesh;};
+ for(const f of visibleFloors){
+  const rooms=BMH.floorRooms(f).filter(r=>!roomFocus||r.id===roomFocus.id),base=roomFocus||floorFocus!==null?0:f*(fh+explode),geometry=BMH.scenePlanGeometry({rooms,openings:p.plan.openings,wallContext:p.plan.rooms},f),bounds=BMH.sceneFootprintBounds(rooms);
+  for(const w of geometry.walls){
+   if(w.kind==='door')continue;const len=w.b-w.a,mid=(w.a+w.b)/2,thickness=(w.thickness||.12)+.025;
+   const mesh=addBox(w.horizontal?len:thickness,.085,w.horizontal?thickness:len,w.horizontal?mid-W/2:w.axis-W/2,base+levels.slab+.043,w.horizontal?w.axis-D/2:mid-D/2,mat(0xddd4c6,.8));detail(mesh,w.roomIds?.[0]);
+   if(focus==='all'&&w.roomIds?.length===1&&w.kind==='wall'){
+    const dark=roomMaterial('accent',w.roomIds[0],mats.accent),z=w.horizontal?w.axis-D/2:mid-D/2,x=w.horizontal?mid-W/2:w.axis-W/2;
+    // Narrow trim at the actual slab line rather than a new facade or opening.
+    detail(addBox(w.horizontal?len:thickness,.09,w.horizontal?thickness:len,x,base+fh-.11,z,dark),w.roomIds[0]);
+   }
+   if(focus==='all'&&bounds&&w.horizontal&&Math.abs(w.axis-bounds.y)<.01&&w.roomIds?.length===1){
+    const finish=roomMaterial('accent',w.roomIds[0],mats.accent),z=w.axis-D/2-(w.thickness||.12)/2-.025;
+    // Finish layers cover existing solid front walls only; openings stay clear.
+    if(w.kind==='wall'&&len>.15){
+     detail(addBox(len-.04,fh-levels.slab-.16,.025,mid-W/2,base+levels.slab+(fh-levels.slab)/2,z,finish),w.roomIds[0]);
+     if(p.style!=='Tối giản')for(let sx=w.a+.065;sx<w.b-.04;sx+=.12)detail(addBox(.045,fh-levels.slab-.16,.04,sx-W/2,base+levels.slab+(fh-levels.slab)/2,z-.023,finish),w.roomIds[0]);
+    }
+    if(w.kind==='window'){
+     detail(addBox(len+.10,.07,.22,mid-W/2,base+w.sill+w.height+.075,z-.075,finish),w.roomIds[0]);
+     detail(addBox(len+.10,.06,.14,mid-W/2,base+w.sill-.035,z-.035,finish),w.roomIds[0]);
+    }
+   }
+  }
+  for(const r of rooms){
+   const cx=r.x+r.w/2-W/2,cz=r.y+r.h/2-D/2,finish=BMH.finishPalette?.(r.id)||{};
+   if(['living','bed'].includes(r.type)){
+    const rug=mat(r.type==='living'?0xc9c0ad:0xd8d0c1,.99);detail(addBox(Math.min(r.w-.3,2.75),.012,Math.min(r.h-.3,2.15),cx,base+levels.slab+.012,cz,rug),r.id);
+    const width=Math.min(1.3,r.w*.4),height=.7,art=mat(0xb8b19b,.92),border=roomMaterial('accent',r.id,mats.accent);
+    // Wall art is on the existing rear surface, within the room perimeter.
+    if(roomFocus){detail(addBox(width+.08,height+.08,.035,cx,base+1.7,r.y+r.h-.13-D/2,border),r.id);detail(addBox(width,height,.014,cx,base+1.7,r.y+r.h-.154-D/2,art),r.id);}
+   }
+   if(roomFocus&&['living','kitchen','bed'].includes(r.type)){
+    const glow=new THREE.MeshStandardMaterial({color:'#fff6d9',emissive:'#f3c077',emissiveIntensity:.5,roughness:.8});
+    const fixture=new THREE.Mesh(new THREE.CylinderGeometry(.17,.25,.2,28),glow);fixture.position.set(cx,fh-.55,cz);detail(fixture,r.id);scene.add(fixture);
+    const light=new THREE.PointLight(0xffe2b5,BMH.state.ui.sceneTheme==='night'?9:4,8,2);light.position.set(cx,fh-.7,cz);scene.add(light);
+   }
+  }
+ }
+ if(focus==='all'){
+  const frontRooms=BMH.floorRooms(0),bounds=BMH.sceneFootprintBounds(frontRooms);
+  if(bounds&&bounds.y>.7){
+   const entrance=p.plan.openings.find(o=>o.floor===0&&o.kind==='door'&&o.side==='north'),r=p.plan.rooms.find(r=>r.id===entrance?.roomId),x=r?r.x+(r.w-entrance.width)*entrance.offset+entrance.width/2:bounds.cx;
+   detail(addBox(Math.min(1.05,W-.2),.055,bounds.y,x-W/2,.095,bounds.y/2-D/2,mat(0xc0b69f,.92)),r?.id);
+   for(const px of [.32,W-.32]){const pot=new THREE.Mesh(new THREE.CylinderGeometry(.2,.16,.4,24),mat(0xb5ac94,.92));pot.position.set(px-W/2,.22,bounds.y*.5-D/2);detail(pot,'garden');scene.add(pot);for(let n=0;n<7;n++){const leaf=new THREE.Mesh(new THREE.SphereGeometry(.12,12,8),mats.green);leaf.scale.set(.7,2.7,1);leaf.rotation.z=Math.sin(n)*.45;leaf.position.set(px-W/2+Math.sin(n)*.11,.61+n*.025,bounds.y*.5-D/2+Math.cos(n)*.1);detail(leaf,'garden');scene.add(leaf);}}
+  }
+ }
+};
+
+const designFooter=BMH.footer;BMH.footer=()=>BMH.state.ui.step===6?'<div class="demo-nextbar design-studio-footer"><button data-nav="4">← Chỉnh bản vẽ</button><span>Thiết kế và 3D dùng chung một phương án.</span><button data-nav="7">Xem dự toán của thiết kế →</button></div>':designFooter();

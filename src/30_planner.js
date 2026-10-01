@@ -378,7 +378,7 @@ BMH.generateAutoPlanSnapshot = strategy => {
   const oldPlan=BMH.planSnapshot(),oldUi=structuredClone(BMH.state.ui.planner),oldStrategy=BMH.state.project.site.designStrategy,oldUndo=BMH.planHistory.undo.slice(),oldRedo=BMH.planHistory.redo.slice();
   const save=BMH.save,render=BMH.render,toast=BMH.toast,push=BMH.pushPlanHistory;let result=null;
   BMH.save=()=>{};BMH.render=()=>{};BMH.toast=()=>{};BMH.pushPlanHistory=()=>{};
-  try{BMH.autoPlanConcept(strategy);result=BMH.planSnapshot();}catch(_){result=null;}
+  try{const before=BMH.state.project.plan;BMH.autoPlanConcept(strategy);if(BMH.state.project.plan!==before)result=BMH.planSnapshot();}catch(_){result=null;}
   finally{BMH.state.project.plan=oldPlan;BMH.state.ui.planner=oldUi;BMH.state.project.site.designStrategy=oldStrategy;BMH.planHistory.undo=oldUndo;BMH.planHistory.redo=oldRedo;BMH.save=save;BMH.render=render;BMH.toast=toast;BMH.pushPlanHistory=push;}
   return result;
 };
@@ -438,7 +438,9 @@ BMH.autoPlanConcept = (strategy=BMH.state.project.site.designStrategy||'climate'
   for(let f=0;f<floors;f++){
     const count=f===0?groundNames.length:Math.max(1,Math.ceil((upperBeds.length-bedIndex)/(floors-f)));
     const names=f===0?groundNames:Array.from({length:count},()=>[upperBeds[bedIndex++]||'Phòng đa năng','bed']);
-    names.forEach(([name,type],i)=>{const start=y0+mainD*i/count,end=y0+mainD*(i+1)/count,r=add(f,name,type,x0,start,roomW,end-start);door(r);win(r,'west',.5,type==='living'?1.8:1.4);});
+    const weights=names.map(([,type],i)=>strategy==='climate'?(type==='living'?1.6:type==='kitchen'?1.2:1):strategy==='balanced'?(type==='kitchen'?1.5:i===0?1.25:1):1);
+    const total=weights.reduce((a,b)=>a+b,0),extra=Math.max(0,mainD-count*2.4);let cursor=y0;
+    names.forEach(([name,type],i)=>{const size=2.4+extra*weights[i]/total,r=add(f,name,type,x0,cursor,roomW,size);cursor+=size;door(r);win(r,'west',.5,type==='living'?1.8:1.4);});
     addService(f);
   }
   // Window pass: add a second opening when climate strategy needs cross-ventilation and the side is externally available.
