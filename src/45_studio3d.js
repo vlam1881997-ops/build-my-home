@@ -5,7 +5,12 @@ BMH.cinematicRender=BMH.cinematicRender||{loading:false,dataUrl:'',error:'',gene
 BMH.ensureThree = () => {
   if(window.THREE)return Promise.resolve(window.THREE);
   if(BMH.threePromise)return BMH.threePromise;
-  BMH.threePromise=Promise.race([import('./vendor/three/three.module.js'),new Promise(resolve=>setTimeout(()=>resolve(null),8000))]).then(m=>m?.Scene&&m?.WebGLRenderer?m:null).catch(()=>null);
+  // The light model is already interactive while this downloads. Keep waiting
+  // so a slow connection can still upgrade to WebGL when the module arrives.
+  BMH.threePromise=import('./vendor/three/three.module.js').then(m=>{
+    if(m?.Scene&&m?.WebGLRenderer)return m;
+    BMH.threePromise=null;return null;
+  }).catch(()=>{BMH.threePromise=null;return null;});
   return BMH.threePromise;
 };
 BMH.scenePalette = () => {
