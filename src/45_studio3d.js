@@ -160,7 +160,7 @@ BMH.mountStudio3D = async () => {
   const roomFocus=focus.startsWith('room:')?BMH.state.project.plan.rooms.find(r=>r.id===focus.slice(5)):null;
   const floorFocus=focus.startsWith('floor:')?BMH.clamp(Number(focus.split(':')[1])||0,0,floors-1):null;
   const visibleFloors=roomFocus?[Number(roomFocus.floor)]:floorFocus!==null?[floorFocus]:Array.from({length:floors},(_,f)=>f);
-  const interiorCamera=roomFocus&&['living','bed','kitchen','bath'].includes(roomFocus.type)&&BMH.state.ui.roomCamera!=='overview'?BMH.roomInteriorCamera(roomFocus):null,insideRoom=!!interiorCamera;
+  const interiorCamera=roomFocus&&['living','bed','kitchen','bath'].includes(roomFocus.type)&&BMH.state.ui.roomCamera==='inside'?BMH.roomInteriorCamera(roomFocus):null,insideRoom=!!interiorCamera;
   const wallHeight=fh-BMH.projectLevels().slab;
   for(const f of visibleFloors){
     const geometry=BMH.scenePlanGeometry(roomFocus?{rooms:[roomFocus],openings:BMH.state.project.plan.openings,wallContext:BMH.state.project.plan.rooms}:BMH.state.project.plan,f);
@@ -170,7 +170,8 @@ BMH.mountStudio3D = async () => {
       const slab=BMH.projectLevels().slab,holes=BMH.stairFloorHoles?.(f)||[],panels=BMH.slabPanels?.(r,holes)||[{x:r.x,y:r.y,w:r.w,d:r.h}];
       for(const panel of panels){const mesh=addBox(panel.w,slab,panel.d,panel.x+panel.w/2-W/2,base+slab/2,panel.y+panel.d/2-D/2,roomMaterial('floor',r.id,r.type==='bath'?mat(0xc8cfcb,.5):mats.floor));mesh.userData={kind:'floor-slab',roomId:r.id,floor:f};}
       roomFurniture(r,base+slab);
-      if((focus==='all'||insideRoom)&&(r.type!=='stairs'||f===floors-1)){
+      // Keep the cover on the whole house; isolated floors and rooms stay open for inspection.
+      if(focus==='all'&&(r.type!=='stairs'||f===floors-1)){
         const nextHoles=BMH.stairFloorHoles?.(f+1)||[],ceilingPanels=BMH.slabPanels?.(r,nextHoles)||[{x:r.x,y:r.y,w:r.w,d:r.h}];
         for(const panel of ceilingPanels){const mesh=addBox(panel.w,slab,panel.d,panel.x+panel.w/2-W/2,base+fh-slab/2,panel.y+panel.d/2-D/2,mats.slab);mesh.userData={kind:'ceiling-slab',roomId:r.id,floor:f};}
       }
@@ -249,7 +250,7 @@ BMH.mountStudio3D = async () => {
 BMH.resetStudio3D = () => {const s=BMH.studio3d;if(!s)return;s.state.yaw=s.state.defaultYaw;s.state.pitch=s.state.defaultPitch;s.state.dist=s.state.defaultDist;s.state.target.copy(s.state.defaultTarget);s.state.updateCamera();};
 BMH.cinematicSignature = (focus=BMH.state.ui?.sceneFocus||'all') => {
   const p=BMH.state.project;
-  return JSON.stringify({style:p.style,focus,viewPreset:focus.startsWith('room:')?(BMH.state.ui.roomCamera||'inside'):'overview',finish:p.materials?.finish||{},site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,floorHeight:p.site.floorHeight,slabThickness:p.site.slabThickness,ceilingDrop:p.site.ceilingDrop,frontDirection:p.site.frontDirection},materials:p.materials?.choices||{},productCodes:Object.values(p.materials?.choices||{}).map(id=>[id,p.dataEngine?.materialOverrides?.[id]?.sku||'']),tier:p.materials?.tier,rooms:p.plan.rooms.map(r=>[r.id,r.floor,r.name,r.type,r.x,r.y,r.w,r.h,r.furnitureRotation,r.stairDirection]),furniture:p.plan.rooms.flatMap(r=>BMH.roomFurnitureLayout?.(r)||[]),openings:(p.plan.openings||[]).map(o=>[o.floor,o.roomId,o.kind,o.side,o.offset,o.width,o.height,o.sill])});
+  return JSON.stringify({style:p.style,focus,viewPreset:focus.startsWith('room:')?(BMH.state.ui.roomCamera||'overview'):'overview',roomInspection:focus.startsWith('room:')?'open':undefined,finish:p.materials?.finish||{},site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,floorHeight:p.site.floorHeight,slabThickness:p.site.slabThickness,ceilingDrop:p.site.ceilingDrop,frontDirection:p.site.frontDirection},materials:p.materials?.choices||{},productCodes:Object.values(p.materials?.choices||{}).map(id=>[id,p.dataEngine?.materialOverrides?.[id]?.sku||'']),tier:p.materials?.tier,rooms:p.plan.rooms.map(r=>[r.id,r.floor,r.name,r.type,r.x,r.y,r.w,r.h,r.furnitureRotation,r.stairDirection]),furniture:p.plan.rooms.flatMap(r=>BMH.roomFurnitureLayout?.(r)||[]),openings:(p.plan.openings||[]).map(o=>[o.floor,o.roomId,o.kind,o.side,o.offset,o.width,o.height,o.sill])});
 };
 BMH.generateCinematicRender = async () => {
   if(BMH.cinematicRender.loading)return;
