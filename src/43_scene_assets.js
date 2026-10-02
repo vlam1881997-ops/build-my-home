@@ -10,9 +10,9 @@ BMH.sceneSurfaceTexture = (THREE, kind, channel='color') => {
  for(let y=0;y<256;y++)for(let x=0;x<256;x++){
   const raw=Math.sin(x*12.9898+y*78.233)*43758.5453,n=raw-Math.floor(raw),grain=Math.sin(y*.20+Math.sin(x*.018)*2+Math.sin(x*.067)*.5);let value=248,height=.5,rough=.85;
   if(kind==='wood'||kind==='plank'||kind==='woodVertical'){const cross=kind==='woodVertical'?x:y,along=kind==='woodVertical'?y:x,vein=Math.sin(cross*.20+Math.sin(along*.024)*2+Math.sin(along*.071)*.65),ring=Math.sin(cross*.72+Math.sin(along*.017)*5);height=.5+vein*.06+n*.025;value=239+vein*6+ring*1.2+n*3;rough=.75+n*.055;if(kind==='plank'&&y<2){value=205;height=.1;rough=.95;}}
-  else if(kind==='fabric'){const weave=(x%4<2?1:0)+(y%4<2?1:0);value=222+weave*12+n*5;height=.3+weave*.22+n*.08;rough=.95;}
+  else if(kind==='fabric'){const weave=(x%4<2?1:0)+(y%4<2?1:0);value=238+weave*4+n*2;height=.5+weave*.04+n*.01;rough=.97+n*.02;}
   else if(kind==='tile'||kind==='stone'){const vein=Math.sin(x*.033+Math.sin(y*.023)*3),seam=kind==='tile'&&(x<2||y<2);value=seam?190:245+vein*6+n*3;height=seam?.08:.55+n*.02;rough=seam?.95:kind==='stone'?.78:.65;}
-  else{value=244+n*10;height=.35+n*.35;rough=.86+n*.08;}
+  else{value=248+(n-.5)*5;height=.5+(n-.5)*.04;rough=.92+n*.03;}
   if(channel==='height')value=height*255;else if(channel==='roughness')value=rough*255;
   const i=(y*256+x)*4;pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=value;pixels.data[i+3]=255;
   if(heights)heights[y*256+x]=height;
@@ -54,7 +54,7 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
     plank: make(finish.floor || '#d3b998', .62, 'plank', [1.6,.18]),
     floorStone: make(finish.floor || '#d8d1c3', .72, 'stone', [.8,.8]),
     rug: make('#d4ccba', .99, 'fabric', [.2, .2]),
-    stone: make('#e7e1d6', .38, 'plaster', [.5, .5]),
+    stone: make('#e7e1d6', .38, 'stone', [.8, .8]),
     white: make('#f4f2e9', .28),
     dark: make('#343b36', .4),
     green: make('#536b45', .85),
@@ -160,6 +160,21 @@ BMH.addFurnitureContact = (THREE, scene, item, base, site) => {
   plane.position.set(item.x+item.w/2-site.width/2,base+.02,item.y+item.d/2-site.depth/2);
   plane.userData={kind:'contact-shadow',roomId:item.roomId,model:item.model};
   scene.add(plane);
+};
+
+// Curved leaves share one bounded mesh instead of solid ellipsoids. The fixed
+// seed keeps a customer's plant identical after edits, reload and PNG export.
+BMH.createSceneFoliage=(THREE,dimensions,material,count=48)=>{
+ const positions=[],colors=[],base=new THREE.Color(material.color),random=n=>{const a=Math.sin(n*127.1+31.7)*43758.5453;return a-Math.floor(a);};count=Math.max(12,Math.min(72,count));
+ for(let i=0;i<count;i++){
+  const angle=i*2.39996,level=.12+random(i+5)*.7,spread=.05+random(i+15)*.16,origin=new THREE.Vector3(Math.sin(angle)*spread,level,Math.cos(angle)*spread),rotation=new THREE.Euler(.3+random(i+25)*.65,angle,.15+random(i+35)*.4),quaternion=new THREE.Quaternion().setFromEuler(rotation),length=.17+random(i+45)*.15,width=.05+random(i+55)*.045,vertices=[];
+  for(let row=0;row<=5;row++)for(let col=0;col<=2;col++){const t=row/5,s=col-1,v=new THREE.Vector3(s*width*.5*Math.sin(Math.PI*t),t*length,.018*Math.sin(Math.PI*t)-Math.abs(s)*.01*Math.sin(Math.PI*t));vertices.push(v.applyQuaternion(quaternion).add(origin));}
+  const tint=base.clone().multiplyScalar(.72+random(i+65)*.5);
+  for(let row=0;row<5;row++)for(let col=0;col<2;col++){const a=row*3+col;for(const triangle of [[a,a+3,a+1],[a+1,a+3,a+4]]){const [v0,v1,v2]=triangle.map(n=>vertices[n]);if(v1.clone().sub(v0).cross(v2.clone().sub(v0)).lengthSq()<1e-14)continue;for(const n of triangle){const p=vertices[n],vein=n%3===1?.88:1;positions.push(p.x,p.y,p.z);colors.push(tint.r*vein,tint.g*vein,tint.b*vein);}}}
+ }
+ const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geometry.computeVertexNormals();geometry.computeBoundingBox();const bounds=geometry.boundingBox,size=bounds.getSize(new THREE.Vector3()),p=geometry.attributes.position;
+ for(let i=0;i<p.count;i++)p.setXYZ(i,(p.getX(i)-(bounds.min.x+bounds.max.x)/2)*dimensions.w/size.x,(p.getY(i)-bounds.min.y)*dimensions.h/size.y,(p.getZ(i)-(bounds.min.z+bounds.max.z)/2)*dimensions.d/size.z);geometry.computeVertexNormals();geometry.computeBoundingBox();
+ const leaves=material.clone();leaves.vertexColors=true;leaves.color.set('#ffffff');leaves.side=THREE.DoubleSide;leaves.roughness=.78;const mesh=new THREE.Mesh(geometry,leaves);mesh.castShadow=mesh.receiveShadow=true;mesh.userData={generic:true,kind:'foliage',dimensions:{...dimensions},leafCount:count};return mesh;
 };
 
 BMH.createRoomAsset = (model, d, THREE, m) => {
@@ -287,9 +302,8 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     for(let i=0;i<9;i++) {
       const a=i*2.4,h=.50+(i%4)*.15;
       cylinder(.005,.008,h,Math.sin(a)*.035,.34+h/2,Math.cos(a)*.035,m.green);
-      const leaf=sphere(.12,.48,.025,Math.sin(a)*.115,.48+h*.7,Math.cos(a)*.12,i%2?m.green:m.leaf);
-      leaf.rotation.set(.25*Math.cos(a),a,.28*Math.sin(a));
     }
+    const foliage=BMH.createSceneFoliage(THREE,{w:.40,h:.96,d:.43},m.leaf);foliage.position.y=.32;root.add(foliage);
   } else if(model==='bathroomSink') {
     box(d.w,.54,d.d-.04,0,.41,0,m.wood,.025);
     front(d.w-.03,.45,.42,d.d/2-.012,2);

@@ -37,7 +37,7 @@ BMH.architecturalRenderScene=(THREE,source)=>{
     // The physical renderer supports normal maps; height maps stay on the fast viewer.
     copy.envMap=null;materials.set(m,copy);ownedMaterials.add(copy);return copy;};
    const mesh=new THREE.Mesh(geometry,Array.isArray(o.material)?o.material.map(convert):convert(o.material));mesh.name=o.name;mesh.userData={...o.userData};scene.add(mesh);
-  }else if(o.isLight&&!o.isHemisphereLight&&o.intensity>0){const light=o.clone();light.castShadow=false;light.position.copy(o.getWorldPosition(new THREE.Vector3()));if(light.isDirectionalLight){light.radius=.035;light.target.position.copy(o.target.getWorldPosition(new THREE.Vector3()));scene.add(light.target);}scene.add(light);}
+  }else if(o.isLight&&!o.isHemisphereLight&&o.intensity>0){const light=o.clone();light.castShadow=false;light.position.copy(o.getWorldPosition(new THREE.Vector3()));if(light.isDirectionalLight){if(BMH.state.ui.sceneFocus==='all'&&BMH.state.ui.sceneTheme!=='night')light.intensity=o.castShadow?3.2:.25;light.radius=.035;light.target.position.copy(o.target.getWorldPosition(new THREE.Vector3()));scene.add(light.target);}scene.add(light);}
  });
  const ui=BMH.state.ui,room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===ui.sceneFocus),site=BMH.state.project.site;
  // Eye-height photographs include the measured ceiling; open inspection views keep covers off.
@@ -45,7 +45,13 @@ BMH.architecturalRenderScene=(THREE,source)=>{
   const levels=BMH.projectLevels(),material=materials.values().next().value?.clone()||new THREE.MeshStandardMaterial({color:'#eee8df',roughness:.92});material.color.set('#eee8df');material.map=null;material.normalMap=null;ownedMaterials.add(material);
   const ceilingY=levels.floorHeight-(levels.ceilingDrop||0);
   for(const p of BMH.slabPanels(room,BMH.stairFloorHoles(room.floor+1))){const mesh=new THREE.Mesh(new THREE.BoxGeometry(p.w,levels.slab,p.d),material);mesh.position.set(p.x+p.w/2-site.width/2,ceilingY+levels.slab/2,p.y+p.d/2-site.depth/2);mesh.userData={kind:'ceiling-slab',roomId:room.id,floor:room.floor};scene.add(mesh);}
-  const light=new THREE.RectAreaLight('#fff5e8',BMH.state.ui.sceneTheme==='night'?25:18,Math.min(.8,room.w*.25),Math.min(.8,room.h*.25));light.position.set(room.x+room.w/2-site.width/2,ceilingY-.025,room.y+room.h/2-site.depth/2);light.rotation.x=-Math.PI/2;light.userData.kind='render-lighting';scene.add(light);
+  // Broad photographic fill converges cleanly; daylight comes from the actual
+  // opening locations rather than a small, bright emitter in the room centre.
+  const night=BMH.state.ui.sceneTheme==='night',light=new THREE.RectAreaLight('#fff5ec',night?2.8:.6,room.w*.65,room.h*.65);light.position.set(room.x+room.w/2-site.width/2,ceilingY-.025,room.y+room.h/2-site.depth/2);light.rotation.x=-Math.PI/2;light.userData.kind='render-lighting';scene.add(light);
+  if(!night)for(const opening of BMH.state.project.plan.openings.filter(o=>o.roomId===room.id&&o.kind==='window')){
+   const span=BMH.openingWallSpan?.(opening);if(!span)continue;const horizontal=span.o==='h',inward={north:1,south:-1,west:1,east:-1}[opening.side],height=Number(opening.height)||1.4,windowLight=new THREE.RectAreaLight('#eef5ff',3.5,span.b-span.a,height);
+   windowLight.position.set((horizontal?(span.a+span.b)/2:span.c+inward*.13)-site.width/2,levels.slab+(Number(opening.sill)||0)+height/2,(horizontal?span.c+inward*.13:(span.a+span.b)/2)-site.depth/2);windowLight.rotation.y={north:Math.PI,south:0,west:-Math.PI/2,east:Math.PI/2}[opening.side];windowLight.userData={kind:'render-lighting',openingId:opening.id};scene.add(windowLight);
+  }
  }
  scene.background=source.background?.clone?.()||new THREE.Color('#ece9e0');scene.backgroundRotation=new THREE.Euler();scene.environmentRotation=new THREE.Euler();scene.backgroundIntensity=1;scene.environmentIntensity=1;scene.userData.ownedMaterials=ownedMaterials;return scene;
 };
@@ -65,12 +71,12 @@ BMH.startArchitecturalRender=async()=>{
   const modules=await (BMH.archRenderModules||(BMH.archRenderModules=import('./vendor/three/pathtracer.js').catch(e=>{BMH.archRenderModules=null;throw e;}))),THREE=await BMH.ensureThree();
   if(BMH.studio3d!==s||s.renderEpoch!==epoch||signature!==BMH.cinematicSignature())return false;
   const preset=BMH.ARCH_RENDER_PRESETS[BMH.state.ui.renderQuality]||BMH.ARCH_RENDER_PRESETS.fine,scene=BMH.architecturalRenderScene(THREE,s.scene),environment=new modules.GradientEquirectTexture(128);
-  environment.topColor.set(BMH.state.ui.sceneTheme==='night'?'#60718e':'#e6eff8');environment.bottomColor.set(BMH.state.ui.sceneTheme==='night'?'#1c242c':'#c4c8c2');environment.exponent=1;environment.update();scene.environment=environment;scene.environmentIntensity=BMH.state.ui.sceneTheme==='night'?.35:1.7;
+  environment.topColor.set(BMH.state.ui.sceneTheme==='night'?'#60718e':'#e6eff8');environment.bottomColor.set(BMH.state.ui.sceneTheme==='night'?'#1c242c':'#c4c8c2');environment.exponent=1;environment.update();scene.environment=environment;scene.environmentIntensity=BMH.state.ui.sceneTheme==='night'?.35:BMH.state.ui.sceneFocus==='all'?.75:1.7;
   s.archRender={scene,environment,preset,signature,raf:0,cancelled:false,samples:0,complete:false};
   const tracer=new modules.WebGLPathTracer(s.renderer);s.archRender.tracer=tracer;const denoise=new modules.FullScreenQuad(new modules.DenoiseMaterial({sigma:1.6,kSigma:1,threshold:.12}));s.archRender.denoise=denoise;
   tracer.bounces=preset.bounces;tracer.transmissiveBounces=6;tracer.filterGlossyFactor=.35;tracer.textureSize.set(256,256);tracer.tiles.set(3,3);tracer.minSamples=1;tracer.renderDelay=0;tracer.fadeDuration=0;tracer.rasterizeScene=false;tracer.renderToCanvas=false;
   const size=s.renderer.getDrawingBufferSize(new THREE.Vector2()),width=Math.min(preset.width,s.renderer.capabilities.maxTextureSize,Math.sqrt(6000000*size.x/size.y));tracer.setScene(scene,s.camera);tracer.synchronizeRenderSize=false;tracer._pathTracer.alpha=true;tracer._pathTracer.setSize(Math.floor(width),Math.floor(width*size.y/size.x));tracer._pathTracer.reset();BMH.state.ui.renderMode='quality';BMH.save();
-  const guide=new THREE.WebGLRenderTarget(tracer.target.width,tracer.target.height,{type:THREE.HalfFloatType,depthBuffer:true,minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter}),guideMaterial=new modules.ArchitecturalGuideMaterial(),previousTarget=s.renderer.getRenderTarget(),previousClear=s.renderer.getClearColor(new THREE.Color()),previousAlpha=s.renderer.getClearAlpha(),background=scene.background;
+  const guide=new THREE.WebGLRenderTarget(tracer.target.width,tracer.target.height,{type:THREE.HalfFloatType,depthBuffer:true,minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter}),guideMaterial=new modules.ArchitecturalGuideMaterial(),previousTarget=s.renderer.getRenderTarget(),previousClear=s.renderer.getClearColor(new THREE.Color()),previousAlpha=s.renderer.getClearAlpha(),background=scene.background;guideMaterial.side=THREE.DoubleSide;
   s.archRender.guide=guide;
   try{scene.overrideMaterial=guideMaterial;scene.background=null;s.renderer.setClearColor(0,0);s.renderer.setRenderTarget(guide);s.renderer.render(scene,s.camera);}finally{scene.overrideMaterial=null;scene.background=background;s.renderer.setRenderTarget(previousTarget);s.renderer.setClearColor(previousClear,previousAlpha);guideMaterial.dispose();}
   denoise.material.uniforms.guide.value=guide.texture;denoise.material.uniforms.resolution.value.set(guide.width,guide.height);denoise.material.uniforms.projectionScale.value.set(s.camera.projectionMatrix.elements[0],s.camera.projectionMatrix.elements[5]);

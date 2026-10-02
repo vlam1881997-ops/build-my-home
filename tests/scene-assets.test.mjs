@@ -27,6 +27,16 @@ test('detailed furniture preserves every measured envelope and has finite smooth
   assert.equal(b.createRoomAsset('table',{w:0,h:1,d:1},THREE,m),null);
 });
 
+test('foliage stays inside its measured envelope with valid shaded leaves and a bounded mesh',()=>{
+ const {b}=client(),material=new THREE.MeshStandardMaterial({color:'#79935a'}),dimensions={w:.38,h:.7,d:.38};
+ const plant=b.createSceneFoliage(THREE,dimensions,material),repeat=b.createSceneFoliage(THREE,dimensions,material);
+ const bounds=new THREE.Box3().setFromObject(plant),size=bounds.getSize(new THREE.Vector3());
+ for(const [actual,expected] of [[size.x,dimensions.w],[size.y,dimensions.h],[size.z,dimensions.d],[bounds.min.y,0]])assert.ok(Math.abs(actual-expected)<1e-6);
+ const {position,normal,color}=plant.geometry.attributes;assert.ok(position.count/3<1200);assert.ok(color.count===position.count);assert.ok(new Set(color.array).size>20);
+ for(let i=0;i<normal.count;i++)assert.ok(Math.abs(Math.hypot(normal.getX(i),normal.getY(i),normal.getZ(i))-1)<1e-5);
+ assert.deepEqual(position.array,repeat.geometry.attributes.position.array);assert.ok(plant.material.vertexColors);assert.equal(plant.material.side,THREE.DoubleSide);assert.equal(material.vertexColors,false);assert.equal(plant.userData.generic,true);
+});
+
 test('the detailed model uses the shared rotated placements and retains drawing footprints',()=>{
   const {b}=client();b.finishPalette=()=>({wall:'#ded8c9',accent:'#806549',fabric:'#a7b39a'});
   for(const type of ['living','bed','kitchen','bath'])for(const rotation of [0,90,180,270]){
@@ -132,4 +142,10 @@ test('stair presentation keeps all measured tops and rotates coherent flights wi
 test('detailed car retains its actual vehicle envelope in both garage orientations',()=>{
  const {b}=client(),before=JSON.stringify(b.state.project.plan);for(const [w,h] of [[3,5.5],[5.5,3]]){const r={id:'g',type:'garage',x:1,y:1,w,h},scene=new THREE.Scene(),v=b.garageVehicle(r);assert.equal(b.addGarageVehicle(r,.14,THREE,scene,b.state.project.site),true);const g=scene.children[0];g.updateMatrixWorld(true);const size=new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3());assert.ok(Math.abs(size.x-v.w)<1e-5);assert.ok(Math.abs(size.z-v.d)<1e-5);assert.ok(Math.abs(size.y-1.45)<1e-5);assert.ok(g.children.length>10);}
  assert.equal(b.addGarageVehicle({id:'tiny',x:0,y:0,w:1,h:1},.14,THREE,new THREE.Scene(),b.state.project.site),false);assert.equal(JSON.stringify(b.state.project.plan),before);
+});
+
+test('matte paint and upholstery have subtle relief rather than coarse random surface normals',()=>{
+ const {b,context}=client();context.document.createElement=()=>{const canvas={};canvas.getContext=()=>({createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData:p=>{canvas.pixels=p.data;}});return canvas;};const materials=b.sceneAssetMaterials(THREE,new THREE.Scene());
+ for(const material of [materials.wall,materials.fabric,materials.linen]){const pixels=material.normalMap.image.pixels;for(let i=0;i<pixels.length;i+=4){assert.ok(pixels[i+2]>=253);assert.ok(Math.abs(pixels[i]-128)<=14);assert.ok(Math.abs(pixels[i+1]-128)<=14);}}
+ assert.equal(materials.stone.map.userData.kind,'stone');assert.equal(materials.wall.map.userData.kind,'plaster');
 });

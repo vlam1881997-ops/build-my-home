@@ -137,7 +137,7 @@ queueMicrotask(()=>BMH.render({preserveScroll:true}));
 // Visible finish details follow existing walls and room bounds. Cutaway is presentation only.
 BMH.decorateStudioScene=({THREE,scene,mats,addBox,mat,roomMaterial,visibleFloors,roomFocus,floorFocus,W,D,fh,explode,focus})=>{
  const levels=BMH.projectLevels(),p=BMH.state.project;
- const detail=(mesh,roomId)=>{mesh.userData={kind:'finish-detail',roomId};return mesh;};
+ const detail=(mesh,roomId)=>{mesh.userData={...mesh.userData,kind:'finish-detail',roomId};return mesh;};
  for(const f of visibleFloors){
   const rooms=BMH.floorRooms(f).filter(r=>!roomFocus||r.id===roomFocus.id),base=roomFocus||floorFocus!==null?0:f*(fh+explode),geometry=BMH.scenePlanGeometry({rooms,openings:p.plan.openings,wallContext:p.plan.rooms},f),bounds=BMH.sceneFootprintBounds(rooms);
   for(const w of geometry.walls){
@@ -195,7 +195,7 @@ BMH.decorateStudioScene=({THREE,scene,mats,addBox,mat,roomMaterial,visibleFloors
     for(let n=0;n<3;n++){const fish=new THREE.Mesh(new THREE.SphereGeometry(.06,12,8),mat(n%2?'#df9c45':'#dfd8c9',.45));fish.scale.set(1.6,.35,.55);fish.position.set(cx+(n-1)*.25,.19,cz+Math.sin(n)*.14);detail(fish,zone.id);scene.add(fish);}
    }else{
     detail(addBox(zone.w,.025,zone.h,cx,.095,cz,mat('#748563',.97)),zone.id);
-    for(let n=0;n<5;n++){const x=zone.x+.2+(zone.w-.4)*(n/4),z=zone.y+zone.h*.55;for(let j=0;j<3;j++){const plant=new THREE.Mesh(new THREE.SphereGeometry(.14,14,10),mat(j%2?'#829362':'#526d48',.96));plant.scale.set(1,1.7,1);plant.position.set(x-W/2+Math.sin(j*2)*.08,.26+j*.08,z-D/2+Math.cos(j*2)*.08);detail(plant,zone.id);scene.add(plant);}}
+    for(let n=0;n<5;n++){const x=zone.x+.2+(zone.w-.4)*(n/4),z=zone.y+zone.h*.55,plant=BMH.createSceneFoliage(THREE,{w:Math.min(.36,zone.w-.1),h:.45,d:Math.min(.36,zone.h-.1)},mats.green,36);plant.position.set(x-W/2,.12,z-D/2);detail(plant,zone.id);scene.add(plant);}
    }
   }
  }
@@ -204,7 +204,7 @@ BMH.decorateStudioScene=({THREE,scene,mats,addBox,mat,roomMaterial,visibleFloors
   if(bounds&&bounds.y>.7){
    const entrance=p.plan.openings.find(o=>o.floor===0&&o.kind==='door'&&o.side==='north'),r=p.plan.rooms.find(r=>r.id===entrance?.roomId),x=r?r.x+(r.w-entrance.width)*entrance.offset+entrance.width/2:bounds.cx;
    detail(addBox(Math.min(1.05,W-.2),.055,bounds.y,x-W/2,.095,bounds.y/2-D/2,mat(0xc0b69f,.92)),r?.id);
-   for(const px of [.32,W-.32]){const pot=new THREE.Mesh(new THREE.CylinderGeometry(.2,.16,.4,24),mat(0xb5ac94,.92));pot.position.set(px-W/2,.22,bounds.y*.5-D/2);detail(pot,'garden');scene.add(pot);for(let n=0;n<7;n++){const leaf=new THREE.Mesh(new THREE.SphereGeometry(.12,12,8),mats.green);leaf.scale.set(.7,2.7,1);leaf.rotation.z=Math.sin(n)*.45;leaf.position.set(px-W/2+Math.sin(n)*.11,.61+n*.025,bounds.y*.5-D/2+Math.cos(n)*.1);detail(leaf,'garden');scene.add(leaf);}}
+   for(const px of [.32,W-.32]){const pot=new THREE.Mesh(new THREE.CylinderGeometry(.2,.16,.4,24),mat(0xb5ac94,.92));pot.position.set(px-W/2,.22,bounds.y*.5-D/2);detail(pot,'garden');scene.add(pot);const plant=BMH.createSceneFoliage(THREE,{w:.38,h:.7,d:.38},mats.green,48);plant.position.set(px-W/2,.42,bounds.y*.5-D/2);detail(plant,'garden');scene.add(plant);}
   }
  }
 };
