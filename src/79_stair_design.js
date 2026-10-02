@@ -39,11 +39,39 @@ BMH.furnitureSvg=r=>{
 const stairSceneFurniture=BMH.addRoomSceneFurniture;
 BMH.addRoomSceneFurniture=(r,base,THREE,scene,mats,site)=>{
  if(r.type!=='stairs')return stairSceneFurniture(r,base,THREE,scene,mats,site);
- for(const p of BMH.stairGeometry(r)){const mesh=new THREE.Mesh(new THREE.BoxGeometry(p.w,p.h,p.d),mats.accent);mesh.position.set(p.x+p.w/2-site.width/2,base+p.base+p.h/2,p.y+p.d/2-site.depth/2);mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);}
+ const parts=BMH.stairGeometry(r),spec=BMH.stairSpec(r),finish=BMH.sceneAssetMaterials(THREE,scene,BMH.finishPalette?.(r.id)||{}),concrete=finish.wall;
+ const add=(g,m,name,kind)=>{const mesh=new THREE.Mesh(g,m);mesh.name=r.id+'-'+name;mesh.userData={kind,roomId:r.id,floor:r.floor,generic:true};mesh.castShadow=mesh.receiveShadow=true;scene.add(mesh);return mesh;};
+ const box=(p,h,top,m,name,kind)=>{const g=new THREE.BoxGeometry(p.w,h,p.d);BMH.sceneSurfaceUvs(g,m,{x:p.x,y:top,z:p.y});const mesh=add(g,m,name,kind);mesh.position.set(p.x+p.w/2-site.width/2,base+top-h/2,p.y+p.d/2-site.depth/2);return mesh;};
+ // Every tread top and landing still matches stairGeometry exactly; the underside is a continuous flight.
+ parts.forEach((p,i)=>box(p,Math.min(.035,p.h),p.base+p.h,finish.wood,'tread-'+i,'stair-tread'));
+ const landingIndex=spec.shape==='u'?spec.first-1:-1,flights=spec.shape==='u'?[parts.slice(0,landingIndex),parts.slice(landingIndex+1)]:[parts];
+ if(parts[landingIndex])box(parts[landingIndex],.15,parts[landingIndex].base+parts[landingIndex].h-.035,concrete,'landing','stair-landing');
+ const rod=(a,b,radius,material,name)=>{const va=new THREE.Vector3(a.x-site.width/2,base+a.h,a.y-site.depth/2),vb=new THREE.Vector3(b.x-site.width/2,base+b.h,b.y-site.depth/2),delta=vb.clone().sub(va),mesh=add(new THREE.CylinderGeometry(radius,radius,delta.length(),12),material,name,'stair-guard');mesh.position.copy(va.clone().add(vb).multiplyScalar(.5));mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());};
+ for(let f=0;f<flights.length;f++){
+  const flight=flights[f];if(flight.length<2)continue;
+  const first=flight[0],last=flight.at(-1),alongX=Math.abs(last.x-first.x)>Math.abs(last.y-first.y),dir=Math.sign(alongX?last.x-first.x:last.y-first.y)||1,width=alongX?first.d:first.w,start=alongX?(dir>0?first.x:first.x+first.w):(dir>0?first.y:first.y+first.d),cross=alongX?first.y:first.x,total=flight.reduce((sum,p)=>sum+(alongX?p.w:p.d),0),contour=[];let run=0;
+  contour.push(new THREE.Vector2(0,first.base+first.h-.035));
+  for(const p of flight){const top=p.base+p.h-.035;contour.push(new THREE.Vector2(run,top));run+=alongX?p.w:p.d;contour.push(new THREE.Vector2(run,top));}
+  contour.push(new THREE.Vector2(total,last.base+last.h-.20),new THREE.Vector2(0,first.base+first.h-.20));
+  const triangles=THREE.ShapeUtils.triangulateShape(contour,[]),coords=[],point=(i,side)=>{const q=contour[i],axis=start+dir*q.x;return alongX?[axis-site.width/2,base+q.y,cross+side*width-site.depth/2]:[cross+side*width-site.width/2,base+q.y,axis-site.depth/2];};
+  for(const t of triangles){for(const i of t)coords.push(...point(i,0));for(const i of [...t].reverse())coords.push(...point(i,1));}
+  for(let i=0;i<contour.length;i++){const j=(i+1)%contour.length;for(const [n,side] of [[i,0],[j,0],[j,1],[i,0],[j,1],[i,1]])coords.push(...point(n,side));}
+  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(coords,3));geometry.computeVertexNormals();const material=concrete.clone();material.side=THREE.DoubleSide;add(geometry,material,'flight-'+f,'stair-flight');
+  if(r.stairGuard!=='none'){
+   const inner=spec.shape==='u'?(f===0?cross+width-.04:cross+.04):cross+width-.04,posts=flight.filter((p,i)=>i===0||i===flight.length-1||i%2===0).map(p=>({x:alongX?p.x+p.w/2:inner,y:alongX?inner:p.y+p.d/2,h:p.base+p.h}));
+   posts.forEach((q,i)=>rod(q,{...q,h:q.h+.95},.012,finish.dark,'post-'+f+'-'+i));
+   if(posts.length>1){rod({...posts[0],h:posts[0].h+.95},{...posts.at(-1),h:posts.at(-1).h+.95},.026,finish.wood,'handrail-'+f);for(const h of [.35,.65])rod({...posts[0],h:posts[0].h+h},{...posts.at(-1),h:posts.at(-1).h+h},.008,finish.dark,'guard-'+f+'-'+h);}
+  }
+ }
+ if(parts[landingIndex]&&r.stairGuard!=='none'){
+  const p=parts[landingIndex],alongX=spec.alongX,h=p.base+p.h,edge=spec.direction===0?{a:{x:p.x,y:p.y,h},b:{x:p.x+p.w,y:p.y,h}}:spec.direction===180?{a:{x:p.x,y:p.y+p.d,h},b:{x:p.x+p.w,y:p.y+p.d,h}}:spec.direction===90?{a:{x:p.x+p.w,y:p.y,h},b:{x:p.x+p.w,y:p.y+p.d,h}}:{a:{x:p.x,y:p.y,h},b:{x:p.x,y:p.y+p.d,h}};
+  rod(edge.a,{...edge.a,h:h+.95},.012,finish.dark,'landing-post-0');rod(edge.b,{...edge.b,h:h+.95},.012,finish.dark,'landing-post-1');rod({...edge.a,h:h+.95},{...edge.b,h:h+.95},.026,finish.wood,'landing-handrail');
+ }
+
 };
 const stairDocument=BMH.architectDocument;
 BMH.architectDocument=(focus='all')=>{const doc=stairDocument(focus);for(let f=0;f<doc.levels.length;f++){const items=BMH.floorRooms(f).filter(r=>r.type==='stairs'&&(!focus.startsWith('room:')||r.id===focus.slice(5))).flatMap(r=>BMH.stairGeometry(r).map((p,i)=>({id:r.id+'-stair-'+i,item_name:'Bậc / chiếu nghỉ',item_type:1,format:'gltf',model_url:'models/stairStep.glb',xpos:(p.x+p.w/2)*100,zpos:(p.y+p.d/2)*100,ypos:p.base*100,scale_x:p.w*100,scale_y:p.h*100,scale_z:p.d*100,rotation:0,fixed:true})));if(f===0)doc.items.push(...items);else doc.levels[f].items.push(...items);}return doc;};
 const stairEditingPanel=BMH.roomEditingPanel;
-BMH.roomEditingPanel=()=>{const r=BMH.selectedRoom(),html=stairEditingPanel();if(r?.type!=='stairs')return html;const s=BMH.stairSpec(r);return html.replace('<form data-opening-form','<div class="architecture-fields"><label>Kiểu thang<select data-stair-shape '+(BMH.isRoomLocked(r.id)?'disabled':'')+'><option value="u" '+(s.shape==='u'?'selected':'')+'>Chữ U · hai vế có chiếu nghỉ</option><option value="straight" '+(s.shape==='straight'?'selected':'')+'>Thẳng</option></select></label><p>'+s.count+' cao bậc · cao '+s.riser.toFixed(3)+' m · mặt bậc '+s.tread.toFixed(3)+' m'+(s.shape==='u'?' · rộng vế '+s.flightWidth.toFixed(2)+' m · chiếu nghỉ '+s.landing.toFixed(2)+' m':'')+'<br>'+BMH.esc(s.warning||'Kiểm tra sơ bộ theo kích thước ô thang. Khoảng thông đầu, lan can, kết cấu và PCCC cần KTS/kỹ sư xác nhận.')+'</p></div><form data-opening-form');};
-document.addEventListener('change',e=>{if(!e.target.matches?.('[data-stair-shape]'))return;const r=BMH.selectedRoom();if(!r||BMH.isRoomLocked(r.id))return;BMH.pushPlanHistory();r.stairShape=e.target.value;BMH.save();BMH.render({preserveScroll:true});});
-const stairSignature=BMH.cinematicSignature;BMH.cinematicSignature=focus=>stairSignature(focus)+'|stairs:'+JSON.stringify(BMH.state.project.plan.rooms.filter(r=>r.type==='stairs').map(r=>[r.id,r.stairShape||'u',BMH.stairSpec(r).direction]));
+BMH.roomEditingPanel=()=>{const r=BMH.selectedRoom(),html=stairEditingPanel();if(r?.type!=='stairs')return html;const s=BMH.stairSpec(r);return html.replace('<form data-opening-form','<div class="architecture-fields"><label>Kiểu thang<select data-stair-shape '+(BMH.isRoomLocked(r.id)?'disabled':'')+'><option value="u" '+(s.shape==='u'?'selected':'')+'>Chữ U · hai vế có chiếu nghỉ</option><option value="straight" '+(s.shape==='straight'?'selected':'')+'>Thẳng</option></select></label><label>Lan can minh họa<select data-stair-guard '+(BMH.isRoomLocked(r.id)?'disabled':'')+'><option value="metal" '+(r.stairGuard!=='none'?'selected':'')+'>Thanh kim loại · tay vịn gỗ</option><option value="none" '+(r.stairGuard==='none'?'selected':'')+'>Ẩn để kiểm tra hình thang</option></select></label><p>'+s.count+' cao bậc · cao '+s.riser.toFixed(3)+' m · mặt bậc '+s.tread.toFixed(3)+' m'+(s.shape==='u'?' · rộng vế '+s.flightWidth.toFixed(2)+' m · chiếu nghỉ '+s.landing.toFixed(2)+' m':'')+'<br>'+BMH.esc(s.warning||'Kiểm tra sơ bộ theo kích thước ô thang. Khoảng thông đầu, lan can, kết cấu và PCCC cần KTS/kỹ sư xác nhận.')+'</p></div><form data-opening-form');};
+document.addEventListener('change',e=>{if(!e.target.matches?.('[data-stair-shape],[data-stair-guard]'))return;const r=BMH.selectedRoom();if(!r||BMH.isRoomLocked(r.id))return;BMH.pushPlanHistory();r[e.target.matches('[data-stair-guard]')?'stairGuard':'stairShape']=e.target.value;BMH.save();BMH.render({preserveScroll:true});});
+const stairSignature=BMH.cinematicSignature;BMH.cinematicSignature=focus=>stairSignature(focus)+'|stairs:'+JSON.stringify(BMH.state.project.plan.rooms.filter(r=>r.type==='stairs').map(r=>[r.id,r.stairShape||'u',BMH.stairSpec(r).direction,r.stairGuard||'metal']));

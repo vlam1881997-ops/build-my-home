@@ -116,3 +116,20 @@ test('scene cleanup disposes shared maps and environment targets exactly once',(
   texture.addEventListener('dispose',()=>textures++);material.addEventListener('dispose',()=>materials++);geometry.addEventListener('dispose',()=>geometries++);scene.userData.environmentTarget={dispose(){environment++}};
   b.studio3d={scene,renderer:{dispose(){renderer++}}};b.disposeStudio3D();assert.deepEqual([textures,materials,geometries,environment,renderer],[1,1,1,1,1]);assert.equal(b.studio3d,null);
 });
+
+
+test('stair presentation keeps all measured tops and rotates coherent flights without tall wood blocks',()=>{
+ const {b,context}=client();b.state.project.site.floors=3;b.projectLevels=()=>({floorHeight:3.4,floors:3});b.stairSpec=()=>({});b.architectDocument=()=>({levels:[],items:[]});b.cinematicSignature=()=>'';vm.runInNewContext(fs.readFileSync('src/79_stair_design.js','utf8'),context);
+ for(const direction of [0,90,180,270]){
+  const r={id:'s',type:'stairs',floor:0,x:1,y:1,w:4,h:4,stairDirection:direction},scene=new THREE.Scene();b.state.project.plan.rooms=[r];const before=JSON.stringify(r),parts=b.stairGeometry(r);b.addRoomSceneFurniture(r,.14,THREE,scene,{},b.state.project.site);
+  const treads=scene.children.filter(m=>m.userData.kind==='stair-tread');assert.equal(treads.length,parts.length);for(let i=0;i<parts.length;i++){const p=parts[i],m=treads[i];assert.ok(Math.abs(m.position.y+m.geometry.parameters.height/2-.14-p.base-p.h)<1e-6);assert.ok(m.geometry.parameters.height<=.035);assert.ok(Math.abs(m.position.x+4-p.x-p.w/2)<1e-6);assert.ok(Math.abs(m.position.z+4-p.y-p.d/2)<1e-6);}
+  assert.equal(scene.children.filter(m=>m.userData.kind==='stair-flight').length,2);assert.ok(scene.children.some(m=>m.userData.kind==='stair-guard'));for(const m of scene.children)assert.ok(m.geometry.attributes.position.array.every(Number.isFinite));assert.equal(JSON.stringify(r),before);
+  const top=new THREE.Scene();b.addRoomSceneFurniture({...r,floor:2},.14,THREE,top,{},b.state.project.site);assert.equal(top.children.length,0);
+ }
+});
+
+
+test('detailed car retains its actual vehicle envelope in both garage orientations',()=>{
+ const {b}=client(),before=JSON.stringify(b.state.project.plan);for(const [w,h] of [[3,5.5],[5.5,3]]){const r={id:'g',type:'garage',x:1,y:1,w,h},scene=new THREE.Scene(),v=b.garageVehicle(r);assert.equal(b.addGarageVehicle(r,.14,THREE,scene,b.state.project.site),true);const g=scene.children[0];g.updateMatrixWorld(true);const size=new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3());assert.ok(Math.abs(size.x-v.w)<1e-5);assert.ok(Math.abs(size.z-v.d)<1e-5);assert.ok(Math.abs(size.y-1.45)<1e-5);assert.ok(g.children.length>10);}
+ assert.equal(b.addGarageVehicle({id:'tiny',x:0,y:0,w:1,h:1},.14,THREE,new THREE.Scene(),b.state.project.site),false);assert.equal(JSON.stringify(b.state.project.plan),before);
+});

@@ -37,13 +37,14 @@ BMH.planDxf=(floor=BMH.state.ui.planner.floor)=>{
   text(x+(horizontal?w/2:.15),y+(horizontal?-.18:w/2),BMH.openingCode(o)+' / '+Math.round(w*1000),o.kind==='door'?'DOORS':'WINDOWS',.15);
  }
  const dimension=(x,y,w,d,vertical=false)=>{const length=vertical?d:w;if(length<=0)return;line(x,y,x+w,y+d,'DIMENSIONS');for(const [a,b] of [[x,y],[x+w,y+d]])line(a-.07,b+.07,a+.07,b-.07,'DIMENSIONS');text(x+w/2+.08,y+d/2-.09,Math.round(length*1000),'DIMENSIONS',.18,vertical?90:0);};
+ for(const z of floor===0?p.plan.outdoor||[]:[]){rect(z.x,z.y,z.w,z.h,'FURNITURE');text(z.x+.1,z.y+z.h/2,z.name);}
  for(const r of rooms){text(r.x+.18,r.y+r.h/2,r.name);text(r.x+.18,r.y+r.h/2+.3,(r.w*r.h).toFixed(2)+' m2');dimension(r.x,r.y+.35,r.w,0);dimension(r.x+.35,r.y,0,r.h,true);for(const i of BMH.roomFurnitureLayout(r))rect(i.x,i.y,i.w,i.d,'FURNITURE');if(r.type==='garage'){const v=BMH.garageVehicle(r);if(v)rect(v.x,v.y,v.w,v.d,'FURNITURE');}if(r.type==='stairs')for(const v of BMH.stairGeometry(r))rect(v.x,v.y,v.w,v.d,'STAIRS');}
  dimension(0,-1,p.site.width,0);dimension(-1,0,0,p.site.depth,true);
  text(0,p.site.depth+1,'BMH / MẶT BẰNG TẦNG '+(floor+1)+' / ĐƠN VỊ mm / MODEL 1:1');text(0,p.site.depth+1.4,'Kiến trúc theo phương án; kết cấu và MEP cần thiết kế riêng.');pair(0,'ENDSEC');pair(0,'EOF');return parts.join('\r\n')+'\r\n';
 };
 // A3 sheets use paper millimetres; the nested model retains measured metres.
 BMH.drawingRevision=()=>{
- const p=BMH.state.project,input=JSON.stringify({site:p.site,rooms:p.plan.rooms,openings:p.plan.openings,levels:BMH.projectLevels()});let hash=2166136261;
+ const p=BMH.state.project,input=JSON.stringify({site:p.site,rooms:p.plan.rooms,openings:p.plan.openings,outdoor:p.plan.outdoor||[],levels:BMH.projectLevels()});let hash=2166136261;
  for(let i=0;i<input.length;i++){hash^=input.charCodeAt(i);hash=Math.imul(hash,16777619);}return (hash>>>0).toString(16).toUpperCase().padStart(8,'0');
 };
 BMH.drawingScale=(w,h,width=308,height=218)=>[50,75,100,125,150,200,250,300,500,750,1000,2000,5000].find(n=>w*1000/n<=width&&h*1000/n<=height)||Math.ceil(Math.max(w/width,h/height)*1000/100)*100;

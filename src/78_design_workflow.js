@@ -121,7 +121,7 @@ BMH.addRoomSceneFurniture=(r,base,THREE,scene,mats,site)=>{
   const s=BMH.stairSpec(r),g=new THREE.Group(),W=s.alongX?r.h:r.w,D=s.alongX?r.w:r.h;g.position.set(r.x+r.w/2-site.width/2,base,r.y+r.h/2-site.depth/2);g.rotation.y=-s.direction*Math.PI/180;
   for(let n=0;n<s.count;n++){const step=new THREE.Mesh(new THREE.BoxGeometry(Math.max(.6,W-.25),(n+1)*s.riser,s.tread),wood);step.position.set(0,(n+1)*s.riser/2,D/2-.15-(n+.5)*s.tread);step.castShadow=true;step.receiveShadow=true;g.add(step);}scene.add(g);
  }
- if(r.type==='garage'){const v=BMH.garageVehicle(r);if(v){const car=new THREE.Mesh(new THREE.BoxGeometry(v.w,.8,v.d),material(0x567a86,.32));car.position.set(v.x+v.w/2-site.width/2,base+.55,v.y+v.d/2-site.depth/2);car.userData={kind:'vehicle',roomId:r.id,vehicle:v.kind};scene.add(car);const cab=new THREE.Mesh(new THREE.BoxGeometry(v.w*.8,.4,v.d*.45),mats.glass);cab.position.copy(car.position);cab.position.y+=.5;scene.add(cab);}}
+ if(r.type==='garage'){if(BMH.addGarageVehicle?.(r,base,THREE,scene,site))return;const v=BMH.garageVehicle(r);if(v){const car=new THREE.Mesh(new THREE.BoxGeometry(v.w,.8,v.d),material(0x567a86,.32));car.position.set(v.x+v.w/2-site.width/2,base+.55,v.y+v.d/2-site.depth/2);car.userData={kind:'vehicle',roomId:r.id,vehicle:v.kind};scene.add(car);const cab=new THREE.Mesh(new THREE.BoxGeometry(v.w*.8,.4,v.d*.45),mats.glass);cab.position.copy(car.position);cab.position.y+=.5;scene.add(cab);}}
 };
 BMH.lightPreviewAngle=BMH.lightPreviewAngle??35;BMH.lightPreviewZoom=BMH.lightPreviewZoom??1;
 BMH.lightPreviewSvg=()=>{

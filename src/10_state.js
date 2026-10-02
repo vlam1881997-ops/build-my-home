@@ -25,7 +25,7 @@ BMH.defaultState = () => ({
       {id:'o2',floor:0,roomId:'r1',kind:'window',side:'east',offset:.35,width:1.6},
       {id:'o3',floor:0,roomId:'r3',kind:'door',side:'east',offset:.25,width:.8},
       {id:'o4',floor:1,roomId:'r6',kind:'window',side:'east',offset:.4,width:1.6}
-    ], lockedRoomIds:[],lockedFloors:[]},
+    ], outdoor:[], lockedRoomIds:[],lockedFloors:[]},
     planVariants:[],
     designStudio:{kits:[],activeKit:'',inputSignature:'',appliedSignature:''},
     planVersions:[],

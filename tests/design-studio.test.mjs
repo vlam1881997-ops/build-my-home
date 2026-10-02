@@ -41,7 +41,22 @@ test('an empty or partial multi-storey plan cannot be accepted as a complete des
 
 
 test('whole design entry opens the editable drawing workspace and 3D only reviews the choice',()=>{
- const b=client(),before=JSON.stringify(b.state.project.plan);b.clickDesign({designStart:''});assert.equal(b.state.ui.step,4);assert.equal(JSON.stringify(b.state.project.plan),before);assert.match(b.SCREENS[3](),/data-design-kit="B"/);assert.match(b.SCREENS[3](),/Editable planner/);
+ const b=client(),before=JSON.stringify(b.state.project.plan);b.clickDesign({designStart:''});assert.equal(b.state.ui.step,4);assert.equal(JSON.stringify(b.state.project.plan),before);assert.match(b.SCREENS[3](),/data-program-create/);assert.equal(b.designState().kits.length,0);b.clickDesign({programSkip:''});assert.match(b.SCREENS[3](),/data-design-kit="B"/);assert.match(b.SCREENS[3](),/Editable planner/);
  b.applyDesignKit('B');assert.equal(b.state.ui.designProposalsOpen,false);assert.match(b.SCREENS[3](),/data-design-restore/);assert.match(b.SCREENS[3](),/data-nav="6"/);assert.doesNotMatch(b.SCREENS[5](),/data-design-kit=|data-design-generate|data-design-restore/);
  b.state.ui.roomCamera='inside';b.clickDesign({designRoom:b.state.project.plan.rooms[0].id});assert.equal(b.state.ui.roomCamera,'overview');assert.equal(b.state.ui.sceneFocus,'room:'+b.state.project.plan.rooms[0].id);
+});
+
+
+test('customer program creates selected landscape and bedroom count without replacing the working plan',()=>{
+ const b=client(),before=JSON.stringify(b.state.project.plan);b.designState().program={mode:'custom',bedrooms:4,garden:true,pond:true};assert.equal(b.createProgramDesign(false),true);assert.equal(JSON.stringify(b.state.project.plan),before);
+ for(const kit of b.designState().kits){assert.equal(kit.plan.rooms.filter(r=>r.type==='bed').length,4);assert.equal(kit.plan.outdoor.length,2);assert.equal(b.layoutValid(kit.plan.rooms.concat(kit.plan.outdoor.map(z=>({...z,floor:0})))),true);}
+ assert.equal(b.applyDesignKit('B'),true);b.VERSION='test';b.defaultDataEngineState=()=>({});const source=fs.readFileSync('src/10_state.js','utf8');vm.runInNewContext(source.slice(0,source.indexOf('BMH.loadState =')),{BMH:b,structuredClone});const saved=b.mergeState(b.defaultState(),b.state);assert.equal(saved.project.plan.outdoor.length,2);assert.equal(saved.project.designStudio.program.bedrooms,4);
+});
+test('garage occupies a real front room with a car entrance and rejected program preserves existing plan',()=>{
+ const b=client();b.state.project.household.relatives=[];b.designState().program={mode:'custom',bedrooms:2,garage:true};assert.equal(b.createProgramDesign(false),true);for(const k of b.designState().kits){const g=k.plan.rooms.find(r=>r.type==='garage');assert.ok(g.w>=3&&g.h>=5.5);assert.equal(g.y,2);assert.ok(k.plan.openings.some(o=>o.roomId===g.id&&o.side==='north'&&o.width>=2.8));}
+ b.applyDesignKit('A');const before=JSON.stringify(b.state.project.plan);b.buildableEnvelope=()=>({buildWidth:4.6,buildDepth:8,originX:.2,originY:0});assert.equal(b.createProgramDesign(false),false);assert.equal(JSON.stringify(b.state.project.plan),before);assert.equal(b.designState().programOpen,true);
+});
+test('skipping optional needs restores the initial household brief; infeasible outdoor choices are not silently lost',()=>{
+ const b=client();b.designState().program={mode:'custom',bedrooms:8,garden:true,pond:true};assert.equal(b.createProgramDesign(true),true);for(const k of b.designState().kits){assert.equal(k.plan.rooms.filter(r=>r.type==='bed').length,3);assert.equal(k.plan.outdoor.length,0);}
+ b.designState().program={mode:'custom',bedrooms:3,garden:true};b.buildableEnvelope=()=>({buildWidth:4.6,buildDepth:17,originX:.2,originY:0});assert.equal(b.createProgramDesign(false),false);assert.match(b.designState().programNotice,/Chưa bố trí/);
 });

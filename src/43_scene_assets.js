@@ -9,7 +9,7 @@ BMH.sceneSurfaceTexture = (THREE, kind, channel='color') => {
  const pixels=ctx.createImageData(256,256);
  for(let y=0;y<256;y++)for(let x=0;x<256;x++){
   const raw=Math.sin(x*12.9898+y*78.233)*43758.5453,n=raw-Math.floor(raw),grain=Math.sin(y*.20+Math.sin(x*.018)*2+Math.sin(x*.067)*.5);let value=248,height=.5,rough=.85;
-  if(kind==='wood'||kind==='plank'||kind==='woodVertical'){const cross=kind==='woodVertical'?x:y,along=kind==='woodVertical'?y:x,vein=Math.sin(cross*.20+Math.sin(along*.024)*2+Math.sin(along*.071)*.65),ring=Math.sin(cross*.72+Math.sin(along*.017)*5);height=.5+vein*.06+n*.025;value=240+vein*5+ring*1.2+n*3;rough=.75+n*.055;if(kind==='plank'&&y<2){value=205;height=.1;rough=.95;}}
+  if(kind==='wood'||kind==='plank'||kind==='woodVertical'){const cross=kind==='woodVertical'?x:y,along=kind==='woodVertical'?y:x,vein=Math.sin(cross*.20+Math.sin(along*.024)*2+Math.sin(along*.071)*.65),ring=Math.sin(cross*.72+Math.sin(along*.017)*5);height=.5+vein*.06+n*.025;value=239+vein*6+ring*1.2+n*3;rough=.75+n*.055;if(kind==='plank'&&y<2){value=205;height=.1;rough=.95;}}
   else if(kind==='fabric'){const weave=(x%4<2?1:0)+(y%4<2?1:0);value=222+weave*12+n*5;height=.3+weave*.22+n*.08;rough=.95;}
   else if(kind==='tile'||kind==='stone'){const vein=Math.sin(x*.033+Math.sin(y*.023)*3),seam=kind==='tile'&&(x<2||y<2);value=seam?190:245+vein*6+n*3;height=seam?.08:.55+n*.02;rough=seam?.95:kind==='stone'?.78:.65;}
   else{value=244+n*10;height=.35+n*.35;rough=.86+n*.08;}
@@ -56,10 +56,10 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
     leaf: make('#79935a', .85),
     metal: new THREE.MeshStandardMaterial({color:'#969080', roughness:.25, metalness:.8}),
     glass: new THREE.MeshPhysicalMaterial({color:'#dce5df', roughness:.06, transparent:true, opacity:.25, metalness:.08}),
-    screen: new THREE.MeshPhysicalMaterial({color:'#26383a', roughness:.15, clearcoat:.9}),
+    screen: new THREE.MeshPhysicalMaterial({color:'#14252a', roughness:.23, clearcoat:.7,envMapIntensity:.2}),
   };
   materials.floor=finish.surface==='wood'?materials.plank:finish.surface==='stone'?materials.floorStone:materials.tile;
-  for (const material of Object.values(materials)) material.envMapIntensity = BMH.state?.ui?.sceneTheme === 'night' ? .15 : .4;
+  for (const material of Object.values(materials)) material.envMapIntensity = BMH.state?.ui?.sceneTheme === 'night' ? .3 : .65;
   cache.set(key, materials);
   return materials;
 };
@@ -317,4 +317,16 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
   root.position.set(-(bounds.min.x+bounds.max.x)/2*root.scale.x,-bounds.min.y*root.scale.y,-(bounds.min.z+bounds.max.z)/2*root.scale.z);
   root.userData = {source:'parametric',model,generic:true,dimensions:{...d}};
   return root;
+};
+
+// Generic passenger vehicle; its envelope is fitted to garageVehicle, never scaled to fit an undersized garage.
+BMH.addGarageVehicle=(r,base,THREE,scene,site)=>{
+ const v=BMH.garageVehicle(r);if(!v||v.kind!=='car')return false;
+ const group=new THREE.Group(),body=new THREE.MeshPhysicalMaterial({color:'#526c6e',roughness:.28,metalness:.38,clearcoat:.8}),glass=new THREE.MeshPhysicalMaterial({color:'#273c42',roughness:.12,metalness:.3,clearcoat:1}),rubber=new THREE.MeshStandardMaterial({color:'#242722',roughness:.94}),metal=new THREE.MeshStandardMaterial({color:'#929b97',roughness:.25,metalness:.85}),lamp=new THREE.MeshStandardMaterial({color:'#ebe8d5',roughness:.2});
+ const box=(w,h,d,x,y,z,m,radius=.04)=>{const g=THREE.RoundedBoxGeometry?new THREE.RoundedBoxGeometry(w,h,d,3,Math.min(radius,h*.45,w*.45,d*.45)):new THREE.BoxGeometry(w,h,d),o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;group.add(o);return o;};
+ box(1.75,.46,4.22,0,.61,0,body,.16);box(1.66,.36,2.1,0,1.06,.12,glass,.16);box(1.52,.085,1.7,0,1.28,.18,body,.04);box(1.65,.09,1.1,0,.9,-1.5,body,.07);box(1.65,.09,.64,0,.91,1.72,body,.06);
+ for(const x of [-.43,.43]){box(.52,.11,.025,x,.75,-2.12,lamp,.03);box(.45,.08,.025,x,.76,2.12,new THREE.MeshStandardMaterial({color:'#88392f',roughness:.32}),.02);}
+ box(.7,.19,.025,0,.47,-2.14,rubber,.02);box(.28,.02,2.1,0,1.16,.12,body,.01);
+ for(const x of [-.80,.80])for(const z of [-1.3,1.3]){const tyre=new THREE.Mesh(new THREE.CylinderGeometry(.31,.31,.19,24),rubber);tyre.rotation.z=Math.PI/2;tyre.position.set(x,.33,z);tyre.castShadow=tyre.receiveShadow=true;group.add(tyre);const rim=new THREE.Mesh(new THREE.CylinderGeometry(.19,.19,.20,20),metal);rim.rotation.z=Math.PI/2;rim.position.copy(tyre.position);group.add(rim);}
+ group.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(group),size=bounds.getSize(new THREE.Vector3());group.scale.set(1.85/size.x,1.45/size.y,4.3/size.z);group.rotation.y=v.w>v.d?Math.PI/2:0;group.position.set(v.x+v.w/2-site.width/2,base-bounds.min.y*group.scale.y,v.y+v.d/2-site.depth/2);group.userData={kind:'vehicle',roomId:r.id,vehicle:'car',generic:true,placement:{...v}};scene.add(group);return true;
 };

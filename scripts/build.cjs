@@ -32,11 +32,18 @@ if(!fs.existsSync(threeModule))throw Error('Three.js 0.160.1 is required. Run np
 fs.mkdirSync(path.join(dist,'vendor','three'),{recursive:true});
 fs.copyFileSync(threeModule,path.join(dist,'vendor','three','three.module.js'));
 // Keep loaders local and on the same Three revision as the renderer.
-for(const file of ['loaders/GLTFLoader.js','loaders/DRACOLoader.js','utils/BufferGeometryUtils.js','geometries/RoundedBoxGeometry.js','environments/RoomEnvironment.js']){
-  const target=path.join(dist,'vendor','three',file);fs.mkdirSync(path.dirname(target),{recursive:true});
-  const source=fs.readFileSync(path.join(root,'node_modules','three','examples','jsm',file),'utf8').replaceAll("from 'three'","from '../three.module.js'");
-  fs.writeFileSync(target,source);
+const vendored=new Set();
+function vendorThree(file){
+ if(vendored.has(file))return;vendored.add(file);
+ const target=path.join(dist,'vendor','three',file);fs.mkdirSync(path.dirname(target),{recursive:true});
+ let source=fs.readFileSync(path.join(root,'node_modules','three','examples','jsm',file),'utf8');
+ const relative=path.relative(path.dirname(file),'three.module.js').replaceAll('\\','/');
+ source=source.replaceAll("from 'three'","from '"+(relative.startsWith('.')?relative:'./'+relative)+"'");
+ for(const match of source.matchAll(/from ['"](\.[^'"]+\.js)['"]/g)){const dependency=path.posix.normalize(path.posix.join(path.posix.dirname(file),match[1]));if(dependency!=='three.module.js')vendorThree(dependency);}
+ fs.writeFileSync(target,source);
 }
+for(const file of ['loaders/GLTFLoader.js','loaders/DRACOLoader.js','utils/BufferGeometryUtils.js','geometries/RoundedBoxGeometry.js','environments/RoomEnvironment.js','postprocessing/EffectComposer.js','postprocessing/RenderPass.js','postprocessing/SSAOPass.js','postprocessing/OutputPass.js','postprocessing/ShaderPass.js','shaders/FXAAShader.js'])vendorThree(file);
+
 let html=fs.readFileSync(path.join(src,'index.html'),'utf8');
 if(!html.includes('<!-- BMH_APP_INLINE -->'))throw Error('Missing BMH_APP_INLINE marker');
 const safeJs=js.replace(/<\/script/gi,'<\\/script');
