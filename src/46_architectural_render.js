@@ -1,5 +1,5 @@
 /* Progressive architectural rendering of the customer's measured scene. */
-BMH.ARCH_RENDER_REVISION='physical-light-1';
+BMH.ARCH_RENDER_REVISION='interior-collections-surfaces-3';
 BMH.ARCH_RENDER_PRESETS={draft:{width:640,samples:32,bounces:5},fine:{width:960,samples:128,bounces:8},print:{width:1920,samples:512,bounces:10}};
 BMH.archRenderModules=null;
 BMH.archRenderStatus=text=>{const node=BMH.$('#architecturalRenderStatus');if(node&&node.textContent!==text)node.textContent=text;};
@@ -50,9 +50,9 @@ BMH.architecturalRenderScene=(THREE,source)=>{
   for(const p of BMH.slabPanels(room,BMH.stairFloorHoles(room.floor+1))){const mesh=new THREE.Mesh(new THREE.BoxGeometry(p.w,levels.slab,p.d),material);mesh.position.set(p.x+p.w/2-site.width/2,ceilingY+levels.slab/2,p.y+p.d/2-site.depth/2);mesh.userData={kind:'ceiling-slab',roomId:room.id,floor:room.floor};scene.add(mesh);}
   // Broad photographic fill converges cleanly; daylight comes from the actual
   // opening locations rather than a small, bright emitter in the room centre.
-  const night=BMH.state.ui.sceneTheme==='night',light=new THREE.RectAreaLight('#fff5ec',night?2.8:.6,room.w*.65,room.h*.65);light.position.set(room.x+room.w/2-site.width/2,ceilingY-.025,room.y+room.h/2-site.depth/2);light.rotation.x=-Math.PI/2;light.userData.kind='render-lighting';scene.add(light);
+  const night=BMH.state.ui.sceneTheme==='night',light=new THREE.RectAreaLight('#fff5ec',night?2.8:.18,room.w*.65,room.h*.65);light.position.set(room.x+room.w/2-site.width/2,ceilingY-.025,room.y+room.h/2-site.depth/2);light.rotation.x=-Math.PI/2;light.userData.kind='render-lighting';scene.add(light);
   if(!night)for(const opening of BMH.state.project.plan.openings.filter(o=>o.roomId===room.id&&o.kind==='window')){
-   const span=BMH.openingWallSpan?.(opening);if(!span)continue;const horizontal=span.o==='h',inward={north:1,south:-1,west:1,east:-1}[opening.side],height=Number(opening.height)||1.4,windowLight=new THREE.RectAreaLight('#eef5ff',3.5,span.b-span.a,height);
+   const span=BMH.openingWallSpan?.(opening);if(!span)continue;const horizontal=span.o==='h',inward={north:1,south:-1,west:1,east:-1}[opening.side],height=Number(opening.height)||1.4,windowLight=new THREE.RectAreaLight('#f3f6ff',5.2,span.b-span.a,height);
    windowLight.position.set((horizontal?(span.a+span.b)/2:span.c+inward*.13)-site.width/2,levels.slab+(Number(opening.sill)||0)+height/2,(horizontal?span.c+inward*.13:(span.a+span.b)/2)-site.depth/2);windowLight.rotation.y={north:Math.PI,south:0,west:-Math.PI/2,east:Math.PI/2}[opening.side];windowLight.userData={kind:'render-lighting',openingId:opening.id};scene.add(windowLight);
   }
  }
@@ -71,13 +71,16 @@ BMH.startArchitecturalRender=async()=>{
  BMH.disposeArchitecturalRender(s);const epoch=s.renderEpoch,signature=BMH.cinematicSignature();BMH.archRenderStatus('Đang chuẩn bị ánh sáng và vật liệu…');
  try{
   if(!s.renderer.capabilities?.isWebGL2||!s.renderer.extensions.has('EXT_color_buffer_float'))throw Error('Thiết bị này chưa hỗ trợ render chất lượng cao. Bạn vẫn xem và chỉnh 3D được.');
+  await Promise.allSettled(s.scene.userData.furnitureLoads||[]);
+  await Promise.allSettled(s.scene.userData.surfaceLoads||[]);
+  if(BMH.studio3d!==s||s.renderEpoch!==epoch||signature!==BMH.cinematicSignature())return false;
   const modules=await (BMH.archRenderModules||(BMH.archRenderModules=import('./vendor/three/pathtracer.js').catch(e=>{BMH.archRenderModules=null;throw e;}))),THREE=await BMH.ensureThree();
   if(BMH.studio3d!==s||s.renderEpoch!==epoch||signature!==BMH.cinematicSignature())return false;
   const preset=BMH.ARCH_RENDER_PRESETS[BMH.state.ui.renderQuality]||BMH.ARCH_RENDER_PRESETS.fine,scene=BMH.architecturalRenderScene(THREE,s.scene),environment=new modules.GradientEquirectTexture(128);
   environment.topColor.set(BMH.state.ui.sceneTheme==='night'?'#60718e':'#e6eff8');environment.bottomColor.set(BMH.state.ui.sceneTheme==='night'?'#1c242c':'#c4c8c2');environment.exponent=1;environment.update();scene.environment=environment;scene.environmentIntensity=BMH.state.ui.sceneTheme==='night'?.35:BMH.state.ui.sceneFocus==='all'?.75:1.7;
   s.archRender={scene,environment,preset,signature,raf:0,cancelled:false,samples:0,complete:false};
   const tracer=new modules.WebGLPathTracer(s.renderer);s.archRender.tracer=tracer;const denoise=new modules.FullScreenQuad(new modules.DenoiseMaterial({sigma:1.6,kSigma:1,threshold:.12}));s.archRender.denoise=denoise;
-  tracer.bounces=preset.bounces;tracer.transmissiveBounces=6;tracer.filterGlossyFactor=.35;tracer.textureSize.set(256,256);tracer.tiles.set(3,3);tracer.minSamples=1;tracer.renderDelay=0;tracer.fadeDuration=0;tracer.rasterizeScene=false;tracer.renderToCanvas=false;
+  tracer.bounces=preset.bounces;tracer.transmissiveBounces=6;tracer.filterGlossyFactor=.35;tracer.textureSize.set(512,512);tracer.tiles.set(3,3);tracer.minSamples=1;tracer.renderDelay=0;tracer.fadeDuration=0;tracer.rasterizeScene=false;tracer.renderToCanvas=false;
   const size=s.renderer.getDrawingBufferSize(new THREE.Vector2()),width=Math.min(preset.width,s.renderer.capabilities.maxTextureSize,Math.sqrt(6000000*size.x/size.y));tracer.setScene(scene,s.camera);tracer.synchronizeRenderSize=false;tracer._pathTracer.alpha=true;tracer._pathTracer.setSize(Math.floor(width),Math.floor(width*size.y/size.x));tracer._pathTracer.reset();BMH.state.ui.renderMode='quality';BMH.save();
   const guide=new THREE.WebGLRenderTarget(tracer.target.width,tracer.target.height,{type:THREE.HalfFloatType,depthBuffer:true,minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter}),guideMaterial=new modules.ArchitecturalGuideMaterial(),previousTarget=s.renderer.getRenderTarget(),previousClear=s.renderer.getClearColor(new THREE.Color()),previousAlpha=s.renderer.getClearAlpha(),background=scene.background;guideMaterial.side=THREE.DoubleSide;
   s.archRender.guide=guide;
@@ -106,7 +109,7 @@ BMH.captureArchitecturalRender=async()=>{
  const blob=await image;if(!blob||BMH.studio3d!==s||s.archRender!==r)return false;
  const name='BMH-'+(BMH.state.ui.sceneFocus||'all').replace(/[^a-z0-9_-]/gi,'-')+'-'+BMH.drawingRevision()+'.png';BMH.download(name,blob,'image/png');return true;
 };
-const archMount=BMH.mountStudio3D;BMH.mountStudio3D=async()=>{await archMount();if(BMH.state.ui.renderMode==='quality')void BMH.startArchitecturalRender();};
+const archMount=BMH.mountStudio3D;BMH.mountStudio3D=async()=>{const canvas=BMH.$('#studio3dCanvas');await archMount();if(BMH.$('#studio3dCanvas')===canvas&&BMH.studio3d?.renderer?.domElement===canvas&&BMH.state.ui.renderMode==='quality')void BMH.startArchitecturalRender();};
 const archDispose=BMH.disposeStudio3D;BMH.disposeStudio3D=()=>{BMH.disposeArchitecturalRender();archDispose();};
 document.addEventListener('click',e=>{const b=e.target.closest?.('[data-architectural-mode],[data-architectural-download]');if(!b)return;if(b.hasAttribute('data-architectural-download'))void BMH.captureArchitecturalRender();else if(b.dataset.architecturalMode==='quality')void BMH.startArchitecturalRender();else{BMH.stopArchitecturalRender();BMH.archRenderStatus('Xoay, phóng to và chỉnh nhà. Khi chọn được góc, tạo ảnh chất lượng cao.');}});
 document.addEventListener('change',e=>{if(!e.target.matches?.('[data-render-quality]'))return;BMH.state.ui.renderQuality=Object.hasOwn(BMH.ARCH_RENDER_PRESETS,e.target.value)?e.target.value:'fine';BMH.save();if(BMH.state.ui.renderMode==='quality')void BMH.startArchitecturalRender();});

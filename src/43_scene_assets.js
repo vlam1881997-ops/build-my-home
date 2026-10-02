@@ -24,36 +24,65 @@ BMH.sceneSurfaceTexture = (THREE, kind, channel='color') => {
  ctx.putImageData(pixels,0,0);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=channel==='color'?THREE.SRGBColorSpace:THREE.NoColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.anisotropy=4;texture.userData={generic:true,kind,channel};return texture;
 };
 
+// Decode each photographed channel once per scene. A slow download keeps the
+// visible fallback, and a retired scene never receives late image updates.
+BMH.scenePhotoSurface = (THREE, scene, asset, channel) => {
+ const loads=scene.userData.surfacePhotoLoads||=new Map(),key=asset+':'+channel;
+ if(loads.has(key))return loads.get(key);
+ const cancels=scene.userData.surfaceCancels||=new Set();
+ const task=new Promise(resolve=>{
+  let settled=false,timer;
+  const finish=image=>{if(settled)return;settled=true;clearTimeout(timer);cancels.delete(cancel);resolve(scene.userData.disposed?null:image);};
+  const cancel=()=>finish(null);cancels.add(cancel);
+  timer=setTimeout(cancel,BMH.SCENE_TEXTURE_TIMEOUT||8000);
+  try{new THREE.TextureLoader().load('assets/interior/textures/'+asset+'-'+channel+'.png',loaded=>{const image=loaded.image;loaded.dispose();finish(image);},undefined,cancel);}catch(_){cancel();}
+ });loads.set(key,task);return task;
+};
+
 BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
   const cache = scene.userData.finishMaterials ||= new Map();
-  const key = JSON.stringify([finish.wall, finish.floor, finish.accent, finish.fabric, finish.surface]);
+  const key = JSON.stringify([finish.wall, finish.floor, finish.accent, finish.fabric, finish.surface,finish.pillow,finish.rug,finish.shape,finish.table]);
   if (cache.has(key)) return cache.get(key);
   const textures = scene.userData.surfaceTextures ||= new Map();
-  const texture = (kind,channel='color') => {const key=kind+':'+channel;if(!textures.has(key))textures.set(key,BMH.sceneSurfaceTexture(THREE,kind,channel));return textures.get(key);};
+  const photoSets={wood:'wood_table_001',woodVertical:'wood_table_001',plank:'wood_floor',fabric:'terlenka'},photoChannels={color:'diff',normal:'nor_gl',roughness:'rough'};
+  const texture = (kind,channel='color') => {
+   const key=kind+':'+channel;if(!textures.has(key)){
+    const fallback=BMH.sceneSurfaceTexture(THREE,kind,channel);textures.set(key,fallback);
+    if(fallback&&photoSets[kind]&&THREE.TextureLoader&&typeof document.createElementNS==='function'){
+     // Keep one canvas and one GPU allocation throughout the upgrade. Browser
+     // drivers must not upload a differently sized HTML image into the old map.
+     const canvas=document.createElement('canvas'),ctx=canvas.getContext?.('2d');
+     if(ctx?.drawImage){canvas.width=canvas.height=512;ctx.drawImage(fallback.image,0,0,512,512);fallback.image=canvas;}
+     const task=BMH.scenePhotoSurface(THREE,scene,photoSets[kind],photoChannels[channel]).then(image=>{if(!image||scene.userData.disposed)return false;if(ctx?.drawImage)ctx.drawImage(image,0,0,512,512);else fallback.image=image;fallback.needsUpdate=true;fallback.userData={...fallback.userData,source:photoSets[kind],license:'CC0-1.0'};return true;});
+     (scene.userData.surfaceLoads||=[]).push(task);
+    }
+   }return textures.get(key);
+  };
   const make = (color, roughness, kind, scale) => {
     const m = new THREE.MeshStandardMaterial({color, roughness});
     if (kind) {
       m.map = texture(kind);
       if (m.map) {
-        m.normalMap=texture(kind,'normal');m.roughnessMap=texture(kind,'roughness');m.normalScale.setScalar(kind==='fabric'?.3:kind==='plaster'?.06:.16);
+        m.normalMap=texture(kind,'normal');m.roughnessMap=texture(kind,'roughness');m.normalScale.setScalar(kind==='fabric'?.42:kind==='plaster'?.06:.20);
         m.bumpScale = kind === 'fabric' ? .0012 : kind === 'wood' ? .0006 : .0003;
       }
       m.userData.surfaceScale = scale;
+      if(kind==='wood')m.userData.surfaceRotation=Math.PI/2;
     }
     return m;
   };
   const wood = finish.accent || '#98785a';
   const materials = {
-    wood: make(wood, .58, 'wood', [.65, .38]),
-    slattedWood: make(wood, .7, 'woodVertical', [.22, 2.4]),
-    fabric: make(finish.fabric || '#d1c7b6', .96, 'fabric', [.18, .18]),
-    linen: make('#f5f1e6', .98, 'fabric', [.18, .18]),
-    pillow: make(finish.accent || '#7b8469', .97, 'fabric', [.18, .18]),
+    wood: make(wood, .58, 'wood', [1.5,1.5]),
+    slattedWood: make(wood, .7, 'woodVertical', [1.5,1.5]),
+    fabric: make(finish.fabric || '#d1c7b6', .96, 'fabric', [.3, .3]),
+    linen: make('#f5f1e6', .98, 'fabric', [.3, .3]),
+    pillow: make(finish.pillow || '#7b8469', .97, 'fabric', [.3, .3]),
     wall: make(finish.wall || '#eee8dd', .9, 'plaster', [.35, .35]),
     tile: make(finish.floor || '#d8d1c3', .6, 'tile', [.6, .6]),
-    plank: make(finish.floor || '#d3b998', .62, 'plank', [1.6,.18]),
+    plank: make(finish.floor || '#d3b998', .62, 'plank', [1.7,1.7]),
     floorStone: make(finish.floor || '#d8d1c3', .72, 'stone', [.8,.8]),
-    rug: make('#d4ccba', .99, 'fabric', [.2, .2]),
+    rug: make(finish.rug || '#d4ccba', .99, 'fabric', [.2, .2]),
     stone: make('#e7e1d6', .38, 'stone', [.8, .8]),
     white: make('#f4f2e9', .28),
     dark: make('#343b36', .4),
@@ -63,8 +92,9 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
     glass: new THREE.MeshPhysicalMaterial({color:'#dce5df', roughness:.06, transparent:true, opacity:.25, metalness:.08}),
     screen: new THREE.MeshPhysicalMaterial({color:'#14252a', roughness:.23, clearcoat:.7,envMapIntensity:.2}),
   };
+  materials.collection={shape:finish.shape||'soft',table:finish.table||'oak'};
   materials.floor=finish.surface==='wood'?materials.plank:finish.surface==='stone'?materials.floorStone:materials.tile;
-  for (const material of Object.values(materials)) material.envMapIntensity = BMH.state?.ui?.sceneTheme === 'night' ? .3 : .65;
+  for (const material of Object.values(materials)) if(material.isMaterial)material.envMapIntensity = BMH.state?.ui?.sceneTheme === 'night' ? .3 : .65;
   cache.set(key, materials);
   return materials;
 };
@@ -77,7 +107,8 @@ BMH.sceneSurfaceUvs = (geometry, material, origin = {x:0,y:0,z:0}) => {
   for (let i = 0; i < p.count; i++) {
     const x = p.getX(i) + origin.x, y = p.getY(i) + origin.y, z = p.getZ(i) + origin.z;
     const ax = Math.abs(n.getX(i)), ay = Math.abs(n.getY(i)), az = Math.abs(n.getZ(i));
-    uv.setXY(i, (ax > ay && ax > az ? z : x) / scale[0], (ay >= ax && ay >= az ? z : y) / scale[1]);
+    const u=(ax > ay && ax > az ? z : x)/scale[0],v=(ay >= ax && ay >= az ? z : y)/scale[1],angle=material.userData.surfaceRotation||0;
+    uv.setXY(i,u*Math.cos(angle)-v*Math.sin(angle),u*Math.sin(angle)+v*Math.cos(angle));
   }
   uv.needsUpdate = true;
   return geometry;
@@ -88,12 +119,14 @@ BMH.addWindowDrapery=(THREE,scene,r,base,site,overview=false)=>{
  if(!['living','bed'].includes(r.type))return;
  const levels=BMH.projectLevels(),materials=BMH.sceneAssetMaterials(THREE,scene,BMH.finishPalette?.(r.id)||{});
  for(const o of BMH.state.project.plan.openings.filter(o=>o.roomId===r.id&&o.kind==='window')){
-  const span=BMH.openingWallSpan(o);if(!span)continue;const horizontal=span.o==='h',inward={north:1,south:-1,west:1,east:-1}[o.side],top=Math.min(levels.slab+levels.clearHeight,levels.slab+(o.sill??.9)+(o.height||1.4)+.15),bottom=levels.slab+.06,width=Math.min(.32,(span.b-span.a)*.20),near=overview&&['north','east'].includes(o.side);
+  const span=BMH.openingWallSpan(o);if(!span)continue;const horizontal=span.o==='h',inward={north:1,south:-1,west:1,east:-1}[o.side],top=levels.slab+levels.clearHeight-.12,bottom=levels.slab+.03,width=Math.min(.48,(span.b-span.a)*.28),near=overview&&['north','east'].includes(o.side),lo=horizontal?r.x+.13:r.y+.13,hi=horizontal?r.x+r.w-.13:r.y+r.h-.13;
   const material=materials.linen.clone();material.side=THREE.DoubleSide;if(near)material.clippingPlanes=[new THREE.Plane(new THREE.Vector3(0,-1,0),base+.85)];
-  for(const start of [span.a+.02,span.b-width-.02]){
-   const geometry=new THREE.PlaneGeometry(width,top-bottom,20,2),positions=geometry.attributes.position;
-   for(let i=0;i<positions.count;i++){const along=positions.getX(i)+width/2+start,h=positions.getY(i)+(top+bottom)/2,z=.05+Math.sin((along-start)/width*Math.PI*10)*.018;positions.setXYZ(i,horizontal?along-site.width/2:span.c+inward*z-site.width/2,base+h,horizontal?span.c+inward*z-site.depth/2:along-site.depth/2);}geometry.computeVertexNormals();BMH.sceneSurfaceUvs(geometry,material);const curtain=new THREE.Mesh(geometry,material);curtain.name='drapery-'+o.id+'-'+start;curtain.userData={kind:'window-drapery',roomId:r.id,openingId:o.id,floor:r.floor,generic:true};curtain.castShadow=curtain.receiveShadow=true;scene.add(curtain);
+  for(const start of [Math.max(lo,span.a-width*.52),Math.min(hi-width,span.b-width*.48)]){
+   const geometry=new THREE.PlaneGeometry(width,top-bottom,32,12),positions=geometry.attributes.position;
+   for(let i=0;i<positions.count;i++){const along=positions.getX(i)+width/2+start,t=(positions.getY(i)+(top-bottom)/2)/(top-bottom),h=positions.getY(i)+(top+bottom)/2,z=.132+Math.sin((along-start)/width*Math.PI*10)*(.010+(1-t)*.004);positions.setXYZ(i,horizontal?along-site.width/2:span.c+inward*z-site.width/2,base+h,horizontal?span.c+inward*z-site.depth/2:along-site.depth/2);}geometry.computeVertexNormals();BMH.sceneSurfaceUvs(geometry,material);const curtain=new THREE.Mesh(geometry,material);curtain.name='drapery-'+o.id+'-'+start;curtain.userData={kind:'window-drapery',roomId:r.id,openingId:o.id,floor:r.floor,generic:true};curtain.castShadow=curtain.receiveShadow=true;scene.add(curtain);
   }
+  const rodA=Math.max(lo,span.a-.28),rodB=Math.min(hi,span.b+.28),rodMaterial=materials.metal.clone();if(near)rodMaterial.clippingPlanes=material.clippingPlanes;
+  const rod=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,rodB-rodA,16),rodMaterial);rod.rotation.z=horizontal?Math.PI/2:0;if(!horizontal)rod.rotation.x=Math.PI/2;rod.position.set((horizontal?(rodA+rodB)/2:span.c+inward*.16)-site.width/2,base+top+.035,(horizontal?span.c+inward*.16:(rodA+rodB)/2)-site.depth/2);rod.userData={kind:'window-drapery',roomId:r.id,openingId:o.id,floor:r.floor,generic:true};scene.add(rod);
  }
 };
 
@@ -178,7 +211,7 @@ BMH.createSceneFoliage=(THREE,dimensions,material,count=48)=>{
 };
 
 BMH.createRoomAsset = (model, d, THREE, m) => {
-  const supported = /^(bedDouble|bedSingle|loungeDesignSofa|loungeChair|tableCoffee|table|desk|chair|chairDesk|cabinetTelevision|televisionModern|kitchenSink|kitchenStove|kitchenFridge|bookcaseClosedWide|cabinetBed|pottedPlant|bathroomSink|toilet|shower)$/;
+  const supported = /^(bedDouble|bedSingle|loungeDesignSofa|loungeChair|tableCoffee|table|desk|chair|chairDesk|cabinetTelevision|televisionModern|kitchenSink|kitchenStove|kitchenFridge|bookcaseClosedWide|cabinetBed|pottedPlant|bathroomSink|toilet|shower|sideTable|floorLamp)$/;
   if (!supported.test(model) || !d || ![d.w,d.h,d.d].every(v => Number.isFinite(v) && v > 0)) return null;
   const root = new THREE.Group();
   root.name = model;
@@ -195,6 +228,14 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
   const box = (w,h,depth,x,y,z,material=m.wood,radius=.015) => mesh(
     THREE.RoundedBoxGeometry ? new THREE.RoundedBoxGeometry(w,h,depth,2,Math.min(radius,w*.49,h*.49,depth*.49)) : new THREE.BoxGeometry(w,h,depth), material,x,y,z);
   const cylinder = (top,bottom,h,x,y,z,material=m.wood) => mesh(new THREE.CylinderGeometry(top,bottom,h,24),material,x,y,z);
+  const ovalTop = (w,h,depth,x,y,z,material=m.wood) => {
+    if(!THREE.Shape||!THREE.ExtrudeGeometry)return box(w,h,depth,x,y,z,material,.02);
+    const edge=Math.min(.012,h*.22),shape=new THREE.Shape();
+    shape.absellipse(0,0,w/2-edge,depth/2-edge,0,Math.PI*2,false,0);
+    const geometry=new THREE.ExtrudeGeometry(shape,{depth:h-2*edge,bevelEnabled:true,bevelThickness:edge,bevelSize:edge,bevelSegments:3,curveSegments:32,steps:1});
+    geometry.translate(0,0,-(h-2*edge)/2);geometry.rotateX(-Math.PI/2);
+    const top=mesh(geometry,material,x,y,z);top.userData={kind:'oval-tabletop',generic:true};return top;
+  };
   const sphere = (w,h,depth,x,y,z,material) => {
     const o = mesh(new THREE.SphereGeometry(1,24,16),material,x,y,z);
     o.scale.set(w/2,h/2,depth/2);
@@ -214,7 +255,7 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     const o=mesh(geometry,material,x,y,z);o.userData={kind:'upholstery',generic:true};
     // Welt follows the actual cushion perimeter, with no painted-on stripe.
     if(THREE.CatmullRomCurve3&&THREE.TubeGeometry){
-      const points=[];for(let i=0;i<48;i++){const a=i/48*Math.PI*2,c=power(Math.cos(a)),s=power(Math.sin(a));points.push(orientation==='seat'?new THREE.Vector3(c*w*.495,0,s*depth*.495):new THREE.Vector3(c*w*.495,s*h*.495,-depth*.44));}
+      const points=[],backRadius=Math.sqrt(1-Math.pow(.76,2/.48));for(let i=0;i<48;i++){const a=i/48*Math.PI*2;points.push(orientation==='seat'?new THREE.Vector3(power(Math.cos(a))*w*.502,0,power(Math.sin(a))*depth*.502):new THREE.Vector3(power(Math.cos(a)*backRadius)*w*.502,power(Math.sin(a)*backRadius)*h*.502,-depth*.381));}
       const curve=new THREE.CatmullRomCurve3(points,true),seam=mesh(new THREE.TubeGeometry(curve,64,.0022,4,true),material,x,y,z);seam.userData={kind:'upholstery-seam',generic:true};o.add(seam);seam.position.set(0,0,0);
     }
     return o;
@@ -230,27 +271,36 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     }
   };
   if (/^lounge/.test(model)) {
-    const chair=model==='loungeChair',arms=.13,seatW=d.w-2*arms;
+    const chair=model==='loungeChair',shape=m.collection?.shape||'soft',timber=shape==='timber',curved=shape==='curved',linear=shape==='linear',arms=timber?.085:curved?.17:.13,seatW=d.w-2*arms;
     legs(.16,d.w-.1,d.d-.08,m.dark);
-    box(d.w-.035,.2,d.d-.06,0,.27,0,m.fabric,.075);
-    box(d.w-.035,.43,.17,0,d.h-.22,d.d/2-.095,m.fabric,.07);
-    for(const x of [-d.w/2+arms/2,d.w/2-arms/2]) box(arms,.41,d.d-.035,x,.43,0,m.fabric,.06);
-    const count=chair?1:2;
+    box(d.w-.035,.16,d.d-.06,0,.24,0,timber?m.wood:m.fabric,linear?.018:.065);
+    box(d.w-.035,.40,.14,0,d.h-.22,d.d/2-.095,timber?m.wood:m.fabric,curved?.12:linear?.018:.065);
+    for(const x of [-d.w/2+arms/2,d.w/2-arms/2]){
+     if(timber){box(arms,.065,d.d-.035,x,.55,0,m.wood,.015);for(const z of [-d.d*.34,d.d*.34])box(.04,.37,.04,x,.345,z,m.wood,.008);for(let z=-d.d*.3;z<d.d*.3;z+=.045)box(.015,.29,.014,x,.38,z,m.slattedWood,.003);}
+     else if(curved)cushion(arms,.42,d.d-.06,x,.43,0,m.fabric,'back');
+     else box(arms,.41,d.d-.035,x,.43,0,m.fabric,linear?.028:.06);
+    }
+    const count=chair?1:curved?3:linear?3:2;
     for(let i=0;i<count;i++) {
       const x=-seatW/2+(i+.5)*seatW/count;
       cushion(seatW/count-.025,.16,d.d-.24,x,.45,-.055,m.fabric);
-      const back=cushion(seatW/count-.025,.31,.15,x,.67,d.d/2-.185,m.fabric,'back');
+      const back=cushion(seatW/count-.025,curved?.35:.31,curved?.20:.15,x,curved?.63:.67,d.d/2-.185,m.fabric,'back');
       back.rotation.x=-.12;
+      if(shape==='channel')for(let j=0;j<4;j++)box(.006,.235,.004,x-seatW/count*.35+j*seatW/count*.23,.67,d.d/2-.265,m.fabric,.001);
     }
     for (const [x,angle,material] of [[-seatW*.32,.16,m.linen],[seatW*.33,-.18,m.pillow]]) {
       const pillow=cushion(chair?.28:.33,.3,.12,x,.62,d.d/2-.31,material,'back');
       pillow.rotation.z=angle; pillow.rotation.x=.16;
     }
+    if(shape==='linen')for(let j=0;j<7;j++){const line=box(.018,.008,.18,-seatW*.35+j*seatW*.12,.38,-d.d*.47,m.fabric,.003);line.rotation.y=.04*Math.sin(j);}
   } else if (/^bed/.test(model)) {
     legs(.16,d.w-.1,d.d-.05);
     box(d.w,.18,d.d-.025,0,.23,0,m.wood,.03);
     box(d.w-.055,.19,d.d-.12,0,.405,.015,m.linen,.07);
-    box(d.w,.7,.10,0,.35,-d.d/2+.05,m.fabric,.025);
+    const shape=m.collection?.shape||'soft';
+    box(d.w,.7,.10,0,.35,-d.d/2+.05,shape==='timber'?m.wood:m.fabric,shape==='curved'?.12:.025);
+    if(['channel','linen'].includes(shape))for(let x=-d.w/2+.07;x<d.w/2-.04;x+=.11)box(.005,.56,.005,x,.36,-d.d/2+.105,m.fabric,.001);
+    if(shape==='timber')for(let x=-d.w/2+.05;x<d.w/2-.04;x+=.045)box(.015,.55,.015,x,.35,-d.d/2+.105,m.slattedWood,.003);
     box(d.w-.08,.065,d.d*.64,0,.52,d.d*.16,m.linen,.028);
     box(d.w-.06,.034,.38,0,.563,d.d*.32,m.pillow,.02);
     const count=model==='bedDouble'?2:1;
@@ -261,10 +311,21 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     for(let i=1;i<6;i++)box((d.w-.08)/6,.008,d.d*.48,-d.w/2+.08+i*(d.w-.16)/6,.559,d.d*.17,m.linen,.003);
   } else if (/^(table|desk)/.test(model)) {
     if(model==='tableCoffee') {
-      for(const x of [-d.w*.28,d.w*.28])cylinder(.11,.15,d.h-.05,x,(d.h-.05)/2,0,m.wood);
-      box(d.w,.055,d.d,0,d.h-.028,0,m.wood,.19);
-      box(.24,.012,.18,-d.w*.2,d.h+.006,-.06,m.linen,.009);
-      cylinder(.055,.035,.055,d.w*.18,d.h+.028,.05,m.stone);
+      const table=m.collection?.table||'oak';
+      if(table==='nested'){
+       for(const [x,z,r,h]of [[-d.w*.19,-.05,d.d*.47,d.h-.025],[d.w*.25,.13,d.d*.32,d.h*.72]]){cylinder(r,r,.045,x,h,z,m.stone);cylinder(r*.34,r*.38,h-.025,x,(h-.025)/2,z,m.wood);}
+      }else{
+       for(const x of [-d.w*.28,d.w*.28]){
+        if(table==='stone')box(.11,d.h-.07,d.d*.64,x,(d.h-.07)/2,0,m.dark,.009);
+        else{cylinder(.12,.14,d.h-.05,x,(d.h-.05)/2,0,m.wood);for(let j=0;j<20;j++){const a=j/20*Math.PI*2;cylinder(.008,.008,d.h-.065,x+Math.sin(a)*.127,(d.h-.065)/2,Math.cos(a)*.127,m.wood);}}
+       }
+       if(table==='oak')ovalTop(d.w,.055,d.d,0,d.h-.028,0,m.wood);
+       else box(d.w,.055,d.d,0,d.h-.028,0,table==='stone'?m.stone:m.wood,table==='stone'?.025:.035);
+       if(table==='rattan'){box(d.w*.76,.025,d.d*.68,0,.14,0,m.wood,.025);for(let x=-d.w*.34;x<d.w*.34;x+=.035)box(.012,.012,d.d*.62,x,.16,0,m.slattedWood,.003);}
+      }
+      const book=box(.28,.034,.20,-d.w*.19,d.h+.017,-.055,m.pillow,.003);book.rotation.y=.1;box(.24,.023,.18,-d.w*.20,d.h+.046,-.06,m.linen,.003);
+      cylinder(.10,.10,.013,d.w*.22,d.h+.008,.04,m.wood);cylinder(.043,.035,.08,d.w*.22,d.h+.053,.04,m.stone);
+      const handle=mesh(new THREE.TorusGeometry(.026,.006,6,14),m.stone,d.w*.22+.04,d.h+.055,.04);handle.rotation.y=Math.PI/2;
     } else {
       legs(d.h-.045,d.w-.08,d.d-.08);
       box(d.w,.045,d.d,0,d.h-.023,0,m.wood,.07);
@@ -273,6 +334,12 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
         cylinder(.055,.04,.14,d.w*.22,d.h+.07,0,m.stone);
       } else box(.3,.014,.2,d.w*.15,d.h+.007,-d.d*.15,m.linen,.015);
     }
+  } else if(model==='sideTable'){
+    cylinder(d.w*.48,d.w*.48,.035,0,d.h-.018,0,m.stone);cylinder(.075,.095,d.h-.04,0,(d.h-.04)/2,0,m.wood);
+    cylinder(.048,.063,.11,.025,d.h+.055,0,m.white);sphere(.07,.08,.07,.025,d.h+.135,0,m.green);
+  } else if(model==='floorLamp'){
+    cylinder(.145,.15,.025,0,.013,0,m.dark);cylinder(.012,.015,d.h*.76,0,d.h*.38,0,m.metal);
+    cylinder(d.w*.33,d.w*.49,d.h*.18,0,d.h*.89,0,m.linen);cylinder(.035,.035,.04,0,d.h*.76,0,m.metal);
   } else if (/^chair/.test(model)) {
     legs(.4,d.w-.03,d.d-.04);
     box(d.w,.10,d.d-.02,0,.45,0,m.fabric,.07);
@@ -288,6 +355,7 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     legs(leg,d.w-.04,d.d-.04,m.dark);
     box(d.w,d.h-leg,d.d,0,(d.h+leg)/2,0,m.wood,.016);
     front(d.w-.02,bed?(d.h-leg)/2-.012:d.h-leg-.035,bed?leg+(d.h-leg)*.75:(d.h+leg)/2,-d.d/2-.012,tv?3:bed?1:2);
+    if(tv&&['soft','channel','timber'].includes(m.collection?.shape))for(let x=-d.w/2+.025;x<d.w/2-.02;x+=.04)box(.022,d.h-leg-.055,.012,x,(d.h+leg)/2,-d.d/2-.032,m.slattedWood,.003);
     if(bed)front(d.w-.02,(d.h-leg)/2-.012,leg+(d.h-leg)*.25,-d.d/2-.012,1);
     if(tv){box(.32,.015,.20,-d.w*.32,d.h+.008,.025,m.linen,.01);cylinder(.055,.045,.11,d.w*.37,d.h+.055,0,m.stone);}
   } else if (/^kitchen/.test(model)) {
@@ -353,7 +421,7 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
   const bounds = new THREE.Box3().setFromObject(root), size = bounds.getSize(new THREE.Vector3());
   root.scale.set(d.w/size.x,d.h/size.y,d.d/size.z);
   root.position.set(-(bounds.min.x+bounds.max.x)/2*root.scale.x,-bounds.min.y*root.scale.y,-(bounds.min.z+bounds.max.z)/2*root.scale.z);
-  root.userData = {source:'parametric',model,generic:true,dimensions:{...d}};
+  root.userData = {source:'parametric',model,generic:true,dimensions:{...d},collection:{...m.collection}};
   return root;
 };
 

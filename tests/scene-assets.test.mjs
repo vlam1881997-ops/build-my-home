@@ -14,6 +14,61 @@ test('soft upholstery keeps finite geometry and its piping follows cushion rotat
   assert.ok(count>=2);assert.ok(triangles<65000,'bounded furniture detail');
  }
 });
+test('interior collections change real furniture shapes within the same measured envelopes',()=>{
+ const {b,context}=client();b.state.project.materials={finish:{rooms:{}}};b.finishPalette=()=>null;b.screen7=()=>'<section class="design-room-list">';vm.runInNewContext(fs.readFileSync('src/85_interior_collections.js','utf8'),context);
+ const signatures=new Set();
+ for(const c of b.INTERIOR_COLLECTIONS){
+  const m=b.sceneAssetMaterials(THREE,new THREE.Scene(),c),geometry=[];
+  for(const model of ['loungeDesignSofa','tableCoffee','bedDouble','cabinetTelevision','sideTable','floorLamp']){
+   const d=b.FURNITURE_DIMENSIONS[model],root=b.createRoomAsset(model,d,THREE,m);root.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(root),size=bounds.getSize(new THREE.Vector3());let triangles=0;
+   for(const [actual,expected]of [[size.x,d.w],[size.y,d.h],[size.z,d.d],[bounds.min.y,0]])assert.ok(Math.abs(actual-expected)<1e-5,c.id+' '+model);
+   root.traverse(o=>{if(o.isMesh){assert.ok(o.geometry.attributes.normal.array.every(Number.isFinite));triangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3;}});assert.ok(triangles<65000,c.id+' '+model);geometry.push(triangles);
+  }
+  signatures.add(geometry.join(','));
+ }
+ assert.ok(signatures.size>=5,'collections have different meshes, not only paint');
+});
+test('a room collection changes finishes while preserving the approved plan, openings and selected product IDs',()=>{
+ const {b,context}=client(),room={id:'living',floor:0,type:'living',x:0,y:0,w:5,h:4};b.state.project.plan.rooms=[room];b.state.project.materials={choices:{floor:'approved-sku'},finish:{rooms:{}}};b.finishPalette=id=>b.state.project.materials.finish.rooms[id];b.save=()=>{};vm.runInNewContext(fs.readFileSync('src/85_interior_collections.js','utf8'),context);
+ const before=JSON.stringify(b.state.project.plan);assert.equal(b.applyInteriorCollection('soft-curves',room.id),true);assert.equal(JSON.stringify(b.state.project.plan),before);assert.equal(b.state.project.materials.choices.floor,'approved-sku');assert.equal(b.finishPalette(room.id).shape,'curved');assert.equal(b.interiorCollection(room.id).id,'soft-curves');assert.equal(b.applyInteriorCollection('unknown',room.id),false);assert.equal(b.applyInteriorCollection('warm-oak','missing'),false);
+ const saved=structuredClone(b.state.project.materials.finish);b.state.project.materials.finish=saved;assert.equal(b.interiorCollection(room.id).id,'soft-curves');
+});
+test('photographed material loads retain colour/data channels and ignore a disposed scene',async()=>{
+ const {b,context}=client();context.document.createElementNS=()=>({});context.document.createElement=()=>{const canvas={};canvas.getContext=()=>({createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData(){}});return canvas;};
+ const callbacks=[],images={};class Loader{load(url,done){callbacks.push({url,done});}}
+ const scene=new THREE.Scene(),m=b.sceneAssetMaterials({...THREE,TextureLoader:Loader},scene,{surface:'wood'}),before=m.plank.map.image;
+ for(const c of callbacks){const loaded=new THREE.Texture();loaded.image=images[c.url]={width:512,height:512};c.done(loaded);}await Promise.all(scene.userData.surfaceLoads);assert.notEqual(m.plank.map.image,before);assert.equal(m.plank.map.colorSpace,THREE.SRGBColorSpace);assert.equal(m.plank.normalMap.colorSpace,THREE.NoColorSpace);assert.equal(m.plank.roughnessMap.colorSpace,THREE.NoColorSpace);assert.equal(m.plank.map.userData.license,'CC0-1.0');
+ callbacks.length=0;const stale=new THREE.Scene(),material=b.sceneAssetMaterials({...THREE,TextureLoader:Loader},stale),original=material.wood.map.image;stale.userData.disposed=true;for(const c of callbacks){const loaded=new THREE.Texture();loaded.image={width:512};c.done(loaded);}assert.equal((await Promise.all(stale.userData.surfaceLoads)).every(x=>x===false),true);assert.equal(material.wood.map.image,original);
+});
+test('bundled photographed maps have recorded CC0 provenance and a bounded 512px resolution',()=>{
+ const manifest=JSON.parse(fs.readFileSync('assets/interior/texture-provenance.json','utf8'));assert.equal(manifest.license,'CC0-1.0');assert.equal(manifest.assets.length,3);let bytes=0;
+ for(const asset of manifest.assets){assert.match(asset.source,/^https:\/\/polyhaven.com\/a\//);assert.equal(asset.files.length,3);for(const file of asset.files){const data=fs.readFileSync(file.file);assert.equal(data.readUInt32BE(16),512);assert.equal(data.readUInt32BE(20),512);assert.match(file.sourceUrl,/^https:\/\/dl.polyhaven.org\//);bytes+=data.length;}}
+ assert.ok(bytes<2000000,'all texture maps stay under 2MB');
+});
+test('slow material downloads settle on the fallback, deduplicate photographs and ignore late completion',async()=>{
+ const {b,context}=client();b.SCENE_TEXTURE_TIMEOUT=10;context.document.createElementNS=()=>({});context.document.createElement=()=>({getContext:()=>({createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData(){}})});
+ const callbacks=[];class Loader{load(url,done){callbacks.push({url,done});}}
+ const scene=new THREE.Scene(),m=b.sceneAssetMaterials({...THREE,TextureLoader:Loader},scene),before=m.wood.map.image;
+ assert.equal(callbacks.length,9,'wood and vertical wood share the decoded photograph');
+ assert.equal(new Set(callbacks.map(c=>c.url)).size,9);
+ assert.ok((await Promise.all(scene.userData.surfaceLoads)).every(ok=>ok===false));
+ for(const {done}of callbacks){const loaded=new THREE.Texture();loaded.image={width:512};done(loaded);}
+ await Promise.resolve();assert.equal(m.wood.map.image,before);assert.equal(scene.userData.surfaceCancels.size,0);
+});
+test('oak collection tables have an oval footprint rather than only rounded rectangle edges',()=>{
+ const {b}=client(),scene=new THREE.Scene(),m=b.sceneAssetMaterials(THREE,scene,{table:'oak'}),root=b.createRoomAsset('tableCoffee',b.FURNITURE_DIMENSIONS.tableCoffee,THREE,m);
+ const top=root.children.find(o=>o.userData.kind==='oval-tabletop');assert.ok(top);top.geometry.computeBoundingBox();const bounds=top.geometry.boundingBox,p=top.geometry.attributes.position;
+ // A corner must be outside an ellipse while an ordinary rounded box fills it.
+ for(let i=0;i<p.count;i++)assert.ok(Math.abs(p.getX(i))<bounds.max.x*.93||Math.abs(p.getZ(i))<bounds.max.z*.93);
+});
+test('full-height drapery follows actual openings and clears the sofa behind all four orientations',()=>{
+ const {b}=client();b.projectLevels=()=>({slab:.14,clearHeight:3.06});
+ for(const side of ['north','south','west','east']){
+  const r={id:'r',floor:0,type:'living',x:1,y:1,w:5,h:5};b.state.project.plan.rooms=[r];b.state.project.plan.openings=[{id:'w',roomId:'r',kind:'window',side,width:1.6,height:1.4,sill:.9}];
+  b.openingWallSpan=()=>({o:['north','south'].includes(side)?'h':'v',a:2,b:3.6,c:{north:1,south:6,west:1,east:6}[side]});const scene=new THREE.Scene();b.addWindowDrapery(THREE,scene,r,0,b.state.project.site);
+  const curtains=scene.children.filter(o=>o.geometry.type==='PlaneGeometry');assert.equal(curtains.length,2);for(const curtain of curtains){const box=new THREE.Box3().setFromObject(curtain);assert.ok(Math.abs(box.min.y-.17)<1e-5);assert.ok(Math.abs(box.max.y-3.08)<1e-5);const axis=['north','south'].includes(side)?'z':'x',inward=['north','west'].includes(side)?1:-1,wall={north:1,south:6,west:1,east:6}[side]-4;for(const n of [box.min[axis],box.max[axis]])assert.ok((n-wall)*inward>=.11-1e-5&&(n-wall)*inward<.17);}
+ }
+});
 
 function client(){
   const BMH={state:{project:{site:{width:8,depth:8},plan:{rooms:[],openings:[]}},ui:{}},screen5:()=>'',screen7:()=>'',SCREENS:[],aiContext:()=>({}),esc:String};
@@ -74,7 +129,7 @@ test('surface channels keep colour separate from relief and roughness across fin
  const scene=new THREE.Scene(),wood=b.sceneAssetMaterials(THREE,scene,{surface:'wood'}),stone=b.sceneAssetMaterials(THREE,scene,{surface:'stone'});
  assert.equal(wood.floor,wood.plank);assert.equal(stone.floor,stone.floorStone);assert.notEqual(wood,stone);assert.equal(wood.plank.map,stone.plank.map);
  for(const m of [wood.plank,wood.slattedWood,stone.floorStone,wood.fabric]){assert.equal(m.map.colorSpace,THREE.SRGBColorSpace);assert.equal(m.normalMap.colorSpace,THREE.NoColorSpace);assert.equal(m.roughnessMap.colorSpace,THREE.NoColorSpace);assert.notEqual(m.map,m.normalMap);assert.notEqual(m.normalMap,m.roughnessMap);assert.notDeepEqual(m.map.image.pixels,m.roughnessMap.image.pixels);assert.notDeepEqual(m.normalMap.image.pixels,m.roughnessMap.image.pixels);}
- assert.deepEqual(Array.from(wood.plank.userData.surfaceScale),[1.6,.18]);assert.deepEqual(Array.from(stone.floorStone.userData.surfaceScale),[.8,.8]);
+ assert.deepEqual(Array.from(wood.plank.userData.surfaceScale),[1.7,1.7]);assert.deepEqual(Array.from(stone.floorStone.userData.surfaceScale),[.8,.8]);
 });
 
 test('room camera selects clear space inside the room for all furniture orientations',()=>{
@@ -102,6 +157,12 @@ test('a bedroom camera sees past the wardrobe instead of filling the view with i
 
 test('inside and overview cameras cannot reuse an image belonging to the other preset',()=>{
   const {b,context}=client();vm.runInNewContext(fs.readFileSync('src/45_studio3d.js','utf8'),context);b.state.ui.sceneFocus='room:r';b.state.ui.roomCamera='inside';const inside=b.cinematicSignature();b.state.ui.roomCamera='overview';assert.notEqual(b.cinematicSignature(),inside);b.state.ui.roomCamera='inside';assert.equal(b.cinematicSignature(),inside);
+});
+test('daylight, night, exploded views and renderer revisions cannot reuse the same room image',()=>{
+ const {b,context}=client();vm.runInNewContext(fs.readFileSync('src/45_studio3d.js','utf8'),context);b.state.ui.sceneFocus='room:r';b.state.ui.sceneTheme='day';const day=b.cinematicSignature();
+ b.state.ui.sceneTheme='night';assert.notEqual(b.cinematicSignature(),day);b.state.ui.sceneTheme='day';assert.equal(b.cinematicSignature(),day);
+ b.state.ui.sceneExploded=true;assert.notEqual(b.cinematicSignature(),day);b.state.ui.sceneExploded=false;assert.equal(b.cinematicSignature(),day);
+ b.ARCH_RENDER_REVISION='new-materials';assert.notEqual(b.cinematicSignature(),day);
 });
 
 test('a narrow bathroom frames its fixtures instead of only the wall above them',()=>{
