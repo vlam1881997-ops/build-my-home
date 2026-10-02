@@ -83,3 +83,14 @@ test('AI image caching matches the captured view as well as the design',async()=
  reference='rotated-view';await b.generateCinematicRender();assert.equal(requests,2,'rotating the camera cannot reuse the previous image');
  assert.equal(b.cinematicRender.loading,false);
 });
+test('an AI reply from an earlier camera is rejected and its hero image becomes hidden',async()=>{
+ const {b,context}=client();let reply;
+ b.MATERIALS={};b.cinematicSignature=()=> 'same-design';b.finishHash=value=>value;b.toast=()=>{};b.cinematicRender={loading:false,views:{}};
+ b.studio3d={state:{yaw:.2,pitch:.3,dist:5,target:new THREE.Vector3(1,2,3)},scene:{userData:{}},renderFrame(){},renderer:{domElement:{toDataURL:()=> 'camera-reference'}}};
+ const source=fs.readFileSync('src/45_studio3d.js','utf8');vm.runInNewContext(source.slice(source.indexOf('BMH.cinematicCameraKey=()=>'),source.indexOf('BMH.generateCinematicRender = async () => {')),context);
+ vm.runInNewContext(source.slice(source.indexOf('BMH.generateCinematicRender = async () => {')),context);
+ const key=b.cinematicCameraKey();b.cinematicRender.views['same-design']='old-image';b.cinematicRender.cameraKeys={'same-design':key};assert.equal(b.currentCinematicImage(),'old-image');
+ context.fetch=()=>new Promise(resolve=>reply=resolve);const pending=b.generateCinematicRender();await Promise.resolve();b.studio3d.state.yaw+=.3;assert.equal(b.currentCinematicImage(),'');
+ const hero={hidden:false};b.$=()=>hero;b.refreshCinematicHero();assert.equal(hero.hidden,true);
+ reply({ok:true,json:async()=>({image:'WRONG-CAMERA',mimeType:'image/png'})});await pending;assert.equal(b.cinematicRender.views['same-design'],'old-image');assert.match(b.cinematicRender.error,/góc nhìn/);assert.equal(b.cinematicRender.loading,false);
+});

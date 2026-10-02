@@ -142,6 +142,15 @@ test('room camera selects clear space inside the room for all furniture orientat
   assert.equal(b.roomInteriorCamera({x:0,y:0,w:1,h:1},[{x:0,y:0,w:1,d:1}]),null);
 });
 
+test('indoor camera clearance rejects a TV at eye height, walls and the ceiling but allows space above a low table',()=>{
+ const {b}=client(),room={id:'r',type:'living',floor:0,x:0,y:0,w:5,h:4},items=b.roomFurnitureLayout(room),tv=items.find(i=>i.model==='televisionModern'),table=items.find(i=>i.model==='tableCoffee');
+ b.projectLevels=()=>({floorHeight:3.4,slab:.14,ceilingDrop:.2});
+ assert.equal(b.interiorCameraIsClear(room,{x:tv.x+tv.w/2,y:tv.y+tv.d/2,height:1.5},items),false);
+ assert.equal(b.interiorCameraIsClear(room,{x:table.x+table.w/2,y:table.y+table.d/2,height:1.5},items),true);
+ assert.equal(b.interiorCameraIsClear(room,{x:-.1,y:2,height:1.5},items),false);
+ assert.equal(b.interiorCameraIsClear(room,{x:1,y:2,height:b.projectLevels().floorHeight},items),false);
+});
+
 test('unavailable rounded geometry keeps a bounded detailed fallback',()=>{
   const {b}=client(),m=b.sceneAssetMaterials(BaseThree,new BaseThree.Scene()),d=b.FURNITURE_DIMENSIONS.bedDouble;
   const root=b.createRoomAsset('bedDouble',d,BaseThree,m),size=new BaseThree.Box3().setFromObject(root).getSize(new BaseThree.Vector3());assert.ok(Math.abs(size.x-d.w)<1e-5);assert.ok(Math.abs(size.y-d.h)<1e-5);assert.ok(Math.abs(size.z-d.d)<1e-5);

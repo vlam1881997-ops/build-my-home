@@ -134,7 +134,7 @@ BMH.lightPreviewSvg=()=>{
  const face=(ps,color)=>{const q=ps.map(v=>project(...v));faces.push({z:q.reduce((sum,v)=>sum+v.z,0)/q.length,color,points:q.map(v=>v.x.toFixed(4)+','+v.y.toFixed(4)).join(' ')});};
  const block=(x,y,w,d,base,height,color)=>{face([[x,y,base+height],[x+w,y,base+height],[x+w,y+d,base+height],[x,y+d,base+height]],color);face([[x,y+d,base],[x+w,y+d,base],[x+w,y+d,base+height],[x,y+d,base+height]],color);face([[x+w,y,base],[x+w,y+d,base],[x+w,y+d,base+height],[x+w,y,base+height]],color);};
  for(const f of floors){const rooms=BMH.floorRooms(f).filter(r=>!room||r.id===room.id),base=f*l.floorHeight;
-  for(const r of rooms){for(const panel of (BMH.slabPanels?.(r,BMH.stairFloorHoles?.(f)||[])||[{x:r.x,y:r.y,w:r.w,d:r.h}]))block(panel.x,panel.y,panel.w,panel.d,base,.12,BMH.finishPalette?.(r.id)?.floor||'#ddd4c4');if(r.type==='garage'){const v=BMH.garageVehicle(r);if(v)block(v.x,v.y,v.w,v.d,base+.15,.8,'#567a86');}for(const i of BMH.roomFurnitureLayout(r))block(i.x,i.y,i.w,i.d,base+.12+i.base,i.h,/toilet|Sink|shower/.test(i.model)?'#f5f4ee':'#ab8d6d');if(r.type==='stairs'){for(const part of BMH.stairGeometry?.(r)||[])block(part.x,part.y,part.w,part.d,base+part.base,part.h,'#a18d74');}const pos=project(r.x+r.w/2,r.y+r.h/2,base+.25);labels.push('<text x="'+pos.x+'" y="'+pos.y+'" font-size=".22" text-anchor="middle">'+BMH.esc(r.name)+'</text>');}
+  for(const r of rooms){for(const panel of (BMH.slabPanels?.(r,BMH.stairFloorHoles?.(f)||[])||[{x:r.x,y:r.y,w:r.w,d:r.h}]))block(panel.x,panel.y,panel.w,panel.d,base,.12,BMH.finishPalette?.(r.id)?.floor||'#ddd4c4');if(r.type==='garage'){const v=BMH.garageVehicle(r);if(v)block(v.x,v.y,v.w,v.d,base+.15,.8,'#567a86');}for(const i of BMH.roomFurnitureLayout(r))block(i.x,i.y,i.w,i.d,base+.12+i.base,i.h,/toilet|Sink|shower/.test(i.model)?'#f5f4ee':'#ab8d6d');if(r.type==='elevator')for(const part of BMH.elevatorGeometry?.(r)||[])block(part.x,part.y,part.w,part.d,base+.12+part.base,part.h,part.finish==='dark'?'#394749':part.finish==='metal'?'#b0bfc2':'#c2d9d5');if(r.type==='stairs'){for(const part of BMH.stairGeometry?.(r)||[])block(part.x,part.y,part.w,part.d,base+part.base,part.h,'#a18d74');}const pos=project(r.x+r.w/2,r.y+r.h/2,base+.25);labels.push('<text x="'+pos.x+'" y="'+pos.y+'" font-size=".22" text-anchor="middle">'+BMH.esc(r.name)+'</text>');}
   const geometry=BMH.scenePlanGeometry({rooms,openings:p.plan.openings.filter(o=>!room||o.roomId===room.id),wallContext:p.plan.rooms},f);
   for(const w of geometry.walls){const length=w.b-w.a,t=w.thickness||.12,x=w.horizontal?w.a:w.axis-t/2,y=w.horizontal?w.axis-t/2:w.a,width=w.horizontal?length:t,depth=w.horizontal?t:length;
    if(w.kind==='door')block(x,y,width,depth,base+w.height,Math.max(.02,l.clearHeight-w.height),wallColor);
@@ -162,7 +162,7 @@ BMH.renderCache=async(mode,key,value)=>{
 BMH.restoringRenderKeys=new Set();
 BMH.restoreRoomRender=signature=>{
  if(BMH.cinematicRender.views[signature]||BMH.restoringRenderKeys.has(signature))return;
- BMH.restoringRenderKeys.add(signature);queueMicrotask(()=>BMH.renderCache('get',signature).then(image=>{if(image){BMH.cinematicRender.views[signature]=image;if(BMH.state.ui.step===6)BMH.render({preserveScroll:true});}}).catch(()=>{}));
+ BMH.restoringRenderKeys.add(signature);queueMicrotask(()=>BMH.renderCache('get',signature).then(cached=>{if(cached){const image=typeof cached==='string'?cached:cached.image;BMH.cinematicRender.views[signature]=image;if(cached.cameraKey)(BMH.cinematicRender.cameraKeys||={})[signature]=cached.cameraKey;if(cached.referenceHash)(BMH.cinematicRender.referenceHashes||={})[signature]=cached.referenceHash;BMH.rememberFinishCamera?.();if(BMH.state.ui.step===6)BMH.render({preserveScroll:true});}}).catch(()=>{}));
 };
 BMH.roomGalleryHtml=()=>{
  BMH.restoreRoomRender(BMH.cinematicSignature());
@@ -171,7 +171,7 @@ BMH.roomGalleryHtml=()=>{
 };
 const workflowScreen7=BMH.screen7;BMH.screen7=()=>workflowScreen7()+BMH.roomGalleryHtml();BMH.SCREENS[5]=BMH.screen7;
 const workflowGenerateRender=BMH.generateCinematicRender;
-BMH.generateCinematicRender=async()=>{if(BMH.cinematicRender.loading)return;const key=BMH.cinematicSignature();await workflowGenerateRender();const image=BMH.cinematicRender.views[key];if(image)await BMH.renderCache('put',key,image).catch(()=>BMH.toast('Đã tạo ảnh nhưng bộ nhớ trình duyệt chưa lưu được.'));};
+BMH.generateCinematicRender=async()=>{if(BMH.cinematicRender.loading)return;const key=BMH.cinematicSignature();await workflowGenerateRender();const image=BMH.cinematicRender.views[key];if(image)await BMH.renderCache('put',key,{image,cameraKey:BMH.cinematicRender.cameraKeys?.[key]||'',referenceHash:BMH.cinematicRender.referenceHashes?.[key]||''}).catch(()=>BMH.toast('Đã tạo ảnh nhưng bộ nhớ trình duyệt chưa lưu được.'));};
 BMH.generateAllRoomRenders=async()=>{
  if(BMH.roomRenderBatch?.running||BMH.cinematicRender.loading)return;
  const original=BMH.state.ui.sceneFocus,batch=BMH.roomRenderBatch={running:true,stop:false,done:0,total:BMH.state.project.plan.rooms.length},rooms=[...BMH.state.project.plan.rooms];

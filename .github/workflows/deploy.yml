@@ -1,4 +1,4 @@
-name: Check and publish GitHub Pages
+name: Check BMH and optionally publish Pages
 on:
   push:
     branches: [main]
@@ -27,7 +27,7 @@ jobs:
           path: dist
           include-hidden-files: true
   deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.ENABLE_GITHUB_PAGES == 'true'
     needs: check
     permissions:
       contents: read

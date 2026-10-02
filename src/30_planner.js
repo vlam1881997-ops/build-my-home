@@ -1,4 +1,4 @@
-BMH.roomColor = type => ({living:'#f4f7f1',kitchen:'#fff9ef',bed:'#f4f7fb',bath:'#f0f7f7',stairs:'#f5f2fa',garage:'#f6f3ee',corridor:'#fafaf7',balcony:'#f1f8f0'}[type]||'#f7f8f5');
+BMH.roomColor = type => ({living:'#f4f7f1',kitchen:'#fff9ef',bed:'#f4f7fb',bath:'#f0f7f7',stairs:'#f5f2fa',elevator:'#e3efed',garage:'#f6f3ee',corridor:'#fafaf7',balcony:'#f1f8f0'}[type]||'#f7f8f5');
 BMH.floorRooms = (floor=BMH.state.ui.planner.floor) => BMH.state.project.plan.rooms.filter(r=>r.floor===floor);
 BMH.selectedRoom = () => BMH.state.project.plan.rooms.find(r=>r.id===BMH.state.ui.planner.selected)||null;
 BMH.roomsOverlap = (a,b) => a.floor===b.floor && a.id!==b.id && a.x < b.x+b.w-.001 && a.x+a.w > b.x+.001 && a.y < b.y+b.h-.001 && a.y+a.h > b.y+.001;
