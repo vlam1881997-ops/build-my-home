@@ -1,6 +1,6 @@
 BMH.defaultState = () => ({
   version: BMH.VERSION,
-  ui: {step:1, onboardingComplete:false, onboardingStep:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', materialSearchLocal:false, location:{drawingLot:false}, planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',layout:'wide',textSize:'large',toolsOpen:false,inspectorOpen:false,legendOpen:true,showFurniture:true,showDimensions:true,showFeng:false,showBelow:false,showStructure:false,showEnvironment:false,showCirculation:false,showSectionLine:false,showClimate:false,showEnvelope:false}, architectureEngine:'existing', sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
+  ui: {step:1, renderMode:'interactive',renderQuality:'fine',designView:'exterior', designDrawing:'plan', roomCamera:'overview', homeMode:'design', onboardingComplete:false, onboardingStep:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', materialSearchLocal:false, location:{drawingLot:false}, planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',openingPage:0,stairDrawingId:'',sectionCutX:null,layout:'wide',textSize:'large',toolsOpen:false,inspectorOpen:false,legendOpen:true,showFurniture:true,showDimensions:true,showFeng:false,showBelow:false,showStructure:false,showEnvironment:false,showCirculation:false,showSectionLine:false,showClimate:false,showEnvelope:false}, architectureEngine:'existing', sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false},
   access: {paid:false, source:'none', paidAt:null, verifiedAt:null, orderCode:null},
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại', briefIdea:'',
@@ -25,21 +25,23 @@ BMH.defaultState = () => ({
       {id:'o2',floor:0,roomId:'r1',kind:'window',side:'east',offset:.35,width:1.6},
       {id:'o3',floor:0,roomId:'r3',kind:'door',side:'east',offset:.25,width:.8},
       {id:'o4',floor:1,roomId:'r6',kind:'window',side:'east',offset:.4,width:1.6}
-    ], lockedRoomIds:[],lockedFloors:[]},
+    ], outdoor:[], lockedRoomIds:[],lockedFloors:[]},
     planVariants:[],
+    designStudio:{kits:[],activeKit:'',inputSignature:'',appliedSignature:''},
     planVersions:[],
-    materials:{tier:'standard',climatePackage:'recommended',choices:{floor:'viglacera',paint:'dulux',door:'xingfa'},lastDelta:0},
+    materials:{tier:'standard',climatePackage:'recommended',choices:{floor:'viglacera',paint:'dulux',door:'xingfa'},finish:{exterior:null,rooms:{}},lastDelta:0},
     aiScan:{sourceName:'',mimeType:'',scannedAt:'',model:'',provider:'',intent:'reference',appliedAt:'',result:{}},
+    homeFinish:{photos:[],activePhotoId:'',preferences:{style:'Hiện đại',budget:'balanced',notes:''},analyses:{},selected:{},satisfaction:{signature:'',confirmedAt:''},geometryKey:''},
     performance:{solarEnabled:true,rainwaterEnabled:true,coolRoof:true,smartShading:true,mode:'balanced'},
     dataEngine: BMH.defaultDataEngineState(),
     wearYear:0,
     checklist:{pipe114:false,acWire:false,pressure:false,internet:false,elcb:false,waterTank:false,drainSlope:false,grounding:false,rcbo:false,acDrain:false,kitchenHood:false,conduitReserve:false},
     dossier:{startDate:'',progress:0,currentStage:'foundation',revision:'A',architect:'',contractor:'',notes:'',actualCosts:{foundation:0,structure:0,walls:0,roof:0,mep:0,finish:0,handover:0},evidence:[]}
   },
-  meta:{savedAt:null}
+  meta:{savedAt:null,createdAt:null,localProjectId:''}
 });
 
-BMH.DYNAMIC_STATE_PATHS=new Set(['project.materials.choices','project.site.mapCenter','project.aiScan.result','project.dataEngine.materialOverrides','project.dataEngine.costSources','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence']);
+BMH.DYNAMIC_STATE_PATHS=new Set(['project.materials.choices','project.materials.finish','project.designStudio','project.homeFinish','project.site.mapCenter','project.aiScan.result','project.dataEngine.materialOverrides','project.dataEngine.costSources','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence']);
 BMH.mergeState = (base, incoming) => {
   const isPlain=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
   if(!isPlain(incoming)) return structuredClone(base);
@@ -76,6 +78,9 @@ BMH.state = BMH.loadState();
 BMH.normalizeState = () => {
   const base=BMH.defaultState();
   if(!BMH.state||typeof BMH.state!=='object')BMH.state=base;
+  if(!BMH.state.meta||typeof BMH.state.meta!=='object'||Array.isArray(BMH.state.meta))BMH.state.meta=structuredClone(base.meta);
+  BMH.state.meta.localProjectId=/^[a-zA-Z0-9_-]{1,120}$/.test(BMH.state.meta.localProjectId||'')?String(BMH.state.meta.localProjectId):'';
+  for(const key of ['createdAt','savedAt']){const value=BMH.state.meta[key];BMH.state.meta[key]=typeof value==='string'&&Number.isFinite(Date.parse(value))?new Date(value).toISOString():null;}
   if(!BMH.state.ui||typeof BMH.state.ui!=='object')BMH.state.ui=structuredClone(base.ui);
   if(!BMH.state.ui.planner||typeof BMH.state.ui.planner!=='object')BMH.state.ui.planner=structuredClone(base.ui.planner);
   if(!BMH.state.ui.location||typeof BMH.state.ui.location!=='object')BMH.state.ui.location=structuredClone(base.ui.location);
@@ -181,7 +186,7 @@ BMH.normalizeState = () => {
   const ui=BMH.state.ui.planner;
   if(!ui.selected || !BMH.state.project.plan.rooms.some(x=>x.id===ui.selected))ui.selected=BMH.state.project.plan.rooms[0]?.id||null;
   if(!['select','door','window'].includes(ui.tool))ui.tool='select';
-  if(!['plan','elevation','section'].includes(ui.view))ui.view='plan';
+  if(!['plan','elevation','section','openings','stairs'].includes(ui.view))ui.view='plan';
   if(!['wide','compact'].includes(ui.layout))ui.layout='wide';
   if(!['normal','large'].includes(ui.textSize))ui.textSize='large';
   if(typeof ui.showBelow!=='boolean')ui.showBelow=false;

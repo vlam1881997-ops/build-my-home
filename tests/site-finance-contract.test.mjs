@@ -49,6 +49,15 @@ test('locked floors survive a saved project reload',()=>{
   assert.deepEqual([...restored.state.project.plan.lockedFloors],[1]);
 });
 
+test('active opening and stair drawings survive project reload with their selected sheet',()=>{
+  for(const view of ['openings','stairs']){
+    const {BMH}=stateEngine();
+    Object.assign(BMH.state.ui.planner,{view,floor:1,openingPage:2,stairDrawingId:'r5',sectionCutX:2.3});BMH.save();
+    const restored=stateEngine(BMH.state).BMH.state.ui.planner;
+    assert.equal(restored.view,view);assert.equal(restored.floor,1);assert.equal(restored.openingPage,2);assert.equal(restored.stairDrawingId,'r5');assert.equal(restored.sectionCutX,2.3);
+  }
+});
+
 test('AI sees the pin and only the Site Intelligence scan matching that pin',()=>{
   const p={site:{lat:21.0321,lng:105.8546,road:3.5,province:'TP. Hồ Chí Minh',district:'Phường cũ',pinAddressNeedsReview:true,geoSource:'Ghim bản đồ'},
     siteIntelligence:{status:'ready',key:'21.0321,105.8546:3.5',elevation_m:null,fetchedAt:'2026-09-26T00:00:00Z',flood:{level:'Chưa đủ dữ liệu'},transport:{surchargePct:8}},
@@ -216,13 +225,13 @@ test('dossier ZIP contains the original construction evidence bytes',async()=>{
   let downloaded=null;
   const bytes=new Uint8Array([0x25,0x50,0x44,0x46,0x00,0xff]);
   const BMH={
-    state:{project:{site:{floors:1}}},isUnlocked:()=>true,
+    state:{project:{site:{floors:1},plan:{rooms:[],openings:[]}}},isUnlocked:()=>true,
     createDossierSnapshot:()=>({evidence:[{id:'evidence-1',stage:'mep',name:'kiem-tra.pdf',type:'application/pdf',size:bytes.length,addedAt:'2026-09-26T00:00:00Z'}],boq:[],materials:[],cashflow:[],mep:[]}),
     evidenceGet:async()=>new Blob([bytes]),planSvg:()=>'<svg/>',elevationSvg:()=>'<svg/>',sectionSvg:()=>'<svg/>',realDataExport:()=>({}),
     download:(name,blob)=>{downloaded={name,blob};},toast:()=>{}
   };
   vm.runInNewContext(fs.readFileSync(new URL('../src/40_exports.js',import.meta.url),'utf8'),{BMH,TextEncoder,Uint8Array,Blob,JSON,Math,Number,String,Intl});
-  BMH.drawingSheetSvg=()=>'<svg/>';BMH.planDxf=()=> '0\r\nEOF\r\n';
+  BMH.drawingSheetSvg=()=>'<svg/>';BMH.openingSheetSvg=()=>'<svg/>';BMH.planDxf=()=> '0\r\nEOF\r\n';
   BMH.dossierWorkbook=()=>'<Workbook/>';
   BMH.dossierPrintHtml=()=>'<html/>';
   await BMH.exportDossierBundle();

@@ -45,6 +45,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/momo/notify",
+      "destination": "/api/ai?operation=checkout-notify"
+    },
+    {
       "source": "/api/ai-health",
       "destination": "/api/ai?operation=health"
     },

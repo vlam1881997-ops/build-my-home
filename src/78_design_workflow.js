@@ -9,14 +9,14 @@ BMH.rotateSelectedRoom=()=>{
 };
 BMH.addOpeningFromInspector=values=>{
  const r=BMH.selectedRoom();if(!r||BMH.isRoomLocked(r.id))return BMH.toast('Chọn một phòng chưa khóa.');
- const o={id:BMH.uid('o'),roomId:r.id,floor:r.floor,kind:values.kind==='window'?'window':'door',side:values.side,offset:Number(values.offset),width:Number(values.width),height:Number(values.height),sill:values.kind==='window'?Number(values.sill):0,hinge:'left',swing:'in'};
+ const o={id:BMH.uid('o'),roomId:r.id,floor:r.floor,kind:values.kind==='window'?'window':'door',side:values.side,offset:Number(values.offset),width:Number(values.width),height:Number(values.height),sill:values.kind==='window'?Number(values.sill):0,hinge:values.hinge==='right'?'right':'left',swing:values.swing==='out'?'out':'in'};
  if(!['north','south','east','west'].includes(o.side)||!Number.isFinite(o.offset)||o.offset<0||o.offset>1||!Number.isFinite(o.height)||o.height<.3||!Number.isFinite(o.sill)||o.sill<0||o.height+o.sill>BMH.projectLevels().clearHeight)return BMH.toast('Kiểm tra cạnh, vị trí 0–1 và cao cửa + bậu dưới trần.');
  if(!BMH.openingFits(o))return BMH.toast('Ô mở quá rộng hoặc trùng cửa có sẵn trên cùng tường. Chọn cạnh/vị trí khác.');
  BMH.pushPlanHistory();BMH.state.project.plan.openings.push(o);BMH.save();BMH.render({preserveScroll:true});BMH.toast('Đã thêm '+(o.kind==='door'?'cửa đi':'cửa sổ')+'; bản vẽ và 3D dùng chung ô mở này.');return o;
 };
 BMH.roomEditingPanel=()=>{
  const r=BMH.selectedRoom();if(!r)return '';const esc=BMH.v6Esc,disabled=BMH.isRoomLocked(r.id)?'disabled':'';
- return '<section class="v6-card room-editing-panel"><h3>Hướng phòng, cầu thang & thêm cửa</h3><p>Đang chọn: <b>'+esc(r.name)+'</b> · '+r.w.toFixed(2)+' × '+r.h.toFixed(2)+' m</p><div class="architecture-fields"><button data-room-rotate '+disabled+'>Xoay phòng 90°</button><label>Hướng nội thất<select data-room-orientation '+disabled+'>'+[0,90,180,270].map(v=>'<option value="'+v+'" '+((r.furnitureRotation||0)===v?'selected':'')+'>'+v+'°</option>').join('')+'</select></label>'+(r.type==='stairs'?'<label>Hướng chạy thang<select data-stair-direction '+disabled+'>'+[[0,'Lên về đầu đất'],[90,'Lên về bên phải'],[180,'Lên về cuối đất'],[270,'Lên về bên trái']].map(([v,n])=>'<option value="'+v+'" '+(BMH.stairSpec(r).direction===v?'selected':'')+'>'+n+'</option>').join('')+'</select></label>':'')+'</div><form data-opening-form class="architecture-fields"><label>Loại<select name="kind"><option value="door">Cửa đi</option><option value="window">Cửa sổ</option></select></label><label>Cạnh tường<select name="side">'+[['north','Đầu đất'],['east','Bên phải'],['south','Cuối đất'],['west','Bên trái']].map(([v,n])=>'<option value="'+v+'">'+n+'</option>').join('')+'</select></label>'+[['width','Rộng / m',.9,.5],['height','Cao / m',2.1,.3],['sill','Bậu cửa sổ / m',0,0],['offset','Vị trí trên cạnh · 0–1',.5,0]].map(([k,n,v,min])=>'<label>'+n+'<input type="number" name="'+k+'" value="'+v+'" min="'+min+'" '+(k==='offset'?'max="1"':'')+' step=".01" required></label>').join('')+'<button '+disabled+'>Thêm vào phòng đang chọn</button></form><p>Đầu/cuối và trái/phải tính theo mặt bằng đất, không theo chiều xoay màn hình. Cửa trên tường chung nối hai phòng. Dùng bảng cửa phía dưới để chỉnh hoặc xóa.</p></section>';
+ return '<section class="v6-card room-editing-panel"><h3>Hướng phòng, cầu thang & thêm cửa</h3><p>Đang chọn: <b>'+esc(r.name)+'</b> · '+r.w.toFixed(2)+' × '+r.h.toFixed(2)+' m</p><div class="architecture-fields"><button data-room-rotate '+disabled+'>Xoay phòng 90°</button><label>Hướng nội thất<select data-room-orientation '+disabled+'>'+[0,90,180,270].map(v=>'<option value="'+v+'" '+((r.furnitureRotation||0)===v?'selected':'')+'>'+v+'°</option>').join('')+'</select></label>'+(r.type==='stairs'?'<label>Hướng chạy thang<select data-stair-direction '+disabled+'>'+[[0,'Lên về đầu đất'],[90,'Lên về bên phải'],[180,'Lên về cuối đất'],[270,'Lên về bên trái']].map(([v,n])=>'<option value="'+v+'" '+(BMH.stairSpec(r).direction===v?'selected':'')+'>'+n+'</option>').join('')+'</select></label>':'')+'</div><form data-opening-form class="architecture-fields"><label>Loại<select name="kind"><option value="door">Cửa đi</option><option value="window">Cửa sổ</option></select></label><label>Cạnh tường<select name="side">'+[['north','Đầu đất'],['east','Bên phải'],['south','Cuối đất'],['west','Bên trái']].map(([v,n])=>'<option value="'+v+'">'+n+'</option>').join('')+'</select></label><label>Bản lề<select name="hinge"><option value="left">Đầu cạnh (trái)</option><option value="right">Cuối cạnh (phải)</option></select></label><label>Chiều mở<select name="swing"><option value="in">Vào phòng</option><option value="out">Ra ngoài</option></select></label>'+[['width','Rộng / m',.9,.5],['height','Cao / m',2.1,.3],['sill','Bậu cửa sổ / m',0,0],['offset','Vị trí trên cạnh · 0–1',.5,0]].map(([k,n,v,min])=>'<label>'+n+'<input type="number" name="'+k+'" value="'+v+'" min="'+min+'" '+(k==='offset'?'max="1"':'')+' step=".01" required></label>').join('')+'<button '+disabled+'>Thêm vào phòng đang chọn</button></form><p>Đầu/cuối và trái/phải tính theo mặt bằng đất, không theo chiều xoay màn hình. Cửa trên tường chung nối hai phòng. Dùng bảng cửa phía dưới để chỉnh hoặc xóa.</p></section>';
 };
 const workflowScreen5=BMH.screen5;
 BMH.screen5=()=>workflowScreen5().replace('<div class="v72-review">',BMH.roomEditingPanel()+'<div class="v72-review">');BMH.SCREENS[3]=BMH.screen5;
@@ -34,6 +34,8 @@ document.addEventListener('pointerdown',e=>{
 },true);
 // Furniture dimensions are measured from the vendored CC0 GLBs, in metres.
 BMH.FURNITURE_DIMENSIONS={"bedDouble": {"w": 1.912, "h": 0.75, "d": 2.25}, "bedSingle": {"w": 1.142, "h": 0.75, "d": 2.25}, "loungeDesignSofa": {"w": 2.24, "h": 0.8, "d": 0.82}, "loungeChair": {"w": 0.98, "h": 0.92, "d": 0.82}, "tableCoffee": {"w": 1.322, "h": 0.46, "d": 0.8}, "table": {"w": 1.683, "h": 0.6535, "d": 0.8947}, "chair": {"w": 0.4, "h": 0.94, "d": 0.4}, "cabinetTelevision": {"w": 1.6, "h": 0.62, "d": 0.5}, "televisionModern": {"w": 1.3696, "h": 0.9095, "d": 0.2568}, "kitchenSink": {"w": 0.86, "h": 0.98, "d": 0.9}, "kitchenStove": {"w": 0.86, "h": 0.9, "d": 0.9}, "kitchenFridge": {"w": 0.86, "h": 1.84, "d": 0.5839}, "bathroomSink": {"w": 0.68, "h": 1.12, "d": 0.58}, "toilet": {"w": 0.6251, "h": 0.9019, "d": 0.9544}, "shower": {"w": 1.1236, "h": 2.1881, "d": 1.1636}, "bookcaseClosedWide": {"w": 1.6, "h": 1.58, "d": 0.5}, "desk": {"w": 1.469, "h": 0.7688, "d": 0.7846}, "chairDesk": {"w": 0.6699, "h": 1.2152, "d": 0.6286}, "pottedPlant": {"w": 0.4241, "h": 1.308, "d": 0.4829}, "cabinetBed": {"w": 0.532, "h": 0.4664, "d": 0.43}};
+BMH.FURNITURE_DIMENSIONS.sideTable={w:.40,h:.65,d:.40};
+BMH.FURNITURE_DIMENSIONS.floorLamp={w:.40,h:1.62,d:.40};
 BMH.roomFurnitureLayout=r=>{
  const rotation=((Number(r.furnitureRotation)||0)%360+360)%360,odd=rotation%180===90,W=odd?r.h:r.w,D=odd?r.w:r.h,items=[];
  const transform=(x,y)=>rotation===90?{x:r.w-y,y:x}:rotation===180?{x:r.w-x,y:r.h-y}:rotation===270?{x:y,y:r.h-x}:{x,y};
@@ -44,12 +46,27 @@ BMH.roomFurnitureLayout=r=>{
   if(item.x<r.x+.08||item.y<r.y+.08||item.x+item.w>r.x+r.w-.08||item.y+item.d>r.y+r.h-.08)return;
   if(items.some(o=>o.base+o.h>base+.05&&base+dim.h>o.base+.05&&item.x<o.x+o.w+.05&&item.x+item.w>o.x-.05&&item.y<o.y+o.d+.05&&item.y+item.d>o.y-.05))return;
   const blocked=BMH.state.project.plan.openings.filter(o=>o.roomId===r.id&&o.kind==='door').some(o=>{const g=BMH.openingGeometry(o);if(!g)return false;const c={x:g.x-.45,y:g.y-.45,w:.9,d:.9};return item.x<c.x+c.w&&item.x+item.w>c.x&&item.y<c.y+c.d&&item.y+item.d>c.y;});if(blocked)return;
-  items.push(item);
+  items.push(item);return true;
  };
- if(r.type==='living'){add('loungeDesignSofa',W/2,.58,180);add('tableCoffee',W/2,1.8);add('cabinetTelevision',W/2,D-.38);add('televisionModern',W/2,D-.38,0,.64);add('loungeChair',.65,D/2,90);add('pottedPlant',W-.4,D-.4);}
+ if(r.type==='living'){add('loungeDesignSofa',W/2,.58,180);add('tableCoffee',W/2,1.8);add('cabinetTelevision',W/2,D-.38);add('televisionModern',W/2,D-.38,0,.64);add('sideTable',.32,.58);add('floorLamp',W-.32,.58);add('loungeChair',.65,D/2,90);add('pottedPlant',W-.4,1.48)||add('pottedPlant',W-.4,D-.4);}
  if(r.type==='bed'){const model=W>=2.7?'bedDouble':'bedSingle';add(model,W/2,1.26);add('cabinetBed',.4,.4);add('bookcaseClosedWide',W/2,D-.42);add('desk',.8,D/2,90);add('chairDesk',1.7,D/2,90);}
  if(r.type==='kitchen'){add('kitchenSink',.55,.62);add('kitchenStove',1.55,.62);add('kitchenFridge',W-.6,.5);add('table',W/2,D*.65);add('chair',W/2-1.1,D*.65,90);add('chair',W/2+1.1,D*.65,270);add('chair',W/2,D*.65+.8,180);}
- if(r.type==='bath'){add('toilet',.48,.63);add('bathroomSink',W-.48,.44);add('shower',W/2,D-.7);}
+ if(r.type==='bath'){
+  const toilets=[[.48,.63,0],[.60,.45,90],[W-.60,.45,270],[.48,D-.63,180],[W-.48,D-.63,180],[.60,D/2,90],[W-.60,D/2,270]];
+  const showers=[[W/2,D-.7,0],[.68,D-.68,0],[W-.68,D-.68,0],[W/2,.7,180]];
+  const sinks=[[W-.48,.44,0],[W-.48,D-.44,180],[.48,D-.44,180],[W/2,.44,0],[W/2,D-.44,180],[.44,D/2,90],[W-.44,D/2,270],[.44,D*.25,90],[W-.44,D*.25,270],[.44,D*.75,90],[W-.44,D*.75,270]];
+  let best=[];
+  for(const toilet of toilets){
+   for(const shower of showers){
+    items.length=0;add('toilet',...toilet);add('shower',...shower);
+    for(const sink of sinks)if(add('bathroomSink',...sink))break;
+    if(items.length>best.length)best=items.map(i=>({...i}));
+    if(best.length===3)break;
+   }
+   if(best.length===3)break;
+  }
+  items.splice(0,items.length,...best);
+ }
  if(r.type==='balcony'){add('chair',.4,.4);add('pottedPlant',W-.4,D-.4);}
  // Corridors stay clear; stairs use their actual rise in the shared stair model.
  return items;
@@ -76,7 +93,7 @@ BMH.loadFurnitureModel=model=>{
 BMH.replaceSceneFurniture=(group,model,THREE,scene)=>{
  const task=BMH.loadFurnitureModel(model).then(source=>{
   if(BMH.studio3d?.scene!==scene)return false;
-  const root=source.clone(true);root.traverse(o=>{if(!o.isMesh)return;o.geometry=o.geometry.clone();const copy=m=>{const next=m.clone();for(const k of ['map','normalMap','roughnessMap','metalnessMap','emissiveMap','aoMap'])if(next[k])next[k]=next[k].clone();return next;};o.material=Array.isArray(o.material)?o.material.map(copy):copy(o.material);o.castShadow=true;o.receiveShadow=true;});
+  const finish=BMH.finishPalette?.(group.userData.roomId)||{},root=source.clone(true);root.traverse(o=>{if(!o.isMesh)return;o.geometry=o.geometry.clone();const copy=m=>{const next=m.clone();for(const k of ['map','normalMap','roughnessMap','metalnessMap','emissiveMap','aoMap'])if(next[k])next[k]=next[k].clone();const name=m.name||'';if(/carpetWhite/i.test(name)){next.color.set('#f4f0e6');next.roughness=.95;}else if(/carpet/i.test(name)){next.color.set(finish.fabric||'#ccc2af');next.roughness=.96;}else if(/wood/i.test(name)){next.color.set(finish.accent||'#8f7658');next.roughness=.72;}else if(/^metal$/i.test(name)){next.color.set('#77776b');next.roughness=.4;}return next;};o.material=Array.isArray(o.material)?o.material.map(copy):copy(o.material);o.castShadow=true;o.receiveShadow=true;});
   root.scale.setScalar(2);root.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(root),center=box.getCenter(new THREE.Vector3());root.position.set(-center.x,-box.min.y,-center.z);
   group.traverse(o=>o.geometry?.dispose());group.clear();group.add(root);group.userData.source='glb';BMH.studio3d.state.updateCamera();return true;
  }).catch(()=>false);
@@ -85,8 +102,10 @@ BMH.replaceSceneFurniture=(group,model,THREE,scene)=>{
 BMH.addRoomSceneFurniture=(r,base,THREE,scene,mats,site)=>{
  const material=(color,roughness=.75)=>new THREE.MeshStandardMaterial({color,roughness});
  const wood=mats.accent,cloth=material(0xd4c8b8,.96),white=material(0xf4f1e9,.35),dark=mats.dark;
- for(const i of BMH.roomFurnitureLayout(r)){
+ for(const [index,i] of BMH.roomFurnitureLayout(r).entries()){
   const d=BMH.FURNITURE_DIMENSIONS[i.model],g=new THREE.Group();g.position.set(i.x+i.w/2-site.width/2,base+i.base,i.y+i.d/2-site.depth/2);g.rotation.y=-i.rotation*Math.PI/180;
+  const detailed=BMH.createRoomAsset?.(i.model,d,THREE,BMH.sceneAssetMaterials?.(THREE,scene,BMH.finishPalette?.(r.id)||{})||{});
+  if(detailed){g.add(detailed);g.name='furniture-'+r.id+'-'+index;g.userData={id:g.name,kind:'furniture',roomId:r.id,floor:r.floor,model:i.model,source:'parametric',placement:{...i},generic:true};scene.add(g);BMH.addFurnitureContact(THREE,scene,i,base,site);continue;}
   const box=(w,h,depth,x,y,z,m=wood)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,depth),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;g.add(o);return o;};
   const legs=(top,w=d.w,depth=d.d)=>{for(const x of [-w/2+.08,w/2-.08])for(const z of [-depth/2+.08,depth/2-.08])box(.045,top,.045,x,top/2,z,dark);};
   if(/bedDouble|bedSingle/.test(i.model)){box(d.w,.22,d.d,0,.2,0);box(d.w,.13,d.d-.08,0,.38,0,white);box(d.w,.07,d.d*.65,0,.49,d.d*.15,cloth);box(d.w,d.h,.10,0,d.h/2,-d.d/2+.05);for(const x of [-d.w*.24,d.w*.24])box(d.w*.38,.1,.4,x,.49,-d.d*.32,white);}
@@ -104,22 +123,23 @@ BMH.addRoomSceneFurniture=(r,base,THREE,scene,mats,site)=>{
   const s=BMH.stairSpec(r),g=new THREE.Group(),W=s.alongX?r.h:r.w,D=s.alongX?r.w:r.h;g.position.set(r.x+r.w/2-site.width/2,base,r.y+r.h/2-site.depth/2);g.rotation.y=-s.direction*Math.PI/180;
   for(let n=0;n<s.count;n++){const step=new THREE.Mesh(new THREE.BoxGeometry(Math.max(.6,W-.25),(n+1)*s.riser,s.tread),wood);step.position.set(0,(n+1)*s.riser/2,D/2-.15-(n+.5)*s.tread);step.castShadow=true;step.receiveShadow=true;g.add(step);}scene.add(g);
  }
- if(r.type==='garage'){const v=BMH.garageVehicle(r);if(v){const car=new THREE.Mesh(new THREE.BoxGeometry(v.w,.8,v.d),material(0x567a86,.32));car.position.set(v.x+v.w/2-site.width/2,base+.55,v.y+v.d/2-site.depth/2);car.userData={kind:'vehicle',roomId:r.id,vehicle:v.kind};scene.add(car);const cab=new THREE.Mesh(new THREE.BoxGeometry(v.w*.8,.4,v.d*.45),mats.glass);cab.position.copy(car.position);cab.position.y+=.5;scene.add(cab);}}
+ if(r.type==='garage'){if(BMH.addGarageVehicle?.(r,base,THREE,scene,site))return;const v=BMH.garageVehicle(r);if(v){const car=new THREE.Mesh(new THREE.BoxGeometry(v.w,.8,v.d),material(0x567a86,.32));car.position.set(v.x+v.w/2-site.width/2,base+.55,v.y+v.d/2-site.depth/2);car.userData={kind:'vehicle',roomId:r.id,vehicle:v.kind};scene.add(car);const cab=new THREE.Mesh(new THREE.BoxGeometry(v.w*.8,.4,v.d*.45),mats.glass);cab.position.copy(car.position);cab.position.y+=.5;scene.add(cab);}}
 };
 BMH.lightPreviewAngle=BMH.lightPreviewAngle??35;BMH.lightPreviewZoom=BMH.lightPreviewZoom??1;
 BMH.lightPreviewSvg=()=>{
  const p=BMH.state.project,l=BMH.projectLevels(),focus=BMH.state.ui.sceneFocus||'all',room=focus.startsWith('room:')?p.plan.rooms.find(r=>r.id===focus.slice(5)):null;
+ const finish=BMH.finishPalette?.(room?.id),wallColor=/^#[0-9a-f]{6}$/i.test(finish?.wall||'')?finish.wall:'#e9e6df';
  const floors=room?[room.floor]:focus.startsWith('floor:')?[Number(focus.slice(6))]:Array.from({length:l.floors},(_,i)=>i),a=BMH.lightPreviewAngle*Math.PI/180,c=Math.cos(a),s=Math.sin(a),faces=[],labels=[];
  const project=(x,y,h)=>{x-=p.site.width/2;y-=p.site.depth/2;const rx=x*c-y*s,ry=x*s+y*c;return {x:rx,y:ry*.52-h*.85,z:ry+h*.02};};
  const face=(ps,color)=>{const q=ps.map(v=>project(...v));faces.push({z:q.reduce((sum,v)=>sum+v.z,0)/q.length,color,points:q.map(v=>v.x.toFixed(4)+','+v.y.toFixed(4)).join(' ')});};
  const block=(x,y,w,d,base,height,color)=>{face([[x,y,base+height],[x+w,y,base+height],[x+w,y+d,base+height],[x,y+d,base+height]],color);face([[x,y+d,base],[x+w,y+d,base],[x+w,y+d,base+height],[x,y+d,base+height]],color);face([[x+w,y,base],[x+w,y+d,base],[x+w,y+d,base+height],[x+w,y,base+height]],color);};
  for(const f of floors){const rooms=BMH.floorRooms(f).filter(r=>!room||r.id===room.id),base=f*l.floorHeight;
-  for(const r of rooms){for(const panel of (BMH.slabPanels?.(r,BMH.stairFloorHoles?.(f)||[])||[{x:r.x,y:r.y,w:r.w,d:r.h}]))block(panel.x,panel.y,panel.w,panel.d,base,.12,'#ddd4c4');if(r.type==='garage'){const v=BMH.garageVehicle(r);if(v)block(v.x,v.y,v.w,v.d,base+.15,.8,'#567a86');}for(const i of BMH.roomFurnitureLayout(r))block(i.x,i.y,i.w,i.d,base+.12+i.base,i.h,/toilet|Sink|shower/.test(i.model)?'#f5f4ee':'#ab8d6d');if(r.type==='stairs'){for(const part of BMH.stairGeometry?.(r)||[])block(part.x,part.y,part.w,part.d,base+part.base,part.h,'#a18d74');}const pos=project(r.x+r.w/2,r.y+r.h/2,base+.25);labels.push('<text x="'+pos.x+'" y="'+pos.y+'" font-size=".22" text-anchor="middle">'+BMH.esc(r.name)+'</text>');}
+  for(const r of rooms){for(const panel of (BMH.slabPanels?.(r,BMH.stairFloorHoles?.(f)||[])||[{x:r.x,y:r.y,w:r.w,d:r.h}]))block(panel.x,panel.y,panel.w,panel.d,base,.12,BMH.finishPalette?.(r.id)?.floor||'#ddd4c4');if(r.type==='garage'){const v=BMH.garageVehicle(r);if(v)block(v.x,v.y,v.w,v.d,base+.15,.8,'#567a86');}for(const i of BMH.roomFurnitureLayout(r))block(i.x,i.y,i.w,i.d,base+.12+i.base,i.h,/toilet|Sink|shower/.test(i.model)?'#f5f4ee':'#ab8d6d');if(r.type==='stairs'){for(const part of BMH.stairGeometry?.(r)||[])block(part.x,part.y,part.w,part.d,base+part.base,part.h,'#a18d74');}const pos=project(r.x+r.w/2,r.y+r.h/2,base+.25);labels.push('<text x="'+pos.x+'" y="'+pos.y+'" font-size=".22" text-anchor="middle">'+BMH.esc(r.name)+'</text>');}
   const geometry=BMH.scenePlanGeometry({rooms,openings:p.plan.openings.filter(o=>!room||o.roomId===room.id),wallContext:p.plan.rooms},f);
   for(const w of geometry.walls){const length=w.b-w.a,t=w.thickness||.12,x=w.horizontal?w.a:w.axis-t/2,y=w.horizontal?w.axis-t/2:w.a,width=w.horizontal?length:t,depth=w.horizontal?t:length;
-   if(w.kind==='door')block(x,y,width,depth,base+w.height,Math.max(.02,l.clearHeight-w.height),'#e9e6df');
-   else if(w.kind==='window'){block(x,y,width,depth,base,w.sill,'#e9e6df');block(x,y,width,depth,base+w.sill,w.height,'#afc8ce');block(x,y,width,depth,base+w.sill+w.height,Math.max(.02,l.clearHeight-w.sill-w.height),'#e9e6df');}
-   else block(x,y,width,depth,base,Math.min(l.clearHeight,room?1.1:1.4),'#e9e6df');
+   if(w.kind==='door')block(x,y,width,depth,base+w.height,Math.max(.02,l.clearHeight-w.height),wallColor);
+   else if(w.kind==='window'){block(x,y,width,depth,base,w.sill,wallColor);block(x,y,width,depth,base+w.sill,w.height,'#afc8ce');block(x,y,width,depth,base+w.sill+w.height,Math.max(.02,l.clearHeight-w.sill-w.height),wallColor);}
+   else block(x,y,width,depth,base,Math.min(l.clearHeight,room?1.1:1.4),wallColor);
   }
  }
  faces.sort((x,y)=>x.z-y.z);const points=faces.flatMap(f=>f.points.split(' ').map(p=>p.split(',').map(Number)));if(!points.length)return '<p>Tầng này chưa có phòng. Thêm phòng ở Tab 4.</p>';

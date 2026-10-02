@@ -35,14 +35,14 @@ BMH.planSvg=options=>{
 };
 BMH.v61OrientPlanner=()=>{const box=document.querySelector('.v6-plan-canvas');box?.classList.remove('v61-landscape-plan');};
 BMH.zoomPlanner=(factor,event)=>{
-  const svg=document.querySelector('#plannerSvg');if(!svg)return;
+  const svg=document.querySelector('#plannerSvg')||document.querySelector('.v6-plan-canvas>svg');if(!svg)return;
   const old=Number(BMH.state.ui.planner.zoom)||1,z=BMH.clamp(old*factor,.75,2.5),v=svg.getAttribute('viewBox').split(/\s+/).map(Number);if(z===old)return;
   let cx=v[0]+v[2]/2,cy=v[1]+v[3]/2;
   if(event&&svg.getScreenCTM()){const pt=svg.createSVGPoint();pt.x=event.clientX;pt.y=event.clientY;const at=pt.matrixTransform(svg.getScreenCTM().inverse());cx=at.x;cy=at.y;}
   const ratio=old/z;svg.setAttribute('viewBox',[cx+(v[0]-cx)*ratio,cy+(v[1]-cy)*ratio,v[2]*ratio,v[3]*ratio].join(' '));BMH.state.ui.planner.zoom=z;
   clearTimeout(BMH.plannerZoomSave);BMH.plannerZoomSave=setTimeout(()=>BMH.save(),250);
 };
-BMH.fitPlanner=()=>{const svg=document.querySelector('#plannerSvg');if(!svg)return;svg.setAttribute('viewBox',svg.getAttribute('data-base-viewbox'));BMH.state.ui.planner.zoom=1;BMH.save();};
+BMH.fitPlanner=()=>{const svg=document.querySelector('#plannerSvg')||document.querySelector('.v6-plan-canvas>svg');if(!svg)return;svg.setAttribute('viewBox',svg.getAttribute('data-base-viewbox'));BMH.state.ui.planner.zoom=1;BMH.save();};
 let planPan=null;
 document.addEventListener('pointerdown',e=>{const svg=e.target.closest?.('#plannerSvg');if(!svg||e.button!==1)return;e.preventDefault();e.stopImmediatePropagation();planPan={svg,x:e.clientX,y:e.clientY,v:svg.getAttribute('viewBox').split(/\s+/).map(Number),matrix:svg.getScreenCTM().inverse()};svg.setPointerCapture?.(e.pointerId);},true);
 document.addEventListener('pointermove',e=>{if(!planPan)return;const p=planPan,dx=e.clientX-p.x,dy=e.clientY-p.y;p.svg.setAttribute('viewBox',[p.v[0]-dx*p.matrix.a-dy*p.matrix.c,p.v[1]-dx*p.matrix.b-dy*p.matrix.d,p.v[2],p.v[3]].join(' '));},true);
@@ -97,18 +97,49 @@ document.addEventListener('click',async e=>{if(!e.target.closest('[data-ai-healt
 // The roof envelope must cover occupied rooms, not the whole plot.
 BMH.sceneFootprintBounds=rooms=>{if(!rooms.length)return null;const x=Math.min(...rooms.map(r=>r.x)),y=Math.min(...rooms.map(r=>r.y)),right=Math.max(...rooms.map(r=>r.x+r.w)),bottom=Math.max(...rooms.map(r=>r.y+r.h)),width=right-x,depth=bottom-y;const xs=[...new Set(rooms.flatMap(r=>[r.x,r.x+r.w]))].sort((a,b)=>a-b),ys=[...new Set(rooms.flatMap(r=>[r.y,r.y+r.h]))].sort((a,b)=>a-b);let rectangular=true;for(let i=1;i<xs.length;i++)for(let j=1;j<ys.length;j++){const cx=(xs[i]+xs[i-1])/2,cy=(ys[j]+ys[j-1])/2;if(!rooms.some(r=>cx>=r.x&&cx<=r.x+r.w&&cy>=r.y&&cy<=r.y+r.h))rectangular=false;}return {x,y,width,depth,cx:x+width/2,cy:y+depth/2,rectangular};};
 BMH.technicalProjection=(kind='elevation')=>{
- const p=BMH.state.project,W=Number(p.site.width),D=Number(p.site.depth),levels=BMH.projectLevels(),fh=levels.floorHeight,span=kind==='elevation'?W:D,total=p.site.floors*fh,cut=W/2,esc=BMH.esc;
- let marks='';for(let f=0;f<p.site.floors;f++){
-  const rooms=BMH.floorRooms(f),front=Math.min(...rooms.map(r=>r.y));
-  for(const r of rooms){if(kind==='elevation'&&Math.abs(r.y-front)>.015)continue;if(kind==='section'&&(cut<r.x||cut>r.x+r.w))continue;const x=kind==='elevation'?r.x:r.y,w=kind==='elevation'?r.w:r.h,y=total-(f+1)*fh;
-   marks+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+fh+'" fill="'+(kind==='elevation'?'#ece9df':'#fff')+'" stroke="#414a40" stroke-width=".04"/><rect x="'+x+'" y="'+(y+fh-levels.slab)+'" width="'+w+'" height="'+levels.slab+'" fill="#777f72"/>';
-   if(kind==='section'){if(r.type==='stairs')for(const step of BMH.stairGeometry(r).filter(q=>cut>=q.x&&cut<=q.x+q.w))marks+='<rect x="'+step.y+'" y="'+(total-f*fh-step.base-step.h)+'" width="'+step.d+'" height="'+step.h+'" fill="#b3ab98" stroke="#414a40" stroke-width=".025"/>';marks+='<text x="'+(x+w/2)+'" y="'+(y+fh*.53)+'">'+esc(r.name)+'</text>';continue;}
-   for(const o of p.plan.openings.filter(o=>Number(o.floor)===f&&o.roomId===r.id&&o.side==='north')){const ow=Math.min(r.w-.12,Math.max(.45,Number(o.width)||.9)),ox=x+(r.w-ow)*BMH.clamp(Number(o.offset)||0,0,1),oh=Number(o.height)||(o.kind==='door'?2.1:1.4),sill=o.kind==='door'?0:(Number(o.sill)||0),oy=total-f*fh-sill-oh;marks+='<rect data-opening-id="'+esc(o.id||'')+'" x="'+ox+'" y="'+oy+'" width="'+ow+'" height="'+oh+'" fill="'+(o.kind==='door'?'#a58b68':'#c4dce0')+'" stroke="#414a40" stroke-width=".04"/><line x1="'+(ox+ow/2)+'" x2="'+(ox+ow/2)+'" y1="'+oy+'" y2="'+(oy+oh)+'" stroke="#414a40" stroke-width=".025"/>';}
+ const p=BMH.state.project,W=Number(p.site.width),D=Number(p.site.depth),levels=BMH.projectLevels(),fh=levels.floorHeight,span=kind==='elevation'?W:D,roof=BMH.sceneRoofSpec?.(),total=Math.max(p.site.floors*fh+levels.slab,roof?roof.eave+roof.rise:0),cut=BMH.sectionCutX?.()??W/2,esc=BMH.esc,scale=BMH.drawingScale(span+4,total+2),font=scale*.0025;
+ let marks='',stairs=[];const line=(x,y,a,b,extra='')=>'<line x1="'+x+'" y1="'+y+'" x2="'+a+'" y2="'+b+'" stroke="#647369" stroke-width=".02" '+extra+'/>';
+ const rect=(x,z,w,h,fill='#fff',extra='')=>'<rect x="'+x+'" y="'+(total-z-h)+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="#39453e" stroke-width=".025" '+extra+'/>';
+ const label=(x,z,text,extra='')=>'<text x="'+x+'" y="'+(total-z)+'" '+extra+'>'+esc(text)+'</text>';
+ for(let f=0;f<p.site.floors;f++){
+  const rooms=BMH.floorRooms(f),base=f*fh;
+  if(kind==='elevation'){
+   const geometry=BMH.scenePlanGeometry?.(p.plan,f);
+   if(geometry){const front=geometry.walls.filter(w=>w.horizontal&&w.roomIds.length===1&&rooms.some(r=>r.id===w.roomIds[0]&&Math.abs(r.y-w.axis)<.001)),xs=[...new Set(front.flatMap(w=>[w.a,w.b]))].sort((a,b)=>a-b);
+    for(let i=1;i<xs.length;i++){const a=xs[i-1],b=xs[i],mid=(a+b)/2,w=front.filter(w=>mid>w.a-.0001&&mid<w.b+.0001).sort((a,b)=>a.axis-b.axis)[0];if(!w)continue;
+     marks+=rect(a,base+levels.slab,b-a,fh-levels.slab,'#f3f0e8')+rect(a,base,b-a,levels.slab,'#adb3a9');
+     if(w.kind!=='wall'){const id=w.openingId||'',oh=w.height,sill=w.sill||0;marks+=rect(a,base+levels.slab+sill,b-a,oh,w.kind==='door'?'#c1af92':'#e2edeb','data-opening-id="'+esc(id)+'"')+line(mid,total-base-levels.slab-sill,mid,total-base-levels.slab-sill-oh);}
+    }
+   }else{const front=Math.min(...rooms.map(r=>r.y));for(const r of rooms.filter(r=>Math.abs(r.y-front)<.015)){marks+=rect(r.x,base,r.w,fh,'#f3f0e8');for(const o of p.plan.openings.filter(o=>o.floor===f&&o.roomId===r.id&&o.side==='north'))marks+=rect(r.x+(r.w-o.width)*(o.offset??.5),base+levels.slab+(o.kind==='door'?0:o.sill??.9),o.width,o.height||(o.kind==='door'?2.1:1.4),'#e2edeb','data-opening-id="'+esc(o.id)+'"');}}
+  }else{
+   const intersects=r=>cut>r.x+.001&&cut<r.x+r.w-.001;
+   for(const r of rooms.filter(intersects)){
+    const floorPanels=BMH.slabPanels?.(r,BMH.stairFloorHoles?.(f)||[])||[{x:r.x,y:r.y,w:r.w,d:r.h}];
+    for(const panel of floorPanels.filter(q=>cut>q.x-.001&&cut<q.x+q.w+.001))marks+=rect(panel.y,base,panel.d,levels.slab,'#9fa89b','data-section-slab="'+f+'"');
+    if(f===p.site.floors-1)marks+=rect(r.y,base+fh,r.h,levels.slab,'#9fa89b');
+    marks+=label(r.y+r.h/2,base+fh*.56,r.name,'text-anchor="middle"');
+    if(r.type!=='stairs'){const ceiling=base+fh-(levels.ceilingDrop||0);marks+=line(r.y+.08,total-ceiling,r.y+r.h-.08,total-ceiling,'stroke-dasharray=".12 .08"')+label(r.y+r.h/2,base+fh*.43,'Htt '+(levels.clearHeight??fh-levels.slab).toFixed(3)+' m','text-anchor="middle" class="section-note"');}
+    if(r.type==='stairs'){const spec=BMH.stairSpec?.(r),steps=BMH.stairGeometry(r).filter(q=>cut>=q.x&&cut<=q.x+q.w);for(const q of steps)marks+=rect(q.y,base+levels.slab+q.base,q.d,q.h,'#d8cfbc','data-section-stair="'+esc(r.id)+'"');if(spec&&f<p.site.floors-1)stairs.push({name:r.name,floor:f+1,spec});}
+   }
+   const geometry=BMH.scenePlanGeometry?.(p.plan,f);
+   for(const w of geometry?.walls||[]){if(!w.horizontal||cut<w.a||cut>w.b)continue;const t=w.thickness||.12,x=w.axis-t/2,h=fh-levels.slab;
+    if(w.kind==='wall')marks+=rect(x,base+levels.slab,t,h,'#7d877c');else{const oh=Math.min(w.height,h),sill=w.sill||0;if(sill)marks+=rect(x,base+levels.slab,t,sill,'#7d877c');if(h-sill-oh>0)marks+=rect(x,base+levels.slab+sill+oh,t,h-sill-oh,'#7d877c');marks+=line(w.axis,total-base-levels.slab-sill,w.axis,total-base-levels.slab-sill-oh,'stroke-dasharray=".05 .04"');}
+   }
   }
  }
- for(let f=0;f<=p.site.floors;f++)marks+='<line x1="-1" x2="'+(span+.3)+'" y1="'+(total-f*fh)+'" y2="'+(total-f*fh)+'" stroke="#72826d" stroke-width=".02" stroke-dasharray=".1 .1"/><text x="-.9" y="'+(total-f*fh-.08)+'" text-anchor="end">'+(f?'+'+(f*fh).toFixed(3):'±0.000')+'</text>';
- return '<svg class="technical-view-svg" viewBox="-2 -1 '+(span+4)+' '+(total+3)+'" aria-label="'+(kind==='elevation'?'Mặt đứng từ ô mở thực tế':'Mặt cắt giữa khu đất')+'"><style>text{font-family:Arial;font-size:.22px;fill:#364332;text-anchor:middle}</style><rect x="-2" y="-1" width="'+(span+4)+'" height="'+(total+3)+'" fill="#fff"/>'+marks+'<text x="'+(span/2)+'" y="'+(total+1)+'">'+(kind==='elevation'?'MẶT ĐỨNG PHÍA TRƯỚC':'MẶT CẮT A–A · x = '+cut+' m')+' · KIẾN TRÚC SƠ BỘ</text><text x="'+(span/2)+'" y="'+(total+1.45)+'">'+span+' m · '+p.site.floors+' tầng · cao tầng '+fh+' m</text></svg>';
+ if(kind==='elevation'){const top=BMH.floorRooms(p.site.floors-1);for(const r of top)marks+=rect(r.x,p.site.floors*fh,r.w,levels.slab,'#a8afa1');}
+ if(roof){
+  if(kind==='elevation'){const points=[...roof.corners,...roof.ridge].map(q=>[q[0],total-q[1]]),unique=[...new Map(points.map(q=>[q.join(','),q])).values()].sort((a,b)=>a[0]-b[0]||a[1]-b[1]),cross=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]),lower=[],upper=[];for(const q of unique){while(lower.length>1&&cross(lower.at(-2),lower.at(-1),q)<=0)lower.pop();lower.push(q);}for(const q of [...unique].reverse()){while(upper.length>1&&cross(upper.at(-2),upper.at(-1),q)<=0)upper.pop();upper.push(q);}marks+='<polygon points="'+[...lower.slice(0,-1),...upper.slice(0,-1)].map(q=>q.join(',')).join(' ')+'" fill="#d2d7cc" stroke="#566454" stroke-width=".035" data-projection-roof="1"/>';
+  }else for(const polygon of roof.faces){const hits=[];for(let i=0;i<polygon.length;i++){const a=polygon[i],b=polygon[(i+1)%polygon.length];if((a[0]-cut)*(b[0]-cut)>0||Math.abs(a[0]-b[0])<1e-8)continue;const k=(cut-a[0])/(b[0]-a[0]);if(k>=0&&k<=1)hits.push([a[2]+k*(b[2]-a[2]),total-a[1]-k*(b[1]-a[1])]);}if(hits.length>=2)marks+=line(...hits[0],...hits[1],'data-projection-roof="1"');}
+ }
+ for(let f=0;f<=p.site.floors;f++){const level=f*fh+levels.slab,y=total-level;marks+=line(-.55,y,span+.55,y,'stroke-dasharray=".1 .08"')+label(-.7,level+.05,f?'+'+(f*fh).toFixed(3):'±0.000','text-anchor="end"')+'<path d="M-.45 '+y+'l-.15-.15h.3z" fill="#56695a"/>';}
+ const dimension=(x,y,a,b,value)=>line(x,y,a,b)+line(x-.07,y+.07,x+.07,y-.07)+line(a-.07,b+.07,a+.07,b-.07)+'<text x="'+((x+a)/2)+'" y="'+((y+b)/2-.12)+'" text-anchor="middle">'+value+'</text>';
+ marks+=dimension(0,total+.55,span,total+.55,Math.round(span*1000));for(let f=0;f<p.site.floors;f++)marks+=dimension(span+.75,total-f*fh,span+.75,total-(f+1)*fh,Math.round(fh*1000));
+ const vb={x:-2,y:-.65,w:span+4,h:total+1.7},width=vb.w*1000/scale,height=vb.h*1000/scale,content='<svg x="'+(12+(308-width)/2)+'" y="'+(24+(218-height)/2)+'" width="'+width+'" height="'+height+'" viewBox="'+[vb.x,vb.y,vb.w,vb.h].join(' ')+'" class="projection-content"><style>.sheet-'+(kind==='section'?'KT-MC':'KT-MD')+' .projection-content text{font-family:Arial;font-size:'+font+'px;fill:#364332}.sheet-'+(kind==='section'?'KT-MC':'KT-MD')+' .projection-content .section-note{font-size:'+(font*.85)+'px}</style>'+marks+'</svg>',t=BMH.sheetText;
+ const sidebar=t(330,29,kind==='section'?'THÔNG SỐ MẶT CẮT':'THÔNG SỐ MẶT ĐỨNG',3,'font-weight="bold"')+t(330,39,p.site.floors+' tầng · cao tầng '+fh.toFixed(3)+' m')+t(330,48,'Dày sàn '+Math.round(levels.slab*1000)+' mm')+t(330,57,'Trần hạ '+Math.round((levels.ceilingDrop||0)*1000)+' mm')+t(330,66,'Cửa theo đúng rộng / cao / bậu.')+(kind==='section'?t(330,78,'A–A: x = '+cut.toFixed(3)+' m')+t(330,86,'Vị trí đường cắt trên mặt bằng.'):'')+stairs.slice(0,5).map((r,i)=>t(330,106+i*25,r.name+' · tầng '+r.floor,2.6,'font-weight="bold"')+t(330,114+i*25,r.spec.count+' cao bậc · '+Math.round(r.spec.riser*1000)+' mm')+t(330,122+i*25,'Mặt bậc '+Math.round(r.spec.tread*1000)+' mm')).join('')+t(330,237,'Khoảng thông đầu cần KTS kiểm tra.',2.4);
+ return BMH.sheetFrame({code:kind==='section'?'KT-MC':'KT-MD',title:kind==='section'?'MẶT CẮT A–A':'MẶT ĐỨNG PHÍA TRƯỚC',scale,content,sidebar,caption:kind==='section'?'Htt: chiều cao thông thủy. Cao độ theo sàn hoàn thiện tầng 1 (±0.000). Sàn, ô thang và bậc dùng chung với 3D.':'Mặt đứng chiếu theo tường và ô mở nhìn từ phía trước. Màu minh họa; quy cách hoàn thiện cần xác nhận.'});
 };
+
 BMH.elevationSvg=()=>BMH.technicalProjection('elevation');BMH.sectionSvg=()=>BMH.technicalProjection('section');
 
 // Studio renders from this registry; replacing a function alone leaves stale screens.

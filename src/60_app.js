@@ -439,7 +439,8 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-save-version]')){const now=new Date(),label=`Mốc ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;BMH.capturePlanVersion(label);return;}
   const restoreVersion=e.target.closest('[data-restore-version]');if(restoreVersion){BMH.restorePlanVersion(restoreVersion.dataset.restoreVersion);return;}
   const deleteVersion=e.target.closest('[data-delete-version]');if(deleteVersion){BMH.deletePlanVersion(deleteVersion.dataset.deleteVersion);return;}
-  const pview=e.target.closest('[data-plan-view]');if(pview){BMH.state.ui.planner.view=pview.dataset.planView;BMH.state.ui.planner.tool='select';BMH.save();BMH.render();return;}
+  const pview=e.target.closest('[data-plan-view]');if(pview){const ui=BMH.state.ui.planner;ui.view=pview.dataset.planView;ui.zoom=1;ui.openingPage=0;ui.tool='select';if(ui.view==='stairs'){const {room}=BMH.stairDrawingSelection();if(room){ui.floor=room.floor;ui.selected=ui.stairDrawingId=room.id;}}BMH.save();BMH.render();return;}
+  const stairAction=e.target.closest('[data-edit-stair-drawing],[data-view-stair-drawing]');if(stairAction){const {room}=BMH.stairDrawingSelection();if(!room)return;const ui=BMH.state.ui;ui.planner.floor=room.floor;ui.planner.selected=ui.planner.stairDrawingId=room.id;ui.planner.zoom=1;if(stairAction.hasAttribute('data-view-stair-drawing')){ui.designView='room';ui.sceneFocus='room:'+room.id;ui.roomCamera='overview';ui.sceneExploded=false;BMH.navigateTo(6);}else{ui.planner.view='plan';ui.planner.tool='select';BMH.save();BMH.render();}return;}
   const mview=e.target.closest('[data-material-view]');if(mview&&!mview.disabled){BMH.state.ui.materialCategory=mview.dataset.materialView;BMH.save();BMH.render();return;}
   const floor=e.target.closest('[data-floor]');if(floor){BMH.state.ui.planner.view='plan';BMH.state.ui.planner.floor=Number(floor.dataset.floor);const first=BMH.floorRooms()[0];BMH.state.ui.planner.selected=first?.id||null;BMH.save();BMH.render();return;}
   const floorLock=e.target.closest('[data-floor-lock]');if(floorLock){BMH.toggleFloorLock(floorLock.dataset.floorLock);return;}
@@ -469,7 +470,7 @@ document.addEventListener('click',e=>{
   const sm=e.target.closest('[data-scene-mode]');if(sm){BMH.state.ui.sceneMode=sm.dataset.sceneMode;BMH.save();BMH.render();return;}
   if(e.target.closest('[data-scene-explode]')){BMH.state.ui.sceneExploded=!BMH.state.ui.sceneExploded;BMH.save();BMH.render();return;}
   if(e.target.closest('[data-scene-theme]')){BMH.state.ui.sceneTheme=BMH.state.ui.sceneTheme==='day'?'night':'day';BMH.save();BMH.render();return;}
-  const focusBtn=e.target.closest('[data-scene-focus-btn]');if(focusBtn){BMH.state.ui.sceneFocus=focusBtn.dataset.sceneFocusBtn||'all';BMH.save();BMH.render();return;}
+  const focusBtn=e.target.closest('[data-scene-focus-btn]');if(focusBtn){BMH.state.ui.sceneFocus=focusBtn.dataset.sceneFocusBtn||'all';if(BMH.state.ui.sceneFocus.startsWith('room:'))BMH.state.ui.roomCamera='overview';BMH.save();BMH.render();return;}
   if(e.target.closest('[data-studio3d-reset]')){BMH.resetStudio3D?.();return;}
   if(e.target.closest('[data-cinematic-render]')){BMH.generateCinematicRender?.();return;}
   if(e.target.closest('[data-render-download]')){const url=BMH.cinematicRender?.views?.[BMH.cinematicSignature()];if(!url)return BMH.toast('Chưa có ảnh phối cảnh của góc nhìn này.');const a=document.createElement('a');a.href=url;a.download='Build-My-Home-phoi-canh.jpg';document.body.append(a);a.click();a.remove();return;}
@@ -478,7 +479,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-dev-pay]')&&BMH.DEV){BMH.state.access.paid=!BMH.state.access.paid;BMH.state.access.source=BMH.state.access.paid?'dev-local':'none';BMH.state.access.paidAt=BMH.state.access.paid?new Date().toISOString():null;BMH.state.access.verifiedAt=BMH.state.access.paid?new Date().toISOString():null;BMH.save();BMH.render();return;}
   const exp=e.target.closest('[data-export]');if(exp){
     e.preventDefault();e.stopPropagation();
-    const actions={loan:BMH.exportLoan,estimate:BMH.exportEstimate,plan:BMH.exportPlanSvg,'plan-dxf':BMH.exportPlanDxf,json:BMH.exportProjectJson,bundle:BMH.exportDossierBundle||BMH.exportBundle,'dossier-pdf':()=>BMH.printDossier(),'mep-pdf':()=>BMH.printDossier({mepOnly:true}),'dossier-excel':BMH.exportDossierExcel,drawings:BMH.exportDrawingsBundle};
+    const actions={loan:BMH.exportLoan,estimate:BMH.exportEstimate,plan:BMH.exportPlanSvg,'plan-dxf':BMH.exportPlanDxf,'drawing-pdf':BMH.printArchitecturalDrawings,json:BMH.exportProjectJson,bundle:BMH.exportDossierBundle||BMH.exportBundle,'dossier-pdf':()=>BMH.printDossier(),'mep-pdf':()=>BMH.printDossier({mepOnly:true}),'dossier-excel':BMH.exportDossierExcel,drawings:BMH.exportDrawingsBundle};
     const fn=actions[exp.dataset.export];
     if(typeof fn!=='function'){BMH.toast('Chức năng tải tài liệu này chưa sẵn sàng.');return;}
     exp.classList.add('is-working');exp.setAttribute('aria-busy','true');
@@ -513,7 +514,10 @@ BMH.set(path,v);return;}
   if(t.dataset.planner){const ui=BMH.state.ui.planner;if(t.dataset.planner==='snap')ui.snap=Number(t.value);if(t.dataset.planner==='furniture')ui.showFurniture=t.checked;if(t.dataset.planner==='dimensions')ui.showDimensions=t.checked;if(t.dataset.planner==='feng')ui.showFeng=t.checked;if(t.dataset.planner==='below')ui.showBelow=t.checked;if(t.dataset.planner==='structure')ui.showStructure=t.checked;if(t.dataset.planner==='environment')ui.showEnvironment=t.checked;if(t.dataset.planner==='circulation')ui.showCirculation=t.checked;if(t.dataset.planner==='sectionLine')ui.showSectionLine=t.checked;if(t.dataset.planner==='climate')ui.showClimate=t.checked;if(t.dataset.planner==='envelope')ui.showEnvelope=t.checked;BMH.save();BMH.render();return;}
   if(t.dataset.roomField){const r=BMH.selectedRoom();if(!r)return;if(BMH.isRoomLocked(r.id))return BMH.toast('Phòng hoặc tầng đang khóa.');BMH.pushPlanHistory();const key=t.dataset.roomField,old={...r};r[key]=['x','y','w','h'].includes(key)?Number(t.value):t.value;if(['x','y','w','h'].includes(key)){r[key]=BMH.roundTo(r[key],BMH.state.ui.planner.snap);if(!BMH.roomValid(r)){Object.assign(r,old);BMH.planHistory.undo.pop();BMH.toast('Giá trị mới gây chồng phòng hoặc vượt ranh.');}}BMH.save();BMH.render();return;}
   if(t.dataset.openingField){const o=BMH.state.project.plan.openings.find(x=>x.id===t.dataset.openingId);if(o){if(BMH.isRoomLocked(o.roomId))return BMH.toast('Phòng hoặc tầng đang khóa.');const old={...o};BMH.pushPlanHistory();o[t.dataset.openingField]=['width','offset'].includes(t.dataset.openingField)?Number(t.value):t.value;if(!BMH.openingFits(o,o.id)){Object.assign(o,old);BMH.planHistory.undo.pop();BMH.toast('Kích thước/vị trí ô mở đang trùng hoặc vượt chiều dài tường.');}BMH.save();BMH.render();}return;}
-  if(t.matches('[data-scene-focus]')){BMH.state.ui.sceneFocus=t.value;BMH.save();BMH.render();return;}
+  if(t.matches('[data-section-cut]')){const value=Number(t.value);if(Number.isFinite(value)&&value>=0&&value<=BMH.state.project.site.width){BMH.state.ui.planner.sectionCutX=value;BMH.save();BMH.render({preserveScroll:true});}return;}
+  if(t.matches('[data-opening-page]')){BMH.state.ui.planner.openingPage=Math.max(0,Number(t.value)||0);BMH.save();BMH.render({preserveScroll:true});return;}
+  if(t.matches('[data-stair-drawing]')){const room=BMH.stairDrawingRooms().find(r=>r.id===t.value);if(room){const ui=BMH.state.ui.planner;ui.stairDrawingId=ui.selected=room.id;ui.floor=room.floor;ui.zoom=1;BMH.save();BMH.render({preserveScroll:true});}return;}
+  if(t.matches('[data-scene-focus]')){BMH.state.ui.sceneFocus=t.value;if(t.value.startsWith('room:'))BMH.state.ui.roomCamera='overview';BMH.save();BMH.render();return;}
   if(t.dataset.check){BMH.state.project.checklist[t.dataset.check]=t.checked;BMH.save();BMH.render({preserveScroll:true});return;}
 });
 
@@ -584,7 +588,6 @@ document.addEventListener('keydown',e=>{
 });
 
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')BMH.save();}); window.addEventListener('pagehide',BMH.save);
-window.addEventListener('load',()=>{try{if('serviceWorker'in navigator)navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).catch(()=>{});if('caches'in window)caches.keys().then(keys=>Promise.all(keys.filter(k=>String(k).startsWith('bmh-')).map(k=>caches.delete(k)))).catch(()=>{});}catch(_){}});
 globalThis.BuildMyHome=BMH;
 if(BMH.DEV){const q=new URLSearchParams(location.search);const qs=Number(q.get('step'));if(qs>=1&&qs<=10)BMH.state.ui.step=qs;if(q.get('unlock')==='1'){BMH.state.access.paid=true;BMH.state.access.source='dev-query';BMH.state.access.verifiedAt=new Date().toISOString();}}
 BMH.render();

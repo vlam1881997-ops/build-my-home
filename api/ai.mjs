@@ -1,7 +1,9 @@
 import materialImageHandler from '../server/_material_image.mjs';
+import homeFinishHandler from '../server/_home_finish_handler.mjs';
 import aiHealthHandler from '../server/_ai_health_handler.mjs';
 import materialCatalogHandler from '../server/_material_catalog_handler.mjs';
 import materialSearchHandler from '../server/_material_search_handler.mjs';
+import guestCheckoutHandler from '../server/_guest_checkout.mjs';
 import {send,jsonBody,apiError} from '../server/_lib.mjs';
 import {geminiGenerate,geminiEnv} from '../server/_gemini.mjs';
 import {runSiteIntelligence} from '../server/_site_intelligence.mjs';
@@ -143,9 +145,11 @@ export const maxDuration=180;
 export default async function handler(req,res){
   const url=new URL(req.url||'/', 'https://buildmyhome.local'),operation=req.query?.operation||url.searchParams.get('operation')||({'/api/ai-health':'health','/api/material-catalog':'catalog','/api/material-search':'materials','/api/material-image':'material-image'}[url.pathname]);
   if(operation==='material-image')return materialImageHandler(req,res);
+  if(operation==='home-finish')return homeFinishHandler(req,res);
   if(operation==='health')return aiHealthHandler(req,res);
   if(operation==='catalog')return materialCatalogHandler(req,res);
   if(operation==='materials')return materialSearchHandler(req,res);
+  if(operation==='checkout'||operation==='checkout-notify')return guestCheckoutHandler(req,res);
   try{
     if(req.method==='OPTIONS')return send(res,200,{ok:true});if(req.method!=='POST')return send(res,405,{ok:false,error:'Method not allowed'});
     const body=await jsonBody(req),action=String(body.action||'review').toLowerCase();if(!['brief','review','cost','whatif','vision','fengshui','site'].includes(action))return send(res,400,{ok:false,error:'AI action không hợp lệ.'});

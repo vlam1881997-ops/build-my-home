@@ -607,6 +607,12 @@ html.bmh-v60 .step01-key-help{display:none!important}
   html.bmh-v60 .step01-hero-quote h2{font-size:27px}
 }
 
+/* Keep the customer brief in one column after the desktop grid overrides. */
+@media(max-width:1180px){
+  html.bmh-v60 .step01-locked{grid-template-columns:minmax(0,1fr);grid-template-areas:none}
+  html.bmh-v60 .step01-locked>*{grid-area:auto;min-width:0}
+}
+
 
 /* ===== V6.1.1 interaction + hero typography hardening ===== */
 html.bmh-v60 .step01-hero .v6-image-shade{pointer-events:none}

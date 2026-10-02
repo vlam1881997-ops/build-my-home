@@ -6,6 +6,7 @@ http.createServer(async(req,res)=>{
   const url=new URL(req.url,'http://localhost'),route=url.pathname;
   res.status=n=>{res.statusCode=n;return res;};
   try{
+    if(route==='/api/momo/notify'){req.url='/api/ai?operation=checkout-notify';const mod=await import(pathToFileURL(path.join(root,'api/ai.mjs')));return await mod.default(req,res);}
     if(/^\/api\/[a-z][a-z0-9-]*$/.test(route)){
       const file=path.join(root,(['/api/ai-health','/api/material-catalog','/api/material-search','/api/material-image'].includes(route)?'/api/ai':route)+'.mjs');if(!fs.existsSync(file)){res.writeHead(404);return res.end('Not found');}
       const mod=await import(pathToFileURL(file));return await mod.default(req,res);
