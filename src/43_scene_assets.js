@@ -6,7 +6,7 @@ BMH.roomSurfaceStyle=id=>{
 BMH.sceneSurfaceTexture = (THREE, kind, channel='color') => {
  if(typeof document==='undefined'||typeof document.createElement!=='function')return null;
  const canvas=document.createElement('canvas');canvas.width=canvas.height=256;const ctx=canvas.getContext('2d');if(!ctx)return null;
- const pixels=ctx.createImageData(256,256);
+ const pixels=ctx.createImageData(256,256),heights=channel==='normal'?new Float32Array(256*256):null;
  for(let y=0;y<256;y++)for(let x=0;x<256;x++){
   const raw=Math.sin(x*12.9898+y*78.233)*43758.5453,n=raw-Math.floor(raw),grain=Math.sin(y*.20+Math.sin(x*.018)*2+Math.sin(x*.067)*.5);let value=248,height=.5,rough=.85;
   if(kind==='wood'||kind==='plank'||kind==='woodVertical'){const cross=kind==='woodVertical'?x:y,along=kind==='woodVertical'?y:x,vein=Math.sin(cross*.20+Math.sin(along*.024)*2+Math.sin(along*.071)*.65),ring=Math.sin(cross*.72+Math.sin(along*.017)*5);height=.5+vein*.06+n*.025;value=239+vein*6+ring*1.2+n*3;rough=.75+n*.055;if(kind==='plank'&&y<2){value=205;height=.1;rough=.95;}}
@@ -15,6 +15,11 @@ BMH.sceneSurfaceTexture = (THREE, kind, channel='color') => {
   else{value=244+n*10;height=.35+n*.35;rough=.86+n*.08;}
   if(channel==='height')value=height*255;else if(channel==='roughness')value=rough*255;
   const i=(y*256+x)*4;pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=value;pixels.data[i+3]=255;
+  if(heights)heights[y*256+x]=height;
+ }
+ if(heights)for(let y=0;y<256;y++)for(let x=0;x<256;x++){
+  const at=(a,b)=>heights[((b+256)%256)*256+(a+256)%256],dx=(at(x+1,y)-at(x-1,y))*2,dy=(at(x,y+1)-at(x,y-1))*2,l=Math.hypot(dx,dy,1),i=(y*256+x)*4;
+  pixels.data[i]=(-dx/l*.5+.5)*255;pixels.data[i+1]=(-dy/l*.5+.5)*255;pixels.data[i+2]=(1/l*.5+.5)*255;
  }
  ctx.putImageData(pixels,0,0);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=channel==='color'?THREE.SRGBColorSpace:THREE.NoColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.anisotropy=4;texture.userData={generic:true,kind,channel};return texture;
 };
@@ -30,7 +35,7 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
     if (kind) {
       m.map = texture(kind);
       if (m.map) {
-        m.bumpMap = texture(kind,'height');m.roughnessMap=texture(kind,'roughness');
+        m.normalMap=texture(kind,'normal');m.roughnessMap=texture(kind,'roughness');m.normalScale.setScalar(kind==='fabric'?.3:kind==='plaster'?.06:.16);
         m.bumpScale = kind === 'fabric' ? .0012 : kind === 'wood' ? .0006 : .0003;
       }
       m.userData.surfaceScale = scale;
