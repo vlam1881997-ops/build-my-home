@@ -118,7 +118,8 @@ BMH.technicalProjection=(kind='elevation')=>{
     for(const panel of floorPanels.filter(q=>cut>q.x-.001&&cut<q.x+q.w+.001))marks+=rect(panel.y,base,panel.d,levels.slab,'#9fa89b','data-section-slab="'+f+'"');
     if(f===p.site.floors-1)marks+=rect(r.y,base+fh,r.h,levels.slab,'#9fa89b');
     marks+=label(r.y+r.h/2,base+fh*.56,r.name,'text-anchor="middle"');
-    if(r.type!=='stairs'){const ceiling=base+fh-(levels.ceilingDrop||0);marks+=line(r.y+.08,total-ceiling,r.y+r.h-.08,total-ceiling,'stroke-dasharray=".12 .08"')+label(r.y+r.h/2,base+fh*.43,'Htt '+(levels.clearHeight??fh-levels.slab).toFixed(3)+' m','text-anchor="middle" class="section-note"');}
+    if(!['stairs','elevator'].includes(r.type)){const ceiling=base+fh-(levels.ceilingDrop||0);marks+=line(r.y+.08,total-ceiling,r.y+r.h-.08,total-ceiling,'stroke-dasharray=".12 .08"')+label(r.y+r.h/2,base+fh*.43,'Htt '+(levels.clearHeight??fh-levels.slab).toFixed(3)+' m','text-anchor="middle" class="section-note"');}
+    if(r.type==='elevator'&&BMH.elevatorSpec){const lift=BMH.elevatorSpec(r);marks+=line(r.y+.12,total-base,r.y+.12,total-base-fh,'data-section-elevator="'+esc(r.id)+'"')+line(r.y+r.h-.12,total-base,r.y+r.h-.12,total-base-fh);if(f===0)marks+=rect(r.y+(r.h-lift.cabinDepth)/2,base+levels.slab,lift.cabinDepth,2.1,'#d5e3e3','data-section-elevator-cabin="'+esc(r.id)+'"');}
     if(r.type==='stairs'){const spec=BMH.stairSpec?.(r),steps=BMH.stairGeometry(r).filter(q=>cut>=q.x&&cut<=q.x+q.w);for(const q of steps)marks+=rect(q.y,base+levels.slab+q.base,q.d,q.h,'#d8cfbc','data-section-stair="'+esc(r.id)+'"');if(spec&&f<p.site.floors-1)stairs.push({name:r.name,floor:f+1,spec});}
    }
    const geometry=BMH.scenePlanGeometry?.(p.plan,f);

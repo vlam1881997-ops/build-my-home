@@ -27,7 +27,7 @@ test('cancelling a render releases snapshots once and keeps editor textures aliv
  const b=client(),scene=new THREE.Scene(),map=new THREE.Texture(),material=new THREE.MeshStandardMaterial({map}),geometry=new THREE.BoxGeometry();scene.add(new THREE.Mesh(geometry,material));scene.userData.ownedMaterials=new Set([material]);let textures=0,materials=0,geometries=0;map.addEventListener('dispose',()=>textures++);material.addEventListener('dispose',()=>materials++);geometry.addEventListener('dispose',()=>geometries++);b.studio3d={archRender:{scene,raf:1}};b.disposeArchitecturalRender();b.disposeArchitecturalRender();assert.deepEqual([textures,materials,geometries],[0,1,1]);assert.equal(b.studio3d.archRender,null);
 });
 test('unsupported devices return to editable 3D without altering the plan',async()=>{
- const b=client();let renders=0;b.cinematicSignature=()=> 'current';b.studio3d={renderer:{capabilities:{isWebGL2:false}},renderFrame(){renders++}};const before=JSON.stringify(b.state.project.plan);assert.equal(await b.startArchitecturalRender(),false);assert.equal(b.state.ui.renderMode,'interactive');assert.equal(renders,1);assert.equal(JSON.stringify(b.state.project.plan),before);
+ const b=client();b.state.ui.renderQuality='fine';let renders=0;b.cinematicSignature=()=> 'current';b.studio3d={renderer:{capabilities:{isWebGL2:false}},renderFrame(){renders++}};const before=JSON.stringify(b.state.project.plan);assert.equal(await b.startArchitecturalRender(),false);assert.equal(b.state.ui.renderMode,'interactive');assert.equal(renders,1);assert.equal(JSON.stringify(b.state.project.plan),before);
 });
 
 test('already rounded furniture keeps its authored shape instead of the base box constructor parameters',()=>{

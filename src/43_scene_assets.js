@@ -150,6 +150,14 @@ BMH.addWindowDrapery=(THREE,scene,r,base,site,overview=false)=>{
  }
 };
 
+// Keep an orbiting indoor camera out of measured walls, ceilings and furniture.
+// A camera inside a television/cabinet can otherwise produce a dark, unusable image.
+BMH.interiorCameraIsClear=(room,point,items=BMH.roomFurnitureLayout(room))=>{
+ const margin=.08,levels=BMH.projectLevels(),height=point.height;
+ if(point.x<room.x+.12||point.x>room.x+room.w-.12||point.y<room.y+.12||point.y>room.y+room.h-.12)return false;
+ if(!Number.isFinite(height)||height<levels.slab+.12||height>levels.floorHeight-(levels.ceilingDrop||0)-.12)return false;
+ return !items.some(i=>height>levels.slab+(i.base||0)-margin&&height<levels.slab+(i.base||0)+(i.h||0)+margin&&point.x>i.x-margin&&point.x<i.x+i.w+margin&&point.y>i.y-margin&&point.y<i.y+i.d+margin);
+};
 BMH.roomInteriorCamera = (room, items = BMH.roomFurnitureLayout(room)) => {
   const rotation = Number(room.furnitureRotation) || 0, angle = -rotation*Math.PI/180;
   const run = rotation%180===90 ? room.w : room.h;

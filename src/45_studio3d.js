@@ -179,7 +179,8 @@ BMH.mountStudio3D = async () => {
       const slab=BMH.projectLevels().slab,holes=BMH.stairFloorHoles?.(f)||[],panels=BMH.slabPanels?.(r,holes)||[{x:r.x,y:r.y,w:r.w,d:r.h}];
       for(const panel of panels){const mesh=addBox(panel.w,slab,panel.d,panel.x+panel.w/2-W/2,base+slab/2,panel.y+panel.d/2-D/2,roomMaterial('floor',r.id,r.type==='bath'?mat(0xc8cfcb,.5):mats.floor));mesh.userData={kind:'floor-slab',roomId:r.id,floor:f};}
       roomFurniture(r,base+slab);BMH.addWindowDrapery?.(THREE,scene,r,base,site,!!roomFocus&&!insideRoom);
-      if(focus==='all'&&r.type!=='stairs'&&(BMH.projectLevels().ceilingDrop||0)>0){for(const panel of BMH.slabPanels?.(r,BMH.stairFloorHoles?.(f+1)||[])||[{x:r.x,y:r.y,w:r.w,d:r.h}]){const ceiling=addBox(panel.w,.02,panel.d,panel.x+panel.w/2-W/2,base+fh-BMH.projectLevels().ceilingDrop+.01,panel.y+panel.d/2-D/2,mats.wall);ceiling.userData={kind:'suspended-ceiling',roomId:r.id,floor:f};}}
+      if(insideRoom){for(const panel of BMH.slabPanels?.(r,BMH.stairFloorHoles?.(f+1)||[])||[{x:r.x,y:r.y,w:r.w,d:r.h}]){const ceiling=addBox(panel.w,slab,panel.d,panel.x+panel.w/2-W/2,base+fh-(BMH.projectLevels().ceilingDrop||0)+slab/2,panel.y+panel.d/2-D/2,roomMaterial('wall',r.id,mats.wall));ceiling.userData={kind:'ceiling-slab',roomId:r.id,floor:f};}}
+      if(focus==='all'&&!['stairs','elevator'].includes(r.type)&&(BMH.projectLevels().ceilingDrop||0)>0){for(const panel of BMH.slabPanels?.(r,BMH.stairFloorHoles?.(f+1)||[])||[{x:r.x,y:r.y,w:r.w,d:r.h}]){const ceiling=addBox(panel.w,.02,panel.d,panel.x+panel.w/2-W/2,base+fh-BMH.projectLevels().ceilingDrop+.01,panel.y+panel.d/2-D/2,mats.wall);ceiling.userData={kind:'suspended-ceiling',roomId:r.id,floor:f};}}
       // Keep the cover on the whole house; isolated floors and rooms stay open for inspection.
       if(focus==='all'&&f===floors-1){
         const nextHoles=BMH.stairFloorHoles?.(f+1)||[],ceilingPanels=BMH.slabPanels?.(r,nextHoles)||[{x:r.x,y:r.y,w:r.w,d:r.h}];
@@ -187,6 +188,8 @@ BMH.mountStudio3D = async () => {
       }
     }
     for(const w of geometry.walls){
+      // Isolated shaft sides use the lift enclosure; shared room walls remain measured walls.
+      if(w.roomIds?.length&&w.roomIds.every(id=>BMH.state.project.plan.rooms.find(r=>r.id===id)?.type==='elevator'))continue;
       const len=w.b-w.a,mid=(w.a+w.b)/2,wallT=w.thickness||.12;
       const x=w.horizontal?mid-W/2:w.axis-W/2;
       const z=w.horizontal?w.axis-D/2:mid-D/2;
@@ -243,7 +246,15 @@ BMH.mountStudio3D = async () => {
    try{composer=new FX.EffectComposer(renderer);composer.setPixelRatio(1);composer.addPass(new FX.RenderPass(scene,camera));ao=new FX.SSAOPass(scene,camera,512,512,16);ao.kernelRadius=.18;ao.minDistance=.00005;ao.maxDistance=.005;const originalVisibility=ao.overrideVisibility.bind(ao);ao.overrideVisibility=()=>{originalVisibility();ground.visible=false;};composer.addPass(ao);fxaa=new FX.ShaderPass(FX.FXAAShader);composer.addPass(fxaa);composer.addPass(new FX.OutputPass());}catch(_){for(const pass of composer?.passes||[])pass.dispose?.();composer?.dispose?.();composer=null;}
   }
   const renderFrame=()=>{if(BMH.studio3d?.renderer===renderer&&BMH.studio3d.archRender)return;if(composer)composer.render();else renderer.render(scene,camera);};
-  const updateCamera=()=>{const cp=Math.cos(state.pitch),sp=Math.sin(state.pitch),cy=Math.cos(state.yaw),sy=Math.sin(state.yaw);camera.position.set(state.target.x+state.dist*cp*sy,state.target.y+state.dist*sp,state.target.z+state.dist*cp*cy);camera.lookAt(state.target);if(BMH.studio3d?.archRender)BMH.stopArchitecturalRender();const current=BMH.studio3d;if(current?.renderer===renderer&&!current.raf)current.raf=requestAnimationFrame(()=>{if(BMH.studio3d!==current)return;current.raf=0;renderFrame();});};updateCamera();
+  const indoorItems=insideRoom?BMH.roomFurnitureLayout(roomFocus):[];let clearIndoorPose=null;
+  const updateCamera=()=>{
+   const position=()=>{const cp=Math.cos(state.pitch),sp=Math.sin(state.pitch),cy=Math.cos(state.yaw),sy=Math.sin(state.yaw);camera.position.set(state.target.x+state.dist*cp*sy,state.target.y+state.dist*sp,state.target.z+state.dist*cp*cy);};position();
+   if(insideRoom){
+    if(!BMH.interiorCameraIsClear(roomFocus,{x:camera.position.x+W/2,y:camera.position.z+D/2,height:camera.position.y},indoorItems)&&clearIndoorPose){Object.assign(state,{yaw:clearIndoorPose.yaw,pitch:clearIndoorPose.pitch,dist:clearIndoorPose.dist});state.target.copy(clearIndoorPose.target);position();}
+    else clearIndoorPose={yaw:state.yaw,pitch:state.pitch,dist:state.dist,target:state.target.clone()};
+   }
+   camera.lookAt(state.target);BMH.refreshCinematicHero?.();if(BMH.studio3d?.archRender)BMH.stopArchitecturalRender();const current=BMH.studio3d;if(current?.renderer===renderer&&!current.raf)current.raf=requestAnimationFrame(()=>{if(BMH.studio3d!==current)return;current.raf=0;renderFrame();});
+  };updateCamera();
   const resize=()=>{const r=stage.getBoundingClientRect(),w=Math.max(280,Math.floor(r.width)),h=Math.max(360,Math.floor(r.height));renderer.setSize(w,h,false);if(composer){composer.setSize(w,h);fxaa.material.uniforms.resolution.value.set(1/w,1/h);}camera.aspect=w/h;camera.updateProjectionMatrix();updateCamera();
     if(!state.framed&&focusedBounds&&!insideRoom){
       const b=frameBounds,height=focus==='all'?Math.max(floors*(fh+explode)+BMH.projectLevels().slab,roof?roof.eave+roof.rise:0):fh+(roomFocus?.type==='stairs'?.95:0);
@@ -265,7 +276,7 @@ BMH.mountStudio3D = async () => {
   const animate=renderFrame;
   state.updateCamera=updateCamera;state.defaultYaw=state.yaw;state.defaultDist=state.dist;state.defaultTarget=state.target.clone();
   const onContextLost=e=>{e.preventDefault();if(BMH.$('#studio3dCanvas')!==canvas)return;BMH.disposeStudio3D();stage.classList.remove('three-ready');BMH.mountLightPreview?.('Đồ họa bị gián đoạn · chế độ tương thích');};canvas.addEventListener('webglcontextlost',onContextLost);
-  BMH.studio3d={scene,camera,renderer,composer,renderFrame,state,ro,onDown,onMove,onUp,onWheel,onContextLost,raf:0};animate();stage.classList.add('three-ready');BMH.$('#studio3dLoading')?.remove();
+  BMH.studio3d={scene,camera,renderer,composer,ao,fxaa,renderFrame,state,ro,onDown,onMove,onUp,onWheel,onContextLost,raf:0};animate();stage.classList.add('three-ready');BMH.$('#studio3dLoading')?.remove();
   Promise.allSettled(scene.userData.surfaceLoads||[]).then(()=>{if(BMH.studio3d?.scene===scene)renderFrame();});
   const furnitureLoads=scene.userData.furnitureLoads||[];
   if(furnitureLoads.length){const status=document.createElement('div');status.className='studio-model-status';status.setAttribute('role','status');status.textContent='Đang tải '+furnitureLoads.length+' mô hình nội thất…';stage.appendChild(status);Promise.all(furnitureLoads).then(results=>{if(BMH.studio3d?.scene!==scene)return;const failed=results.filter(ok=>!ok).length;status.textContent=failed?failed+' món đang dùng mô hình đơn giản · thử tải lại để xem chi tiết':'Đã tải '+results.length+' mô hình nội thất';updateCamera();});}
@@ -276,23 +287,29 @@ BMH.cinematicSignature = (focus=BMH.state.ui?.sceneFocus||'all') => {
   const p=BMH.state.project,ui=BMH.state.ui||{};
   return JSON.stringify({sceneDetail:BMH.ARCH_RENDER_REVISION||'continuous-stairs-and-landscape',theme:ui.sceneTheme||'day',exploded:!!ui.sceneExploded,outdoor:p.plan.outdoor||[],style:p.style,focus,viewPreset:focus.startsWith('room:')?(ui.roomCamera||'overview'):focus==='all'?(ui.exteriorCamera||'overview'):'overview',roomInspection:focus.startsWith('room:')?'open':undefined,finish:p.materials?.finish||{},site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,floorHeight:p.site.floorHeight,slabThickness:p.site.slabThickness,ceilingDrop:p.site.ceilingDrop,frontDirection:p.site.frontDirection},materials:p.materials?.choices||{},productCodes:Object.values(p.materials?.choices||{}).map(id=>[id,p.dataEngine?.materialOverrides?.[id]?.sku||'']),tier:p.materials?.tier,rooms:p.plan.rooms.map(r=>[r.id,r.floor,r.name,r.type,r.x,r.y,r.w,r.h,r.furnitureRotation,r.stairDirection,r.stairShape]),furniture:p.plan.rooms.flatMap(r=>BMH.roomFurnitureLayout?.(r)||[]),openings:(p.plan.openings||[]).map(o=>[o.floor,o.roomId,o.kind,o.side,o.offset,o.width,o.height,o.sill,o.hinge,o.swing])});
 };
+BMH.cinematicCameraKey=()=>{
+ const s=BMH.studio3d?.state,p=BMH.pendingFinishCamera,pose=s?{yaw:s.yaw,pitch:s.pitch,dist:s.dist,target:s.target.toArray()}:p&&p.project===BMH.state.project&&p.focus===BMH.state.ui.sceneFocus?p:null;
+ return pose?JSON.stringify([pose.yaw,pose.pitch,pose.dist,...pose.target].map(v=>Math.round(v*100000)/100000)):'';
+};
+BMH.currentCinematicImage=()=>{const key=BMH.cinematicSignature(),camera=BMH.cinematicCameraKey();return camera&&BMH.cinematicRender.cameraKeys?.[key]===camera?BMH.cinematicRender.views[key]||'':'';};
+BMH.refreshCinematicHero=()=>{const node=BMH.$('[data-cinematic-hero]');if(!node)return;const image=BMH.currentCinematicImage();node.hidden=!image;if(image&&node.querySelector('img')?.getAttribute('src')!==image)node.querySelector('img').src=image;};
 BMH.generateCinematicRender = async () => {
   if(BMH.cinematicRender.loading)return;
   BMH.cinematicRender.loading=true;
   const scene=BMH.studio3d,viewer=BMH.architectViewer,architect=viewer?.three;
   const signature=BMH.cinematicSignature();let screenshot;
   try{if(scene?.scene?.userData?.furnitureLoads)await Promise.allSettled(scene.scene.userData.furnitureLoads);if(scene?.scene?.userData?.surfaceLoads)await Promise.allSettled(scene.scene.userData.surfaceLoads);if(viewer?.furnitureReady)await viewer.furnitureReady;if(signature!==BMH.cinematicSignature()||(scene&&scene!==BMH.studio3d)||(viewer&&viewer!==BMH.architectViewer))throw new Error('Góc nhìn đã đổi. Hãy tạo lại phối cảnh.');if(scene?.scene)(scene.renderFrame||(()=>scene.renderer.render(scene.scene,scene.camera)))();architect?.render?.(true);screenshot=scene?scene.renderer.domElement.toDataURL('image/jpeg',.8):architect?.renderer?architect.renderer.domElement.toDataURL('image/jpeg',.8):await BMH.capturePlanReference();}catch(err){BMH.cinematicRender.loading=false;BMH.cinematicRender.error=err.message||'Không tạo được ảnh tham chiếu.';BMH.toast(BMH.cinematicRender.error);return;}
-  const referenceHash=BMH.finishHash?.(screenshot),cached=BMH.cinematicRender.views?.[signature];
-  if(referenceHash&&cached&&BMH.cinematicRender.referenceHashes?.[signature]===referenceHash){BMH.cinematicRender.loading=false;BMH.cinematicRender.dataUrl=cached;BMH.cinematicRender.signature=signature;BMH.cinematicRender.error='';BMH.rememberFinishCamera?.();BMH.render({preserveScroll:true});return;}
+  const referenceHash=BMH.finishHash?.(screenshot),cached=BMH.cinematicRender.views?.[signature],cameraKey=BMH.cinematicCameraKey?.()||'';
+  if(referenceHash&&cached&&BMH.cinematicRender.referenceHashes?.[signature]===referenceHash){BMH.cinematicRender.loading=false;BMH.cinematicRender.dataUrl=cached;BMH.cinematicRender.signature=signature;(BMH.cinematicRender.cameraKeys||={})[signature]=cameraKey;BMH.cinematicRender.error='';BMH.rememberFinishCamera?.();BMH.render({preserveScroll:true});return;}
   const p=BMH.state.project;
   const selectedMaterials=Object.fromEntries(Object.entries(p.materials.choices||{}).map(([cat,id])=>{const name=(BMH.MATERIALS[cat]||[]).find(x=>x.id===id)?.name||id,sku=p.dataEngine?.materialOverrides?.[id]?.sku;return [cat,sku?`${name} · SKU ${sku}`:name];}));
   const focus=BMH.state.ui?.sceneFocus||'all',focusedRoom=focus.startsWith('room:')?p.plan.rooms.find(r=>r.id===focus.slice(5)):null;
   const payload={image:screenshot,project:{referenceKind:scene||architect?.renderer||(BMH.lightPreviewSvg&&BMH.state.ui.step===6)?'model':'drawing',style:p.style,styleDescription:BMH.houseStyle?.()?.description||'',view:{kind:focusedRoom?'room':focus.startsWith('floor:')?'floor':'house',roomName:focusedRoom?.name||'',roomType:focusedRoom?.type||'',floor:focusedRoom?.floor??(focus.startsWith('floor:')?Number(focus.slice(6)):0)},site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,floorHeight:p.site.floorHeight,slabThickness:p.site.slabThickness,ceilingDrop:p.site.ceilingDrop,frontDirection:p.site.frontDirection},materials:{choices:selectedMaterials,finish:BMH.visualMaterialContext?.(focusedRoom?.id)||{palette:BMH.finishPalette?.(focusedRoom?.id)||{}},rooms:focusedRoom?[]:p.plan.rooms.filter(r=>['living','bed','kitchen','bath'].includes(r.type)).slice(0,12).map(r=>({roomId:r.id,roomName:r.name,finish:BMH.visualMaterialContext?.(r.id)||{palette:BMH.finishPalette?.(r.id)||{}}}))},rooms:p.plan.rooms.map(r=>({id:r.id,furnitureRotation:r.furnitureRotation,stairDirection:r.stairDirection,furniture:BMH.roomFurnitureLayout?.(r)||[],name:r.name,type:r.type,floor:r.floor,x:r.x,y:r.y,w:r.w,h:r.h})),openings:(p.plan.openings||[]).map(o=>({roomId:o.roomId,kind:o.kind,side:o.side,offset:o.offset,width:o.width,height:o.height,sill:o.sill}))}};
-  BMH.cinematicRender.loading=true;BMH.cinematicRender.error='';BMH.render({preserveScroll:true});
+  BMH.cinematicRender.loading=true;BMH.cinematicRender.error='';BMH.rememberFinishCamera?.();BMH.render({preserveScroll:true});
   try{
     const r=await fetch('/api/gemini-render',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||`Render HTTP ${r.status}`);if(!data.image)throw new Error('Gemini không trả về ảnh render.');
-    if(signature!==BMH.cinematicSignature()){BMH.toast('Thiết kế đã đổi khi đang render. Hãy tạo lại phối cảnh cho phương án mới.');BMH.cinematicRender.error='Thiết kế đã thay đổi; dừng tạo ảnh để tránh dùng sai phương án.';return;}
+    if(signature!==BMH.cinematicSignature()||cameraKey!==(BMH.cinematicCameraKey?.()||'')){BMH.toast('Thiết kế hoặc góc nhìn đã đổi khi đang render. Hãy tạo lại phối cảnh.');BMH.cinematicRender.error='Thiết kế hoặc góc nhìn đã thay đổi; tạo lại ảnh từ góc hiện tại.';return;}
     const mime=['image/jpeg','image/png','image/webp'].includes(data.mimeType)?data.mimeType:'image/jpeg';
-    BMH.cinematicRender.dataUrl=`data:${mime};base64,${data.image}`;BMH.cinematicRender.signature=signature;BMH.cinematicRender.views[signature]=BMH.cinematicRender.dataUrl;if(referenceHash)(BMH.cinematicRender.referenceHashes||={})[signature]=referenceHash;BMH.cinematicRender.generatedAt=data.generatedAt||new Date().toISOString();BMH.cinematicRender.error='';
-  }catch(err){BMH.cinematicRender.loading=false;BMH.cinematicRender.error=err.message||String(err);BMH.toast(BMH.cinematicRender.error);}finally{BMH.cinematicRender.loading=false;BMH.render({preserveScroll:true});}
+    BMH.cinematicRender.dataUrl=`data:${mime};base64,${data.image}`;BMH.cinematicRender.signature=signature;BMH.cinematicRender.views[signature]=BMH.cinematicRender.dataUrl;(BMH.cinematicRender.cameraKeys||={})[signature]=cameraKey;if(referenceHash)(BMH.cinematicRender.referenceHashes||={})[signature]=referenceHash;BMH.cinematicRender.generatedAt=data.generatedAt||new Date().toISOString();BMH.cinematicRender.error='';
+  }catch(err){BMH.cinematicRender.loading=false;BMH.cinematicRender.error=err.message||String(err);BMH.toast(BMH.cinematicRender.error);}finally{BMH.cinematicRender.loading=false;BMH.rememberFinishCamera?.();BMH.render({preserveScroll:true});}
 };

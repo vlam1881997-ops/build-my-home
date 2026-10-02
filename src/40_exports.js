@@ -12,7 +12,7 @@ BMH.exportLoan = () => {
 BMH.exportEstimate = () => { const e=BMH.estimate(), b=BMH.dataCostBasis(), rows=[['Hạng mục','Giá trị (VND)'],['Đơn giá phần thô / m²',b.shellPerM2],['Đơn giá hoàn thiện / m²',b.finishPerM2],['Đơn giá chuẩn bị / m²',b.prepPerM2],['Phần thô',e.shell],['Hoàn thiện & vật liệu',e.finish],['Vận chuyển',e.transport],['Thích ứng khí hậu',e.climatePrep||0],['Năng lượng & nước bền vững',e.performanceUpgrade||0],['Chuẩn bị',e.prep],['Dự phòng 10%',e.contingency],['TỔNG',e.total],['Nguồn đơn giá',b.sourceLabel],['Ngày nguồn',b.sourceDate],['Tham chiếu',b.reference]]; BMH.download('BMH-du-toan.xls',BMH.excelXml('Du toan',rows),'application/vnd.ms-excel'); };
 // CAD geometry uses millimetres at 1:1; annotations are on separate layers.
 BMH.planDxf=(floor=BMH.state.ui.planner.floor)=>{
- const p=BMH.state.project,rooms=BMH.floorRooms(floor),parts=[],layers=['PLOT','WALLS','DOORS','WINDOWS','FURNITURE','STAIRS','DIMENSIONS','LABELS'];
+ const p=BMH.state.project,rooms=BMH.floorRooms(floor),parts=[],layers=['PLOT','WALLS','DOORS','WINDOWS','FURNITURE','STAIRS','ELEVATOR','DIMENSIONS','LABELS'];
  const pair=(code,value)=>parts.push(String(code),String(value));
  const entity=(type,layer,subclass)=>{pair(0,type);pair(100,'AcDbEntity');pair(8,layer);pair(100,subclass);};
  const mm=v=>Math.round(v*1000000)/1000;
@@ -38,7 +38,7 @@ BMH.planDxf=(floor=BMH.state.ui.planner.floor)=>{
  }
  const dimension=(x,y,w,d,vertical=false)=>{const length=vertical?d:w;if(length<=0)return;line(x,y,x+w,y+d,'DIMENSIONS');for(const [a,b] of [[x,y],[x+w,y+d]])line(a-.07,b+.07,a+.07,b-.07,'DIMENSIONS');text(x+w/2+.08,y+d/2-.09,Math.round(length*1000),'DIMENSIONS',.18,vertical?90:0);};
  for(const z of floor===0?p.plan.outdoor||[]:[]){rect(z.x,z.y,z.w,z.h,'FURNITURE');text(z.x+.1,z.y+z.h/2,z.name);}
- for(const r of rooms){text(r.x+.18,r.y+r.h/2,r.name);text(r.x+.18,r.y+r.h/2+.3,(r.w*r.h).toFixed(2)+' m2');dimension(r.x,r.y+.35,r.w,0);dimension(r.x+.35,r.y,0,r.h,true);for(const i of BMH.roomFurnitureLayout(r))rect(i.x,i.y,i.w,i.d,'FURNITURE');if(r.type==='garage'){const v=BMH.garageVehicle(r);if(v)rect(v.x,v.y,v.w,v.d,'FURNITURE');}if(r.type==='stairs')for(const v of BMH.stairGeometry(r))rect(v.x,v.y,v.w,v.d,'STAIRS');}
+ for(const r of rooms){text(r.x+.18,r.y+r.h/2,r.name);text(r.x+.18,r.y+r.h/2+.3,(r.w*r.h).toFixed(2)+' m2');dimension(r.x,r.y+.35,r.w,0);dimension(r.x+.35,r.y,0,r.h,true);for(const i of BMH.roomFurnitureLayout(r))rect(i.x,i.y,i.w,i.d,'FURNITURE');if(r.type==='garage'){const v=BMH.garageVehicle(r);if(v)rect(v.x,v.y,v.w,v.d,'FURNITURE');}if(r.type==='stairs')for(const v of BMH.stairGeometry(r))rect(v.x,v.y,v.w,v.d,'STAIRS');if(r.type==='elevator'&&BMH.elevatorSpec){const v=BMH.elevatorSpec(r);rect(r.x+(r.w-v.cabinWidth)/2,r.y+(r.h-v.cabinDepth)/2,v.cabinWidth,v.cabinDepth,'ELEVATOR');text(r.x+.15,r.y+.35,'TM / CABIN '+Math.round(v.cabinWidth*1000)+'x'+Math.round(v.cabinDepth*1000),'ELEVATOR',.15);}}
  dimension(0,-1,p.site.width,0);dimension(-1,0,0,p.site.depth,true);
  text(0,p.site.depth+1,'BMH / MẶT BẰNG TẦNG '+(floor+1)+' / ĐƠN VỊ mm / MODEL 1:1');text(0,p.site.depth+1.4,'Kiến trúc theo phương án; kết cấu và MEP cần thiết kế riêng.');pair(0,'ENDSEC');pair(0,'EOF');return parts.join('\r\n')+'\r\n';
 };
