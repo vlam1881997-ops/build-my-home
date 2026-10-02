@@ -5,6 +5,8 @@ BMH.roomSurfaceStyle=id=>{
 };
 BMH.sceneSurfaceTexture = (THREE, kind, channel='color') => {
  if(typeof document==='undefined'||typeof document.createElement!=='function')return null;
+ const templates=BMH.surfaceTextureTemplates||=new Map(),key=kind+':'+channel;
+ if(templates.has(key)){const texture=new THREE.CanvasTexture(templates.get(key));texture.colorSpace=channel==='color'?THREE.SRGBColorSpace:THREE.NoColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.anisotropy=4;texture.userData={generic:true,kind,channel};return texture;}
  const canvas=document.createElement('canvas');canvas.width=canvas.height=256;const ctx=canvas.getContext('2d');if(!ctx)return null;
  const pixels=ctx.createImageData(256,256),heights=channel==='normal'?new Float32Array(256*256):null;
  for(let y=0;y<256;y++)for(let x=0;x<256;x++){
@@ -12,6 +14,13 @@ BMH.sceneSurfaceTexture = (THREE, kind, channel='color') => {
   if(kind==='wood'||kind==='plank'||kind==='woodVertical'){const cross=kind==='woodVertical'?x:y,along=kind==='woodVertical'?y:x,vein=Math.sin(cross*.20+Math.sin(along*.024)*2+Math.sin(along*.071)*.65),ring=Math.sin(cross*.72+Math.sin(along*.017)*5);height=.5+vein*.06+n*.025;value=239+vein*6+ring*1.2+n*3;rough=.75+n*.055;if(kind==='plank'&&y<2){value=205;height=.1;rough=.95;}}
   else if(kind==='fabric'){const weave=(x%4<2?1:0)+(y%4<2?1:0);value=238+weave*4+n*2;height=.5+weave*.04+n*.01;rough=.97+n*.02;}
   else if(kind==='tile'||kind==='stone'){const vein=Math.sin(x*.033+Math.sin(y*.023)*3),seam=kind==='tile'&&(x<2||y<2);value=seam?190:245+vein*6+n*3;height=seam?.08:.55+n*.02;rough=seam?.95:kind==='stone'?.78:.65;}
+  else if(kind==='marble'){const flow=y+x*.53+9*Math.sin(x*.041)+4*Math.sin(y*.027),vein=Math.pow(Math.max(0,Math.cos(flow*.12)),28);value=250-vein*64-n*3;height=.5+n*.002;rough=.44+vein*.12;}
+  else if(kind==='travertine'){const band=Math.sin(y*.09+Math.sin(x*.014)*1.7),pore=n>.986&&Math.sin(x*.8+y*.37)>.1;value=239+band*9-(pore?38:0);height=pore?.24:.5+band*.005;rough=pore?.95:.86;}
+  else if(kind==='concrete'){const cloud=Math.sin(x*.031)*Math.cos(y*.028)+Math.sin((x+y)*.064)*.3;value=241+cloud*7+(n-.5)*8;height=.5+(n-.5)*.015;rough=.95;}
+  else if(kind==='terrazzo'){const cx=Math.floor(x/13),cy=Math.floor(y/13),seed=Math.sin(cx*19.13+cy*87.17)*43758.54,f=seed-Math.floor(seed),dx=x%13-(3+f*7),dy=y%13-(9-f*6),chip=dx*dx+(dy*.8)**2<7+f*10;value=chip?140+f*82:249;height=.5+(n-.5)*.002;rough=chip?.64:.8;}
+  else if(kind==='boucle'){const loop=Math.sin(x*1.8)*Math.cos(y*1.6);value=241+loop*8+n*5;height=.5+loop*.11+n*.035;rough=.99;}
+  else if(kind==='velvet'){value=245+Math.sin(y*.5)*2+n*3;height=.5+n*.015;rough=.9;}
+  else if(kind==='leather'){const pore=Math.sin(x*.8+Math.sin(y*.51))*Math.sin(y*.73+Math.sin(x*.32));value=244+pore*5+n*3;height=.5+pore*.022+n*.005;rough=.76+pore*.04;}
   else{value=248+(n-.5)*5;height=.5+(n-.5)*.04;rough=.92+n*.03;}
   if(channel==='height')value=height*255;else if(channel==='roughness')value=rough*255;
   const i=(y*256+x)*4;pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=value;pixels.data[i+3]=255;
@@ -21,7 +30,7 @@ BMH.sceneSurfaceTexture = (THREE, kind, channel='color') => {
   const at=(a,b)=>heights[((b+256)%256)*256+(a+256)%256],dx=(at(x+1,y)-at(x-1,y))*2,dy=(at(x,y+1)-at(x,y-1))*2,l=Math.hypot(dx,dy,1),i=(y*256+x)*4;
   pixels.data[i]=(-dx/l*.5+.5)*255;pixels.data[i+1]=(-dy/l*.5+.5)*255;pixels.data[i+2]=(1/l*.5+.5)*255;
  }
- ctx.putImageData(pixels,0,0);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=channel==='color'?THREE.SRGBColorSpace:THREE.NoColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.anisotropy=4;texture.userData={generic:true,kind,channel};return texture;
+ ctx.putImageData(pixels,0,0);templates.set(key,canvas);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=channel==='color'?THREE.SRGBColorSpace:THREE.NoColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.anisotropy=4;texture.userData={generic:true,kind,channel};return texture;
 };
 
 // Decode each photographed channel once per scene. A slow download keeps the
@@ -29,19 +38,20 @@ BMH.sceneSurfaceTexture = (THREE, kind, channel='color') => {
 BMH.scenePhotoSurface = (THREE, scene, asset, channel) => {
  const loads=scene.userData.surfacePhotoLoads||=new Map(),key=asset+':'+channel;
  if(loads.has(key))return loads.get(key);
+ const photos=BMH.surfacePhotoCache||=new Map();if(photos.has(key))return Promise.resolve(photos.get(key));
  const cancels=scene.userData.surfaceCancels||=new Set();
  const task=new Promise(resolve=>{
   let settled=false,timer;
   const finish=image=>{if(settled)return;settled=true;clearTimeout(timer);cancels.delete(cancel);resolve(scene.userData.disposed?null:image);};
   const cancel=()=>finish(null);cancels.add(cancel);
   timer=setTimeout(cancel,BMH.SCENE_TEXTURE_TIMEOUT||8000);
-  try{new THREE.TextureLoader().load('assets/interior/textures/'+asset+'-'+channel+'.png',loaded=>{const image=loaded.image;loaded.dispose();finish(image);},undefined,cancel);}catch(_){cancel();}
+  try{new THREE.TextureLoader().load('assets/interior/textures/'+asset+'-'+channel+'.png',loaded=>{const image=loaded.image;loaded.dispose();if(!settled&&!scene.userData.disposed)photos.set(key,image);finish(image);},undefined,cancel);}catch(_){cancel();}
  });loads.set(key,task);return task;
 };
 
 BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
   const cache = scene.userData.finishMaterials ||= new Map();
-  const key = JSON.stringify([finish.wall, finish.floor, finish.accent, finish.fabric, finish.surface,finish.pillow,finish.rug,finish.shape,finish.table]);
+  const key = JSON.stringify([finish.wall, finish.floor, finish.accent, finish.fabric, finish.surface,finish.pillow,finish.rug,finish.shape,finish.table,finish.visualMaterials]);
   if (cache.has(key)) return cache.get(key);
   const textures = scene.userData.surfaceTextures ||= new Map();
   const photoSets={wood:'wood_table_001',woodVertical:'wood_table_001',plank:'wood_floor',fabric:'terlenka'},photoChannels={color:'diff',normal:'nor_gl',roughness:'rough'};
@@ -94,6 +104,16 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
   };
   materials.collection={shape:finish.shape||'soft',table:finish.table||'oak'};
   materials.floor=finish.surface==='wood'?materials.plank:finish.surface==='stone'?materials.floorStone:materials.tile;
+  const replace=(key,material)=>{const previous=materials[key];materials[key]=material;if(previous?.isMaterial&&!Object.values(materials).includes(previous))previous.dispose();};
+  // Apply the selected finish's physical properties as well as its colour.
+  for(const [role,id]of Object.entries(finish.visualMaterials||{})){
+   const profile=BMH.VISUAL_MATERIALS?.find(p=>p.id===id&&p.role===role);if(!profile)continue;
+   const target={floor:'floor',wall:'wall',accent:'wood',fabric:'fabric'}[role];if(!target)continue;
+   const material=make(finish[role]||profile.color,profile.roughness,profile.kind,profile.scale);
+   material.normalScale?.setScalar(profile.normalStrength);material.userData.visualMaterial=profile.id;
+   if(profile.kind==='velvet'){const physical=new THREE.MeshPhysicalMaterial({color:material.color.clone(),map:material.map,normalMap:material.normalMap,roughnessMap:material.roughnessMap,roughness:material.roughness,sheen:.6,sheenRoughness:.85,sheenColor:finish.fabric||profile.color});physical.normalScale.copy(material.normalScale);physical.userData={...material.userData};material.dispose();replace(target,physical);}else replace(target,material);
+   if(role==='accent')replace('slattedWood',make(finish.accent||profile.color,profile.roughness,profile.kind==='wood'?'woodVertical':profile.kind,profile.scale));
+  }
   for (const material of Object.values(materials)) if(material.isMaterial)material.envMapIntensity = BMH.state?.ui?.sceneTheme === 'night' ? .3 : .65;
   cache.set(key, materials);
   return materials;
@@ -271,8 +291,8 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     }
   };
   if (/^lounge/.test(model)) {
-    const chair=model==='loungeChair',shape=m.collection?.shape||'soft',timber=shape==='timber',curved=shape==='curved',linear=shape==='linear',arms=timber?.085:curved?.17:.13,seatW=d.w-2*arms;
-    legs(.16,d.w-.1,d.d-.08,m.dark);
+    const chair=model==='loungeChair',shape=m.collection?.shape||'soft',timber=['timber','midcentury'].includes(shape),curved=shape==='curved',linear=shape==='linear',arms=timber?.085:curved?.17:.13,seatW=d.w-2*arms;
+    legs(shape==='midcentury'?.24:.16,d.w-.1,d.d-.08,shape==='midcentury'?m.wood:m.dark);
     box(d.w-.035,.16,d.d-.06,0,.24,0,timber?m.wood:m.fabric,linear?.018:.065);
     box(d.w-.035,.40,.14,0,d.h-.22,d.d/2-.095,timber?m.wood:m.fabric,curved?.12:linear?.018:.065);
     for(const x of [-d.w/2+arms/2,d.w/2-arms/2]){
@@ -287,6 +307,7 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
       const back=cushion(seatW/count-.025,curved?.35:.31,curved?.20:.15,x,curved?.63:.67,d.d/2-.185,m.fabric,'back');
       back.rotation.x=-.12;
       if(shape==='channel')for(let j=0;j<4;j++)box(.006,.235,.004,x-seatW/count*.35+j*seatW/count*.23,.67,d.d/2-.265,m.fabric,.001);
+      if(shape==='tufted')for(const y of [.59,.72])for(const bx of [-.22,.22])sphere(.018,.018,.009,x+bx*seatW/count,y,d.d/2-.278,m.fabric);
     }
     for (const [x,angle,material] of [[-seatW*.32,.16,m.linen],[seatW*.33,-.18,m.pillow]]) {
       const pillow=cushion(chair?.28:.33,.3,.12,x,.62,d.d/2-.31,material,'back');
@@ -300,7 +321,8 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     const shape=m.collection?.shape||'soft';
     box(d.w,.7,.10,0,.35,-d.d/2+.05,shape==='timber'?m.wood:m.fabric,shape==='curved'?.12:.025);
     if(['channel','linen'].includes(shape))for(let x=-d.w/2+.07;x<d.w/2-.04;x+=.11)box(.005,.56,.005,x,.36,-d.d/2+.105,m.fabric,.001);
-    if(shape==='timber')for(let x=-d.w/2+.05;x<d.w/2-.04;x+=.045)box(.015,.55,.015,x,.35,-d.d/2+.105,m.slattedWood,.003);
+    if(['timber','midcentury'].includes(shape))for(let x=-d.w/2+.05;x<d.w/2-.04;x+=.045)box(.015,.55,.015,x,.35,-d.d/2+.105,m.slattedWood,.003);
+    if(shape==='tufted')for(let x=-d.w/2+.12;x<d.w/2-.1;x+=.2)for(const y of [.22,.42,.62])sphere(.019,.019,.009,x,y,-d.d/2+.112,m.fabric);
     box(d.w-.08,.065,d.d*.64,0,.52,d.d*.16,m.linen,.028);
     box(d.w-.06,.034,.38,0,.563,d.d*.32,m.pillow,.02);
     const count=model==='bedDouble'?2:1;
@@ -314,6 +336,12 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
       const table=m.collection?.table||'oak';
       if(table==='nested'){
        for(const [x,z,r,h]of [[-d.w*.19,-.05,d.d*.47,d.h-.025],[d.w*.25,.13,d.d*.32,d.h*.72]]){cylinder(r,r,.045,x,h,z,m.stone);cylinder(r*.34,r*.38,h-.025,x,(h-.025)/2,z,m.wood);}
+      }else if(table==='pedestal'){
+       cylinder(d.d*.46,d.d*.46,.045,0,d.h-.023,0,m.wood);cylinder(.08,.15,d.h-.07,0,(d.h-.07)/2+.025,0,m.wood);cylinder(d.d*.31,d.d*.34,.035,0,.025,0,m.wood);
+      }else if(table==='glass'){
+       const glass=new THREE.MeshPhysicalMaterial({color:'#dce6e1',roughness:.08,transparent:true,opacity:.45,transmission:.35,thickness:.012});
+       box(d.w,.035,d.d,0,d.h-.018,0,glass,.018);for(const x of [-d.w*.36,d.w*.36])for(const z of [-d.d*.32,d.d*.32])cylinder(.018,.018,d.h-.04,x,(d.h-.04)/2,z,m.dark);
+       box(d.w*.75,.015,d.d*.68,0,.12,0,m.dark,.006);
       }else{
        for(const x of [-d.w*.28,d.w*.28]){
         if(table==='stone')box(.11,d.h-.07,d.d*.64,x,(d.h-.07)/2,0,m.dark,.009);
