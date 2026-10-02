@@ -26,6 +26,7 @@ BMH.renderMeshGeometry=(THREE,mesh)=>{
  if(geometry!==world)geometry.dispose();world.dispose();const result=new THREE.BufferGeometry();result.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));result.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));result.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));result.computeBoundingBox();return result;
 };
 BMH.architecturalRenderScene=(THREE,source)=>{
+ const ui=BMH.state.ui,room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===ui.sceneFocus),site=BMH.state.project.site,photographicRoom=room&&room.type!=='stairs'&&ui.roomCamera==='inside';
  const scene=new THREE.Scene(),materials=new Map(),ownedMaterials=new Set();source.updateMatrixWorld(true);
  source.traverse(o=>{
   if(!o.visible)return;for(let parent=o.parent;parent;parent=parent.parent)if(!parent.visible)return;
@@ -35,13 +36,15 @@ BMH.architecturalRenderScene=(THREE,source)=>{
    const convert=m=>{if(materials.has(m))return materials.get(m);let copy=m.clone();copy.clippingPlanes=[];
     if(m.isMeshPhysicalMaterial&&m.transparent&&m.opacity<.85){const glass=new THREE.MeshPhysicalMaterial({color:m.color.clone().lerp(new THREE.Color('#ffffff'),.65),roughness:.015,transmission:.98,thickness:0,ior:1.45,metalness:0,side:THREE.DoubleSide});copy.dispose();copy=glass;}
     // The physical renderer supports normal maps; height maps stay on the fast viewer.
+    // Broad photographic sources replace small preview emitters; their visible
+    // measured geometry remains. Duplicate emitters cause rare bright paths.
+    if(photographicRoom&&copy.emissive)copy.emissiveIntensity=0;
     copy.envMap=null;materials.set(m,copy);ownedMaterials.add(copy);return copy;};
    const mesh=new THREE.Mesh(geometry,Array.isArray(o.material)?o.material.map(convert):convert(o.material));mesh.name=o.name;mesh.userData={...o.userData};scene.add(mesh);
-  }else if(o.isLight&&!o.isHemisphereLight&&o.intensity>0){const light=o.clone();light.castShadow=false;light.position.copy(o.getWorldPosition(new THREE.Vector3()));if(light.isDirectionalLight){if(BMH.state.ui.sceneFocus==='all'&&BMH.state.ui.sceneTheme!=='night')light.intensity=o.castShadow?3.2:.25;light.radius=.035;light.target.position.copy(o.target.getWorldPosition(new THREE.Vector3()));scene.add(light.target);}scene.add(light);}
+  }else if(o.isLight&&!o.isHemisphereLight&&o.intensity>0){if(photographicRoom&&(o.isPointLight||o.isDirectionalLight))return;const light=o.clone();light.castShadow=false;light.position.copy(o.getWorldPosition(new THREE.Vector3()));if(light.isDirectionalLight){if(BMH.state.ui.sceneFocus==='all'&&BMH.state.ui.sceneTheme!=='night')light.intensity=o.castShadow?3.2:.25;light.radius=.035;light.target.position.copy(o.target.getWorldPosition(new THREE.Vector3()));scene.add(light.target);}scene.add(light);}
  });
- const ui=BMH.state.ui,room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===ui.sceneFocus),site=BMH.state.project.site;
  // Eye-height photographs include the measured ceiling; open inspection views keep covers off.
- if(room&&ui.roomCamera==='inside'&&room.type!=='stairs'){
+ if(photographicRoom){
   const levels=BMH.projectLevels(),material=materials.values().next().value?.clone()||new THREE.MeshStandardMaterial({color:'#eee8df',roughness:.92});material.color.set('#eee8df');material.map=null;material.normalMap=null;ownedMaterials.add(material);
   const ceilingY=levels.floorHeight-(levels.ceilingDrop||0);
   for(const p of BMH.slabPanels(room,BMH.stairFloorHoles(room.floor+1))){const mesh=new THREE.Mesh(new THREE.BoxGeometry(p.w,levels.slab,p.d),material);mesh.position.set(p.x+p.w/2-site.width/2,ceilingY+levels.slab/2,p.y+p.d/2-site.depth/2);mesh.userData={kind:'ceiling-slab',roomId:room.id,floor:room.floor};scene.add(mesh);}

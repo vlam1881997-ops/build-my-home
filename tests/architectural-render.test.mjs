@@ -39,3 +39,9 @@ test('daylight helpers follow edited opening dimensions and illuminate towards t
  assert.equal(lights.length,4);scene.updateMatrixWorld();for(const light of lights){const o=b.state.project.plan.openings.find(o=>o.id===light.userData.openingId),direction=new THREE.Vector3(0,0,-1).applyQuaternion(light.quaternion),centre=new THREE.Vector3(0,light.position.y,-2);assert.ok(Math.abs(light.width-o.width)<1e-8);assert.equal(light.height,o.height);assert.ok(Math.abs(light.position.y-1.74)<1e-6);assert.ok(direction.dot(centre.sub(light.position))>0);}
  assert.equal(JSON.stringify(b.state.project.plan),before);b.state.ui.sceneTheme='night';assert.equal(b.architecturalRenderScene(THREE,new THREE.Scene()).children.filter(l=>l.userData.openingId).length,0);
 });
+
+test('interior photographic light avoids duplicate tiny emitters while inspection retains the source lighting',()=>{
+ const b=client(),source=new THREE.Scene(),fixture=new THREE.MeshStandardMaterial({emissive:'#f3c077',emissiveIntensity:.5});source.add(new THREE.Mesh(new THREE.CylinderGeometry(.17,.25,.2),fixture),new THREE.PointLight('#ffe2b5',2),new THREE.DirectionalLight('#ffffff',1.65));
+ for(const theme of ['day','night']){b.state.ui.sceneTheme=theme;const copy=b.architecturalRenderScene(THREE,source);assert.equal(copy.children.some(o=>o.isPointLight||o.isDirectionalLight),false);assert.equal(copy.children.find(o=>o.isMesh&&!o.userData.kind).material.emissiveIntensity,0);assert.ok(copy.children.some(o=>o.isRectAreaLight));assert.equal(fixture.emissiveIntensity,.5);}
+ b.state.ui.roomCamera='overview';const copy=b.architecturalRenderScene(THREE,source);assert.ok(copy.children.some(o=>o.isPointLight));assert.ok(copy.children.some(o=>o.isDirectionalLight));assert.equal(copy.children.find(o=>o.isMesh&&!o.userData.kind).material.emissiveIntensity,.5);
+});
