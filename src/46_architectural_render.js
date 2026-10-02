@@ -1,6 +1,6 @@
 /* Progressive architectural rendering of the customer's measured scene. */
-BMH.ARCH_RENDER_REVISION='interior-collections-surfaces-3';
-BMH.ARCH_RENDER_PRESETS={draft:{width:640,samples:32,bounces:5},fine:{width:960,samples:128,bounces:8},print:{width:1920,samples:512,bounces:10}};
+BMH.ARCH_RENDER_REVISION='instant-preview-materials-4';
+BMH.ARCH_RENDER_PRESETS={draft:{width:640,samples:16,bounces:4,budgetMs:12000},fine:{width:960,samples:128,bounces:8,budgetMs:30000},print:{width:1920,samples:512,bounces:10,budgetMs:120000}};
 BMH.archRenderModules=null;
 BMH.archRenderStatus=text=>{const node=BMH.$('#architecturalRenderStatus');if(node&&node.textContent!==text)node.textContent=text;};
 // Bake presentation clipping in world space. The plan and original wall meshes remain untouched.
@@ -76,11 +76,11 @@ BMH.startArchitecturalRender=async()=>{
   if(BMH.studio3d!==s||s.renderEpoch!==epoch||signature!==BMH.cinematicSignature())return false;
   const modules=await (BMH.archRenderModules||(BMH.archRenderModules=import('./vendor/three/pathtracer.js').catch(e=>{BMH.archRenderModules=null;throw e;}))),THREE=await BMH.ensureThree();
   if(BMH.studio3d!==s||s.renderEpoch!==epoch||signature!==BMH.cinematicSignature())return false;
-  const preset=BMH.ARCH_RENDER_PRESETS[BMH.state.ui.renderQuality]||BMH.ARCH_RENDER_PRESETS.fine,scene=BMH.architecturalRenderScene(THREE,s.scene),environment=new modules.GradientEquirectTexture(128);
+  const preset=BMH.ARCH_RENDER_PRESETS[BMH.state.ui.renderQuality]||BMH.ARCH_RENDER_PRESETS.draft,scene=BMH.architecturalRenderScene(THREE,s.scene),environment=new modules.GradientEquirectTexture(128);
   environment.topColor.set(BMH.state.ui.sceneTheme==='night'?'#60718e':'#e6eff8');environment.bottomColor.set(BMH.state.ui.sceneTheme==='night'?'#1c242c':'#c4c8c2');environment.exponent=1;environment.update();scene.environment=environment;scene.environmentIntensity=BMH.state.ui.sceneTheme==='night'?.35:BMH.state.ui.sceneFocus==='all'?.75:1.7;
-  s.archRender={scene,environment,preset,signature,raf:0,cancelled:false,samples:0,complete:false};
+  s.archRender={scene,environment,preset,signature,raf:0,cancelled:false,samples:0,complete:false,paused:false,startedAt:performance.now()};
   const tracer=new modules.WebGLPathTracer(s.renderer);s.archRender.tracer=tracer;const denoise=new modules.FullScreenQuad(new modules.DenoiseMaterial({sigma:1.6,kSigma:1,threshold:.12}));s.archRender.denoise=denoise;
-  tracer.bounces=preset.bounces;tracer.transmissiveBounces=6;tracer.filterGlossyFactor=.35;tracer.textureSize.set(512,512);tracer.tiles.set(3,3);tracer.minSamples=1;tracer.renderDelay=0;tracer.fadeDuration=0;tracer.rasterizeScene=false;tracer.renderToCanvas=false;
+  tracer.bounces=preset.bounces;tracer.transmissiveBounces=6;tracer.filterGlossyFactor=.35;tracer.textureSize.set(512,512);tracer.tiles.set(2,2);tracer.minSamples=1;tracer.renderDelay=0;tracer.fadeDuration=0;tracer.rasterizeScene=false;tracer.renderToCanvas=false;
   const size=s.renderer.getDrawingBufferSize(new THREE.Vector2()),width=Math.min(preset.width,s.renderer.capabilities.maxTextureSize,Math.sqrt(6000000*size.x/size.y));tracer.setScene(scene,s.camera);tracer.synchronizeRenderSize=false;tracer._pathTracer.alpha=true;tracer._pathTracer.setSize(Math.floor(width),Math.floor(width*size.y/size.x));tracer._pathTracer.reset();BMH.state.ui.renderMode='quality';BMH.save();
   const guide=new THREE.WebGLRenderTarget(tracer.target.width,tracer.target.height,{type:THREE.HalfFloatType,depthBuffer:true,minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter}),guideMaterial=new modules.ArchitecturalGuideMaterial(),previousTarget=s.renderer.getRenderTarget(),previousClear=s.renderer.getClearColor(new THREE.Color()),previousAlpha=s.renderer.getClearAlpha(),background=scene.background;guideMaterial.side=THREE.DoubleSide;
   s.archRender.guide=guide;
@@ -88,16 +88,32 @@ BMH.startArchitecturalRender=async()=>{
   denoise.material.uniforms.guide.value=guide.texture;denoise.material.uniforms.resolution.value.set(guide.width,guide.height);denoise.material.uniforms.projectionScale.value.set(s.camera.projectionMatrix.elements[0],s.camera.projectionMatrix.elements[5]);
   document.querySelectorAll('[data-architectural-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.architecturalMode==='quality')));
   const render=s.archRender,draw=()=>{
+   render.raf=0;
    if(BMH.studio3d!==s||s.archRender!==render||render.cancelled)return;
    if(signature!==BMH.cinematicSignature()){BMH.stopArchitecturalRender();BMH.archRenderStatus('Thiết kế đã đổi. Chọn Render chất lượng cao để tạo ảnh mới.');return;}
    if(document.hidden){render.raf=requestAnimationFrame(draw);return;}
-   try{tracer._pathTracer.update();const samples=Math.floor(tracer.samples);if(samples>render.samples){render.samples=samples;denoise.material.map=tracer.target.texture;denoise.material.uniforms.samples.value=samples;denoise.render(s.renderer);}BMH.archRenderStatus(tracer.isCompiling?'Đang chuẩn bị bộ render…':'Ảnh đang nét dần · '+render.samples+'/'+preset.samples+' lượt');
-    if(tracer.samples<preset.samples)render.raf=requestAnimationFrame(draw);else{render.complete=true;BMH.archRenderStatus('Ảnh đã hoàn tất · '+Math.round(tracer.target.width)+' × '+Math.round(tracer.target.height)+' px · Có thể tải ảnh.');}
+   try{tracer._pathTracer.update();const samples=Math.floor(tracer.samples);if(samples>render.samples){render.samples=samples;denoise.material.map=tracer.target.texture;denoise.material.uniforms.samples.value=samples;denoise.render(s.renderer);}BMH.archRenderStatus(tracer.isCompiling?'Đang chuẩn bị bộ render…':'Ảnh đang nét dần · '+render.samples+'/'+preset.samples+' lượt · Có thể tải khi đã có ảnh.');
+    if(tracer.samples>=preset.samples){render.complete=true;BMH.archRenderStatus('Ảnh đã hoàn tất · '+Math.round(tracer.target.width)+' × '+Math.round(tracer.target.height)+' px · Có thể tải ảnh.');}
+    else if(render.samples>0&&performance.now()-render.startedAt>=preset.budgetMs){render.paused=true;BMH.archRenderStatus('Đã có ảnh · '+render.samples+'/'+preset.samples+' lượt. Tải ảnh hiện tại hoặc chọn Làm nét tiếp.');}
+    else render.raf=requestAnimationFrame(draw);
    }catch(e){BMH.stopArchitecturalRender();BMH.archRenderStatus('Không tạo được ảnh trên thiết bị này. Chế độ 3D nhanh vẫn hoạt động.');console.warn('BMH architectural renderer',e);}
-  };render.raf=requestAnimationFrame(draw);return true;
+  };render.draw=draw;render.raf=requestAnimationFrame(draw);return true;
  }catch(e){console.warn('BMH render setup',e);if(BMH.studio3d===s&&s.renderEpoch===epoch){BMH.stopArchitecturalRender();BMH.archRenderStatus(e.message?.includes('Thiết bị')?e.message:'Bộ render chưa tải được. Thử lại hoặc tiếp tục xem 3D nhanh.');}return false;}
 };
 BMH.stopArchitecturalRender=()=>{const s=BMH.studio3d;BMH.disposeArchitecturalRender(s);BMH.state.ui.renderMode='interactive';BMH.save();document.querySelectorAll('[data-architectural-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.architecturalMode==='interactive')));s?.renderFrame();};
+BMH.resumeArchitecturalRender=()=>{const r=BMH.studio3d?.archRender;if(!r?.paused||r.complete||r.cancelled||r.signature!==BMH.cinematicSignature())return false;r.paused=false;r.startedAt=performance.now();r.raf=requestAnimationFrame(r.draw);return true;};
+BMH.captureStudioPreview=async()=>{
+ const s=BMH.studio3d;if(!s?.renderer){BMH.archRenderStatus('Mô hình đang tải. Khi thấy 3D, bạn có thể lấy ảnh ngay.');return false;}
+ try{
+  // A raster snapshot is immediately available, independent of the physical renderer.
+  if(s.composer)s.composer.render();else s.renderer.render(s.scene,s.camera);
+  const image=new Promise(resolve=>s.renderer.domElement.toBlob(resolve,'image/png'));
+  if(s.archRender?.samples>0)s.archRender.denoise.render(s.renderer);
+  const blob=await image;if(!blob||BMH.studio3d!==s)return false;
+  BMH.download('BMH-'+(BMH.state.ui.sceneFocus||'all').replace(/[^a-z0-9_-]/gi,'-')+'-xem-nhanh.png',blob,'image/png');
+  BMH.archRenderStatus('Đã lấy ảnh từ 3D đang xem. Chọn Làm nét ảnh nếu muốn tính thêm ánh sáng và phản xạ.');return true;
+ }catch(error){console.warn('BMH quick image export',error);BMH.archRenderStatus('Chưa tải được ảnh. Thử lại khi mô hình đã hiện.');return false;}
+};
 BMH.captureArchitecturalRender=async()=>{
  const s=BMH.studio3d,r=s?.archRender;if(!r||r.samples<1||r.signature!==BMH.cinematicSignature()){BMH.archRenderStatus('Tạo ảnh từ góc nhìn hiện tại trước khi tải.');return false;}
  const THREE=await BMH.ensureThree();if(BMH.studio3d!==s||s.archRender!==r)return false;const size=s.renderer.getSize(new THREE.Vector2()),ratio=s.renderer.getPixelRatio(),previous=s.renderer.getRenderTarget();let image;
@@ -109,9 +125,10 @@ BMH.captureArchitecturalRender=async()=>{
  const blob=await image;if(!blob||BMH.studio3d!==s||s.archRender!==r)return false;
  const name='BMH-'+(BMH.state.ui.sceneFocus||'all').replace(/[^a-z0-9_-]/gi,'-')+'-'+BMH.drawingRevision()+'.png';BMH.download(name,blob,'image/png');return true;
 };
-const archMount=BMH.mountStudio3D;BMH.mountStudio3D=async()=>{const canvas=BMH.$('#studio3dCanvas');await archMount();if(BMH.$('#studio3dCanvas')===canvas&&BMH.studio3d?.renderer?.domElement===canvas&&BMH.state.ui.renderMode==='quality')void BMH.startArchitecturalRender();};
+// Editing or reopening a project always starts with its instant interactive view.
+const archMount=BMH.mountStudio3D;BMH.mountStudio3D=async()=>{BMH.state.ui.renderMode='interactive';await archMount();};
 const archDispose=BMH.disposeStudio3D;BMH.disposeStudio3D=()=>{BMH.disposeArchitecturalRender();archDispose();};
-document.addEventListener('click',e=>{const b=e.target.closest?.('[data-architectural-mode],[data-architectural-download]');if(!b)return;if(b.hasAttribute('data-architectural-download'))void BMH.captureArchitecturalRender();else if(b.dataset.architecturalMode==='quality')void BMH.startArchitecturalRender();else{BMH.stopArchitecturalRender();BMH.archRenderStatus('Xoay, phóng to và chỉnh nhà. Khi chọn được góc, tạo ảnh chất lượng cao.');}});
-document.addEventListener('change',e=>{if(!e.target.matches?.('[data-render-quality]'))return;BMH.state.ui.renderQuality=Object.hasOwn(BMH.ARCH_RENDER_PRESETS,e.target.value)?e.target.value:'fine';BMH.save();if(BMH.state.ui.renderMode==='quality')void BMH.startArchitecturalRender();});
+document.addEventListener('click',e=>{const b=e.target.closest?.('[data-architectural-mode],[data-architectural-download],[data-preview-download],[data-architectural-continue]');if(!b)return;if(b.hasAttribute('data-preview-download'))void BMH.captureStudioPreview();else if(b.hasAttribute('data-architectural-continue'))BMH.resumeArchitecturalRender();else if(b.hasAttribute('data-architectural-download'))void BMH.captureArchitecturalRender();else if(b.dataset.architecturalMode==='quality')void BMH.startArchitecturalRender();else{BMH.stopArchitecturalRender();BMH.archRenderStatus('Xoay, đổi vật liệu và tải ảnh ngay từ góc đang xem.');}});
+document.addEventListener('change',e=>{if(!e.target.matches?.('[data-render-quality]'))return;BMH.state.ui.renderQuality=Object.hasOwn(BMH.ARCH_RENDER_PRESETS,e.target.value)?e.target.value:'draft';BMH.save();if(BMH.state.ui.renderMode==='quality')void BMH.startArchitecturalRender();});
 
-BMH.architecturalRenderControlsHtml=()=>'<div class="architectural-render-controls"><div class="architectural-render-actions"><button data-architectural-mode="interactive" aria-pressed="'+(BMH.state.ui.renderMode!=='quality')+'">Xoay / chỉnh nhanh</button><button data-architectural-mode="quality" aria-pressed="'+(BMH.state.ui.renderMode==='quality')+'">Render chất lượng cao</button><select data-render-quality aria-label="Chất lượng ảnh">'+[['draft','Xem thử'],['fine','Ảnh chi tiết'],['print','Ảnh kỹ hơn · chờ lâu hơn']].map(([id,name])=>'<option value="'+id+'" '+(BMH.state.ui.renderQuality===id?'selected':'')+'>'+name+'</option>').join('')+'</select><button data-architectural-download>Tải ảnh PNG</button></div><p id="architecturalRenderStatus" role="status">Chọn góc nhìn rồi tạo ảnh. Ánh sáng, bóng và phản xạ được tính từ chính thiết kế; thời gian tùy thiết bị.</p></div>';
+BMH.architecturalRenderControlsHtml=()=>'<div class="architectural-render-controls"><div class="architectural-render-actions"><button class="preview-download-primary" data-preview-download>Tải ảnh ngay ↓</button><button data-architectural-mode="interactive" aria-pressed="'+(BMH.state.ui.renderMode!=='quality')+'">Xoay / chỉnh</button><details class="render-detail-options"><summary>Làm nét ảnh</summary><div><select data-render-quality aria-label="Chất lượng ảnh">'+[['draft','Ảnh nhanh'],['fine','Ảnh chi tiết'],['print','Ảnh lớn · chờ lâu hơn']].map(([id,name])=>'<option value="'+id+'" '+((BMH.state.ui.renderQuality||'draft')===id?'selected':'')+'>'+name+'</option>').join('')+'</select><button data-architectural-mode="quality" aria-pressed="'+(BMH.state.ui.renderMode==='quality')+'">Bắt đầu làm nét</button><button data-architectural-continue>Làm nét tiếp</button><button data-architectural-download>Tải ảnh đã làm nét</button></div></details></div><p id="architecturalRenderStatus" role="status">Đổi phong cách hoặc vật liệu để xem ngay. Tải ảnh từ góc đang xem; làm nét thêm khi cần.</p></div>';

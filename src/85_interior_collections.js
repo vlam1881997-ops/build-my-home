@@ -5,20 +5,33 @@ BMH.INTERIOR_COLLECTIONS=[
  {id:'soft-curves',name:'Đường cong mềm',note:'Sofa bo tròn, bàn đôi tròn, sắc kem và đất nung.',shape:'curved',table:'nested',wall:'#f3e9df',floor:'#cab393',accent:'#b08567',fabric:'#e8dfd0',pillow:'#b77c61',rug:'#ddd3c1',surface:'wood'},
  {id:'indochine',name:'Đông Dương',note:'Khung gỗ tối, mây đan, vải kem và xanh lá.',shape:'timber',table:'rattan',wall:'#eee4cd',floor:'#b39974',accent:'#4b382b',fabric:'#e0d9c7',pillow:'#4e6c5b',rug:'#c5b795',surface:'wood'},
  {id:'coastal',name:'Nhẹ nhàng ven biển',note:'Vải linen, gỗ tẩy sáng, đệm xanh biển nhạt.',shape:'linen',table:'oak',wall:'#f1f2e8',floor:'#d3c2a2',accent:'#b6a17e',fabric:'#e5e4d8',pillow:'#91acb1',rug:'#dce0d4',surface:'wood'},
- {id:'olive-gallery',name:'Xanh trầm & đồng',note:'Sofa xanh olive, bàn travertine và kim loại ấm.',shape:'channel',table:'stone',wall:'#eae5d9',floor:'#c2b99e',accent:'#816349',fabric:'#6f7962',pillow:'#c6ad7c',rug:'#ddd5c1',surface:'stone'}
+ {id:'olive-gallery',name:'Xanh trầm & đồng',note:'Sofa xanh olive, bàn travertine và kim loại ấm.',shape:'channel',table:'stone',wall:'#eae5d9',floor:'#c2b99e',accent:'#816349',fabric:'#6f7962',pillow:'#c6ad7c',rug:'#ddd5c1',surface:'stone'},
+ {id:'nordic-light',name:'Bắc Âu sáng',note:'Gỗ sồi sáng, sofa linen, tường trắng và terrazzo kem.',shape:'linen',table:'oak',wall:'#f2f0e8',floor:'#e7e0cd',accent:'#ae8658',fabric:'#d9cfbb',pillow:'#7e9294',rug:'#ece6d7',surface:'stone'},
+ {id:'mid-century',name:'Mid-century ấm',note:'Sofa chân gỗ thanh, da cognac, bàn tròn chân trụ và óc chó.',shape:'midcentury',table:'pedestal',wall:'#e8dfcc',floor:'#795038',accent:'#65432e',fabric:'#a66738',pillow:'#ba9954',rug:'#c7bba2',surface:'wood'},
+ {id:'loft-leather',name:'Loft & da cognac',note:'Bê tông xám, sofa da, bàn kính và kim loại đen.',shape:'linear',table:'glass',wall:'#c7c6be',floor:'#a9aaa4',accent:'#65432e',fabric:'#a66738',pillow:'#676c62',rug:'#bab6a9',surface:'stone'},
+ {id:'neo-elegance',name:'Tân cổ điển thanh lịch',note:'Sofa lưng đệm nút, nhung olive, marble trắng và gỗ trầm.',shape:'tufted',table:'stone',wall:'#f1ebde',floor:'#f0ede6',accent:'#65432e',fabric:'#6f7962',pillow:'#c2ad7a',rug:'#dbd0bb',surface:'stone'}
 ];
+const collectionSurfaces={
+ 'warm-oak':['oak-floor','natural-oak','natural-linen'], 'urban-stone':['grey-concrete','dark-walnut','natural-linen'],
+ 'soft-curves':['oak-floor','natural-oak','cream-boucle'], 'indochine':['walnut-floor','dark-walnut','natural-linen'],
+ 'coastal':['oak-floor','natural-oak','natural-linen'], 'olive-gallery':['sand-travertine','dark-walnut','olive-velvet'],
+ 'nordic-light':['ivory-terrazzo','natural-oak','natural-linen'], 'mid-century':['walnut-floor','dark-walnut','cognac-leather'],
+ 'loft-leather':['grey-concrete','dark-walnut','cognac-leather'], 'neo-elegance':['white-marble','dark-walnut','olive-velvet']
+};
+for(const c of BMH.INTERIOR_COLLECTIONS){const [floor,accent,fabric]=collectionSurfaces[c.id];c.visualMaterials={floor,accent,fabric,wall:c.id==='loft-leather'?'grey-paint':'ivory-paint'};}
 BMH.interiorCollection=roomId=>{
  const f=BMH.state.project.materials?.finish||{},stored=roomId?f.interior?.rooms?.[roomId]||f.interior?.default:f.interior?.default;
- const byStyle=/Đông Dương|Indochine/i.test(BMH.state.project.style||'')?'indochine':/Đương đại|Art Deco/i.test(BMH.state.project.style||'')?'urban-stone':/Bắc Âu|Nhiệt đới/i.test(BMH.state.project.style||'')?'coastal':'warm-oak';
+ const byStyle=/Đông Dương|Indochine/i.test(BMH.state.project.style||'')?'indochine':/cổ điển|classic/i.test(BMH.state.project.style||'')?'neo-elegance':/Bắc Âu|Scandinavian/i.test(BMH.state.project.style||'')?'nordic-light':/Đương đại/i.test(BMH.state.project.style||'')?'urban-stone':/Art Deco/i.test(BMH.state.project.style||'')?'olive-gallery':/Nhiệt đới/i.test(BMH.state.project.style||'')?'coastal':'warm-oak';
  return BMH.INTERIOR_COLLECTIONS.find(c=>c.id===stored)||BMH.INTERIOR_COLLECTIONS.find(c=>c.id===byStyle);
 };
 const collectionFinish=BMH.finishPalette;
-BMH.finishPalette=roomId=>{const original=collectionFinish?.(roomId);if(!roomId)return original;const collection=BMH.interiorCollection(roomId);return {...collection,...original,collectionId:collection.id,shape:collection.shape,table:collection.table,pillow:original?.pillow||collection.pillow,rug:original?.rug||collection.rug};};
+BMH.finishPalette=roomId=>{const original=collectionFinish?.(roomId);if(!roomId)return original;const collection=BMH.interiorCollection(roomId),visualMaterials={...(original?.visualMaterials||collection.visualMaterials)};if(!original?.visualMaterials&&['wood','tile','stone','auto'].includes(original?.surface))visualMaterials.floor={wood:'oak-floor',tile:'ivory-tile',stone:'sand-travertine'}[original.surface];return {...collection,...original,visualMaterials,collectionId:collection.id,shape:collection.shape,table:collection.table,pillow:original?.pillow||collection.pillow,rug:original?.rug||collection.rug};};
 BMH.applyInteriorCollection=(id,roomId=null)=>{
  const c=BMH.INTERIOR_COLLECTIONS.find(c=>c.id===id),p=BMH.state.project;if(!c||roomId&&!p.plan.rooms.some(r=>r.id===roomId))return false;
+ BMH.rememberFinishCamera?.();
  const f=p.materials.finish||=( {exterior:null,rooms:{}} );f.rooms||={};f.interior||={default:'',rooms:{}};f.interior.rooms||={};
  const target=roomId?p.plan.rooms.filter(r=>r.id===roomId):p.plan.rooms.filter(r=>['living','bed','kitchen','bath'].includes(r.type));
- for(const r of target){f.interior.rooms[r.id]=id;f.rooms[r.id]={...f.rooms[r.id],wall:c.wall,floor:c.floor,accent:c.accent,fabric:c.fabric,pillow:c.pillow,rug:c.rug,surface:r.type==='bath'?'stone':c.surface};}
+ for(const r of target){f.interior.rooms[r.id]=id;f.rooms[r.id]={...f.rooms[r.id],wall:c.wall,floor:c.floor,accent:c.accent,fabric:c.fabric,pillow:c.pillow,rug:c.rug,surface:r.type==='bath'?'stone':c.surface,visualMaterials:{...c.visualMaterials,...(r.type==='bath'?{floor:'sand-travertine'}:{})}};}
  if(!roomId)f.interior.default=id;
  BMH.finishInvalidate?.();BMH.save();return true;
 };
