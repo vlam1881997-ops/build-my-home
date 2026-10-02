@@ -200,6 +200,25 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     o.scale.set(w/2,h/2,depth/2);
     return o;
   };
+  // A soft, slightly compressed superellipsoid gives upholstery a continuous
+  // silhouette. It remains inside the same measured furniture envelope.
+  const cushion = (w,h,depth,x,y,z,material=m.fabric,orientation='seat') => {
+    const geometry=new THREE.SphereGeometry(1,32,16),p=geometry.attributes.position,power=v=>Math.sign(v)*Math.pow(Math.abs(v),.48);
+    for(let i=0;i<p.count;i++){
+      let px=power(p.getX(i))*w/2,py=power(p.getY(i))*h/2,pz=power(p.getZ(i))*depth/2;
+      const centre=Math.max(0,1-(px/(w/2))**2)*Math.max(0,1-(pz/(depth/2))**2);
+      if(orientation==='seat'&&py>0)py-=Math.min(.009,h*.06)*centre*(py/(h/2));
+      p.setXYZ(i,px,py,pz);
+    }
+    geometry.computeVertexNormals();geometry.computeBoundingBox();
+    const o=mesh(geometry,material,x,y,z);o.userData={kind:'upholstery',generic:true};
+    // Welt follows the actual cushion perimeter, with no painted-on stripe.
+    if(THREE.CatmullRomCurve3&&THREE.TubeGeometry){
+      const points=[];for(let i=0;i<48;i++){const a=i/48*Math.PI*2,c=power(Math.cos(a)),s=power(Math.sin(a));points.push(orientation==='seat'?new THREE.Vector3(c*w*.495,0,s*depth*.495):new THREE.Vector3(c*w*.495,s*h*.495,-depth*.44));}
+      const curve=new THREE.CatmullRomCurve3(points,true),seam=mesh(new THREE.TubeGeometry(curve,64,.0022,4,true),material,x,y,z);seam.userData={kind:'upholstery-seam',generic:true};o.add(seam);seam.position.set(0,0,0);
+    }
+    return o;
+  };
   const legs = (height,w=d.w,depth=d.d,material=m.wood) => {
     for (const x of [-w/2+.075,w/2-.075]) for (const z of [-depth/2+.075,depth/2-.075]) cylinder(.025,.018,height,x,height/2,z,material);
   };
@@ -219,12 +238,12 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     const count=chair?1:2;
     for(let i=0;i<count;i++) {
       const x=-seatW/2+(i+.5)*seatW/count;
-      box(seatW/count-.025,.16,d.d-.24,x,.45,-.055,m.fabric,.075);
-      const back=box(seatW/count-.025,.31,.15,x,.67,d.d/2-.185,m.fabric,.06);
+      cushion(seatW/count-.025,.16,d.d-.24,x,.45,-.055,m.fabric);
+      const back=cushion(seatW/count-.025,.31,.15,x,.67,d.d/2-.185,m.fabric,'back');
       back.rotation.x=-.12;
     }
     for (const [x,angle,material] of [[-seatW*.32,.16,m.linen],[seatW*.33,-.18,m.pillow]]) {
-      const pillow=box(chair?.28:.33,.3,.12,x,.62,d.d/2-.31,material,.065);
+      const pillow=cushion(chair?.28:.33,.3,.12,x,.62,d.d/2-.31,material,'back');
       pillow.rotation.z=angle; pillow.rotation.x=.16;
     }
   } else if (/^bed/.test(model)) {
@@ -236,7 +255,7 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     box(d.w-.06,.034,.38,0,.563,d.d*.32,m.pillow,.02);
     const count=model==='bedDouble'?2:1;
     for(let i=0;i<count;i++) {
-      const pillow=box((d.w-.24)/count,.12,.43,-(d.w-.24)/2+(i+.5)*(d.w-.24)/count,.535,-d.d*.31,m.linen,.058);
+      const pillow=cushion((d.w-.24)/count,.12,.43,-(d.w-.24)/2+(i+.5)*(d.w-.24)/count,.535,-d.d*.31,m.linen);
       pillow.rotation.x=.07;
     }
     for(let i=1;i<6;i++)box((d.w-.08)/6,.008,d.d*.48,-d.w/2+.08+i*(d.w-.16)/6,.559,d.d*.17,m.linen,.003);

@@ -1,6 +1,6 @@
 require('./load-env.cjs')();
 const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..'),src=path.join(root,'src'),dist=path.join(root,'dist');
-const jsFiles=['00_boot.js','01_vn34_catalog.js','15_data_engine.js','10_state.js','17_cloud_payment.js','18_ai_copilot.js','19_gemini_scan.js','20_calc.js','30_planner.js','35_dossier.js','40_exports.js','43_scene_assets.js','44_house_styles.js','45_studio3d.js','46_architectural_render.js','50_screens.js','60_app.js','70_v60_product_ui.js','75_completion.js','76_architecture.js','77_architect3d.js','78_design_workflow.js','79_stair_design.js','80_home_finish.js','81_design_studio.js'];
+const jsFiles=['00_boot.js','01_vn34_catalog.js','15_data_engine.js','10_state.js','17_cloud_payment.js','18_ai_copilot.js','19_gemini_scan.js','20_calc.js','30_planner.js','35_dossier.js','40_exports.js','43_scene_assets.js','44_house_styles.js','45_studio3d.js','46_architectural_render.js','50_screens.js','60_app.js','70_v60_product_ui.js','75_completion.js','76_architecture.js','77_architect3d.js','78_design_workflow.js','79_stair_design.js','80_home_finish.js','81_design_studio.js','82_customer_projects.js','83_customer_app.js'];
 const banner=`/* Build My Home Official V6.2.0 Connected Project Preview
  * Existing calculation, Gemini, planner, 3D and dossier engines are retained.
  * V6.1 fixes the production gaps found in the screen recording: blank map, portrait planner fit, image-only 3D, tiny text and broken bank logos.
@@ -21,7 +21,7 @@ const googleMapsKey=String(process.env.BMH_GOOGLE_MAPS_API_KEY||'').replace(/[^A
 js=js.replaceAll('__BMH_GOOGLE_MAPS_API_KEY__',googleMapsKey);
 fs.rmSync(dist,{recursive:true,force:true});fs.mkdirSync(dist,{recursive:true});
 fs.writeFileSync(path.join(dist,'app.js'),js);
-const cssFiles=['styles.css','visual-v60.css','architecture.css','home-finish.css','design-studio.css'];
+const cssFiles=['styles.css','visual-v60.css','architecture.css','home-finish.css','design-studio.css','customer-projects.css'];
 const css=cssFiles.map(f=>`\n/* ===== ${f} ===== */\n`+fs.readFileSync(path.join(src,f),'utf8')).join('\n');
 fs.writeFileSync(path.join(dist,'styles.css'),css);
 const leafletDist=path.join(root,'node_modules','leaflet','dist');
@@ -58,7 +58,7 @@ if(!html.includes('<!-- BMH_APP_INLINE -->'))throw Error('Missing BMH_APP_INLINE
 const safeJs=js.replace(/<\/script/gi,'<\\/script');
 html=html.replace('<!-- BMH_APP_INLINE -->',()=>`<script id="bmh-inline-app">${safeJs}</script>`);
 fs.writeFileSync(path.join(dist,'index.html'),html);
-const assetDigest=require('node:crypto').createHash('sha256').update(js).update(css).update(tracedJs).update(tracerCompat).digest('hex').slice(0,16);
+const assetDigest=require('node:crypto').createHash('sha256').update(js).update(css).update(tracedJs).update(tracerCompat).update(html).update(fs.readFileSync(path.join(src,'sw.js'),'utf8')).update(fs.readFileSync(path.join(src,'manifest.webmanifest'),'utf8')).digest('hex').slice(0,16);
 fs.writeFileSync(path.join(dist,'sw.js'),fs.readFileSync(path.join(src,'sw.js'),'utf8').replace('__BMH_ASSET_DIGEST__',assetDigest));
 fs.copyFileSync(path.join(src,'manifest.webmanifest'),path.join(dist,'manifest.webmanifest'));
 fs.cpSync(path.join(root,'assets'),path.join(dist,'assets'),{recursive:true});fs.writeFileSync(path.join(dist,'.nojekyll'),'');

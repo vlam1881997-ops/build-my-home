@@ -6,6 +6,15 @@ import * as BaseThree from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 const THREE={...BaseThree,RoundedBoxGeometry};
 
+test('soft upholstery keeps finite geometry and its piping follows cushion rotations',()=>{
+ const {b}=client(),m=b.sceneAssetMaterials(THREE,new THREE.Scene());
+ for(const name of ['loungeDesignSofa','bedDouble']){
+  const root=b.createRoomAsset(name,b.FURNITURE_DIMENSIONS[name],THREE,m);let count=0,triangles=0;
+  root.traverse(o=>{if(!o.isMesh)return;triangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3;if(o.userData.kind!=='upholstery')return;count++;assert.equal(o.geometry.type,'SphereGeometry');assert.ok(o.geometry.attributes.normal.array.every(Number.isFinite));const seam=o.children.find(c=>c.userData.kind==='upholstery-seam');assert.ok(seam);assert.equal(seam.parent,o);assert.equal(seam.position.length(),0);const before=seam.getWorldPosition(new THREE.Vector3());o.rotation.z+=.2;root.updateMatrixWorld(true);assert.ok(seam.getWorldPosition(new THREE.Vector3()).distanceTo(o.getWorldPosition(new THREE.Vector3()))<1e-7);assert.ok(before.length()>0);});
+  assert.ok(count>=2);assert.ok(triangles<65000,'bounded furniture detail');
+ }
+});
+
 function client(){
   const BMH={state:{project:{site:{width:8,depth:8},plan:{rooms:[],openings:[]}},ui:{}},screen5:()=>'',screen7:()=>'',SCREENS:[],aiContext:()=>({}),esc:String};
   const context={BMH,document:{addEventListener(){}},window:{addEventListener(){},removeEventListener(){}},structuredClone,URL,setTimeout,clearTimeout,console,cancelAnimationFrame(){}};
