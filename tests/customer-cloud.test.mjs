@@ -59,9 +59,16 @@ test('customer API capability, account and quota boundaries',async t=>{
   await t.test('parallel provider work inside one request reserves and settles exactly once',async()=>{
    calls.length=0;assert.equal((await invoke(provider,{headers})).status,200);assert.equal(providers,1);assert.equal(calls.filter(x=>x.path.endsWith('bmh_ai_reserve')).length,1);const settle=calls.find(x=>x.path.endsWith('bmh_ai_settle'));assert.equal(settle.body.p_used,true);assert.equal(settle.body.p_user,user.id);assert.equal(settle.options.headers.apikey,'server-fixture');
   });
+  await t.test('response ends only after settlement, and a settlement failure still delivers the result',async()=>{
+   const savedFetch=globalThis.fetch;let ledgerDone=false,fail=false,delivered=0;
+   globalThis.fetch=async(url,options)=>{if(new URL(url).pathname.endsWith('bmh_ai_settle')){assert.equal(options.signal instanceof AbortSignal,true);ledgerDone=true;if(fail)throw Error('Ledger temporarily offline');}return savedFetch(url,options);};
+   const res={status(n){this.statusCode=n;return this;},setHeader(){},end(raw){assert.equal(ledgerDone,true,'settlement must precede HTTP completion');assert.equal(JSON.parse(raw).ok,true);delivered++;}};
+   try{for(const broken of [false,true]){fail=broken;ledgerDone=false;await provider({method:'POST',headers,body:{},url:'/api/ai'},res);}assert.equal(delivered,2);}
+   finally{globalThis.fetch=savedFetch;}
+  });
   await t.test('exhausted quota or expired token prevents any provider invocation',async()=>{
-   quotaResult={accepted:false,code:'AI_LIMIT_REACHED'};await assert.rejects(invoke(provider,{headers}),e=>e.statusCode===429&&e.code==='AI_LIMIT_REACHED');assert.equal(providers,1);
-   authStatus=401;await assert.rejects(invoke(provider,{headers}),e=>e.statusCode===401&&e.code==='AI_LOGIN_REQUIRED');assert.equal(providers,1);authStatus=200;quotaResult={accepted:true};
+   const before=providers;quotaResult={accepted:false,code:'AI_LIMIT_REACHED'};await assert.rejects(invoke(provider,{headers}),e=>e.statusCode===429&&e.code==='AI_LIMIT_REACHED');assert.equal(providers,before);
+   authStatus=401;await assert.rejects(invoke(provider,{headers}),e=>e.statusCode===401&&e.code==='AI_LOGIN_REQUIRED');assert.equal(providers,before);authStatus=200;quotaResult={accepted:true};
   });
   await t.test('known failure settles unused while a cached response consumes nothing',async()=>{
    const failed=withAiUsage(async()=>{await reserveAiUsage();throw Error('Provider rejected request');},'scan');await assert.rejects(invoke(failed,{headers}));assert.equal(calls.findLast(x=>x.path.endsWith('bmh_ai_settle')).body.p_used,false);
