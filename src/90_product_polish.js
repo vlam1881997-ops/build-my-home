@@ -30,11 +30,11 @@
    if(!target.has(id)&&!(role==='wall'&&!roomId&&!id))return;
    const old=mesh.material,source=materials(id)[slot];if(!source||source===old)return;
    // A cutaway wall owns its clipping plane; never attach it to a shared room material.
-   const next=old.clippingPlanes?.length?source.clone():source;
+   const next=old.clippingPlanes?.length||old.userData.bmhWallView?source.clone():source;
    if(next!==source){next.clippingPlanes=old.clippingPlanes;next.clipShadows=old.clipShadows;next.side=old.side;}
-   changes.push({mesh,old,next});
+   B.prepareModelMaterial?.(next,old,mesh,s.scene);changes.push({mesh,old,next,owned:next!==source});
   });
-  if(unknown){for(const {next}of changes)if(next.clippingPlanes?.length)next.dispose();return false;}
+  if(unknown){for(const {next,owned}of changes)if(owned)next.dispose();return false;}
   if(!changes.length)return false;
   const retired=new Set();
   for(const {mesh,old,next}of changes){mesh.material=next;B.sceneSurfaceUvs(mesh.geometry,next,mesh.position);retired.add(old);}

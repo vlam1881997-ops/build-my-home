@@ -126,11 +126,11 @@ BMH.mountStudio3D = async () => {
   const finishMaterials=new Map();
   const roomMaterial=(role,id,fallback)=>{if(id&&['floor','wall','accent'].includes(role)){const finishes=BMH.sceneAssetMaterials(THREE,scene,{...(BMH.finishPalette?.(id)||{}),floor:BMH.finishPalette?.(id)?.floor||'#'+palette.floor.toString(16).padStart(6,'0'),surface:BMH.roomSurfaceStyle(id)});return finishes[role==='accent'?'wood':role];}const hex=BMH.finishPalette?.(id)?.[role];if(!/^#[0-9a-f]{6}$/i.test(hex||''))return fallback;const key=role+hex;if(!finishMaterials.has(key)){const m=fallback.clone();m.color.set(hex);finishMaterials.set(key,m);}return finishMaterials.get(key);};
   const addBox=(w,h,d,x,y,z,material=mats.wall)=>{const g=new THREE.BoxGeometry(w,h,d);BMH.sceneSurfaceUvs(g,material,{x,y,z});const o=new THREE.Mesh(g,material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o;};
-  const site=BMH.state.project.site,W=Number(site.width)||5,D=Number(site.depth)||20,floors=Math.max(1,Number(site.floors)||1),fh=BMH.projectLevels().floorHeight,explode=BMH.state.ui.sceneExploded?1.25:0,focus=BMH.state.ui.sceneFocus||'all',classical=/tân cổ điển|tan co dien|neoclassic|classical|cổ điển|co dien/i.test(BMH.state.project.style||'');
+  const site=BMH.state.project.site,W=Number(site.width)||5,D=Number(site.depth)||20,floors=Math.max(1,Number(site.floors)||1),fh=BMH.projectLevels().floorHeight,explode=BMH.state.ui.sceneExploded?(BMH.modelExplodeGap?.(fh)??1.25):0,focus=BMH.state.ui.sceneFocus||'all',classical=/tân cổ điển|tan co dien|neoclassic|classical|cổ điển|co dien/i.test(BMH.state.project.style||'');
   // landscape
-  const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),mat(0xefebe2,1));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),mat(0xefebe2,1));ground.userData={kind:'display-ground',presentationOnly:true};ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
   const displayRoom=focus.startsWith('room:')?BMH.state.project.plan.rooms.find(r=>r.id===focus.slice(5)):null;
-  addBox((displayRoom?.w||W)+.25,.065,(displayRoom?.h||D)+.25,displayRoom?displayRoom.x+displayRoom.w/2-W/2:0,.025,displayRoom?displayRoom.y+displayRoom.h/2-D/2:0,mat(0xd4caba,.97));
+  const displayBase=addBox((displayRoom?.w||W)+.25,.065,(displayRoom?.h||D)+.25,displayRoom?displayRoom.x+displayRoom.w/2-W/2:0,.025,displayRoom?displayRoom.y+displayRoom.h/2-D/2:0,mat(0xd4caba,.97));displayBase.userData={kind:'display-base',presentationOnly:true};
   const roomFurniture=(r,y)=>{
     if(BMH.addRoomSceneFurniture)return BMH.addRoomSceneFurniture(r,y,THREE,scene,{...mats,accent:roomMaterial('accent',r.id,mats.accent)},BMH.state.project.site);
     const cx=r.x+r.w/2-W/2,cz=r.y+r.h/2-D/2;
@@ -198,14 +198,13 @@ BMH.mountStudio3D = async () => {
       const near=(roomFocus||floorFocus!==null)&&(w.horizontal?w.axis<=Math.min(...geometry.rooms.map(r=>r.y))+.02:w.axis>=Math.max(...geometry.rooms.map(r=>r.x+r.w))-.02);
       const clipped=new Map();
       const viewMaterial=material=>{if(!(floorFocus!==null||roomFocus&&near&&!insideRoom)||!THREE.Plane)return material;if(!clipped.has(material)){const copy=material.clone();copy.clippingPlanes=[new THREE.Plane(new THREE.Vector3(0,-1,0),base+(roomFocus?.85:1.05))];copy.clipShadows=true;clipped.set(material,copy);}return clipped.get(material);};
-      const segment=(h,cy,material=wallMaterial)=>{const mesh=addBox(w.horizontal?len:wallT,h,w.horizontal?wallT:len,x,base+BMH.projectLevels().slab+cy,z,viewMaterial(material));mesh.userData={kind:'wall',roomIds:w.roomIds||[],floor:f};return mesh;};
+      const segment=(h,cy,material=wallMaterial)=>{const mesh=addBox(w.horizontal?len:wallT,h,w.horizontal?wallT:len,x,base+BMH.projectLevels().slab+cy,z,viewMaterial(material));mesh.userData={kind:'wall',roomIds:w.roomIds||[],floor:f,wallAxis:w.horizontal?'z':'x',wallCoordinate:w.axis,base,wallSurface:w.kind==='window'&&material===mats.glass?'window':'solid'};return mesh;};
       if(w.kind==='door'){
         const oh=Math.min(w.height,wallHeight);segment(wallHeight-oh,oh+(wallHeight-oh)/2);
       }else if(w.kind==='window'){
         const sill=w.sill,oh=Math.min(w.height,Math.max(.1,wallHeight-sill)),top=sill+oh;segment(sill,sill/2);segment(Math.max(.001,wallHeight-top),top+(wallHeight-top)/2);segment(oh,sill+oh/2,mats.glass);
-        for(const v of [w.a,w.b,mid])addBox(w.horizontal?.045:.07,oh,w.horizontal?.07:.045,w.horizontal?v-W/2:x,base+BMH.projectLevels().slab+sill+oh/2,w.horizontal?z:v-D/2,viewMaterial(mats.frame));
-        addBox(w.horizontal?len:.045,.045,w.horizontal?.045:len,x,base+BMH.projectLevels().slab+sill,z,viewMaterial(mats.frame));
-        addBox(w.horizontal?len:.045,.045,w.horizontal?.045:len,x,base+BMH.projectLevels().slab+top,z,viewMaterial(mats.frame));
+        for(const v of [w.a,w.b,mid]){const frame=addBox(w.horizontal?.045:.07,oh,w.horizontal?.07:.045,w.horizontal?v-W/2:x,base+BMH.projectLevels().slab+sill+oh/2,w.horizontal?z:v-D/2,viewMaterial(mats.frame));frame.userData={kind:'window-frame',openingId:w.openingId,roomId:w.openingRoomId,floor:f};}
+        for(const height of [sill,top]){const frame=addBox(w.horizontal?len:.045,.045,w.horizontal?.045:len,x,base+BMH.projectLevels().slab+height,z,viewMaterial(mats.frame));frame.userData={kind:'window-frame',openingId:w.openingId,roomId:w.openingRoomId,floor:f};}
       }else{
         // Cut away the near side in an isolated room so the interior stays visible.
         segment(wallHeight,wallHeight/2);
@@ -235,17 +234,18 @@ BMH.mountStudio3D = async () => {
   const centerRoom=roomFocus?new THREE.Vector3(roomFocus.x+roomFocus.w/2-W/2,roomFocus.type==='stairs'?fh*.55:1.12,roomFocus.y+roomFocus.h/2-D/2):null;
   const focusedBounds=BMH.sceneFootprintBounds(roomFocus?[roomFocus]:visibleFloors.flatMap(f=>BMH.floorRooms(f)));if(focusedBounds){const cx=focusedBounds.cx-W/2,cz=focusedBounds.cy-D/2,extent=Math.max(focusedBounds.width,focusedBounds.depth,floors*fh)+2;sun.target.position.set(cx,0,cz);scene.add(sun.target);sun.position.set(cx-10,18,cz-12);sun.shadow.camera.left=sun.shadow.camera.bottom=-extent;sun.shadow.camera.right=sun.shadow.camera.top=extent;sun.shadow.camera.updateProjectionMatrix();}
   const facadeCamera=focus==='all'&&BMH.state.ui.exteriorCamera==='front',frameBounds=facadeCamera&&focusedBounds?{...focusedBounds,depth:Math.min(1,focusedBounds.depth)}:focusedBounds;
-  const defaultPitch=roomFocus?(insideRoom?.13:.62):floorFocus!==null?1.05:.38;
+  BMH.configureModelPresentation?.({THREE,scene,renderer,camera,ground,displayBase,visibleFloors,roomFocus,floorFocus,W,D,fh,explode,focus});
+  const defaultPitch=roomFocus?(insideRoom?.13:.62):floorFocus!==null?.84:.38;
   const span=Math.hypot(focusedBounds?.width||W,focusedBounds?.depth||D),aspect=Math.max(.55,stage.getBoundingClientRect().width/Math.max(360,stage.getBoundingClientRect().height)),distance=span*(aspect<1?1.5:1.05);
   const state={yaw:floorFocus!==null?(aspect<1?Math.PI-.5:Math.PI/2+.3):focus==='all'?Math.PI+.42:Math.PI-.5,pitch:focus==='all'?.28:defaultPitch,dist:roomFocus?Math.max(4.2,Math.max(roomFocus.w,roomFocus.h)*(aspect<1?2.1:1.55)):Math.max(10,distance),target:centerRoom||new THREE.Vector3(focusedBounds?focusedBounds.cx-W/2:0,floorFocus!==null?.65:floors*fh*.45,focusedBounds?focusedBounds.cy-D/2:0),drag:false,lastX:0,lastY:0,defaultPitch:focus==='all'?.28:defaultPitch};
   if(facadeCamera&&focusedBounds){state.yaw=Math.PI+.06;state.pitch=state.defaultPitch=.09;state.dist=Math.max(7,Math.max(focusedBounds.width,floors*fh)*1.7);state.target.set(focusedBounds.cx-W/2,Math.max(floors*fh,roof?roof.eave+roof.rise:0)*.46,focusedBounds.y-D/2);}
   if(insideRoom){state.yaw=interiorCamera.yaw;state.dist=interiorCamera.distance;state.pitch=state.defaultPitch=interiorCamera.pitch;state.target.set(interiorCamera.target.x-W/2,interiorCamera.targetHeight??1.15,interiorCamera.target.y-D/2);camera.fov=58;}state.minDist=insideRoom?.45:roomFocus?1.5:4;
   let composer=null,ao=null,fxaa=null;
   const clippedScene=scene.children.some(o=>(Array.isArray(o.material)?o.material:[o.material]).some(m=>m?.clippingPlanes?.length));
-  if(!clippedScene&&renderer.capabilities?.isWebGL2&&FX.EffectComposer&&FX.RenderPass&&FX.SSAOPass&&FX.OutputPass&&FX.ShaderPass&&FX.FXAAShader){
+  if(BMH.modelLook?.()!=='neon'&&!clippedScene&&renderer.capabilities?.isWebGL2&&FX.EffectComposer&&FX.RenderPass&&FX.SSAOPass&&FX.OutputPass&&FX.ShaderPass&&FX.FXAAShader){
    try{composer=new FX.EffectComposer(renderer);composer.setPixelRatio(1);composer.addPass(new FX.RenderPass(scene,camera));ao=new FX.SSAOPass(scene,camera,512,512,16);ao.kernelRadius=.18;ao.minDistance=.00005;ao.maxDistance=.005;const originalVisibility=ao.overrideVisibility.bind(ao);ao.overrideVisibility=()=>{originalVisibility();ground.visible=false;};composer.addPass(ao);fxaa=new FX.ShaderPass(FX.FXAAShader);composer.addPass(fxaa);composer.addPass(new FX.OutputPass());}catch(_){for(const pass of composer?.passes||[])pass.dispose?.();composer?.dispose?.();composer=null;}
   }
-  const renderFrame=()=>{if(BMH.studio3d?.renderer===renderer&&BMH.studio3d.archRender)return;if(composer)composer.render();else renderer.render(scene,camera);const current=BMH.studio3d;if(current?.renderer===renderer){current.displayedCameraKey=BMH.cinematicCameraKey();current.displayedDesignKey=BMH.cinematicSignature();BMH.updateModelRoomLabels?.(current);}};
+  const renderFrame=()=>{if(BMH.studio3d?.renderer===renderer&&BMH.studio3d.archRender)return;BMH.updateModelPresentation?.({scene,camera,THREE});if(composer)composer.render();else renderer.render(scene,camera);if(renderer.shadowMap.enabled&&sun.shadow.map)renderer.shadowMap.autoUpdate=false;const current=BMH.studio3d;if(current?.renderer===renderer){current.displayedCameraKey=BMH.cinematicCameraKey();current.displayedDesignKey=BMH.cinematicSignature();BMH.updateModelRoomLabels?.(current);}};
   const indoorItems=insideRoom?BMH.roomFurnitureLayout(roomFocus):[];let clearIndoorPose=null;
   const updateCamera=()=>{
    const position=()=>{const cp=Math.cos(state.pitch),sp=Math.sin(state.pitch),cy=Math.cos(state.yaw),sy=Math.sin(state.yaw);camera.position.set(state.target.x+state.dist*cp*sy,state.target.y+state.dist*sp,state.target.z+state.dist*cp*cy);};position();
@@ -279,7 +279,7 @@ BMH.mountStudio3D = async () => {
   BMH.studio3d={THREE,project:BMH.state.project,structureKey:BMH.studioStructureKey?.(),scene,camera,renderer,composer,ao,fxaa,renderFrame,state,ro,onDown,onMove,onUp,onWheel,onContextLost,raf:0};animate();stage.classList.add('three-ready');BMH.$('#studio3dLoading')?.remove();
   Promise.allSettled(scene.userData.surfaceLoads||[]).then(()=>{if(BMH.studio3d?.scene===scene)renderFrame();});
   const furnitureLoads=scene.userData.furnitureLoads||[];
-  if(furnitureLoads.length){const status=document.createElement('div');status.className='studio-model-status';status.setAttribute('role','status');status.textContent='Đang tải '+furnitureLoads.length+' mô hình nội thất…';stage.appendChild(status);Promise.all(furnitureLoads).then(results=>{if(BMH.studio3d?.scene!==scene)return;const failed=results.filter(ok=>!ok).length;status.textContent=failed?failed+' món đang dùng mô hình đơn giản · thử tải lại để xem chi tiết':'Đã tải '+results.length+' mô hình nội thất';updateCamera();});}
+  if(furnitureLoads.length){const status=document.createElement('div');status.className='studio-model-status';status.setAttribute('role','status');status.textContent='Đang tải '+furnitureLoads.length+' mô hình nội thất…';stage.appendChild(status);Promise.all(furnitureLoads).then(results=>{if(BMH.studio3d?.scene!==scene)return;renderer.shadowMap.needsUpdate=true;const failed=results.filter(ok=>!ok).length;status.textContent=failed?failed+' món đang dùng mô hình đơn giản · thử tải lại để xem chi tiết':'Đã tải '+results.length+' mô hình nội thất';updateCamera();});}
   if(!visibleFloors.some(f=>BMH.floorRooms(f).length)){const message=document.createElement('div');message.className='studio-empty-floor';message.textContent='Tầng này chưa có phòng trong mặt bằng. Bổ sung ở Bước 4 để dựng 3D.';stage.appendChild(message);}
 };
 BMH.resetStudio3D = () => {const s=BMH.studio3d;if(!s)return;s.state.yaw=s.state.defaultYaw;s.state.pitch=s.state.defaultPitch;s.state.dist=s.state.defaultDist;s.state.target.copy(s.state.defaultTarget);s.state.updateCamera();};
