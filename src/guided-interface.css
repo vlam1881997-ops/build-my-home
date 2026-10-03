@@ -30,3 +30,22 @@ html.bmh-v60 .guided-footer .v6-next{background:var(--guided-action);border-colo
 @media(max-width:760px){html.bmh-v60 .guided-stepper small{font-size:8px}.guided-planner .v6-plan-toolbar>button{white-space:nowrap;padding:10px 8px;font-size:11px}}
 @media(max-width:760px){html.bmh-v60 .guided-studio .design-view-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}html.bmh-v60 .guided-studio .design-view-controls>select{grid-column:1/-1;order:-1;width:100%;min-width:0}html.bmh-v60 .guided-studio .design-view-controls>.guided-select,html.bmh-v60 .guided-studio .design-view-controls>.guided-menu{grid-column:1/-1;width:100%}html.bmh-v60 .guided-studio .design-brief .visual-material-quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}html.bmh-v60 .guided-studio .design-brief .visual-material-quick label{display:grid;gap:6px;min-width:0}html.bmh-v60 .guided-studio .design-brief .visual-material-quick select{width:100%;min-width:0;padding:10px 8px;font-size:12px}}
 @media(max-width:760px){html.bmh-v60 .guided-studio .design-brief .visual-material-quick label{grid-template-columns:minmax(0,1fr)}}
+/* All ten established functions remain visible, including showroom and finance. */
+html.bmh-v60 .guided-ten-tabs{grid-template-columns:repeat(10,minmax(0,1fr));max-width:1440px;width:100%;padding:0 24px;gap:7px;margin:14px auto}
+html.bmh-v60 .guided-ten-tabs>button{flex-direction:column;gap:6px;min-height:68px;padding:10px 5px}
+html.bmh-v60 .guided-ten-tabs span{display:block;text-align:center;min-width:0}
+html.bmh-v60 .guided-ten-tabs b{font-size:12px;line-height:1.3;white-space:normal;overflow-wrap:normal}
+html.bmh-v60 .guided-ten-tabs i{display:flex;align-items:center;justify-content:center;width:19px;height:19px;border:1px solid #bdcbb9;border-radius:50%;background:transparent;font-size:10px;font-weight:600;font-style:normal;color:inherit;flex:none}
+html.bmh-v60 .guided-ten-tabs>button.active i{border-color:#6e9577;background:#dcebd9}
+@media(max-width:1000px){html.bmh-v60 .guided-ten-tabs{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:760px){html.bmh-v60 .guided-ten-tabs{grid-template-columns:repeat(5,minmax(0,1fr));padding:0 12px;gap:6px;margin:10px auto}html.bmh-v60 .guided-ten-tabs>button{min-height:62px;padding:8px 3px;gap:5px}html.bmh-v60 .guided-ten-tabs b{font-size:10px;line-height:1.25}html.bmh-v60 .guided-ten-tabs i{width:17px;height:17px;font-size:9px}}
+/* Family fields and the full-width reference table need room to stay readable. */
+html.bmh-v60 .v6-s4{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);grid-template-areas:"head head" "land family" "feng feng"}
+html.bmh-v60 .v6-s4>*{min-width:0}
+html.bmh-v60 .v6-s4-head{grid-template-columns:repeat(2,minmax(0,1fr))}
+html.bmh-v60 .v6-s4 .v6-people{grid-template-columns:repeat(2,minmax(0,1fr))}
+html.bmh-v60 .v6-s4 .v6-person-head{grid-template-columns:30px minmax(0,1fr) auto}
+html.bmh-v60 .v6-s4 .v6-person-head b{overflow-wrap:anywhere}
+html.bmh-v60 .v6-s4 .v6-person input,html.bmh-v60 .v6-s4 .v6-person select{width:100%;min-width:0}
+html.bmh-v60 .v6-s4 .v6-feng-base{grid-template-columns:220px minmax(0,1fr)}
+@media(max-width:760px){html.bmh-v60 .v6-s4{grid-template-columns:minmax(0,1fr);grid-template-areas:none}html.bmh-v60 .v6-s4>*,html.bmh-v60 .v6-s4-head{grid-area:auto}html.bmh-v60 .v6-s4-head,html.bmh-v60 .v6-s4 .v6-people,html.bmh-v60 .v6-s4 .v6-feng-base{grid-template-columns:minmax(0,1fr)}}
