@@ -768,8 +768,6 @@ BMH.afterRender=()=>{
   }
   if(step===8){
     BMH.v65LoadBankLogos?.();
-    const bank=BMH.BANKS.find(x=>x.id===BMH.state.project.finance.bank)||BMH.BANKS[0];
-    setTimeout(()=>BMH.v65RefreshBankRate?.(bank,{force:false,silent:true}),80);
   }
   if(step===2){
     BMH.installFallbackPinCapture?.();

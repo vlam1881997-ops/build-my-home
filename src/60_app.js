@@ -379,14 +379,13 @@ document.addEventListener('click',e=>{
       f.bank=b.id;
       if(BMH.bankHasPreset?.(b)){
         Object.assign(f,{introRate:b.intro,postRate:b.post,promoMonths:b.months});
-        BMH.toast(`Đã chọn ${b.name}. Gemini sẽ kiểm tra lãi suất công khai mới nhất.`);
+        BMH.toast(`Đã chọn ${b.name}. Lãi suất mẫu dùng để mô phỏng; bấm Cập nhật để đối chiếu nguồn.`);
       }else{
         Object.assign(f,{introRate:0,postRate:0,promoMonths:0});
-        BMH.toast(`Đã chọn ${b.name}. Chưa có lãi suất cho ngân hàng này; hãy nhập kịch bản hoặc đợi nguồn xác minh.`);
+        BMH.toast(`Đã chọn ${b.name}. Chưa có lãi suất; hãy nhập kịch bản hoặc bấm Cập nhật để đối chiếu nguồn.`);
       }
-      f.rateMeta={bankId:b.id,status:'pending',verified:false,product:'',sourceDate:'',fetchedAt:'',provider:'',model:'',introRate:0,postRate:0,promoMonths:0,citations:[],note:''};
+      f.rateMeta={bankId:b.id,status:'unverified',verified:false,product:'',sourceDate:'',fetchedAt:'',provider:'',model:'',introRate:0,postRate:0,promoMonths:0,citations:[],note:'Chưa kiểm tra nguồn. Nhập kịch bản hoặc chọn Cập nhật để đối chiếu.'};
       BMH.save();BMH.render({preserveScroll:true});
-      setTimeout(()=>BMH.v65RefreshBankRate?.(b,{force:true,silent:true}),80);
     }
     return;
   }

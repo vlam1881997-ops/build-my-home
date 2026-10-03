@@ -62,6 +62,7 @@ BMH.mergeState = (base, incoming) => {
   return merge(out,incoming);
 };
 BMH.loadState = () => {
+  BMH.localStateLoaded=false;
   const base=BMH.defaultState(), keys=[BMH.STORAGE_KEY,...(BMH.LEGACY_STORAGE_KEYS||[])];
   for(const key of keys){
     try{
@@ -69,7 +70,7 @@ BMH.loadState = () => {
       const parsed=JSON.parse(raw);const merged=BMH.mergeState(base,parsed);
       if(!Object.prototype.hasOwnProperty.call(parsed?.project?.site||{},'pinAddressNeedsReview'))merged.project.site.pinAddressNeedsReview=!/^(Địa chỉ ·|Dữ liệu vùng)/.test(merged.project.site.geoSource||'Dữ liệu vùng');
       if(key!==BMH.STORAGE_KEY){try{localStorage.setItem(BMH.STORAGE_KEY,JSON.stringify(merged));}catch(_){}}
-      return merged;
+      BMH.localStateLoaded=true;return merged;
     }catch(e){try{localStorage.removeItem(key);}catch(_){}}
   }
   return base;
@@ -208,7 +209,7 @@ BMH.syncHouseholdSize=()=>{
   h.requestedSize=Math.max(actual,requested);
   return h.requestedSize;
 };
-BMH.save = () => { BMH.state.version=BMH.VERSION; BMH.state.meta.savedAt=new Date().toISOString(); try{localStorage.setItem(BMH.STORAGE_KEY,JSON.stringify(BMH.state));}catch(e){BMH.toast('Không thể lưu cục bộ. Hãy xuất bản sao dự án.');} };
+BMH.save = () => { BMH.state.version=BMH.VERSION; BMH.state.meta.savedAt=new Date().toISOString(); try{localStorage.setItem(BMH.STORAGE_KEY,JSON.stringify(BMH.state));BMH.localSaveFailed=false;}catch(e){if(!BMH.localSaveFailed)BMH.toast(BMH.projects?.db?'Lưu nhanh bị giới hạn. Đang lưu vào kho dự án trên thiết bị.':'Trình duyệt hạn chế lưu nhanh. Mở Dự án để tải bản sao.');BMH.localSaveFailed=true;} };
 BMH.get = path => path.split('.').reduce((o,k)=>o?.[k],BMH.state);
 BMH.set = (path,value,{render=true}={}) => { const keys=path.split('.'); let o=BMH.state; for(let i=0;i<keys.length-1;i++){if(!o[keys[i]]||typeof o[keys[i]]!=='object')o[keys[i]]={};o=o[keys[i]];} o[keys.at(-1)]=value; BMH.save(); if(render) BMH.render(); };
 BMH.isUnlocked = () => BMH.DEFER_PAYMENT===true || (BMH.state.access.paid===true && (BMH.state.access.source==='server-verified' || (BMH.DEV && String(BMH.state.access.source||'').startsWith('dev'))));
