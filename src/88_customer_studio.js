@@ -56,12 +56,12 @@ BMH.customerPackageFiles=(snapshot,sheets,html)=>{
 BMH.exportCustomerPackage=async()=>{
  if(BMH.customerPackageBusy)return false;BMH.customerPackageBusy=true;const buttons=[...document.querySelectorAll('[data-client-package]')];buttons.forEach(b=>b.disabled=true);const project=BMH.state.project,revision=BMH.drawingRevision(),designKey=BMH.cinematicSignature(),cameraKey=BMH.cinematicCameraKey();
  try{
-  const snapshot=BMH.customerDesignSnapshot(),sheets=BMH.architecturalSheets(),frame=BMH.studio3d?.renderer?await BMH.sharpStudioFrame(1280):null;
+  const snapshot=BMH.customerDesignSnapshot(),sheets=BMH.architecturalSheets(),frame=BMH.studio3d?.renderer?await BMH.sharpStudioFrame(1280):BMH.cachedCustomerFrame?.()||null;
   if(BMH.state.project!==project||BMH.drawingRevision()!==revision||BMH.cinematicSignature()!==designKey||BMH.cinematicCameraKey()!==cameraKey){BMH.toast('Thiết kế vừa đổi. Tạo lại hồ sơ để giữ đồng bộ.');return false;}
   let image='';if(frame)image=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('Ảnh chưa đọc được'));reader.readAsDataURL(frame.blob);});
   if(BMH.state.project!==project||BMH.drawingRevision()!==revision||BMH.cinematicSignature()!==designKey||BMH.cinematicCameraKey()!==cameraKey)return false;
   const files=BMH.customerPackageFiles(snapshot,sheets,BMH.customerPresentationHtml(snapshot,sheets,image));if(frame)files.push(['phoi-canh-3D.png',new Uint8Array(await frame.blob.arrayBuffer())]);
-  BMH.download('BMH-ho-so-gui-khach-'+revision+'.zip',BMH.zipStored(files),'application/zip');BMH.toast('Đã xuất hồ sơ: bản vẽ, CAD, vật liệu và ảnh 3D nếu đang mở.');return true;
+  BMH.download('BMH-ho-so-gui-khach-'+revision+'.zip',BMH.zipStored(files),'application/zip');BMH.toast('Đã xuất hồ sơ: bản vẽ, CAD, vật liệu'+(frame?' và ảnh 3D của phương án.':'.'));return true;
  }catch(error){console.warn('BMH client pack',error);BMH.toast('Chưa xuất được hồ sơ. Kiểm tra mặt bằng rồi thử lại.');return false;}finally{BMH.customerPackageBusy=false;buttons.forEach(b=>b.disabled=false);}
 };
 document.addEventListener('click',e=>{
