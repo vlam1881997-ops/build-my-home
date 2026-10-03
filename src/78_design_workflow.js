@@ -27,7 +27,7 @@ document.addEventListener('change',e=>{
 });
 // Accept a touch anywhere on a room and resolve the nearest wall in plan coordinates.
 document.addEventListener('pointerdown',e=>{
- if(BMH.state.ui.step!==4||!['door','window'].includes(BMH.state.ui.planner.tool)||!e.target.closest?.('#plannerSvg'))return;
+ if(BMH.state.ui.step!==4||BMH.state.ui.planner.view!=='plan'||!['door','window'].includes(BMH.state.ui.planner.tool)||!e.target.closest?.('#plannerSvg'))return;
  const svg=BMH.$('#plannerSvg'),p=BMH.svgPoint(e,svg),rooms=BMH.floorRooms().filter(r=>p.x>=r.x-.2&&p.x<=r.x+r.w+.2&&p.y>=r.y-.2&&p.y<=r.y+r.h+.2);
  if(!rooms.length)return;const r=rooms.find(r=>r.id===BMH.state.ui.planner.selected)||rooms[0],side=[['north',Math.abs(p.y-r.y)],['south',Math.abs(p.y-r.y-r.h)],['west',Math.abs(p.x-r.x)],['east',Math.abs(p.x-r.x-r.w)]].sort((a,b)=>a[1]-b[1])[0][0];
  e.preventDefault();e.stopImmediatePropagation();BMH.placeOpeningAt(BMH.state.ui.planner.tool,r.id,side,p);
@@ -48,9 +48,12 @@ BMH.roomFurnitureLayout=r=>{
   const blocked=BMH.state.project.plan.openings.filter(o=>o.roomId===r.id&&o.kind==='door').some(o=>{const g=BMH.openingGeometry(o);if(!g)return false;const c={x:g.x-.45,y:g.y-.45,w:.9,d:.9};return item.x<c.x+c.w&&item.x+item.w>c.x&&item.y<c.y+c.d&&item.y+item.d>c.y;});if(blocked)return;
   items.push(item);return true;
  };
- if(r.type==='living'){add('loungeDesignSofa',W/2,.58,180);add('tableCoffee',W/2,1.8);add('cabinetTelevision',W/2,D-.38);add('televisionModern',W/2,D-.38,0,.64);add('sideTable',.32,.58);add('floorLamp',W-.32,.58);add('loungeChair',.65,D/2,90);add('pottedPlant',W-.4,1.48)||add('pottedPlant',W-.4,D-.4);}
- if(r.type==='bed'){const model=W>=2.7?'bedDouble':'bedSingle';add(model,W/2,1.26);add('cabinetBed',.4,.4);add('bookcaseClosedWide',W/2,D-.42);add('desk',.8,D/2,90);add('chairDesk',1.7,D/2,90);}
- if(r.type==='kitchen'){add('kitchenSink',.55,.62);add('kitchenStove',1.55,.62);add('kitchenFridge',W-.6,.5);add('table',W/2,D*.65);add('chair',W/2-1.1,D*.65,90);add('chair',W/2+1.1,D*.65,270);add('chair',W/2,D*.65+.8,180);}
+ if(r.type==='living'){add('loungeDesignSofa',W/2,.58,180);add('tableCoffee',W/2,1.8);if(add('cabinetTelevision',W/2,D-.38))add('televisionModern',W/2,D-.38,0,.64);add('sideTable',.32,.58);add('floorLamp',W-.32,.58);add('loungeChair',.65,D/2,90);add('pottedPlant',W-.4,1.48)||add('pottedPlant',W-.4,D-.4);}
+ if(r.type==='bed'){const model=W>=2.7?'bedDouble':'bedSingle';add(model,W/2,1.26);add('cabinetBed',.4,.4);add('bookcaseClosedWide',W/2,D-.42);if(add('desk',.8,D/2,90))add('chairDesk',1.7,D/2,90);}
+ if(r.type==='kitchen'){add('kitchenSink',.55,.62);add('kitchenStove',1.55,.62);add('kitchenFridge',W-.6,.5);if(add('table',W/2,D*.65)){add('chair',W/2-1.1,D*.65,90);add('chair',W/2+1.1,D*.65,270);add('chair',W/2,D*.65+.8,180);}}
+ if(r.type==='office'){if(add('desk',W/2,.55))add('chairDesk',W/2,1.45);add('bookcaseClosedWide',W/2,D-.4);}
+ if(r.type==='utility'){add('cabinetBed',.42,.38);add('kitchenSink',W-.6,.6);}
+ // Worship fittings require a customer's specification; no invented altar model.
  if(r.type==='bath'){
   const toilets=[[.48,.63,0],[.60,.45,90],[W-.60,.45,270],[.48,D-.63,180],[W-.48,D-.63,180],[.60,D/2,90],[W-.60,D/2,270]];
   const showers=[[W/2,D-.7,0],[.68,D-.68,0],[W-.68,D-.68,0],[W/2,.7,180]];

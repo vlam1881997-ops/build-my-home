@@ -143,12 +143,12 @@ BMH.decorateStudioScene=({THREE,scene,mats,addBox,mat,roomMaterial,visibleFloors
   for(const w of geometry.walls){
    if(w.kind==='door')continue;const len=w.b-w.a,mid=(w.a+w.b)/2,thickness=(w.thickness||.12)+.025;
    const mesh=addBox(w.horizontal?len:thickness,.085,w.horizontal?thickness:len,w.horizontal?mid-W/2:w.axis-W/2,base+levels.slab+.043,w.horizontal?w.axis-D/2:mid-D/2,mat(0xddd4c6,.8));detail(mesh,w.roomIds?.[0]);
-   if(focus==='all'&&w.roomIds?.length===1&&w.kind==='wall'){
+   if(focus==='all'&&!BMH.facadeComponents&&w.roomIds?.length===1&&w.kind==='wall'){
     const dark=roomMaterial('accent',w.roomIds[0],mats.accent),z=w.horizontal?w.axis-D/2:mid-D/2,x=w.horizontal?mid-W/2:w.axis-W/2;
     // Narrow trim at the actual slab line rather than a new facade or opening.
     detail(addBox(w.horizontal?len:thickness,.09,w.horizontal?thickness:len,x,base+fh-.11,z,dark),w.roomIds[0]);
    }
-   if(focus==='all'&&bounds&&w.horizontal&&Math.abs(w.axis-bounds.y)<.01&&w.roomIds?.length===1){
+   if(focus==='all'&&!BMH.facadeComponents&&bounds&&w.horizontal&&Math.abs(w.axis-bounds.y)<.01&&w.roomIds?.length===1){
     const finish=roomMaterial('accent',w.roomIds[0],mats.accent),z=w.axis-D/2-(w.thickness||.12)/2-.025;
     // Finish layers cover existing solid front walls only; openings stay clear.
     if(w.kind==='wall'&&len>.45&&p.style!=='Tối giản'&&(Math.abs(w.a-bounds.x)<.12||Math.abs(w.b-bounds.x-bounds.width)<.12)){
