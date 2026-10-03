@@ -511,7 +511,7 @@ BMH.v65RefreshBankRate=async(bank,{force=false,silent=false}={})=>{
   BMH.v6.bankRateLoading=true;BMH.v6.bankRateBankId=bank.id;BMH.v6.bankRateError='';BMH.v6.bankRateLastAttempt={bankId:bank.id,at:now};
   if(BMH.state.ui.step===8)BMH.render({preserveScroll:true});
   try{
-    const res=await fetch('/api/bank-rate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bank_id:bank.id,bank_name:bank.name,full_name:bank.fullName||bank.name,swift:bank.swift||'',force})});
+    const res=await (BMH.aiFetch||fetch)('/api/bank-rate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bank_id:bank.id,bank_name:bank.name,full_name:bank.fullName||bank.name,swift:bank.swift||'',force})});
     let data={};try{data=await res.json();}catch(_){}
     if(requestId!==BMH.v6.bankRateRequestId||BMH.state.project.finance.bank!==bank.id)return false;
     if(!res.ok)throw new Error(data?.error||('HTTP '+res.status));

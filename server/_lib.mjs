@@ -5,7 +5,12 @@ export const PAYMENT_AMOUNT=99000;
 
 export function send(res,status,payload){res.status(status).setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(payload));}
 export function allow(res){res.setHeader('Allow','GET,POST,DELETE,OPTIONS');}
-export async function jsonBody(req){if(req.body&&typeof req.body==='object')return req.body;let raw='';for await(const chunk of req)raw+=chunk; if(!raw)return {};try{return JSON.parse(raw);}catch{throw Object.assign(new Error('JSON không hợp lệ.'),{statusCode:400});}}
+export async function jsonBody(req){
+ const max=6*1024*1024,large=()=>Object.assign(new Error('Yêu cầu quá lớn. Hãy giảm dung lượng dữ liệu.'),{statusCode:413});
+ if(req.body&&typeof req.body==='object'){if(Buffer.byteLength(JSON.stringify(req.body))>max)throw large();return req.body;}
+ let raw='',size=0;for await(const chunk of req){size+=Buffer.byteLength(chunk);if(size>max)throw large();raw+=chunk;}
+ if(!raw)return {};try{return req.body=JSON.parse(raw);}catch{throw Object.assign(new Error('JSON không hợp lệ.'),{statusCode:400});}
+}
 export function supabaseEnv(){return {url:String(process.env.SUPABASE_URL||'').replace(/\/$/,''),publishable:String(process.env.SUPABASE_PUBLISHABLE_KEY||process.env.SUPABASE_ANON_KEY||''),secret:String(process.env.SUPABASE_SECRET_KEY||process.env.SUPABASE_SERVICE_ROLE_KEY||'')};}
 export function payosEnv(){return {clientId:String(process.env.PAYOS_CLIENT_ID||''),apiKey:String(process.env.PAYOS_API_KEY||''),checksumKey:String(process.env.PAYOS_CHECKSUM_KEY||'')};}
 export function bearer(req){const h=String(req.headers?.authorization||'');return h.toLowerCase().startsWith('bearer ')?h.slice(7).trim():'';}
@@ -19,4 +24,4 @@ export function hmacHex(data,key){return crypto.createHmac('sha256',key).update(
 export function safeHexEqual(a,b){const aa=Buffer.from(String(a||'').toLowerCase(),'utf8'),bb=Buffer.from(String(b||'').toLowerCase(),'utf8');return aa.length===bb.length&&crypto.timingSafeEqual(aa,bb);}
 export function payosCreateSignature(payload,checksumKey){const signed={amount:payload.amount,cancelUrl:payload.cancelUrl,description:payload.description,orderCode:payload.orderCode,returnUrl:payload.returnUrl};return hmacHex(canonical(signed),checksumKey);}
 export function payosWebhookValid(payload,checksumKey){return !!payload?.data&&safeHexEqual(hmacHex(canonical(payload.data),checksumKey),payload.signature);}
-export function apiError(res,err){const status=Number(err?.statusCode)||500;send(res,status,{ok:false,error:err?.message||'Lỗi máy chủ.',details:status<500?err?.details||undefined:undefined});}
+export function apiError(res,err){const status=Number(err?.statusCode)||500;send(res,status,{ok:false,error:err?.message||'Lỗi máy chủ.',code:err?.code||undefined,details:status<500?err?.details||undefined:undefined});}

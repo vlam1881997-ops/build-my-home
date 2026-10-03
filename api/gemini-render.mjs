@@ -1,3 +1,4 @@
+import {withAiUsage,reserveAiUsage,markAiProviderAccepted,beginAiProviderCall} from '../server/_ai_usage.mjs';
 import {send,apiError} from '../server/_lib.mjs';
 import {geminiEnv,geminiRateLimit} from '../server/_gemini.mjs';
 import {resolveGeminiModels} from '../server/_gemini_models.mjs';
@@ -61,29 +62,35 @@ export function extractRenderedImage(result){
   throw Object.assign(new Error('Gemini không trả về ảnh phối cảnh.'),{statusCode:502});
 }
 
-export default async function handler(req,res){
+async function handler(req,res){
   try{
     if(req.method!=='POST')return send(res,405,{ok:false,error:'Method not allowed'});
     if(process.env.GEMINI_IMAGE_ENABLED==='false')return send(res,503,{ok:false,error:'Chưa bật dịch vụ ảnh AI. Mô hình 3D tương tác vẫn dùng miễn phí; chủ dự án có thể bật GEMINI_IMAGE_ENABLED=true khi đã cấu hình tài khoản Gemini có tính phí.'});
     const key=geminiEnv().key;if(!key)return send(res,503,{ok:false,error:'Chưa cấu hình GEMINI_API_KEY trên server.'});
     const body=await imageRequestBody(req),{mimeType,image,prompt}=renderRequestPayload(body);
     geminiRateLimit(req,{bucket:'image-render',max:12,windowMs:60*60*1000});
+    await reserveAiUsage();
     const models=await resolveGeminiModels(geminiEnv(),{kind:'image'});
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),55_000);
     try{
       for(const model of models){
+      let finish=beginAiProviderCall();
       let response=await fetch('https://generativelanguage.googleapis.com/v1beta/interactions',{
         method:'POST',signal:controller.signal,headers:{'x-goog-api-key':key,'Content-Type':'application/json'},
         body:JSON.stringify({model,store:false,input:[{type:'text',text:prompt},{type:'image',mime_type:mimeType,data:image}],response_format:{type:'image',...(body.mode==='home-finish'?{}:{aspect_ratio:'16:9'}),image_size:'1K'}})
       });
+      finish(response.status);
       let data=await response.json().catch(()=>({}));
       // A listed image model may expose generateContent before Interactions.
       if([400,404].includes(response.status)){
+        finish=beginAiProviderCall();
         response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',signal:controller.signal,headers:{'x-goog-api-key':key,'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt},{inlineData:{mimeType,data:image}}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}})});
+        finish(response.status);
         data=await response.json().catch(()=>({}));
       }
       if([400,404].includes(response.status)&&model!==models.at(-1))continue;
       if(!response.ok)throw Object.assign(new Error(response.status===429?'Giới hạn tạo ảnh hoặc tài khoản Gemini chưa có quota ảnh.':`Gemini trả về lỗi ${response.status}. Kiểm tra cấu hình và quota ảnh.`),{statusCode:response.status===429?429:502});
+      markAiProviderAccepted();
       const rendered=extractRenderedImage(data);
       return send(res,200,{ok:true,...rendered,model,generatedAt:new Date().toISOString()});
       }
@@ -92,3 +99,5 @@ export default async function handler(req,res){
     apiError(res,error?.name==='AbortError'?Object.assign(new Error('Tạo phối cảnh quá thời gian cho phép.'),{statusCode:504}):error);
   }
 }
+
+export default withAiUsage(handler,'image');

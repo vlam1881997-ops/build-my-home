@@ -1,3 +1,4 @@
+import {withAiUsage,reserveAiUsage,markAiProviderAccepted} from '../server/_ai_usage.mjs';
 import {send,jsonBody,apiError} from '../server/_lib.mjs';
 import {geminiGenerate,geminiEnv,geminiRateLimit} from '../server/_gemini.mjs';
 
@@ -36,7 +37,7 @@ export function verifyRateEvidence(result,citations,bank,now=new Date()){
     &&saneRate(result?.intro_rate_pct)>0&&saneRate(result?.post_rate_pct)>0;
 }
 
-export default async function handler(req,res){
+async function handler(req,res){
   try{
     if(req.method==='OPTIONS')return send(res,200,{ok:true});
     if(req.method!=='POST')return send(res,405,{ok:false,error:'Method not allowed'});
@@ -97,3 +98,5 @@ export default async function handler(req,res){
     return send(res,200,{ok:true,cached:false,...payload});
   }catch(err){apiError(res,err);}
 }
+
+export default withAiUsage(handler,'bank-research');

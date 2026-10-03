@@ -1,3 +1,4 @@
+import {withAiUsage,reserveAiUsage,markAiProviderAccepted,beginAiProviderCall,aiUsageHandler} from '../server/_ai_usage.mjs';
 import materialImageHandler from '../server/_material_image.mjs';
 import homeFinishHandler from '../server/_home_finish_handler.mjs';
 import aiHealthHandler from '../server/_ai_health_handler.mjs';
@@ -82,8 +83,10 @@ async function openAIFallback({action,prompt,project,image}){
   const userText=`Yêu cầu: ${prompt||'(không có câu hỏi bổ sung)'}\n\nDữ liệu dự án JSON:\n${JSON.stringify(project)}`;
   const content=[{type:'input_text',text:userText}];if(action==='vision'&&/^data:image\/(png|jpe?g|webp);base64,/i.test(image)&&image.length<12_000_000)content.push({type:'input_image',image_url:image,detail:'auto'});
   const payload={model:OPENAI_MODEL,store:false,max_output_tokens:1800,input:[{role:'system',content:[{type:'input_text',text:`Bạn là Build My Home AI Decision Engine. ${actionInstruction(action)} Trả lời tiếng Việt rõ ràng, có hành động cụ thể.`}]},{role:'user',content}],text:{format:{type:'json_schema',name:'build_my_home_ai_result',strict:true,schema:RESULT_SCHEMA}}};
-  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),50000);let r,data;try{r=await fetch(OPENAI_URL,{method:'POST',signal:ctl.signal,headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify(payload)});data=await r.json();}finally{clearTimeout(timer);}
+  await reserveAiUsage();
+  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),50000);let r,data;const finish=beginAiProviderCall();try{r=await fetch(OPENAI_URL,{method:'POST',signal:ctl.signal,headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify(payload)});finish(r.status);data=await r.json();}finally{clearTimeout(timer);}
   if(!r.ok)throw Object.assign(new Error(data?.error?.message||`OpenAI HTTP ${r.status}`),{statusCode:r.status>=400&&r.status<500?r.status:502});
+  markAiProviderAccepted();
   const raw=extractOpenAIText(data);let result;try{result=JSON.parse(raw);}catch{throw Object.assign(new Error('OpenAI trả về dữ liệu không đúng JSON schema.'),{statusCode:502});}
   return {result,model:OPENAI_MODEL,provider:'openai',usage:data?.usage||null};
 }
@@ -142,8 +145,9 @@ export function localBriefFallback(prompt,project={}){
 }
 
 export const maxDuration=180;
-export default async function handler(req,res){
+async function handler(req,res){
   const url=new URL(req.url||'/', 'https://buildmyhome.local'),operation=req.query?.operation||url.searchParams.get('operation')||({'/api/ai-health':'health','/api/material-catalog':'catalog','/api/material-search':'materials','/api/material-image':'material-image'}[url.pathname]);
+  if(operation==='usage')return aiUsageHandler(req,res);
   if(operation==='material-image')return materialImageHandler(req,res);
   if(operation==='home-finish')return homeFinishHandler(req,res);
   if(operation==='health')return aiHealthHandler(req,res);
@@ -175,6 +179,7 @@ export default async function handler(req,res){
         });
         return send(res,200,{ok:true,provider:'gemini',model,apiVersion,autoUpgrade:geminiEnv().auto,usage,result,citations:citations||[],grounded});
       }catch(gemErr){
+        if(gemErr.code?.startsWith('AI_'))throw gemErr;
         if(action==='fengshui'&&[401,403].includes(Number(gemErr?.statusCode))){
           throw Object.assign(new Error('Gemini Search grounding bị từ chối bởi API key hoặc dự án. Hãy kiểm tra quyền, gói sử dụng và hạn mức trong Google AI Studio; phần công thức gia đình vẫn xem được mà không cần AI web.'),{statusCode:503,details:{code:'grounding_access_denied'}});
         }
@@ -201,3 +206,5 @@ export default async function handler(req,res){
     }
   }catch(err){apiError(res,err);}
 }
+
+export default withAiUsage(handler,'assistant');

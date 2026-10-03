@@ -6,7 +6,7 @@ BMH.projectSnapshot=state=>{
 };
 BMH.projectSummary=(state,id)=>{
  const p=state.project,s=p.site,rooms=p.plan.rooms;
- return {id,name:String(p.name||'Ngôi nhà của mình').slice(0,120),updatedAt:state.meta.savedAt,createdAt:state.meta.createdAt||state.meta.savedAt,width:Number(s.width),depth:Number(s.depth),floors:Number(s.floors),roomCount:rooms.length,rooms:rooms.filter(r=>r.floor===0).slice(0,160).map(r=>({x:r.x,y:r.y,w:r.w,h:r.h,type:r.type}))};
+ return {id,cloudProjectId:state.meta.cloudProjectId||'',cloudOwnerId:state.meta.cloudOwnerId||'',name:String(p.name||'Ngôi nhà của mình').slice(0,120),updatedAt:state.meta.savedAt,createdAt:state.meta.createdAt||state.meta.savedAt,width:Number(s.width),depth:Number(s.depth),floors:Number(s.floors),roomCount:rooms.length,rooms:rooms.filter(r=>r.floor===0).slice(0,160).map(r=>({x:r.x,y:r.y,w:r.w,h:r.h,type:r.type}))};
 };
 BMH.projectDb=()=>{
  const p=BMH.projects;if(p.db)return Promise.resolve(p.db);if(p.dbPromise)return p.dbPromise;
@@ -70,7 +70,7 @@ BMH.openCustomerProject=async id=>{await BMH.saveCustomerProject();const record=
 BMH.newCustomerProject=async({copyId=''}={})=>{
  await BMH.saveCustomerProject();const source=copyId?await BMH.projectGet(copyId):null;if(copyId&&!source)throw new Error('Không tìm thấy thiết kế để tạo bản sao.');
  const state=source?BMH.projectSnapshot(source.state):BMH.defaultState(),id=globalThis.crypto?.randomUUID?.()||BMH.uid('home'),now=new Date().toISOString();
- state.meta.localProjectId=id;state.meta.createdAt=state.meta.savedAt=now;state.project.name=source?String(source.state.project.name||'Ngôi nhà').slice(0,110)+' · bản sao':'Ngôi nhà mới';state.ui.renderMode='interactive';state.ui.onboardingComplete=BMH.state.ui.onboardingComplete;state.ui.step=source?state.ui.step:1;
+ BMH.clearCloudLink?.(state);state.meta.localProjectId=id;state.meta.createdAt=state.meta.savedAt=now;state.project.name=source?String(source.state.project.name||'Ngôi nhà').slice(0,110)+' · bản sao':'Ngôi nhà mới';state.ui.renderMode='interactive';state.ui.onboardingComplete=BMH.state.ui.onboardingComplete;state.ui.step=source?state.ui.step:1;
  await BMH.projectEnqueue(()=>BMH.projectPut(state,id));BMH.useCustomerProject({id,state});BMH.toast(source?'Đã tạo thiết kế riêng từ bản sao.':'Đã tạo dự án mới; thiết kế trước vẫn được giữ.');return id;
 };
 BMH.deleteCustomerProject=async id=>{
@@ -101,7 +101,7 @@ BMH.closeProjectLibrary=()=>{BMH.projects.open=false;BMH.projects.confirmDelete=
 BMH.saveBeforeProjects=BMH.save;BMH.save=()=>{const result=BMH.saveBeforeProjects();BMH.queueProjectSave();return result;};
 const customerProjectRender=BMH.render;BMH.render=options=>{customerProjectRender(options);BMH.projectSaveStatus();};
 const customerProjectImport=BMH.importProjectJson;BMH.importProjectJson=async file=>{
- const available=await BMH.projectDb().then(()=>true,()=>false);if(available)await BMH.saveCustomerProject();const imported=await customerProjectImport(file);clearTimeout(BMH.projects.timer);BMH.projects.activeId='';delete imported.meta.localProjectId;BMH.projects.dirty=true;
+ const available=await BMH.projectDb().then(()=>true,()=>false);if(available)await BMH.saveCustomerProject();const imported=await customerProjectImport(file);clearTimeout(BMH.projects.timer);BMH.projects.activeId='';delete imported.meta.localProjectId;BMH.clearCloudLink?.(imported);BMH.projects.dirty=true;
  BMH.restoreProjectRuntime();if(available)await BMH.saveCustomerProject();else BMH.saveBeforeProjects();BMH.closeProjectLibrary();BMH.render();BMH.projectSaveStatus();return imported;
 };
 // A slow disk write cannot let a second project switch replace the first one.

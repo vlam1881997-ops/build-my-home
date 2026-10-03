@@ -1,0 +1,195 @@
+/* Optional customer account. Local design, cloud receipts and AI allowance are separate. */
+(()=>{
+ const B=BMH,c=B.cloud,esc=B.esc;
+ Object.assign(c,{verified:false,epoch:0,mode:'signin',writeTail:Promise.resolve(),refreshPromise:null,usage:null,lastDesign:'',conflict:null});
+ const owner=()=>c.verified?String(c.user?.id||''):'';
+ const design=()=>JSON.stringify(B.state.project);
+ const current=(ref,id,user,epoch)=>B.state===ref&&B.projects.activeId===id&&owner()===user&&c.epoch===epoch;
+ B.clearCloudLink=state=>Object.assign(state.meta,{cloudProjectId:'',cloudOwnerId:'',cloudRevision:null,cloudUpdatedAt:null});
+ const linked=()=>!!(owner()&&B.state.meta.cloudOwnerId===owner()&&B.state.meta.cloudProjectId);
+ B.restoreCloudLink=()=>{
+  clearTimeout(c.saveTimer);c.activeProjectId=linked()?B.state.meta.cloudProjectId:'';c.lastDesign=design();c.conflict=null;c.error='';c.syncStatus=c.activeProjectId?'linked':'local';
+  try{localStorage.removeItem(B.CLOUD_ACTIVE_KEY);}catch(_){}
+ };
+ const restore=B.restoreProjectRuntime;B.restoreProjectRuntime=()=>{restore();B.restoreCloudLink();};
+ B.cloudOverlay=()=>'';
+ B.cloudFetchRaw=async(path,opts={})=>{
+  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),30000),options={method:opts.method||'GET',signal:ctl.signal,headers:{'Content-Type':'application/json',...(opts.headers||{})}};
+  if(opts.auth&&c.session?.access_token)options.headers.Authorization='Bearer '+c.session.access_token;
+  if(opts.body!==undefined)options.body=JSON.stringify(opts.body);
+  try{const r=await fetch(path,options),data=await r.json().catch(()=>({}));return {r,data};}finally{clearTimeout(timer);}
+ };
+ B.refreshCloudSession=()=>{
+  if(c.refreshPromise)return c.refreshPromise;
+  const token=c.session?.refresh_token,epoch=c.epoch,user=String(c.session?.user?.id||'');if(!token)return Promise.resolve(false);
+  const run=(async()=>{
+   let out;try{out=await B.cloudFetchRaw('/api/auth',{method:'POST',body:{action:'refresh',refresh_token:token}});}catch(_){return false;}
+   if(c.epoch!==epoch||c.session?.refresh_token!==token)return false;
+   const session=out.r.ok?B.cloudSessionData(out.data):null;
+   if(!session||!session.user?.id||(user&&String(session.user.id)!==user)){if([400,401,403].includes(out.r.status)){B.persistCloudSession(null);c.verified=false;c.epoch++;B.restoreCloudLink();}return false;}
+   B.persistCloudSession(session);c.verified=true;return true;
+  })();c.refreshPromise=run;run.finally(()=>{if(c.refreshPromise===run)c.refreshPromise=null;});return run;
+ };
+ B.cloudApi=async(path,opts={})=>{
+  const epoch=c.epoch;let out=await B.cloudFetchRaw(path,opts);
+  if(out.r.status===401&&opts.auth&&opts.retry!==false&&await B.refreshCloudSession()&&c.epoch===epoch)out=await B.cloudFetchRaw(path,{...opts,retry:false});
+  if(opts.auth&&c.epoch!==epoch)throw new Error('Tài khoản đã thay đổi. Yêu cầu cũ đã dừng.');
+  if(!out.r.ok)throw Object.assign(new Error(out.data.error||'Chưa kết nối được. Hãy thử lại.'),{status:out.r.status,code:out.data.code,project:out.data.project});
+  return out.data;
+ };
+ const statusText=()=>({local:'Chỉ lưu trên thiết bị',linked:'Đã liên kết · sẽ kiểm tra khi lưu',pending:'Có thay đổi chờ đồng bộ',saving:'Đang lưu lên máy chủ…',synced:'Đã đồng bộ',error:'Chưa đồng bộ · bản trên máy vẫn được giữ',conflict:'Thiết bị khác đã sửa · cần chọn cách lưu'})[c.syncStatus]||'Chỉ lưu trên thiết bị';
+ const accountHtml=()=>{
+  const configured=c.config?.cloudConfigured,logged=!!owner(),disabled=c.loading?'disabled':'',messages=(c.error?'<p class="customer-cloud-alert bad" role="alert">'+esc(c.error)+'</p>':'')+(c.message?'<p class="customer-cloud-alert good" role="status">'+esc(c.message)+'</p>':'');
+  let content;
+  if(!configured)content='<div class="customer-cloud-empty"><h3>Giữ thiết kế để mở trên máy khác</h3><p>Dịch vụ đồng bộ tài khoản chưa được mở. Tải bản sao JSON rồi mở tệp đó trên thiết bị mới để tiếp tục.</p><button class="clay" data-cloud-backup>Tải bản sao thiết kế</button></div>';
+  else if(!logged||c.mode==='password'){
+   const mode=c.mode,recover=mode==='recover',password=mode==='password',signup=mode==='signup';
+   content='<form id="customerCloudAuth"><h3>'+esc(password?'Đặt mật khẩu mới':recover?'Lấy lại mật khẩu':signup?'Tạo tài khoản':'Đăng nhập để lưu nhiều thiết bị')+'</h3>'+(!password?'<label>Email<input name="email" id="cloudEmail" type="email" autocomplete="email" maxlength="254" required></label>':'')+(!recover?'<label>Mật khẩu<input name="password" id="cloudPassword" type="password" autocomplete="'+(signup||password?'new-password':'current-password')+'" minlength="8" maxlength="128" required><small>Từ 8 đến 128 ký tự</small></label>':'')+'<button class="clay" type="submit" '+disabled+'>'+(c.loading?'Đang xử lý…':password?'Lưu mật khẩu':recover?'Gửi liên kết đặt lại':signup?'Tạo tài khoản':'Đăng nhập')+'</button></form><div class="customer-cloud-links">'+(mode!=='signin'?'<button data-customer-auth-mode="signin">Quay lại đăng nhập</button>':'<button data-customer-auth-mode="signup">Chưa có tài khoản?</button><button data-customer-auth-mode="recover">Quên mật khẩu?</button>')+'</div>';
+  }else{
+   const rows=c.projects.map(p=>'<article><div><b>'+esc(p.name||'Ngôi nhà của mình')+'</b><small>Phiên bản '+Number(p.revision)+' · '+esc(new Date(p.updated_at).toLocaleString('vi-VN'))+'</small></div>'+(c.deleteId===p.id?'<div class="customer-cloud-delete-confirm"><small>Xóa bản trên tài khoản? Bản trên thiết bị được giữ.</small><button data-customer-cloud-delete-confirm="'+esc(p.id)+'" '+disabled+'>Xóa bản này</button><button data-customer-cloud-delete-cancel>Giữ lại</button></div>':'<button data-cloud-load="'+esc(p.id)+'" '+disabled+'>Mở</button><details class="customer-cloud-row-tools"><summary aria-label="Thao tác với '+esc(p.name)+'">⋯</summary><button data-customer-cloud-delete="'+esc(p.id)+'" '+disabled+'>Xóa bản trên tài khoản</button></details>')+'</article>').join('');
+   const usage=c.usage?'<details class="customer-ai-usage"><summary>Lượt AI · còn '+Number(c.usage.remaining)+' / '+Number(c.usage.limit)+'</summary><span>'+Number(c.usage.used)+' đã dùng'+(c.usage.pending?' · '+Number(c.usage.pending)+' đang xử lý':'')+'</span><small>Đặt lại '+esc(new Date(c.usage.resetAt).toLocaleString('vi-VN'))+'. Tác vụ dùng kết quả có sẵn không trừ lượt.</small></details>':'';
+   content='<div class="customer-cloud-user"><span>'+esc(c.user.email||'Tài khoản của tôi')+'</span><button data-cloud-logout '+disabled+'>Đăng xuất</button></div><section class="customer-cloud-sync"><b>'+esc(B.state.project.name)+'</b><p role="status" data-customer-cloud-status>'+esc(statusText())+'</p>'+usage+(c.syncStatus==='conflict'?'<div class="customer-cloud-conflict"><p>Bản trên máy này chưa bị thay đổi. Lưu thành bản riêng để giữ cả hai phương án, hoặc tải bản mới từ máy chủ. Khi tải bản mới, phương án trên máy được giữ thành một bản sao.</p><button class="clay" data-cloud-save-copy '+disabled+'>Giữ thành bản riêng</button><button data-cloud-conflict-load '+disabled+'>Tải bản mới từ máy chủ</button></div>':'<button class="clay" data-cloud-save-now '+disabled+'>'+(c.loading?'Đang xử lý…':c.syncStatus==='error'?'Thử đồng bộ lại':'Lưu thiết kế đang mở')+'</button>')+'</section><details class="customer-cloud-list" '+(c.projects.length?'open':'')+'><summary>Thiết kế trên tài khoản ('+c.projects.length+')</summary><button data-cloud-refresh '+disabled+'>Làm mới danh sách</button>'+ (rows||'<p>Chưa có thiết kế được lưu lên tài khoản.</p>')+'</details>';
+  }
+  return '<header><div><small>BUILD MY HOME</small><h2 id="customerCloudTitle">Lưu nhiều thiết bị</h2><p>Tài khoản tùy chọn để giữ và mở thiết kế trên máy khác.</p></div><button data-cloud-close aria-label="Đóng">×</button></header>'+messages+content+'<footer>Ảnh và tệp hiện trường lưu riêng trên thiết bị. Bản sao JSON là cách giữ thêm một bản thiết kế.</footer>';
+ };
+ const saveStatus=B.projectSaveStatus;B.projectSaveStatus=()=>{saveStatus();const node=document.querySelector('.guided-footer>span');if(node&&linked()&&!B.projects.error){if(c.syncStatus==='conflict'||c.syncStatus==='error'){node.textContent+=' · '+(c.syncStatus==='conflict'?'Thiết bị khác đã sửa.':'Chưa đồng bộ.')+' Mở Dự án để xử lý.';node.dataset.state='error';}else if(c.syncStatus==='pending'||c.syncStatus==='saving')node.textContent+=' · Đang chờ đồng bộ…';else if(c.syncStatus==='synced')node.textContent+=' · Đã đồng bộ.';}};
+ B.paintCustomerCloud=()=>{B.projectSaveStatus();const dialog=B.$('#customerCloud');if(!dialog?.open)return;dialog.innerHTML=accountHtml();};
+ B.openCloud=()=>{
+  B.closeProjectLibrary();c.focus=document.activeElement;c.open=true;c.error='';c.message='';
+  let dialog=B.$('#customerCloud');if(!dialog){dialog=document.createElement('dialog');dialog.id='customerCloud';dialog.className='customer-cloud-dialog';dialog.setAttribute('aria-labelledby','customerCloudTitle');document.body.appendChild(dialog);dialog.addEventListener('close',()=>{c.open=false;c.focus?.focus?.();});}
+  dialog.innerHTML=accountHtml();dialog.showModal();if(owner())Promise.all([B.cloudLoadProjects(),B.cloudLoadUsage()]).catch(()=>{});
+ };
+ B.closeCloud=()=>{c.open=false;B.$('#customerCloud')?.close();};
+ B.cloudAuth=async action=>{
+  if(c.loading)return;const email=B.$('#cloudEmail')?.value||'',password=B.$('#cloudPassword')?.value||'',epoch=c.epoch;
+  c.loading=true;c.error='';c.message='';B.paintCustomerCloud();
+  try{
+   const data=await B.cloudApi('/api/auth',{method:'POST',auth:action==='password',body:{action,email,password}});if(c.epoch!==epoch)return;
+   if(action==='recover'){c.message=data.message;c.mode='signin';}
+   else if(action==='password'){c.mode='signin';c.message='Đã đổi mật khẩu.';}
+   else {const session=B.cloudSessionData(data);if(session){if(!session.user?.id)throw new Error('Chưa xác nhận được tài khoản.');B.persistCloudSession(session);c.verified=true;c.epoch++;B.restoreCloudLink();c.message='Đã đăng nhập.';await Promise.all([B.cloudLoadProjects(false),B.cloudLoadUsage(false)]);}else{c.mode='signin';c.message='Hãy kiểm tra email xác nhận rồi đăng nhập.';}}
+  }catch(err){c.error=err.message;}finally{c.loading=false;B.paintCustomerCloud();B.paintProjectLibrary();}
+ };
+ B.cloudLogout=async()=>{
+  const token=c.session?.access_token;B.persistCloudSession(null);c.verified=false;c.epoch++;c.projects=[];c.usage=null;c.refreshPromise=null;c.deleteId='';B.restoreCloudLink();c.mode='signin';c.message='Đã đăng xuất. Thiết kế trên máy vẫn được giữ.';B.paintCustomerCloud();B.paintProjectLibrary();
+  if(token)try{await B.cloudFetchRaw('/api/auth',{method:'POST',headers:{Authorization:'Bearer '+token},body:{action:'logout'}});}catch(_){}
+ };
+ B.cloudLoadProjects=async(paint=true)=>{
+  if(!owner()||!c.config?.cloudConfigured)return;const user=owner(),epoch=c.epoch;
+  try{const data=await B.cloudApi('/api/projects',{auth:true});if(user===owner()&&epoch===c.epoch)c.projects=data.projects||[];}catch(err){if(epoch===c.epoch)c.error=err.message;}
+  if(paint)B.paintCustomerCloud();
+ };
+ B.cloudLoadUsage=async(paint=true)=>{
+  if(!owner()||!c.config?.aiUsage?.enabled)return;const epoch=c.epoch;
+  try{const data=await B.cloudApi('/api/ai?operation=usage',{auth:true});if(epoch===c.epoch)c.usage=data.usage;}catch(err){if(epoch===c.epoch)c.usage=null;}
+  if(paint)B.paintCustomerCloud();
+ };
+ const pendingKey=(user,id)=>'cloud-request:'+user+':'+id;
+ const pendingGet=key=>B.projectTransaction(['settings'],'readonly',(tx,result)=>{const r=tx.objectStore('settings').get(key);r.onsuccess=()=>result(r.result?.value||null);});
+ const pendingPut=(key,value)=>B.projectTransaction(['settings'],'readwrite',tx=>value?tx.objectStore('settings').put({key,value}):tx.objectStore('settings').delete(key));
+ B.cloudStatePayload=()=>{const snap=B.projectSnapshot(B.state);snap.meta={createdAt:snap.meta.createdAt,savedAt:snap.meta.savedAt};return snap;};
+ B.cloudSaveProject=({createIfMissing=false}={})=>{
+  const ref=B.state,user=owner(),epoch=c.epoch;
+  const run=async()=>{
+   if(!user||!c.config?.cloudConfigured||owner()!==user||c.epoch!==epoch||B.state!==ref)return false;
+   if(c.syncStatus==='conflict'||(!linked()&&!createIfMissing))return false;
+   const id=await B.saveCustomerProject();if(!current(ref,id,user,epoch))return false;
+   const key=pendingKey(user,id);let pending=await pendingGet(key);
+   if(!pending){
+    pending={body:{id:linked()?ref.meta.cloudProjectId:B.newCloudId(),requestId:B.newCloudId(),expectedRevision:linked()?ref.meta.cloudRevision:null,name:ref.project.name,version:B.VERSION,state:B.cloudStatePayload()},fingerprint:design()};
+    await pendingPut(key,pending);
+   }
+   if(!current(ref,id,user,epoch))return false;c.syncStatus='saving';B.paintCustomerCloud();
+   try{
+    const data=await B.cloudApi('/api/projects',{method:'POST',auth:true,body:pending.body});
+    if(!current(ref,id,user,epoch))return false;
+    const p=data.project;if(!p?.id||!Number.isSafeInteger(p.revision)||p.revision<1)throw new Error('Chưa nhận được xác nhận lưu hợp lệ. Hãy thử lại.');
+    Object.assign(ref.meta,{cloudProjectId:p.id,cloudOwnerId:user,cloudRevision:p.revision,cloudUpdatedAt:p.updated_at});c.activeProjectId=p.id;c.lastDesign=pending.fingerprint;c.lastSyncedAt=p.updated_at;c.error='';c.conflict=null;
+    // Save the receipt before clearing the durable request. Lost acknowledgements replay safely.
+    B.projects.dirty=true;await B.saveCustomerProject();await pendingPut(key,null);
+    if(!current(ref,id,user,epoch))return false;
+    c.syncStatus=design()===pending.fingerprint?'synced':'pending';
+    const i=c.projects.findIndex(x=>x.id===p.id);if(i>=0)c.projects[i]=p;else c.projects.unshift(p);
+    if(c.syncStatus==='pending')B.queueCloudSave();B.paintCustomerCloud();return true;
+   }catch(err){
+    if(current(ref,id,user,epoch)){c.error=err.name==='AbortError'?'Kết nối quá lâu. Bản trên máy được giữ; bấm thử lại để kiểm tra lần lưu.':err.message;c.syncStatus=err.code==='PROJECT_CONFLICT'?'conflict':'error';c.conflict=err.code==='PROJECT_CONFLICT'?{id:pending.body.id,project:err.project}:null;
+     if(err.status>=400&&err.status<500)await pendingPut(key,null);B.paintCustomerCloud();}
+    return false;
+   }
+  };
+  const next=c.writeTail.catch(()=>{}).then(run).catch(err=>{if(B.state===ref&&c.epoch===epoch){c.error=err.message;c.syncStatus='error';B.paintCustomerCloud();}return false;});c.writeTail=next;return next;
+ };
+ B.queueCloudSave=()=>{
+  if(c.suppressSave||!owner()||!linked()||!c.config?.cloudConfigured||['error','conflict'].includes(c.syncStatus)||design()===c.lastDesign)return;
+  c.syncStatus='pending';clearTimeout(c.saveTimer);c.saveTimer=setTimeout(()=>B.cloudSaveProject(),1600);
+ };
+ B.cloudSaveNow=async()=>{if(c.loading)return;c.loading=true;c.error='';c.message='';B.paintCustomerCloud();try{const ok=await B.cloudSaveProject({createIfMissing:true});if(ok)c.message=c.syncStatus==='synced'?'Thiết kế đã được lưu lên tài khoản.':'Đã lưu bản trước; đang đồng bộ thay đổi mới.';}finally{c.loading=false;B.paintCustomerCloud();B.paintProjectLibrary();}};
+ B.cloudSaveCopy=async()=>{
+  if(c.loading)return;const user=owner(),id=await B.saveCustomerProject();await pendingPut(pendingKey(user,id),null);B.clearCloudLink(B.state);B.restoreCloudLink();B.projects.dirty=true;await B.saveCustomerProject();return B.cloudSaveNow();
+ };
+ B.cloudLoadProject=async(id,{preserveDraft=false}={})=>{
+  if(c.loading||B.projects.actionBusy)return;
+  if(B.v6?.briefLoading||B.v6?.uploadBusy||B.v6?.feng?.loading||B.v6?.bankRateLoading||B.ai?.loading||B.scan?.busy||B.cinematicRender?.loading||B.state.project.siteIntelligence?.status==='loading'){c.error='Hãy chờ tác vụ đang chạy hoàn tất trước khi mở thiết kế khác.';B.paintCustomerCloud();return;}
+  c.loading=true;c.error='';const ref=B.state,user=owner(),epoch=c.epoch;B.paintCustomerCloud();
+  try{
+   await B.saveCustomerProject();const data=await B.cloudApi('/api/projects?id='+encodeURIComponent(id),{auth:true});if(B.state!==ref||owner()!==user||c.epoch!==epoch)return;
+   const p=data.project;if(!p?.state||!Number.isSafeInteger(p.revision))throw new Error('Không tìm thấy thiết kế trên tài khoản.');
+   // Always preserve a differing local draft before replacing its linked copy.
+   const rows=await B.projectList(),existing=rows.find(x=>x.cloudProjectId===id&&x.cloudOwnerId===user),record=existing?await B.projectGet(existing.id):null;
+   if(record&&(preserveDraft||JSON.stringify(record.state.project)!==JSON.stringify(p.state.project))){const copy=B.projectSnapshot(record.state),copyId=B.newCloudId();B.clearCloudLink(copy);copy.meta.localProjectId=copyId;copy.project.name=String(copy.project.name).slice(0,100)+' · bản trước đồng bộ';copy.meta.savedAt=copy.meta.createdAt=new Date().toISOString();await B.projectEnqueue(()=>B.projectTransaction(['designs','summaries'],'readwrite',tx=>{tx.objectStore('designs').put({id:copyId,state:copy});tx.objectStore('summaries').put(B.projectSummary(copy,copyId));}));}
+   if(B.state!==ref||owner()!==user||c.epoch!==epoch)return;
+   const localId=existing?.id||B.newCloudId(),state=B.mergeState(B.defaultState(),p.state);Object.assign(state.meta,{localProjectId:localId,cloudProjectId:p.id,cloudOwnerId:user,cloudRevision:p.revision,cloudUpdatedAt:p.updated_at,savedAt:new Date().toISOString()});
+   await pendingPut(pendingKey(user,localId),null);await B.projectEnqueue(()=>B.projectPut(state,localId));if(B.state!==ref||owner()!==user||c.epoch!==epoch)return;B.useCustomerProject({id:localId,state});await B.projects.activation;B.closeCloud();B.toast('Đã mở '+p.name+'.');
+  }catch(err){c.error=err.message;}finally{c.loading=false;B.paintCustomerCloud();}
+ };
+ // Rechecking obsolete payOS entitlement is independent of customer design access.
+ const entitlement=B.refreshEntitlement;B.refreshEntitlement=(render=true)=>c.config?.paymentConfigured?entitlement(render):Promise.resolve(false);
+ B.cloudDeleteProject=async id=>{
+  if(c.loading)return;const p=c.projects.find(p=>p.id===id),epoch=c.epoch;if(!p)return;c.loading=true;c.error='';B.paintCustomerCloud();
+  try{await B.cloudApi('/api/projects?id='+encodeURIComponent(id)+'&revision='+p.revision,{method:'DELETE',auth:true});if(c.epoch!==epoch)return;c.projects=c.projects.filter(x=>x.id!==id);c.deleteId='';if(B.state.meta.cloudProjectId===id&&B.state.meta.cloudOwnerId===owner()){B.clearCloudLink(B.state);B.restoreCloudLink();B.projects.dirty=true;await B.saveCustomerProject();}c.message='Đã xóa bản trên tài khoản. Thiết kế trên thiết bị vẫn được giữ.';}catch(err){c.error=err.message;}finally{c.loading=false;B.paintCustomerCloud();B.paintProjectLibrary();}
+ };
+ const library=B.projectLibraryHtml;B.projectLibraryHtml=()=>library().replace('<div class="customer-project-tools">','<section class="customer-project-account"><div><b>'+(owner()?esc(c.user.email):'Lưu nhiều thiết bị')+'</b><small>'+(owner()?esc(statusText()):'Tài khoản tùy chọn · thiết kế vẫn lưu trên máy')+'</small></div><button data-cloud-open>'+(owner()?'Mở tài khoản':'Tài khoản & đồng bộ')+'</button></section><div class="customer-project-tools">');
+ document.addEventListener('submit',e=>{if(e.target.id!=='customerCloudAuth')return;e.preventDefault();B.cloudAuth(c.mode);});
+ document.addEventListener('click',e=>{
+  // The main shell deliberately ignores native dialogs outside #app.
+  if(!e.target.closest?.('#app')){
+   if(e.target.closest?.('[data-cloud-open]')){e.preventDefault();B.openCloud();return;}
+   if(e.target.closest?.('[data-cloud-close]')){B.closeCloud();return;}
+   if(e.target.closest?.('[data-cloud-logout]')){B.cloudLogout();return;}
+   if(e.target.closest?.('[data-cloud-save-now]')){B.cloudSaveNow();return;}
+   if(e.target.closest?.('[data-cloud-refresh]')){B.cloudLoadProjects();return;}
+   const load=e.target.closest?.('[data-cloud-load]');if(load){B.cloudLoadProject(load.dataset.cloudLoad);return;}
+  }
+  const del=e.target.closest?.('[data-customer-cloud-delete]');if(del){c.deleteId=del.dataset.customerCloudDelete;B.paintCustomerCloud();return;}
+  if(e.target.closest?.('[data-customer-cloud-delete-cancel]')){c.deleteId='';B.paintCustomerCloud();return;}
+  const confirmed=e.target.closest?.('[data-customer-cloud-delete-confirm]');if(confirmed){B.cloudDeleteProject(confirmed.dataset.customerCloudDeleteConfirm);return;}
+  const mode=e.target.closest?.('[data-customer-auth-mode]');if(mode){c.mode=mode.dataset.customerAuthMode;c.error='';c.message='';B.paintCustomerCloud();}
+  if(e.target.closest?.('[data-cloud-backup]'))B.exportProjectJson();
+  if(e.target.closest?.('[data-cloud-save-copy]'))B.cloudSaveCopy().catch(err=>{c.error=err.message;B.paintCustomerCloud();});
+  if(e.target.closest?.('[data-cloud-conflict-load]')&&c.conflict)B.cloudLoadProject(c.conflict.id,{preserveDraft:true});
+ });
+ B.aiFetch=async(url,options={})=>{
+  const u=new URL(url,location.href);if(u.origin!==location.origin||!/^\/api\/(ai|bank-rate|gemini-scan|gemini-render|gemini-upload-start|gemini-file-status|material-search|material-catalog)$/.test(u.pathname))return fetch(url,options);
+  const epoch=c.epoch,headers=new Headers(options.headers||{});headers.set('X-BMH-AI-Request-Id',B.newCloudId());if(c.session?.access_token&&c.verified)headers.set('Authorization','Bearer '+c.session.access_token);
+  let response=await fetch(url,{...options,headers});
+  if(epoch!==c.epoch)return new Response(JSON.stringify({error:'Tài khoản đã thay đổi. Kết quả yêu cầu cũ đã được bỏ qua.'}),{status:409,headers:{'Content-Type':'application/json'}});
+  if(response.status===401&&c.verified&&await B.refreshCloudSession()){headers.set('Authorization','Bearer '+c.session.access_token);response=await fetch(url,{...options,headers});}
+  if(epoch!==c.epoch)return new Response(JSON.stringify({error:'Tài khoản đã thay đổi. Kết quả yêu cầu cũ đã được bỏ qua.'}),{status:409,headers:{'Content-Type':'application/json'}});
+  if([401,429].includes(response.status)&&c.config?.aiUsage?.enabled){const data=await response.clone().json().catch(()=>({}));if(data.code==='AI_LOGIN_REQUIRED'){c.message='Đăng nhập để sử dụng lượt AI của tài khoản.';B.openCloud();}}
+  if(c.config?.aiUsage?.enabled)B.cloudLoadUsage().catch(()=>{});return response;
+ };
+ B.customerCloudReady=(async()=>{
+  await B.projects.ready;
+  // cloudInit was started by the original shell before this final module loaded.
+  if(!c.config){try{const {r,data}=await B.cloudFetchRaw('/api/config');c.config=r.ok?data:{cloudConfigured:false};}catch(_){c.config={cloudConfigured:false};}}
+  const fragment=new URLSearchParams(location.hash.slice(1)),access=fragment.get('access_token'),refresh=fragment.get('refresh_token'),recovery=fragment.get('type')==='recovery';
+  if(access||fragment.has('error'))history.replaceState({},'',location.pathname+location.search);
+  if(!c.config.cloudConfigured){B.restoreCloudLink();return;}
+  if(access)B.persistCloudSession({access_token:access,refresh_token:refresh||'',expires_at:Date.now()/1000+Number(fragment.get('expires_in')||3600),user:null});
+  if(c.session?.access_token){
+   const epoch=c.epoch;try{const data=await B.cloudApi('/api/auth',{method:'POST',auth:true,body:{action:'session'}});if(c.epoch!==epoch)return;B.persistCloudSession({...c.session,user:data.user});c.verified=true;B.restoreCloudLink();await Promise.all([B.cloudLoadProjects(false),B.cloudLoadUsage(false)]);if(recovery){c.mode='password';B.openCloud();}}
+   catch(err){if(c.epoch===epoch){c.verified=false;c.error=err.message;B.restoreCloudLink();}}
+  }
+  B.paintProjectLibrary();
+ })();
+})();
