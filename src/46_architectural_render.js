@@ -29,12 +29,12 @@ BMH.architecturalRenderScene=(THREE,source)=>{
  const ui=BMH.state.ui,room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===ui.sceneFocus),site=BMH.state.project.site,photographicRoom=room&&room.type!=='stairs'&&ui.roomCamera==='inside';
  const scene=new THREE.Scene(),materials=new Map(),ownedMaterials=new Set();source.updateMatrixWorld(true);
  source.traverse(o=>{
-  if(!o.visible)return;for(let parent=o.parent;parent;parent=parent.parent)if(!parent.visible)return;
+  if(!o.visible||o.userData.presentationOnly)return;for(let parent=o.parent;parent;parent=parent.parent)if(!parent.visible||parent.userData.presentationOnly)return;
   if(o.isMesh){
    if(photographicRoom&&o.userData.kind==='ceiling-slab')return;
    if(o.userData.kind==='contact-shadow')return;
    const geometry=BMH.renderMeshGeometry(THREE,o);if(!geometry.attributes.position.count){geometry.dispose();return;}
-   const convert=m=>{if(materials.has(m))return materials.get(m);let copy=m.clone();copy.clippingPlanes=[];
+   const convert=m=>{if(materials.has(m))return materials.get(m);let copy=m.clone();copy.clippingPlanes=[];BMH.restoreModelMaterial?.(copy,m);
     if(m.isMeshPhysicalMaterial&&m.transparent&&m.opacity<.85){const glass=new THREE.MeshPhysicalMaterial({color:m.color.clone().lerp(new THREE.Color('#ffffff'),.65),roughness:.015,transmission:.98,thickness:0,ior:1.45,metalness:0,side:THREE.DoubleSide});copy.dispose();copy=glass;}
     // The physical renderer supports normal maps; height maps stay on the fast viewer.
     // Broad photographic sources replace small preview emitters; their visible
@@ -121,7 +121,8 @@ BMH.captureStudioPreview=async()=>{
 BMH.sharpStudioFrame=async(longEdge)=>{
  const s=BMH.studio3d;if(!s?.renderer)return null;
  if(s.sharpExport)return s.sharpExport;
- const work=(async()=>{
+  const work=(async()=>{
+  const designKey=BMH.cinematicSignature?.()||'',cameraKey=BMH.cinematicCameraKey?.()||'';
   const THREE=await BMH.ensureThree();if(BMH.studio3d!==s)return null;
   const renderer=s.renderer,size=renderer.getSize(new THREE.Vector2()),ratio=renderer.getPixelRatio(),target=renderer.getRenderTarget(),aoEnabled=s.ao?.enabled,fxaaSize=s.fxaa?.material.uniforms.resolution.value.clone(),shadowAutoUpdate=renderer.shadowMap?.autoUpdate;
   const edge=BMH.clamp(Number(longEdge)||Number(BMH.state.ui.sharpResolution)||1280,640,2560),aspect=size.x/size.y,pixels=edge>1920?5000000:edge>1280?3000000:1800000,limit=Math.min(edge,renderer.capabilities.maxTextureSize,Math.sqrt(pixels*Math.max(aspect,1/aspect)));
@@ -142,7 +143,7 @@ BMH.sharpStudioFrame=async(longEdge)=>{
     if(BMH.studio3d===s){if(s.archRender?.samples>0)s.archRender.denoise.render(renderer);else s.renderFrame();}
    }finally{if(renderer.shadowMap)renderer.shadowMap.autoUpdate=shadowAutoUpdate;}
   }
-  const blob=await encoded;return blob&&BMH.studio3d===s?{blob,width,height}:null;
+  const blob=await encoded;return blob&&BMH.studio3d===s&&designKey===(BMH.cinematicSignature?.()||'')&&cameraKey===(BMH.cinematicCameraKey?.()||'')?{blob,width,height}:null;
  })();s.sharpExport=work;try{return await work;}finally{if(s.sharpExport===work)s.sharpExport=null;}
 };
 BMH.captureSharpStudioPreview=async()=>{
