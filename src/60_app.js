@@ -550,7 +550,7 @@ document.addEventListener('wheel',e=>{
 
 document.addEventListener('pointerdown',e=>{
   if(!e.target.closest?.('#app'))return;
-  if(BMH.state.ui.step!==4||BMH.state.ui.planner.tool!=='select')return;
+  if(BMH.state.ui.step!==4||BMH.state.ui.planner.tool!=='select'||BMH.state.ui.planner.view!=='plan')return;
   const edge=e.target.closest('[data-edge-id]'),handle=e.target.closest('[data-resize-id]'),group=e.target.closest('[data-room-id]');
   const id=edge?.dataset.edgeId||handle?.dataset.resizeId||group?.dataset.roomId;if(!id)return;
   const r=BMH.state.project.plan.rooms.find(x=>x.id===id);if(!r)return;if(BMH.isRoomLocked(id)){BMH.state.ui.planner.selected=id;BMH.save();BMH.render({preserveScroll:true});BMH.toast('Phòng này đang khóa. Mở khóa trong bảng thuộc tính nếu muốn di chuyển.');return;}const svg=BMH.$('#plannerSvg');if(!svg)return;
