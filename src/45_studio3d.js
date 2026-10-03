@@ -54,7 +54,7 @@ BMH.scenePlanGeometry = (plan, floor) => {
       const opening=edge.openings.find(o=>o.a<=mid&&o.b>=mid);
       const adjacent=(plan.wallContext||rooms).filter(r=>Number(r.floor)===floor&&(edge.horizontal?((Math.abs(r.y-edge.axis)<.001||Math.abs(r.y+r.h-edge.axis)<.001)&&mid>r.x-.001&&mid<r.x+r.w+.001):((Math.abs(r.x-edge.axis)<.001||Math.abs(r.x+r.w-edge.axis)<.001)&&mid>r.y-.001&&mid<r.y+r.h+.001)));
       const count=adjacent.length;
-      walls.push({roomIds:adjacent.map(r=>r.id),thickness:count>1?.12:.22,horizontal:edge.horizontal,axis:edge.axis,a,b,kind:opening?.kind||'wall',openingId:opening?.openingId,openingRoomId:opening?.roomId,height:opening?.height,sill:opening?.sill});
+      walls.push({roomIds:adjacent.map(r=>r.id),thickness:BMH.measuredWallThickness?.(count>1)??(count>1?.12:.22),horizontal:edge.horizontal,axis:edge.axis,a,b,kind:opening?.kind||'wall',openingId:opening?.openingId,openingRoomId:opening?.roomId,height:opening?.height,sill:opening?.sill});
     }
   }
   return {rooms,walls};
@@ -121,7 +121,7 @@ BMH.mountStudio3D = async () => {
   const fill=new THREE.DirectionalLight(0xe5f4ff,BMH.state.ui.sceneTheme==='night'?.3:.85);fill.position.set(12,10,-8);scene.add(fill);
   const warm=new THREE.PointLight(0xffb66a,BMH.state.ui.sceneTheme==='night'?8:0,24,2);warm.position.set(0,4,1);scene.add(warm);
   const mat=(color,rough=.75,metal=.02,opacity=1)=>new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal,transparent:opacity<1,opacity});
-  const mats={wall:mat(palette.wall,.82),slab:mat(0xe3ddd0,.88),frame:mat(palette.frame,.45,.22),glass:new THREE.MeshPhysicalMaterial({color:0xd3dedb,roughness:.05,metalness:.05,transparent:true,opacity:.28}),floor:mat(palette.floor,.62),accent:mat(palette.accent,.65),ground:mat(0xe7e1d4,1),green:mat(0x788669,.95),dark:mat(0x4a4f4b,.75),roof:mat(0x555e59,.85),rail:mat(0x9a7b49,.37,.62)};
+  const mats={wall:mat(palette.wall,.82),slab:mat(0xe3ddd0,.88),frame:mat(palette.frame,.45,.22),glass:new THREE.MeshPhysicalMaterial({color:0xd3dedb,roughness:.05,metalness:.05,transparent:true,opacity:.28}),floor:mat(palette.floor,.62),accent:mat(palette.accent,.65),ground:mat(0xe7e1d4,1),green:mat(0x788669,.95),dark:mat(0x4a4f4b,.75),roof:BMH.roofSceneMaterial?.(THREE)||mat(0x555e59,.85),rail:mat(0x9a7b49,.37,.62)};
   const surfaces=BMH.sceneAssetMaterials(THREE,scene,{wall:'#'+palette.wall.toString(16).padStart(6,'0'),floor:'#'+palette.floor.toString(16).padStart(6,'0'),accent:'#'+palette.accent.toString(16).padStart(6,'0')});mats.wall=surfaces.wall;mats.floor=surfaces.floor;mats.accent=surfaces.wood;
   const finishMaterials=new Map();
   const roomMaterial=(role,id,fallback)=>{if(id&&['floor','wall','accent'].includes(role)){const finishes=BMH.sceneAssetMaterials(THREE,scene,{...(BMH.finishPalette?.(id)||{}),floor:BMH.finishPalette?.(id)?.floor||'#'+palette.floor.toString(16).padStart(6,'0'),surface:BMH.roomSurfaceStyle(id)});return finishes[role==='accent'?'wood':role];}const hex=BMH.finishPalette?.(id)?.[role];if(!/^#[0-9a-f]{6}$/i.test(hex||''))return fallback;const key=role+hex;if(!finishMaterials.has(key)){const m=fallback.clone();m.color.set(hex);finishMaterials.set(key,m);}return finishMaterials.get(key);};
@@ -228,8 +228,8 @@ BMH.mountStudio3D = async () => {
   const roof=BMH.sceneRoofSpec(explode);
   if(focus==='all'&&roof){
    mats.roof.side=THREE.DoubleSide;
-   for(const polygon of roof.faces){const coords=[];for(let i=1;i<polygon.length-1;i++)for(const q of [polygon[0],polygon[i],polygon[i+1]])coords.push(q[0]-W/2,q[1],q[2]-D/2);const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(coords,3));geo.computeVertexNormals();const mesh=new THREE.Mesh(geo,mats.roof);mesh.userData={kind:'roof'};mesh.castShadow=mesh.receiveShadow=true;scene.add(mesh);}
-   addBox(roof.width,.12,roof.depth,roof.bounds.cx-W/2,roof.eave-.08,roof.bounds.cy-D/2,mats.dark);
+   for(const [polygon,gable]of [...roof.faces.map(p=>[p,false]),...(roof.gables||[]).map(p=>[p,true])]){const coords=[];for(let i=1;i<polygon.length-1;i++)for(const q of [polygon[0],polygon[i],polygon[i+1]])coords.push(q[0]-W/2,q[1],q[2]-D/2);const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(coords,3));geo.computeVertexNormals();if(!gable)BMH.roofSurfaceUvs?.(THREE,geo,polygon);const mesh=new THREE.Mesh(geo,gable?mats.wall:mats.roof);mesh.userData={kind:gable?'roof-gable':'roof',roofType:roof.type||'hip',modelArea:BMH.polygonArea3D?.(polygon),designRevision:BMH.drawingRevision()};mesh.castShadow=mesh.receiveShadow=true;scene.add(mesh);}
+   if(roof.type!=='flat')addBox(roof.width,.12,roof.depth,roof.bounds.cx-W/2,roof.eave-.08,roof.bounds.cy-D/2,mats.dark);
   }
 
   const centerRoom=roomFocus?new THREE.Vector3(roomFocus.x+roomFocus.w/2-W/2,roomFocus.type==='stairs'?fh*.55:1.12,roomFocus.y+roomFocus.h/2-D/2):null;
