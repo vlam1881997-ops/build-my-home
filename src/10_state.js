@@ -32,16 +32,18 @@ BMH.defaultState = () => ({
     materials:{tier:'standard',climatePackage:'recommended',choices:{floor:'viglacera',paint:'dulux',door:'xingfa'},finish:{exterior:null,rooms:{}},lastDelta:0},
     aiScan:{sourceName:'',mimeType:'',scannedAt:'',model:'',provider:'',intent:'reference',appliedAt:'',result:{}},
     homeFinish:{photos:[],activePhotoId:'',preferences:{style:'Hiện đại',budget:'balanced',notes:''},analyses:{},selected:{},satisfaction:{signature:'',confirmedAt:''},geometryKey:''},
+    measuredDesign:{roof:{type:'auto',pitchDeg:0,overhang:-1,ridge:'auto',surface:'auto',color:''},wallThickness:{exterior:.22,interior:.12}},
+    costPlan:{contingencyPct:10,pricing:{},extras:{}},
     performance:{solarEnabled:true,rainwaterEnabled:true,coolRoof:true,smartShading:true,mode:'balanced'},
     dataEngine: BMH.defaultDataEngineState(),
     wearYear:0,
     checklist:{pipe114:false,acWire:false,pressure:false,internet:false,elcb:false,waterTank:false,drainSlope:false,grounding:false,rcbo:false,acDrain:false,kitchenHood:false,conduitReserve:false},
-    dossier:{startDate:'',progress:0,currentStage:'foundation',revision:'A',architect:'',contractor:'',notes:'',actualCosts:{foundation:0,structure:0,walls:0,roof:0,mep:0,finish:0,handover:0},evidence:[]}
+    dossier:{startDate:'',progress:0,currentStage:'foundation',revision:'A',architect:'',contractor:'',notes:'',actualCosts:{foundation:0,structure:0,walls:0,roof:0,mep:0,finish:0,handover:0},stageProgress:{},budgetBaselines:[],activeBaselineId:'',evidence:[]}
   },
   meta:{savedAt:null,createdAt:null,localProjectId:'',cloudProjectId:'',cloudOwnerId:'',cloudRevision:null,cloudUpdatedAt:null}
 });
 
-BMH.DYNAMIC_STATE_PATHS=new Set(['ui.guidedPanels','project.materials.choices','project.materials.finish','project.designStudio','project.homeFinish','project.site.mapCenter','project.aiScan.result','project.dataEngine.materialOverrides','project.dataEngine.costSources','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence']);
+BMH.DYNAMIC_STATE_PATHS=new Set(['ui.guidedPanels','project.materials.choices','project.materials.finish','project.designStudio','project.homeFinish','project.site.mapCenter','project.aiScan.result','project.dataEngine.materialOverrides','project.dataEngine.costSources','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence','project.costPlan.pricing','project.costPlan.extras','project.dossier.stageProgress']);
 BMH.mergeState = (base, incoming) => {
   const isPlain=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
   if(!isPlain(incoming)) return structuredClone(base);
@@ -189,7 +191,7 @@ BMH.normalizeState = () => {
   const ui=BMH.state.ui.planner;
   if(!ui.selected || !BMH.state.project.plan.rooms.some(x=>x.id===ui.selected))ui.selected=BMH.state.project.plan.rooms[0]?.id||null;
   if(!['select','door','window'].includes(ui.tool))ui.tool='select';
-  if(!['plan','elevation','section','openings','stairs'].includes(ui.view))ui.view='plan';
+  if(!['plan','elevation','section','openings','stairs','roof'].includes(ui.view))ui.view='plan';
   if(!['wide','compact'].includes(ui.layout))ui.layout='wide';
   if(!['normal','large'].includes(ui.textSize))ui.textSize='large';
   if(typeof ui.showBelow!=='boolean')ui.showBelow=false;
