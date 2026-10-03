@@ -6,10 +6,10 @@ import * as THREE from 'three';
 
 function client(){
  let id=0;const b={state:{ui:{planner:{floor:0,snap:.2,selected:null},sceneFocus:'all',renderQuality:'draft'},project:{name:'Nhà khách',style:'Japandi',site:{width:5,depth:12,floors:3,floorHeight:3.4},plan:{rooms:[],openings:[],outdoor:[],lockedRoomIds:[],lockedFloors:[]},materials:{choices:{floor:'approved-floor'},finish:{rooms:{}}},designStudio:{},finance:{cash:987654321,income:12345678},household:{ownerBirth:1988,children:[{name:'PRIVATE-CHILD'}]}}},SCREENS:[],planHistory:{undo:[],redo:[]},uid:p=>p+'-'+(++id),clamp:(v,a,z)=>Math.min(z,Math.max(a,v)),roundTo:(v,s)=>Math.round(v/s)*s,esc:v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),save(){},render(){},toast(){},normalizeState(){},$:()=>null,roomFurnitureLayout:()=>[],screen7:()=>'<div class="design-studio"><div class="design-workspace"></div></div>',mountStudio3D:async()=>{},disposeStudio3D(){},roomEditingPanel:()=>'',furnitureSvg:()=>'',addRoomSceneFurniture(){},stairSpec:()=>({direction:0}),architectDocument:()=>({levels:[],items:[]}),architecturalSheets:()=>[],aiContext:()=>({}),cinematicSignature:()=> 'current',scenePlanGeometry:()=>({walls:[]}),projectLevels:()=>({floors:b.state.project.site.floors,floorHeight:3.4,slab:.14,ceilingDrop:.2}),visualMaterialContext:()=>({collection:{id:'japandi',name:'Japandi',private:'HIDDEN'},palette:{floor:'#123456',cash:'HIDDEN'},surfaces:[{id:'oak',role:'floor',name:'Sàn sồi',financial:'HIDDEN'}]}),designState:()=>b.state.project.designStudio,rememberFinishCamera(){},ensureThree:async()=>THREE};
- const context={BMH:b,document:{addEventListener(){},querySelectorAll:()=>[]},window:{matchMedia:()=>({matches:false})},structuredClone,console,Blob,TextEncoder,Uint8Array,cancelAnimationFrame(){},requestAnimationFrame:()=>1,performance:{now:()=>100}};
+ const context={BMH:b,document:{addEventListener(){},querySelectorAll:()=>[]},window:{matchMedia:()=>({matches:false})},structuredClone,console,Blob,TextEncoder,Uint8Array,atob,cancelAnimationFrame(){},requestAnimationFrame:()=>1,performance:{now:()=>100}};
  for(const file of ['30_planner.js','40_exports.js','79_stair_design.js'])vm.runInNewContext(fs.readFileSync('src/'+file,'utf8'),context);
  b.plannerIssues=()=>[];b.architecturalSheets=()=>[];
- for(const file of ['46_architectural_render.js','87_elevator_design.js','88_customer_studio.js'])vm.runInNewContext(fs.readFileSync('src/'+file,'utf8'),context);
+ for(const file of ['46_architectural_render.js','87_elevator_design.js','88_customer_studio.js','89_guided_interface.js'])vm.runInNewContext(fs.readFileSync('src/'+file,'utf8'),context);
  return {b,context};
 }
 test('a lift reserves the same shaft and a sliding landing at every floor, without replacing rooms',()=>{
@@ -53,6 +53,21 @@ test('sharp raster capture restores renderer, camera, composer and a running lig
 });
 test('the default sharpening action uses raster and never starts light transport',async()=>{
  const {b}=client();let calls=0;b.studio3d={renderer:{}};b.captureSharpStudioPreview=async()=>{calls++;return true;};assert.equal(await b.startArchitecturalRender(),true);assert.equal(calls,1);assert.equal(b.archRenderModules,null);assert.equal(b.state.ui.renderQuality,'draft');
+});
+test('a cached customer cover is isolated by project, drawing, finish and camera',async()=>{
+ const {b}=client();let revision='R1',design='finish-1',camera='camera-1';b.drawingRevision=()=>revision;b.cinematicSignature=()=>design;b.cinematicCameraKey=()=>camera;
+ const project=b.state.project,frame={project,revision,designKey:design,cameraKey:camera,width:2,height:1,dataUrl:'data:image/png;base64,UE5H'};b.customerFrameCache=frame;
+ assert.equal(b.customerFrameMatches(frame),true);assert.equal(await b.cachedCustomerFrame().blob.text(),'PNG');
+ b.state.project=structuredClone(project);assert.equal(b.cachedCustomerFrame(),null);b.state.project=project;
+ revision='R2';assert.equal(b.cachedCustomerFrame(),null);revision='R1';design='finish-2';assert.equal(b.cachedCustomerFrame(),null);design='finish-1';camera='camera-2';assert.equal(b.cachedCustomerFrame(),null);camera='';assert.equal(b.cachedCustomerFrame(),null);
+});
+test('navigation never copies an unfinished, stale, or advanced-light frame into the dossier',()=>{
+ const {b}=client();b.cinematicCameraKey=()=> 'camera-1';b.cinematicSignature=()=> 'finish-1';b.studio3d={renderer:{},raf:1,displayedCameraKey:'camera-1',displayedDesignKey:'finish-1'};
+ assert.equal(b.cacheCustomerFrame(),false);b.studio3d.raf=0;b.studio3d.displayedCameraKey='camera-0';assert.equal(b.cacheCustomerFrame(),false);b.studio3d.displayedCameraKey='camera-1';b.studio3d.archRender={};assert.equal(b.cacheCustomerFrame(),false);assert.equal(b.customerFrameCache,null);
+});
+test('an immediate edit keeps a just-opened disclosure without copying it to another project',()=>{
+ const {b,context}=client();b.render();context.document.querySelectorAll=()=>[{dataset:{guidedPanel:'colours:r'},open:true}];b.render({preserveScroll:true});assert.equal(b.state.ui.guidedPanels['colours:r'],true);
+ b.state.project=structuredClone(b.state.project);b.state.ui.guidedPanels={};b.render();assert.equal(b.state.ui.guidedPanels['colours:r'],undefined);
 });
 test('failed sharp image rendering restores the display and shadow-update state',async()=>{
  const {b}=client();let size=new THREE.Vector2(800,500),ratio=2,target=null;const renderer={shadowMap:{enabled:true,autoUpdate:true,needsUpdate:false},capabilities:{maxTextureSize:4096},getSize:v=>v.copy(size),getPixelRatio:()=>ratio,getRenderTarget:()=>target,setPixelRatio:v=>ratio=v,setSize:(x,y)=>size.set(x,y),setRenderTarget:v=>target=v};
