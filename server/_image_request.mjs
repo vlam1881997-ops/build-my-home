@@ -7,7 +7,7 @@ export async function imageRequestBody(req){
   }
   const chunks=[];let size=0;
   for await(const chunk of req){size+=Buffer.byteLength(chunk);if(size>IMAGE_BODY_LIMIT)throw Object.assign(new Error('Ảnh quá lớn. Hãy chọn ảnh dung lượng nhỏ hơn.'),{statusCode:413});chunks.push(Buffer.from(chunk));}
-  try{return JSON.parse(Buffer.concat(chunks).toString('utf8'));}
+  try{return req.body=JSON.parse(Buffer.concat(chunks).toString('utf8'));}
   catch{throw Object.assign(new Error('JSON không hợp lệ.'),{statusCode:400});}
 }
 

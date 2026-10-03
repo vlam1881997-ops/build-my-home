@@ -1,3 +1,4 @@
+import {reserveAiUsage,markAiProviderAccepted,beginAiProviderCall} from './_ai_usage.mjs';
 import {resolveGeminiModels} from './_gemini_models.mjs';
 const GEMINI_BASE='https://generativelanguage.googleapis.com';
 
@@ -72,7 +73,9 @@ function extractInteractionText(data){
 
 async function postInteraction(apiVersion,model,payload,key,signal){
   const url=`${GEMINI_BASE}/${apiVersion}/interactions`;
+  const finish=beginAiProviderCall();
   const r=await fetch(url,{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({...payload,model})});
+  finish(r.status);
   let data={};const raw=await r.text();if(raw){try{data=JSON.parse(raw);}catch{data={raw};}}
   return {r,data};
 }
@@ -82,7 +85,9 @@ async function postGenerateContent(model,{normalized,systemInstruction,schema,ma
   const body={contents:[{role:'user',parts}],generationConfig:{maxOutputTokens,...(schema?{responseMimeType:'application/json',responseJsonSchema:schema}:{})}};
   if(systemInstruction)body.systemInstruction={parts:[{text:systemInstruction}]};
   if(tools?.some(t=>t.type==='google_search'||t.google_search))body.tools=[{googleSearch:{}}];
+  const finish=beginAiProviderCall();
   const r=await fetch(`${GEMINI_BASE}/v1beta/models/${model}:generateContent`,{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify(body)});
+  finish(r.status);
   const data=JSON.parse(await r.text()||'{}');
   data.output_text=(data.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
   return {r,data};
@@ -93,6 +98,7 @@ export async function geminiGenerate({parts,input,systemInstruction='',schema,ma
   if(!env.key)throw Object.assign(new Error('Gemini chưa cấu hình GEMINI_API_KEY trên server.'),{statusCode:503});
   const normalized=Array.isArray(input)?input:normalizeInput(parts);
   if(!normalized.length)throw Object.assign(new Error('Gemini không có dữ liệu đầu vào.'),{statusCode:400});
+  await reserveAiUsage();
   const combos=[];for(const model of await resolveGeminiModels(env))for(const apiVersion of apiVersions())combos.push({model,apiVersion});
   let lastErr=null,quotaModel='',deadline=Date.now()+timeoutMs;
   for(let i=0;i<combos.length;i++){
@@ -118,6 +124,7 @@ export async function geminiGenerate({parts,input,systemInstruction='',schema,ma
         if(more&&(r.status===408||r.status>=500||r.status===404||r.status===400||msg.includes('model')||msg.includes('unsupported')||msg.includes('api version'))){lastErr=err;continue;}
         throw err;
       }
+      markAiProviderAccepted();
       const text=extractInteractionText(data);if(!text)throw Object.assign(new Error('Gemini không trả về nội dung có thể đọc.'),{statusCode:502,model,apiVersion});
       let result;try{result=schema?JSON.parse(text):text;}catch{throw Object.assign(new Error('Gemini trả về dữ liệu không đúng JSON.'),{statusCode:502,model,apiVersion});}
       const citations=[];const seen=new Set();

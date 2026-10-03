@@ -8,7 +8,7 @@ BMH.geminiConfigured=()=>!!BMH.cloud?.config?.geminiConfigured;
 BMH.scanState=()=>BMH.state.project.aiScan||(BMH.state.project.aiScan={sourceName:'',mimeType:'',scannedAt:'',model:'',provider:'',intent:'reference',appliedAt:'',result:{}});
 BMH.scanExisting=()=>{const a=BMH.scanState();return BMH.scan.result&&Object.keys(BMH.scan.result).length?BMH.scan.result:a.result&&Object.keys(a.result).length?a.result:null;};
 BMH.scanSetStage=(stage,progress)=>{BMH.scan.stage=stage;BMH.scan.progress=progress;BMH.render({preserveScroll:true});};
-BMH.scanFetchJson=async(url,opts={})=>{const r=await fetch(url,opts);let data={};try{data=await r.json();}catch(_){}if(!r.ok)throw new Error(data?.error||`HTTP ${r.status}`);return data;};
+BMH.scanFetchJson=async(url,opts={})=>{const r=await (BMH.aiFetch||fetch)(url,opts);let data={};try{data=await r.json();}catch(_){}if(!r.ok)throw new Error(data?.error||`HTTP ${r.status}`);return data;};
 BMH.geminiFileState=file=>String(file?.state?.name||file?.state||'UNKNOWN').toUpperCase();
 
 BMH.geminiUploadFile=async file=>{

@@ -1,3 +1,6 @@
+import {withAiUsage,reserveAiUsage,markAiProviderAccepted} from '../server/_ai_usage.mjs';
+import {ownedAiFile} from '../server/_ai_files.mjs';
+import {customerConfig} from '../server/_customer_config.mjs';
 import {send,jsonBody,apiError} from '../server/_lib.mjs';
 import {geminiGenerate,geminiDeleteFile,geminiEnv,geminiRateLimit,validGeminiFileUri} from '../server/_gemini.mjs';
 
@@ -24,8 +27,8 @@ export const SCAN_SCHEMA={
 
 function cleanProject(p={}){return {style:String(p.style||'').slice(0,80),site:{province:String(p.site?.province||'').slice(0,80),district:String(p.site?.district||'').slice(0,100),width:Number(p.site?.width)||0,depth:Number(p.site?.depth)||0,floors:Number(p.site?.floors)||0,frontDirection:String(p.site?.frontDirection||'').slice(0,30)},materials:{tier:String(p.materials?.tier||''),choices:p.materials?.choices||{}},finance:{cash:Number(p.finance?.cash)||0,loan:Number(p.finance?.loan)||0}};}
 
-export default async function handler(req,res){
-  let fileName='';
+async function handler(req,res){
+  let fileName='',validatedFile=false;
   try{
     if(req.method==='OPTIONS')return send(res,200,{ok:true});
     if(req.method!=='POST')return send(res,405,{ok:false,error:'Method not allowed'});
@@ -35,6 +38,8 @@ export default async function handler(req,res){
     if(!validGeminiFileUri(fileUri,fileName))return send(res,400,{ok:false,error:'Thiếu Gemini file URI hợp lệ.'});
     const isVideo=mime.startsWith('video/'),isImage=mime.startsWith('image/'),isPdf=mime==='application/pdf';
     if(!isVideo&&!isImage&&!isPdf)return send(res,400,{ok:false,error:'Loại tệp không hỗ trợ cho AI Scan.'});
+    if(customerConfig().quota)await ownedAiFile(req,fileName);
+    validatedFile=true;
     const userIntent=String(body.intent||'reference').slice(0,30);
     const project=cleanProject(body.project||{});
     const mediaPart={file_data:{file_uri:fileUri,mime_type:mime}};
@@ -54,5 +59,7 @@ Dữ liệu dự án hiện tại để đối chiếu, KHÔNG được coi là 
     const {result,model,apiVersion,usage,interactionId}=await geminiGenerate({parts:[mediaPart,{text:prompt}],systemInstruction:'Bạn là Gemini Visual Scan Engine của Build My Home. Ưu tiên bằng chứng, mức tin cậy và sự an toàn kỹ thuật hơn sự tự tin giả.',schema:SCAN_SCHEMA,maxOutputTokens:3200,thinkingLevel:'medium',timeoutMs:isVideo?120000:70000});
     return send(res,200,{ok:true,provider:'gemini',model,apiVersion,autoUpgrade:geminiEnv().auto,usage,interactionId,result});
   }catch(err){apiError(res,err);}
-  finally{if(fileName&&geminiEnv().deleteUploads)await geminiDeleteFile(fileName);}
+  finally{if(validatedFile&&fileName&&geminiEnv().deleteUploads)await geminiDeleteFile(fileName);}
 }
+
+export default withAiUsage(handler,'scan');

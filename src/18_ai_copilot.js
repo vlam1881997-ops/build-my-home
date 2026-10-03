@@ -24,7 +24,7 @@ BMH.aiCall=async(action,prompt='',extra={})=>{
   const stamp=String(BMH.state?.meta?.savedAt||''),key=action+'|'+String(prompt||'').trim()+'|'+stamp;
   if(BMH.ai.inflight?.key===key)return BMH.ai.inflight.promise;
   const promise=(async()=>{
-    const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,prompt,project:BMH.aiContext({lightweight:action==='brief'}),...extra})});
+    const r=await (BMH.aiFetch||fetch)('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,prompt,project:BMH.aiContext({lightweight:action==='brief'}),...extra})});
     let data={};try{data=await r.json();}catch(_){}
     if(!r.ok){
       const message=r.status===429?'AI đang bị giới hạn lượt gọi tạm thời. Hệ thống sẽ tự dùng provider/model dự phòng khi có thể.':(data?.error||`AI HTTP ${r.status}`);

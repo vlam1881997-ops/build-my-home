@@ -60,7 +60,7 @@ BMH.finishRemovePhoto=async id=>{
 };
 BMH.finishFetch=async(url,body,timeout=70_000)=>{
   const rt=BMH.finishRuntime,controller=new AbortController();rt.controller=controller;const timer=setTimeout(()=>controller.abort(),timeout);
-  try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:controller.signal}),data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'Chưa xử lý được yêu cầu. Hãy thử lại.');return data;}
+  try{const r=await (BMH.aiFetch||fetch)(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:controller.signal}),data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'Chưa xử lý được yêu cầu. Hãy thử lại.');return data;}
   catch(error){if(error.name==='AbortError')throw new Error('Đã dừng yêu cầu hoặc xử lý quá lâu. Ảnh gốc vẫn được giữ.');throw error;}
   finally{clearTimeout(timer);if(rt.controller===controller)rt.controller=null;}
 };

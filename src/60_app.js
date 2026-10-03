@@ -283,7 +283,7 @@ BMH.loadSiteIntelligence=async(force=false)=>{
   if(BMH.state.ui.step===2)BMH.render({preserveScroll:true});
   try{
     const locationLabelCurrent=!s.pinAddressNeedsReview;
-    const res=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({action:'site',lat:s.lat,lng:s.lng,address:locationLabelCurrent?s.address||'':'',district:locationLabelCurrent?s.district||'':'',province:locationLabelCurrent?s.province||'':'',road_width_m:s.road||0,force})});
+    const res=await (BMH.aiFetch||fetch)('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({action:'site',lat:s.lat,lng:s.lng,address:locationLabelCurrent?s.address||'':'',district:locationLabelCurrent?s.district||'':'',province:locationLabelCurrent?s.province||'':'',road_width_m:s.road||0,force})});
     let data={};try{data=await res.json();}catch(_){}
     if(scanId!==BMH.siteIntelScanId||key!==BMH.siteIntelClientKey())return;
     if(!res.ok)throw new Error(data?.error||('HTTP '+res.status));

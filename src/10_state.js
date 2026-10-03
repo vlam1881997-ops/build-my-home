@@ -38,7 +38,7 @@ BMH.defaultState = () => ({
     checklist:{pipe114:false,acWire:false,pressure:false,internet:false,elcb:false,waterTank:false,drainSlope:false,grounding:false,rcbo:false,acDrain:false,kitchenHood:false,conduitReserve:false},
     dossier:{startDate:'',progress:0,currentStage:'foundation',revision:'A',architect:'',contractor:'',notes:'',actualCosts:{foundation:0,structure:0,walls:0,roof:0,mep:0,finish:0,handover:0},evidence:[]}
   },
-  meta:{savedAt:null,createdAt:null,localProjectId:''}
+  meta:{savedAt:null,createdAt:null,localProjectId:'',cloudProjectId:'',cloudOwnerId:'',cloudRevision:null,cloudUpdatedAt:null}
 });
 
 BMH.DYNAMIC_STATE_PATHS=new Set(['ui.guidedPanels','project.materials.choices','project.materials.finish','project.designStudio','project.homeFinish','project.site.mapCenter','project.aiScan.result','project.dataEngine.materialOverrides','project.dataEngine.costSources','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence']);
@@ -81,7 +81,9 @@ BMH.normalizeState = () => {
   if(!BMH.state||typeof BMH.state!=='object')BMH.state=base;
   if(!BMH.state.meta||typeof BMH.state.meta!=='object'||Array.isArray(BMH.state.meta))BMH.state.meta=structuredClone(base.meta);
   BMH.state.meta.localProjectId=/^[a-zA-Z0-9_-]{1,120}$/.test(BMH.state.meta.localProjectId||'')?String(BMH.state.meta.localProjectId):'';
-  for(const key of ['createdAt','savedAt']){const value=BMH.state.meta[key];BMH.state.meta[key]=typeof value==='string'&&Number.isFinite(Date.parse(value))?new Date(value).toISOString():null;}
+  for(const key of ['cloudProjectId','cloudOwnerId'])BMH.state.meta[key]=/^[0-9a-f-]{36}$/i.test(BMH.state.meta[key]||'')?String(BMH.state.meta[key]):'';
+  BMH.state.meta.cloudRevision=Number.isSafeInteger(BMH.state.meta.cloudRevision)&&BMH.state.meta.cloudRevision>0?BMH.state.meta.cloudRevision:null;
+  for(const key of ['createdAt','savedAt','cloudUpdatedAt']){const value=BMH.state.meta[key];BMH.state.meta[key]=typeof value==='string'&&Number.isFinite(Date.parse(value))?new Date(value).toISOString():null;}
   if(!BMH.state.ui||typeof BMH.state.ui!=='object')BMH.state.ui=structuredClone(base.ui);
   if(!BMH.state.ui.planner||typeof BMH.state.ui.planner!=='object')BMH.state.ui.planner=structuredClone(base.ui.planner);
   if(!BMH.state.ui.location||typeof BMH.state.ui.location!=='object')BMH.state.ui.location=structuredClone(base.ui.location);
