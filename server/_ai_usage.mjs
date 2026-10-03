@@ -38,11 +38,23 @@ export function beginAiProviderCall(){
 }
 export function withAiUsage(handler,feature){return async(req,res)=>{
  const ctx={req,feature,accepted:false,uncertain:0,receipt:null,reservation:null};
+ let endArgs=null,response=res;
+ if(customerConfig().quota){
+  response=new Proxy(res,{get(target,key){
+   if(key==='end')return (...args)=>{endArgs=args;return response;};
+   if(key==='status')return status=>{target.status(status);return response;};
+   const value=Reflect.get(target,key,target);return typeof value==='function'?value.bind(target):value;
+  },set(target,key,value){return Reflect.set(target,key,value,target);}});
+ }
  return contexts.run(ctx,async()=>{
-  try{return await handler(req,res);}
-  finally{if(ctx.receipt){try{await supabaseFetch('/rest/v1/rpc/bmh_ai_settle',{method:'POST',admin:true,body:{p_user:ctx.receipt.user,p_request:ctx.receipt.id,p_used:ctx.accepted||ctx.uncertain>0}});}catch(_){
+  try{return await handler(req,response);}
+  finally{if(ctx.receipt){try{await supabaseFetch('/rest/v1/rpc/bmh_ai_settle',{method:'POST',admin:true,signal:AbortSignal.timeout(5000),body:{p_user:ctx.receipt.user,p_request:ctx.receipt.id,p_used:ctx.accepted||ctx.uncertain>0}});}catch(_){
    // A lost settlement remains reserved and counts against the limit. SQL ages it
    // into a used attempt, rather than making a provider call free by a timeout.
-  }}}
+  }}
+  // Serverless runtimes can suspend work after res.end(). Finish the bounded
+  // ledger write first, then deliver the existing JSON or binary response.
+  if(endArgs)res.end(...endArgs);
+  }
  });
 };}
