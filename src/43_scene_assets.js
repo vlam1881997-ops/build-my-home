@@ -115,6 +115,8 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
    if(role==='accent')replace('slattedWood',make(finish.accent||profile.color,profile.roughness,profile.kind==='wood'?'woodVertical':profile.kind,profile.scale));
   }
   for (const material of Object.values(materials)) if(material.isMaterial)material.envMapIntensity = BMH.state?.ui?.sceneTheme === 'night' ? .3 : .65;
+  for(const [slot,material] of Object.entries(materials))if(material?.isMaterial)material.userData.finishSlot=slot;
+  materials.floor.userData.finishSlot='floor';
   cache.set(key, materials);
   return materials;
 };

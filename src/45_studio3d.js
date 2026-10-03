@@ -276,7 +276,7 @@ BMH.mountStudio3D = async () => {
   const animate=renderFrame;
   state.updateCamera=updateCamera;state.defaultYaw=state.yaw;state.defaultDist=state.dist;state.defaultTarget=state.target.clone();
   const onContextLost=e=>{e.preventDefault();if(BMH.$('#studio3dCanvas')!==canvas)return;BMH.disposeStudio3D();stage.classList.remove('three-ready');BMH.mountLightPreview?.('Đồ họa bị gián đoạn · chế độ tương thích');};canvas.addEventListener('webglcontextlost',onContextLost);
-  BMH.studio3d={scene,camera,renderer,composer,ao,fxaa,renderFrame,state,ro,onDown,onMove,onUp,onWheel,onContextLost,raf:0};animate();stage.classList.add('three-ready');BMH.$('#studio3dLoading')?.remove();
+  BMH.studio3d={THREE,project:BMH.state.project,structureKey:BMH.studioStructureKey?.(),scene,camera,renderer,composer,ao,fxaa,renderFrame,state,ro,onDown,onMove,onUp,onWheel,onContextLost,raf:0};animate();stage.classList.add('three-ready');BMH.$('#studio3dLoading')?.remove();
   Promise.allSettled(scene.userData.surfaceLoads||[]).then(()=>{if(BMH.studio3d?.scene===scene)renderFrame();});
   const furnitureLoads=scene.userData.furnitureLoads||[];
   if(furnitureLoads.length){const status=document.createElement('div');status.className='studio-model-status';status.setAttribute('role','status');status.textContent='Đang tải '+furnitureLoads.length+' mô hình nội thất…';stage.appendChild(status);Promise.all(furnitureLoads).then(results=>{if(BMH.studio3d?.scene!==scene)return;const failed=results.filter(ok=>!ok).length;status.textContent=failed?failed+' món đang dùng mô hình đơn giản · thử tải lại để xem chi tiết':'Đã tải '+results.length+' mô hình nội thất';updateCamera();});}

@@ -78,6 +78,35 @@ function client(){
   return {b:BMH,context};
 }
 
+function liveFinishClient(){
+ const {b,context}=client();Object.assign(context,{performance});context.document.querySelector=()=>null;
+ b.state.project.materials={choices:{floor:'approved-sku'},finish:{rooms:{}}};b.state.project.plan.rooms=[{id:'a',type:'living',floor:0,x:0,y:0,w:4,h:4},{id:'b',type:'bed',floor:0,x:4,y:0,w:4,h:4}];Object.assign(b.state.ui,{step:6,sceneFocus:'room:a',roomCamera:'inside'});
+ b.finishPalette=id=>b.state.project.materials.finish.rooms[id]||{};b.save=()=>{};b.refreshCinematicHero=()=>{};
+ for(const file of ['85_interior_collections.js','86_visual_materials.js','90_product_polish.js'])vm.runInNewContext(fs.readFileSync('src/'+file,'utf8'),context);
+ const scene=new THREE.Scene(),sets=b.sceneAssetMaterials(THREE,scene,b.finishPalette('a'));
+ for(const id of ['a','b']){const floor=new THREE.Mesh(new THREE.BoxGeometry(4,.2,4),sets.floor);floor.userData={kind:'floor-slab',roomId:id};scene.add(floor);}
+ const wallMaterial=sets.wall.clone();wallMaterial.clippingPlanes=[new THREE.Plane(new THREE.Vector3(0,-1,0),1)];wallMaterial.clipShadows=true;
+ const wall=new THREE.Mesh(new THREE.BoxGeometry(4,3,.12),wallMaterial);wall.userData={kind:'wall',roomIds:['a']};scene.add(wall);
+ const sofa=b.createRoomAsset('loungeDesignSofa',b.FURNITURE_DIMENSIONS.loungeDesignSofa,THREE,sets);sofa.userData.roomId='a';scene.add(sofa);
+ b.studio3d={THREE,project:b.state.project,scene,renderer:{domElement:{isConnected:true}},structureKey:b.studioStructureKey(),renderFrame(){this.frames=(this.frames||0)+1;}};
+ return {b,scene,wall,sofa};
+}
+test('live finish changes preserve measured geometry and keep another room isolated',()=>{
+ const {b,scene,wall,sofa}=liveFinishClient(),floorA=scene.children[0],floorB=scene.children[1],unchanged=floorB.material,geometry=new Map();scene.traverse(o=>{if(o.geometry)geometry.set(o,o.geometry);});const positions=floorA.geometry.attributes.position.array.slice(),plane=wall.material.clippingPlanes[0];
+ assert.equal(b.applyVisualMaterial('floor','ivory-tile','a'),true);assert.equal(b.refreshStudioFinishes('floor','a'),true);assert.equal(floorA.material.userData.visualMaterial,'ivory-tile');assert.equal(floorB.material,unchanged);assert.equal(b.state.project.materials.choices.floor,'approved-sku');assert.deepEqual(floorA.geometry.attributes.position.array,positions);
+ b.applyVisualMaterial('wall','grey-paint','a');assert.equal(b.refreshStudioFinishes('wall','a'),true);assert.equal(wall.material.userData.visualMaterial,'grey-paint');assert.equal(wall.material.clippingPlanes[0],plane);assert.equal(wall.material.clipShadows,true);
+ b.applyVisualMaterial('fabric','olive-velvet','a');assert.equal(b.refreshStudioFinishes('fabric','a'),true);let fabrics=0;sofa.traverse(o=>{if(o.material?.userData.finishSlot==='fabric'){fabrics++;assert.equal(o.material.userData.visualMaterial,'olive-velvet');assert.equal(o.material.isMeshPhysicalMaterial,true);}});assert.ok(fabrics>0);
+ for(const [o,g]of geometry)assert.equal(o.geometry,g);
+ for(let i=0;i<24;i++){b.applyVisualMaterial('floor',i%2?'oak-floor':'walnut-floor','a');assert.equal(b.refreshStudioFinishes('floor','a'),true);}assert.ok(scene.userData.finishMaterials.size<=6,'retired finish sets do not grow per selection');
+ b.state.project.plan.rooms[0].w=5;b.applyVisualMaterial('floor','ivory-tile','a');assert.equal(b.refreshStudioFinishes('floor','a'),false,'a geometry edit requires rebuilding');
+});
+test('unknown model finishes fall back before changing any mesh, and stale supplier bindings are omitted',()=>{
+ const {b,scene}=liveFinishClient(),floor=scene.children[0],old=floor.material,model=new THREE.Group();model.userData={roomId:'a',source:'glb'};scene.add(model);b.studio3d.structureKey=b.studioStructureKey();
+ b.applyVisualMaterial('floor','ivory-tile','a');assert.equal(b.refreshStudioFinishes('floor','a'),false);assert.equal(floor.material,old);
+ b.state.project.materials.choices.floor='p';b.state.project.dataEngine={materialOverrides:{p:{product:{id:'p',category:'floor',name:'Gạch hãng',sku:'SKU-600',finance:'PRIVATE'}}}};b.state.project.materials.finish.rooms.a.catalogMaterials={floor:{id:'p',profileId:'ivory-tile'}};
+ const info=b.showroomFinishInfo('a');assert.equal(info.length,1);assert.equal(info[0].sku,'SKU-600');assert.equal('finance'in info[0],false);b.applyVisualMaterial('floor','oak-floor','a');assert.equal(b.showroomFinishInfo('a').length,0);b.applyVisualMaterial('floor','ivory-tile','a');b.state.project.materials.choices.floor='other';assert.equal(b.showroomFinishInfo('a').length,0);
+});
+
 test('detailed furniture preserves every measured envelope and has finite smooth geometry',()=>{
   const {b}=client(),m=b.sceneAssetMaterials(THREE,new THREE.Scene());
   for(const [name,d] of Object.entries(b.FURNITURE_DIMENSIONS)){

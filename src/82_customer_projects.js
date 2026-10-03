@@ -12,9 +12,10 @@ BMH.projectDb=()=>{
  const p=BMH.projects;if(p.db)return Promise.resolve(p.db);if(p.dbPromise)return p.dbPromise;
  p.dbPromise=new Promise((resolve,reject)=>{
   if(!globalThis.indexedDB)return reject(new Error('Trình duyệt chưa cho phép lưu nhiều dự án. Bạn vẫn có thể tải bản sao JSON.'));
-  const request=indexedDB.open('bmh-customer-projects',1);
-  request.onupgradeneeded=()=>{const db=request.result;db.createObjectStore('designs',{keyPath:'id'});const summaries=db.createObjectStore('summaries',{keyPath:'id'});summaries.createIndex('updatedAt','updatedAt');};
+  const request=indexedDB.open('bmh-customer-projects',2);
+  request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains('designs'))db.createObjectStore('designs',{keyPath:'id'});if(!db.objectStoreNames.contains('summaries')){const summaries=db.createObjectStore('summaries',{keyPath:'id'});summaries.createIndex('updatedAt','updatedAt');}if(!db.objectStoreNames.contains('settings'))db.createObjectStore('settings',{keyPath:'key'});};
   request.onerror=()=>reject(new Error('Chưa mở được kho dự án trên thiết bị. Hãy tải bản sao JSON để giữ thiết kế.'));
+  request.onblocked=()=>reject(new Error('Kho dự án đang mở trong một tab cũ. Đóng tab đó và thử lại; bạn vẫn có thể tải bản sao JSON.'));
   request.onsuccess=()=>{p.db=request.result;p.db.onversionchange=()=>{p.db.close();p.db=null;p.dbPromise=null;};resolve(p.db);};
  }).catch(error=>{p.dbPromise=null;throw error;});return p.dbPromise;
 };
@@ -27,9 +28,12 @@ BMH.projectTransaction=async(stores,mode,operation)=>{
  });
 };
 BMH.projectEnqueue=operation=>{const p=BMH.projects,next=p.tail.catch(()=>{}).then(operation);p.tail=next;return next;};
-BMH.projectPut=(state,id)=>BMH.projectTransaction(['designs','summaries'],'readwrite',transaction=>{
+BMH.projectPut=(state,id)=>BMH.projectTransaction(['designs','summaries','settings'],'readwrite',transaction=>{
  transaction.objectStore('designs').put({id,state});transaction.objectStore('summaries').put(BMH.projectSummary(state,id));
+ transaction.objectStore('settings').put({key:'active',id,updatedAt:state.meta.savedAt});
 });
+BMH.projectActive=()=>BMH.projectTransaction(['settings'],'readonly',(transaction,result)=>{const r=transaction.objectStore('settings').get('active');r.onsuccess=()=>result(r.result||null);});
+BMH.projectActivate=id=>BMH.projectTransaction(['settings'],'readwrite',transaction=>transaction.objectStore('settings').put({key:'active',id,updatedAt:new Date().toISOString()}));
 BMH.projectGet=id=>BMH.projectTransaction(['designs'],'readonly',(transaction,result)=>{const r=transaction.objectStore('designs').get(id);r.onsuccess=()=>result(r.result||null);});
 BMH.projectList=()=>BMH.projectTransaction(['summaries'],'readonly',(transaction,result)=>{
  const rows=[],r=transaction.objectStore('summaries').index('updatedAt').openCursor(null,'prev');r.onsuccess=()=>{const cursor=r.result;if(cursor){rows.push(cursor.value);cursor.continue();}else result(rows);};
@@ -59,9 +63,10 @@ BMH.restoreProjectRuntime=()=>{
 BMH.useCustomerProject=(record,{close=true}={})=>{
  const access=structuredClone(BMH.state.access);BMH.detachProjectCloud();BMH.state=BMH.mergeState(BMH.defaultState(),record.state);BMH.state.access=access;BMH.state.meta.localProjectId=record.id;BMH.state.ui.renderMode='interactive';BMH.normalizeState();
  BMH.projects.activeId=record.id;BMH.projects.dirty=false;BMH.projects.error='';BMH.planHistory={undo:[],redo:[]};BMH.suggestionCache?.clear();BMH.restoreProjectRuntime();BMH.saveBeforeProjects();
+ BMH.projects.activation=BMH.projectEnqueue(()=>BMH.projectActivate(record.id)).catch(error=>{BMH.projects.error=error.message;BMH.projectSaveStatus();});
  if(close)BMH.closeProjectLibrary();BMH.render();BMH.projectSaveStatus();
 };
-BMH.openCustomerProject=async id=>{await BMH.saveCustomerProject();const record=await BMH.projectGet(id);if(!record)throw new Error('Bản lưu này không còn trên thiết bị.');BMH.useCustomerProject(record);BMH.toast('Đã mở '+record.state.project.name+'.');};
+BMH.openCustomerProject=async id=>{await BMH.saveCustomerProject();const record=await BMH.projectGet(id);if(!record)throw new Error('Bản lưu này không còn trên thiết bị.');BMH.useCustomerProject(record);await BMH.projects.activation;BMH.toast('Đã mở '+record.state.project.name+'.');};
 BMH.newCustomerProject=async({copyId=''}={})=>{
  await BMH.saveCustomerProject();const source=copyId?await BMH.projectGet(copyId):null;if(copyId&&!source)throw new Error('Không tìm thấy thiết kế để tạo bản sao.');
  const state=source?BMH.projectSnapshot(source.state):BMH.defaultState(),id=globalThis.crypto?.randomUUID?.()||BMH.uid('home'),now=new Date().toISOString();
@@ -113,6 +118,6 @@ document.addEventListener('click',event=>{
 document.addEventListener('submit',event=>{if(event.target.id!=='customerProjectNameForm')return;event.preventDefault();const name=String(new FormData(event.target).get('projectName')||'').trim().slice(0,120);if(!name)return;BMH.state.project.name=name;BMH.save();BMH.saveCustomerProject().then(()=>BMH.refreshProjectLibrary()).catch(error=>{BMH.projects.error=error.message;BMH.paintProjectLibrary();});});
 BMH.projects.ready=(async()=>{
  const initial=BMH.state,mutation=BMH.projects.mutation;
- try{await BMH.projectDb();if(BMH.projects.activeId){const record=await BMH.projectGet(BMH.projects.activeId);if(BMH.state===initial&&mutation===BMH.projects.mutation){if(record&&String(record.state.meta.savedAt)>String(initial.meta.savedAt))BMH.useCustomerProject(record,{close:false});else if(!record||String(initial.meta.savedAt)>String(record.state.meta.savedAt))BMH.queueProjectSave();}}return true;}
+ try{await BMH.projectDb();const active=await BMH.projectActive();if(BMH.state!==initial||mutation!==BMH.projects.mutation)return true;if(active?.id&&(!BMH.localStateLoaded||!BMH.projects.activeId||String(active.updatedAt)>=String(initial.meta.savedAt)))BMH.projects.activeId=active.id;if(BMH.projects.activeId){const record=await BMH.projectGet(BMH.projects.activeId);if(BMH.state===initial&&mutation===BMH.projects.mutation){if(record&&(!BMH.localStateLoaded||record.id!==initial.meta.localProjectId||String(record.state.meta.savedAt)>String(initial.meta.savedAt)))BMH.useCustomerProject(record,{close:false});else if(!record||String(initial.meta.savedAt)>String(record.state.meta.savedAt))BMH.queueProjectSave();}}return true;}
  catch(error){BMH.projects.error=error.message;BMH.projectSaveStatus();return false;}
 })();
