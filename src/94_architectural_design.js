@@ -11,6 +11,8 @@
   const number=(key,pattern,fallback)=>Number.isInteger(Number(v[key]))&&Number(v[key])>0?Number(v[key]):
    Number.isInteger(Number(explicit[key]))&&Number(explicit[key])>0?Number(explicit[key]):Number(text.match(pattern)?.[1])||fallback;
   const requested=word=>new RegExp('(?:'+word+')','i').test(text)&&!new RegExp('(không|chưa)\\s+(cần\\s+|có\\s+|làm\\s+)?(?:'+word+')','i').test(text);
+  const floorProgram=B.requestedFloorProgram?.();
+  if(floorProgram)return {floorProgram,bedrooms:floorProgram.reduce((n,f)=>n+f.bedrooms,0),bathrooms:floorProgram.reduce((n,f)=>n+f.bathrooms,0),garage:floorProgram.some(f=>f.garage),office:floorProgram.some(f=>f.office),worship:floorProgram.some(f=>f.worship!=='none'),elevator:v.elevator??explicit.elevator??requested('thang máy'),garden:v.garden??explicit.garden??requested('sân vườn'),pond:v.pond??explicit.pond??requested('bể cá'),elderly:(p.household.relatives||[]).length>0};
   return {bedrooms:number('bedrooms',/(\d{1,2})\s*(?:phòng ngủ|pn\b)/i,B.householdNeeds().bedrooms),
    bathrooms:number('bathrooms',/(\d{1,2})\s*(?:wc\b|nhà vệ sinh|phòng vệ sinh)/i,Number(p.site.floors)),
    garage:v.garage??explicit.garage??requested('gara|garage'),elevator:v.elevator??explicit.elevator??requested('thang máy'),
@@ -22,16 +24,18 @@
   const W=e.buildWidth-t,D=e.buildDepth-t,x0=(e.originX??e.side??0)+t/2,y0=(e.originY??e.front??0)+t/2;
   const floors=Number(p.site.floors),fail=text=>({ok:false,reason:text,program});
   if(![W,D,x0,y0].every(Number.isFinite)||W<3.35||D<6||!Number.isInteger(floors)||floors<1||floors>10)return fail('Khung xây dựng chưa đủ để bố trí phòng và lối đi. Kiểm tra ranh, khoảng lùi và số tầng.');
-  if(program.bedrooms>20||program.bathrooms>20)return fail('Số phòng vượt phạm vi tự bố trí. Cần triển khai công năng riêng.');
-  if(program.bathrooms<floors)return fail('Bố trí hiện tại cần một WC ở mỗi tầng. Giảm số tầng hoặc chọn ít nhất '+floors+' WC; không tự thêm ngoài yêu cầu.');
+  if(!program.floorProgram&&(program.bedrooms>20||program.bathrooms>20))return fail('Số phòng vượt phạm vi tự bố trí. Cần triển khai công năng riêng.');
+  if(program.floorProgram&&B.floorProgramError(program.floorProgram))return fail(B.floorProgramError(program.floorProgram));
+  if(!program.floorProgram&&program.bathrooms<floors)return fail('Chọn công năng từng tầng để quyết định tầng nào có WC; không tự thêm ngoài yêu cầu.');
   if(program.elevator&&floors===1)return fail('Nhà một tầng chưa có điểm dừng trên để bố trí thang máy. Điều chỉnh số tầng hoặc bỏ lựa chọn này.');
   const wide=W>=7.2&&!program.garage, hallW=1.2,bank=wide?(W-hallW)/2:W-hallW;
   if(bank<2.65)return fail('Phòng còn quá hẹp sau khi dành hành lang 1,20 m. Điều chỉnh công năng hoặc khung đất.');
   const multi=floors>1,coreD=multi?(wide?4.2:5.4):2.2,mainD=D-coreD;
-  const groundBeds=program.elderly?1:0,upperCount=program.bedrooms-groundBeds;
+  const groundBeds=program.floorProgram?0:program.elderly?1:0,upperCount=program.bedrooms-groundBeds;
   if(upperCount<0)return fail('Cần ít nhất một phòng ngủ tầng trệt cho người thân đã khai báo.');
   const beds=Array.from({length:Math.max(0,upperCount)},(_,i)=>i===0?'Phòng ngủ chính':p.household.children?.[i-1]?.name?'Phòng '+p.household.children[i-1].name:'Phòng ngủ '+(i+1));
   const extraBaths=Math.max(0,program.bathrooms-floors),names=Array.from({length:floors},()=>[]);
+  if(program.floorProgram){for(let f=0;f<floors;f++){const v=program.floorProgram[f];if(v.garage)names[f].push(['Gara','garage']);if(v.living)names[f].push(['Phòng khách','living']);if(v.kitchen)names[f].push(['Bếp + ăn','kitchen']);for(let i=0;i<v.bedrooms;i++)names[f].push(['Phòng ngủ '+(i+1),'bed']);if(v.office)names[f].push(['Phòng làm việc','office']);if(v.worship==='room')names[f].push(['Phòng thờ','worship']);for(let i=1;i<v.bathrooms;i++)names[f].push(['WC bổ sung '+(i+1),'bath']);}}else{
   names[0].push(...(program.garage?[['Gara','garage']]:[]),['Phòng khách','living'],['Bếp + ăn','kitchen']);
   if(groundBeds)names[0].push(['Phòng ông bà','bed']);
   if(program.office)names[0].push(['Phòng làm việc','office']);
@@ -39,29 +43,31 @@
   if(floors===1)names[0].push(...beds.map(n=>[n,'bed']));
   else beds.forEach((n,i)=>names[1+i%(floors-1)].push([n,'bed']));
   for(let i=0;i<extraBaths;i++)names[i%floors].push(['WC bổ sung '+(i+1),'bath']);
+  }
   const minDepth=type=>({living:3.0,kitchen:2.8,bed:2.95,garage:5.5,office:2.6,worship:2.4,bath:2.2})[type]||2.6;
   const rows=names.map(list=>wide?Array.from({length:Math.max(1,Math.ceil(list.length/2))},(_,i)=>[list[i*2],list[i*2+1]]):list.map(x=>[x]));
   if(rows.some(row=>row.reduce((n,pair)=>n+Math.max(...pair.filter(Boolean).map(x=>minDepth(x[1])),2.6),0)>mainD+.001))return fail('Chưa đủ chiều sâu cho số phòng yêu cầu với kích thước sử dụng được. Giảm công năng, tăng số tầng hoặc điều chỉnh khoảng lùi.');
   if(program.garage&&bank<3)return fail('Bề ngang gara chưa đủ cho chỗ đỗ mẫu. Cần kích thước xe và lối vào thực tế.');
   if(program.elevator&&bank-1.8<1.35&&wide)return fail('Khối thang máy và vệ sinh chưa đủ chỗ. Cần phân chia công năng riêng cho bề ngang này.');
   if(program.elevator&&!wide&&bank-1.8<1.35)return fail('Khối thang máy 1,80 m để lại WC quá hẹp. Tăng bề ngang hoặc điều chỉnh công năng.');
-  const rooms=[],openings=[];let rid=0,oid=0;
-  const add=(floor,name,type,x,y,w,h)=>{const r={id:'design-r'+(++rid),floor,name,type,x,y,w,h};rooms.push(r);return r;};
+  const rooms=[],openings=[],occurrences={};let oid=0;
+  const add=(floor,name,type,x,y,w,h)=>{const key=floor+'-'+type,n=occurrences[key]=(occurrences[key]||0)+1,r={id:'design-f'+floor+'-'+type+'-'+n,floor,name,type,x,y,w,h};rooms.push(r);return r;};
   const opening=(r,kind,side,width,offset=.5,extra={})=>{
    const span=['north','south'].includes(side)?r.w:r.h,widthFit=Math.min(width,span-.25);
    const o={id:'design-o'+(++oid),roomId:r.id,floor:r.floor,kind,side,width:widthFit,offset,height:kind==='door'?2.2:1.4,sill:kind==='door'?0:.9,hinge:'left',swing:'in',...extra};
    if(widthFit<.5)return;openings.push(o);return o;
   };
   for(let f=0;f<floors;f++){
+   const wc=!program.floorProgram||program.floorProgram[f].bathrooms>0,wcType=wc?'bath':'utility',wcName=wc?'WC T'+(f+1):'Giặt / kỹ thuật T'+(f+1);
    const hx=x0+bank,hall=add(f,'Sảnh / hành lang T'+(f+1),'corridor',hx,y0,hallW,D);
    if(f===0)opening(hall,'door','north',1.0,.5,{height:2.4});
-   const list=rows[f],minimum=list.map(pair=>Math.max(...pair.filter(Boolean).map(x=>minDepth(x[1])),2.6));
+   const list=rows[f].length?rows[f]:[[null]],minimum=list.map(pair=>Math.max(...pair.filter(Boolean).map(x=>minDepth(x[1])),2.6));
    const weights=list.map(pair=>pair.some(x=>x?.[1]===(strategy==='climate'?'living':strategy==='balanced'?'kitchen':'bed'))?1.5:1);
    const remaining=mainD-minimum.reduce((a,b)=>a+b,0),weightSum=weights.reduce((a,b)=>a+b,0);let cursor=y0;
    list.forEach((pair,i)=>{
     const depth=minimum[i]+remaining*weights[i]/weightSum;
     for(let side=0;side<(wide?2:1);side++){
-     const item=pair[side]||['Sinh hoạt chung','living'],x=side?hx+hallW:x0,r=add(f,item[0],item[1],x,cursor,bank,depth);
+     const item=pair[side]||(program.floorProgram?['Không gian linh hoạt','corridor']:['Sinh hoạt chung','living']),x=side?hx+hallW:x0,r=add(f,item[0],item[1],x,cursor,bank,depth);
      opening(r,'door',side?'west':'east',r.type==='bath'?.8:.9,.76);
      if(r.type==='garage')opening(r,'door','north',2.8,.5,{height:2.4});
      else if(i===0)opening(r,'window','north',r.type==='living'?Math.min(2.4,bank-.4):1.5,.5,{height:r.type==='living'?1.65:1.4,sill:r.type==='living'?.65:.9});
@@ -76,15 +82,15 @@
     const right=hx+hallW;
     if(program.elevator){
      const landing=add(f,'Sảnh thang máy','corridor',right,y0+mainD,1.8,coreD-2.2);opening(landing,'door','west',.9);
-     const bath=add(f,'WC T'+(f+1),'bath',right+1.8,y0+mainD,bank-1.8,coreD);opening(bath,'door','west',.8,.15);opening(bath,'window','east',.65,.5,{height:.55,sill:1.7});
+     const bath=add(f,wcName,wcType,right+1.8,y0+mainD,bank-1.8,coreD);opening(bath,'door','west',.8,.15);opening(bath,'window','east',.65,.5,{height:.55,sill:1.7});
      const lift=add(f,'Thang máy','elevator',right,y0+mainD+coreD-2.2,1.8,2.2);
      lift.elevator={shaftId:'design-lift',doorSide:'west',cabinWidth:1.1,cabinDepth:1.3,doorWidth:.8,pitDepth:null,headroom:null,model:''};const o=B.elevatorLanding(lift);if(o)openings.push({...o,id:'design-o'+(++oid)});
     }else{
-     const bath=add(f,'WC T'+(f+1),'bath',right,y0+mainD,bank,2.2);opening(bath,'door','west',.8);opening(bath,'window','east',.65,.5,{height:.55,sill:1.7});
+     const bath=add(f,wcName,wcType,right,y0+mainD,bank,2.2);opening(bath,'door','west',.8);opening(bath,'window','east',.65,.5,{height:.55,sill:1.7});
      if(coreD>2.3){const laundry=add(f,'Giặt / kỹ thuật','utility',right,y0+mainD+2.2,bank,coreD-2.2);opening(laundry,'door','west',.9);}
     }
    }else{
-    const bw=program.elevator?bank-1.8:bank,bath=add(f,'WC T'+(f+1),'bath',x0,y0+mainD,bw,2.2);
+    const bw=program.elevator?bank-1.8:bank,bath=add(f,wcName,wcType,x0,y0+mainD,bw,2.2);
     opening(bath,'door','south',.8,.3);opening(bath,'window','west',.65,.5,{height:.55,sill:1.7});
     if(program.elevator){
      const lift=add(f,'Thang máy','elevator',x0+bw,y0+mainD,1.8,2.2);lift.elevator={shaftId:'design-lift',doorSide:'east',cabinWidth:1.1,cabinDepth:1.3,doorWidth:.8,pitDepth:null,headroom:null,model:''};const o=B.elevatorLanding(lift);if(o)openings.push({...o,id:'design-o'+(++oid)});
@@ -98,8 +104,10 @@
   // When a lift shares the narrow service strip, the WC gets a direct hall opening
   // via the lower stair landing; mark that coordination issue rather than invent a corridor.
   if(program.elevator&&!wide)return fail('Bề ngang này chưa bố trí được WC, sảnh và thang máy với lối vào riêng. Tăng bề ngang hoặc thiết kế khối thang riêng.');
-  const plan={rooms,openings,outdoor:B.programOutdoorZones?.({...program,mode:'custom'})||[],lockedRoomIds:[],lockedFloors:[]};
-  if(!B.layoutValid(rooms))return fail('Phương án vượt ranh hoặc chồng phòng. Giữ mặt bằng hiện tại.');
+  const plan={rooms,openings,fixtures:[],outdoor:B.programOutdoorZones?.({...program,mode:'custom'})||[],lockedRoomIds:[],lockedFloors:[]};
+  if(B.createWorshipFixtures)plan.fixtures=B.createWorshipFixtures(plan,program);
+  if(program.floorProgram&&plan.fixtures.length!==program.floorProgram.filter(f=>f.worship!=='none').length)return fail('Chưa có vị trí bàn thờ dự trù không chắn cửa tại các tầng yêu cầu. Điều chỉnh công năng hoặc đặt trực tiếp sau khi chọn mặt bằng.');
+  if(!(B.customerBaseLayoutValid||B.layoutValid)(rooms))return fail('Phương án vượt ranh hoặc chồng phòng. Giữ mặt bằng hiện tại.');
   const geometryErrors=B.withPlan(plan,()=>[...B.measuredGeometryIssues(),...B.elevatorIssues().filter(i=>i.sev==='error')]);
   if(geometryErrors.length)return fail(geometryErrors[0].text);
   const disconnected=B.withPlan(plan,()=>Array.from({length:floors},(_,f)=>B.circulationAnalysis(f).unreachable).flat());if(disconnected.length)return fail(disconnected[0].name+': chưa có đường tiếp cận liên tục qua cửa.');

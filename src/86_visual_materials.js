@@ -49,9 +49,9 @@ BMH.applyVisualMaterial=(role,id,roomId=null)=>{
  if(!profile||roomId&&!p.plan.rooms.some(r=>r.id===roomId))return false;
  BMH.rememberFinishCamera();
  const f=p.materials.finish||={exterior:null,rooms:{}};f.rooms||={};
- const rooms=roomId?p.plan.rooms.filter(r=>r.id===roomId):p.plan.rooms.filter(r=>['living','bed','kitchen','bath'].includes(r.type));
+ const rooms=roomId?p.plan.rooms.filter(r=>r.id===roomId):p.plan.rooms.filter(r=>!['stairs','elevator','balcony'].includes(r.type));
  for(const room of rooms){const previous=BMH.finishPalette(room.id);f.rooms[room.id]={...previous,[role]:profile.color,visualMaterials:{...previous.visualMaterials,[role]:id},...(role==='floor'?{surface:profile.surface}:{})};}
- if(!roomId&&role==='wall')f.exterior={...f.exterior,wall:profile.color};
+ if(!roomId)f.exterior={...f.exterior,[role]:profile.color,visualMaterials:{...f.exterior?.visualMaterials,[role]:id},...(role==='floor'?{surface:profile.surface}:{})};
  BMH.state.ui.renderMode='interactive';BMH.finishInvalidate?.();BMH.save();return true;
 };
 BMH.visualMaterialContext=roomId=>{
@@ -60,11 +60,11 @@ BMH.visualMaterialContext=roomId=>{
 };
 BMH.visualMaterialsHtml=()=>{
  const focus=BMH.state.ui.sceneFocus||'',room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===focus),palette=BMH.finishPalette(room?.id),esc=BMH.esc;
- if(!room){const rooms=BMH.state.project.plan.rooms.filter(r=>['living','bed','kitchen','bath'].includes(r.type));palette.visualMaterials=Object.fromEntries(['floor','wall','accent','fabric'].map(role=>{const ids=[...new Set(rooms.map(r=>BMH.finishPalette(r.id).visualMaterials?.[role]))];return [role,ids.length===1?ids[0]:''];}));}
+ if(!room){const rooms=BMH.state.project.plan.rooms.filter(r=>!['stairs','elevator','balcony'].includes(r.type));palette.visualMaterials=Object.fromEntries(['floor','wall','accent','fabric'].map(role=>{const ids=[...new Set(rooms.map(r=>BMH.finishPalette(r.id).visualMaterials?.[role]))];return [role,ids.length===1?ids[0]:''];}));}
  return '<section class="visual-materials" aria-label="Vật liệu trong ảnh"><div><span>VẬT LIỆU TRONG ẢNH</span><h3>Đổi bề mặt, thấy ngay trong 3D.</h3><p>'+esc(room?'Áp dụng riêng cho '+room.name:'Áp dụng cho các phòng trong nhà')+'. Vân, độ nhám và độ bóng đổi cùng lựa chọn.</p></div><div class="visual-material-groups">'+[['floor','Sàn'],['wall','Tường'],['accent','Gỗ & tủ'],['fabric','Sofa & vải']].map(([role,label])=>'<fieldset><legend>'+label+'</legend>'+BMH.VISUAL_MATERIALS.filter(p=>p.role===role).map(p=>'<button type="button" data-visual-material="'+p.id+'" data-visual-role="'+role+'" aria-pressed="'+(palette.visualMaterials?.[role]===p.id)+'" title="'+esc(p.detail)+'"><i class="finish-swatch finish-'+p.kind+'" style="--finish-color:'+p.color+'" aria-hidden="true"></i><span>'+esc(p.name)+'</span></button>').join('')+'</fieldset>').join('')+'</div><small>Bề mặt mô phỏng. Mã hàng, ảnh sản phẩm và báo giá được chọn riêng tại showroom.</small></section>';
 };
 BMH.visualMaterialsQuickHtml=()=>{
- const room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===BMH.state.ui.sceneFocus),rooms=room?[room]:BMH.state.project.plan.rooms.filter(r=>['living','bed','kitchen','bath'].includes(r.type)),esc=BMH.esc;
+ const room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===BMH.state.ui.sceneFocus),rooms=room?[room]:BMH.state.project.plan.rooms.filter(r=>!['stairs','elevator','balcony'].includes(r.type)),esc=BMH.esc;
  return '<div class="visual-material-quick"><b>Vật liệu trong ảnh</b><small>'+esc(room?'Riêng '+room.name:'Các phòng trong nhà')+'</small>'+[['floor','Sàn'],['wall','Tường'],['accent','Gỗ & tủ'],['fabric','Sofa & vải']].map(([role,label])=>{const ids=[...new Set(rooms.map(r=>BMH.finishPalette(r.id).visualMaterials?.[role]))],selected=ids.length===1?ids[0]:'';return '<label>'+label+'<select data-visual-material-select="'+role+'"><option value="" disabled '+(!selected?'selected':'')+'>Theo từng phòng</option>'+BMH.VISUAL_MATERIALS.filter(p=>p.role===role).map(p=>'<option value="'+p.id+'" '+(selected===p.id?'selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select></label>';}).join('')+'<small>Đổi vân, độ nhám và độ bóng ngay trong 3D.</small></div>';
 };
 const materialsScreen=BMH.screen7;

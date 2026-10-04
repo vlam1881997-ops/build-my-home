@@ -1,6 +1,6 @@
 BMH.defaultState = () => ({
   version: BMH.VERSION,
-  ui: {step:1, guidedPanels:{}, renderMode:'interactive',renderQuality:'draft',sharpResolution:1280,designView:'exterior', presentationMode:false, designDrawing:'plan', roomCamera:'overview', homeMode:'design', onboardingComplete:false, onboardingStep:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', materialSearchLocal:false, location:{drawingLot:false}, planner:{floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',openingPage:0,stairDrawingId:'',sectionCutX:null,layout:'wide',textSize:'large',toolsOpen:false,inspectorOpen:false,legendOpen:true,showFurniture:true,showDimensions:true,showFeng:false,showBelow:false,showStructure:false,showEnvironment:false,showCirculation:false,showSectionLine:false,showClimate:false,showEnvelope:false}, architectureEngine:'existing', sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false, modelLook:'neon', modelWalls:'auto', modelRoomId:'', modelLightLevel:75},
+  ui: {step:1, guidedPanels:{'style-output':false,'worship-review':false},programFloor:0,proposalFloor:0, renderMode:'interactive',renderQuality:'draft',sharpResolution:1280,designView:'exterior', presentationMode:false, designDrawing:'plan', roomCamera:'overview', homeMode:'design', onboardingComplete:false, onboardingStep:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', materialSearchLocal:false, location:{drawingLot:false}, planner:{directTool:'select',drawRoomType:'bed',selectedOpening:'',selectedFixture:'',floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',openingPage:0,stairDrawingId:'',sectionCutX:null,layout:'wide',textSize:'large',toolsOpen:false,inspectorOpen:false,legendOpen:true,showFurniture:true,showDimensions:true,showFeng:false,showBelow:false,showStructure:false,showEnvironment:false,showCirculation:false,showSectionLine:false,showClimate:false,showEnvelope:false}, architectureEngine:'existing', sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false, modelLook:'neon', modelWalls:'auto', modelRoomId:'', modelLightLevel:75},
   access: {paid:false, source:'none', paidAt:null, verifiedAt:null, orderCode:null},
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại', briefIdea:'',
@@ -25,7 +25,7 @@ BMH.defaultState = () => ({
       {id:'o2',floor:0,roomId:'r1',kind:'window',side:'east',offset:.35,width:1.6},
       {id:'o3',floor:0,roomId:'r3',kind:'door',side:'east',offset:.25,width:.8},
       {id:'o4',floor:1,roomId:'r6',kind:'window',side:'east',offset:.4,width:1.6}
-    ], outdoor:[], lockedRoomIds:[],lockedFloors:[]},
+    ], outdoor:[], fixtures:[], lockedRoomIds:[],lockedFloors:[]},
     planVariants:[],
     designStudio:{kits:[],activeKit:'',inputSignature:'',appliedSignature:''},
     planVersions:[],
@@ -123,6 +123,7 @@ BMH.normalizeState = () => {
   if(!BMH.state.project.plan||typeof BMH.state.project.plan!=='object')BMH.state.project.plan=structuredClone(base.project.plan);
   if(!Array.isArray(BMH.state.project.plan.rooms))BMH.state.project.plan.rooms=structuredClone(base.project.plan.rooms);
   if(!Array.isArray(BMH.state.project.plan.openings))BMH.state.project.plan.openings=structuredClone(base.project.plan.openings);
+  if(!Array.isArray(BMH.state.project.plan.fixtures))BMH.state.project.plan.fixtures=[];
   if(!Array.isArray(BMH.state.project.plan.lockedRoomIds))BMH.state.project.plan.lockedRoomIds=[];
   BMH.state.project.plan.lockedRoomIds=BMH.state.project.plan.lockedRoomIds.filter(id=>BMH.state.project.plan.rooms.some(r=>r.id===id));
   if(!Array.isArray(BMH.state.project.plan.lockedFloors))BMH.state.project.plan.lockedFloors=[];

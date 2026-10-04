@@ -55,7 +55,7 @@ BMH.openingCode = o => {
 
 // The same hinge and swing endpoints drive the SVG, DXF and 3D door leaf.
 BMH.doorLeafGeometry = o => {
- const span=BMH.openingWallSpan(o);if(!span||o.kind!=='door')return null;
+ const span=BMH.openingWallSpan(o);if(!span||o.kind!=='door'||o.passage)return null;
  const horizontal=span.o==='h',right=o.hinge==='right',width=span.b-span.a;
  const point=a=>horizontal?{x:a,y:span.c}:{x:span.c,y:a};
  const hinge=point(right?span.b:span.a),closed=point(right?span.a:span.b),normals={north:[0,1],south:[0,-1],west:[1,0],east:[-1,0]},normal=normals[o.side],sign=o.swing==='out'?-1:1;
@@ -71,6 +71,7 @@ BMH.openingSvg = o => {
     if(o.side==='north'||o.side==='south') return `<g class="opening window"><line class="opening-cut" x1="${x}" y1="${y}" x2="${x+w}" y2="${y}"/><line x1="${x}" y1="${y-.06}" x2="${x+w}" y2="${y-.06}"/><line x1="${x}" y1="${y+.06}" x2="${x+w}" y2="${y+.06}"/>${tag(x+w/2,y+(o.side==='north'?-.18:.18))}</g>`;
     return `<g class="opening window"><line class="opening-cut" x1="${x}" y1="${y}" x2="${x}" y2="${y+w}"/><line x1="${x-.06}" y1="${y}" x2="${x-.06}" y2="${y+w}"/><line x1="${x+.06}" y1="${y}" x2="${x+.06}" y2="${y+w}"/>${tag(x+(o.side==='west'?-.18:.18),y+w/2)}</g>`;
   }
+  if(o.passage)return `<g class="opening passage" data-opening-id="${BMH.esc(o.id)}"><line class="opening-cut" x1="${x}" y1="${y}" x2="${x+(['north','south'].includes(o.side)?w:0)}" y2="${y+(['north','south'].includes(o.side)?0:w)}"/>${tag(x+(['north','south'].includes(o.side)?w/2:.2),y+(['north','south'].includes(o.side)?-.2:w/2))}</g>`;
   const leaf=BMH.doorLeafGeometry(o);if(!leaf)return '';
   return `<g class="opening door" data-opening-id="${BMH.esc(o.id)}"><line class="opening-cut" x1="${x}" y1="${y}" x2="${x+(leaf.horizontal?w:0)}" y2="${y+(leaf.horizontal?0:w)}"/><line class="door-leaf" x1="${leaf.hinge.x}" y1="${leaf.hinge.y}" x2="${leaf.open.x}" y2="${leaf.open.y}"/><path d="M${leaf.closed.x} ${leaf.closed.y} A${w} ${w} 0 0 ${leaf.sweep} ${leaf.open.x} ${leaf.open.y}"/>${tag(x+(leaf.horizontal?w/2:(o.side==='west'?-.25:.25)),y+(leaf.horizontal?(o.side==='north'?-.25:.25):w/2))}</g>`;
 };
@@ -571,4 +572,4 @@ BMH.sectionSvg = () => {
   return `<svg class="technical-view-svg section-svg" viewBox="0 0 960 520" aria-label="Mặt cắt kiến trúc sơ bộ"><rect width="960" height="520" class="section-bg"/><path d="M80 438H900" class="ground-line"/><g class="foundation"><path d="M135 438v30h-28l16 22h44l16-22h-28v-30M795 438v30h-28l16 22h44l16-22h-28v-30"/></g>${floorsSvg}<g class="section-stairs">${stairs}<path d="M${left+span*.58} ${baseY-14}L${left+span*.58+162} ${baseY-78}"/></g><g class="section-roof"><path d="M${left-14} ${baseY-floors*fh}H${right+14}l-16-18H${left+16}z"/></g>${levels}<g class="section-height"><line x1="880" y1="${baseY}" x2="880" y2="${baseY-floors*fh-18}"/><line x1="870" y1="${baseY}" x2="890" y2="${baseY}"/><line x1="870" y1="${baseY-floors*fh-18}" x2="890" y2="${baseY-floors*fh-18}"/><text x="895" y="${baseY-floors*fh/2}" transform="rotate(-90 895 ${baseY-floors*fh/2})">CHIỀU CAO TẦNG ${floorHeight.toFixed(1)}m</text></g><g class="doc-title"><text x="70" y="500">MẶT CẮT A–A · SƠ BỘ</text><text x="520" y="500">Sàn ${Math.round(slab*1000)}mm · Cao tầng ${floorHeight.toFixed(1)}m · Móng minh họa</text></g></svg>`;
 };
 BMH.areaSchedule = () => BMH.state.project.plan.rooms.map(r=>{const t=BMH.roomTechnicalStats(r);return {floor:r.floor+1,name:r.name,area:t.area,perimeter:t.perimeter,type:r.type,doors:t.doors,windows:t.windows,daylight:t.daylight,ventilation:t.ventilation};});
-BMH.openingSchedule = () => BMH.state.project.plan.openings.map(o=>{const r=BMH.state.project.plan.rooms.find(x=>x.id===o.roomId),v=BMH.openingReview(o);return {code:BMH.openingCode(o),floor:o.floor+1,room:r?.name||'—',kind:o.kind,width:o.width||0,height:v.height,sill:v.sill,side:o.side};});
+BMH.openingSchedule = () => BMH.state.project.plan.openings.map(o=>{const r=BMH.state.project.plan.rooms.find(x=>x.id===o.roomId),v=BMH.openingReview(o);return {code:BMH.openingCode(o),floor:o.floor+1,room:r?.name||'—',kind:o.kind,passage:!!o.passage,width:o.width||0,height:v.height,sill:v.sill,side:o.side};});

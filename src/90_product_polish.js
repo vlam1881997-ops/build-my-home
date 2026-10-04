@@ -1,7 +1,7 @@
 /* Keep measured geometry alive while changing finishes; connect supplier choices to previews. */
 (()=>{
  const B=BMH,roles={floor:['floor'],wall:['wall'],accent:['wood','slattedWood'],fabric:['fabric']};
- const regularRooms=()=>B.state.project.plan.rooms.filter(r=>['living','bed','kitchen','bath'].includes(r.type));
+ const regularRooms=()=>B.state.project.plan.rooms.filter(r=>!['stairs','elevator','balcony'].includes(r.type));
  B.studioStructureKey=()=>{
   const p=B.state.project,u=B.state.ui;
   return JSON.stringify({site:p.site,style:p.style,plan:p.plan,choices:p.materials.choices,tier:p.materials.tier,focus:u.sceneFocus,theme:u.sceneTheme,exploded:u.sceneExploded,roomCamera:u.roomCamera,exteriorCamera:u.exteriorCamera,collections:p.plan.rooms.map(r=>{const c=B.interiorCollection?.(r.id);return [r.id,c?.id,c?.shape,c?.table];})});
@@ -56,7 +56,7 @@
   return product?.category===category?product:null;
  };
  B.showroomFinishInfo=roomId=>{
-  const palette=B.finishPalette(roomId),bindings=B.state.project.materials.finish?.rooms?.[roomId]?.catalogMaterials||{};
+  const palette=B.finishPalette(roomId),bindings={...B.state.project.materials.finish?.exterior?.catalogMaterials,...B.state.project.materials.finish?.rooms?.[roomId]?.catalogMaterials};
   return Object.entries(categories).flatMap(([category,config])=>{
    const binding=bindings[category],product=B.selectedShowroomProduct(category);
    if(!binding||!product||binding.id!==product.id||palette.visualMaterials?.[config.role]!==binding.profileId)return [];
@@ -80,6 +80,7 @@
   const button=e.target.closest?.('[data-showroom-3d]');if(!button)return;
   const category=button.getAttribute('data-showroom-3d'),config=categories[category],product=B.selectedShowroomProduct(category),profileId=button.closest('.showroom-preview')?.querySelector('[data-showroom-profile]')?.value,rooms=regularRooms();
   if(!config||!product||!rooms.length||!B.applyVisualMaterial(config.role,profileId))return;
+  const exterior=B.state.project.materials.finish.exterior;exterior.catalogMaterials={...exterior.catalogMaterials,[category]:{id:product.id,profileId}};
   for(const room of rooms){const f=B.state.project.materials.finish.rooms[room.id];f.catalogMaterials={...f.catalogMaterials,[category]:{id:product.id,profileId}};}
   const current=rooms.find(r=>'room:'+r.id===B.state.ui.sceneFocus)||rooms.find(r=>r.type==='living')||rooms[0];
   B.state.ui.designView='room';B.state.ui.sceneFocus='room:'+current.id;B.state.ui.roomCamera='inside';B.save();B.navigateTo(6);
