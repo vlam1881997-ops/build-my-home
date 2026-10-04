@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="bmh-team-token" content="__BMH_TOKEN__">
   <meta name="color-scheme" content="light">
-  <title>BMH Team v1.1.0 · Hai tài khoản, một dự án</title>
+  <title>BMH Team v1.1.1 · Hai tài khoản, một dự án</title>
   <link rel="stylesheet" href="/style.css">
   <script src="/app.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <a class="brand" href="/" aria-label="BMH Team v1.1.0 trang chính"><span class="brand-icon" aria-hidden="true">B</span><span>BMH <b>TEAM</b></span><span class="release-tag">v1.1.0</span></a>
+      <a class="brand" href="/" aria-label="BMH Team v1.1.1 trang chính"><span class="brand-icon" aria-hidden="true">B</span><span>BMH <b>TEAM</b></span><span class="release-tag">v1.1.1</span></a>
       <span class="local-badge"><i aria-hidden="true"></i> Chạy trên máy ông</span>
     </header>
     <main>
@@ -40,6 +40,8 @@
           <label for="repo-path">Thư mục dự án BMH</label>
           <input id="repo-path" name="repo" type="text" spellcheck="false" autocomplete="off" placeholder="C:\Users\Tên ông\Documents\GitHub\build-my-home" required>
           <p class="field-hint">Trong GitHub Desktop: Repository → Show in Explorer, rồi sao chép đường dẫn thư mục.</p>
+          <div class="source-control"><label for="source-mode">Lấy mã nguồn mới</label><select id="source-mode" name="sourceMode" aria-describedby="source-hint" disabled><option value="fetch">Git tự lấy bản mới</option><option value="desktop">GitHub Desktop — đã Fetch origin</option></select></div>
+          <p id="source-hint" class="field-hint">BMH Team lấy origin/main mới trước khi tạo nhánh làm việc.</p>
           <label for="goal">Ông muốn hoàn thiện điều gì?</label>
           <textarea id="goal" name="goal" rows="5" maxlength="12000" placeholder="Ví dụ: Hoàn thiện lựa chọn vật liệu và đồng bộ vào bản vẽ/3D. Giữ đầy đủ 10 tab, đơn giản giao diện và không tự triển khai lên web." required></textarea>
           <div class="submit-row"><div><button type="submit" id="run-button" class="button button-primary" disabled><span aria-hidden="true">↗</span> Phân việc & làm song song</button><p id="run-hint" class="field-hint">Đăng nhập đủ hai tài khoản để bắt đầu.</p></div><button type="button" id="stop-button" class="button button-stop" hidden>Dừng công việc</button></div>
@@ -52,7 +54,9 @@
         <div id="run-empty" class="empty-state"><span aria-hidden="true">◇</span><p>Nhận một mục tiêu, trả về một nhánh để ông xem lại.</p><small>Code được làm trong các worktree riêng. Công việc này chưa tự cập nhật main hay Vercel.</small></div>
         <div id="run-content" hidden>
           <p id="active-goal" class="active-goal"></p><p id="run-models" class="run-models"></p>
+          <p id="run-source" class="run-source" hidden></p>
           <div id="run-error" class="notice notice-error" role="alert" hidden></div>
+          <section id="run-diagnostic" class="git-diagnostic" role="alert" aria-labelledby="diagnostic-summary" hidden><h3 id="diagnostic-summary"></h3><p id="diagnostic-operation" class="diagnostic-operation" hidden></p><p id="diagnostic-help" class="diagnostic-help" hidden></p><details id="diagnostic-details-group" hidden><summary>Thông tin Git</summary><pre id="diagnostic-details"></pre></details><dl id="diagnostic-log" hidden><dt>File nhật ký</dt><dd id="diagnostic-log-path"></dd></dl></section>
           <div id="run-result" class="result-box" hidden><strong id="result-title">Nhánh đã chuẩn bị</strong><dl><div><dt>Nhánh</dt><dd id="result-branch"></dd></div><div><dt>Thư mục xem lại</dt><dd id="result-path"></dd></div></dl><p>Ông xem diff và kết quả kiểm tra trước khi ghép vào main.</p></div>
           <details id="plan-details"><summary>Phần việc của từng tài khoản</summary><pre id="plan-output"></pre></details>
           <details id="result-details"><summary>Kết quả của hai Codex</summary><div id="worker-results" class="worker-results"></div></details>
@@ -61,7 +65,7 @@
         </div>
       </section>
     </main>
-    <footer>BMH Team v1.1.0 là bộ điều phối riêng cho dự án BMH, dùng Codex CLI chính thức của OpenAI. Mỗi tài khoản dùng hạn mức Codex riêng theo gói đủ điều kiện.</footer>
+    <footer>BMH Team v1.1.1 là bộ điều phối riêng cho dự án BMH, dùng Codex CLI chính thức của OpenAI. Mỗi tài khoản dùng hạn mức Codex riêng theo gói đủ điều kiện.</footer>
   </div>
 </body>
 </html>

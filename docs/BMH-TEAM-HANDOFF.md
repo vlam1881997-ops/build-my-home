@@ -14,10 +14,10 @@ Giữ đầy đủ 10 tab, chọn vật liệu, ngân hàng và các dự án đ
 
 ## Làm song song bằng BMH Team
 
-1. Trong GitHub Desktop, lấy bản mới của `build-my-home`, chọn **Repository → Show in Explorer** và sao chép đường dẫn. Đây phải là repo Git thực tế, không phải thư mục Downloads hoặc thư mục chỉ giải nén ZIP.
+1. Trong GitHub Desktop, chọn `build-my-home`, chọn **Repository → Show in Explorer** và sao chép đường dẫn, ví dụ **`D:\KBL\build-my-home`**. Bấm **Fetch origin** ngay trước khi giao việc nếu dùng chế độ Desktop. Đây phải là repo Git thực tế, không phải thư mục Downloads hoặc thư mục chỉ giải nén ZIP.
 2. Cài Node.js 22 64-bit nếu máy chưa có. Mở `MO-BMH-TEAM.cmd` ở gốc repo, hoặc `tools/bmh-team/MO-BMH-TEAM.cmd`. Giữ cửa sổ khởi chạy mở.
 3. Đăng nhập lần lượt hai thẻ. Nếu hai thẻ cùng email, đăng xuất thẻ thứ hai, bấm Đăng nhập rồi mở liên kết trong hồ sơ Chrome khác hoặc cửa sổ ẩn danh. Bảng phải có **2/2 tài khoản khác nhau**.
-4. Chọn **Model giao việc** và **Mức suy luận** trên từng thẻ (v1.1.0 mặc định GPT-6.1 Sol + High, có GPT-6 Astra). Lựa chọn tự lưu và được giữ cố định cho nhiệm vụ. Dán đường dẫn repo, nhập một mục tiêu cụ thể và bấm **Phân việc & làm song song**. Bộ điều phối chọn hai phần việc với các file riêng, tạo worktree, ghép vào nhánh cục bộ, dựng lại nguồn và chạy kiểm tra phù hợp.
+4. Chọn **Model giao việc** và **Mức suy luận** trên từng thẻ (v1.1.1 mặc định GPT-6.1 Sol + High, có GPT-6 Astra). Lựa chọn tự lưu và được giữ cố định cho nhiệm vụ. Dán đường dẫn repo, chọn **Lấy mã nguồn mới**, nhập một mục tiêu cụ thể rồi bấm **Phân việc & làm song song**. Với **GitHub Desktop — đã Fetch origin**, công cụ chỉ nhận `FETCH_HEAD` khớp `origin/main`, Fetch trong 15 phút. Với **Git tự lấy bản mới**, công cụ Fetch trước khi làm. Bộ điều phối chọn hai phần việc với các file riêng, tạo worktree, ghép vào nhánh cục bộ, dựng lại nguồn và chạy kiểm tra phù hợp.
 5. Khi trạng thái **Sẵn sàng xem lại** xuất hiện, dùng nhánh và thư mục được báo để xem diff. Đăng nhập hai thẻ không tự nối lịch sử của hai cửa sổ ChatGPT. Việc điều phối tự động diễn ra trong BMH Team.
 
 Mục tiêu đầu tiên có thể dán:
@@ -34,6 +34,10 @@ Có thể gửi gói full rồi dán yêu cầu sau vào cửa sổ thứ hai:
 
 ## Kiểm tra và lỗi khởi chạy
 
-Chạy `node --test tools/bmh-team/test/*.test.mjs` để kiểm tra bộ điều phối. Kiểm tra ứng dụng theo các script trong `package.json` và kịch bản liên quan đến thay đổi. Trên Windows, launcher v1.0.1 đọc phiên bản qua Node, tự bổ sung gói thực thi Windows phù hợp khi xác định được và hiển thị lỗi thật nếu chưa chạy được. Hướng dẫn chi tiết nằm ở `tools/bmh-team/README.md`.
+**v1.1.1 sửa lỗi lấy nguồn Git trước khi model nhận việc.** Nếu báo `git.exe` thất bại, mã thoát 128, mở gói **BMH-Team-Windows-v1.1.1.zip** ở một thư mục mới. Trong GitHub Desktop, chọn `D:\KBL\build-my-home`, bấm **Fetch origin**, rồi chọn **GitHub Desktop — đã Fetch origin** trong BMH Team và giao lại mục tiêu. Hai phiên đăng nhập và lựa chọn model giữ ở `%LOCALAPPDATA%\BMHTeam`; mở gói mới dùng lại dữ liệu này.
 
-Đăng nhập và chạy suy luận thật cần thực hiện trên máy của người sử dụng. Các test dùng phiên/process mô phỏng không thay thế bằng chứng hai tài khoản thật đã nhận và hoàn thành nhiệm vụ.
+Chế độ Desktop dừng nếu lần Fetch thiếu, quá 15 phút hoặc commit không khớp. Không tự chuyển về nguồn cũ. Màn hình hiển thị nguyên nhân, chi tiết Git đã lọc thông tin đăng nhập, hướng xử lý và đường dẫn **File nhật ký**. Nhánh/thư mục xem lại chỉ hiện sau khi worktree thật đã được tạo. Commit nguồn và thời điểm Fetch được giữ trong báo cáo của lượt chạy.
+
+Chạy `node --test tools/bmh-team/test/*.test.mjs` để kiểm tra bộ điều phối. Kiểm tra ứng dụng theo các script trong `package.json` và kịch bản liên quan đến thay đổi. Launcher vẫn kiểm tra CLI qua Node và tự bổ sung gói thực thi Windows phù hợp khi xác định được. Hướng dẫn chi tiết nằm ở `tools/bmh-team/README.md`.
+
+Đăng nhập, GitHub Desktop trên Windows và chạy suy luận thật cần thực hiện trên máy của người sử dụng. Các test dùng repo Git tạm, phiên/process mô phỏng không thay thế bằng chứng hai tài khoản thật đã nhận và hoàn thành nhiệm vụ.

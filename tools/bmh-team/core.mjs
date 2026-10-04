@@ -6,9 +6,10 @@ import {createHash} from 'node:crypto';
 import path from 'node:path';
 import os from 'node:os';
 import {DEFAULT_MODEL_SETTINGS,validateModelSettings} from './models.mjs';
+import {redactProcessText} from './git-source.mjs';
 
 const exec = promisify(execFile);
-export const scrub = value => String(value || '').replace(/\b(?:sk-[\w-]{12,}|eyJ[\w-]{20,}\.[\w-]+\.[\w-]+)\b/g, '[ẩn thông tin đăng nhập]').replace(/((?:access_token|refresh_token|id_token|api_key|authorization)["']?\s*[=:]\s*["']?)(?:Bearer\s+)?[^\s,"';}]+/gi, '$1[ẩn]').replace(/\bBearer\s+[^\s,"';}]+/gi, 'Bearer [ẩn]').slice(0, 12000);
+export const scrub = value => redactProcessText(value).replace(/\beyJ[\w-]{20,}\.[\w-]+\.[\w-]+\b/g, '[ẩn thông tin đăng nhập]').replace(/((?:access_token|refresh_token|id_token|api_key|authorization)["']?\s*[=:]\s*["']?)(?:Bearer\s+)?[^\s,"';}]+/gi, '$1[ẩn]').replace(/\bBearer\s+[^\s,"';}]+/gi, 'Bearer [ẩn]').slice(0, 12000);
 
 export function isolatedEnvironment(stateHome, inherited = process.env) {
   const env = {...inherited};

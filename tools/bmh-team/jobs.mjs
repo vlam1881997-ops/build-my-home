@@ -5,6 +5,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { randomBytes } from 'node:crypto';
 import {DEFAULT_MODEL_SETTINGS,validateModelSettings} from './models.mjs';
+import {validateSourceMode,desktopFetchEvidence,redactProcessText,gitFailureDiagnostic} from './git-source.mjs';
 
 const ORIGIN = 'vlam1881997-ops/build-my-home';
 const SCHEMA = {
@@ -24,10 +25,7 @@ const SCHEMA = {
 const INVARIANTS = `BMH invariants: measured 2D drawings and 3D use the same geometry, units, floor program, openings and materials. Preserve the customer's selected style, existing 10 tabs, banking/material features and persisted projects. Do not invent construction-ready structural accuracy. Read docs/BMH-CUSTOMER-DESIGN.md when present. Do not call paid external APIs, install global dependencies, log in, add accounts or delegate to subagents. Do not commit, push, merge, deploy, reset or change Git refs. Do not write secrets or credentials. Make only the assigned literal files; report actual changes and limits.`;
 
 function scrub(value) {
-  return String(value ?? '').replace(/AIza[\w-]{20,}/g, '[redacted]').replace(/\bsk-[\w-]{12,}/g, '[redacted]')
-    .replace(/(Bearer\s+)[\w.+\/-]{8,}/gi, '$1[redacted]')
-    .replace(/((?:api[_-]?key|access[_-]?token|password|authorization)\s*[=:]\s*)[^\s,;]+/gi, '$1[redacted]')
-    .replace(/https?:\/\/[^\s/@]+:[^\s/@]+@/gi, 'https://[redacted]@').slice(0, 6000);
+  return redactProcessText(value).slice(0, 6000);
 }
 function inside(parent, child) { const relative = path.relative(parent, child); return !relative || (!relative.startsWith('..' + path.sep) && relative !== '..' && !path.isAbsolute(relative)); }
 async function canonicalPath(filename) {
@@ -53,9 +51,10 @@ function parseJson(text) {
 }
 async function optionalRead(filename) { try { return await fs.readFile(filename, 'utf8'); } catch (e) { if (e.code === 'ENOENT') return null; throw e; } }
 
-/** Local-only job: fetch defaults true. fetch:false is exclusively for offline fixture tests. */
+/** Local-only job. Desktop mode requires matching recent FETCH_HEAD evidence.
+ * fetch:false remains exclusively for offline fixture tests. */
 export class TeamJob extends EventEmitter {
-  constructor({ workers, repo, goal, gitCommand = 'git', stateRoot = path.join(os.homedir(), '.bmh-team', 'jobs'), onEvent, fetch = true, workerTimeoutMs = 20 * 60_000, commandTimeoutMs = 5 * 60_000, modelSettings }) {
+  constructor({ workers, repo, goal, gitCommand = 'git', stateRoot = path.join(os.homedir(), '.bmh-team', 'jobs'), onEvent, fetch = true, sourceMode = 'fetch', workerTimeoutMs = 20 * 60_000, commandTimeoutMs = 5 * 60_000, modelSettings }) {
     super();
     if (!Array.isArray(workers) || workers.length !== 2 || workers.some(w => !w?.id || typeof w.run !== 'function' || typeof w.interrupt !== 'function') || workers[0].id === workers[1].id) throw new Error('Exactly two distinct workers are required.');
     this.workers = workers; this.repo = path.resolve(repo); this.goal = String(goal || '').trim();
@@ -64,13 +63,14 @@ export class TeamJob extends EventEmitter {
     if (!this.goal || this.goal.length > 20_000) throw new Error('Provide a goal of 1–20,000 characters.');
     this.gitCommand = gitCommand; this.stateRoot = path.resolve(stateRoot);
     if (inside(this.repo, this.stateRoot)) throw new Error('Worktrees must be stored outside the source repository.');
-    this.onEvent = onEvent; this.fetch = fetch; this.workerTimeoutMs = workerTimeoutMs; this.commandTimeoutMs = commandTimeoutMs;
+    this.onEvent = onEvent; this.fetch = fetch; this.sourceMode=validateSourceMode(sourceMode); this.workerTimeoutMs = workerTimeoutMs; this.commandTimeoutMs = commandTimeoutMs;
     this.id = `${Date.now()}-${randomBytes(4).toString('hex')}`;
     this.status = 'preparing'; this.plan = null; this.results = []; this.artifacts = []; this.branch = `bmh-team/${this.id}/integration`;
     this.path = path.join(this.stateRoot, this.id, 'integration'); this.error = null; this.events = [];
+    this.diagnostic=null; this.source=null; this.workspaceReady=false;
     this.children = new Set(); this.timers = new Set(); this.aborted = false; this.failing = false; this.started = false; this.activePromise = null;
   }
-  get publicState() { return structuredClone({ id: this.id, status: this.status, goal: this.goal, modelSettings:this.modelSettings, plan: this.plan, results: this.results, artifacts: this.artifacts, branch: this.branch, path: this.path, error: this.error, events: this.events }); }
+  get publicState() { return structuredClone({ id: this.id, status: this.status, goal: this.goal, modelSettings:this.modelSettings, sourceMode:this.sourceMode, source:this.source, workspaceReady:this.workspaceReady, diagnostic:this.diagnostic, plan: this.plan, results: this.results, artifacts: this.artifacts, branch: this.branch, path: this.path, error: this.error, events: this.events }); }
   note(message, worker) {
     this.events.push({ at: new Date().toISOString(), ...(worker ? { worker } : {}), message: scrub(message) });
     if (this.events.length > 200) this.events.shift();
@@ -96,7 +96,7 @@ export class TeamJob extends EventEmitter {
     }
     if (this.children.has(child)) await new Promise(resolve => { const timer = setTimeout(resolve, 2000); child.once('close', () => { clearTimeout(timer); resolve(); }); });
   }
-  async command(program, args, cwd, { timeoutMs = this.commandTimeoutMs, logName, allowFailure = false } = {}) {
+  async command(program, args, cwd, { timeoutMs = this.commandTimeoutMs, logName, allowFailure = false, gitOperation } = {}) {
     this.assertActive();
     if (program === 'node') program = process.execPath;
     if (program === 'npm' && process.platform === 'win32') {
@@ -110,27 +110,36 @@ export class TeamJob extends EventEmitter {
       const env = { ...process.env }; delete env.NODE_TEST_CONTEXT; delete env.NODE_OPTIONS; delete env.CODEX_HOME;
       for (const key of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_COMMON_DIR', 'GIT_INDEX_FILE', 'GIT_OBJECT_DIRECTORY', 'GIT_ALTERNATE_OBJECT_DIRECTORIES', 'GIT_CONFIG_COUNT']) delete env[key];
       for (const key of Object.keys(env)) if (/(?:API[_-]?KEY|ACCESS[_-]?TOKEN|AUTH[_-]?TOKEN|PASSWORD|SECRET|(?:^|_)TOKEN$)/i.test(key) || /^(?:OPENAI|ANTHROPIC|GEMINI|VERCEL|GOOGLE_APPLICATION_CREDENTIALS)(?:_|$)/i.test(key)) delete env[key];
+      if (gitOperation) { env.GIT_TERMINAL_PROMPT='0'; env.GCM_INTERACTIVE='never'; }
       const child = spawn(program, args, { cwd, env, shell: false, windowsHide: true, detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] });
-      this.children.add(child); let output = ''; let exceeded = false; let timedOut = false; let spawnError;
-      const capture = bytes => { output += bytes.toString(); if (output.length > 2_000_000) { exceeded = true; output = output.slice(-200_000); void this.kill(child); } };
-      child.stdout.on('data', capture); child.stderr.on('data', capture);
+      this.children.add(child); let output = ''; let stdout=''; let stderr=''; let exceeded = false; let timedOut = false; let spawnError;
+      child.stdout.setEncoding('utf8'); child.stderr.setEncoding('utf8');
+      const capture = stream => bytes => { output += bytes; if(stream==='stdout')stdout+=bytes;else stderr+=bytes; if (output.length > 2_000_000) { exceeded = true; output = output.slice(-200_000); stdout=stdout.slice(-100_000); stderr=stderr.slice(-100_000); void this.kill(child); } };
+      child.stdout.on('data', capture('stdout')); child.stderr.on('data', capture('stderr'));
       const timer = setTimeout(() => { timedOut = true; void this.kill(child); }, timeoutMs); this.timers.add(timer);
       child.once('error', error => { spawnError = error; });
       child.once('close', async code => {
         clearTimeout(timer); this.timers.delete(timer); this.children.delete(child);
         try {
-          if (logName) await fs.writeFile(path.join(this.stateRoot, this.id, logName), scrub(output), 'utf8');
+          const logPath=logName?path.join(this.stateRoot, this.id, logName):null;
+          if (logPath) await fs.writeFile(logPath, redactProcessText(output).slice(-100_000), {encoding:'utf8',mode:0o600});
           this.assertActive();
           if (timedOut) throw new Error(`Command timed out: ${path.basename(program)}. See local job logs.`);
           if (exceeded) throw new Error('Command output exceeded the safety limit.');
           if (spawnError) throw new Error(`Cannot start ${path.basename(program)}: ${spawnError.code || 'error'}.`);
-          if (code !== 0 && !allowFailure) throw new Error(`${path.basename(program)} command failed (exit ${code}). See local job logs.`);
-          resolve({ output, code });
+          if (code !== 0 && !allowFailure) {
+            if(gitOperation) {
+              const diagnostic=gitFailureDiagnostic({operation:gitOperation,exitCode:code,output:stderr || stdout,logPath});
+              const failure=new Error(diagnostic.summary); failure.gitDiagnostic=diagnostic; throw failure;
+            }
+            throw new Error(`${path.basename(program)} command failed (exit ${code}). See local job logs.`);
+          }
+          resolve({ output, stdout, stderr, code });
         } catch (error) { reject(error); }
       });
     });
   }
-  async git(args, cwd = this.repo, options) { return (await this.command(this.gitCommand, process.platform === 'win32' ? ['-c', 'core.longpaths=true', ...args] : args, cwd, options)).output.trim(); }
+  async git(args, cwd = this.repo, options) { return (await this.command(this.gitCommand, process.platform === 'win32' ? ['-c', 'core.longpaths=true', ...args] : args, cwd, {...options,gitOperation:args[0]})).stdout.trim(); }
   async runWorker(worker, prompt, options) {
     this.assertActive(); let timer; let onStop;
     const timeout = new Promise((_, reject) => { timer = setTimeout(() => { void Promise.resolve().then(() => worker.interrupt()).catch(() => {}); reject(new Error(`Account ${worker.id} timed out.`)); }, this.workerTimeoutMs); this.timers.add(timer); });
@@ -221,7 +230,7 @@ export class TeamJob extends EventEmitter {
     this.activePromise = this.execute().catch(async error => {
       this.failing = true; this.emit('stop');
       await Promise.allSettled([this.interruptWorkers(), ...[...this.children].map(child => this.kill(child))]);
-      if (!this.aborted) { this.error = scrub(error.message); this.phase('failed', this.error); }
+      if (!this.aborted) { this.error = scrub(error.message); this.diagnostic=error.gitDiagnostic || null; this.phase('failed', this.error); }
       return this.publicState;
     });
     return this.activePromise;
@@ -241,9 +250,14 @@ export class TeamJob extends EventEmitter {
     if (!accepted.test(origin)) throw new Error(`Repository origin must be github.com/${ORIGIN}.`);
     if (await this.git(['status', '--porcelain=v1', '--untracked-files=all'])) throw new Error('Source checkout has uncommitted files. Keep them safe; commit or stash them before starting a team job.');
     this.sourceHead = await this.git(['rev-parse', 'HEAD']);
-    if (this.fetch) { this.note('Fetching the latest origin/main; the source checkout is not reset.'); await this.git(['fetch', '--no-tags', 'origin', 'main'], this.repo, { logName: 'fetch.log' }); }
+    if (this.sourceMode==='fetch' && this.fetch) { this.note('Fetching the latest origin/main; the source checkout is not reset.'); await this.git(['fetch', '--no-tags', 'origin', 'main'], this.repo, { logName: 'fetch.log' }); }
     const base = await this.git(['rev-parse', '--verify', 'refs/remotes/origin/main']);
+    if(this.sourceMode==='desktop') {
+      this.source=await desktopFetchEvidence({repo:this.repo,commonDir,baseCommit:base,git:args=>this.git(args)});
+      this.note(`Dùng origin/main ${base.slice(0,12)} vừa Fetch qua GitHub Desktop lúc ${this.source.fetchedAt}.`);
+    } else this.source={mode:this.fetch?'fetch':'fixture',baseCommit:base,fetchedAt:this.fetch?new Date().toISOString():null};
     await this.git(['worktree', 'add', '-b', this.branch, this.path, base]);
+    this.workspaceReady=true;
     this.packageText = await optionalRead(path.join(this.path, 'package.json'));
     try { this.packageJson = this.packageText ? JSON.parse(this.packageText) : null; } catch { throw new Error('Repository package.json is invalid.'); }
     const scripts = this.packageJson?.scripts || {};

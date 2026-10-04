@@ -68,6 +68,28 @@ test('two concurrent run requests cannot create overlapping jobs',async t=>{
   const pending=await Promise.all([f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'First goal'}),f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Second goal'})]);
   assert.deepEqual(pending.map(r=>r.status).sort(),[202,400]);assert.equal(count,1);await f.post('/api/stop',{});
 });
+
+test('source modes are explicit and invalid values cannot start a job or request offline execution',async t=>{
+  const selected=[];
+  const f=await fixture(t,{jobFactory:options=>{selected.push(options);return {publicState:{id:'fixture-source',status:'ready'},start:async()=>{},stop:async()=>{}};}});
+  const state=await (await fetch(f.url+'/api/state')).json();assert.equal(state.version,'1.1.1');assert.equal(state.sourceModeDefault,'fetch');
+  assert.deepEqual(state.sourceModeOptions.map(item=>item.id),['fetch','desktop']);
+  for(const mode of ['offline','fixture',false,null])assert.equal((await f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Use source safely',sourceMode:mode})).status,400);
+  assert.equal(selected.length,0);
+  assert.equal((await f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Use direct Git',fetch:false})).status,202);
+  assert.equal(selected[0].sourceMode,'fetch');assert.equal(selected[0].fetch,undefined);
+  assert.equal((await f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Use Desktop snapshot',sourceMode:'desktop'})).status,202);
+  assert.equal(selected[1].sourceMode,'desktop');assert.equal(selected[1].modelSettings.one.model,'gpt-6.1-sol');
+});
+
+test('bundled GitHub Desktop Git suggests Desktop mode without changing API default or auth',async t=>{
+  const stateRoot=await mkdtemp(path.join(os.tmpdir(),'bmh-source-default-'));
+  const workers=[new FakeWorker('one','one@example.test'),new FakeWorker('two','two@example.test')];
+  const app=await createTeamServer({stateRoot,workers,codex:{command:'fixture'},git:'C:\\Users\\fixture\\AppData\\Local\\GitHubDesktop\\app-3.5.0\\resources\\app\\git\\cmd\\git.exe'});
+  t.after(async()=>{await app.close();await rm(stateRoot,{recursive:true,force:true});});
+  await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
+  assert.equal(app.state().sourceModeDefault,'desktop');assert.equal(workers[0].logins,0);assert.equal(workers[1].logins,0);
+});
 test('model selection is authenticated, validated, saved separately and restored after restart',async t=>{
   const f=await fixture(t);const selection={worker:'one',model:'gpt-6-astra',reasoningEffort:'xhigh'};
   assert.equal((await f.post('/api/settings',selection,{'X-BMH-Team':''})).status,403);

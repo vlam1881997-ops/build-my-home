@@ -12,6 +12,8 @@
   let stateInFlight = false;
   let connectionError = false;
   let repoTouched = false;
+  let sourceModeInitialized = false;
+  let sourceModeTouched = false;
   let previousRunId = null;
   let previousEvents = '';
   let previousPlan = '';
@@ -145,6 +147,46 @@
     return available;
   }
 
+  function renderSourceMode() {
+    const select = $('source-mode');
+    const options = state.sourceModeOptions || [{ id: 'fetch', label: 'Git tự lấy bản mới' }, { id: 'desktop', label: 'GitHub Desktop — đã Fetch origin' }];
+    const signature = JSON.stringify(options);
+    const currentValue = select.value;
+    if (selectSignatures.get(select.id) !== signature) {
+      selectSignatures.set(select.id, signature);
+      select.replaceChildren(...options.map(option => {
+        const element = document.createElement('option');
+        element.value = option.id; element.textContent = option.label; return element;
+      }));
+      if ((sourceModeInitialized || sourceModeTouched) && options.some(option => option.id === currentValue)) select.value = currentValue;
+    }
+    if (!sourceModeInitialized && !sourceModeTouched) {
+      const defaultMode = state.sourceModeDefault || 'fetch';
+      select.value = options.some(option => option.id === defaultMode) ? defaultMode : 'fetch';
+      sourceModeInitialized = true;
+    }
+    select.disabled = activeRun() || state.busy || settingsPending() || pending.has('run') || connectionError;
+    setText($('source-hint'), select.value === 'desktop'
+      ? 'Trong GitHub Desktop, chọn D:\\KBL\\build-my-home và bấm Fetch origin ngay trước khi giao việc. Chỉ nhận lần Fetch có FETCH_HEAD khớp origin/main, trong 15 phút.'
+      : 'BMH Team chạy Git để lấy origin/main mới trước khi tạo nhánh làm việc. Nếu Fetch lỗi, công việc dừng và hiện nguyên nhân.');
+  }
+
+  function renderDiagnostic(diagnostic) {
+    $('run-diagnostic').hidden = !diagnostic;
+    if (!diagnostic) return;
+    setText($('diagnostic-summary'), bounded(diagnostic.summary || 'Chưa chuẩn bị được mã nguồn dự án.', 1500));
+    const operation = [diagnostic.operation, diagnostic.exitCode !== undefined && diagnostic.exitCode !== null ? `mã thoát ${diagnostic.exitCode}` : ''].filter(Boolean).join(' · ');
+    $('diagnostic-operation').hidden = !operation;
+    setText($('diagnostic-operation'), bounded(operation, 800));
+    $('diagnostic-details-group').hidden = !diagnostic.details;
+    setText($('diagnostic-details'), displayValue(diagnostic.details || '', 16000));
+    const help = Array.isArray(diagnostic.help) ? diagnostic.help.join('\n') : diagnostic.help || '';
+    $('diagnostic-help').hidden = !help;
+    setText($('diagnostic-help'), bounded(help, 6000));
+    $('diagnostic-log').hidden = !diagnostic.logPath;
+    setText($('diagnostic-log-path'), bounded(diagnostic.logPath, 1200));
+  }
+
   function renderEvents(events) {
     const list = Array.isArray(events) ? events.slice(-250) : [];
     const signature = JSON.stringify(list);
@@ -220,14 +262,21 @@
       $('result-details').open = false;
     }
     setText($('active-goal'), bounded(run.goal, 12000));
-    $('run-error').hidden = !run.error;
+    $('run-error').hidden = !run.error || Boolean(run.diagnostic);
     setText($('run-error'), bounded(run.error, 5000));
+    renderDiagnostic(run.diagnostic);
+    $('run-source').hidden = !run.source;
+    if (run.source) {
+      const fetchedDate = new Date(run.source.fetchedAt);
+      const fetchedAt = run.source.fetchedAt && Number.isFinite(fetchedDate.getTime()) ? fetchedDate.toLocaleString('vi-VN') : '';
+      setText($('run-source'), [run.source.mode === 'desktop' ? 'Nguồn: Fetch của GitHub Desktop' : 'Nguồn: Git đã Fetch origin/main', run.source.baseCommit ? `main ${bounded(run.source.baseCommit, 12)}` : '', fetchedAt].filter(Boolean).join(' · '));
+    }
     const plan = displayValue(run.plan || '', 36000);
     if (plan !== previousPlan) { setText($('plan-output'), plan); previousPlan = plan; }
     $('plan-details').hidden = !run.plan;
     renderResults(run.results);
     renderEvents(run.events);
-    $('run-result').hidden = !run.branch && !run.path;
+    $('run-result').hidden = run.workspaceReady !== true || (!run.branch && !run.path);
     setText($('result-title'), currentStage === 5 ? 'Code đã sẵn sàng để xem lại' : terminal.has(status) ? 'Thư mục công việc để kiểm tra' : 'Nhánh đang làm việc');
     setText($('result-branch'), bounded(run.branch || '—', 500));
     setText($('result-path'), bounded(run.path || '—', 1000));
@@ -243,6 +292,7 @@
     const accountEmails = (state.workers || []).map(worker => worker.account?.email?.trim().toLowerCase()).filter(Boolean);
     const repeatedAccount = accountEmails.length === 2 && accountEmails[0] === accountEmails[1];
     if (!repoTouched && !$('repo-path').value && state.repoDefault) $('repo-path').value = state.repoDefault;
+    renderSourceMode();
     const working = activeRun();
     const canStart = accountCount === 2 && !repeatedAccount && gitReady && codexReady && !working && !state.busy && !state.settingsWarning && !settingsPending() && !pending.has('run') && !connectionError;
     $('run-button').disabled = !canStart;
@@ -274,6 +324,7 @@
       if (!connectionError) notice(`Không nối được bộ điều phối. Giữ cửa sổ khởi chạy mở rồi tải lại trang. ${error.message}`, true);
       connectionError = true;
       $('run-button').disabled = true;
+      $('source-mode').disabled = true;
     } finally { stateInFlight = false; }
   }
 
@@ -310,13 +361,15 @@
       .finally(() => { if (!select.disabled && document.activeElement === document.body) select.focus({ preventScroll: true }); });
   });
   $('repo-path').addEventListener('input', () => { repoTouched = true; });
+  $('source-mode').addEventListener('change', () => { sourceModeTouched = true; renderSourceMode(); });
   $('run-form').addEventListener('submit', event => {
     event.preventDefault();
     if ($('run-button').disabled) return;
     const repo = $('repo-path').value.trim();
     const goal = $('goal').value.trim();
     if (!repo || !goal) { notice('Nhập thư mục repo và mục tiêu công việc.', true); return; }
-    mutate('run', '/api/run', { repo, goal }, 'Đã nhận mục tiêu. Bộ điều phối đang chuẩn bị phần việc.');
+    const sourceMode = $('source-mode').value;
+    mutate('run', '/api/run', { repo, goal, sourceMode }, 'Đã nhận mục tiêu. Bộ điều phối đang chuẩn bị phần việc.');
   });
   $('stop-button').addEventListener('click', () => mutate('stop', '/api/stop', {}, 'Đã gửi yêu cầu dừng. Xem nhật ký để biết công việc nào đã hoàn tất.'));
   window.addEventListener('focus', refresh);

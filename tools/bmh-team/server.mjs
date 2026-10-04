@@ -7,6 +7,7 @@ import {spawn} from 'node:child_process';
 import {CodexWorker,privateStateRoot,findCodex,findGit,scrub} from './core.mjs';
 import {TeamJob} from './jobs.mjs';
 import {MODEL_OPTIONS,REASONING_OPTIONS,loadModelSettings,saveModelSettings,validateModelSettings} from './models.mjs';
+import {SOURCE_MODE_OPTIONS,validateSourceMode} from './git-source.mjs';
 
 const toolRoot=path.dirname(fileURLToPath(import.meta.url));
 const terminalStates=new Set(['ready','failed','stopped']);
@@ -25,7 +26,8 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
   let modelSettings=loadedSettings.settings;let settingsWarning=loadedSettings.warning;let settingsSaving=false;let settingsRevision=0;
   const token=randomBytes(32).toString('hex');let job=null;let shuttingDown=false;let runPreparing=false;let runEpoch=0;
   const isBusy=()=>runPreparing || Boolean(job && !terminalStates.has(job.publicState.status));
-  const state=()=>({version:'1.1.0',workers:workers.map(w=>({...w.publicState,modelSettings:{...modelSettings[w.id]}})),modelOptions:MODEL_OPTIONS,reasoningOptions:REASONING_OPTIONS,settingsWarning,settingsRevision,run:job?.publicState||null,repoDefault,capabilities:{git:Boolean(git),codex:Boolean(codex),windows:process.platform==='win32'},busy:isBusy()||settingsSaving});
+  const sourceModeDefault=/(?:^|[\\/])GitHubDesktop(?:[\\/]|$)/i.test(String(git || ''))?'desktop':'fetch';
+  const state=()=>({version:'1.1.1',workers:workers.map(w=>({...w.publicState,modelSettings:{...modelSettings[w.id]}})),modelOptions:MODEL_OPTIONS,reasoningOptions:REASONING_OPTIONS,sourceModeOptions:SOURCE_MODE_OPTIONS,sourceModeDefault,settingsWarning,settingsRevision,run:job?.publicState||null,repoDefault,capabilities:{git:Boolean(git),codex:Boolean(codex),windows:process.platform==='win32'},busy:isBusy()||settingsSaving});
   const json=(res,status,data)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));};
   const server=http.createServer(async(req,res)=>{
     const address=server.address();const allowedHost=`127.0.0.1:${address.port}`;const origin=`http://${allowedHost}`;
@@ -68,6 +70,7 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
         if(pathname==='/api/run'){
           if(isBusy() || settingsSaving)throw Error('Đang có nhiệm vụ chạy hoặc cấu hình đang lưu. Chờ hoàn tất trước.');
           if(settingsWarning)throw Error(settingsWarning);
+          const sourceMode=validateSourceMode(body.sourceMode);
           runPreparing=true;
           const ticket=++runEpoch;
           const runModels=structuredClone(modelSettings);
@@ -80,7 +83,7 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
           if(!path.isAbsolute(repo))throw Error('Chọn đường dẫn đầy đủ tới thư mục BMH trên máy.');
           if(goal.length<5 || goal.length>12000)throw Error('Nhập mục tiêu từ 5 đến 12.000 ký tự.');
           repoDefault=repo;
-          job=jobFactory({workers,repo,goal,gitCommand:git,stateRoot,modelSettings:runModels,onEvent:async update=>{
+          job=jobFactory({workers,repo,goal,gitCommand:git,stateRoot,sourceMode,modelSettings:runModels,onEvent:async update=>{
             // Save task summaries only; authentication remains in Codex-managed account storage.
             try{await mkdir(path.join(stateRoot,'reports'),{recursive:true,mode:0o700});await writeFile(path.join(stateRoot,'reports',`${update.id}.json`),JSON.stringify(update,null,2),{mode:0o600});}catch{}
           }});
@@ -124,7 +127,7 @@ async function main() {
   const app=await createTeamServer({repoDefault});
   await new Promise((resolve,reject)=>{app.server.once('error',reject);app.server.listen(0,'127.0.0.1',resolve);});
   const url=`http://127.0.0.1:${app.server.address().port}/`;
-  process.stdout.write(`\nBMH Team v1.1.0: ${url}\nGiữ cửa sổ này mở. Chọn model, mức suy luận và giao việc cho hai tài khoản.\n`);
+  process.stdout.write(`\nBMH Team v1.1.1: ${url}\nGiữ cửa sổ này mở. Chọn nguồn code, model, mức suy luận và giao việc cho hai tài khoản.\n`);
   if(!args.includes('--no-browser')){
     const command=process.platform==='win32'?'rundll32.exe':process.platform==='darwin'?'open':'xdg-open';
     const openArgs=process.platform==='win32'?['url.dll,FileProtocolHandler',url]:[url];

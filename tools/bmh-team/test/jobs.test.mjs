@@ -59,6 +59,42 @@ test('planning and parallel edits retain each chosen model from the job snapshot
   assert.equal(result.modelSettings.one.model,'gpt-6-astra');assert.equal(await git(fix.repo,'rev-parse','main'),fix.base);
 });
 
+test('Desktop mode uses matching recently fetched main without a second authenticated fetch',async t=>{
+  const fix=await fixture(t);
+  await fs.writeFile(path.join(fix.repo,'.git','FETCH_HEAD'),`${fix.base}\t\tbranch 'main' of https://github.com/vlam1881997-ops/build-my-home\n`);
+  const job=create(fix,mockWorkers(plan()),{fetch:true,sourceMode:'desktop'});
+  const actualGit=job.git.bind(job);let fetches=0;
+  job.git=async(args,...rest)=>{if(args[0]==='fetch'){fetches++;throw Error('Unexpected remote fetch');}return actualGit(args,...rest);};
+  const result=await job.start();assert.equal(result.status,'ready',result.error);
+  assert.equal(fetches,0);assert.equal(result.source.mode,'desktop');assert.equal(result.source.baseCommit,fix.base);assert.equal(result.workspaceReady,true);
+  assert.equal(await git(fix.repo,'rev-parse','main'),fix.base);assert.equal(result.modelSettings.one.model,'gpt-6.1-sol');
+});
+test('Desktop mode without recent fetch evidence blocks before planning and never falls back',async t=>{
+  const fix=await fixture(t);let calls=0;
+  const workers=['one','two'].map(id=>({id,run:async()=>{calls++;throw Error('Worker should not run');},interrupt:async()=>{}}));
+  const job=create(fix,workers,{fetch:true,sourceMode:'desktop'});
+  const actualGit=job.git.bind(job);let fetches=0;
+  job.git=async(args,...rest)=>{if(args[0]==='fetch')fetches++;return actualGit(args,...rest);};
+  const result=await job.start();assert.equal(result.status,'failed');assert.match(result.error,/Fetch origin/);
+  assert.equal(calls,0);assert.equal(fetches,0);assert.equal(result.workspaceReady,false);assert.equal(result.source,null);
+});
+test('real child fetch failure exposes sanitized Git details and log path before model calls',async t=>{
+  const fix=await fixture(t);let calls=0;
+  const workers=['one','two'].map(id=>({id,run:async()=>{calls++;throw Error('Worker should not run');},interrupt:async()=>{}}));
+  const job=create(fix,workers,{fetch:true});const actualGit=job.git.bind(job);
+  const secret='ghp_'+'a'.repeat(35);
+  job.git=async(args,...rest)=>{
+    if(args[0]==='fetch')return (await job.command(process.execPath,['--eval',`process.stderr.write(${JSON.stringify('fatal: could not read Username: terminal prompts disabled '+secret)});process.exit(128)`],fix.repo,{gitOperation:'fetch',logName:'fetch.log'})).stdout;
+    return actualGit(args,...rest);
+  };
+  const result=await job.start();assert.equal(result.status,'failed');assert.equal(calls,0);assert.equal(result.workspaceReady,false);
+  assert.equal(result.diagnostic.exitCode,128);assert.match(result.diagnostic.details,/terminal prompts disabled/);
+  assert.match(result.diagnostic.help,/GitHub Desktop/);assert.ok(!JSON.stringify(result).includes(secret));
+  assert.match(await fs.readFile(result.diagnostic.logPath,'utf8'),/\[redacted\]/);
+  assert.ok(!(await fs.readFile(result.diagnostic.logPath,'utf8')).includes(secret));
+  await assert.rejects(fs.stat(result.path),{code:'ENOENT'});assert.equal(await git(fix.repo,'rev-parse','main'),fix.base);
+});
+
 for (const [name, value] of [
   ['ownership overlap', plan({ second: ['one.txt'] })],
   ['path traversal', plan({ first: ['../one.txt'] })],
