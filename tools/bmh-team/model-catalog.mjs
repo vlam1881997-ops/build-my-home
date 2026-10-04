@@ -32,7 +32,7 @@ export async function readCodexModelCatalog(start) {
     if(!done)fail(Error('Codex app-server kết thúc trước khi trả danh sách model.'));
     return result;
   },error=>{fail(error);return null;});
-  send({id:1,method:'initialize',params:{clientInfo:{name:'bmh_team',title:'BMH Team',version:'1.1.2'}}});
+  send({id:1,method:'initialize',params:{clientInfo:{name:'bmh_team',title:'BMH Team',version:'1.1.3'}}});
   try {
     const options=await response;
     entry.child.stdin.end();

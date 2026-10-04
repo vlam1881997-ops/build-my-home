@@ -8,6 +8,7 @@ import os from 'node:os';
 import {emptyModelCatalog,validateModelSettings,validateCatalogSettings} from './models.mjs';
 import {readCodexModelCatalog} from './model-catalog.mjs';
 import {redactProcessText} from './git-source.mjs';
+import {MAX_WORKER_TIMEOUT_MS,workerTimeLimits} from './limits.mjs';
 
 const exec = promisify(execFile);
 export const scrub = value => redactProcessText(value).replace(/\beyJ[\w-]{20,}\.[\w-]+\.[\w-]+\b/g, '[ẩn thông tin đăng nhập]').replace(/((?:access_token|refresh_token|id_token|api_key|authorization)["']?\s*[=:]\s*["']?)(?:Bearer\s+)?[^\s,"';}]+/gi, '$1[ẩn]').replace(/\bBearer\s+[^\s,"';}]+/gi, 'Bearer [ẩn]').slice(0, 12000);
@@ -123,6 +124,45 @@ function commandError(result) {
   return Error('Codex chưa hoàn thành nhiệm vụ. '+message.slice(-2000));
 }
 
+const itemTypes=new Set(['command_execution','file_change','agent_message','reasoning','mcp_tool_call','web_search','todo_list','image_generation']);
+function meaningfulCodexEvent(event) {
+  if(!event || typeof event!=='object' || Array.isArray(event))return false;
+  if(event.type==='thread.started')return typeof event.thread_id==='string' && Boolean(event.thread_id);
+  if(event.type==='turn.started' || event.type==='turn.completed')return true;
+  if(event.type==='turn.failed')return typeof event.error?.message==='string';
+  if(event.type==='error')return typeof event.message==='string' && Boolean(event.message);
+  if(!['item.started','item.updated','item.completed'].includes(event.type) || !itemTypes.has(event.item?.type))return false;
+  const item=event.item;
+  if(['agent_message','reasoning'].includes(item.type))return typeof item.text==='string' && Boolean(item.text.trim());
+  if(item.type==='command_execution')return typeof item.command==='string' && Boolean(item.command.trim());
+  if(item.type==='file_change')return Array.isArray(item.changes) && item.changes.some(change=>typeof change?.path==='string' && Boolean(change.path));
+  if(item.type==='mcp_tool_call')return typeof item.tool==='string' && Boolean(item.tool);
+  if(item.type==='web_search')return typeof item.query==='string' && Boolean(item.query.trim());
+  if(item.type==='todo_list')return Array.isArray(item.items);
+  return item.type==='image_generation' && (typeof item.id==='string' || typeof item.status==='string');
+}
+
+function safeCommandLabel(value) {
+  let command=String(value || '').trim();
+  // Display known executable/verb labels, not shell arguments, inline scripts,
+  // credentials or arbitrary remote command output.
+  command=command.replace(/^\S*[\\/](?:bash|sh)(?:\s+-\w+)*\s+["']?/i,'').replace(/^(?:bash|sh)(?:\s+-\w+)*\s+["']?/i,'');
+  const token=command.match(/^([\w.\\/:-]+)/)?.[1] || '';
+  const executable=token.replace(/^.*[\\/]/,'').replace(/\.exe$/i,'').toLowerCase();
+  const known=new Set(['rg','git','node','npm','pnpm','yarn','python','python3','ls','cat','sed','find','apply_patch','pwsh','powershell','bash','sh']);
+  if(!known.has(executable))return 'thao tác trong thư mục nhiệm vụ';
+  const verb=command.slice(token.length).trim().match(/^([a-z][a-z-]*)\b/)?.[1];
+  const verbs={git:['status','diff','show','log','branch','rev-parse','fetch','add','commit'],npm:['test','run','ci','install'],pnpm:['test','run','build','install'],yarn:['test','run','build','install']};
+  return executable+(verbs[executable]?.includes(verb)?' '+verb:'');
+}
+
+function timeoutError(type,duration) {
+  const display=duration>=60000?`${Math.round(duration/60000)} phút`:`${duration} mili giây`;
+  const error=Error(type==='idle'?`Codex hết thời gian chờ hoạt động (${display}); nhiệm vụ chưa hoàn thành. Mã nguồn được giữ để tiếp tục.`:`Codex hết thời gian tối đa (${display}); nhiệm vụ chưa hoàn thành. Mã nguồn được giữ để tiếp tục.`);
+  error.code=type==='idle'?'CODEX_IDLE_TIMEOUT':'CODEX_TOTAL_TIMEOUT';
+  error.timeoutType=type;error.timeoutMs=duration;return error;
+}
+
 export class CodexWorker extends EventEmitter {
   constructor({id,stateRoot,codex,spawnImpl=spawn,loginTimeoutMs=300000,modelTimeoutMs=20000}) {
     super();
@@ -153,25 +193,40 @@ export class CodexWorker extends EventEmitter {
 
   // All invocations are direct, shell-free, bounded CLI processes. `close`
   // waits for stdio to drain; successful text alone is never a successful job.
-  command(args,{cwd=this.home,input='',timeoutMs=20000,onLine,keepStdinOpen=false}={}) {
+  command(args,{cwd=this.home,input='',timeoutMs=20000,idleTimeoutMs,onLine,onActivity,keepStdinOpen=false}={}) {
     if(this.closed)throw Error('BMH Team đã đóng.');
+    if(!Number.isSafeInteger(timeoutMs) || timeoutMs<1 || timeoutMs>MAX_WORKER_TIMEOUT_MS)throw Error('Thời gian tối đa của Codex không hợp lệ.');
+    if(idleTimeoutMs!==undefined && (!Number.isSafeInteger(idleTimeoutMs) || idleTimeoutMs<1 || idleTimeoutMs>timeoutMs))throw Error('Thời gian chờ hoạt động của Codex không hợp lệ.');
     const child=this.spawnImpl(this.codex.command,[...this.codex.prefix,...args],{
       cwd,env:isolatedEnvironment(this.home),stdio:['pipe','pipe','pipe'],windowsHide:true,detached:process.platform!=='win32'
     });
-    const entry={child,cancel:null,finished:null};this.processes.add(entry);
-    let stdout='',stderr='',buffer='',settled=false,reason=null,total=0,timer,cancelTimer;
+    const entry={child,cancel:null,finished:null,touchActivity:null};this.processes.add(entry);
+    let stdout='',stderr='',buffer='',settled=false,reason=null,total=0,timer,idleTimer,cancelTimer;
     let resolve,reject;
     entry.finished=new Promise((yes,no)=>{resolve=yes;reject=no;});
     const finish=(error,result)=>{
-      if(settled)return;settled=true;clearTimeout(timer);clearTimeout(cancelTimer);this.processes.delete(entry);
+      if(settled)return;settled=true;clearTimeout(timer);clearTimeout(idleTimer);clearTimeout(cancelTimer);this.processes.delete(entry);
       if(error)reject(error);else resolve(result);
     };
     entry.cancel=(error=Error('Nhiệm vụ đã dừng.'))=>{
       if(settled || reason)return;reason=error;killTree(child);
-      // Wait for process-tree shutdown before releasing this account and files.
-      cancelTimer=setTimeout(()=>finish(error),2500);cancelTimer.unref?.();
+      clearTimeout(timer);clearTimeout(idleTimer);
+      // An elapsed shutdown grace period forces termination; it must not report
+      // a released account while the actual process still owns the workspace.
+      cancelTimer=setTimeout(()=>{
+        if(process.platform!=='win32' && child.pid){try {process.kill(-child.pid,'SIGKILL');} catch {child.kill('SIGKILL');}}
+        else child.kill('SIGKILL');
+      },2500);cancelTimer.unref?.();
     };
-    timer=setTimeout(()=>entry.cancel(Error('Codex hết thời gian chờ; nhiệm vụ chưa hoàn thành.')),timeoutMs);timer.unref?.();
+    const resetIdle=()=>{
+      if(idleTimeoutMs===undefined)return;
+      clearTimeout(idleTimer);idleTimer=setTimeout(()=>entry.cancel(timeoutError('idle',idleTimeoutMs)),idleTimeoutMs);idleTimer.unref?.();
+    };
+    entry.touchActivity=metadata=>{
+      if(settled || reason)return false;
+      resetIdle();onActivity?.(metadata);return true;
+    };
+    timer=setTimeout(()=>entry.cancel(timeoutError('maximum',timeoutMs)),timeoutMs);timer.unref?.();resetIdle();
     child.stdout.setEncoding('utf8');child.stderr.setEncoding('utf8');
     child.stdout.on('data',chunk=>{
       if(settled)return;
@@ -289,18 +344,19 @@ export class CodexWorker extends EventEmitter {
     this.account=null;this.identity=null;this.error=null;this.changed();
   }
 
-  async run(prompt,{cwd,readOnly=false,outputSchema,timeoutMs=20*60*1000,model,reasoningEffort}={}) {
+  async run(prompt,{cwd,readOnly=false,outputSchema,timeoutMs,idleTimeoutMs,model,reasoningEffort}={}) {
     const selected=validateCatalogSettings(validateModelSettings({model,reasoningEffort}),this.modelCatalog);
+    const limits=workerTimeLimits({reasoningEffort:selected.reasoningEffort,readOnly,timeoutMs,idleTimeoutMs});
     if(this.current)throw Error('Tài khoản đang làm một nhiệm vụ khác.');
     if(this.loginInfo)throw Error('Hoàn tất đăng nhập trước khi giao việc.');
     // Reserve before the first await; Stop must also cancel preparation.
-    const marker={stopped:false,cancel:null};const ticket=++this.runEpoch;
+    const marker={stopped:false,cancel:null,entry:null};const ticket=++this.runEpoch;
     this.current=marker;let runRoot;
     try {
       await this.prepare();
       if(ticket!==this.runEpoch || marker.stopped)throw Error('Nhiệm vụ đã dừng.');
       // Use the same stable CLI status check, even though this run is reserved.
-      const statusEntry=this.command(['login','status']);marker.cancel=statusEntry.cancel;
+      const statusEntry=this.command(['login','status']);marker.cancel=statusEntry.cancel;marker.entry=statusEntry;
       const status=await statusEntry.finished;
       if(status.code!==0 || !/logged in using chatgpt/i.test(status.stdout+'\n'+status.stderr))throw Error('Đăng nhập tài khoản ChatGPT trước khi giao việc.');
       if(ticket!==this.runEpoch || marker.stopped)throw Error('Nhiệm vụ đã dừng.');
@@ -310,17 +366,29 @@ export class CodexWorker extends EventEmitter {
       if(outputSchema){const file=path.join(runRoot,'schema.json');await writeFile(file,JSON.stringify(outputSchema),{mode:0o600});args.push('--output-schema',file);}
       args.push('-');
       if(ticket!==this.runEpoch || marker.stopped)throw Error('Nhiệm vụ đã dừng.');
-      let completed=false,failed=false,diagnostic='';
-      const entry=this.command(args,{cwd,input:String(prompt),timeoutMs,onLine:(line,stream)=>{
+      let completed=false,failed=false,diagnostic='';const recentEvents=new Set();
+      const entry=this.command(args,{cwd,input:String(prompt),...limits,onActivity:metadata=>this.emit('activity',{at:new Date().toISOString(),type:metadata.type}),onLine:(line,stream)=>{
         if(stream!=='stdout')return;
         let event;try {event=JSON.parse(line);} catch {return;}
+        if(!event || typeof event!=='object' || Array.isArray(event))return;
+        if(meaningfulCodexEvent(event)){
+          const signature=createHash('sha256').update(line).digest('hex');
+          if(!recentEvents.has(signature)){
+            recentEvents.add(signature);if(recentEvents.size>256)recentEvents.delete(recentEvents.values().next().value);
+            entry.touchActivity({type:event.type});
+          }
+        }
         if(event.type==='turn.completed')completed=true;
         if(event.type==='turn.failed'){failed=true;diagnostic=event.error?.message || 'Lượt Codex bị lỗi.';}
         if(event.type==='error')diagnostic=event.message || diagnostic;
         if(event.type==='item.completed' && event.item?.type==='agent_message')this.emit('progress',scrub(event.item.text).slice(0,1200));
-        if(event.type==='item.started' && event.item?.type==='command_execution')this.emit('progress','Đang thực hiện thao tác trong thư mục nhiệm vụ.');
+        if(event.type==='item.started' && event.item?.type==='command_execution')this.emit('progress','Đang chạy: '+safeCommandLabel(event.item.command)+'.');
+        if(event.type==='item.completed' && event.item?.type==='file_change' && Array.isArray(event.item.changes)){
+          const files=event.item.changes.filter(change=>typeof change?.path==='string').slice(0,8).map(change=>scrub(change.path).replace(/\s+/g,' ').slice(0,160)).filter(Boolean);
+          if(files.length)this.emit('progress','Đã sửa: '+files.join(', ')+(event.item.changes.length>8?', …':'')+'.');
+        }
       }});
-      marker.cancel=entry.cancel;this.child=entry.child;
+      marker.cancel=entry.cancel;marker.entry=entry;this.child=entry.child;
       if(ticket!==this.runEpoch || marker.stopped)entry.cancel(Error('Nhiệm vụ đã dừng.'));
       const result=await entry.finished;
       if(marker.stopped || ticket!==this.runEpoch)throw Error('Nhiệm vụ đã dừng.');
@@ -335,7 +403,14 @@ export class CodexWorker extends EventEmitter {
       if(runRoot)await rm(runRoot,{recursive:true,force:true}).catch(()=>{});
     }
   }
-  async interrupt() {this.runEpoch++;if(this.current){this.current.stopped=true;this.current.cancel?.(Error('Nhiệm vụ đã dừng.'));}}
+  async interrupt() {
+    this.runEpoch++;const marker=this.current;
+    if(!marker)return;
+    marker.stopped=true;marker.cancel?.(Error('Nhiệm vụ đã dừng.'));
+    // Preparation has no child to wait for. Its epoch guard prevents a delayed
+    // exec; an existing child must really exit before Stop reports completion.
+    await marker.entry?.finished.catch(()=>{});
+  }
   async close() {
     this.closed=true;this.runEpoch++;this.modelEpoch++;
     if(this.current)this.current.stopped=true;

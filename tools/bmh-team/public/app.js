@@ -22,9 +22,11 @@
   const selectSignatures = new Map();
   const settingsDrafts = new Map();
   let previousSettingsWarning = null;
+  let previousReportWarning = '';
   const settingsPending = () => ['one', 'two'].some(id => pending.has(`settings:${id}`));
   const loginPending = () => ['one', 'two'].some(id => pending.has(`login:${id}`) || pending.has(`logout:${id}`));
   const modelsPending = () => ['one', 'two'].some(id => pending.has(`models:${id}`));
+  const runPending = () => pending.has('run') || pending.has('resume');
 
   const bounded = (value, max = 24000) => String(value ?? '').slice(0, max);
   const displayValue = (value, max = 48000) => bounded(typeof value === 'string' ? value : JSON.stringify(value, null, 2), max);
@@ -137,7 +139,7 @@
     const placeholder = !connected ? 'Đăng nhập để tải model' : loading ? 'Đang tải model…' : catalog.status === 'error' ? 'Chưa tải được model' : catalog.status !== 'ready' ? 'Đang chờ danh sách model…' : !options.length ? 'Chưa có model khả dụng' : settings?.model ? 'Model cũ chưa khả dụng — chọn lại' : 'Chọn model cho tài khoản này';
     renderSelect(modelSelect, options.map(option => ({ id: option.id, label: `${option.label}${option.isDefault ? ' (Codex đề xuất)' : ''}` })), settings?.model, placeholder);
     renderSelect(effortSelect, efforts, settings?.reasoningEffort, model ? 'Chọn mức suy luận' : 'Chọn model trước');
-    const locked = activeRun() || state.busy || settingsPending() || loginPending() || modelsPending() || pending.has('run') || connectionError;
+    const locked = activeRun() || state.busy || settingsPending() || loginPending() || modelsPending() || runPending() || connectionError;
     modelSelect.disabled = locked || !connected || catalog.status !== 'ready' || !options.length;
     effortSelect.disabled = locked || !connected || catalog.status !== 'ready' || !model || !efforts.length;
     modelSelect.setAttribute('aria-invalid', catalog.status === 'ready' && !model ? 'true' : 'false');
@@ -179,10 +181,10 @@
       const loginButton = card.querySelector('[data-action="login"]');
       const logoutButton = card.querySelector('[data-action="logout"]');
       loginButton.hidden = connected;
-      loginButton.disabled = activeRun() || pending.has(`login:${id}`) || pending.has(`logout:${id}`);
+      loginButton.disabled = activeRun() || state.busy || runPending() || pending.has(`login:${id}`) || pending.has(`logout:${id}`);
       setText(loginButton, worker.login ? 'Lấy lại liên kết' : loggedIn ? 'Kết nối lại' : 'Đăng nhập');
       logoutButton.hidden = !loggedIn && !worker.login;
-      logoutButton.disabled = activeRun() || pending.has(`logout:${id}`);
+      logoutButton.disabled = activeRun() || state.busy || runPending() || pending.has(`logout:${id}`);
       setText(logoutButton, pending.has(`logout:${id}`) ? 'Đang đăng xuất…' : worker.login && !loggedIn ? 'Hủy đăng nhập' : 'Đăng xuất');
     }
     return count;
@@ -216,7 +218,7 @@
       select.value = options.some(option => option.id === defaultMode) ? defaultMode : 'fetch';
       sourceModeInitialized = true;
     }
-    select.disabled = activeRun() || state.busy || settingsPending() || pending.has('run') || connectionError;
+    select.disabled = activeRun() || state.busy || settingsPending() || runPending() || connectionError;
     setText($('source-hint'), select.value === 'desktop'
       ? 'Trong GitHub Desktop, chọn D:\\KBL\\build-my-home và bấm Fetch origin ngay trước khi giao việc. Chỉ nhận lần Fetch có FETCH_HEAD khớp origin/main, trong 15 phút.'
       : 'BMH Team chạy Git để lấy origin/main mới trước khi tạo nhánh làm việc. Nếu Fetch lỗi, công việc dừng và hiện nguyên nhân.');
@@ -236,6 +238,31 @@
     setText($('diagnostic-help'), bounded(help, 6000));
     $('diagnostic-log').hidden = !diagnostic.logPath;
     setText($('diagnostic-log-path'), bounded(diagnostic.logPath, 1200));
+  }
+
+  function renderRecovery(canStart) {
+    const recovery = state.recovery;
+    const visible = Boolean(recovery?.id && !activeRun());
+    $('recovery-card').hidden = !visible;
+    $('run-button').classList.toggle('button-primary', !visible);
+    $('run-button').classList.toggle('button-secondary', visible);
+    if (!visible) return;
+    setText($('recovery-goal'), bounded(recovery.goal || 'Công việc trước đã lưu.', 450));
+    const completed = Number.isInteger(recovery.completedWorkers) ? Math.max(0, Math.min(2, recovery.completedWorkers)) : 0;
+    setText($('recovery-progress'), `${completed}/2 phần việc đã hoàn tất`);
+    setText($('recovery-reason'), bounded(recovery.error || (recovery.status === 'stopped' ? 'Lượt trước đã dừng.' : 'Lượt trước chưa hoàn tất.'), 1400));
+    setText($('recovery-path'), bounded(recovery.path || '—', 1200));
+    $('resume-button').disabled = !canStart || !$('repo-path').value.trim();
+    setText($('resume-button'), pending.has('resume') ? 'Đang khôi phục…' : 'Tiếp tục phần đã làm');
+    const hint = connectionError ? 'Không nối được bộ điều phối. Giữ cửa sổ khởi chạy mở rồi tải lại trang.'
+      : runPending() || state.busy ? 'Đang chuẩn bị lượt chạy hoặc kết nối, ông chờ một chút.'
+      : state.settingsWarning ? bounded(state.settingsWarning, 1800)
+      : settingsPending() ? 'Đang lưu lựa chọn model; chờ lưu xong để tiếp tục.'
+      : loginPending() || modelsPending() ? 'Chờ kết nối và tải xong model của hai tài khoản.'
+      : !canStart ? 'Hoàn tất Git, Codex, hai tài khoản khác nhau và model hợp lệ trước khi tiếp tục.'
+      : !$('repo-path').value.trim() ? 'Nhập đúng thư mục repo đã dùng ở lượt trước.'
+      : 'Giữ phần code đã làm, mục tiêu và phân công cũ. Dùng model đang chọn trên hai thẻ; không cần Fetch lại.';
+    setText($('recovery-hint'), hint);
   }
 
   function renderEvents(events) {
@@ -320,8 +347,18 @@
     if (run.source) {
       const fetchedDate = new Date(run.source.fetchedAt);
       const fetchedAt = run.source.fetchedAt && Number.isFinite(fetchedDate.getTime()) ? fetchedDate.toLocaleString('vi-VN') : '';
-      setText($('run-source'), [run.source.mode === 'desktop' ? 'Nguồn: Fetch của GitHub Desktop' : 'Nguồn: Git đã Fetch origin/main', run.source.baseCommit ? `main ${bounded(run.source.baseCommit, 12)}` : '', fetchedAt].filter(Boolean).join(' · '));
+      const resumed = run.source.mode === 'resume' || Boolean(run.resumedFrom);
+      setText($('run-source'), [resumed ? 'Nguồn: tiếp tục nhánh đã làm' : run.source.mode === 'desktop' ? 'Nguồn: Fetch của GitHub Desktop' : 'Nguồn: Git đã Fetch origin/main', run.source.baseCommit ? `${resumed ? 'gốc' : 'main'} ${bounded(run.source.baseCommit, 12)}` : '', resumed ? run.resumedFrom ? `từ lượt ${bounded(run.resumedFrom, 100)}` : '' : fetchedAt].filter(Boolean).join(' · '));
     }
+    const timing = run.timing;
+    const codexActive = status === 'planning' || status === 'working';
+    const timingParts = [];
+    if (codexActive && Number.isFinite(timing?.maxMinutes) && timing.maxMinutes > 0) timingParts.push(`Tối đa ${timing.maxMinutes} phút`);
+    if (codexActive && Number.isFinite(timing?.idleMinutes) && timing.idleMinutes > 0) timingParts.push(`chờ hoạt động mới ${timing.idleMinutes} phút`);
+    const lastActivity = new Date(timing?.lastActivityAt);
+    if (codexActive && timing?.lastActivityAt && Number.isFinite(lastActivity.getTime())) timingParts.push(`hoạt động gần nhất ${lastActivity.toLocaleTimeString('vi-VN')}`);
+    $('run-timing').hidden = !timingParts.length;
+    setText($('run-timing'), timingParts.join(' · '));
     const plan = displayValue(run.plan || '', 36000);
     if (plan !== previousPlan) { setText($('plan-output'), plan); previousPlan = plan; }
     $('plan-details').hidden = !run.plan;
@@ -337,6 +374,10 @@
     if (!state) return;
     if (state.settingsWarning && state.settingsWarning !== previousSettingsWarning) notice(state.settingsWarning, true);
     previousSettingsWarning = state.settingsWarning;
+    const reportWarning = bounded(state.reportWarning, 2000);
+    if (reportWarning && !connectionError) notice(reportWarning, true);
+    else if (previousReportWarning && $('notice').textContent === previousReportWarning) notice('');
+    previousReportWarning = reportWarning;
     const accountCount = renderAccounts();
     const gitReady = capability('git', 'Git');
     const codexReady = capability('codex', 'Codex');
@@ -349,10 +390,11 @@
       const worker = (state.workers || []).find(item => item.id === id);
       return Boolean(worker && validModelSettings(worker));
     });
-    const canStart = accountCount === 2 && !repeatedAccount && gitReady && codexReady && modelsReady && !working && !state.busy && !state.settingsWarning && !settingsPending() && !loginPending() && !modelsPending() && !pending.has('run') && !connectionError;
+    const canStart = accountCount === 2 && !repeatedAccount && gitReady && codexReady && modelsReady && !working && !state.busy && !state.settingsWarning && !settingsPending() && !loginPending() && !modelsPending() && !runPending() && !connectionError;
     $('run-button').disabled = !canStart;
+    renderRecovery(canStart);
     // Preserve the decorative arrow while updating the action label.
-    const actionLabel = pending.has('run') ? 'Đang chuẩn bị…' : working ? 'Đội đang làm việc…' : 'Phân việc & làm song song';
+    const actionLabel = runPending() ? pending.has('resume') ? 'Đang khôi phục…' : 'Đang chuẩn bị…' : working ? 'Đội đang làm việc…' : state.recovery?.id ? 'Giao mục tiêu mới' : 'Phân việc & làm song song';
     if ($('run-button').dataset.label !== actionLabel) {
       $('run-button').dataset.label = actionLabel;
       const arrow = document.createElement('span'); arrow.setAttribute('aria-hidden', 'true'); arrow.textContent = '↗';
@@ -360,9 +402,9 @@
     }
     $('stop-button').hidden = !working;
     $('stop-button').disabled = pending.has('stop');
-    $('repo-path').disabled = working;
-    $('goal').disabled = working;
-    setText($('run-hint'), working ? 'Ông có thể theo dõi tiến độ bên dưới hoặc dừng công việc.' : state.settingsWarning ? state.settingsWarning : settingsPending() ? 'Đang lưu model. Chờ một chút trước khi giao việc.' : repeatedAccount ? 'Hai thẻ đang dùng cùng email. Đăng xuất thẻ thứ hai rồi chọn tài khoản khác.' : accountCount < 2 ? 'Đăng nhập đủ hai tài khoản để bắt đầu.' : !gitReady || !codexReady ? 'Hoàn tất Git và Codex CLI trước khi bắt đầu.' : !modelsReady || modelsPending() ? 'Chờ danh sách Codex và chọn model, mức suy luận hợp lệ ở cả hai thẻ.' : state.busy || loginPending() ? 'Đang chuẩn bị kết nối, ông chờ một chút.' : 'Tạo nhánh cục bộ để xem lại; chưa tự ghép main hay triển khai web.');
+    $('repo-path').disabled = working || runPending();
+    $('goal').disabled = working || runPending();
+    setText($('run-hint'), reportWarning || (working ? 'Ông có thể theo dõi tiến độ bên dưới hoặc dừng công việc.' : state.settingsWarning ? state.settingsWarning : settingsPending() ? 'Đang lưu model. Chờ một chút trước khi giao việc.' : repeatedAccount ? 'Hai thẻ đang dùng cùng email. Đăng xuất thẻ thứ hai rồi chọn tài khoản khác.' : accountCount < 2 ? 'Đăng nhập đủ hai tài khoản để bắt đầu.' : !gitReady || !codexReady ? 'Hoàn tất Git và Codex CLI trước khi bắt đầu.' : !modelsReady || modelsPending() ? 'Chờ danh sách Codex và chọn model, mức suy luận hợp lệ ở cả hai thẻ.' : state.busy || loginPending() ? 'Đang chuẩn bị kết nối, ông chờ một chút.' : 'Tạo nhánh cục bộ để xem lại; chưa tự ghép main hay triển khai web.'));
     renderRun();
   }
 
@@ -380,6 +422,7 @@
       connectionError = true;
       render();
       $('run-button').disabled = true;
+      $('resume-button').disabled = true;
       $('source-mode').disabled = true;
     } finally { stateInFlight = false; }
   }
@@ -427,7 +470,7 @@
     mutate(`settings:${worker}`, '/api/settings', { worker, model, reasoningEffort }, 'Đã lưu model và mức suy luận cho tài khoản này.')
       .finally(() => { settingsDrafts.delete(worker); render(); if (!select.disabled && document.activeElement === document.body) select.focus({ preventScroll: true }); });
   });
-  $('repo-path').addEventListener('input', () => { repoTouched = true; });
+  $('repo-path').addEventListener('input', () => { repoTouched = true; render(); });
   $('source-mode').addEventListener('change', () => { sourceModeTouched = true; renderSourceMode(); });
   $('run-form').addEventListener('submit', event => {
     event.preventDefault();
@@ -439,6 +482,12 @@
     mutate('run', '/api/run', { repo, goal, sourceMode }, 'Đã nhận mục tiêu. Bộ điều phối đang chuẩn bị phần việc.');
   });
   $('stop-button').addEventListener('click', () => mutate('stop', '/api/stop', {}, 'Đã gửi yêu cầu dừng. Xem nhật ký để biết công việc nào đã hoàn tất.'));
+  $('resume-button').addEventListener('click', () => {
+    if ($('resume-button').disabled || !state?.recovery?.id) return;
+    const repo = $('repo-path').value.trim();
+    if (!repo) { notice('Nhập đúng thư mục repo đã dùng ở lượt trước.', true); return; }
+    mutate('resume', '/api/resume', { jobId: state.recovery.id, repo }, 'Đã nhận yêu cầu tiếp tục. Bộ điều phối đang kiểm tra và dùng lại phần đã làm.');
+  });
   window.addEventListener('focus', refresh);
   refresh();
   setInterval(refresh, 1500);

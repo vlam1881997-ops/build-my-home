@@ -46,10 +46,28 @@ if(args.includes('exec')) {
   const output=args[args.indexOf('--output-last-message')+1];
   const send=event=>process.stdout.write(JSON.stringify(event)+'\n');
   send({type:'thread.started',thread_id:'fixture'});
-  send({type:'item.started',item:{type:'command_execution',command:'fixture'}});
+  send({type:'item.started',item:{id:'initial',type:'command_execution',command:'fixture'}});
   if(mode==='hang'){setInterval(()=>{},1000);}
+  else if(mode==='heartbeat-only') {
+    setInterval(()=>{
+      send({type:'heartbeat',at:Date.now()});
+      send({type:'item.started',item:{id:'initial',type:'command_execution',command:'fixture'}});
+      process.stdout.write('not a Codex JSON event\n');
+      process.stderr.write('CLI heartbeat, no model progress\n');
+    },50);
+  }
   else {
+    if(mode==='activity' || mode==='continuous-activity') {
+      let count=0;
+      const timer=setInterval(()=>send({type:'item.completed',item:{id:'active-'+(++count),type:'command_execution',command:'git diff',status:'completed',exit_code:0}}),100);
+      if(mode==='continuous-activity')await new Promise(()=>{});
+      await new Promise(resolve=>setTimeout(resolve,1500));clearInterval(timer);
+    }
     await writeFile(output,JSON.stringify({prompt:input,schema,sandbox:args[args.indexOf('--sandbox')+1],approval:args[args.indexOf('-a')+1],cwd:args[args.indexOf('--cd')+1],model:args[args.indexOf('--model')+1],reasoning:args[args.indexOf('-c')+1]}));
+    if(mode==='progress-redaction') {
+      send({type:'item.started',item:{id:'safe-command',type:'command_execution',command:'/bin/bash -lc "git diff --token ghp_abcdefghijklmnopqrstuvwxyz123456"'}});
+      send({type:'item.completed',item:{id:'files',type:'file_change',changes:[{path:'src/layout.js',kind:'update'},{path:'src/ghp_abcdefghijklmnopqrstuvwxyz123456.js',kind:'update'}]}});
+    }
     send({type:'item.completed',item:{type:'agent_message',text:'Đã hoàn thành phần được giao.'}});
     if(mode==='failed-turn')send({type:'turn.failed',error:{message:'fixture turn failed'}});
     else if(mode!=='missing-completion')send({type:'turn.completed',usage:{output_tokens:4}});
@@ -154,8 +172,40 @@ test('nonzero exit, failed turn or missing completion never report completed wor
 test('Stop cancels a real running CLI process and releases the worker',async t=>{
   const f=await workerFixture(t,{mode:'hang'});
   const run=runSelected(f.worker,'task',{cwd:f.root,timeoutMs:5000});const stopped=assert.rejects(run,/đã dừng/);
-  await waitFor(()=>Boolean(f.worker.child));await f.worker.interrupt();await stopped;
+  await waitFor(()=>Boolean(f.worker.child));const child=f.worker.child;
+  await f.worker.interrupt();assert.ok(child.exitCode!==null || child.signalCode!==null,'Stop must await actual child exit');
+  assert.equal(f.worker.processes.size,0);await stopped;
   assert.equal(f.worker.current,null);assert.equal(f.worker.processes.size,0);
+});
+test('meaningful stdout activity keeps real execution alive past its idle window',async t=>{
+  const f=await workerFixture(t,{mode:'activity'});const activities=[];
+  f.worker.on('activity',activity=>activities.push(activity));const start=Date.now();
+  const output=JSON.parse(await runSelected(f.worker,'active work',{cwd:f.root,timeoutMs:5000,idleTimeoutMs:600}));
+  assert.equal(output.prompt,'active work');assert.ok(Date.now()-start>=1500);
+  assert.ok(activities.length>=10);assert.ok(activities.every(activity=>Object.keys(activity).sort().join(',')==='at,type' && !Number.isNaN(Date.parse(activity.at))));
+  assert.equal(f.worker.processes.size,0);assert.equal(f.calls.filter(call=>call.args.includes('exec')).length,1);
+});
+test('stderr, unknown heartbeats, malformed stdout and duplicate events cannot renew idle timeout',async t=>{
+  const f=await workerFixture(t,{mode:'heartbeat-only'});const activities=[];f.worker.on('activity',value=>activities.push(value));
+  await assert.rejects(runSelected(f.worker,'silent work',{cwd:f.root,timeoutMs:4000,idleTimeoutMs:500}),error=>{
+    assert.equal(error.code,'CODEX_IDLE_TIMEOUT');assert.equal(error.timeoutType,'idle');assert.match(error.message,/chờ hoạt động/);assert.match(error.message,/Mã nguồn được giữ/);return true;
+  });
+  assert.equal(activities.length,2);assert.equal(f.worker.processes.size,0);assert.equal(f.worker.current,null);
+});
+test('continuous real activity cannot extend the absolute execution cap or trigger a provider fallback',async t=>{
+  const f=await workerFixture(t,{mode:'continuous-activity'});const activities=[];f.worker.on('activity',value=>activities.push(value));
+  await assert.rejects(runSelected(f.worker,'bounded work',{cwd:f.root,timeoutMs:1300,idleTimeoutMs:600}),error=>{
+    assert.equal(error.code,'CODEX_TOTAL_TIMEOUT');assert.equal(error.timeoutType,'maximum');assert.match(error.message,/tối đa/);return true;
+  });
+  assert.ok(activities.length>2);assert.equal(f.calls.filter(call=>call.args.includes('exec')).length,1);assert.equal(f.worker.processes.size,0);
+});
+test('progress exposes useful command labels and redacted file paths without forwarding event payloads',async t=>{
+  const f=await workerFixture(t,{mode:'progress-redaction'});const progress=[],activities=[];
+  f.worker.on('progress',text=>progress.push(text));f.worker.on('activity',value=>activities.push(value));
+  await runSelected(f.worker,'show progress',{cwd:f.root});
+  assert.ok(progress.includes('Đang chạy: git diff.'));assert.ok(progress.some(text=>text.includes('src/layout.js')));
+  const exposed=JSON.stringify({progress,activities});assert.ok(!exposed.includes('ghp_abcdefghijklmnopqrstuvwxyz123456'));assert.ok(!exposed.includes('--token'));
+  assert.ok(activities.every(value=>!('item' in value) && !('command' in value)));
 });
 test('Stop during preparation prevents a later exec from starting',async t=>{
   const f=await workerFixture(t);let release;

@@ -1,13 +1,14 @@
 import http from 'node:http';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {readFile,writeFile,mkdir,access} from 'node:fs/promises';
+import {readFile,access} from 'node:fs/promises';
 import {randomBytes,timingSafeEqual} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import {CodexWorker,privateStateRoot,findCodex,findGit,scrub} from './core.mjs';
 import {TeamJob} from './jobs.mjs';
 import {loadModelSettings,saveModelSettings,validateCatalogSettings,modelSettingsWarning} from './models.mjs';
 import {SOURCE_MODE_OPTIONS,validateSourceMode} from './git-source.mjs';
+import {createJobReportStore,jobId} from './job-reports.mjs';
 
 const toolRoot=path.dirname(fileURLToPath(import.meta.url));
 const terminalStates=new Set(['ready','failed','stopped']);
@@ -24,10 +25,27 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
   workers ||= ['one','two'].map(id=>new CodexWorker({id,stateRoot,codex}));
   const loadedSettings=await loadModelSettings(stateRoot);
   let modelSettings=loadedSettings.settings;let settingsWarning=loadedSettings.warning;let settingsSaving=false;let settingsRevision=0;
-  const token=randomBytes(32).toString('hex');let job=null;let shuttingDown=false;let runPreparing=false;let runEpoch=0;
-  const isBusy=()=>runPreparing || Boolean(job && !terminalStates.has(job.publicState.status));
+  const reports=createJobReportStore(stateRoot);
+  let recovery=null;let reportWarning=null;
+  try {const loadedRecovery=await reports.latestRecoverable();recovery=loadedRecovery?.recovery || null;if(!repoDefault && loadedRecovery)repoDefault=loadedRecovery.snapshot.repo || '';}
+  catch {reportWarning='Không đọc được tiến độ đã lưu. Các file và nhánh công việc vẫn được giữ trên máy.';}
+  const token=randomBytes(32).toString('hex');let job=null;let shuttingDown=false;let runPreparing=false;let stopPending=null;let runEpoch=0;
+  const isBusy=()=>runPreparing || Boolean(stopPending) || Boolean(job && !terminalStates.has(job.publicState.status));
   const sourceModeDefault=/(?:^|[\\/])GitHubDesktop(?:[\\/]|$)/i.test(String(git || ''))?'desktop':'fetch';
-  const state=()=>({version:'1.1.2',workers:workers.map(w=>({...w.publicState,modelSettings:{...modelSettings[w.id]},modelSettingsWarning:modelSettingsWarning(modelSettings[w.id],w.modelCatalog)})),sourceModeOptions:SOURCE_MODE_OPTIONS,sourceModeDefault,settingsWarning,settingsRevision,run:job?.publicState||null,repoDefault,capabilities:{git:Boolean(git),codex:Boolean(codex),windows:process.platform==='win32'},busy:isBusy()||settingsSaving});
+  const state=()=>({version:'1.1.3',workers:workers.map(w=>({...w.publicState,modelSettings:{...modelSettings[w.id]},modelSettingsWarning:modelSettingsWarning(modelSettings[w.id],w.modelCatalog)})),sourceModeOptions:SOURCE_MODE_OPTIONS,sourceModeDefault,settingsWarning,settingsRevision,run:job?.publicState||null,recovery,reportWarning,repoDefault,capabilities:{git:Boolean(git),codex:Boolean(codex),windows:process.platform==='win32'},busy:isBusy()||settingsSaving});
+  const saveReport=async update=>{
+    try {
+      await reports.save(update);reportWarning=null;
+      if(terminalStates.has(update.status) && job?.publicState.id===update.id)recovery=(await reports.latestRecoverable())?.recovery || null;
+    } catch {reportWarning='Không lưu được tiến độ để tiếp tục sau khi mở lại. Các file và nhánh đang làm vẫn được giữ trên máy.';}
+  };
+  const stopJob=async()=>{
+    if(stopPending)return stopPending;
+    if(!job || terminalStates.has(job.publicState.status))return;
+    const activeJob=job;
+    stopPending=Promise.resolve().then(async()=>{await activeJob.stop();await saveReport(activeJob.publicState);});
+    try {await stopPending;}finally {stopPending=null;}
+  };
   const json=(res,status,data)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));};
   const server=http.createServer(async(req,res)=>{
     const address=server.address();const allowedHost=`127.0.0.1:${address.port}`;const origin=`http://${allowedHost}`;
@@ -73,10 +91,11 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
           if(!worker)throw Error('Tài khoản không hợp lệ.');
           await worker.logout();return json(res,200,{ok:true});
         }
-        if(pathname==='/api/run'){
-          if(isBusy() || settingsSaving)throw Error('Đang có nhiệm vụ chạy hoặc cấu hình đang lưu. Chờ hoàn tất trước.');
+        if(pathname==='/api/run' || pathname==='/api/resume'){
+          if(isBusy() || settingsSaving || shuttingDown)throw Error('Đang có nhiệm vụ chạy hoặc cấu hình đang lưu. Chờ hoàn tất trước.');
           if(settingsWarning)throw Error(settingsWarning);
-          const sourceMode=validateSourceMode(body.sourceMode);
+          const resuming=pathname==='/api/resume';
+          const sourceMode=resuming?null:validateSourceMode(body.sourceMode);
           runPreparing=true;
           const ticket=++runEpoch;
           const runModels=structuredClone(modelSettings);
@@ -88,23 +107,31 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
           await Promise.all(workers.map(w=>w.refreshModels({force:true})));
           if(ticket!==runEpoch || shuttingDown)throw Error('Nhiệm vụ đã dừng trước khi bắt đầu.');
           for(const w of workers)validateCatalogSettings(runModels[w.id],w.modelCatalog);
-          const repo=String(body.repo||repoDefault).trim().replace(/^"|"$/g,'');const goal=String(body.goal||'').trim();
+          let resumeSnapshot=null;
+          if(resuming) {
+            const savedId=jobId(body.jobId);
+            if(!recovery || recovery.id!==savedId)throw Error('Công việc đã lưu đã thay đổi. Tải lại trang để chọn đúng phần cần tiếp tục.');
+            await reports.flush();resumeSnapshot=await reports.read(savedId);
+            if(!await reports.candidate(resumeSnapshot))throw Error('Không còn đủ thư mục và kế hoạch để tiếp tục tự động. Các file đã làm vẫn được giữ để xem trên nhánh cũ.');
+          }
+          const repo=String(body.repo||repoDefault).trim().replace(/^"|"$/g,'');const goal=String(resumeSnapshot?.goal || body.goal || '').trim();
           if(!path.isAbsolute(repo))throw Error('Chọn đường dẫn đầy đủ tới thư mục BMH trên máy.');
           if(goal.length<5 || goal.length>12000)throw Error('Nhập mục tiêu từ 5 đến 12.000 ký tự.');
+          if(ticket!==runEpoch || shuttingDown)throw Error('Nhiệm vụ đã dừng trước khi bắt đầu.');
           repoDefault=repo;
-          job=jobFactory({workers,repo,goal,gitCommand:git,stateRoot,sourceMode,modelSettings:runModels,onEvent:async update=>{
-            // Save task summaries only; authentication remains in Codex-managed account storage.
-            try{await mkdir(path.join(stateRoot,'reports'),{recursive:true,mode:0o700});await writeFile(path.join(stateRoot,'reports',`${update.id}.json`),JSON.stringify(update,null,2),{mode:0o600});}catch{}
-          }});
+          job=jobFactory({workers,repo,goal,gitCommand:git,stateRoot,sourceMode:resuming?(resumeSnapshot.sourceMode || 'fetch'):sourceMode,modelSettings:runModels,...(resuming?{resumeSnapshot}:{}),onEvent:saveReport});
+          recovery=null;
           for(const w of workers)w.removeAllListeners('progress');
-          for(const w of workers)w.on('progress',message=>{job?.note?.(scrub(message),w.id);});
-          Promise.resolve(job.start()).catch(()=>{});
+          const activeJob=job;
+          for(const w of workers)w.on('progress',message=>{if(job===activeJob)activeJob.note?.(scrub(message),w.id);});
+          Promise.resolve(activeJob.start()).then(()=>saveReport(activeJob.publicState)).catch(()=>{});
           return json(res,202,{ok:true,run:job.publicState});
           } finally {runPreparing=false;}
         }
         if(pathname==='/api/stop'){
           runEpoch++;
-          if(job && isBusy())await job.stop();return json(res,200,{ok:true,run:job?.publicState||null});
+          await stopJob();
+          return json(res,200,{ok:true,run:job?.publicState||null});
         }
         return json(res,404,{ok:false,error:'Không có thao tác này.'});
       }
@@ -123,8 +150,8 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
   const close=async()=>{
     if(shuttingDown)return;shuttingDown=true;
     runEpoch++;
-    if(isBusy() && job)await job.stop().catch(()=>{});
-    await Promise.all(workers.map(w=>w.close()));await new Promise(resolve=>server.close(resolve));
+    await stopJob().catch(()=>{});
+    await Promise.all(workers.map(w=>w.close()));await reports.flush().catch(()=>{});await new Promise(resolve=>server.close(resolve));
   };
   return {server,state,workers,close,token};
 }
@@ -136,7 +163,7 @@ async function main() {
   const app=await createTeamServer({repoDefault});
   await new Promise((resolve,reject)=>{app.server.once('error',reject);app.server.listen(0,'127.0.0.1',resolve);});
   const url=`http://127.0.0.1:${app.server.address().port}/`;
-  process.stdout.write(`\nBMH Team v1.1.2: ${url}\nGiữ cửa sổ này mở. Chọn model trong danh sách Codex của từng tài khoản rồi giao việc.\n`);
+  process.stdout.write(`\nBMH Team v1.1.3: ${url}\nGiữ cửa sổ này mở. Chọn model trong danh sách Codex của từng tài khoản rồi giao việc hoặc tiếp tục phần đã lưu.\n`);
   if(!args.includes('--no-browser')){
     const command=process.platform==='win32'?'rundll32.exe':process.platform==='darwin'?'open':'xdg-open';
     const openArgs=process.platform==='win32'?['url.dll,FileProtocolHandler',url]:[url];

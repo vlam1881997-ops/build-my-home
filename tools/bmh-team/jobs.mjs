@@ -3,9 +3,11 @@ import { spawn } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, createHash } from 'node:crypto';
 import {DEFAULT_MODEL_SETTINGS,validateModelSettings} from './models.mjs';
 import {validateSourceMode,desktopFetchEvidence,redactProcessText,gitFailureDiagnostic} from './git-source.mjs';
+import {workerTimeLimits} from './limits.mjs';
+import {jobId,worktreeId} from './job-reports.mjs';
 
 const ORIGIN = 'vlam1881997-ops/build-my-home';
 const SCHEMA = {
@@ -54,30 +56,35 @@ async function optionalRead(filename) { try { return await fs.readFile(filename,
 /** Local-only job. Desktop mode requires matching recent FETCH_HEAD evidence.
  * fetch:false remains exclusively for offline fixture tests. */
 export class TeamJob extends EventEmitter {
-  constructor({ workers, repo, goal, gitCommand = 'git', stateRoot = path.join(os.homedir(), '.bmh-team', 'jobs'), onEvent, fetch = true, sourceMode = 'fetch', workerTimeoutMs = 20 * 60_000, commandTimeoutMs = 5 * 60_000, modelSettings }) {
+  constructor({ workers, repo, goal, gitCommand = 'git', stateRoot = path.join(os.homedir(), '.bmh-team', 'jobs'), onEvent, fetch = true, sourceMode = 'fetch', workerTimeoutMs, workerIdleTimeoutMs, commandTimeoutMs = 5 * 60_000, modelSettings, resumeSnapshot }) {
     super();
     if (!Array.isArray(workers) || workers.length !== 2 || workers.some(w => !w?.id || typeof w.run !== 'function' || typeof w.interrupt !== 'function') || workers[0].id === workers[1].id) throw new Error('Exactly two distinct workers are required.');
-    this.workers = workers; this.repo = path.resolve(repo); this.goal = String(goal || '').trim();
+    this.resumeSnapshot=resumeSnapshot?structuredClone(resumeSnapshot):null;
+    if(this.resumeSnapshot && (!['failed','stopped'].includes(this.resumeSnapshot.status) || !this.resumeSnapshot.workspaceReady || !this.resumeSnapshot.plan || !/^[a-f0-9]{40}$/i.test(this.resumeSnapshot.source?.baseCommit || '')))throw Error('Công việc đã lưu chưa có kế hoạch và thư mục để tiếp tục.');
+    this.workers = workers; this.repo = path.resolve(repo); this.goal = String(this.resumeSnapshot?.goal || goal || '').trim();
     this.modelSettings=Object.fromEntries(workers.map(worker=>[worker.id,Object.freeze(validateModelSettings(modelSettings?.[worker.id] || DEFAULT_MODEL_SETTINGS))]));
     Object.freeze(this.modelSettings);
     if (!this.goal || this.goal.length > 20_000) throw new Error('Provide a goal of 1–20,000 characters.');
     this.gitCommand = gitCommand; this.stateRoot = path.resolve(stateRoot);
     if (inside(this.repo, this.stateRoot)) throw new Error('Worktrees must be stored outside the source repository.');
-    this.onEvent = onEvent; this.fetch = fetch; this.sourceMode=validateSourceMode(sourceMode); this.workerTimeoutMs = workerTimeoutMs; this.commandTimeoutMs = commandTimeoutMs;
+    this.onEvent = onEvent; this.fetch = fetch; this.sourceMode=validateSourceMode(sourceMode); this.workerTimeoutMs = workerTimeoutMs; this.workerIdleTimeoutMs=workerIdleTimeoutMs; this.commandTimeoutMs = commandTimeoutMs;
     this.id = `${Date.now()}-${randomBytes(4).toString('hex')}`;
-    this.status = 'preparing'; this.plan = null; this.results = []; this.artifacts = []; this.branch = `bmh-team/${this.id}/integration`;
-    this.path = path.join(this.stateRoot, this.id, 'integration'); this.error = null; this.events = [];
+    this.worktreeId=this.resumeSnapshot?worktreeId(this.resumeSnapshot):this.id;
+    this.resumedFrom=this.resumeSnapshot?jobId(this.resumeSnapshot.id):null;
+    this.status = 'preparing'; this.plan = null; this.results = []; this.artifacts = []; this.branch = `bmh-team/${this.worktreeId}/integration`;
+    this.path = path.join(this.stateRoot, this.worktreeId, 'integration'); this.error = null; this.events = [];
     this.diagnostic=null; this.source=null; this.workspaceReady=false;
+    this.checkpoint=null; this.timing=null;
     this.children = new Set(); this.timers = new Set(); this.aborted = false; this.failing = false; this.started = false; this.activePromise = null;
   }
-  get publicState() { return structuredClone({ id: this.id, status: this.status, goal: this.goal, modelSettings:this.modelSettings, sourceMode:this.sourceMode, source:this.source, workspaceReady:this.workspaceReady, diagnostic:this.diagnostic, plan: this.plan, results: this.results, artifacts: this.artifacts, branch: this.branch, path: this.path, error: this.error, events: this.events }); }
+  get publicState() { return structuredClone({ id: this.id, repo:this.repo, worktreeId:this.worktreeId, resumedFrom:this.resumedFrom, status: this.status, goal: this.goal, modelSettings:this.modelSettings, sourceMode:this.sourceMode, source:this.source, workspaceReady:this.workspaceReady, diagnostic:this.diagnostic, plan: this.plan, results: this.results, artifacts: this.artifacts, branch: this.branch, path: this.path, error: this.error, events: this.events, checkpoint:this.checkpoint, timing:this.timing }); }
   note(message, worker) {
     this.events.push({ at: new Date().toISOString(), ...(worker ? { worker } : {}), message: scrub(message) });
     if (this.events.length > 200) this.events.shift();
     const state = this.publicState; this.emit('state', state);
-    try { this.onEvent?.(state); } catch { /* An observer cannot alter the job outcome. */ }
+    try { Promise.resolve(this.onEvent?.(state)).catch(()=>{}); } catch { /* An observer cannot alter the job outcome. */ }
   }
-  phase(status, message) { if (this.aborted && status !== 'stopped') return; this.status = status; this.note(message); }
+  phase(status, message) { if (this.aborted && status !== 'stopped') return; this.status = status; if(this.checkpoint)this.checkpoint.phase=status; this.note(message); }
   assertActive() { if (this.aborted) throw new Error('Job stopped.'); if (this.failing) throw new Error('Job is cancelling after a task failure.'); }
   async kill(child) {
     if (child.exitCode !== null || child.signalCode !== null || !child.pid) return;
@@ -141,13 +148,30 @@ export class TeamJob extends EventEmitter {
   }
   async git(args, cwd = this.repo, options) { return (await this.command(this.gitCommand, process.platform === 'win32' ? ['-c', 'core.longpaths=true', ...args] : args, cwd, {...options,gitOperation:args[0]})).stdout.trim(); }
   async runWorker(worker, prompt, options) {
-    this.assertActive(); let timer; let onStop;
-    const timeout = new Promise((_, reject) => { timer = setTimeout(() => { void Promise.resolve().then(() => worker.interrupt()).catch(() => {}); reject(new Error(`Account ${worker.id} timed out.`)); }, this.workerTimeoutMs); this.timers.add(timer); });
-    const stopped = new Promise((_, reject) => { onStop = () => reject(new Error('Job stopped.')); this.once('stop', onStop); });
+    this.assertActive(); let timer; let idleTimer; let onStop;
     const selected=this.modelSettings[worker.id];
+    const limits=workerTimeLimits({...selected,readOnly:Boolean(options.readOnly),timeoutMs:this.workerTimeoutMs,idleTimeoutMs:this.workerIdleTimeoutMs});
+    const budget={maxMinutes:limits.timeoutMs/60_000,idleMinutes:limits.idleTimeoutMs/60_000,lastActivityAt:new Date().toISOString(),status:'working'};
+    this.timing ||= {workers:{}};this.timing.workers[worker.id]=budget;
+    Object.assign(this.timing,{maxMinutes:Math.max(...Object.values(this.timing.workers).filter(v=>v.status==='working').map(v=>v.maxMinutes)),idleMinutes:Math.max(...Object.values(this.timing.workers).filter(v=>v.status==='working').map(v=>v.idleMinutes)),lastActivityAt:budget.lastActivityAt});
+    let rejectTimeout;
+    const timeout=new Promise((_,reject)=>{rejectTimeout=reject;});
+    const expire=kind=>{
+      void Promise.resolve().then(()=>worker.interrupt()).catch(()=>{});
+      const error=new Error(`Account ${worker.id} timed out: ${kind==='idle'?'không có hoạt động mới trong thời gian chờ':'đã đạt thời gian tối đa của lượt làm'}. Các file đã làm được giữ lại để tiếp tục.`);
+      error.timeoutType=kind;rejectTimeout(error);
+    };
+    const resetIdle=()=>{clearTimeout(idleTimer);this.timers.delete(idleTimer);idleTimer=setTimeout(()=>expire('idle'),limits.idleTimeoutMs);this.timers.add(idleTimer);};
+    const onActivity=event=>{
+      if(!event || typeof event.type!=='string' || !event.type)return;
+      budget.lastActivityAt=new Date().toISOString();this.timing.lastActivityAt=budget.lastActivityAt;resetIdle();
+    };
+    worker.on?.('activity',onActivity);
+    timer=setTimeout(()=>expire('maximum'),limits.timeoutMs);this.timers.add(timer);resetIdle();
+    const stopped = new Promise((_, reject) => { onStop = () => reject(new Error('Job stopped.')); this.once('stop', onStop); });
     this.note(`Giao bằng ${selected.model} · ${selected.reasoningEffort}`,worker.id);
-    try { return await Promise.race([worker.run(prompt, { ...options, ...selected, timeoutMs: this.workerTimeoutMs }), timeout, stopped]); }
-    finally { clearTimeout(timer); this.timers.delete(timer); this.removeListener('stop', onStop); }
+    try { return await Promise.race([worker.run(prompt, { ...options, ...selected, ...limits }), timeout, stopped]); }
+    finally { clearTimeout(timer);clearTimeout(idleTimer);this.timers.delete(timer);this.timers.delete(idleTimer);worker.removeListener?.('activity',onActivity);this.removeListener('stop',onStop);budget.status='finished'; }
   }
   validatePlan(value, scripts) {
     if (!value || typeof value.summary !== 'string' || !Array.isArray(value.tasks) || value.tasks.length !== 2 || !Array.isArray(value.checks) || !value.checks.length || value.checks.length > 12) throw new Error('Plan must contain exactly two tasks and at least one verification command.');
@@ -191,10 +215,9 @@ export class TeamJob extends EventEmitter {
     try { if (!(await fs.lstat(full)).isFile()) throw new Error('Owned paths must be literal files, not directories.'); } catch (error) { if (allowMissing && error.code === 'ENOENT') return; throw error; }
   }
   async interruptWorkers() {
-    await Promise.allSettled(this.workers.map(worker => new Promise(resolve => {
-      const timer = setTimeout(resolve, 5000);
-      Promise.resolve().then(() => worker.interrupt()).finally(() => { clearTimeout(timer); resolve(); }).catch(() => {});
-    })));
+    // The core interrupt resolves after the real child has exited. A timer here
+    // could mark a job terminal while Codex still writes into its saved files.
+    await Promise.allSettled(this.workers.map(worker=>Promise.resolve().then(()=>worker.interrupt())));
   }
   async prepareDependencies(paths) {
     if (!this.packageJson || (!Object.keys(this.packageJson.dependencies || {}).length && !Object.keys(this.packageJson.devDependencies || {}).length)) return;
@@ -205,7 +228,16 @@ export class TeamJob extends EventEmitter {
     let source = path.join(this.path, 'node_modules');
     let reusable = false;
     try { reusable = basePackage === this.packageText && baseLock === lock && (await fs.stat(path.join(this.repo, 'node_modules'))).isDirectory(); } catch {}
-    if (reusable) {
+    let existing;
+    try {existing=await fs.lstat(source);}catch(error){if(error.code!=='ENOENT')throw error;}
+    if(existing) {
+      if(!this.resumeSnapshot || !(await fs.stat(source)).isDirectory())throw Error('Dependency folder already exists unexpectedly; existing files were preserved.');
+      if(existing.isSymbolicLink()) {
+        if(!reusable || !samePath(await canonicalPath(source),await canonicalPath(path.join(this.repo,'node_modules'))))throw Error('Saved dependencies link to a different folder or package version; existing files were preserved.');
+        source=path.join(this.repo,'node_modules');
+      }
+      reusable=true;this.note('Tiếp tục dùng thư mục dependencies đã chuẩn bị cho kế hoạch cũ.');
+    } else if (reusable) {
       source = path.join(this.repo, 'node_modules'); this.note('Using existing dependencies with the same package and lockfile.');
       try { await fs.symlink(path.resolve(source), path.join(this.path, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir'); }
       catch (error) {
@@ -218,10 +250,36 @@ export class TeamJob extends EventEmitter {
       await this.command('npm', ['ci', '--ignore-scripts', '--no-audit', '--no-fund'], this.path, { logName: 'dependencies.log' });
     }
     for (const cwd of paths) {
-      try { await fs.symlink(path.resolve(source), path.join(cwd, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir'); }
+      try {
+        const target=path.join(cwd,'node_modules');let current;
+        try {current=await fs.lstat(target);}catch(error){if(error.code!=='ENOENT')throw error;}
+        if(current) {
+          if(!this.resumeSnapshot || !current.isSymbolicLink() || !samePath(await canonicalPath(target),await canonicalPath(source)))throw Error('Saved worker dependencies point to a different folder.');
+        } else await fs.symlink(path.resolve(source),target,process.platform === 'win32' ? 'junction' : 'dir');
+      }
       catch (error) { throw new Error(`Cannot create a dependency ${process.platform === 'win32' ? 'junction' : 'link'} (${error.code || 'error'}). Choose a local writable disk for the job folder; existing files were preserved.`); }
     }
     this.dependencyLock = lock;
+  }
+  async validateWorkerChanges(index,paths,branches,base,ignoredBefore,{allowEmpty=false}={}) {
+    const worker=this.workers[index];const task=this.plan.tasks[index];const cwd=paths[index];
+    if(await this.git(['rev-parse','HEAD'],cwd)!==base || await this.git(['branch','--show-current'],cwd)!==branches[index])throw Error(`Account ${worker.id} changed Git history or branch. Existing files were preserved; review this branch before continuing.`);
+    if(await this.git(['ls-files','--unmerged','-z'],cwd))throw Error('Saved worker has unresolved merge conflicts; existing files were preserved.');
+    await this.git(['diff','--check'],cwd);await this.git(['diff','--cached','--check'],cwd);
+    const tracked=await this.git(['diff','--name-only','--no-renames','-z',base],cwd);
+    const untracked=await this.git(['ls-files','--others','--exclude-standard','-z'],cwd);
+    if(await this.git(['ls-files','--others','--ignored','--exclude-standard','-z','--','.',':(exclude)node_modules'],cwd)!==ignoredBefore[index])throw Error(`Account ${worker.id} created protected or ignored files outside its source ownership.`);
+    const files=[...new Set((tracked+'\0'+untracked).split('\0').filter(Boolean))].sort();const fileHashes={};
+    if(!files.length && !allowEmpty)throw Error(`Account ${worker.id} made no source changes; the task is not complete.`);
+    for(const filename of files) {
+      safeFile(filename);if(!task.ownedPaths.includes(filename))throw Error(`Account ${worker.id} changed an unowned file: ${filename}.`);
+      await this.verifyLiteral(cwd,filename,true);
+      const contents=await optionalRead(path.join(cwd,filename));
+      if(contents && /AIza[\w-]{25,}|\bsk-[\w-]{20,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(contents))throw Error('Source changes appear to contain credentials; review the isolated worker files.');
+      fileHashes[filename]=contents===null?'deleted':createHash('sha256').update(await fs.readFile(path.join(cwd,filename))).digest('hex');
+    }
+    if(this.dependencyLock && (await optionalRead(path.join(cwd,'package.json'))!==this.packageText || await optionalRead(path.join(cwd,'package-lock.json'))!==this.dependencyLock))throw Error('Dependency declarations changed; rerun with isolated dependency preparation.');
+    return {files,fileHashes};
   }
   start() {
     if (this.aborted) return Promise.resolve(this.publicState);
@@ -236,10 +294,10 @@ export class TeamJob extends EventEmitter {
     return this.activePromise;
   }
   async execute() {
-    this.phase('preparing', 'Checking BMH repository and preparing isolated branches.');
+    this.phase('preparing', this.resumeSnapshot?'Kiểm tra thư mục đã lưu để tiếp tục đúng công việc cũ.':'Checking BMH repository and preparing isolated branches.');
     this.repo = await canonicalPath(this.repo); this.stateRoot = await canonicalPath(this.stateRoot);
     if (inside(this.repo, this.stateRoot)) throw new Error('Worktrees must be stored outside the source repository, including junction/symlink paths.');
-    this.path = path.join(this.stateRoot, this.id, 'integration');
+    this.path = path.join(this.stateRoot, this.worktreeId, 'integration');
     const root = await this.git(['rev-parse', '--show-toplevel']);
     if (!samePath(await canonicalPath(root), this.repo)) throw new Error('Select the repository root directory.');
     const commonDir = await canonicalPath(path.resolve(this.repo, await this.git(['rev-parse', '--git-common-dir'])));
@@ -250,53 +308,80 @@ export class TeamJob extends EventEmitter {
     if (!accepted.test(origin)) throw new Error(`Repository origin must be github.com/${ORIGIN}.`);
     if (await this.git(['status', '--porcelain=v1', '--untracked-files=all'])) throw new Error('Source checkout has uncommitted files. Keep them safe; commit or stash them before starting a team job.');
     this.sourceHead = await this.git(['rev-parse', 'HEAD']);
-    if (this.sourceMode==='fetch' && this.fetch) { this.note('Fetching the latest origin/main; the source checkout is not reset.'); await this.git(['fetch', '--no-tags', 'origin', 'main'], this.repo, { logName: 'fetch.log' }); }
-    const base = await this.git(['rev-parse', '--verify', 'refs/remotes/origin/main']);
-    if(this.sourceMode==='desktop') {
-      this.source=await desktopFetchEvidence({repo:this.repo,commonDir,baseCommit:base,git:args=>this.git(args)});
-      this.note(`Dùng origin/main ${base.slice(0,12)} vừa Fetch qua GitHub Desktop lúc ${this.source.fetchedAt}.`);
-    } else this.source={mode:this.fetch?'fetch':'fixture',baseCommit:base,fetchedAt:this.fetch?new Date().toISOString():null};
-    await this.git(['worktree', 'add', '-b', this.branch, this.path, base]);
+    let base;
+    if(this.resumeSnapshot) {
+      if(this.resumeSnapshot.repo && !samePath(await canonicalPath(this.resumeSnapshot.repo),this.repo))throw Error('Chọn đúng repo của công việc đã lưu. Các thư mục đang làm được giữ nguyên.');
+      base=this.resumeSnapshot.source.baseCommit;
+      this.source={...this.resumeSnapshot.source,mode:'resume',previousMode:this.resumeSnapshot.source.mode};
+      this.note(`Tiếp tục từ bản nguồn ${base.slice(0,12)} và các file đã làm; không Fetch hoặc tạo lại thư mục.`);
+    } else {
+      if(this.sourceMode==='fetch' && this.fetch) {this.note('Fetching the latest origin/main; the source checkout is not reset.');await this.git(['fetch','--no-tags','origin','main'],this.repo,{logName:'fetch.log'});}
+      base=await this.git(['rev-parse','--verify','refs/remotes/origin/main']);
+      if(this.sourceMode==='desktop') {
+        this.source=await desktopFetchEvidence({repo:this.repo,commonDir,baseCommit:base,git:args=>this.git(args)});
+        this.note(`Dùng origin/main ${base.slice(0,12)} vừa Fetch qua GitHub Desktop lúc ${this.source.fetchedAt}.`);
+      } else this.source={mode:this.fetch?'fetch':'fixture',baseCommit:base,fetchedAt:this.fetch?new Date().toISOString():null};
+      await this.git(['worktree', 'add', '-b', this.branch, this.path, base]);
+    }
+    const paths=this.workers.map((_,index)=>path.join(this.stateRoot,this.worktreeId,`account-${index+1}`));
+    const branches=this.workers.map((_,index)=>`bmh-team/${this.worktreeId}/account-${index+1}`);
+    if(this.resumeSnapshot) {
+      for(const [index,cwd] of [this.path,...paths].entries()) {
+        const stat=await fs.lstat(cwd);
+        if(!stat.isDirectory() || stat.isSymbolicLink() || !samePath(await canonicalPath(cwd),cwd))throw Error('Saved worktree path changed; existing files were preserved.');
+        const actualRoot=await this.git(['rev-parse','--show-toplevel'],cwd);
+        const actualCommon=await canonicalPath(path.resolve(cwd,await this.git(['rev-parse','--git-common-dir'],cwd)));
+        if(!samePath(await canonicalPath(actualRoot),cwd) || !samePath(actualCommon,commonDir))throw Error('Saved worktrees belong to a different repository; existing files were preserved.');
+        if(await this.git(['rev-parse','HEAD'],cwd)!==base || await this.git(['branch','--show-current'],cwd)!==(index===0?this.branch:branches[index-1]))throw Error('Saved branches have already changed history or started integration. Existing files were preserved for branch review.');
+      }
+      if(await this.git(['status','--porcelain=v1','--untracked-files=all'],this.path) || await this.git(['ls-files','--others','--ignored','--exclude-standard','-z','--','.',':(exclude)node_modules'],this.path))throw Error('Saved integration workspace has unexpected edits; existing files were preserved for review.');
+    }
     this.workspaceReady=true;
     this.packageText = await optionalRead(path.join(this.path, 'package.json'));
     try { this.packageJson = this.packageText ? JSON.parse(this.packageText) : null; } catch { throw new Error('Repository package.json is invalid.'); }
     const scripts = this.packageJson?.scripts || {};
-    this.phase('planning', 'Account 1 is splitting the goal into two tasks with separate file ownership.');
-    const prompt = `Plan this BMH development goal for exactly two accounts:\n${this.goal}\n\n${INVARIANTS}\nReturn JSON matching the provided schema. No edits. Each task must own exact literal relative file paths, never directories or globs. Account tasks may not share files. Do not include .git, secrets, auth, node_modules, dist or public paths. Use applicable npm build/check/test scripts or selected node --test files, never shell strings. Declared package scripts: ${JSON.stringify(scripts)}. Keep checks relevant and bounded; do not repeat every historical UI test.`;
-    this.plan = this.validatePlan(parseJson(await this.runWorker(this.workers[0], prompt, { cwd: this.path, readOnly: true, outputSchema: SCHEMA })), scripts);
-    this.assertActive();
-    if (await this.git(['rev-parse', 'HEAD'], this.path) !== base || await this.git(['status', '--porcelain=v1', '--untracked-files=all'], this.path)) throw new Error('Planning changed the read-only worktree.');
-    const paths = this.workers.map((_, index) => path.join(this.stateRoot, this.id, `account-${index + 1}`));
-    const branches = this.workers.map((_, index) => `bmh-team/${this.id}/account-${index + 1}`);
-    for (let index = 0; index < 2; index++) {
-      await this.git(['worktree', 'add', '-b', branches[index], paths[index], base]);
-      for (const filename of this.plan.tasks[index].ownedPaths) await this.verifyLiteral(paths[index], filename, true);
+    if(this.resumeSnapshot)this.plan=this.validatePlan(this.resumeSnapshot.plan,scripts);
+    else {
+      this.phase('planning', 'Account 1 is splitting the goal into two tasks with separate file ownership.');
+      const prompt = `Plan this BMH development goal for exactly two accounts:\n${this.goal}\n\n${INVARIANTS}\nReturn JSON matching the provided schema. No edits. Each task must own exact literal relative file paths, never directories or globs. Account tasks may not share files. Do not include .git, secrets, auth, node_modules, dist or public paths. Use applicable npm build/check/test scripts or selected node --test files, never shell strings. Declared package scripts: ${JSON.stringify(scripts)}. Keep checks relevant and bounded; do not repeat every historical UI test.`;
+      this.plan = this.validatePlan(parseJson(await this.runWorker(this.workers[0], prompt, { cwd: this.path, readOnly: true, outputSchema: SCHEMA })), scripts);
+      this.assertActive();
+      if (await this.git(['rev-parse', 'HEAD'], this.path) !== base || await this.git(['status', '--porcelain=v1', '--untracked-files=all'], this.path)) throw new Error('Planning changed the read-only worktree.');
+      for (let index = 0; index < 2; index++) {
+        await this.git(['worktree', 'add', '-b', branches[index], paths[index], base]);
+        for (const filename of this.plan.tasks[index].ownedPaths) await this.verifyLiteral(paths[index], filename, true);
+      }
     }
-    await this.prepareDependencies(paths);
-    const refsBefore = await this.git(['for-each-ref', '--format=%(refname) %(objectname)']);
     const ignoredBefore = [];
-    for (const cwd of paths) ignoredBefore.push(await this.git(['ls-files', '--others', '--ignored', '--exclude-standard', '-z', '--', '.', ':(exclude)node_modules'], cwd));
-    this.phase('working', 'Both accounts are working simultaneously in separate worktrees.');
+    if(this.resumeSnapshot) {
+      const saved=this.resumeSnapshot.checkpoint?.ignoredBefore;
+      if(saved!==undefined && (!Array.isArray(saved) || saved.length!==2 || saved.some(value=>typeof value!=='string' || value.length>200_000)))throw Error('Saved ownership checkpoint is invalid; existing files were preserved.');
+      ignoredBefore.push(...(saved || ['','']));
+      if(this.packageJson && (Object.keys(this.packageJson.dependencies || {}).length || Object.keys(this.packageJson.devDependencies || {}).length))this.dependencyLock=await optionalRead(path.join(this.path,'package-lock.json'));
+      // Check existing diffs before dependencies or any new model execution.
+      for(let index=0;index<2;index++) {
+        for(const filename of this.plan.tasks[index].ownedPaths)await this.verifyLiteral(paths[index],filename,true);
+        await this.validateWorkerChanges(index,paths,branches,base,ignoredBefore,{allowEmpty:true});
+      }
+    } else for(const cwd of paths)ignoredBefore.push(await this.git(['ls-files','--others','--ignored','--exclude-standard','-z','--','.',':(exclude)node_modules'],cwd));
+    await this.prepareDependencies(paths);
+    const refsBefore=await this.git(['for-each-ref','--format=%(refname) %(objectname)']);
+    this.checkpoint={baseCommit:base,ignoredBefore,phase:'working'};
+    this.phase('working', this.resumeSnapshot?'Hai tài khoản tiếp tục kế hoạch cũ trên đúng file đang làm.':'Both accounts are working simultaneously in separate worktrees.');
     const work = this.workers.map((worker, index) => (async () => {
       const task = this.plan.tasks[index]; this.note(`Started: ${task.title}`, worker.id);
-      const report = await this.runWorker(worker, `Original goal:\n${this.goal}\n\nYour task: ${task.title}\n${task.instructions}\n\nYou may edit ONLY these exact files: ${JSON.stringify(task.ownedPaths)}. The other account owns different files. ${INVARIANTS}\nDo not change package/lock declarations when dependencies are shared. Do not run builds or tests that write dist/public in your worker worktree; the coordinator will run the planned verification after integration. Finish with a short report of actual changes and checks.`, { cwd: paths[index], readOnly: false });
-      this.assertActive();
-      if (await this.git(['rev-parse', 'HEAD'], paths[index]) !== base || await this.git(['branch', '--show-current'], paths[index]) !== branches[index]) throw new Error(`Account ${worker.id} changed Git history or branch.`);
-      await this.git(['diff', '--check'], paths[index]);
-      await this.git(['diff', '--cached', '--check'], paths[index]);
-      const tracked = await this.git(['diff', '--name-only', '--no-renames', '-z', base], paths[index]);
-      const untracked = await this.git(['ls-files', '--others', '--exclude-standard', '-z'], paths[index]);
-      if (await this.git(['ls-files', '--others', '--ignored', '--exclude-standard', '-z', '--', '.', ':(exclude)node_modules'], paths[index]) !== ignoredBefore[index]) throw new Error(`Account ${worker.id} created protected or ignored files outside its source ownership.`);
-      const files = [...new Set((tracked + '\0' + untracked).split('\0').filter(Boolean))];
-      if (!files.length) throw new Error(`Account ${worker.id} made no source changes; the task is not complete.`);
-      for (const filename of files) {
-        safeFile(filename); if (!task.ownedPaths.includes(filename)) throw new Error(`Account ${worker.id} changed an unowned file: ${filename}.`);
-        await this.verifyLiteral(paths[index], filename, true);
-        const contents = await optionalRead(path.join(paths[index], filename));
-        if (contents && /AIza[\w-]{25,}|\bsk-[\w-]{20,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(contents)) throw new Error('Source changes appear to contain credentials; review the isolated worker files.');
+      const saved=this.resumeSnapshot?.results?.[index];
+      if(saved?.status==='completed' && saved.worker===worker.id && saved.fileHashes && !saved.commit) {
+        const current=await this.validateWorkerChanges(index,paths,branches,base,ignoredBefore);
+        if(JSON.stringify(current.files)===JSON.stringify([...(saved.files || [])].sort()) && current.files.every(filename=>current.fileHashes[filename]===saved.fileHashes[filename])) {
+          this.results[index]={...saved,...current};this.note(`Giữ lại phần đã hoàn thành, nội dung ${current.files.length} file khớp bản đã lưu.`,worker.id);return;
+        }
       }
-      if (this.dependencyLock && (await optionalRead(path.join(paths[index], 'package.json')) !== this.packageText || await optionalRead(path.join(paths[index], 'package-lock.json')) !== this.dependencyLock)) throw new Error('Dependency declarations changed; rerun with isolated dependency preparation.');
-      this.results[index] = { worker: worker.id, title: task.title, report: scrub(report), files, status: 'completed' };
+      const resumeInstructions=this.resumeSnapshot?'\nThis is a continuation after interruption. Read your current Git diff and existing files first. Preserve valid completed edits, finish only missing work, and do not recreate the project or redo completed work. The saved plan and file ownership below remain authoritative.\n':'';
+      const report = await this.runWorker(worker, `Original goal:\n${this.goal}\n${resumeInstructions}\nYour task: ${task.title}\n${task.instructions}\n\nYou may edit ONLY these exact files: ${JSON.stringify(task.ownedPaths)}. The other account owns different files. ${INVARIANTS}\nDo not change package/lock declarations when dependencies are shared. Do not run builds or tests that write dist/public in your worker worktree; the coordinator will run the planned verification after integration. Finish with a short report of actual changes and checks.`, { cwd: paths[index], readOnly: false });
+      this.assertActive();
+      const {files,fileHashes}=await this.validateWorkerChanges(index,paths,branches,base,ignoredBefore);
+      this.results[index] = { worker: worker.id, title: task.title, report: scrub(report), files, fileHashes, status: 'completed' };
       this.note(`Completed source changes in ${files.length} file(s).`, worker.id);
     })());
     try { await Promise.all(work); } catch (error) {
@@ -308,7 +393,8 @@ export class TeamJob extends EventEmitter {
     if (await this.git(['for-each-ref', '--format=%(refname) %(objectname)']) !== refsBefore) throw new Error('Git refs changed during worker execution; review the preserved worktrees.');
     if (await this.git(['status', '--porcelain=v1', '--untracked-files=all'], this.path)) throw new Error('A worker changed the integration worktree; review it before combining.');
     if (await this.git(['rev-parse', 'HEAD']) !== this.sourceHead) throw new Error('The source checkout changed during the job. No integration was applied to it.');
-    const hooksPath = path.join(this.stateRoot, this.id, 'empty-hooks'); await fs.mkdir(hooksPath);
+    this.checkpoint.integrationStarted=true;this.note('Đã kiểm tra phạm vi file; chuẩn bị các commit cục bộ để gộp.');
+    const hooksPath = path.join(this.stateRoot, this.id, 'empty-hooks'); await fs.mkdir(hooksPath,{recursive:true});
     for (let index = 0; index < this.results.length; index++) {
       const result = this.results[index];
       await this.git(['add', '--', ...result.files], paths[index]);
@@ -350,6 +436,7 @@ export class TeamJob extends EventEmitter {
     for (const timer of this.timers) clearTimeout(timer);
     this.timers.clear();
     await Promise.allSettled([this.interruptWorkers(), ...[...this.children].map(child => this.kill(child))]);
+    if(this.activePromise)await this.activePromise;
     return this.publicState;
   }
 }

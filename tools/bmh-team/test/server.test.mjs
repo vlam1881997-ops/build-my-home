@@ -1,12 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,rm,readFile,writeFile} from 'node:fs/promises';
+import {mkdtemp,rm,readFile,writeFile,mkdir} from 'node:fs/promises';
 import os from 'node:os';import path from 'node:path';
 import {EventEmitter} from 'node:events';
 import http from 'node:http';
 import {createTeamServer,twoAccountsReady} from '../server.mjs';
 import {fixtureCatalog,fixtureSettings} from './model-fixtures.mjs';
 import {saveModelSettings} from '../models.mjs';
+import {createJobReportStore} from '../job-reports.mjs';
 
 class FakeWorker extends EventEmitter {
   constructor(id,email){super();this.id=id;this.account=email?{email,planType:'plus'}:null;this.loginInfo=null;this.logins=0;this.modelCatalog=fixtureCatalog();this.modelReads=0;}
@@ -17,10 +18,11 @@ class FakeWorker extends EventEmitter {
   async logout(){this.account=null;}
   close(){}
 }
-async function fixture(t,{emails=['one@example.test','two@example.test'],jobFactory}={}) {
+async function fixture(t,{emails=['one@example.test','two@example.test'],jobFactory,prepare}={}) {
   const stateRoot=await mkdtemp(path.join(os.tmpdir(),'bmh-http-'));
   const workers=emails.map((email,i)=>new FakeWorker(i?'two':'one',email));
   await saveModelSettings(stateRoot,fixtureSettings());
+  await prepare?.(stateRoot);
   const app=await createTeamServer({stateRoot,workers,codex:{command:'fixture'},git:'fixture',repoDefault:'/tmp/fixture-repo',jobFactory});
   await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
   const url=`http://127.0.0.1:${app.server.address().port}`;
@@ -76,7 +78,7 @@ test('two concurrent run requests cannot create overlapping jobs',async t=>{
 test('source modes are explicit and invalid values cannot start a job or request offline execution',async t=>{
   const selected=[];
   const f=await fixture(t,{jobFactory:options=>{selected.push(options);return {publicState:{id:'fixture-source',status:'ready'},start:async()=>{},stop:async()=>{}};}});
-  const state=await (await fetch(f.url+'/api/state')).json();assert.equal(state.version,'1.1.2');assert.equal(state.sourceModeDefault,'fetch');
+  const state=await (await fetch(f.url+'/api/state')).json();assert.equal(state.version,'1.1.3');assert.equal(state.sourceModeDefault,'fetch');
   assert.deepEqual(state.sourceModeOptions.map(item=>item.id),['fetch','desktop']);
   for(const mode of ['offline','fixture',false,null])assert.equal((await f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Use source safely',sourceMode:mode})).status,400);
   assert.equal(selected.length,0);
@@ -178,4 +180,72 @@ test('stop during model discovery cannot create a job after the discovery finish
   await ready;assert.equal((await f.post('/api/models',{worker:'two'})).status,400);
   assert.equal((await f.post('/api/stop',{})).status,200);release();
   assert.equal((await request).status,400);assert.equal(jobs,0);assert.equal(f.app.state().run,null);
+});
+
+async function seedRecovery(stateRoot) {
+  const id='1791111468736-5ca72725';
+  for(const name of ['integration','account-1','account-2']){const cwd=path.join(stateRoot,id,name);await mkdir(cwd,{recursive:true});await writeFile(path.join(cwd,'.git'),'gitdir: fixture\n');}
+  const snapshot={id,status:'failed',goal:'Continue the original measured BMH design',workspaceReady:true,sourceMode:'desktop',source:{mode:'desktop',baseCommit:'a'.repeat(40)},plan:{summary:'Original plan',tasks:[{title:'First task',instructions:'Keep original ownership',ownedPaths:['one.txt']},{title:'Second task',instructions:'Finish remaining edits',ownedPaths:['two.txt']}],checks:[{program:'node',args:['--test','test/result.test.mjs']}]},results:[],error:'Account one timed out.'};
+  await createJobReportStore(stateRoot).save(snapshot);return snapshot;
+}
+
+test('resume restores the saved goal and ownership with current explicit models instead of typed replacements',async t=>{
+  let saved,options,release;
+  const f=await fixture(t,{prepare:async root=>{saved=await seedRecovery(root);},jobFactory:args=>{
+    options=args;return {publicState:{...args.resumeSnapshot,id:'1791111499999-44444444',worktreeId:args.resumeSnapshot.id,resumedFrom:args.resumeSnapshot.id,repo:args.repo,status:'working',modelSettings:args.modelSettings,source:{...args.resumeSnapshot.source,mode:'resume'}},start:()=>new Promise(resolve=>release=resolve),async stop(){this.publicState.status='stopped';release();},note(){}};
+  }});
+  assert.equal(f.app.state().recovery.id,saved.id);assert.equal(f.app.state().recovery.goal,saved.goal);
+  await f.post('/api/settings',{worker:'one',model:'gpt-6-astra',reasoningEffort:'xhigh'});
+  const response=await f.post('/api/resume',{jobId:saved.id,repo:'/tmp/fixture-repo',goal:'Unrelated replacement',sourceMode:'offline',fetch:false});
+  assert.equal(response.status,202);assert.equal(options.goal,saved.goal);assert.deepEqual(options.resumeSnapshot.plan,saved.plan);
+  assert.equal(options.sourceMode,'desktop');assert.equal(options.fetch,undefined);assert.equal(options.modelSettings.one.model,'gpt-6-astra');
+  assert.equal(f.workers[0].modelReads,1);assert.equal(f.workers[1].modelReads,1);assert.equal(f.app.state().recovery,null);
+  assert.equal((await f.post('/api/resume',{jobId:saved.id,repo:'/tmp/fixture-repo'})).status,400);
+  assert.equal((await f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Another new goal'})).status,400);
+  await f.post('/api/stop',{});assert.equal(f.app.state().recovery.id,'1791111499999-44444444');assert.equal(f.app.state().recovery.worktreeId,saved.id);
+});
+
+test('resume requires session authorization, exact saved ID and existing worktrees',async t=>{
+  let saved,jobs=0;const f=await fixture(t,{prepare:async root=>{saved=await seedRecovery(root);},jobFactory:()=>{jobs++;throw Error('Must not start');}});
+  assert.equal((await f.post('/api/resume',{jobId:saved.id,repo:'/tmp/fixture-repo'},{'X-BMH-Team':''})).status,403);
+  for(const jobId of ['../accounts/one/auth','1791111499999-55555555'])assert.equal((await f.post('/api/resume',{jobId,repo:'/tmp/fixture-repo'})).status,400);
+  await rm(path.join(f.stateRoot,saved.id,'account-2'),{recursive:true});
+  const response=await f.post('/api/resume',{jobId:saved.id,repo:'/tmp/fixture-repo'});assert.equal(response.status,400);assert.match((await response.json()).error,/Không còn đủ thư mục/);
+  assert.equal(jobs,0);assert.equal(f.app.state().run,null);
+});
+
+test('resume refuses a stale model catalog before touching saved work and retains the choice',async t=>{
+  let saved,jobs=0;const f=await fixture(t,{prepare:async root=>{saved=await seedRecovery(root);},jobFactory:()=>{jobs++;throw Error('Must not start');}});
+  f.workers[1].refreshModels=async()=>{f.workers[1].modelCatalog.options=[];return f.workers[1].modelCatalog;};
+  const response=await f.post('/api/resume',{jobId:saved.id,repo:'/tmp/fixture-repo'});assert.equal(response.status,400);assert.equal(jobs,0);
+  assert.equal(f.app.state().recovery.id,saved.id);assert.equal(f.app.state().workers[1].modelSettings.model,'gpt-6.1-sol');
+  assert.match(await readFile(path.join(f.stateRoot,saved.id,'account-2','.git'),'utf8'),/fixture/);
+});
+
+test('Stop during resume discovery prevents a late job and concurrent fresh job',async t=>{
+  let saved,jobs=0,entered,release;const ready=new Promise(resolve=>entered=resolve);const gate=new Promise(resolve=>release=resolve);
+  const f=await fixture(t,{prepare:async root=>{saved=await seedRecovery(root);},jobFactory:()=>{jobs++;throw Error('Must not start');}});
+  f.workers[0].refreshModels=async()=>{entered();await gate;return f.workers[0].modelCatalog;};
+  const request=f.post('/api/resume',{jobId:saved.id,repo:'/tmp/fixture-repo'});await ready;
+  assert.equal((await f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Fresh conflicting goal'})).status,400);
+  assert.equal((await f.post('/api/stop',{})).status,200);release();assert.equal((await request).status,400);assert.equal(jobs,0);assert.equal(f.app.state().recovery.id,saved.id);
+});
+
+test('overlapping Stop requests cannot release busy while real cleanup is still pending',async t=>{
+  let saved,cleanupEntered,releaseCleanup,releaseJob;const entered=new Promise(resolve=>cleanupEntered=resolve);const cleanup=new Promise(resolve=>releaseCleanup=resolve);
+  const f=await fixture(t,{prepare:async root=>{saved=await seedRecovery(root);},jobFactory:args=>({publicState:{...args.resumeSnapshot,id:'1791111499999-66666666',worktreeId:saved.id,status:'working'},start:()=>new Promise(resolve=>releaseJob=resolve),async stop(){this.publicState.status='stopped';cleanupEntered();await cleanup;releaseJob();},note(){}})});
+  assert.equal((await f.post('/api/resume',{jobId:saved.id,repo:'/tmp/fixture-repo'})).status,202);
+  const first=f.post('/api/stop',{});await entered;const second=f.post('/api/stop',{});
+  assert.equal((await f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Must wait for cleanup'})).status,400);assert.equal(f.app.state().busy,true);
+  releaseCleanup();assert.deepEqual((await Promise.all([first,second])).map(response=>response.status),[200,200]);assert.equal(f.app.state().busy,false);
+});
+
+test('failed checkpoint writes are visible and do not claim resumable progress',async t=>{
+  let options,release;
+  const f=await fixture(t,{prepare:async root=>{await writeFile(path.join(root,'reports'),'unwritable report directory');},jobFactory:args=>{
+    options=args;return {publicState:{id:'1791111499999-77777777',status:'working'},start:()=>new Promise(resolve=>release=resolve),async stop(){this.publicState.status='stopped';release();},note(){}};
+  }});
+  assert.equal((await f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Save progress reliably'})).status,202);
+  await options.onEvent({id:'1791111499999-77777777',status:'working'});assert.match(f.app.state().reportWarning,/Không lưu được tiến độ/);assert.equal(f.app.state().recovery,null);
+  await f.post('/api/stop',{});
 });

@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="bmh-team-token" content="__BMH_TOKEN__">
   <meta name="color-scheme" content="light">
-  <title>BMH Team v1.1.2 · Hai tài khoản, một dự án</title>
+  <title>BMH Team v1.1.3 · Hai tài khoản, một dự án</title>
   <link rel="stylesheet" href="/style.css">
   <script src="/app.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <a class="brand" href="/" aria-label="BMH Team v1.1.2 trang chính"><span class="brand-icon" aria-hidden="true">B</span><span>BMH <b>TEAM</b></span><span class="release-tag">v1.1.2</span></a>
+      <a class="brand" href="/" aria-label="BMH Team v1.1.3 trang chính"><span class="brand-icon" aria-hidden="true">B</span><span>BMH <b>TEAM</b></span><span class="release-tag">v1.1.3</span></a>
       <span class="local-badge"><i aria-hidden="true"></i> Chạy trên máy ông</span>
     </header>
     <main>
@@ -35,6 +35,14 @@
 
       <section class="work-section panel" aria-labelledby="work-title">
         <div class="section-heading"><h2 id="work-title">2. Giao việc một lần</h2><div class="capabilities"><span id="git-status">Git · kiểm tra</span><span id="codex-status">Codex · kiểm tra</span></div></div>
+        <section id="recovery-card" class="recovery-card" aria-labelledby="recovery-title" hidden>
+          <div class="recovery-heading"><h3 id="recovery-title">Công việc trước vẫn còn</h3><span id="recovery-progress" class="muted"></span></div>
+          <p id="recovery-goal" class="recovery-goal"></p>
+          <p id="recovery-reason" class="recovery-reason"></p>
+          <dl class="recovery-location"><dt>Thư mục đã làm</dt><dd id="recovery-path"></dd></dl>
+          <button type="button" id="resume-button" class="button button-primary" aria-describedby="recovery-hint" disabled>Tiếp tục phần đã làm</button>
+          <p id="recovery-hint" class="field-hint">Tiếp tục mục tiêu cũ trong các nhánh đã làm, không cần nhập lại mục tiêu.</p>
+        </section>
         <form id="run-form">
           <label for="repo-path">Thư mục dự án BMH</label>
           <input id="repo-path" name="repo" type="text" spellcheck="false" autocomplete="off" placeholder="C:\Users\Tên ông\Documents\GitHub\build-my-home" required>
@@ -54,6 +62,7 @@
         <div id="run-content" hidden>
           <p id="active-goal" class="active-goal"></p><p id="run-models" class="run-models"></p>
           <p id="run-source" class="run-source" hidden></p>
+          <p id="run-timing" class="run-timing" hidden></p>
           <div id="run-error" class="notice notice-error" role="alert" hidden></div>
           <section id="run-diagnostic" class="git-diagnostic" role="alert" aria-labelledby="diagnostic-summary" hidden><h3 id="diagnostic-summary"></h3><p id="diagnostic-operation" class="diagnostic-operation" hidden></p><p id="diagnostic-help" class="diagnostic-help" hidden></p><details id="diagnostic-details-group" hidden><summary>Thông tin Git</summary><pre id="diagnostic-details"></pre></details><dl id="diagnostic-log" hidden><dt>File nhật ký</dt><dd id="diagnostic-log-path"></dd></dl></section>
           <div id="run-result" class="result-box" hidden><strong id="result-title">Nhánh đã chuẩn bị</strong><dl><div><dt>Nhánh</dt><dd id="result-branch"></dd></div><div><dt>Thư mục xem lại</dt><dd id="result-path"></dd></div></dl><p>Ông xem diff và kết quả kiểm tra trước khi ghép vào main.</p></div>
@@ -64,7 +73,7 @@
         </div>
       </section>
     </main>
-    <footer>BMH Team v1.1.2 là bộ điều phối riêng cho dự án BMH, dùng Codex CLI chính thức của OpenAI. Mỗi tài khoản dùng hạn mức Codex riêng theo gói đủ điều kiện.</footer>
+    <footer>BMH Team v1.1.3 là bộ điều phối riêng cho dự án BMH, dùng Codex CLI chính thức của OpenAI. Mỗi tài khoản dùng hạn mức Codex riêng theo gói đủ điều kiện.</footer>
   </div>
 </body>
 </html>
