@@ -60,16 +60,10 @@
     element.replaceChildren();
     element.hidden = !login;
     if (!login) return;
-    const url = loginUrl(login.authUrl || login.verificationUrl);
+    const url = loginUrl(login.authUrl);
     const instruction = document.createElement('p');
-    instruction.textContent = login.userCode ? 'Mở trang OpenAI, chọn đúng tài khoản rồi nhập mã này:' : 'Mở trang OpenAI và chọn đúng tài khoản. Bảng này sẽ cập nhật khi đăng nhập xong.';
+    instruction.textContent = 'Mở trang OpenAI và chọn đúng tài khoản. Bảng này sẽ cập nhật khi đăng nhập xong.';
     element.append(instruction);
-    if (login.userCode) {
-      const code = document.createElement('code');
-      code.className = 'device-code';
-      code.textContent = bounded(login.userCode, 50);
-      element.append(code);
-    }
     if (url) {
       const link = document.createElement('a');
       link.href = url;
@@ -115,18 +109,6 @@
       logoutButton.hidden = !loggedIn && !worker.login;
       logoutButton.disabled = activeRun() || pending.has(`logout:${id}`);
       setText(logoutButton, pending.has(`logout:${id}`) ? 'Đang đăng xuất…' : worker.login && !loggedIn ? 'Hủy đăng nhập' : 'Đăng xuất');
-      let fallback = card.querySelector('[data-action="device"]');
-      if (!fallback) {
-        fallback = document.createElement('button');
-        fallback.type = 'button';
-        fallback.className = 'button button-text device-fallback';
-        fallback.dataset.action = 'device';
-        fallback.dataset.worker = id;
-        fallback.textContent = 'Thử đăng nhập bằng mã';
-        card.append(fallback);
-      }
-      fallback.hidden = connected || !worker.error;
-      fallback.disabled = activeRun() || pending.has(`login:${id}`);
     }
     return count;
   }
@@ -250,9 +232,6 @@
     $('stop-button').disabled = pending.has('stop');
     $('repo-path').disabled = working;
     $('goal').disabled = working;
-    $('setup-box').hidden = !state.capabilities?.windows;
-    setText($('setup-hint'), !gitReady || !codexReady ? 'Máy cần Git và Codex CLI. Nếu chưa cài, mở lại start.ps1 để được hướng dẫn.' : 'Nếu Windows chưa cho Codex chạy, khởi tạo môi trường Windows của hai phiên tại đây.');
-    $('setup-button').disabled = working || pending.has('setup');
     setText($('run-hint'), working ? 'Ông có thể theo dõi tiến độ bên dưới hoặc dừng công việc.' : repeatedAccount ? 'Hai thẻ đang dùng cùng email. Đăng xuất thẻ thứ hai rồi chọn tài khoản khác.' : accountCount < 2 ? 'Đăng nhập đủ hai tài khoản để bắt đầu.' : !gitReady || !codexReady ? 'Hoàn tất Git và Codex CLI trước khi bắt đầu.' : state.busy ? 'Đang chuẩn bị kết nối, ông chờ một chút.' : 'Tạo nhánh cục bộ để xem lại; chưa tự ghép main hay triển khai web.');
     renderRun();
   }
@@ -290,7 +269,6 @@
     const worker = button.dataset.worker;
     if (!['one', 'two'].includes(worker)) return;
     if (button.dataset.action === 'login') mutate(`login:${worker}`, '/api/login', { worker }, 'Mở liên kết OpenAI trong thẻ tài khoản và hoàn tất đăng nhập.');
-    if (button.dataset.action === 'device') mutate(`login:${worker}`, '/api/login', { worker, device: true }, 'Mở trang OpenAI và nhập mã trong thẻ tài khoản.');
     if (button.dataset.action === 'logout') mutate(`logout:${worker}`, '/api/logout', { worker }, 'Phiên tài khoản này đã được đăng xuất khỏi BMH Team.');
   });
   $('repo-path').addEventListener('input', () => { repoTouched = true; });
@@ -303,7 +281,6 @@
     mutate('run', '/api/run', { repo, goal }, 'Đã nhận mục tiêu. Bộ điều phối đang chuẩn bị phần việc.');
   });
   $('stop-button').addEventListener('click', () => mutate('stop', '/api/stop', {}, 'Đã gửi yêu cầu dừng. Xem nhật ký để biết công việc nào đã hoàn tất.'));
-  $('setup-button').addEventListener('click', () => mutate('setup', '/api/setup-windows', {}, result => result.message || 'Đã kiểm tra thiết lập. Xem trạng thái Git/Codex hoặc cửa sổ khởi chạy.'));
   window.addEventListener('focus', refresh);
   refresh();
   setInterval(refresh, 1500);

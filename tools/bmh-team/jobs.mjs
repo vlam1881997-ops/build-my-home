@@ -29,10 +29,19 @@ function scrub(value) {
     .replace(/https?:\/\/[^\s/@]+:[^\s/@]+@/gi, 'https://[redacted]@').slice(0, 6000);
 }
 function inside(parent, child) { const relative = path.relative(parent, child); return !relative || (!relative.startsWith('..' + path.sep) && relative !== '..' && !path.isAbsolute(relative)); }
+async function canonicalPath(filename) {
+  let current = path.resolve(filename); const missing = [];
+  while (true) {
+    try { return path.join(await fs.realpath(current), ...missing.reverse()); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; const parent = path.dirname(current); if (parent === current) throw error; missing.push(path.basename(current)); current = parent; }
+  }
+}
+function samePath(left, right) { return process.platform === 'win32' ? left.toLowerCase() === right.toLowerCase() : left === right; }
 function safeFile(value) {
   if (typeof value !== 'string' || !value || value.trim() !== value || value.length > 240 || value.includes('\\') || /[\x00-\x1f]/.test(value) || path.posix.isAbsolute(value) || /^[a-z]:/i.test(value)) throw new Error('Plan contains an invalid relative file path.');
   const parts = value.split('/');
   if (parts.some(p => !p || p === '.' || p === '..' || /[*?\[\]{}]/.test(p))) throw new Error('Plan paths must be exact relative filenames without traversal or globs.');
+  if (parts.some(p => /[:<>"|]/.test(p) || /[ .]$/.test(p) || /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(p))) throw new Error('Plan contains a filename unsafe on Windows.');
   if (parts.some(p => /^(?:\.git|\.ssh|\.codex|\.bmh-team|\.npmrc|\.netrc|\.pypirc|node_modules|dist|public)$/i.test(p) || /^\.env(?:\.|$)/i.test(p) || /(?:^|[._-])(?:auth|secrets?|credentials?|tokens?)(?:[._-]|$)/i.test(p) || /\.(?:pem|key|p12|pfx)$/i.test(p))) throw new Error('Plan includes a protected, credential or generated path.');
   return value;
 }
@@ -56,7 +65,7 @@ export class TeamJob extends EventEmitter {
     this.id = `${Date.now()}-${randomBytes(4).toString('hex')}`;
     this.status = 'preparing'; this.plan = null; this.results = []; this.artifacts = []; this.branch = `bmh-team/${this.id}/integration`;
     this.path = path.join(this.stateRoot, this.id, 'integration'); this.error = null; this.events = [];
-    this.children = new Set(); this.timers = new Set(); this.aborted = false; this.started = false; this.activePromise = null;
+    this.children = new Set(); this.timers = new Set(); this.aborted = false; this.failing = false; this.started = false; this.activePromise = null;
   }
   get publicState() { return structuredClone({ id: this.id, status: this.status, goal: this.goal, plan: this.plan, results: this.results, artifacts: this.artifacts, branch: this.branch, path: this.path, error: this.error, events: this.events }); }
   note(message, worker) {
@@ -66,16 +75,23 @@ export class TeamJob extends EventEmitter {
     try { this.onEvent?.(state); } catch { /* An observer cannot alter the job outcome. */ }
   }
   phase(status, message) { if (this.aborted && status !== 'stopped') return; this.status = status; this.note(message); }
-  assertActive() { if (this.aborted) throw new Error('Job stopped.'); }
+  assertActive() { if (this.aborted) throw new Error('Job stopped.'); if (this.failing) throw new Error('Job is cancelling after a task failure.'); }
   async kill(child) {
-    if (child.exitCode !== null || !child.pid) return;
+    if (child.exitCode !== null || child.signalCode !== null || !child.pid) return;
     if (process.platform === 'win32') {
-      await new Promise(resolve => { const killer = spawn('taskkill.exe', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' }); killer.once('error', resolve); killer.once('close', resolve); });
+      await new Promise(resolve => {
+        const executable = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'taskkill.exe');
+        const killer = spawn(executable, ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' });
+        const timer = setTimeout(() => { try { killer.kill(); child.kill(); } catch {} resolve(); }, 2000);
+        const done = () => { clearTimeout(timer); if (child.exitCode === null && child.signalCode === null) { try { child.kill(); } catch {} } resolve(); };
+        killer.once('error', done); killer.once('close', done);
+      });
     } else {
       try { process.kill(-child.pid, 'SIGTERM'); } catch { try { child.kill('SIGTERM'); } catch {} }
       await new Promise(resolve => { const timer = setTimeout(resolve, 100); child.once('close', () => { clearTimeout(timer); resolve(); }); });
       try { process.kill(-child.pid, 'SIGKILL'); } catch { try { child.kill('SIGKILL'); } catch {} }
     }
+    if (this.children.has(child)) await new Promise(resolve => { const timer = setTimeout(resolve, 2000); child.once('close', () => { clearTimeout(timer); resolve(); }); });
   }
   async command(program, args, cwd, { timeoutMs = this.commandTimeoutMs, logName, allowFailure = false } = {}) {
     this.assertActive();
@@ -88,7 +104,8 @@ export class TeamJob extends EventEmitter {
       program = process.execPath; args = [cli, ...args];
     }
     return await new Promise((resolve, reject) => {
-      const env = { ...process.env }; delete env.NODE_TEST_CONTEXT; delete env.NODE_OPTIONS;
+      const env = { ...process.env }; delete env.NODE_TEST_CONTEXT; delete env.NODE_OPTIONS; delete env.CODEX_HOME;
+      for (const key of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_COMMON_DIR', 'GIT_INDEX_FILE', 'GIT_OBJECT_DIRECTORY', 'GIT_ALTERNATE_OBJECT_DIRECTORIES', 'GIT_CONFIG_COUNT']) delete env[key];
       for (const key of Object.keys(env)) if (/(?:API[_-]?KEY|ACCESS[_-]?TOKEN|AUTH[_-]?TOKEN|PASSWORD|SECRET|(?:^|_)TOKEN$)/i.test(key) || /^(?:OPENAI|ANTHROPIC|GEMINI|VERCEL|GOOGLE_APPLICATION_CREDENTIALS)(?:_|$)/i.test(key)) delete env[key];
       const child = spawn(program, args, { cwd, env, shell: false, windowsHide: true, detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] });
       this.children.add(child); let output = ''; let exceeded = false; let timedOut = false; let spawnError;
@@ -100,7 +117,7 @@ export class TeamJob extends EventEmitter {
         clearTimeout(timer); this.timers.delete(timer); this.children.delete(child);
         try {
           if (logName) await fs.writeFile(path.join(this.stateRoot, this.id, logName), scrub(output), 'utf8');
-          if (this.aborted) throw new Error('Job stopped.');
+          this.assertActive();
           if (timedOut) throw new Error(`Command timed out: ${path.basename(program)}. See local job logs.`);
           if (exceeded) throw new Error('Command output exceeded the safety limit.');
           if (spawnError) throw new Error(`Cannot start ${path.basename(program)}: ${spawnError.code || 'error'}.`);
@@ -110,7 +127,7 @@ export class TeamJob extends EventEmitter {
       });
     });
   }
-  async git(args, cwd = this.repo, options) { return (await this.command(this.gitCommand, args, cwd, options)).output.trim(); }
+  async git(args, cwd = this.repo, options) { return (await this.command(this.gitCommand, process.platform === 'win32' ? ['-c', 'core.longpaths=true', ...args] : args, cwd, options)).output.trim(); }
   async runWorker(worker, prompt, options) {
     this.assertActive(); let timer; let onStop;
     const timeout = new Promise((_, reject) => { timer = setTimeout(() => { void Promise.resolve().then(() => worker.interrupt()).catch(() => {}); reject(new Error(`Account ${worker.id} timed out.`)); }, this.workerTimeoutMs); this.timers.add(timer); });
@@ -142,6 +159,12 @@ export class TeamJob extends EventEmitter {
       } else throw new Error('Only node or npm verification is supported.');
       return { program: check.program, args: [...check.args] };
     });
+    // BMH tests and previews consume generated bundles. Rebuild merged source
+    // before selected checks so a stale tracked dist/app.js cannot pass them.
+    if (typeof scripts.build === 'string') {
+      const withoutBuild = checks.filter(check => !(check.program === 'npm' && check.args[0] === 'run' && check.args[1] === 'build'));
+      checks.splice(0, checks.length, { program: 'npm', args: ['run', 'build'] }, ...withoutBuild);
+    }
     return { summary: value.summary.slice(0, 2000), tasks, checks };
   }
   async verifyLiteral(cwd, filename, allowMissing = false) {
@@ -170,12 +193,20 @@ export class TeamJob extends EventEmitter {
     try { reusable = basePackage === this.packageText && baseLock === lock && (await fs.stat(path.join(this.repo, 'node_modules'))).isDirectory(); } catch {}
     if (reusable) {
       source = path.join(this.repo, 'node_modules'); this.note('Using existing dependencies with the same package and lockfile.');
-      await fs.symlink(source, path.join(this.path, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
-    } else {
+      try { await fs.symlink(path.resolve(source), path.join(this.path, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir'); }
+      catch (error) {
+        if (!['EPERM', 'EACCES', 'EINVAL', 'ENOTSUP', 'EXDEV'].includes(error.code)) throw error;
+        reusable = false; source = path.join(this.path, 'node_modules'); this.note('The existing dependency folder cannot be linked here; preparing isolated dependencies instead.');
+      }
+    }
+    if (!reusable) {
       this.note('Preparing isolated dependencies with npm ci; lifecycle scripts are disabled.');
       await this.command('npm', ['ci', '--ignore-scripts', '--no-audit', '--no-fund'], this.path, { logName: 'dependencies.log' });
     }
-    for (const cwd of paths) await fs.symlink(source, path.join(cwd, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
+    for (const cwd of paths) {
+      try { await fs.symlink(path.resolve(source), path.join(cwd, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir'); }
+      catch (error) { throw new Error(`Cannot create a dependency ${process.platform === 'win32' ? 'junction' : 'link'} (${error.code || 'error'}). Choose a local writable disk for the job folder; existing files were preserved.`); }
+    }
     this.dependencyLock = lock;
   }
   start() {
@@ -183,18 +214,23 @@ export class TeamJob extends EventEmitter {
     if (this.started) return this.activePromise;
     this.started = true;
     this.activePromise = this.execute().catch(async error => {
+      this.failing = true; this.emit('stop');
+      await Promise.allSettled([this.interruptWorkers(), ...[...this.children].map(child => this.kill(child))]);
       if (!this.aborted) { this.error = scrub(error.message); this.phase('failed', this.error); }
-      await this.interruptWorkers();
-      await Promise.allSettled([...this.children].map(child => this.kill(child)));
       return this.publicState;
     });
     return this.activePromise;
   }
   async execute() {
     this.phase('preparing', 'Checking BMH repository and preparing isolated branches.');
-    await fs.mkdir(path.join(this.stateRoot, this.id), { recursive: true });
+    this.repo = await canonicalPath(this.repo); this.stateRoot = await canonicalPath(this.stateRoot);
+    if (inside(this.repo, this.stateRoot)) throw new Error('Worktrees must be stored outside the source repository, including junction/symlink paths.');
+    this.path = path.join(this.stateRoot, this.id, 'integration');
     const root = await this.git(['rev-parse', '--show-toplevel']);
-    if (path.resolve(root) !== this.repo) throw new Error('Select the repository root directory.');
+    if (!samePath(await canonicalPath(root), this.repo)) throw new Error('Select the repository root directory.');
+    const commonDir = await canonicalPath(path.resolve(this.repo, await this.git(['rev-parse', '--git-common-dir'])));
+    if (inside(commonDir, this.stateRoot)) throw new Error('Worktrees must be stored outside Git metadata.');
+    await fs.mkdir(path.join(this.stateRoot, this.id), { recursive: true });
     const origin = await this.git(['remote', 'get-url', 'origin']);
     const accepted = /^(?:https:\/\/github\.com\/|git@github\.com:|ssh:\/\/git@github\.com\/)(vlam1881997-ops\/build-my-home)(?:\.git)?\/?$/i;
     if (!accepted.test(origin)) throw new Error(`Repository origin must be github.com/${ORIGIN}.`);
@@ -219,16 +255,19 @@ export class TeamJob extends EventEmitter {
     }
     await this.prepareDependencies(paths);
     const refsBefore = await this.git(['for-each-ref', '--format=%(refname) %(objectname)']);
+    const ignoredBefore = [];
+    for (const cwd of paths) ignoredBefore.push(await this.git(['ls-files', '--others', '--ignored', '--exclude-standard', '-z', '--', '.', ':(exclude)node_modules'], cwd));
     this.phase('working', 'Both accounts are working simultaneously in separate worktrees.');
     const work = this.workers.map((worker, index) => (async () => {
       const task = this.plan.tasks[index]; this.note(`Started: ${task.title}`, worker.id);
-      const report = await this.runWorker(worker, `Original goal:\n${this.goal}\n\nYour task: ${task.title}\n${task.instructions}\n\nYou may edit ONLY these exact files: ${JSON.stringify(task.ownedPaths)}. The other account owns different files. ${INVARIANTS}\nDo not change package/lock declarations when dependencies are shared. Finish with a short report of actual changes and checks.`, { cwd: paths[index], readOnly: false });
+      const report = await this.runWorker(worker, `Original goal:\n${this.goal}\n\nYour task: ${task.title}\n${task.instructions}\n\nYou may edit ONLY these exact files: ${JSON.stringify(task.ownedPaths)}. The other account owns different files. ${INVARIANTS}\nDo not change package/lock declarations when dependencies are shared. Do not run builds or tests that write dist/public in your worker worktree; the coordinator will run the planned verification after integration. Finish with a short report of actual changes and checks.`, { cwd: paths[index], readOnly: false });
       this.assertActive();
       if (await this.git(['rev-parse', 'HEAD'], paths[index]) !== base || await this.git(['branch', '--show-current'], paths[index]) !== branches[index]) throw new Error(`Account ${worker.id} changed Git history or branch.`);
       await this.git(['diff', '--check'], paths[index]);
       await this.git(['diff', '--cached', '--check'], paths[index]);
-      const tracked = await this.git(['diff', '--name-only', '-z', base], paths[index]);
+      const tracked = await this.git(['diff', '--name-only', '--no-renames', '-z', base], paths[index]);
       const untracked = await this.git(['ls-files', '--others', '--exclude-standard', '-z'], paths[index]);
+      if (await this.git(['ls-files', '--others', '--ignored', '--exclude-standard', '-z', '--', '.', ':(exclude)node_modules'], paths[index]) !== ignoredBefore[index]) throw new Error(`Account ${worker.id} created protected or ignored files outside its source ownership.`);
       const files = [...new Set((tracked + '\0' + untracked).split('\0').filter(Boolean))];
       if (!files.length) throw new Error(`Account ${worker.id} made no source changes; the task is not complete.`);
       for (const filename of files) {
@@ -241,7 +280,11 @@ export class TeamJob extends EventEmitter {
       this.results[index] = { worker: worker.id, title: task.title, report: scrub(report), files, status: 'completed' };
       this.note(`Completed source changes in ${files.length} file(s).`, worker.id);
     })());
-    try { await Promise.all(work); } catch (error) { await this.interruptWorkers(); this.emit('stop'); await Promise.allSettled(work); throw error; }
+    try { await Promise.all(work); } catch (error) {
+      this.failing = true; this.emit('stop');
+      await Promise.allSettled([this.interruptWorkers(), ...[...this.children].map(child => this.kill(child)), ...work]);
+      throw error;
+    }
     this.assertActive();
     if (await this.git(['for-each-ref', '--format=%(refname) %(objectname)']) !== refsBefore) throw new Error('Git refs changed during worker execution; review the preserved worktrees.');
     if (await this.git(['status', '--porcelain=v1', '--untracked-files=all'], this.path)) throw new Error('A worker changed the integration worktree; review it before combining.');
@@ -251,12 +294,12 @@ export class TeamJob extends EventEmitter {
       const result = this.results[index];
       await this.git(['add', '--', ...result.files], paths[index]);
       await this.git(['diff', '--cached', '--check'], paths[index]);
-      await this.git(['-c', 'user.name=BMH Team', '-c', 'user.email=bmh-team@localhost', '-c', `core.hooksPath=${hooksPath}`, 'commit', '-m', `BMH Team: ${result.title.replace(/[\r\n]/g, ' ')}`], paths[index]);
+      await this.git(['-c', 'user.name=BMH Team', '-c', 'user.email=bmh-team@localhost', '-c', 'commit.gpgsign=false', '-c', `core.hooksPath=${hooksPath}`, 'commit', '-m', `BMH Team: ${result.title.replace(/[\r\n]/g, ' ')}`], paths[index]);
       result.commit = await this.git(['rev-parse', 'HEAD'], paths[index]);
     }
     this.phase('merging', 'Combining the two local commits into the isolated integration branch.');
     for (const result of this.results) {
-      const cherry = await this.command(this.gitCommand, ['-c', 'user.name=BMH Team', '-c', 'user.email=bmh-team@localhost', '-c', `core.hooksPath=${hooksPath}`, 'cherry-pick', result.commit], this.path, { allowFailure: true, logName: `merge-${result.worker.replace(/[^a-z0-9_-]/gi, '_')}.log` });
+      const cherry = await this.command(this.gitCommand, ['-c', 'core.longpaths=true', '-c', 'user.name=BMH Team', '-c', 'user.email=bmh-team@localhost', '-c', 'commit.gpgsign=false', '-c', `core.hooksPath=${hooksPath}`, 'cherry-pick', result.commit], this.path, { allowFailure: true, logName: `merge-${result.worker.replace(/[^a-z0-9_-]/gi, '_')}.log` });
       if (cherry.code !== 0) { await this.git(['cherry-pick', '--abort'], this.path, { allowFailure: true }); throw new Error('Integration conflict: separate worker branches are preserved for review.'); }
     }
     this.phase('checking', 'Running the plan’s bounded verification commands on the combined result.');
@@ -270,7 +313,7 @@ export class TeamJob extends EventEmitter {
       await this.command(check.program, check.args, this.path, { logName: `check-${index + 1}.log` });
     }
     this.assertActive();
-    await this.git(['diff', '--check'], this.path);
+    await this.git(['diff', '--check', '--', '.', ':(exclude)dist', ':(exclude)public'], this.path);
     const changedAfterChecks = await this.git(['diff', '--name-only', '--no-renames', '-z', 'HEAD'], this.path);
     const untrackedAfterChecks = await this.git(['ls-files', '--others', '--exclude-standard', '-z'], this.path);
     const ignoredArtifacts = await this.git(['ls-files', '--others', '--ignored', '--exclude-standard', '-z', '--', 'dist', 'public'], this.path);
@@ -287,8 +330,7 @@ export class TeamJob extends EventEmitter {
     this.emit('stop');
     for (const timer of this.timers) clearTimeout(timer);
     this.timers.clear();
-    await this.interruptWorkers();
-    await Promise.allSettled([...this.children].map(child => this.kill(child)));
+    await Promise.allSettled([this.interruptWorkers(), ...[...this.children].map(child => this.kill(child))]);
     return this.publicState;
   }
 }

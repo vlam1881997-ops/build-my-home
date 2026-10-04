@@ -52,6 +52,9 @@ test('two workers use separate worktrees and combine only into checked integrati
 for (const [name, value] of [
   ['ownership overlap', plan({ second: ['one.txt'] })],
   ['path traversal', plan({ first: ['../one.txt'] })],
+  ['Windows alternate data stream', plan({ first: ['one.txt:stream'] })],
+  ['Windows reserved device', plan({ first: ['src/CON.js'] })],
+  ['Windows trailing dot alias', plan({ first: ['src/one.js.'] })],
   ['protected secret path', plan({ first: ['.env'] })],
   ['shell command', plan({ checks: [{ program: 'sh', args: ['-c', 'true'] }] })],
   ['node arbitrary evaluation', plan({ checks: [{ program: 'node', args: ['--eval', '1'] }] })]
@@ -99,7 +102,7 @@ test('unexpected shared Git ref changes prevent integration', async t => {
 
 test('owned symlink cannot escape the worktree', async t => {
   const fix = await fixture(t);
-  const workers = mockWorkers(plan(), { async afterWrite(cwd, index) { if (!index) { await fs.unlink(path.join(cwd, 'one.txt')); await fs.symlink(path.join(fix.repo, 'one.txt'), path.join(cwd, 'one.txt')); } } });
+  const workers = mockWorkers(plan(), { async afterWrite(cwd, index) { if (!index) { await fs.unlink(path.join(cwd, 'one.txt')); await fs.symlink(process.platform === 'win32' ? fix.repo : path.join(fix.repo, 'one.txt'), path.join(cwd, 'one.txt'), process.platform === 'win32' ? 'junction' : 'file'); } } });
   const result = await create(fix, workers).start(); assert.equal(result.status, 'failed'); assert.match(result.error, /symbolic links/);
 });
 
@@ -144,4 +147,57 @@ for (const outside of [false, true]) test(`verification ${outside ? 'source writ
     assert.equal(await git(result.path, 'ls-files', 'dist', 'public'), '');
     assert.ok(result.events.some(event => /Preserved 2 generated/.test(event.message)));
   }
+});
+
+test('stateRoot symlink/junction cannot place worktrees under source', async t => {
+  const fix = await fixture(t); const alias = path.join(path.dirname(fix.repo), 'alias');
+  await fs.symlink(fix.repo, alias, process.platform === 'win32' ? 'junction' : 'dir');
+  const result = await create(fix, mockWorkers(plan()), { stateRoot: path.join(alias, 'jobs') }).start();
+  assert.equal(result.status, 'failed'); assert.match(result.error, /outside the source repository/); await assert.rejects(fs.stat(path.join(fix.repo, 'jobs')), { code: 'ENOENT' });
+});
+
+test('signed-commit user defaults do not block local team integration', async t => {
+  const fix = await fixture(t); await git(fix.repo, 'config', 'commit.gpgsign', 'true'); await git(fix.repo, 'config', 'gpg.program', 'nonexistent-bmh-gpg');
+  const result = await create(fix, mockWorkers(plan())).start(); assert.equal(result.status, 'ready', result.error); assert.equal(await git(fix.repo, 'config', 'commit.gpgsign'), 'true');
+});
+
+test('worker-generated ignored artifacts fail before integration', async t => {
+  const fix = await fixture(t); await fs.writeFile(path.join(fix.repo, '.gitignore'), 'dist/\npublic/\n.env\nnode_modules/\n');
+  await git(fix.repo, 'add', '.gitignore'); await git(fix.repo, 'commit', '-m', 'Ignore generated files'); await git(fix.repo, 'update-ref', 'refs/remotes/origin/main', await git(fix.repo, 'rev-parse', 'HEAD'));
+  const workers = mockWorkers(plan(), { async afterWrite(cwd, index) { if (!index) { await fs.mkdir(path.join(cwd, 'dist')); await fs.writeFile(path.join(cwd, 'dist/app.js'), 'worker build'); } } });
+  const result = await create(fix, workers).start(); assert.equal(result.status, 'failed'); assert.match(result.error, /protected or ignored files/);
+});
+
+test('failed dependency link falls back to isolated npm ci without changing base', async t => {
+  const fix = await fixture(t); const job = create(fix, mockWorkers(plan()));
+  job.packageJson = { dependencies: { fixture: '1.0.0' } }; job.packageText = JSON.stringify(job.packageJson);
+  await fs.writeFile(path.join(fix.repo, 'package.json'), job.packageText); await fs.writeFile(path.join(fix.repo, 'package-lock.json'), 'fixture-lock'); await fs.mkdir(path.join(fix.repo, 'node_modules'));
+  await fs.mkdir(job.path, { recursive: true }); await fs.writeFile(path.join(job.path, 'package-lock.json'), 'fixture-lock');
+  const worker = path.join(fix.stateRoot, 'worker'); await fs.mkdir(worker, { recursive: true });
+  const original = fs.symlink; let calls = 0; fs.symlink = async (...args) => { if (++calls === 1) throw Object.assign(new Error('cross-volume fixture'), { code: 'EXDEV' }); return original(...args); };
+  t.after(() => { fs.symlink = original; });
+  let installed = false; job.command = async (program, args, cwd) => { assert.equal(program, 'npm'); assert.deepEqual(args, ['ci', '--ignore-scripts', '--no-audit', '--no-fund']); assert.equal(cwd, job.path); await fs.mkdir(path.join(cwd, 'node_modules')); installed = true; };
+  await job.prepareDependencies([worker]); assert.equal(installed, true); assert.equal(await fs.realpath(path.join(worker, 'node_modules')), await fs.realpath(path.join(job.path, 'node_modules')));
+  assert.equal((await fs.lstat(path.join(fix.repo, 'node_modules'))).isDirectory(), true);
+});
+
+test('tracked generated outputs remain reviewable without source whitespace failure', async t => {
+  const fix = await fixture(t); const filename = 'test/tracked-artifact.test.mjs';
+  await fs.mkdir(path.join(fix.repo, 'dist')); await fs.writeFile(path.join(fix.repo, 'dist/app.js'), 'old output\n');
+  await fs.writeFile(path.join(fix.repo, filename), "import{test}from'node:test';import{writeFileSync}from'node:fs';test('generated output',()=>writeFileSync('dist/app.js','generated output  \\n'));");
+  await git(fix.repo, 'add', '.'); await git(fix.repo, 'commit', '-m', 'Tracked artifact'); const base = await git(fix.repo, 'rev-parse', 'HEAD'); await git(fix.repo, 'update-ref', 'refs/remotes/origin/main', base);
+  const result = await create(fix, mockWorkers(plan({ checks: [{ program: 'node', args: ['--test', filename] }] }))).start();
+  assert.equal(result.status, 'ready', result.error); assert.deepEqual(result.artifacts, ['dist/app.js']);
+  assert.equal(await git(result.path, 'show', 'HEAD:dist/app.js'), 'old output'); assert.equal(await fs.readFile(path.join(result.path, 'dist/app.js'), 'utf8'), 'generated output  \n');
+  assert.equal(await git(fix.repo, 'rev-parse', 'main'), base);
+});
+
+test('declared build runs before selected tests to avoid stale BMH bundles', async t => {
+  const fix = await fixture(t); const filename = 'test/bundle.test.mjs'; await fs.mkdir(path.join(fix.repo, 'scripts'));
+  await fs.writeFile(path.join(fix.repo, 'package.json'), JSON.stringify({ scripts: { build: 'node scripts/build.cjs' } }));
+  await fs.writeFile(path.join(fix.repo, 'scripts/build.cjs'), "const fs=require('node:fs');fs.mkdirSync('dist',{recursive:true});fs.writeFileSync('dist/bundle.txt',fs.readFileSync('one.txt','utf8'));");
+  await fs.writeFile(path.join(fix.repo, filename), "import{test}from'node:test';import assert from'node:assert/strict';import{readFileSync}from'node:fs';test('rebuilt merged source',()=>assert.equal(readFileSync('dist/bundle.txt','utf8'),'new one\\n'));");
+  await fs.writeFile(path.join(fix.repo, '.gitignore'), 'dist/\n'); await git(fix.repo, 'add', '.'); await git(fix.repo, 'commit', '-m', 'Build fixture'); await git(fix.repo, 'update-ref', 'refs/remotes/origin/main', await git(fix.repo, 'rev-parse', 'HEAD'));
+  const result = await create(fix, mockWorkers(plan({ checks: [{ program: 'node', args: ['--test', filename] }] }))).start();
+  assert.equal(result.status, 'ready', result.error); assert.deepEqual(result.plan.checks[0], { program: 'npm', args: ['run', 'build'] }); assert.deepEqual(result.artifacts, ['dist/bundle.txt']);
 });

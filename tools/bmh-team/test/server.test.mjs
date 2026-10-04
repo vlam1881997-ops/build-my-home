@@ -43,12 +43,16 @@ test('cross-origin, missing token and DNS-rebinding requests cannot start a logi
 test('official browser login is started for a selected account, one browser callback at a time',async t=>{
   const f=await fixture(t);assert.equal((await f.post('/api/login',{worker:'one'})).status,200);
   assert.equal((await f.post('/api/login',{worker:'two'})).status,400);
-  assert.equal((await f.post('/api/login',{worker:'two',device:true})).status,200);
+  assert.equal((await f.post('/api/login',{worker:'two',device:true})).status,400);
+  assert.equal(f.workers[1].logins,0);
+  f.workers[0].loginInfo=null;
+  assert.equal((await f.post('/api/login',{worker:'two'})).status,200);
   assert.equal(f.workers[1].logins,1);
 });
 test('same or missing email cannot masquerade as two separate ChatGPT accounts',()=>{
   assert.throws(()=>twoAccountsReady([{account:{email:'A@example.test'}},{account:{email:' a@example.test '}}]),/cùng email/);
   assert.throws(()=>twoAccountsReady([{account:{email:'A@example.test'}},{account:null}]),/cả hai/);
+  assert.throws(()=>twoAccountsReady([{account:{email:'A@example.test'},identity:'same-user'},{account:{email:'B@example.test'},identity:'same-user'}]),/cùng email hoặc tài khoản/);
 });
 test('one objective starts only one job and accounts cannot switch while it works',async t=>{
   let count=0,resolveJob;

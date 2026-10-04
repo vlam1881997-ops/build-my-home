@@ -12,7 +12,7 @@ const terminalStates=new Set(['ready','failed','stopped']);
 export function twoAccountsReady(workers) {
   const emails=workers.map(worker=>worker.account?.email?.trim().toLowerCase());
   if(emails.some(v=>!v))throw Error('Đăng nhập cả hai tài khoản ChatGPT và chờ email hiện trên hai thẻ.');
-  if(emails[0]===emails[1])throw Error('Hai thẻ đang đăng nhập cùng email. Đăng xuất thẻ thứ hai và chọn tài khoản ChatGPT khác.');
+  if(emails[0]===emails[1] || (workers[0].identity && workers[0].identity===workers[1].identity))throw Error('Hai thẻ đang đăng nhập cùng email hoặc tài khoản. Đăng xuất thẻ thứ hai và chọn tài khoản ChatGPT khác.');
 }
 
 export async function createTeamServer({stateRoot,repoDefault='',codex,git,workers,jobFactory=options=>new TeamJob(options)}={}) {
@@ -41,19 +41,14 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
         if(pathname==='/api/login'){
           if(isBusy())throw Error('Dừng nhiệm vụ trước khi thay đổi tài khoản.');
           if(!worker)throw Error('Chọn thẻ tài khoản 1 hoặc 2.');
-          if(!body.device && workers.some(w=>w!==worker && w.loginInfo))throw Error('Hoàn tất đăng nhập thẻ đang mở trước, rồi đăng nhập tài khoản còn lại.');
-          await worker.login(body.device===true);return json(res,200,{ok:true,worker:worker.publicState});
+          if(body.device)throw Error('BMH Team v1 dùng đăng nhập trình duyệt. Bấm Đăng nhập trên thẻ tài khoản.');
+          if(workers.some(w=>w!==worker && w.loginInfo))throw Error('Hoàn tất đăng nhập thẻ đang mở trước, rồi đăng nhập tài khoản còn lại.');
+          await worker.login();return json(res,200,{ok:true,worker:worker.publicState});
         }
         if(pathname==='/api/logout'){
           if(isBusy())throw Error('Dừng nhiệm vụ trước khi thay đổi tài khoản.');
           if(!worker)throw Error('Tài khoản không hợp lệ.');
           await worker.logout();return json(res,200,{ok:true});
-        }
-        if(pathname==='/api/setup-windows'){
-          if(isBusy())throw Error('Dừng nhiệm vụ trước khi thiết lập sandbox.');
-          if(process.platform!=='win32')throw Error('Thiết lập này dành cho Windows.');
-          for(const w of workers)await w.setupWindows();
-          return json(res,200,{ok:true,message:'Đã bắt đầu thiết lập sandbox Windows cho hai phiên Codex. Chờ thông báo từ Codex.'});
         }
         if(pathname==='/api/run'){
           if(isBusy())throw Error('Đang có nhiệm vụ chạy. Dừng hoặc chờ hoàn tất trước.');
@@ -100,7 +95,7 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
     if(shuttingDown)return;shuttingDown=true;
     runEpoch++;
     if(isBusy() && job)await job.stop().catch(()=>{});
-    for(const w of workers)w.close();await new Promise(resolve=>server.close(resolve));
+    await Promise.all(workers.map(w=>w.close()));await new Promise(resolve=>server.close(resolve));
   };
   return {server,state,workers,close,token};
 }
@@ -111,14 +106,14 @@ async function main() {
   const app=await createTeamServer({repoDefault});
   await new Promise((resolve,reject)=>{app.server.once('error',reject);app.server.listen(0,'127.0.0.1',resolve);});
   const url=`http://127.0.0.1:${app.server.address().port}/`;
-  process.stdout.write(`\nBMH Team: ${url}\nGiữ cửa sổ này mở. Đăng nhập hai tài khoản riêng trong trang vừa mở.\n`);
+  process.stdout.write(`\nBMH Team v1: ${url}\nGiữ cửa sổ này mở. Đăng nhập hai tài khoản riêng trong trang vừa mở.\n`);
   if(!args.includes('--no-browser')){
     const command=process.platform==='win32'?'rundll32.exe':process.platform==='darwin'?'open':'xdg-open';
     const openArgs=process.platform==='win32'?['url.dll,FileProtocolHandler',url]:[url];
     const browser=spawn(command,openArgs,{stdio:'ignore',windowsHide:true});browser.on('error',()=>{});
   }
   for(const worker of app.workers)worker.start().catch(e=>{worker.error=scrub(e.message);worker.changed();});
-  const refresh=setInterval(()=>{for(const w of app.workers)if(w.child && !w.current)w.refreshAccount().catch(()=>{});},15000);
+  const refresh=setInterval(()=>{for(const w of app.workers)if(!w.current && !w.loginInfo)w.refreshAccount().catch(()=>{});},15000);
   refresh.unref();
   for(const signal of ['SIGINT','SIGTERM'])process.once(signal,()=>{clearInterval(refresh);app.close().finally(()=>process.exit(0));});
 }

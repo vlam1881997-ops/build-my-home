@@ -22,6 +22,18 @@ function Find-Codex {
   return $null
 }
 
+function Get-CodexVersion([string]$Executable) {
+  if (-not $Executable) { return $null }
+  try {
+    $versionOutput = (& $Executable --version 2>&1 | Out-String).Trim()
+    if ($LASTEXITCODE -eq 0 -and $versionOutput -match '\bcodex(?:-cli)?\s+(\d+\.\d+\.\d+)\b') {
+      return $Matches[1]
+    }
+  }
+  catch { return $null }
+  return $null
+}
+
 function Stop-WithMessage([string]$Message) {
   Write-Host ""
   Write-Host $Message -ForegroundColor Yellow
@@ -30,7 +42,7 @@ function Stop-WithMessage([string]$Message) {
 }
 
 Write-Host ""
-Write-Host "BMH Team - Two ChatGPT accounts, one local project" -ForegroundColor Cyan
+Write-Host "BMH Team v1 - Two ChatGPT accounts, one local project" -ForegroundColor Cyan
 Write-Host "Keep this window open while using the dashboard."
 
 $bmhNode = Find-Executable "node"
@@ -62,28 +74,31 @@ if (-not $bmhGit) {
 $env:BMH_TEAM_GIT = $bmhGit
 $env:PATH = "$(Split-Path -Parent $bmhGit);$env:PATH"
 
+$bmhPinnedVersion = "0.158.0"
+$bmhRuntimeRoot = if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA "BMHTeam\runtime" } else { Join-Path $PSScriptRoot ".runtime" }
+$bmhCodexPrefix = Join-Path $bmhRuntimeRoot "codex-$bmhPinnedVersion"
+$bmhPrivateCodex = Join-Path $bmhCodexPrefix "codex.cmd"
 $bmhCodex = Find-Codex
-if (-not $bmhCodex -and $env:APPDATA) {
-  $bmhGlobalCodex = Join-Path $env:APPDATA "npm\codex.cmd"
-  if (Test-Path -LiteralPath $bmhGlobalCodex) { $bmhCodex = $bmhGlobalCodex }
+if ((Get-CodexVersion $bmhCodex) -ne $bmhPinnedVersion) {
+  $bmhCodex = if (Test-Path -LiteralPath $bmhPrivateCodex) { $bmhPrivateCodex } else { $null }
 }
-if (-not $bmhCodex) {
+if ((Get-CodexVersion $bmhCodex) -ne $bmhPinnedVersion) {
   Write-Host ""
-  Write-Host "Official Codex CLI is missing. It is needed for the two local sessions." -ForegroundColor Yellow
-  Write-Host "Installing the official @openai/codex package required by this launcher."
+  Write-Host "BMH Team v1 uses official Codex CLI $bmhPinnedVersion." -ForegroundColor Yellow
+  Write-Host "Installing the pinned official npm package in a private BMH Team folder."
+  Write-Host "Your other Codex installations will not be changed."
   $bmhNpm = Find-Executable "npm.cmd"
   if (-not $bmhNpm) { $bmhNpm = Find-Executable "npm" }
   if (-not $bmhNpm) { Stop-WithMessage "npm was not found. Install the complete Node.js distribution and run this launcher again." }
-  & $bmhNpm install -g '@openai/codex@0.158.0'
+  & $bmhNpm install --global --prefix $bmhCodexPrefix "@openai/codex@$bmhPinnedVersion"
   if ($LASTEXITCODE -ne 0) { Stop-WithMessage "Codex installation did not complete. Review the npm error above." }
-  $bmhCodex = Find-Codex
-  if (-not $bmhCodex -and $env:APPDATA) {
-    $bmhGlobalCodex = Join-Path $env:APPDATA "npm\codex.cmd"
-    if (Test-Path -LiteralPath $bmhGlobalCodex) { $bmhCodex = $bmhGlobalCodex }
-  }
+  $bmhCodex = $bmhPrivateCodex
 }
-if (-not $bmhCodex) { Stop-WithMessage "Codex CLI was not found after setup. Open a new PowerShell window and try again." }
+if ((Get-CodexVersion $bmhCodex) -ne $bmhPinnedVersion) {
+  Stop-WithMessage "Codex CLI $bmhPinnedVersion could not be started. Review the installation error above and run the launcher again."
+}
 $env:BMH_TEAM_CODEX = $bmhCodex
+Write-Host "Codex CLI $bmhPinnedVersion is ready." -ForegroundColor Green
 
 $bmhServer = Join-Path $PSScriptRoot "server.mjs"
 if (-not (Test-Path -LiteralPath $bmhServer)) {
