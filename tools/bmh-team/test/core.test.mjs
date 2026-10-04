@@ -1,0 +1,144 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+import {mkdtemp,rm,readFile,writeFile,mkdir,readdir} from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import {CodexWorker,isolatedEnvironment,scrub} from '../core.mjs';
+
+const fakeAuth=(email='one@example.test',subject=email)=>({auth_mode:'chatgpt',tokens:{id_token:'eyJmaXh0dXJlIjp0cnVlfQ.'+Buffer.from(JSON.stringify({sub:subject,email,'https://api.openai.com/auth':{chatgpt_plan_type:'plus'}})).toString('base64url')+'.not-a-real-signature',access_token:'fixture-access-never-public',refresh_token:'fixture-refresh-never-public'}});
+
+// A real spawned process exercises CLI arguments, stdout/stderr, stdin, output
+// files, nonzero exits and termination. It never sends a model/network request.
+const fixtureCli=String.raw`
+import {readFile,writeFile,unlink} from 'node:fs/promises';
+import path from 'node:path';
+const args=process.argv.slice(2), home=process.env.CODEX_HOME;
+const mode=process.env.BMH_TEST_CASE || 'complete';
+const authFile=path.join(home,'auth.json');
+if(args[0]==='login' && args[1]==='status') {
+  let auth;try{auth=JSON.parse(await readFile(authFile,'utf8'));}catch{}
+  process.stderr.write(auth?'Logged in using '+(auth.auth_mode==='chatgpt'?'ChatGPT':'an API key')+'\n':'Not logged in\n');
+  process.exit(auth?0:1);
+}
+if(args[0]==='login') {
+  process.stderr.write('Opening browser...\nhttps://auth.openai.com/oauth/authorize?state=fixture');
+  process.stderr.write('&client_id=fixture\n');
+  await new Promise(resolve=>setTimeout(resolve,150));
+  await writeFile(authFile,JSON.stringify(JSON.parse(await readFile(path.join(home,'fixture-auth.json'),'utf8'))));
+  process.exit(0);
+}
+if(args[0]==='logout'){await unlink(authFile).catch(()=>{});process.exit(0);}
+if(args.includes('exec')) {
+  let input='';for await(const chunk of process.stdin)input+=chunk;
+  const schemaAt=args.indexOf('--output-schema');
+  const schema=schemaAt>=0?JSON.parse(await readFile(args[schemaAt+1],'utf8')):null;
+  const output=args[args.indexOf('--output-last-message')+1];
+  const send=event=>process.stdout.write(JSON.stringify(event)+'\n');
+  send({type:'thread.started',thread_id:'fixture'});
+  send({type:'item.started',item:{type:'command_execution',command:'fixture'}});
+  if(mode==='hang'){setInterval(()=>{},1000);}
+  else {
+    await writeFile(output,JSON.stringify({prompt:input,schema,sandbox:args[args.indexOf('--sandbox')+1],approval:args[args.indexOf('-a')+1],cwd:args[args.indexOf('--cd')+1]}));
+    send({type:'item.completed',item:{type:'agent_message',text:'Đã hoàn thành phần được giao.'}});
+    if(mode==='failed-turn')send({type:'turn.failed',error:{message:'fixture turn failed'}});
+    else if(mode!=='missing-completion')send({type:'turn.completed',usage:{output_tokens:4}});
+    if(mode==='quota')process.stderr.write('429 usage limit reached\n');
+    if(mode==='secret-error')process.stderr.write('authorization=Bearer private-value refresh_token="fixture-secret"\n');
+    process.exit(['nonzero','quota','secret-error'].includes(mode)?1:0);
+  }
+}
+`;
+
+async function workerFixture(t,{mode='complete',loggedIn=true,auth=fakeAuth(),loginTimeoutMs=1000}={}) {
+  const root=await mkdtemp(path.join(os.tmpdir(),'bmh-cli-'));
+  const script=path.join(root,'fixture-cli.mjs');await writeFile(script,fixtureCli);
+  const home=path.join(root,'accounts','one');await mkdir(home,{recursive:true});
+  await writeFile(path.join(home,'fixture-auth.json'),JSON.stringify(auth));
+  if(loggedIn)await writeFile(path.join(home,'auth.json'),JSON.stringify(auth));
+  const calls=[];
+  const worker=new CodexWorker({id:'one',stateRoot:root,codex:{command:process.execPath,prefix:[script]},loginTimeoutMs,spawnImpl:(command,args,options)=>{
+    calls.push({command,args,options});return spawn(command,args,{...options,env:{...options.env,BMH_TEST_CASE:mode}});
+  }});
+  t.after(async()=>{await worker.close();await rm(root,{recursive:true,force:true});});
+  return {root,home,worker,calls};
+}
+
+const waitFor=async(predicate)=>{for(let i=0;i<100 && !predicate();i++)await new Promise(resolve=>setTimeout(resolve,10));assert.ok(predicate(),'fixture timed out');};
+
+test('isolated account environments exclude API billing keys and shared state',()=>{
+  const env=isolatedEnvironment('/tmp/account-one',{PATH:'local-path',CODEX_HOME:'/existing',CODEX_ACCESS_TOKEN:'private',CODEX_SQLITE_HOME:'/shared',OPENAI_API_KEY:'private',CODEX_API_KEY:'private',OPENAI_BASE_URL:'custom',NODE_OPTIONS:'untrusted',GEMINI_API_KEY:'private'});
+  assert.equal(env.CODEX_HOME,'/tmp/account-one');assert.equal(env.PATH,'local-path');
+  for(const key of ['CODEX_ACCESS_TOKEN','CODEX_SQLITE_HOME','OPENAI_API_KEY','CODEX_API_KEY','OPENAI_BASE_URL','NODE_OPTIONS','GEMINI_API_KEY'])assert.equal(env[key],undefined);
+});
+test('stable login status exposes only account label from its own private cache',async t=>{
+  const f=await workerFixture(t);await f.worker.start();
+  assert.deepEqual(f.worker.publicState.account,{email:'one@example.test',planType:'plus'});
+  assert.equal(f.worker.publicState.connected,true);
+  assert.ok(f.calls.every(call=>call.options.env.CODEX_HOME===f.home));
+  assert.deepEqual(f.calls[0].args.slice(1),['login','status']);
+  assert.match(await readFile(path.join(f.home,'config.toml'),'utf8'),/forced_login_method = "chatgpt"/);
+  assert.ok(!JSON.stringify(f.worker.publicState).includes('fixture-access'));
+  assert.ok(!JSON.stringify(f.worker.publicState).includes('not-a-real-signature'));
+  assert.equal(typeof f.worker.identity,'string');assert.ok(!JSON.stringify(f.worker.publicState).includes(f.worker.identity));
+});
+test('API auth or absent/unreadable account metadata cannot masquerade as ChatGPT',async t=>{
+  for(const auth of [{auth_mode:'api',OPENAI_API_KEY:'fixture-api'}, {auth_mode:'chatgpt',tokens:{id_token:'invalid'}}]) {
+    const f=await workerFixture(t,{auth});await f.worker.start();assert.equal(f.worker.account,null);assert.equal(f.worker.publicState.connected,false);
+  }
+  const none=await workerFixture(t,{loggedIn:false});await none.worker.start();assert.equal(none.worker.account,null);assert.equal(none.worker.error,null);
+});
+test('browser login uses stable CLI login, confirms status after exit and logout removes only this account',async t=>{
+  const f=await workerFixture(t,{loggedIn:false});await f.worker.login();
+  assert.match(f.worker.publicState.login.authUrl,/^https:\/\/auth.openai.com\/oauth\/authorize\?/);
+  assert.equal(f.worker.account,null);
+  await waitFor(()=>Boolean(f.worker.account));assert.equal(f.worker.loginInfo,null);
+  await f.worker.logout();assert.equal(f.worker.account,null);
+  assert.ok(f.calls.some(call=>call.args.at(-1)==='logout'));
+  assert.ok(f.calls.every(call=>!call.args.includes('--device-auth') && !call.args.includes('app-server')));
+});
+test('exec uses stdin, explicit sandbox/approval, JSON schema and actual final output file',async t=>{
+  const f=await workerFixture(t);const schema={type:'object',properties:{answer:{type:'string'}}};
+  const progress=[];f.worker.on('progress',text=>progress.push(text));
+  const output=JSON.parse(await f.worker.run('Bản vẽ tầng 2 — không mất vật liệu',{cwd:f.root,readOnly:true,outputSchema:schema,timeoutMs:2000}));
+  assert.equal(output.prompt,'Bản vẽ tầng 2 — không mất vật liệu');assert.deepEqual(output.schema,schema);
+  assert.equal(output.sandbox,'read-only');assert.equal(output.approval,'never');assert.equal(output.cwd,f.root);
+  const call=f.calls.find(call=>call.args.includes('exec'));
+  assert.ok(call.args.includes('--ephemeral'));assert.ok(call.args.includes('--json'));
+  assert.ok(!call.args.includes('--dangerously-bypass-approvals-and-sandbox'));
+  assert.ok(!call.args.includes(output.prompt));assert.ok(progress.length>=2);
+  assert.ok(!(await readdir(f.home)).some(file=>file.startsWith('run-')));
+});
+test('write tasks retain workspace-write sandbox',async t=>{
+  const f=await workerFixture(t);const output=JSON.parse(await f.worker.run('task',{cwd:f.root}));assert.equal(output.sandbox,'workspace-write');
+});
+test('nonzero exit, failed turn or missing completion never report completed work',async t=>{
+  for(const mode of ['nonzero','failed-turn','missing-completion']) {
+    const f=await workerFixture(t,{mode});await assert.rejects(f.worker.run('task',{cwd:f.root}),/chưa hoàn thành/);assert.equal(f.worker.current,null);
+  }
+});
+test('Stop cancels a real running CLI process and releases the worker',async t=>{
+  const f=await workerFixture(t,{mode:'hang'});
+  const run=f.worker.run('task',{cwd:f.root,timeoutMs:5000});const stopped=assert.rejects(run,/đã dừng/);
+  await waitFor(()=>Boolean(f.worker.child));await f.worker.interrupt();await stopped;
+  assert.equal(f.worker.current,null);assert.equal(f.worker.processes.size,0);
+});
+test('Stop during preparation prevents a later exec from starting',async t=>{
+  const f=await workerFixture(t);let release;
+  f.worker.prepare=()=>new Promise(resolve=>{release=resolve;});
+  const run=f.worker.run('task',{cwd:f.root});const stopped=assert.rejects(run,/đã dừng/);
+  await f.worker.interrupt();release();await stopped;assert.equal(f.calls.length,0);
+});
+test('hung CLI times out, duplicate task is rejected and quota failure has no API fallback',async t=>{
+  const f=await workerFixture(t,{mode:'hang'});
+  const run=f.worker.run('task',{cwd:f.root,timeoutMs:100});const timed=assert.rejects(run,/hết thời gian/);
+  await assert.rejects(f.worker.run('other',{cwd:f.root}),/nhiệm vụ khác/);await timed;
+  const quota=await workerFixture(t,{mode:'quota'});await assert.rejects(quota.worker.run('task',{cwd:quota.root}),/hạn mức/);
+  assert.equal(quota.calls.filter(call=>call.args.includes('exec')).length,1);
+});
+test('public CLI errors redact JSON-shaped credentials and bearer values',async t=>{
+  const message=scrub('Authorization: Bearer private-value "access_token":"fixture-value" refresh_token="fixture-secret" sk-abcdefghijk123456789');
+  for(const secret of ['private-value','fixture-value','fixture-secret','sk-abcdefgh'])assert.ok(!message.includes(secret));
+  const f=await workerFixture(t,{mode:'secret-error'});await assert.rejects(f.worker.run('task',{cwd:f.root}));
+  assert.ok(!JSON.stringify(f.worker.publicState).includes('private-value'));assert.ok(!JSON.stringify(f.worker.publicState).includes('fixture-secret'));
+});

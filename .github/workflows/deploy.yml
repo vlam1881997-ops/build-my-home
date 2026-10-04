@@ -20,6 +20,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      - name: Check BMH Team coordinator
+        run: node --test tools/bmh-team/test/*.test.mjs
       - uses: actions/upload-artifact@v4
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         with:
