@@ -241,7 +241,7 @@ BMH.createSceneFoliage=(THREE,dimensions,material,count=48)=>{
 };
 
 BMH.createRoomAsset = (model, d, THREE, m) => {
-  const supported = /^(bedDouble|bedSingle|loungeDesignSofa|loungeChair|tableCoffee|table|desk|chair|chairDesk|cabinetTelevision|televisionModern|kitchenSink|kitchenStove|kitchenFridge|bookcaseClosedWide|cabinetBed|pottedPlant|bathroomSink|toilet|shower|sideTable|floorLamp)$/;
+  const supported = /^(bedDouble|bedSingle|loungeDesignSofa|loungeChair|tableCoffee|table|desk|chair|chairDesk|cabinetTelevision|televisionModern|kitchenSink|kitchenStove|kitchenFridge|bookcaseClosedWide|cabinetBed|pottedPlant|washingMachine|bathroomSink|toilet|shower|sideTable|floorLamp)$/;
   if (!supported.test(model) || !d || ![d.w,d.h,d.d].every(v => Number.isFinite(v) && v > 0)) return null;
   const root = new THREE.Group();
   root.name = model;
@@ -429,6 +429,13 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
       cylinder(.005,.008,h,Math.sin(a)*.035,.34+h/2,Math.cos(a)*.035,m.green);
     }
     const foliage=BMH.createSceneFoliage(THREE,{w:.40,h:.96,d:.43},m.leaf);foliage.position.y=.32;root.add(foliage);
+  } else if(model==='washingMachine') {
+    box(d.w,d.h,d.d,0,d.h/2,0,m.white,.025);
+    box(d.w-.05,.13,.012,0,d.h-.08,d.d/2-.006,m.stone,.008);
+    const rim=cylinder(.19,.19,.024,0,.40,d.d/2-.022,m.metal);rim.rotation.x=Math.PI/2;
+    const glass=cylinder(.151,.151,.026,0,.40,d.d/2-.018,m.screen);glass.rotation.x=Math.PI/2;
+    box(.18,.035,.014,-.13,d.h-.08,d.d/2-.008,m.dark,.005);
+    const dial=cylinder(.023,.023,.02,.20,d.h-.08,d.d/2-.010,m.metal);dial.rotation.x=Math.PI/2;
   } else if(model==='bathroomSink') {
     box(d.w,.54,d.d-.04,0,.41,0,m.wood,.025);
     front(d.w-.03,.45,.42,d.d/2-.012,2);

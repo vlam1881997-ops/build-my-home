@@ -1,5 +1,6 @@
 import {reserveAiUsage,markAiProviderAccepted,beginAiProviderCall} from './_ai_usage.mjs';
 import {resolveGeminiModels} from './_gemini_models.mjs';
+import {geminiProviderError} from './_gemini_error.mjs';
 const GEMINI_BASE='https://generativelanguage.googleapis.com';
 
 export function geminiEnv(){
@@ -80,9 +81,15 @@ async function postInteraction(apiVersion,model,payload,key,signal){
   return {r,data};
 }
 
-async function postGenerateContent(model,{normalized,systemInstruction,schema,maxOutputTokens,tools},key,signal){
+async function postGenerateContent(model,{normalized,systemInstruction,schema,maxOutputTokens,thinkingLevel='low',tools},key,signal){
   const parts=normalized.map(p=>p.type==='text'?{text:p.text}:p.data?{inlineData:{mimeType:p.mime_type,data:p.data}}:{fileData:{mimeType:p.mime_type,fileUri:p.uri}});
   const body={contents:[{role:'user',parts}],generationConfig:{maxOutputTokens,...(schema?{responseMimeType:'application/json',responseJsonSchema:schema}:{})}};
+  // Bound reasoning separately so a JSON response is not cut off by thought tokens.
+  const major=Number(/^gemini-(\d+)/.exec(model)?.[1]);
+  if(major>=3)body.generationConfig.thinkingConfig={thinkingLevel:['low','medium','high'].includes(thinkingLevel)?thinkingLevel:'low'};
+  else if(/^gemini-2\.5.*flash/.test(model))body.generationConfig.thinkingConfig={thinkingBudget:thinkingLevel==='low'?0:1024};
+  else if(/^gemini-flash(?:-lite)?-latest$/.test(model))body.generationConfig.thinkingConfig={thinkingBudget:512};
+  if(body.generationConfig.thinkingConfig&&schema)body.generationConfig.maxOutputTokens=maxOutputTokens+1024;
   if(systemInstruction)body.systemInstruction={parts:[{text:systemInstruction}]};
   if(tools?.some(t=>t.type==='google_search'||t.google_search))body.tools=[{googleSearch:{}}];
   const finish=beginAiProviderCall();
@@ -99,7 +106,8 @@ export async function geminiGenerate({parts,input,systemInstruction='',schema,ma
   const normalized=Array.isArray(input)?input:normalizeInput(parts);
   if(!normalized.length)throw Object.assign(new Error('Gemini không có dữ liệu đầu vào.'),{statusCode:400});
   await reserveAiUsage();
-  const combos=[];for(const model of await resolveGeminiModels(env))for(const apiVersion of apiVersions())combos.push({model,apiVersion});
+  const interactions=process.env.GEMINI_TRANSPORT==='interactions',combos=[];
+  for(const model of await resolveGeminiModels(env))for(const apiVersion of interactions?apiVersions():['v1beta'])combos.push({model,apiVersion});
   let lastErr=null,quotaModel='',deadline=Date.now()+timeoutMs;
   for(let i=0;i<combos.length;i++){
     const {model,apiVersion}=combos[i];
@@ -114,17 +122,20 @@ export async function geminiGenerate({parts,input,systemInstruction='',schema,ma
     };
     const remaining=deadline-Date.now();if(remaining<1500)throw Object.assign(new Error('Gemini xử lý quá thời gian cho phép.'),{statusCode:504});
     const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),remaining);
+    let accepted=false;
     try{
-      let {r,data}=await postInteraction(apiVersion,model,payload,env.key,ctl.signal);
-      if([400,404].includes(r.status))({r,data}=await postGenerateContent(model,{normalized,systemInstruction,schema,maxOutputTokens,tools},env.key,ctl.signal));
+      let {r,data}=await (interactions?postInteraction(apiVersion,model,payload,env.key,ctl.signal):postGenerateContent(model,{normalized,systemInstruction,schema,maxOutputTokens,thinkingLevel,tools},env.key,ctl.signal));
+      if([400,404].includes(r.status)&&! /API_KEY_INVALID|api.?key.*(?:invalid|not valid)/i.test(String(data.error?.message||'')))({r,data}=await (interactions?postGenerateContent(model,{normalized,systemInstruction,schema,maxOutputTokens,thinkingLevel,tools},env.key,ctl.signal):postInteraction(apiVersion,model,payload,env.key,ctl.signal)));
       if(!r.ok){
-        const err=Object.assign(new Error(data?.error?.message||`Gemini HTTP ${r.status}`),{statusCode:r.status>=400&&r.status<500?r.status:502,details:data,model,apiVersion});
+        const err=geminiProviderError(r.status,data,model);
         const msg=String(data?.error?.message||'').toLowerCase(),more=i<combos.length-1;
+        if(err.code==='GEMINI_QUOTA_EXHAUSTED')throw err;
         if(more&&r.status===429){lastErr=err;quotaModel=model;continue;}
         if(more&&(r.status===408||r.status>=500||r.status===404||r.status===400||msg.includes('model')||msg.includes('unsupported')||msg.includes('api version'))){lastErr=err;continue;}
         throw err;
       }
       markAiProviderAccepted();
+      accepted=true;
       const text=extractInteractionText(data);if(!text)throw Object.assign(new Error('Gemini không trả về nội dung có thể đọc.'),{statusCode:502,model,apiVersion});
       let result;try{result=schema?JSON.parse(text):text;}catch{throw Object.assign(new Error('Gemini trả về dữ liệu không đúng JSON.'),{statusCode:502,model,apiVersion});}
       const citations=[];const seen=new Set();
@@ -136,7 +147,7 @@ export async function geminiGenerate({parts,input,systemInstruction='',schema,ma
       lastErr=err?.name==='AbortError'?Object.assign(new Error('Gemini xử lý quá thời gian cho phép.'),{statusCode:504,model,apiVersion}):err;
       // A key/project permission error cannot be fixed by trying another
       // model or API version. Stop before making several identical requests.
-      if([401,403].includes(Number(lastErr?.statusCode)))throw lastErr;
+      if(accepted||lastErr?.code==='GEMINI_QUOTA_EXHAUSTED'||[401,403].includes(Number(lastErr?.statusCode)))throw lastErr;
       if(i===combos.length-1)throw lastErr;
     }finally{clearTimeout(timer);}
   }

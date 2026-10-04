@@ -2,9 +2,10 @@ import {withAiUsage,reserveAiUsage,markAiProviderAccepted,beginAiProviderCall} f
 import {send,apiError} from '../server/_lib.mjs';
 import {geminiEnv,geminiRateLimit} from '../server/_gemini.mjs';
 import {resolveGeminiModels} from '../server/_gemini_models.mjs';
+import {geminiProviderError} from '../server/_gemini_error.mjs';
 import {imageRequestBody,inlinePhoto} from '../server/_image_request.mjs';
 
-export const maxDuration=60;
+export const maxDuration=90;
 const cut=(value,max=80)=>String(value||'').replace(/[\r\n\t]+/g,' ').trim().slice(0,max);
 const finishRoles=['wall','floor','accent','fabric','pillow','rug'];
 export function renderFinishDescription(finish={}){
@@ -74,22 +75,18 @@ async function handler(req,res){
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),55_000);
     try{
       for(const model of models){
+      const headers={'x-goog-api-key':key,'Content-Type':'application/json'};
+      const standard={contents:[{role:'user',parts:[{text:prompt},{inlineData:{mimeType,data:image}}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}};
       let finish=beginAiProviderCall();
-      let response=await fetch('https://generativelanguage.googleapis.com/v1beta/interactions',{
-        method:'POST',signal:controller.signal,headers:{'x-goog-api-key':key,'Content-Type':'application/json'},
-        body:JSON.stringify({model,store:false,input:[{type:'text',text:prompt},{type:'image',mime_type:mimeType,data:image}],response_format:{type:'image',...(body.mode==='home-finish'?{}:{aspect_ratio:'16:9'}),image_size:'1K'}})
-      });
+      let response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',signal:controller.signal,headers,body:JSON.stringify(standard)});
       finish(response.status);
       let data=await response.json().catch(()=>({}));
-      // A listed image model may expose generateContent before Interactions.
-      if([400,404].includes(response.status)){
+      if([400,404].includes(response.status)&&! /API_KEY_INVALID|api.?key.*(?:invalid|not valid)/i.test(String(data.error?.message||''))){
         finish=beginAiProviderCall();
-        response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{method:'POST',signal:controller.signal,headers:{'x-goog-api-key':key,'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt},{inlineData:{mimeType,data:image}}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}})});
-        finish(response.status);
-        data=await response.json().catch(()=>({}));
+        response=await fetch('https://generativelanguage.googleapis.com/v1beta/interactions',{method:'POST',signal:controller.signal,headers,body:JSON.stringify({model,store:false,input:[{type:'text',text:prompt},{type:'image',mime_type:mimeType,data:image}],response_format:{type:'image',image_size:'1K'}})});
+        finish(response.status);data=await response.json().catch(()=>({}));
       }
-      if([400,404].includes(response.status)&&model!==models.at(-1))continue;
-      if(!response.ok)throw Object.assign(new Error(response.status===429?'Giới hạn tạo ảnh hoặc tài khoản Gemini chưa có quota ảnh.':`Gemini trả về lỗi ${response.status}. Kiểm tra cấu hình và quota ảnh.`),{statusCode:response.status===429?429:502});
+      if(!response.ok){const error=geminiProviderError(response.status,data,model);if(!['GEMINI_QUOTA_EXHAUSTED','GEMINI_KEY_INVALID','GEMINI_ACCESS_DENIED'].includes(error.code)&&[400,404,429,502,503].includes(response.status)&&model!==models.at(-1))continue;throw error;}
       markAiProviderAccepted();
       const rendered=extractRenderedImage(data);
       return send(res,200,{ok:true,...rendered,model,generatedAt:new Date().toISOString()});
