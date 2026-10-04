@@ -1,0 +1,64 @@
+BMH – ĐỢT 2: KHU ĐẤT CÓ NGUỒN + MẶT BẰNG ĐÚNG RANH
+
+Làm trên BMH hiện có. Worker one là TK1; worker two là TK2. Giữ đúng thứ tự hai nhiệm vụ và exact file ownership bên dưới. Chỉ thực hiện đợt 2.
+
+ĐIỀU KIỆN BẮT ĐẦU
+Kết quả đợt 1 đã được kiểm tra và tích hợp vào nguồn dùng cho đợt này. Khi giao mục tiêu mới, BMH Team v1.1.3 lấy origin/main: đợt 1 cần có trong main trước. Nút Tiếp tục phần đã làm chỉ tiếp tục cùng công việc bị ngắt, không tự chuyển sang đợt 2. Nếu thiếu kết quả trước, báo rõ điều kiện còn thiếu; không tự merge/push, không làm lại đợt 1.
+Đọc AGENTS.md và skill BMH nếu có. Brief này chứa hợp đồng cần dùng; thiếu bộ tài liệu trong main không phải lý do tự đặt schema khác.
+
+YÊU CẦU CHUNG
+Giữ nguyên màn nhập ban đầu, tệp khách đã tải, dự án đã lưu và 10 tab; tab 7–10 giữ UI/nghiệp vụ. Giữ phong cách, vật liệu, phòng theo từng tầng và quyền lựa chọn của khách. Một nguồn hình học đo cho bản vẽ, 3D và khối lượng. Không thay bằng ảnh AI. Dùng dependency/API adapter hiện có; không bật billing, gọi API trả phí để thử, ghi key vào browser, đổi account/model, commit/push/merge/deploy hoặc sửa ngoài allowlist. Dùng mock cho Maps/Places/Gemini và dữ liệu khách giả lập khi kiểm tra.
+
+HỢP ĐỒNG CHUNG CHO HAI WORKER
+1. project.site vẫn giữ lat/lng, lotPoints, lotMode/useParcelGeometry, frontEdge, width/depth/floors, floorHeight/slabThickness và khoảng lùi hiện có. Ghim lat/lng là vị trí bản đồ; không phải số đo khảo sát. Không thêm một bộ ranh độc lập cạnh tranh với hình học hiện tại. Nội bộ m, nhãn/DXF có thể đổi mm; plan y ánh xạ sang Three z; tầng bắt đầu từ 0.
+2. TK1 chuẩn bị project.designEvidence mặc định {schemaVersion:1,research:[],site:[],fengSources:[],materialSources:[]}. project.constructionDesign mặc định {schemaVersion:1,inputs:{},elements:[],reviews:[],issues:[]}. Nếu đã có dữ liệu tương đương, normalize/migrate tương thích và giữ lựa chọn cũ; không xóa dữ liệu để áp default. Đợt này chỉ chuẩn bị nền lưu trữ, không tự thiết kế kết cấu.
+3. Một chứng cứ có id, kind, sourceUrl, sourceTitle, publisher, retrievedAt, effectiveAt, scope, sourceType, verifiedState, value, unit, notes. Thiếu thông tin giữ null/chưa xác minh. Phân biệt khách cung cấp, khảo sát, tài liệu cơ quan, báo giá và đề xuất AI. URL có thật không tự chứng minh nội dung áp dụng đúng thửa.
+4. designEvidence.site chứa chứng cứ ranh, số đo, khoảng lùi, quy hoạch và supplier gắn đúng địa điểm/phạm vi. Chứng cứ ranh có thể giữ rawCoordinates, sourceCrs, transformReference, localVertices, edgeMeasurements, surveyReference, restrictionAreas và verificationState trong value. localVertices dùng m chỉ khi số đo/phép chuyển có căn cứ. Dữ liệu VN-2000 thiếu CRS/kinh tuyến/tham số chuyển phải giữ tọa độ gốc, không tự đổi thành ranh chuẩn.
+5. TK2 đọc site và chứng cứ bằng các tên/ngữ nghĩa trên; field chưa có phải giữ trạng thái chờ. Không đọc worktree TK1 đang sửa, không tự tạo schema thứ hai. TK1 bàn giao mẫu JSON giả lập và kết quả normalize/lưu/reload trong báo cáo để đối chiếu sau khi ghép.
+6. Revision dùng drawingRevision/các chữ ký hiện có. Đổi ranh, cạnh/mặt tiền, hướng, khoảng lùi hay đầu vào kỹ thuật phải làm đầu ra phụ thuộc hết hiệu lực; giữ mốc tài chính cũ. Xuất thiết kế chia sẻ tiếp tục loại trừ account/token, tài chính riêng và ngày sinh gia đình.
+
+NHIỆM VỤ TK1 / WORKER ONE
+Nâng tab 2 và đường lưu dự án: cho ghim vị trí, nhập/xem ranh và số đo, thêm nguồn khảo sát/tài liệu quy hoạch. Hiển thị rõ dữ liệu nào từ khách, bản đồ, khảo sát hay cơ quan; trạng thái chưa xác minh khi thiếu. Nguồn quy hoạch phải có phạm vi, đơn vị ban hành, ngày/quyết định khi có; không suy phần được xây từ màu bản đồ hay kết quả AI.
+Triển khai defaults, normalize, migration và lưu/open/reload/import/export cho hai extension đã chốt. Giữ dữ liệu các dự án cũ và các loại chứng cứ dành cho đợt sau; không đưa metadata mới vào gói chia sẻ nếu chưa nằm trong allowlist công khai. Lỗi lưu/import phải hiện và giữ được bản dữ liệu đang làm.
+Đổi địa điểm/ranh hoặc tài liệu nền làm nguồn quy hoạch và supplier cũ hết hiệu lực đúng phạm vi. Không giữ cache của địa điểm A làm kết quả cho địa điểm B. Tái dùng adapter supplier hiện có: tên, địa chỉ, nguồn, ngày kiểm và khoảng cách nếu đủ tọa độ. Gemini key không cấp quyền Places; thiếu năng lực thì hiện chưa có dữ liệu, vẫn cho nhập nhà cung cấp/nguồn thủ công. Không bịa địa chỉ hoặc báo giá.
+UI gọn: một hành động chính, thông tin nâng cao mở khi cần; giữ các control tab khác và thông tin tài chính/gia đình. Tạo fixture nguồn thiếu, nguồn cũ, dự án cũ và reload tương thích. Skill phù hợp: bmh-ui-design, bmh-webapp-quality; bmh-construction-design cho provenance đầu vào.
+Được sửa CHỈ các file:
+src/10_state.js
+src/60_app.js
+src/82_customer_projects.js
+server/_site_intelligence.mjs
+server/_places.mjs
+tests/site-finance-contract.test.mjs
+tests/customer-projects.test.cjs
+tests/design-evidence.test.mjs
+design-evidence.test.mjs là test mới nếu cần. Trong 60_app chỉ sửa luồng khu đất/nguồn tương ứng; giữ intake và các tab khác. Không sửa planner, renderer, export, dependency hoặc module build.
+
+NHIỆM VỤ TK2 / WORKER TWO
+Nâng hình học đo theo ranh hiện có: kiểm polygon tự cắt, cạnh/diện tích, mặt tiền/hướng Bắc và phần được bố trí theo khoảng lùi/nguồn đầu vào. Không tự sửa ranh của khách khi dữ liệu sai; báo cạnh/vị trí cần chỉnh. Khi chỉ có kích thước nhập tay, giữ chế độ hiện có và ghi rõ mức căn cứ; không giả vờ có khảo sát pháp lý.
+Phòng, tường, mái và circulation phải được kiểm theo envelope của phương án. Khoảng lùi mặc định chỉ là giả định cho tới khi có đầu vào xác minh. Dữ liệu quy hoạch chưa xác minh phải giữ pending, không được đánh dấu phần được xây đã được cơ quan chấp thuận. Từ chối thao tác vượt ranh hoặc hình học không hợp lệ và giữ nguyên thiết kế/undo.
+Giữ ID/phòng/cửa/style/material/per-floor program. Đồng bộ cầu thang, chiếu nghỉ, giếng/thang máy và lỗ sàn giữa các tầng bằng geometry hiện có; số đo lắp đặt chưa biết giữ thiếu. Mở rộng phụ thuộc revision cho ranh, khoảng lùi và hồ sơ kỹ thuật liên quan, tránh PDF/3D/khối lượng dùng kết quả cũ sau khi đất đổi. Không tính móng, tiết diện cột/dầm hay thép từ số phòng.
+Skill phù hợp: bmh-drawings, bmh-3d, bmh-construction-design, bmh-webapp-quality. Bàn giao JSON/hình học/revision và các lỗi còn thiếu số liệu trong báo cáo.
+Được sửa CHỈ các file:
+src/76_architecture.js
+src/30_planner.js
+src/92_measured_design.js
+src/79_stair_design.js
+src/87_elevator_design.js
+tests/architecture.test.mjs
+tests/measured-design.test.mjs
+tests/measured-design.browser.cjs
+Không sửa state, UI/API của TK1, material catalog, 3D renderer, export, dependency hoặc build. Không đọc thay đổi chưa ghép của TK1 như một contract đã phát hành.
+
+NGHIỆM THU SAU KHI GHÉP
+1. Dự án nhà 5×20 m hai tầng: vị trí ghim và số đo tách biệt; lưu/open/reload/import giữ ranh, nguồn, phòng, style/material và các lựa chọn theo tầng.
+2. Thửa không chữ nhật ba tầng có thang: polygon lỗi bị từ chối; phòng/tường/mái được kiểm trong envelope; cầu thang/thang máy/lỗ sàn đồng bộ.
+3. Đổi địa điểm hoặc tài liệu nền: nguồn/supplier cũ hiện hết hiệu lực đúng phạm vi; thiếu quy hoạch hiện chưa xác minh. Không có nguồn pháp lý giả từ màu bản đồ.
+4. Đổi ranh/khoảng lùi làm revision và đầu ra phụ thuộc đổi; undo/thao tác sai không làm mất thiết kế. Dự án cũ chưa có extension vẫn mở đúng.
+5. Mười tab còn truy cập được, đặc biệt vật liệu/ngân hàng; gói thiết kế chia sẻ không lộ thông tin riêng.
+Bộ điều phối chạy npm run build một lần trên nguồn đã ghép, rồi node --test với đúng các file:
+tests/site-finance-contract.test.mjs
+tests/customer-projects.test.cjs
+tests/design-evidence.test.mjs
+tests/architecture.test.mjs
+tests/measured-design.test.mjs
+Worker không chạy build/test ghi dist/public trong worktree riêng. Kiểm thao tác browser desktop/phone sau tích hợp khi có browser, cô lập request trả phí và dùng fixture; thiếu browser phải ghi rõ. Báo file đã sửa, schema/mẫu JSON bàn giao, kết quả kiểm thực và dữ liệu còn thiếu. Đạt nghiệm thu của đợt này chưa phải chứng nhận hồ sơ đủ để xây dựng.

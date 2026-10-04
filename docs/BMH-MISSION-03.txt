@@ -1,0 +1,68 @@
+BMH – ĐỢT 3: VẬT LIỆU CÓ GIÁ/NGUỒN + HỒ SƠ BẢN VẼ CÓ SỐ ĐO
+
+Làm trên BMH hiện có. Worker one là TK1; worker two là TK2. Giữ đúng thứ tự hai nhiệm vụ và exact file ownership bên dưới. Chỉ thực hiện đợt 3.
+
+ĐIỀU KIỆN BẮT ĐẦU
+Kết quả đợt 2 đã được kiểm tra và tích hợp vào nguồn dùng cho đợt này: có state/normalize/lưu chứng cứ và hình học theo ranh. Khi giao mục tiêu mới, BMH Team v1.1.3 lấy origin/main: đợt 2 cần có trong main trước. Nút Tiếp tục phần đã làm chỉ tiếp tục cùng công việc bị ngắt. Nếu thiếu nền đợt 2, báo rõ điều kiện thiếu; không tự merge/push hay kéo phần state/geometry vào nhiệm vụ này.
+Đọc AGENTS.md, hợp đồng dữ liệu và skill BMH nếu có. Brief dưới đây chứa phạm vi/hợp đồng cần dùng, không tự đặt bộ vật liệu hay geometry riêng.
+
+YÊU CẦU CHUNG
+Giữ intake, tệp khách, dự án đã lưu và 10 tab; tab 7–10 giữ UI/nghiệp vụ. Giữ ý định phong cách/vật liệu của khách và công năng từng tầng. Bản vẽ, 3D và khối lượng dùng cùng measured geometry. Tái dùng dependency/API adapter hiện có. Không bịa giá/SKU/nguồn/texture hãng, không bật billing hay gọi API trả phí để thử, không ghi key vào browser, đổi account/model, commit/push/merge/deploy hoặc sửa ngoài allowlist. Dùng fixture cho giá, provider và dự án khách.
+
+HỢP ĐỒNG CHUNG CHO HAI WORKER
+1. Giữ project.site/project.plan, ID phòng/cửa/fixtures/thang và drawingRevision/các chữ ký hiện có. Nội bộ m; đổi mm ở nhãn/DXF theo đúng quy ước. Không lấy ảnh AI làm số đo hoặc dùng một model thứ hai cho hồ sơ.
+2. project.materials, style và finish từng phòng đang có vẫn là nguồn lựa chọn. Catalog/visual bindings dùng schema hiện có và metadata tương thích. Không ghi đè finish khách tự chọn bằng gợi ý theo style. Field thiếu giữ null hoặc trạng thái chờ; không sửa state/normalize ngoài allowlist đợt này.
+3. Giá có productId, sku, specification, quantityUnit, amountVnd, priceType, sourceUrl, quotedAt, locationScope, includesVat, includesLabour, includesTransport, validUntil. amountVnd null nghĩa là chưa có giá; 0 chỉ dùng khi nguồn thực xác nhận giá bằng 0. Phân biệt giá tham khảo, báo giá công trình, giá chưa xác minh và giá hết hiệu lực; không biến ngày truy cập thành ngày hãng báo giá. Đơn vị/quy cách phải đủ để so sánh, không nhầm m²/thùng/viên/kg.
+4. Liên kết hiển thị có productId, sku, styleIds, surfaceSlot, roomId khi liên quan, visualProfileId, textureAssetId, realWorldScale và exactness. Phân biệt generic/mô phỏng với asset hãng đã xác minh. SKU/binding không còn khớp sản phẩm thì bỏ preview cũ và báo cần chọn lại; không tự đổi sản phẩm. Chỉ dùng asset/texture có quyền dùng tương ứng. Nếu metadata mới chưa được state hiện tại lưu đúng, ghi rõ giới hạn; không mở rộng file ownership để sửa state.
+5. Tái dùng designEvidence.materialSources/metadata nguồn đã có sau đợt 2; gắn nguồn giá với productId/SKU và phạm vi. Không đọc worktree TK1 đang chỉnh như dữ liệu đã phát hành. Hai worker cùng dùng contract trong brief; TK1 bàn giao mẫu JSON không có dữ liệu cá nhân sau khi hoàn thành.
+6. SVG/PDF/DXF/bảng phòng/cửa mang cùng design revision; giá có ngày/pricing revision riêng. Đổi ranh, phòng, cửa, thang hoặc vật liệu phải làm đầu ra liên quan hết hiệu lực đúng phạm vi. Gói thiết kế chia sẻ giữ allowlist công khai, loại trừ account/token, tài chính riêng và ngày sinh gia đình.
+
+NHIỆM VỤ TK1 / WORKER ONE
+Nâng tab 5 và catalog thật đang có. Đa dạng lựa chọn theo nhóm công năng, phong cách và ngân sách; cho lọc đơn giản và xem thông tin cần thiết, không chỉ tăng số thẻ. Mỗi sản phẩm hiện SKU nếu có, quy cách/đơn vị, ảnh hợp lệ, giá có nguồn/ngày/khu vực và các khoản đã bao gồm hoặc chưa rõ.
+Tái dùng material search/catalog/discovery adapters: dữ liệu web là tham khảo, không tự trở thành báo giá cho nhà khách. Thiếu giá vẫn chọn được vật liệu nhưng hiện chưa có giá; không cộng 0 như đã biết chi phí. Không bịa giá hãng và không hứa key Gemini cho phép miễn phí mọi truy vấn. Chống truy vấn trùng/retry vô hạn; lỗi mạng/quota vẫn dùng được catalog hiện có.
+Nối đúng sản phẩm/SKU vào visualProfile, surfaceSlot và tỷ lệ texture qua 85/86 hiện có. Style gợi ý phải giữ lựa chọn thủ công; đổi vật liệu không đổi phòng, camera hay phong cách đã chốt. Chỉ gắn nhãn hiển thị chính xác khi asset/spec đủ căn cứ; phần generic hiển thị rõ mô phỏng. Đổi SKU/sản phẩm làm binding cũ hết hiệu lực, không giữ hình preview của sản phẩm trước.
+Trong 75_completion chỉ nâng phần vật liệu và UI/source mapping tương ứng; giữ nghiệp vụ dự toán/ngân hàng/thi công/bàn giao. Không sửa công thức chi phí hay tài chính ở đợt này. Tạo fixture giá thiếu, đơn vị/quy cách, VAT/nhân công/vận chuyển chưa biết, nguồn cũ và stale SKU/binding.
+Skill phù hợp: bmh-ui-design, bmh-graphic-design, bmh-images, bmh-3d cho material binding, bmh-webapp-quality. Dùng ảnh có quyền; đợt này không cần gọi dịch vụ AI tạo ảnh để đạt nghiệm thu.
+Được sửa CHỈ các file:
+assets/materials/official-catalog.json
+server/_material_search.mjs
+server/_material_catalog.mjs
+server/_material_discovery.mjs
+server/_material_search_handler.mjs
+server/_material_catalog_handler.mjs
+server/_material_image.mjs
+src/75_completion.js
+src/85_interior_collections.js
+src/86_visual_materials.js
+tests/completion.test.mjs
+tests/material-source.test.mjs
+material-source.test.mjs là test mới nếu cần. Không thêm file texture/image mới ngoài allowlist; dùng asset được phép đang có hoặc binding generic có nhãn. Không sửa state, planner, renderer/export của TK2, dependency hoặc build.
+
+NHIỆM VỤ TK2 / WORKER TWO
+Nâng pipeline hồ sơ vector hiện có ở tab 4 và xuất: nét tường/đường kích thước có phân cấp; kích thước tổng/phân đoạn/cửa; north, tỷ lệ, đơn vị, tầng, revision; ký hiệu, cao độ, mặt đứng/mặt cắt và bảng phòng/cửa/fixtures. Giữ tên phòng tự đặt, phòng giặt/phòng thờ theo tầng và thang/thang máy hiện có.
+SVG, DXF và PDF phải dùng cùng số đo/ID của model đo hiện tại. Cửa lệch tâm/cửa sổ/lối mở được thể hiện đúng vị trí; lỗ sàn và giếng thang không bị vẽ như sàn đặc. Không dựng PDF từ ảnh chụp hoặc tạo hình AI thay bản vẽ vector. Không vẽ móng/cột/thép thành cấu kiện đã thiết kế nếu chỉ có ký hiệu sơ bộ.
+Hoàn thiện bố cục A3: khung tên, margins, legend, chữ Việt, độ đọc nét và clipping. Tỷ lệ in lấy từ geometry/viewBox và kích thước trang; thể hiện đúng tỷ lệ được hỗ trợ, không chỉ đổi nhãn scale. Mỗi trang ghi revision/trạng thái dữ liệu. Trường kỹ thuật chưa có giữ thiếu hoặc sơ bộ, không tự thêm cao độ/tiết diện để cho trang trông đầy đủ.
+Xuất bản vẽ tại revision hiện tại và làm hết hiệu lực cover/hồ sơ cũ sau khi geometry đổi. Tệp phải mở đọc được, không chỉ có header. Giữ API export hiện có để tabs7–10 dùng được; không làm lộ dữ liệu riêng trong hồ sơ chia sẻ. Kiểm tên phòng dài, chữ Việt, thửa không chữ nhật, nhiều tầng và openings/thang trong trang thật.
+Skill phù hợp: bmh-drawings, bmh-graphic-design, bmh-construction-design, bmh-webapp-quality; dùng quy trình PDF khi công cụ có sẵn. Không tự cài CAD/Blender/dependency để hoàn thành việc này.
+Được sửa CHỈ các file:
+src/40_exports.js
+src/95_architectural_documents.js
+src/96_vector_pdf.js
+src/architectural-documents.css
+tests/drawing-contract.test.mjs
+tests/architectural-dossier.test.mjs
+tests/architectural-dossier.browser.cjs
+Không sửa catalog/UI/state của TK1, planner/geometry, 3D renderer, dependency hoặc build. Hồ sơ đọc cùng geometry đã có sau đợt 2; không tự thay thiết kế khách để dễ xuất.
+
+NGHIỆM THU SAU KHI GHÉP
+1. Chọn hai sản phẩm khác SKU: giữ đúng lựa chọn, nguồn/quy cách/đơn vị; binding chuyển đúng sản phẩm, không giữ preview cũ. Gợi ý style không thay finish riêng của khách.
+2. Giá thiếu hiện chưa có giá; nguồn/ngày/khu vực/phạm vi VAT/nhân công/vận chuyển rõ hoặc chưa xác minh. Hai đơn vị khác nhau không được so giá như cùng đơn vị. Catalog vẫn dùng được khi provider/quota lỗi.
+3. Nhà 5×20 m hai tầng và thửa không chữ nhật ba tầng có thang: SVG/PDF/DXF có số đo, cửa, thang/lỗ sàn và revision khớp model; kích thước trang/tỷ lệ in được kiểm thật.
+4. Mở/render PDF kiểm chữ Việt, kích thước tổng, tên phòng dài, khung tên và clipping. Thêm/xóa cửa rồi xuất lại cho kết quả mới, không dùng cover/hồ sơ cũ. Nếu môi trường không mở/render được, ghi phần chưa kiểm thay vì báo đã đạt toàn bộ.
+5. Lưu/reload giữ lựa chọn vật liệu; tabs7–10 và intake còn hoạt động. Gói chia sẻ không chứa dữ liệu riêng. Bản vẽ sơ bộ không được ghi là hồ sơ kết cấu đủ để thi công.
+Bộ điều phối chạy npm run build một lần trên nguồn đã ghép, rồi node --test với đúng các file:
+tests/completion.test.mjs
+tests/material-source.test.mjs
+tests/drawing-contract.test.mjs
+tests/architectural-dossier.test.mjs
+Worker không chạy build/test ghi dist/public trong worktree riêng. Kiểm UI desktop/phone và export sau tích hợp khi có công cụ, cô lập request và dùng fixture; thiếu phải ghi rõ. Báo file đã sửa, mẫu metadata bàn giao, ảnh/tệp xuất thực đã kiểm, kết quả và giới hạn còn lại. Đợt này chuẩn bị vật liệu/hồ sơ cho 3D đợt 4, không tuyên bố đã nâng xong toàn bộ renderer hoặc sản phẩm thương mại.

@@ -112,6 +112,8 @@ BMH Team hiện bắt đầu mỗi job từ `origin/main`, tạo nhánh mới v�
 
 Đợt1 dùng tệp `BMH-MISSION-01.txt`: dán toàn bộ vào ô Mục tiêu BMH Team. Các tệp hướng dẫn/skill đang nằm trên nhánh review cho đến khi tích hợp; brief đợt1 đã tự chứa phạm vi nên có thể dùng với main hiện tại.
 
+Đợt2 dùng `BMH-MISSION-02.txt`; đợt3 dùng `BMH-MISSION-03.txt`. Mỗi tệp có brief và contract tối thiểu tự chứa, exact ownership cho hai worker, nghiệm thu và selected checks. Dán một tệp mỗi job; không gộp hai đợt vào cùng mục tiêu. Các đợt phụ thuộc phải dùng nguồn đã tích hợp kết quả đợt trước. BMH Team v1.1.3 có thể tiếp tục cùng job bị ngắt từ báo cáo/worktree hợp lệ trước commit/gộp; chức năng này không tự chuyển sang đợt kế tiếp.
+
 ## File giao nhau và cách tránh sửa chồng
 
 | Chủ sở hữu | File quan trọng |
