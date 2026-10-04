@@ -192,8 +192,8 @@ export class TeamJob extends EventEmitter {
         const [run, script] = check.args;
         if (check.args.length !== 2 || run !== 'run' || !/^(?:build|check|test|lint|typecheck)(?:[:_-][a-z0-9_-]+)?$/i.test(script || '') || /deploy|publish|release|upload|push|clean|reset|install|migrat/i.test(script) || typeof scripts[script] !== 'string') throw new Error('npm checks must run a declared non-destructive build, check, test, lint or typecheck script.');
       } else if (check.program === 'node') {
-        if (check.args[0] !== '--test' || check.args.length < 2 || check.args.length > 33) throw new Error('node verification only supports --test with selected test files.');
-        for (const filename of check.args.slice(1)) { safeFile(filename); if (!/^(?:tests?|[^/]+\/tests?)\/.+\.test\.(?:mjs|cjs|js)$/.test(filename)) throw new Error('node verification must select repository test files.'); }
+        if (check.args[0] !== '--test' || check.args.length < 2 || check.args.length > 33) throw new Error('Node verification needs args beginning with --test followed by exact repository test filenames, such as node --test tests/example.test.mjs. Do not include browser fixtures, globs or shell commands.');
+        for (const filename of check.args.slice(1)) { safeFile(filename); if (!/^(?:tests?|[^/]+\/tests?)\/.+\.test\.(?:mjs|cjs|js)$/.test(filename)) throw new Error('Node verification needs args beginning with --test followed by exact repository test filenames, such as node --test tests/example.test.mjs. Do not include browser fixtures, globs or shell commands.'); }
       } else throw new Error('Only node or npm verification is supported.');
       return { program: check.program, args: [...check.args] };
     });
@@ -343,8 +343,18 @@ export class TeamJob extends EventEmitter {
     if(this.resumeSnapshot)this.plan=this.validatePlan(this.resumeSnapshot.plan,scripts);
     else {
       this.phase('planning', 'Account 1 is splitting the goal into two tasks with separate file ownership.');
-      const prompt = `Plan this BMH development goal for exactly two accounts:\n${this.goal}\n\n${INVARIANTS}\nReturn JSON matching the provided schema. No edits. Each task must own exact literal relative file paths, never directories or globs. Account tasks may not share files. Do not include .git, secrets, auth, node_modules, dist or public paths. Use applicable npm build/check/test scripts or selected node --test files, never shell strings. Declared package scripts: ${JSON.stringify(scripts)}. Keep checks relevant and bounded; do not repeat every historical UI test.`;
-      this.plan = this.validatePlan(parseJson(await this.runWorker(this.workers[0], prompt, { cwd: this.path, readOnly: true, outputSchema: SCHEMA })), scripts);
+      const prompt = `Plan this BMH development goal for exactly two accounts:\n${this.goal}\n\n${INVARIANTS}\nReturn JSON matching the provided schema. No edits. Each task must own exact literal relative file paths, never directories or globs. Account tasks may not share files. Do not include .git, secrets, auth, node_modules, dist or public paths. Pick one or more relevant verification checks. For an npm check use program "npm" and args exactly ["run","declared-script"]. For a node test check use program "node" and args exactly ["--test","tests/actual-existing.test.mjs"]. The first argument MUST be --test. Use only exact repository test files under test/ or tests/ ending .test.mjs, .test.cjs or .test.js. Do not use browser tests, flags, names without extensions, relative ./ prefixes, directories, globs, shell commands, or examples unless they appear among the existing test paths below. Existing eligible test paths:\n${JSON.stringify(await this.availableTestFiles(this.path))}\nDeclared package scripts: ${JSON.stringify(scripts)}. Keep checks relevant and bounded; do not repeat every historical UI test.`;
+      const planner=this.workers[0];let draft=parseJson(await this.runWorker(planner,prompt,{cwd:this.path,readOnly:true,outputSchema:SCHEMA}));
+      try {this.plan=this.validatePlan(draft,scripts);}
+      catch(error) {
+        if(!/Node verification needs args/.test(error.message))throw error;
+        this.note('Kế hoạch chọn lệnh test không đúng định dạng; yêu cầu TK1 sửa một lần bằng file test đang có trong repo. Chưa giao sửa mã nguồn.');
+        const eligible=await this.availableTestFiles(this.path);
+        const safeScripts=Object.keys(scripts).filter(name=>/^(?:build|check|test|lint|typecheck)(?:[:_-][a-z0-9_-]+)?$/i.test(name) && typeof scripts[name]==='string' && !/deploy|publish|release|upload|push|clean|reset|install|migrat/i.test(name));
+        const correction=`Correct the verification checks in this read-only plan exactly once. The previous draft was not accepted: ${error.message}\n\nPrevious draft (reference only): ${JSON.stringify(draft).slice(0,18000)}\n\nValid existing test paths: ${JSON.stringify(eligible)}\nValid declared npm scripts: ${JSON.stringify(safeScripts)}\n\nReturn the complete original JSON plan with exactly two distinct owned-file tasks and at least one check. A node check MUST be {"program":"node","args":["--test","exact/existing.test.mjs"]}; --test must be args[0] and every remaining argument must exactly match a valid path above. A script check MUST be {"program":"npm","args":["run","exact-script-name"]}. Choose only relevant tests; do not invent filenames. Do not edit any file. Keep task titles, instructions, ownership and all other valid plan choices unchanged. ${INVARIANTS}`;
+        const repaired=parseJson(await this.runWorker(planner,correction,{cwd:this.path,readOnly:true,outputSchema:SCHEMA}));
+        this.plan=this.validatePlan(repaired,scripts);
+      }
       this.assertActive();
       if (await this.git(['rev-parse', 'HEAD'], this.path) !== base || await this.git(['status', '--porcelain=v1', '--untracked-files=all'], this.path)) throw new Error('Planning changed the read-only worktree.');
       for (let index = 0; index < 2; index++) {
@@ -428,6 +438,15 @@ export class TeamJob extends EventEmitter {
     if (this.artifacts.length) this.note(`Preserved ${this.artifacts.length} generated dist/public artifact(s) for review; they are not committed.`);
     this.phase('ready', 'Both tasks and their checks passed. Review the local integration branch; nothing was pushed, merged into main or deployed.');
     return this.publicState;
+  }
+  async availableTestFiles(cwd) {
+    const tracked=await this.git(['ls-files','-z','--','test','tests'],cwd);
+    const existing=[];
+    for(const filename of tracked.split('\0').filter(Boolean)) {
+      if(existing.length>=120)break;
+      try {safeFile(filename);if(!/^(?:tests?|[^/]+\/tests?)\/.+\.test\.(?:mjs|cjs|js)$/.test(filename))continue;await this.verifyLiteral(cwd,filename);existing.push(filename);} catch {}
+    }
+    return existing;
   }
   async stop() {
     if (this.status === 'ready' || this.status === 'failed' || this.status === 'stopped') return this.publicState;

@@ -32,7 +32,7 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
   const token=randomBytes(32).toString('hex');let job=null;let shuttingDown=false;let runPreparing=false;let stopPending=null;let runEpoch=0;
   const isBusy=()=>runPreparing || Boolean(stopPending) || Boolean(job && !terminalStates.has(job.publicState.status));
   const sourceModeDefault=/(?:^|[\\/])GitHubDesktop(?:[\\/]|$)/i.test(String(git || ''))?'desktop':'fetch';
-  const state=()=>({version:'1.1.3',workers:workers.map(w=>({...w.publicState,modelSettings:{...modelSettings[w.id]},modelSettingsWarning:modelSettingsWarning(modelSettings[w.id],w.modelCatalog)})),sourceModeOptions:SOURCE_MODE_OPTIONS,sourceModeDefault,settingsWarning,settingsRevision,run:job?.publicState||null,recovery,reportWarning,repoDefault,capabilities:{git:Boolean(git),codex:Boolean(codex),windows:process.platform==='win32'},busy:isBusy()||settingsSaving});
+  const state=()=>({version:'1.1.4',workers:workers.map(w=>({...w.publicState,modelSettings:{...modelSettings[w.id]},modelSettingsWarning:modelSettingsWarning(modelSettings[w.id],w.modelCatalog)})),sourceModeOptions:SOURCE_MODE_OPTIONS,sourceModeDefault,settingsWarning,settingsRevision,run:job?.publicState||null,recovery,reportWarning,repoDefault,capabilities:{git:Boolean(git),codex:Boolean(codex),windows:process.platform==='win32'},busy:isBusy()||settingsSaving});
   const saveReport=async update=>{
     try {
       await reports.save(update);reportWarning=null;
@@ -163,7 +163,7 @@ async function main() {
   const app=await createTeamServer({repoDefault});
   await new Promise((resolve,reject)=>{app.server.once('error',reject);app.server.listen(0,'127.0.0.1',resolve);});
   const url=`http://127.0.0.1:${app.server.address().port}/`;
-  process.stdout.write(`\nBMH Team v1.1.3: ${url}\nGiữ cửa sổ này mở. Chọn model trong danh sách Codex của từng tài khoản rồi giao việc hoặc tiếp tục phần đã lưu.\n`);
+  process.stdout.write(`\nBMH Team v1.1.4: ${url}\nGiữ cửa sổ này mở. Chọn model trong danh sách Codex của từng tài khoản rồi giao việc hoặc tiếp tục phần đã lưu.\n`);
   if(!args.includes('--no-browser')){
     const command=process.platform==='win32'?'rundll32.exe':process.platform==='darwin'?'open':'xdg-open';
     const openArgs=process.platform==='win32'?['url.dll,FileProtocolHandler',url]:[url];

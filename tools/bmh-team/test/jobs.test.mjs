@@ -179,6 +179,36 @@ test('worker timeout remains failed and interrupts both accounts', async t => {
   const result = await job.start(); assert.equal(result.status, 'failed'); assert.match(result.error, /timed out/); assert.ok(workers.every(worker => worker.interrupted)); assert.equal(job.children.size, 0);
 });
 
+test('read-only planner gets the exact test-file rules and one repair for a malformed node check',async t=>{
+  const fix=await fixture(t);const workers=mockWorkers(plan());const original=workers[0].run.bind(workers[0]);let planningCalls=0,writableCalls=0;
+  workers[0].run=async(prompt,options)=>{
+    if(options.readOnly) {
+      planningCalls++;
+      if(planningCalls===1){assert.match(prompt,/args exactly \["--test","tests\/actual-existing\.test\.mjs"\]/);assert.match(prompt,/test\/result\.test\.mjs/);return JSON.stringify(plan({checks:[{program:'node',args:['test/result.test.mjs']}]}));}
+      assert.match(prompt,/previous draft was not accepted/i);assert.match(prompt,/--test must be args\[0\]/);
+      assert.match(prompt,/Valid existing test paths: \["test\/result\.test\.mjs"\]/);
+      return JSON.stringify(plan({checks:[{program:'node',args:['--test','test/result.test.mjs']}]}));
+    }
+    writableCalls++;return original(prompt,options);
+  };
+  const result=await create(fix,workers).start();assert.equal(result.status,'ready',result.error);
+  assert.equal(planningCalls,2);assert.equal(writableCalls,1);
+  assert.ok(result.events.some(event=>/yêu cầu TK1 sửa một lần/.test(event.message)));
+  assert.equal(await git(fix.repo,'rev-parse','main'),fix.base);
+});
+
+test('bad node-plan repair is attempted once and cannot create worker worktrees',async t=>{
+  const fix=await fixture(t);const workers=mockWorkers(plan());const original=workers[0].run.bind(workers[0]);let planningCalls=0,writableCalls=0;
+  workers[0].run=async(prompt,options)=>{
+    if(options.readOnly){planningCalls++;return JSON.stringify(plan({checks:[{program:'node',args:['browser.cjs']}]}));}
+    writableCalls++;return original(prompt,options);
+  };
+  const result=await create(fix,workers).start();assert.equal(result.status,'failed');
+  assert.match(result.error,/Node verification needs args/);assert.equal(planningCalls,2);assert.equal(writableCalls,0);
+  for(const account of ['account-1','account-2'])await assert.rejects(fs.stat(path.join(fix.stateRoot,result.id,account)),{code:'ENOENT'});
+  assert.equal(await git(fix.repo,'rev-parse','main'),fix.base);
+});
+
 async function stoppedWithEdits(t) {
   const fix=await fixture(t);let secondEntered,firstCompleted;
   const second=new Promise(resolve=>secondEntered=resolve);const first=new Promise(resolve=>firstCompleted=resolve);

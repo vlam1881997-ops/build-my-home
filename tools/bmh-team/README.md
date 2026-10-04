@@ -1,12 +1,14 @@
-# BMH Team v1.1.3
+# BMH Team v1.1.4
 
 Bộ điều phối của dự án BMH trên máy Windows: **hai tài khoản ChatGPT riêng, một mục tiêu, hai phiên Codex làm song song**. Công cụ dùng các lệnh ổn định `codex login`, `codex login status` và `codex exec` của Codex CLI chính thức, tạo worktree riêng, ghép kết quả vào một nhánh cục bộ và chạy kiểm tra. BMH Team là phần mềm riêng của dự án, không phải sản phẩm do OpenAI phát hành.
+
+**v1.1.4 giữ các nâng cấp của v1.1.3 và tự sửa một lỗi lập kế hoạch trước khi giao hai tài khoản:** nếu TK1 chọn sai định dạng lệnh node test, BMH Team yêu cầu chính TK1 lập lại danh sách kiểm tra đúng một lần, kèm đường dẫn test có thật trong repo. Tài khoản vẫn dùng nguyên model/mức suy luận đã chọn. Nếu lần sửa vẫn sai, công cụ dừng trước khi tạo worktree của TK1/TK2.
 
 **v1.1.3 cho phép tiếp tục phần đã làm và sửa giới hạn thời gian cho nhiệm vụ dài:** hoạt động từ Codex gia hạn thời gian chờ, trong giới hạn tối đa của mỗi phiên. Khi lượt trước thất bại hoặc dừng, công cụ tìm báo cáo đã lưu và các worktree còn hợp lệ để hiện **Tiếp tục phần đã làm**. Model và mức suy luận vẫn lấy từ danh sách riêng của mỗi tài khoản; công cụ không tự hạ model. Hai phiên đăng nhập, lựa chọn và báo cáo giữ ở `%LOCALAPPDATA%\BMHTeam`.
 
 ## Tiếp tục lượt bị hết thời gian hoặc đã dừng
 
-1. Đóng bộ điều phối cũ sau khi lượt chạy đã dừng. Giải nén **BMH-Team-Windows-v1.1.3.zip** vào thư mục mới **ngoài `D:\KBL\build-my-home`**, rồi mở **MO-BMH-TEAM.cmd**. Giữ nguyên `%LOCALAPPDATA%\BMHTeam` và các thư mục công việc cũ để dùng lại đăng nhập, model, báo cáo và code.
+1. Đóng bộ điều phối cũ sau khi lượt chạy đã dừng. Giải nén **BMH-Team-Windows-v1.1.4.zip** vào thư mục mới **ngoài `D:\KBL\build-my-home`**, rồi mở **MO-BMH-TEAM.cmd**. Giữ nguyên `%LOCALAPPDATA%\BMHTeam` và các thư mục công việc cũ để dùng lại đăng nhập, model, báo cáo và code.
 2. Điền repo thật **`D:\KBL\build-my-home`**. Chờ cả hai thẻ kết nối và tải danh sách model. Kiểm tra lựa chọn đã lưu; **Ultra/max được giữ khi vẫn hợp lệ**. Nếu ông chủ động đổi lựa chọn trước khi tiếp tục, lượt mới dùng chính lựa chọn vừa lưu.
 3. Thẻ **Công việc trước vẫn còn** hiển thị mục tiêu đã lưu, lý do dừng, số phần việc hoàn tất và thư mục đã làm. Bấm **Tiếp tục phần đã làm**. Không cần Fetch lại hay dán mục tiêu một lần nữa. Mục tiêu khác đang gõ trong ô nhập không bị thay bằng mục tiêu cũ.
 
@@ -15,6 +17,10 @@ Công cụ kiểm tra báo cáo, kế hoạch và phạm vi file, repo, nhánh, 
 Tiếp tục tự động áp dụng cho lượt bị ngắt trước bước commit/gộp. Những nhánh đã commit hoặc bắt đầu gộp được giữ để xem lại kết quả và lỗi, không tự đặt lại lịch sử Git. Với báo cáo v1.1.3, phần đã hoàn thành có nội dung khớp bản lưu được dùng lại; báo cáo v1.1.2 được tài khoản phụ trách kiểm tra từ diff hiện có trước khi hoàn thiện.
 
 Nút chỉ mở khi có hai tài khoản khác nhau, model hợp lệ, repo đã nhập và bộ điều phối đang rảnh, kết nối được. Thẻ chỉ xuất hiện khi có báo cáo thất bại/dừng với kế hoạch và worktree cũ còn tồn tại. Nếu kiểm tra phát hiện nhánh, đường dẫn hoặc thay đổi không hợp lệ, công cụ báo lỗi và giữ nguyên file để xem lại. **Code chưa tự ghép vào `main` hay triển khai Vercel.** Muốn bắt đầu mục tiêu khác, dùng **Giao mục tiêu mới** ở phần nhập bên dưới; đây là lượt mới theo chế độ lấy mã nguồn đang chọn.
+
+## Khi TK1 lập kế hoạch chọn sai node test
+
+Bản v1.1.4 liệt kê các file test thật trong repo cho TK1 lúc lập kế hoạch. Nếu kế hoạch đầu tiên vẫn sai định dạng node test, BMH Team yêu cầu TK1 sửa kế hoạch một lần ở chế độ chỉ đọc trước khi tạo hai worktree tài khoản. Lượt sửa dùng nguyên model và mức suy luận TK1 đang chọn, không chuyển sang tài khoản hoặc nhà cung cấp khác. Nếu lượt đó vẫn sai, đọc thông báo lỗi và giao mục tiêu lại sau khi đã cập nhật hướng dẫn; nguồn Git chính và file dự án không bị sửa.
 
 Nếu bảng báo **Không lưu được tiến độ để tiếp tục sau khi mở lại**, báo cáo chưa được lưu thành công. File và nhánh vẫn còn trên máy, nhưng không bảo đảm có thể tiếp tục tự động sau khi đóng bộ điều phối. Giữ thông tin nhánh/thư mục để xem lại phần đã làm.
 
@@ -31,7 +37,7 @@ Hoạt động từ tiến trình gia hạn thời gian chờ, vẫn giữ giớ
 
 ## Khi màn hình báo Git thất bại, mã thoát 128
 
-1. Dừng lượt cũ nếu đang chạy, đóng cửa sổ khởi chạy, giải nén **BMH-Team-Windows-v1.1.3.zip** vào một thư mục mới ngoài repo rồi mở **MO-BMH-TEAM.cmd**. Giữ nguyên `%LOCALAPPDATA%\BMHTeam` để dùng lại hai phiên đăng nhập và model đã chọn.
+1. Dừng lượt cũ nếu đang chạy, đóng cửa sổ khởi chạy, giải nén **BMH-Team-Windows-v1.1.4.zip** vào một thư mục mới ngoài repo rồi mở **MO-BMH-TEAM.cmd**. Giữ nguyên `%LOCALAPPDATA%\BMHTeam` để dùng lại hai phiên đăng nhập và model đã chọn.
 2. Trong GitHub Desktop, chọn đúng repo **`D:\KBL\build-my-home`** và bấm **Fetch origin** ngay trước khi giao việc. Nếu Desktop báo lỗi, xử lý đăng nhập/quyền truy cập theo thông báo của Desktop trước.
 3. Trong BMH Team, điền **`D:\KBL\build-my-home`**, chọn **GitHub Desktop — đã Fetch origin**, giữ mục tiêu công việc rồi bấm **Phân việc & làm song song**.
 
@@ -64,7 +70,7 @@ Chế độ Desktop chỉ nhận `FETCH_HEAD` có commit khớp `origin/main` v�
 - **Mức suy luận** chỉ hiện các mức model đang chọn hỗ trợ. Khi ông đổi model, công cụ giữ mức hiện có nếu model mới hỗ trợ; nếu không, nó chọn và hiển thị mức mặc định model mới trả về, rồi lưu chính xác cả hai giá trị. Mức cao có thể chạy lâu hơn và dùng thêm hạn mức.
 - Cả hai danh sách phải tải thành công và cả hai lựa chọn phải hợp lệ trước khi giao việc. Nếu danh sách tải lỗi, đọc cảnh báo tại thẻ và bấm **Làm mới model**. Danh sách khả dụng không thay thế kiểm tra hạn mức: lỗi quyền truy cập hoặc quota khi suy luận vẫn sẽ dừng nhiệm vụ và báo lỗi.
 - Mỗi lần chạy truyền rõ `--model` và `-c model_reasoning_effort` vào `codex exec`. Tài khoản 1 lập kế hoạch bằng lựa chọn trên thẻ 1; hai phần việc dùng lựa chọn tương ứng. Model được chụp lại trong báo cáo của nhiệm vụ và bị khóa khi đang chạy.
-- Lựa chọn được lưu ở `%LOCALAPPDATA%\BMHTeam\model-settings.json`; hai phiên đăng nhập vẫn nằm trong các thư mục riêng. Nâng cấp bằng cách dừng nhiệm vụ nếu có, đóng bộ điều phối cũ, giải nén **BMH-Team-Windows-v1.1.3.zip** vào thư mục mới **ngoài repo dự án**, rồi mở **MO-BMH-TEAM.cmd**. Chọn repo Git thật như `D:\KBL\build-my-home`, không chọn thư mục giải nén công cụ. Phiên đăng nhập được dùng lại; kiểm tra model hợp lệ trước khi giao việc hoặc tiếp tục lượt cũ.
+- Lựa chọn được lưu ở `%LOCALAPPDATA%\BMHTeam\model-settings.json`; hai phiên đăng nhập vẫn nằm trong các thư mục riêng. Nâng cấp bằng cách dừng nhiệm vụ nếu có, đóng bộ điều phối cũ, giải nén **BMH-Team-Windows-v1.1.4.zip** vào thư mục mới **ngoài repo dự án**, rồi mở **MO-BMH-TEAM.cmd**. Chọn repo Git thật như `D:\KBL\build-my-home`, không chọn thư mục giải nén công cụ. Phiên đăng nhập được dùng lại; kiểm tra model hợp lệ trước khi giao việc hoặc tiếp tục lượt cũ.
 
 Nguồn chính thức: [Codex app-server và `model/list`](https://learn.chatgpt.com/docs/app-server), [chọn model](https://learn.chatgpt.com/docs/models) và [cấu hình theo lần chạy](https://learn.chatgpt.com/docs/developer-settings). Các test dùng tiến trình/đầu ra mô phỏng; kết quả không xác nhận suy luận thật trên hai tài khoản của người sử dụng.
 
