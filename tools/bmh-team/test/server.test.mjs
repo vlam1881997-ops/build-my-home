@@ -5,11 +5,14 @@ import os from 'node:os';import path from 'node:path';
 import {EventEmitter} from 'node:events';
 import http from 'node:http';
 import {createTeamServer,twoAccountsReady} from '../server.mjs';
+import {fixtureCatalog,fixtureSettings} from './model-fixtures.mjs';
+import {saveModelSettings} from '../models.mjs';
 
 class FakeWorker extends EventEmitter {
-  constructor(id,email){super();this.id=id;this.account=email?{email,planType:'plus'}:null;this.loginInfo=null;this.logins=0;}
-  get publicState(){return {id:this.id,account:this.account,connected:true,login:this.loginInfo,error:null};}
+  constructor(id,email){super();this.id=id;this.account=email?{email,planType:'plus'}:null;this.loginInfo=null;this.logins=0;this.modelCatalog=fixtureCatalog();this.modelReads=0;}
+  get publicState(){return {id:this.id,account:this.account,connected:true,login:this.loginInfo,error:null,modelCatalog:this.modelCatalog};}
   async refreshAccount(){return this.account;}
+  async refreshModels(){this.modelReads++;return this.modelCatalog;}
   async login(){this.logins++;this.loginInfo={authUrl:'https://auth.openai.com/authorize?state=fixture',loginId:'fixture'};}
   async logout(){this.account=null;}
   close(){}
@@ -17,6 +20,7 @@ class FakeWorker extends EventEmitter {
 async function fixture(t,{emails=['one@example.test','two@example.test'],jobFactory}={}) {
   const stateRoot=await mkdtemp(path.join(os.tmpdir(),'bmh-http-'));
   const workers=emails.map((email,i)=>new FakeWorker(i?'two':'one',email));
+  await saveModelSettings(stateRoot,fixtureSettings());
   const app=await createTeamServer({stateRoot,workers,codex:{command:'fixture'},git:'fixture',repoDefault:'/tmp/fixture-repo',jobFactory});
   await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));
   const url=`http://127.0.0.1:${app.server.address().port}`;
@@ -72,7 +76,7 @@ test('two concurrent run requests cannot create overlapping jobs',async t=>{
 test('source modes are explicit and invalid values cannot start a job or request offline execution',async t=>{
   const selected=[];
   const f=await fixture(t,{jobFactory:options=>{selected.push(options);return {publicState:{id:'fixture-source',status:'ready'},start:async()=>{},stop:async()=>{}};}});
-  const state=await (await fetch(f.url+'/api/state')).json();assert.equal(state.version,'1.1.1');assert.equal(state.sourceModeDefault,'fetch');
+  const state=await (await fetch(f.url+'/api/state')).json();assert.equal(state.version,'1.1.2');assert.equal(state.sourceModeDefault,'fetch');
   assert.deepEqual(state.sourceModeOptions.map(item=>item.id),['fetch','desktop']);
   for(const mode of ['offline','fixture',false,null])assert.equal((await f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Use source safely',sourceMode:mode})).status,400);
   assert.equal(selected.length,0);
@@ -129,4 +133,49 @@ test('corrupt persisted model settings block a run until a visible choice is sav
   assert.equal((await post('/api/run',{repo:'/tmp/fixture',goal:'Measured upgrade'})).status,400);
   assert.equal((await post('/api/settings',{worker:'one',model:'gpt-6.1-sol',reasoningEffort:'high'})).status,200);
   assert.equal(app.state().settingsWarning,null);
+});
+
+test('a fresh account catalog rejects old saved models before creating any Git job',async t=>{
+  let jobs=0;
+  const f=await fixture(t,{jobFactory:()=>{jobs++;throw Error('Should not create a worktree job');}});
+  const before=await readFile(path.join(f.stateRoot,'model-settings.json'),'utf8');
+  f.workers[0].refreshModels=async options=>{
+    assert.equal(options.force,true);f.workers[0].modelReads++;
+    f.workers[0].modelCatalog.options=f.workers[0].modelCatalog.options.filter(x=>x.id!=='gpt-6.1-sol');
+    return f.workers[0].modelCatalog;
+  };
+  const response=await f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Upgrade actual customer design'});
+  assert.equal(response.status,400);assert.match((await response.json()).error,/không có trong danh sách/);
+  assert.equal(jobs,0);assert.equal(f.app.state().run,null);assert.equal(f.app.state().busy,false);
+  assert.equal(f.app.state().workers[0].modelSettings.model,'gpt-6.1-sol');
+  assert.match(f.app.state().workers[0].modelSettingsWarning,/không có trong danh sách/);
+  assert.equal(await readFile(path.join(f.stateRoot,'model-settings.json'),'utf8'),before);
+});
+
+test('authenticated model refresh and settings are scoped to one account and its supported effort pair',async t=>{
+  const f=await fixture(t);const before=await readFile(path.join(f.stateRoot,'model-settings.json'),'utf8');
+  assert.equal((await f.post('/api/models',{worker:'one'},{'X-BMH-Team':''})).status,403);
+  assert.equal((await f.post('/api/models',{worker:'other'})).status,400);
+  f.workers[0].modelCatalog.options=f.workers[0].modelCatalog.options.filter(x=>x.id==='gpt-6-astra');
+  f.workers[0].modelCatalog.options[0].efforts=[{id:'xhigh',label:'Extra High'}];
+  const response=await f.post('/api/models',{worker:'one'});assert.equal(response.status,200);
+  const state=(await response.json()).state;
+  assert.equal(state.workers[0].modelCatalog.options.length,1);assert.equal(state.workers[1].modelCatalog.options.length,3);
+  assert.equal(f.workers[0].modelReads,1);assert.equal(f.workers[1].modelReads,0);
+  assert.equal(await readFile(path.join(f.stateRoot,'model-settings.json'),'utf8'),before);
+  assert.equal((await f.post('/api/settings',{worker:'one',model:'gpt-6.1-sol',reasoningEffort:'high'})).status,400);
+  assert.equal((await f.post('/api/settings',{worker:'one',model:'gpt-6-astra',reasoningEffort:'high'})).status,400);
+  assert.equal((await f.post('/api/settings',{worker:'one',model:'gpt-6-astra',reasoningEffort:'xhigh'})).status,200);
+  assert.equal(f.app.state().workers[0].modelSettingsWarning,null);
+});
+
+test('stop during model discovery cannot create a job after the discovery finishes',async t=>{
+  let jobs=0,release,entered;
+  const ready=new Promise(resolve=>entered=resolve);const gate=new Promise(resolve=>release=resolve);
+  const f=await fixture(t,{jobFactory:()=>{jobs++;throw Error('Should not create a worktree job');}});
+  f.workers[0].refreshModels=async()=>{entered();await gate;return f.workers[0].modelCatalog;};
+  const request=f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Upgrade after discovery'});
+  await ready;assert.equal((await f.post('/api/models',{worker:'two'})).status,400);
+  assert.equal((await f.post('/api/stop',{})).status,200);release();
+  assert.equal((await request).status,400);assert.equal(jobs,0);assert.equal(f.app.state().run,null);
 });

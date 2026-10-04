@@ -6,7 +6,7 @@ import {randomBytes,timingSafeEqual} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import {CodexWorker,privateStateRoot,findCodex,findGit,scrub} from './core.mjs';
 import {TeamJob} from './jobs.mjs';
-import {MODEL_OPTIONS,REASONING_OPTIONS,loadModelSettings,saveModelSettings,validateModelSettings} from './models.mjs';
+import {loadModelSettings,saveModelSettings,validateCatalogSettings,modelSettingsWarning} from './models.mjs';
 import {SOURCE_MODE_OPTIONS,validateSourceMode} from './git-source.mjs';
 
 const toolRoot=path.dirname(fileURLToPath(import.meta.url));
@@ -27,7 +27,7 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
   const token=randomBytes(32).toString('hex');let job=null;let shuttingDown=false;let runPreparing=false;let runEpoch=0;
   const isBusy=()=>runPreparing || Boolean(job && !terminalStates.has(job.publicState.status));
   const sourceModeDefault=/(?:^|[\\/])GitHubDesktop(?:[\\/]|$)/i.test(String(git || ''))?'desktop':'fetch';
-  const state=()=>({version:'1.1.1',workers:workers.map(w=>({...w.publicState,modelSettings:{...modelSettings[w.id]}})),modelOptions:MODEL_OPTIONS,reasoningOptions:REASONING_OPTIONS,sourceModeOptions:SOURCE_MODE_OPTIONS,sourceModeDefault,settingsWarning,settingsRevision,run:job?.publicState||null,repoDefault,capabilities:{git:Boolean(git),codex:Boolean(codex),windows:process.platform==='win32'},busy:isBusy()||settingsSaving});
+  const state=()=>({version:'1.1.2',workers:workers.map(w=>({...w.publicState,modelSettings:{...modelSettings[w.id]},modelSettingsWarning:modelSettingsWarning(modelSettings[w.id],w.modelCatalog)})),sourceModeOptions:SOURCE_MODE_OPTIONS,sourceModeDefault,settingsWarning,settingsRevision,run:job?.publicState||null,repoDefault,capabilities:{git:Boolean(git),codex:Boolean(codex),windows:process.platform==='win32'},busy:isBusy()||settingsSaving});
   const json=(res,status,data)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));};
   const server=http.createServer(async(req,res)=>{
     const address=server.address();const allowedHost=`127.0.0.1:${address.port}`;const origin=`http://${allowedHost}`;
@@ -46,7 +46,7 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
         if(pathname==='/api/settings'){
           if(isBusy() || settingsSaving || shuttingDown)throw Error('Chờ nhiệm vụ kết thúc trước khi đổi model.');
           if(!worker)throw Error('Chọn thẻ tài khoản 1 hoặc 2.');
-          const selected=validateModelSettings(body);
+          const selected=validateCatalogSettings(body,worker.modelCatalog);
           settingsSaving=true;
           try {
             const updated={...modelSettings,[worker.id]:selected};
@@ -54,6 +54,12 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
             modelSettings=updated;settingsWarning=null;settingsRevision++;
             return json(res,200,{ok:true,modelSettings:selected,state:{...state(),busy:isBusy()}});
           } finally {settingsSaving=false;}
+        }
+        if(pathname==='/api/models'){
+          if(isBusy() || settingsSaving || shuttingDown)throw Error('Chờ nhiệm vụ kết thúc trước khi lấy model.');
+          if(!worker)throw Error('Chọn thẻ tài khoản 1 hoặc 2.');
+          await worker.refreshModels({force:true});
+          return json(res,200,{ok:true,state:state()});
         }
         if(pathname==='/api/login'){
           if(isBusy())throw Error('Dừng nhiệm vụ trước khi thay đổi tài khoản.');
@@ -79,6 +85,9 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
           for(const w of workers)await w.refreshAccount();
           if(ticket!==runEpoch || shuttingDown)throw Error('Nhiệm vụ đã dừng trước khi bắt đầu.');
           twoAccountsReady(workers);
+          await Promise.all(workers.map(w=>w.refreshModels({force:true})));
+          if(ticket!==runEpoch || shuttingDown)throw Error('Nhiệm vụ đã dừng trước khi bắt đầu.');
+          for(const w of workers)validateCatalogSettings(runModels[w.id],w.modelCatalog);
           const repo=String(body.repo||repoDefault).trim().replace(/^"|"$/g,'');const goal=String(body.goal||'').trim();
           if(!path.isAbsolute(repo))throw Error('Chọn đường dẫn đầy đủ tới thư mục BMH trên máy.');
           if(goal.length<5 || goal.length>12000)throw Error('Nhập mục tiêu từ 5 đến 12.000 ký tự.');
@@ -127,14 +136,14 @@ async function main() {
   const app=await createTeamServer({repoDefault});
   await new Promise((resolve,reject)=>{app.server.once('error',reject);app.server.listen(0,'127.0.0.1',resolve);});
   const url=`http://127.0.0.1:${app.server.address().port}/`;
-  process.stdout.write(`\nBMH Team v1.1.1: ${url}\nGiữ cửa sổ này mở. Chọn nguồn code, model, mức suy luận và giao việc cho hai tài khoản.\n`);
+  process.stdout.write(`\nBMH Team v1.1.2: ${url}\nGiữ cửa sổ này mở. Chọn model trong danh sách Codex của từng tài khoản rồi giao việc.\n`);
   if(!args.includes('--no-browser')){
     const command=process.platform==='win32'?'rundll32.exe':process.platform==='darwin'?'open':'xdg-open';
     const openArgs=process.platform==='win32'?['url.dll,FileProtocolHandler',url]:[url];
     const browser=spawn(command,openArgs,{stdio:'ignore',windowsHide:true});browser.on('error',()=>{});
   }
   for(const worker of app.workers)worker.start().catch(e=>{worker.error=scrub(e.message);worker.changed();});
-  const refresh=setInterval(()=>{for(const w of app.workers)if(!w.current && !w.loginInfo)w.refreshAccount().catch(()=>{});},15000);
+  const refresh=setInterval(()=>{for(const w of app.workers)if(!w.current && !w.loginInfo)w.refreshAccount().then(()=>{if(w.account && w.modelCatalog.status==='idle')return w.refreshModels();}).catch(()=>{});},15000);
   refresh.unref();
   for(const signal of ['SIGINT','SIGTERM'])process.once(signal,()=>{clearInterval(refresh);app.close().finally(()=>process.exit(0));});
 }

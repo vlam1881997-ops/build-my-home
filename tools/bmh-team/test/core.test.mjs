@@ -5,6 +5,7 @@ import {mkdtemp,rm,readFile,writeFile,mkdir,readdir} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {CodexWorker,isolatedEnvironment,scrub} from '../core.mjs';
+import {fixtureCatalog} from './model-fixtures.mjs';
 
 const fakeAuth=(email='one@example.test',subject=email)=>({auth_mode:'chatgpt',tokens:{id_token:'eyJmaXh0dXJlIjp0cnVlfQ.'+Buffer.from(JSON.stringify({sub:subject,email,'https://api.openai.com/auth':{chatgpt_plan_type:'plus'}})).toString('base64url')+'.not-a-real-signature',access_token:'fixture-access-never-public',refresh_token:'fixture-refresh-never-public'}});
 
@@ -16,6 +17,15 @@ import path from 'node:path';
 const args=process.argv.slice(2), home=process.env.CODEX_HOME;
 const mode=process.env.BMH_TEST_CASE || 'complete';
 const authFile=path.join(home,'auth.json');
+if(args[0]==='app-server') {
+  const {createInterface}=await import('node:readline');
+  for await(const line of createInterface({input:process.stdin})) {
+    const request=JSON.parse(line);
+    if(request.method==='initialize')process.stdout.write(JSON.stringify({id:request.id,result:{userAgent:'fixture'}})+'\n');
+    if(request.method==='model/list')process.stdout.write(JSON.stringify({id:request.id,result:{data:['gpt-6.1-sol','gpt-6-astra','gpt-6-sol'].map(model=>({id:model,model,displayName:model,hidden:false,isDefault:model==='gpt-6.1-sol',defaultReasoningEffort:'medium',supportedReasoningEfforts:['medium','high','xhigh'].map(reasoningEffort=>({reasoningEffort,description:'Fixture'}))})),nextCursor:null}})+'\n');
+  }
+  process.exit(0);
+}
 if(args[0]==='login' && args[1]==='status') {
   let auth;try{auth=JSON.parse(await readFile(authFile,'utf8'));}catch{}
   process.stderr.write(auth?'Logged in using '+(auth.auth_mode==='chatgpt'?'ChatGPT':'an API key')+'\n':'Not logged in\n');
@@ -61,9 +71,12 @@ async function workerFixture(t,{mode='complete',loggedIn=true,auth=fakeAuth(),lo
   const worker=new CodexWorker({id:'one',stateRoot:root,codex:{command:process.execPath,prefix:[script]},loginTimeoutMs,spawnImpl:(command,args,options)=>{
     calls.push({command,args,options});return spawn(command,args,{...options,env:{...options.env,BMH_TEST_CASE:mode}});
   }});
+  worker.modelCatalog=fixtureCatalog();
   t.after(async()=>{await worker.close();await rm(root,{recursive:true,force:true});});
   return {root,home,worker,calls};
 }
+
+const runSelected=(worker,prompt,options={})=>worker.run(prompt,{model:'gpt-6.1-sol',reasoningEffort:'high',...options});
 
 const waitFor=async(predicate)=>{for(let i=0;i<100 && !predicate();i++)await new Promise(resolve=>setTimeout(resolve,10));assert.ok(predicate(),'fixture timed out');};
 
@@ -96,12 +109,13 @@ test('browser login uses stable CLI login, confirms status after exit and logout
   await waitFor(()=>Boolean(f.worker.account));assert.equal(f.worker.loginInfo,null);
   await f.worker.logout();assert.equal(f.worker.account,null);
   assert.ok(f.calls.some(call=>call.args.at(-1)==='logout'));
-  assert.ok(f.calls.every(call=>!call.args.includes('--device-auth') && !call.args.includes('app-server')));
+  assert.ok(f.calls.every(call=>!call.args.includes('--device-auth') && !call.args.includes('exec')));
+  assert.ok(f.calls.some(call=>call.args.includes('app-server')));
 });
 test('exec uses stdin, explicit sandbox/approval, JSON schema and actual final output file',async t=>{
   const f=await workerFixture(t);const schema={type:'object',properties:{answer:{type:'string'}}};
   const progress=[];f.worker.on('progress',text=>progress.push(text));
-  const output=JSON.parse(await f.worker.run('Bản vẽ tầng 2 — không mất vật liệu',{cwd:f.root,readOnly:true,outputSchema:schema,timeoutMs:2000}));
+  const output=JSON.parse(await runSelected(f.worker,'Bản vẽ tầng 2 — không mất vật liệu',{cwd:f.root,readOnly:true,outputSchema:schema,timeoutMs:2000}));
   assert.equal(output.prompt,'Bản vẽ tầng 2 — không mất vật liệu');assert.deepEqual(output.schema,schema);
   assert.equal(output.sandbox,'read-only');assert.equal(output.approval,'never');assert.equal(output.cwd,f.root);
   assert.equal(output.model,'gpt-6.1-sol');assert.equal(output.reasoning,'model_reasoning_effort="high"');
@@ -112,53 +126,53 @@ test('exec uses stdin, explicit sandbox/approval, JSON schema and actual final o
   assert.ok(!(await readdir(f.home)).some(file=>file.startsWith('run-')));
 });
 test('write tasks retain workspace-write sandbox',async t=>{
-  const f=await workerFixture(t);const output=JSON.parse(await f.worker.run('task',{cwd:f.root}));assert.equal(output.sandbox,'workspace-write');
+  const f=await workerFixture(t);const output=JSON.parse(await runSelected(f.worker,'task',{cwd:f.root}));assert.equal(output.sandbox,'workspace-write');
 });
 test('a chosen model and effort override defaults in the actual child process',async t=>{
   const f=await workerFixture(t);const authBefore=await readFile(path.join(f.home,'auth.json'),'utf8');
-  const output=JSON.parse(await f.worker.run('Astra measured design',{cwd:f.root,model:'gpt-6-astra',reasoningEffort:'xhigh'}));
+  const output=JSON.parse(await runSelected(f.worker,'Astra measured design',{cwd:f.root,model:'gpt-6-astra',reasoningEffort:'xhigh'}));
   assert.equal(output.model,'gpt-6-astra');assert.equal(output.reasoning,'model_reasoning_effort="xhigh"');
   assert.equal(output.sandbox,'workspace-write');assert.equal(await readFile(path.join(f.home,'auth.json'),'utf8'),authBefore);
 });
 test('invalid model input is rejected before any CLI or authentication process',async t=>{
   const f=await workerFixture(t);
-  await assert.rejects(f.worker.run('task',{cwd:f.root,model:'gpt-6-astra --yolo'}),/Model/);
-  await assert.rejects(f.worker.run('task',{cwd:f.root,reasoningEffort:'ultra;echo bad'}),/suy luận/);
+  await assert.rejects(runSelected(f.worker,'task',{cwd:f.root,model:'gpt-6-astra --yolo'}),/Model/);
+  await assert.rejects(runSelected(f.worker,'task',{cwd:f.root,reasoningEffort:'ultra;echo bad'}),/suy luận/);
   assert.equal(f.calls.length,0);assert.equal(f.worker.current,null);
 });
 test('an unsupported model stops once without a smaller model or another provider',async t=>{
   const f=await workerFixture(t,{mode:'unsupported-model'});
-  await assert.rejects(f.worker.run('task',{cwd:f.root,model:'gpt-6-astra',reasoningEffort:'high'}),/chưa hỗ trợ model/);
+  await assert.rejects(runSelected(f.worker,'task',{cwd:f.root,model:'gpt-6-astra',reasoningEffort:'high'}),/chưa hỗ trợ model/);
   const calls=f.calls.filter(call=>call.args.includes('exec'));assert.equal(calls.length,1);
   assert.equal(calls[0].args[calls[0].args.indexOf('--model')+1],'gpt-6-astra');
 });
 test('nonzero exit, failed turn or missing completion never report completed work',async t=>{
   for(const mode of ['nonzero','failed-turn','missing-completion']) {
-    const f=await workerFixture(t,{mode});await assert.rejects(f.worker.run('task',{cwd:f.root}),/chưa hoàn thành/);assert.equal(f.worker.current,null);
+    const f=await workerFixture(t,{mode});await assert.rejects(runSelected(f.worker,'task',{cwd:f.root}),/chưa hoàn thành/);assert.equal(f.worker.current,null);
   }
 });
 test('Stop cancels a real running CLI process and releases the worker',async t=>{
   const f=await workerFixture(t,{mode:'hang'});
-  const run=f.worker.run('task',{cwd:f.root,timeoutMs:5000});const stopped=assert.rejects(run,/đã dừng/);
+  const run=runSelected(f.worker,'task',{cwd:f.root,timeoutMs:5000});const stopped=assert.rejects(run,/đã dừng/);
   await waitFor(()=>Boolean(f.worker.child));await f.worker.interrupt();await stopped;
   assert.equal(f.worker.current,null);assert.equal(f.worker.processes.size,0);
 });
 test('Stop during preparation prevents a later exec from starting',async t=>{
   const f=await workerFixture(t);let release;
   f.worker.prepare=()=>new Promise(resolve=>{release=resolve;});
-  const run=f.worker.run('task',{cwd:f.root});const stopped=assert.rejects(run,/đã dừng/);
+  const run=runSelected(f.worker,'task',{cwd:f.root});const stopped=assert.rejects(run,/đã dừng/);
   await f.worker.interrupt();release();await stopped;assert.equal(f.calls.length,0);
 });
 test('hung CLI times out, duplicate task is rejected and quota failure has no API fallback',async t=>{
   const f=await workerFixture(t,{mode:'hang'});
-  const run=f.worker.run('task',{cwd:f.root,timeoutMs:100});const timed=assert.rejects(run,/hết thời gian/);
-  await assert.rejects(f.worker.run('other',{cwd:f.root}),/nhiệm vụ khác/);await timed;
-  const quota=await workerFixture(t,{mode:'quota'});await assert.rejects(quota.worker.run('task',{cwd:quota.root}),/hạn mức/);
+  const run=runSelected(f.worker,'task',{cwd:f.root,timeoutMs:100});const timed=assert.rejects(run,/hết thời gian/);
+  await assert.rejects(runSelected(f.worker,'other',{cwd:f.root}),/nhiệm vụ khác/);await timed;
+  const quota=await workerFixture(t,{mode:'quota'});await assert.rejects(runSelected(quota.worker,'task',{cwd:quota.root}),/hạn mức/);
   assert.equal(quota.calls.filter(call=>call.args.includes('exec')).length,1);
 });
 test('public CLI errors redact JSON-shaped credentials and bearer values',async t=>{
   const message=scrub('Authorization: Bearer private-value "access_token":"fixture-value" refresh_token="fixture-secret" sk-abcdefghijk123456789');
   for(const secret of ['private-value','fixture-value','fixture-secret','sk-abcdefgh'])assert.ok(!message.includes(secret));
-  const f=await workerFixture(t,{mode:'secret-error'});await assert.rejects(f.worker.run('task',{cwd:f.root}));
+  const f=await workerFixture(t,{mode:'secret-error'});await assert.rejects(runSelected(f.worker,'task',{cwd:f.root}));
   assert.ok(!JSON.stringify(f.worker.publicState).includes('private-value'));assert.ok(!JSON.stringify(f.worker.publicState).includes('fixture-secret'));
 });

@@ -1,12 +1,12 @@
-# BMH Team v1.1.1
+# BMH Team v1.1.2
 
 Bộ điều phối của dự án BMH trên máy Windows: **hai tài khoản ChatGPT riêng, một mục tiêu, hai phiên Codex làm song song**. Công cụ dùng các lệnh ổn định `codex login`, `codex login status` và `codex exec` của Codex CLI chính thức, tạo worktree riêng, ghép kết quả vào một nhánh cục bộ và chạy kiểm tra. BMH Team là phần mềm riêng của dự án, không phải sản phẩm do OpenAI phát hành.
 
-**v1.1.1 sửa bước lấy nguồn Git:** có lựa chọn dùng lần **Fetch origin** vừa thực hiện trong GitHub Desktop, hiển thị nguyên nhân Git thất bại cùng đường dẫn nhật ký, và chỉ hiện thư mục xem lại khi worktree đã được tạo. Hai phiên đăng nhập và lựa chọn model hiện có được giữ trong `%LOCALAPPDATA%\BMHTeam`.
+**v1.1.2 lấy danh sách model riêng cho từng tài khoản từ Codex:** bỏ danh sách cố định của bộ chọn cũ. Model và mức suy luận phải có trong kết quả `model/list` của chính phiên đăng nhập trước khi giao việc. Lựa chọn cũ chưa được hỗ trợ sẽ hiện cảnh báo để ông chọn lại; không âm thầm đổi model. Bản này giữ chế độ **Fetch origin** qua GitHub Desktop, chi tiết lỗi Git và hai phiên đăng nhập ở `%LOCALAPPDATA%\BMHTeam`.
 
 ## Khi màn hình báo Git thất bại, mã thoát 128
 
-1. Dừng lượt cũ nếu đang chạy, đóng cửa sổ khởi chạy, giải nén **BMH-Team-Windows-v1.1.1.zip** vào một thư mục mới rồi mở **MO-BMH-TEAM.cmd**. Giữ nguyên `%LOCALAPPDATA%\BMHTeam` để dùng lại hai phiên đăng nhập và model đã chọn.
+1. Dừng lượt cũ nếu đang chạy, đóng cửa sổ khởi chạy, giải nén **BMH-Team-Windows-v1.1.2.zip** vào một thư mục mới rồi mở **MO-BMH-TEAM.cmd**. Giữ nguyên `%LOCALAPPDATA%\BMHTeam` để dùng lại hai phiên đăng nhập và model đã chọn.
 2. Trong GitHub Desktop, chọn đúng repo **`D:\KBL\build-my-home`** và bấm **Fetch origin** ngay trước khi giao việc. Nếu Desktop báo lỗi, xử lý đăng nhập/quyền truy cập theo thông báo của Desktop trước.
 3. Trong BMH Team, điền **`D:\KBL\build-my-home`**, chọn **GitHub Desktop — đã Fetch origin**, giữ mục tiêu công việc rồi bấm **Phân việc & làm song song**.
 
@@ -21,9 +21,9 @@ Chế độ Desktop chỉ nhận `FETCH_HEAD` có commit khớp `origin/main` v�
    powershell -NoProfile -ExecutionPolicy Bypass -File .\start.ps1 -RepoPath "C:\Users\Tên ông\Documents\GitHub\build-my-home"
    ```
 
-   Chính sách này chỉ áp dụng cho phiên PowerShell vừa mở. Launcher nhận Git từ GitHub Desktop và kiểm tra Codex CLI đúng phiên bản `0.158.0`. Nếu cần, nó cài gói chính thức `@openai/codex@0.158.0` cùng các thành phần phù hợp với Windows vào `%LOCALAPPDATA%\BMHTeam\runtime\codex-0.158.0`. Máy cần Node.js 64-bit (`x64` hoặc `arm64`).
+   Chính sách này chỉ áp dụng cho phiên PowerShell vừa mở. Launcher nhận Git từ GitHub Desktop và kiểm tra Codex CLI đúng phiên bản `0.160.0`. Nếu cần, nó cài gói chính thức `@openai/codex@0.160.0` cùng các thành phần phù hợp với Windows vào `%LOCALAPPDATA%\BMHTeam\runtime\codex-0.160.0`. Máy cần Node.js 64-bit (`x64` hoặc `arm64`).
 3. **Đăng nhập lần lượt hai tài khoản.** Trên bảng vừa mở, bấm **Đăng nhập** ở thẻ thứ nhất, mở liên kết OpenAI và hoàn tất đăng nhập. Khi thẻ báo đã kết nối, làm tiếp thẻ thứ hai. Mở liên kết của tài khoản thứ hai trong hồ sơ Chrome khác hoặc cửa sổ ẩn danh để không chọn nhầm tài khoản thứ nhất. Không nhập mật khẩu hay API key vào BMH Team. Giữ cửa sổ PowerShell mở.
-4. **Chọn model và giao một mục tiêu.** Mỗi thẻ có **Model giao việc** và **Mức suy luận**, tự lưu ngay khi đổi. Kiểm tra thư mục BMH và bộ chọn **Lấy mã nguồn mới**, nhập việc cần hoàn thiện rồi bấm **Phân việc & làm song song**. Bộ điều phối chia nhiệm vụ, chạy hai phiên, ghép code và kiểm tra. Khi sẵn sàng, mở thư mục/nhánh được báo, xem diff và kết quả. **Main và Vercel hiện tại chưa đổi**; chỉ triển khai sau khi ông chủ động ghép nhánh qua quy trình GitHub của dự án.
+4. **Chọn model và giao một mục tiêu.** Sau khi đăng nhập, mỗi thẻ tự tải danh sách model của chính phiên Codex. Chọn **Model giao việc** và **Mức suy luận** trong danh sách, tự lưu ngay khi đổi. Nếu lựa chọn cũ báo không được hỗ trợ, chọn lại trên từng thẻ; có thể bấm **Làm mới model** để tải lại. Nút giao việc chỉ mở khi cả hai lựa chọn hợp lệ. Kiểm tra thư mục BMH và bộ chọn **Lấy mã nguồn mới**, nhập việc cần hoàn thiện rồi bấm **Phân việc & làm song song**. Bộ điều phối chia nhiệm vụ, chạy hai phiên, ghép code và kiểm tra. Khi sẵn sàng, mở thư mục/nhánh được báo, xem diff và kết quả. **Main và Vercel hiện tại chưa đổi**; chỉ triển khai sau khi ông chủ động ghép nhánh qua quy trình GitHub của dự án.
 
 ## Chọn cách lấy mã nguồn
 
@@ -34,16 +34,14 @@ Chế độ Desktop chỉ nhận `FETCH_HEAD` có commit khớp `origin/main` v�
 
 ## Chọn model khi giao việc
 
-- Chọn sẵn **GPT-6.1 Sol + High** cho cả hai thẻ. Chọn **GPT-6 Astra** cho việc khó nhất, hoặc **GPT-6 Sol** nếu phù hợp quyền tài khoản. Có thể đặt hai thẻ khác nhau.
-- Mức suy luận: **High**, **Extra High** hoặc **Medium**. Mức cao thường tốn thêm thời gian và hạn mức. Danh sách là lựa chọn cấu hình, không phải kiểm tra quyền dùng model của tài khoản.
-- Mỗi lần chạy truyền rõ `--model` và `-c model_reasoning_effort` vào lệnh `codex exec`. Tài khoản 1 lập kế hoạch bằng model đã chọn trên thẻ 1; hai phần việc sau đó dùng model tương ứng. Cấu hình trong repo không hạ lựa chọn này xuống model khác.
-- Bảng tiến độ, nhật ký và báo cáo giữ model đã giao cho từng phần việc. Trong khi nhiệm vụ đang chạy, bộ chọn bị khóa; đổi sau khi kết thúc để áp dụng cho lượt tiếp theo.
-- Lựa chọn được lưu ở `%LOCALAPPDATA%\BMHTeam\model-settings.json`; hai phiên đăng nhập vẫn nằm trong thư mục riêng hiện có. Mở gói nâng cấp ở thư mục mới để dùng lại đăng nhập. Không chép gói lên repo đang làm nếu muốn tránh thay đổi chưa commit.
-- Khi tài khoản/CLI chưa hỗ trợ model, mức suy luận hoặc đã hết quota, nhiệm vụ dừng và báo lỗi. Không tự chuyển xuống model khác, tài khoản khác hay API tính phí.
+- Mỗi tài khoản dùng danh sách riêng do `codex app-server` trả về qua `model/list`, gồm tên model, mức suy luận được hỗ trợ và giá trị mặc định. Danh sách tự tải khi mở bộ điều phối và sau khi đăng nhập; **Làm mới model** tải lại cho riêng thẻ đó. Model có nhãn **Codex đề xuất** là mục `isDefault` trong kết quả, không phải cam kết chất lượng hay quyền suy luận luôn sẵn có.
+- Không dùng danh sách model cố định chung cho hai thẻ. `gpt-6.1-sol` được chọn ở bản cũ có thể không được phiên ChatGPT/Codex hiện tại hỗ trợ. Khi model hoặc mức suy luận đã lưu không nằm trong danh sách của tài khoản, bộ chọn hiện chỗ trống và cảnh báo, giữ nguyên dữ liệu đã lưu cho đến khi ông chọn lại. Không tự hạ model, đổi tài khoản hoặc gọi API tính phí.
+- **Mức suy luận** chỉ hiện các mức model đang chọn hỗ trợ. Khi ông đổi model, công cụ giữ mức hiện có nếu model mới hỗ trợ; nếu không, nó chọn và hiển thị mức mặc định model mới trả về, rồi lưu chính xác cả hai giá trị. Mức cao có thể chạy lâu hơn và dùng thêm hạn mức.
+- Cả hai danh sách phải tải thành công và cả hai lựa chọn phải hợp lệ trước khi giao việc. Nếu danh sách tải lỗi, đọc cảnh báo tại thẻ và bấm **Làm mới model**. Danh sách khả dụng không thay thế kiểm tra hạn mức: lỗi quyền truy cập hoặc quota khi suy luận vẫn sẽ dừng nhiệm vụ và báo lỗi.
+- Mỗi lần chạy truyền rõ `--model` và `-c model_reasoning_effort` vào `codex exec`. Tài khoản 1 lập kế hoạch bằng lựa chọn trên thẻ 1; hai phần việc dùng lựa chọn tương ứng. Model được chụp lại trong báo cáo của nhiệm vụ và bị khóa khi đang chạy.
+- Lựa chọn được lưu ở `%LOCALAPPDATA%\BMHTeam\model-settings.json`; hai phiên đăng nhập vẫn nằm trong các thư mục riêng. Nâng cấp bằng cách dừng nhiệm vụ nếu có, đóng bộ điều phối cũ, giải nén **BMH-Team-Windows-v1.1.2.zip** vào thư mục mới **ngoài repo dự án**, rồi mở **MO-BMH-TEAM.cmd**. Chọn repo Git thật như `D:\KBL\build-my-home`, không chọn thư mục giải nén công cụ. Phiên đăng nhập được dùng lại; kiểm tra và chọn model hợp lệ trước lượt chạy mới.
 
-Để nâng cấp từ v1.0.1 hoặc v1.1.0: dừng nhiệm vụ đang chạy nếu có, đóng cửa sổ khởi chạy cũ, giải nén **BMH-Team-Windows-v1.1.1.zip** sang thư mục mới rồi mở **MO-BMH-TEAM.cmd** bên trong. Trong bảng mới, chọn thư mục repo Git thật, ví dụ `D:\KBL\build-my-home`; không chọn thư mục giải nén gói công cụ. Hai phiên đăng nhập và cấu hình model ở `%LOCALAPPDATA%\BMHTeam` được dùng lại.
-
-Nguồn chính thức: [chọn model](https://learn.chatgpt.com/docs/models) và [cấu hình theo lần chạy](https://learn.chatgpt.com/docs/developer-settings). Các test dùng tiến trình mô phỏng, không gọi suy luận tính hạn mức và không xác nhận mọi tài khoản đã có quyền vào từng model.
+Nguồn chính thức: [Codex app-server và `model/list`](https://learn.chatgpt.com/docs/app-server), [chọn model](https://learn.chatgpt.com/docs/models) và [cấu hình theo lần chạy](https://learn.chatgpt.com/docs/developer-settings). Các test dùng tiến trình/đầu ra mô phỏng; kết quả không xác nhận suy luận thật trên hai tài khoản của người sử dụng.
 
 ## Phạm vi thực tế
 

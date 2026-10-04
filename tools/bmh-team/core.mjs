@@ -5,7 +5,8 @@ import {mkdir, writeFile, access, readdir, readFile, mkdtemp, rm, stat} from 'no
 import {createHash} from 'node:crypto';
 import path from 'node:path';
 import os from 'node:os';
-import {DEFAULT_MODEL_SETTINGS,validateModelSettings} from './models.mjs';
+import {emptyModelCatalog,validateModelSettings,validateCatalogSettings} from './models.mjs';
+import {readCodexModelCatalog} from './model-catalog.mjs';
 import {redactProcessText} from './git-source.mjs';
 
 const exec = promisify(execFile);
@@ -123,7 +124,7 @@ function commandError(result) {
 }
 
 export class CodexWorker extends EventEmitter {
-  constructor({id,stateRoot,codex,spawnImpl=spawn,loginTimeoutMs=300000}) {
+  constructor({id,stateRoot,codex,spawnImpl=spawn,loginTimeoutMs=300000,modelTimeoutMs=20000}) {
     super();
     if(!['one','two'].includes(id))throw Error('Thẻ tài khoản không hợp lệ.');
     this.id=id;this.stateRoot=stateRoot;this.codex=codex;this.spawnImpl=spawnImpl;this.loginTimeoutMs=loginTimeoutMs;
@@ -131,8 +132,9 @@ export class CodexWorker extends EventEmitter {
     this.account=null;this.identity=null;this.loginInfo=null;this.error=null;
     this.child=null;this.current=null;this.preparing=null;this.refreshing=null;this.loginProcess=null;
     this.processes=new Set();this.runEpoch=0;this.closed=false;
+    this.modelCatalog=emptyModelCatalog();this.modelRefreshing=null;this.modelEntry=null;this.modelEpoch=0;this.modelTimeoutMs=modelTimeoutMs;
   }
-  get publicState() {return {id:this.id,account:this.account,connected:Boolean(this.account),login:this.loginInfo,error:this.error};}
+  get publicState() {return {id:this.id,account:this.account,connected:Boolean(this.account),login:this.loginInfo,error:this.error,modelCatalog:structuredClone(this.modelCatalog)};}
   changed() {this.emit('change',this.publicState);}
   async prepare() {
     if(this.closed)throw Error('BMH Team đã đóng. Mở lại bộ điều phối.');
@@ -147,11 +149,11 @@ export class CodexWorker extends EventEmitter {
     })().finally(()=>{this.preparing=null;});
     return this.preparing;
   }
-  async start() {await this.prepare();return this.refreshAccount();}
+  async start() {await this.prepare();await this.refreshAccount();if(this.account)await this.refreshModels();return this.account;}
 
   // All invocations are direct, shell-free, bounded CLI processes. `close`
   // waits for stdio to drain; successful text alone is never a successful job.
-  command(args,{cwd=this.home,input='',timeoutMs=20000,onLine}={}) {
+  command(args,{cwd=this.home,input='',timeoutMs=20000,onLine,keepStdinOpen=false}={}) {
     if(this.closed)throw Error('BMH Team đã đóng.');
     const child=this.spawnImpl(this.codex.command,[...this.codex.prefix,...args],{
       cwd,env:isolatedEnvironment(this.home),stdio:['pipe','pipe','pipe'],windowsHide:true,detached:process.platform!=='win32'
@@ -188,12 +190,12 @@ export class CodexWorker extends EventEmitter {
       finish(reason,{code,signal,stdout,stderr});
     });
     child.stdin.on('error',()=>{});
-    child.stdin.end(input);
+    if(!keepStdinOpen)child.stdin.end(input);
     return entry;
   }
 
   async refreshAccount() {
-    if(this.loginProcess || this.current)return this.account;
+    if(this.loginProcess || this.current || this.modelRefreshing)return this.account;
     if(this.refreshing)return this.refreshing;
     this.refreshing=(async()=>{
       await this.prepare();
@@ -203,6 +205,7 @@ export class CodexWorker extends EventEmitter {
         const file=path.join(this.home,'auth.json');
         try {if((await stat(file)).size<=1024*1024)label=accountLabel(JSON.parse(await readFile(file,'utf8')));} catch {}
       }
+      if(this.identity!==label?.identity){this.modelEpoch++;this.modelCatalog=emptyModelCatalog();}
       this.account=label?.account || null;this.identity=label?.identity || null;
       this.error=result.code===0 && !label?'Không nhận diện được tài khoản ChatGPT trong phiên riêng. Đăng xuất thẻ này và đăng nhập lại.':null;
       this.changed();return this.account;
@@ -210,11 +213,43 @@ export class CodexWorker extends EventEmitter {
     return this.refreshing;
   }
 
+  async refreshModels({force=false}={}) {
+    if(this.closed)throw Error('BMH Team đã đóng.');
+    if(this.current || this.loginInfo)throw Error('Chờ nhiệm vụ hoặc đăng nhập kết thúc trước khi lấy model.');
+    if(!this.account)throw Error('Đăng nhập tài khoản ChatGPT trên thẻ này trước khi lấy model.');
+    if(this.modelRefreshing)return this.modelRefreshing;
+    if(!force && this.modelCatalog.status==='ready')return this.modelCatalog;
+    const ticket=++this.modelEpoch;const identity=this.identity;
+    this.modelCatalog={...emptyModelCatalog(),status:'loading'};this.changed();
+    this.modelRefreshing=(async()=>{
+      await this.prepare();
+      const options=await readCodexModelCatalog(onLine=>{
+        const entry=this.command(['app-server'],{timeoutMs:this.modelTimeoutMs,onLine,keepStdinOpen:true});
+        this.modelEntry=entry;return entry;
+      });
+      if(this.closed || ticket!==this.modelEpoch || identity!==this.identity)throw Error('Tài khoản thay đổi trong khi lấy model.');
+      this.modelCatalog={status:'ready',options,updatedAt:new Date().toISOString(),error:null};
+      this.changed();return this.modelCatalog;
+    })().catch(error=>{
+      if(!this.closed && ticket===this.modelEpoch){this.modelCatalog={...emptyModelCatalog(),status:'error',error:scrub(error.message)};this.changed();}
+      throw error;
+    }).finally(()=>{this.modelRefreshing=null;this.modelEntry=null;});
+    return this.modelRefreshing;
+  }
+
+  async cancelModelRefresh() {
+    this.modelEpoch++;
+    this.modelEntry?.cancel(Error('Dừng lấy model vì tài khoản thay đổi.'));
+    await this.modelRefreshing?.catch(()=>{});
+    this.modelCatalog=emptyModelCatalog();
+  }
+
   async login() {
     if(this.current)throw Error('Dừng nhiệm vụ trước khi thay đổi tài khoản.');
     if(this.loginProcess)return this.loginInfo;
     if(this.loginInfo)throw Error('Đăng nhập đang được chuẩn bị.');
     this.loginInfo={authUrl:null};this.error=null;this.account=null;this.identity=null;this.changed();
+    await this.cancelModelRefresh();
     try {await this.prepare();} catch(error){this.loginInfo=null;throw error;}
     let readyResolve;const ready=new Promise(resolve=>{readyResolve=resolve;});
     let loginBuffer='';
@@ -230,6 +265,7 @@ export class CodexWorker extends EventEmitter {
       if(result.code!==0)throw commandError(result);
       await this.refreshAccount();
       if(!this.account)throw Error('Chưa xác nhận được tài khoản ChatGPT. Đăng nhập lại trên thẻ này.');
+      await this.refreshModels();
     }).catch(error=>{
       if(this.loginProcess && this.loginProcess!==entry)return;
       this.loginProcess=null;this.loginInfo=null;this.error=scrub(error.message);this.changed();
@@ -247,14 +283,14 @@ export class CodexWorker extends EventEmitter {
     const previous=this.loginProcess;this.loginProcess=null;this.loginInfo=null;
     previous?.cancel(Error('Đã đóng cửa sổ đăng nhập.'));
     await previous?.finished.catch(()=>{});
-    await this.prepare();
+    await this.cancelModelRefresh();await this.prepare();
     const result=await this.command(['logout']).finished;
     if(result.code!==0)throw commandError(result);
     this.account=null;this.identity=null;this.error=null;this.changed();
   }
 
-  async run(prompt,{cwd,readOnly=false,outputSchema,timeoutMs=20*60*1000,model=DEFAULT_MODEL_SETTINGS.model,reasoningEffort=DEFAULT_MODEL_SETTINGS.reasoningEffort}={}) {
-    const selected=validateModelSettings({model,reasoningEffort});
+  async run(prompt,{cwd,readOnly=false,outputSchema,timeoutMs=20*60*1000,model,reasoningEffort}={}) {
+    const selected=validateCatalogSettings(validateModelSettings({model,reasoningEffort}),this.modelCatalog);
     if(this.current)throw Error('Tài khoản đang làm một nhiệm vụ khác.');
     if(this.loginInfo)throw Error('Hoàn tất đăng nhập trước khi giao việc.');
     // Reserve before the first await; Stop must also cancel preparation.
@@ -301,7 +337,7 @@ export class CodexWorker extends EventEmitter {
   }
   async interrupt() {this.runEpoch++;if(this.current){this.current.stopped=true;this.current.cancel?.(Error('Nhiệm vụ đã dừng.'));}}
   async close() {
-    this.closed=true;this.runEpoch++;
+    this.closed=true;this.runEpoch++;this.modelEpoch++;
     if(this.current)this.current.stopped=true;
     const pending=[...this.processes];
     for(const entry of pending)entry.cancel(Error('BMH Team đã đóng.'));

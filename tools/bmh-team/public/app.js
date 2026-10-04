@@ -20,8 +20,11 @@
   let previousResults = '';
   const loginSignatures = new Map();
   const selectSignatures = new Map();
+  const settingsDrafts = new Map();
   let previousSettingsWarning = null;
   const settingsPending = () => ['one', 'two'].some(id => pending.has(`settings:${id}`));
+  const loginPending = () => ['one', 'two'].some(id => pending.has(`login:${id}`) || pending.has(`logout:${id}`));
+  const modelsPending = () => ['one', 'two'].some(id => pending.has(`models:${id}`));
 
   const bounded = (value, max = 24000) => String(value ?? '').slice(0, max);
   const displayValue = (value, max = 48000) => bounded(typeof value === 'string' ? value : JSON.stringify(value, null, 2), max);
@@ -88,6 +91,67 @@
     }
   }
 
+  function catalogOptions(worker) {
+    return worker.modelCatalog?.status === 'ready' && Array.isArray(worker.modelCatalog.options) ? worker.modelCatalog.options : [];
+  }
+
+  function selectedModel(worker, settings = worker.modelSettings) {
+    return catalogOptions(worker).find(option => option.id === settings?.model);
+  }
+
+  function validModelSettings(worker) {
+    const model = selectedModel(worker);
+    return Boolean(model && Array.isArray(model.efforts) && model.efforts.some(option => option.id === worker.modelSettings?.reasoningEffort) && !worker.modelSettingsWarning);
+  }
+
+  function renderSelect(select, options, value, placeholder) {
+    const hasValue = options.some(option => option.id === value);
+    const signature = JSON.stringify([options, hasValue ? null : placeholder]);
+    if (selectSignatures.get(select.id) !== signature) {
+      selectSignatures.set(select.id, signature);
+      const elements = [];
+      if (!hasValue) {
+        const empty = document.createElement('option');
+        empty.value = ''; empty.textContent = placeholder; empty.disabled = true;
+        elements.push(empty);
+      }
+      for (const option of options) {
+        const element = document.createElement('option');
+        element.value = option.id; element.textContent = bounded(option.label, 160);
+        elements.push(element);
+      }
+      select.replaceChildren(...elements);
+    }
+    select.value = hasValue ? value : '';
+  }
+
+  function renderModelControls(worker, card, field, connected) {
+    const catalog = worker.modelCatalog || { status: 'idle', options: [] };
+    const options = catalogOptions(worker);
+    const settings = settingsDrafts.get(worker.id) || worker.modelSettings;
+    const model = selectedModel(worker, settings);
+    const efforts = Array.isArray(model?.efforts) ? model.efforts : [];
+    const modelSelect = card.querySelector('[data-setting="model"]');
+    const effortSelect = card.querySelector('[data-setting="reasoningEffort"]');
+    const loading = catalog.status === 'loading' || pending.has(`models:${worker.id}`);
+    const placeholder = !connected ? 'Đăng nhập để tải model' : loading ? 'Đang tải model…' : catalog.status === 'error' ? 'Chưa tải được model' : catalog.status !== 'ready' ? 'Đang chờ danh sách model…' : !options.length ? 'Chưa có model khả dụng' : settings?.model ? 'Model cũ chưa khả dụng — chọn lại' : 'Chọn model cho tài khoản này';
+    renderSelect(modelSelect, options.map(option => ({ id: option.id, label: `${option.label}${option.isDefault ? ' (Codex đề xuất)' : ''}` })), settings?.model, placeholder);
+    renderSelect(effortSelect, efforts, settings?.reasoningEffort, model ? 'Chọn mức suy luận' : 'Chọn model trước');
+    const locked = activeRun() || state.busy || settingsPending() || loginPending() || modelsPending() || pending.has('run') || connectionError;
+    modelSelect.disabled = locked || !connected || catalog.status !== 'ready' || !options.length;
+    effortSelect.disabled = locked || !connected || catalog.status !== 'ready' || !model || !efforts.length;
+    modelSelect.setAttribute('aria-invalid', catalog.status === 'ready' && !model ? 'true' : 'false');
+    effortSelect.setAttribute('aria-invalid', catalog.status === 'ready' && Boolean(model) && !efforts.some(option => option.id === settings?.reasoningEffort) ? 'true' : 'false');
+    const warning = worker.modelSettingsWarning || (catalog.status === 'error' ? catalog.error || 'Không tải được model của tài khoản này. Bấm Làm mới model để thử lại.' : catalog.status === 'ready' && !options.length ? 'Codex chưa trả về model khả dụng cho tài khoản này.' : catalog.status === 'ready' && !model ? 'Chọn lại model từ danh sách của tài khoản này. Lựa chọn cũ chưa được thay đổi.' : catalog.status === 'ready' && !efforts.some(option => option.id === settings?.reasoningEffort) ? 'Chọn mức suy luận mà model này hỗ trợ.' : '');
+    field('model-warning').hidden = !warning;
+    setText(field('model-warning'), bounded(warning, 1800));
+    const effort = efforts.find(option => option.id === settings?.reasoningEffort);
+    setText(field('model-save'), pending.has(`settings:${worker.id}`) ? 'Đang lưu lựa chọn…' : loading ? 'Đang tải model của tài khoản này…' : !connected ? 'Đăng nhập để chọn model.' : model && effort ? `${bounded(model.label, 140)} · ${bounded(effort.label, 80)}` : 'Chọn model và mức suy luận trước khi giao việc.');
+    const refreshButton = card.querySelector('[data-action="models"]');
+    refreshButton.disabled = locked || loading || !connected || Boolean(worker.login);
+    setText(refreshButton, loading ? 'Đang tải…' : 'Làm mới model');
+  }
+
   function renderAccounts() {
     const workers = state.workers || [];
     const emails = workers.filter(w => w.account && w.connected).map(w => w.account.email?.trim().toLowerCase()).filter(Boolean);
@@ -103,20 +167,7 @@
       const connected = loggedIn && Boolean(worker.connected);
       setText(field('email'), bounded(worker.account?.email || (loggedIn ? 'Đã đăng nhập ChatGPT' : 'Chưa đăng nhập'), 200));
       setText(field('plan'), worker.account?.planType ? `Gói ${bounded(worker.account.planType, 60)} · phiên Codex riêng` : loggedIn ? 'Phiên Codex đã có tài khoản.' : 'Dùng đăng nhập ChatGPT chính thức.');
-      for (const [key, options] of [['model', state.modelOptions], ['reasoningEffort', state.reasoningOptions]]) {
-        const select = card.querySelector(`[data-setting="${key}"]`);
-        const signature = JSON.stringify(options || []);
-        if (selectSignatures.get(select.id) !== signature) {
-          selectSignatures.set(select.id, signature);
-          select.replaceChildren(...(options || []).map(option => {
-            const element = document.createElement('option');
-            element.value = option.id; element.textContent = option.label; return element;
-          }));
-        }
-        if (!pending.has(`settings:${id}`)) select.value = worker.modelSettings?.[key] || '';
-        select.disabled = activeRun() || state.busy || settingsPending() || pending.has('run') || connectionError;
-      }
-      setText(field('model-save'), pending.has(`settings:${id}`) ? 'Đang lưu lựa chọn…' : `${worker.modelSettings?.model || '—'} · ${worker.modelSettings?.reasoningEffort || '—'}`);
+      renderModelControls(worker, card, field, connected);
       const duplicate = repeatedAccount && id === 'two';
       setText(field('status'), pending.has(`login:${id}`) ? 'Đang mở đăng nhập' : duplicate ? 'Trùng tài khoản' : connected ? 'Đã kết nối' : worker.login ? 'Chờ đăng nhập' : loggedIn ? 'Chờ kết nối' : 'Chưa kết nối');
       field('status').classList.toggle('connected', connected && !duplicate);
@@ -294,7 +345,11 @@
     if (!repoTouched && !$('repo-path').value && state.repoDefault) $('repo-path').value = state.repoDefault;
     renderSourceMode();
     const working = activeRun();
-    const canStart = accountCount === 2 && !repeatedAccount && gitReady && codexReady && !working && !state.busy && !state.settingsWarning && !settingsPending() && !pending.has('run') && !connectionError;
+    const modelsReady = ['one', 'two'].every(id => {
+      const worker = (state.workers || []).find(item => item.id === id);
+      return Boolean(worker && validModelSettings(worker));
+    });
+    const canStart = accountCount === 2 && !repeatedAccount && gitReady && codexReady && modelsReady && !working && !state.busy && !state.settingsWarning && !settingsPending() && !loginPending() && !modelsPending() && !pending.has('run') && !connectionError;
     $('run-button').disabled = !canStart;
     // Preserve the decorative arrow while updating the action label.
     const actionLabel = pending.has('run') ? 'Đang chuẩn bị…' : working ? 'Đội đang làm việc…' : 'Phân việc & làm song song';
@@ -307,7 +362,7 @@
     $('stop-button').disabled = pending.has('stop');
     $('repo-path').disabled = working;
     $('goal').disabled = working;
-    setText($('run-hint'), working ? 'Ông có thể theo dõi tiến độ bên dưới hoặc dừng công việc.' : state.settingsWarning ? state.settingsWarning : settingsPending() ? 'Đang lưu model. Chờ một chút trước khi giao việc.' : repeatedAccount ? 'Hai thẻ đang dùng cùng email. Đăng xuất thẻ thứ hai rồi chọn tài khoản khác.' : accountCount < 2 ? 'Đăng nhập đủ hai tài khoản để bắt đầu.' : !gitReady || !codexReady ? 'Hoàn tất Git và Codex CLI trước khi bắt đầu.' : state.busy ? 'Đang chuẩn bị kết nối, ông chờ một chút.' : 'Tạo nhánh cục bộ để xem lại; chưa tự ghép main hay triển khai web.');
+    setText($('run-hint'), working ? 'Ông có thể theo dõi tiến độ bên dưới hoặc dừng công việc.' : state.settingsWarning ? state.settingsWarning : settingsPending() ? 'Đang lưu model. Chờ một chút trước khi giao việc.' : repeatedAccount ? 'Hai thẻ đang dùng cùng email. Đăng xuất thẻ thứ hai rồi chọn tài khoản khác.' : accountCount < 2 ? 'Đăng nhập đủ hai tài khoản để bắt đầu.' : !gitReady || !codexReady ? 'Hoàn tất Git và Codex CLI trước khi bắt đầu.' : !modelsReady || modelsPending() ? 'Chờ danh sách Codex và chọn model, mức suy luận hợp lệ ở cả hai thẻ.' : state.busy || loginPending() ? 'Đang chuẩn bị kết nối, ông chờ một chút.' : 'Tạo nhánh cục bộ để xem lại; chưa tự ghép main hay triển khai web.');
     renderRun();
   }
 
@@ -323,6 +378,7 @@
     } catch (error) {
       if (!connectionError) notice(`Không nối được bộ điều phối. Giữ cửa sổ khởi chạy mở rồi tải lại trang. ${error.message}`, true);
       connectionError = true;
+      render();
       $('run-button').disabled = true;
       $('source-mode').disabled = true;
     } finally { stateInFlight = false; }
@@ -348,6 +404,7 @@
     if (!['one', 'two'].includes(worker)) return;
     if (button.dataset.action === 'login') mutate(`login:${worker}`, '/api/login', { worker }, 'Mở liên kết OpenAI trong thẻ tài khoản và hoàn tất đăng nhập.');
     if (button.dataset.action === 'logout') mutate(`logout:${worker}`, '/api/logout', { worker }, 'Phiên tài khoản này đã được đăng xuất khỏi BMH Team.');
+    if (button.dataset.action === 'models') mutate(`models:${worker}`, '/api/models', { worker }, 'Đã cập nhật danh sách model của tài khoản này.');
   });
   document.addEventListener('change', event => {
     const select = event.target.closest('select[data-setting]');
@@ -356,9 +413,19 @@
     const worker = card?.dataset.account;
     if (!['one', 'two'].includes(worker)) return;
     const model = card.querySelector('[data-setting="model"]').value;
-    const reasoningEffort = card.querySelector('[data-setting="reasoningEffort"]').value;
+    const account = (state.workers || []).find(item => item.id === worker);
+    const option = selectedModel(account || {}, { model });
+    let reasoningEffort = card.querySelector('[data-setting="reasoningEffort"]').value;
+    if (select.dataset.setting === 'model' && !reasoningEffort) reasoningEffort = account?.modelSettings?.reasoningEffort;
+    if (select.dataset.setting === 'model' && !option?.efforts?.some(item => item.id === reasoningEffort)) reasoningEffort = option?.defaultReasoningEffort;
+    if (!option?.efforts?.some(item => item.id === reasoningEffort)) {
+      notice('Model chưa có mức suy luận hợp lệ. Bấm Làm mới model rồi chọn lại.', true);
+      render();
+      return;
+    }
+    settingsDrafts.set(worker, { model, reasoningEffort });
     mutate(`settings:${worker}`, '/api/settings', { worker, model, reasoningEffort }, 'Đã lưu model và mức suy luận cho tài khoản này.')
-      .finally(() => { if (!select.disabled && document.activeElement === document.body) select.focus({ preventScroll: true }); });
+      .finally(() => { settingsDrafts.delete(worker); render(); if (!select.disabled && document.activeElement === document.body) select.focus({ preventScroll: true }); });
   });
   $('repo-path').addEventListener('input', () => { repoTouched = true; });
   $('source-mode').addEventListener('change', () => { sourceModeTouched = true; renderSourceMode(); });

@@ -6,6 +6,7 @@ import path from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { TeamJob } from '../jobs.mjs';
+import {fixtureSettings} from './model-fixtures.mjs';
 
 const exec = promisify(execFile);
 async function git(repo, ...args) { return (await exec('git', args, { cwd: repo })).stdout.trim(); }
@@ -37,7 +38,7 @@ function mockWorkers(value, { extra = false, hang = false, noChanges = false, on
     return 'Completed assigned file.';
   } }));
 }
-function create(fix, workers, extras = {}) { return new TeamJob({ ...fix, goal: 'Improve the selected feature', workers, fetch: false, ...extras }); }
+function create(fix, workers, extras = {}) { return new TeamJob({ ...fix, goal: 'Improve the selected feature', workers, fetch: false, modelSettings:fixtureSettings(), ...extras }); }
 
 test('two workers use separate worktrees and combine only into checked integration branch', async t => {
   const fix = await fixture(t); const paths = []; const workers = mockWorkers(plan(), { onRun: (cwd, index) => { paths[index] = cwd; } });
