@@ -39,13 +39,14 @@ if(args.includes('exec')) {
   send({type:'item.started',item:{type:'command_execution',command:'fixture'}});
   if(mode==='hang'){setInterval(()=>{},1000);}
   else {
-    await writeFile(output,JSON.stringify({prompt:input,schema,sandbox:args[args.indexOf('--sandbox')+1],approval:args[args.indexOf('-a')+1],cwd:args[args.indexOf('--cd')+1]}));
+    await writeFile(output,JSON.stringify({prompt:input,schema,sandbox:args[args.indexOf('--sandbox')+1],approval:args[args.indexOf('-a')+1],cwd:args[args.indexOf('--cd')+1],model:args[args.indexOf('--model')+1],reasoning:args[args.indexOf('-c')+1]}));
     send({type:'item.completed',item:{type:'agent_message',text:'Đã hoàn thành phần được giao.'}});
     if(mode==='failed-turn')send({type:'turn.failed',error:{message:'fixture turn failed'}});
     else if(mode!=='missing-completion')send({type:'turn.completed',usage:{output_tokens:4}});
     if(mode==='quota')process.stderr.write('429 usage limit reached\n');
+    if(mode==='unsupported-model')process.stderr.write('The selected model is not available for this account\n');
     if(mode==='secret-error')process.stderr.write('authorization=Bearer private-value refresh_token="fixture-secret"\n');
-    process.exit(['nonzero','quota','secret-error'].includes(mode)?1:0);
+    process.exit(['nonzero','quota','secret-error','unsupported-model'].includes(mode)?1:0);
   }
 }
 `;
@@ -103,6 +104,7 @@ test('exec uses stdin, explicit sandbox/approval, JSON schema and actual final o
   const output=JSON.parse(await f.worker.run('Bản vẽ tầng 2 — không mất vật liệu',{cwd:f.root,readOnly:true,outputSchema:schema,timeoutMs:2000}));
   assert.equal(output.prompt,'Bản vẽ tầng 2 — không mất vật liệu');assert.deepEqual(output.schema,schema);
   assert.equal(output.sandbox,'read-only');assert.equal(output.approval,'never');assert.equal(output.cwd,f.root);
+  assert.equal(output.model,'gpt-6.1-sol');assert.equal(output.reasoning,'model_reasoning_effort="high"');
   const call=f.calls.find(call=>call.args.includes('exec'));
   assert.ok(call.args.includes('--ephemeral'));assert.ok(call.args.includes('--json'));
   assert.ok(!call.args.includes('--dangerously-bypass-approvals-and-sandbox'));
@@ -111,6 +113,24 @@ test('exec uses stdin, explicit sandbox/approval, JSON schema and actual final o
 });
 test('write tasks retain workspace-write sandbox',async t=>{
   const f=await workerFixture(t);const output=JSON.parse(await f.worker.run('task',{cwd:f.root}));assert.equal(output.sandbox,'workspace-write');
+});
+test('a chosen model and effort override defaults in the actual child process',async t=>{
+  const f=await workerFixture(t);const authBefore=await readFile(path.join(f.home,'auth.json'),'utf8');
+  const output=JSON.parse(await f.worker.run('Astra measured design',{cwd:f.root,model:'gpt-6-astra',reasoningEffort:'xhigh'}));
+  assert.equal(output.model,'gpt-6-astra');assert.equal(output.reasoning,'model_reasoning_effort="xhigh"');
+  assert.equal(output.sandbox,'workspace-write');assert.equal(await readFile(path.join(f.home,'auth.json'),'utf8'),authBefore);
+});
+test('invalid model input is rejected before any CLI or authentication process',async t=>{
+  const f=await workerFixture(t);
+  await assert.rejects(f.worker.run('task',{cwd:f.root,model:'gpt-6-astra --yolo'}),/Model/);
+  await assert.rejects(f.worker.run('task',{cwd:f.root,reasoningEffort:'ultra;echo bad'}),/suy luận/);
+  assert.equal(f.calls.length,0);assert.equal(f.worker.current,null);
+});
+test('an unsupported model stops once without a smaller model or another provider',async t=>{
+  const f=await workerFixture(t,{mode:'unsupported-model'});
+  await assert.rejects(f.worker.run('task',{cwd:f.root,model:'gpt-6-astra',reasoningEffort:'high'}),/chưa hỗ trợ model/);
+  const calls=f.calls.filter(call=>call.args.includes('exec'));assert.equal(calls.length,1);
+  assert.equal(calls[0].args[calls[0].args.indexOf('--model')+1],'gpt-6-astra');
 });
 test('nonzero exit, failed turn or missing completion never report completed work',async t=>{
   for(const mode of ['nonzero','failed-turn','missing-completion']) {

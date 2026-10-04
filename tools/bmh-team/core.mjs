@@ -5,6 +5,7 @@ import {mkdir, writeFile, access, readdir, readFile, mkdtemp, rm, stat} from 'no
 import {createHash} from 'node:crypto';
 import path from 'node:path';
 import os from 'node:os';
+import {DEFAULT_MODEL_SETTINGS,validateModelSettings} from './models.mjs';
 
 const exec = promisify(execFile);
 export const scrub = value => String(value || '').replace(/\b(?:sk-[\w-]{12,}|eyJ[\w-]{20,}\.[\w-]+\.[\w-]+)\b/g, '[ẩn thông tin đăng nhập]').replace(/((?:access_token|refresh_token|id_token|api_key|authorization)["']?\s*[=:]\s*["']?)(?:Bearer\s+)?[^\s,"';}]+/gi, '$1[ẩn]').replace(/\bBearer\s+[^\s,"';}]+/gi, 'Bearer [ẩn]').slice(0, 12000);
@@ -114,6 +115,7 @@ function officialLoginUrl(line) {
 function commandError(result) {
   const message=scrub(result.stderr || result.stdout || '');
   if(/usage.limit|quota|rate.limit|429|limit.reached/i.test(message))return Error('Tài khoản đã chạm hạn mức Codex. Chờ hạn mức hồi phục hoặc dừng nhiệm vụ; BMH không chuyển sang API tính phí.');
+  if(/model[_ -]?not[_ -]?found|(?:model|reasoning)[\s\S]{0,120}(?:not supported|unsupported|not available|not found|does not exist|access|permission)|(?:unsupported|not supported)[\s\S]{0,100}(?:model|reasoning)/i.test(message))return Error('Tài khoản hoặc Codex CLI chưa hỗ trợ model/mức suy luận đã chọn. Chọn lại model trên đúng thẻ; BMH giữ nguyên lựa chọn và dừng nhiệm vụ. '+message.slice(-1200));
   if(/401|unauthorized|not logged in|authentication|refresh.token/i.test(message))return Error('Phiên ChatGPT không còn sử dụng được. Đăng xuất và đăng nhập lại đúng thẻ tài khoản.');
   if(/sandbox|CreateProcess|1385|access.denied/i.test(message))return Error('Codex không chạy được trong sandbox trên máy này. Kiểm tra quyền thư mục và hướng dẫn Windows trong README. '+message.slice(-1000));
   return Error('Codex chưa hoàn thành nhiệm vụ. '+message.slice(-2000));
@@ -250,7 +252,8 @@ export class CodexWorker extends EventEmitter {
     this.account=null;this.identity=null;this.error=null;this.changed();
   }
 
-  async run(prompt,{cwd,readOnly=false,outputSchema,timeoutMs=20*60*1000}={}) {
+  async run(prompt,{cwd,readOnly=false,outputSchema,timeoutMs=20*60*1000,model=DEFAULT_MODEL_SETTINGS.model,reasoningEffort=DEFAULT_MODEL_SETTINGS.reasoningEffort}={}) {
+    const selected=validateModelSettings({model,reasoningEffort});
     if(this.current)throw Error('Tài khoản đang làm một nhiệm vụ khác.');
     if(this.loginInfo)throw Error('Hoàn tất đăng nhập trước khi giao việc.');
     // Reserve before the first await; Stop must also cancel preparation.
@@ -266,7 +269,7 @@ export class CodexWorker extends EventEmitter {
       if(ticket!==this.runEpoch || marker.stopped)throw Error('Nhiệm vụ đã dừng.');
       runRoot=await mkdtemp(path.join(this.home,'run-'));
       const output=path.join(runRoot,'result.txt');
-      const args=['-a','never','exec','--sandbox',readOnly?'read-only':'workspace-write','--cd',cwd,'--json','--color','never','--ephemeral','--output-last-message',output];
+      const args=['-a','never','exec','--model',selected.model,'-c',`model_reasoning_effort="${selected.reasoningEffort}"`,'--sandbox',readOnly?'read-only':'workspace-write','--cd',cwd,'--json','--color','never','--ephemeral','--output-last-message',output];
       if(outputSchema){const file=path.join(runRoot,'schema.json');await writeFile(file,JSON.stringify(outputSchema),{mode:0o600});args.push('--output-schema',file);}
       args.push('-');
       if(ticket!==this.runEpoch || marker.stopped)throw Error('Nhiệm vụ đã dừng.');

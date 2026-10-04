@@ -17,7 +17,7 @@ Giữ đầy đủ 10 tab, chọn vật liệu, ngân hàng và các dự án đ
 1. Trong GitHub Desktop, lấy bản mới của `build-my-home`, chọn **Repository → Show in Explorer** và sao chép đường dẫn. Đây phải là repo Git thực tế, không phải thư mục Downloads hoặc thư mục chỉ giải nén ZIP.
 2. Cài Node.js 22 64-bit nếu máy chưa có. Mở `MO-BMH-TEAM.cmd` ở gốc repo, hoặc `tools/bmh-team/MO-BMH-TEAM.cmd`. Giữ cửa sổ khởi chạy mở.
 3. Đăng nhập lần lượt hai thẻ. Nếu hai thẻ cùng email, đăng xuất thẻ thứ hai, bấm Đăng nhập rồi mở liên kết trong hồ sơ Chrome khác hoặc cửa sổ ẩn danh. Bảng phải có **2/2 tài khoản khác nhau**.
-4. Dán đường dẫn repo, nhập một mục tiêu cụ thể và bấm **Phân việc & làm song song**. Bộ điều phối chọn hai phần việc với các file riêng, tạo worktree, ghép vào nhánh cục bộ, dựng lại nguồn và chạy kiểm tra phù hợp.
+4. Chọn **Model giao việc** và **Mức suy luận** trên từng thẻ (v1.1.0 mặc định GPT-6.1 Sol + High, có GPT-6 Astra). Lựa chọn tự lưu và được giữ cố định cho nhiệm vụ. Dán đường dẫn repo, nhập một mục tiêu cụ thể và bấm **Phân việc & làm song song**. Bộ điều phối chọn hai phần việc với các file riêng, tạo worktree, ghép vào nhánh cục bộ, dựng lại nguồn và chạy kiểm tra phù hợp.
 5. Khi trạng thái **Sẵn sàng xem lại** xuất hiện, dùng nhánh và thư mục được báo để xem diff. Đăng nhập hai thẻ không tự nối lịch sử của hai cửa sổ ChatGPT. Việc điều phối tự động diễn ra trong BMH Team.
 
 Mục tiêu đầu tiên có thể dán:

@@ -6,6 +6,7 @@ import {randomBytes,timingSafeEqual} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import {CodexWorker,privateStateRoot,findCodex,findGit,scrub} from './core.mjs';
 import {TeamJob} from './jobs.mjs';
+import {MODEL_OPTIONS,REASONING_OPTIONS,loadModelSettings,saveModelSettings,validateModelSettings} from './models.mjs';
 
 const toolRoot=path.dirname(fileURLToPath(import.meta.url));
 const terminalStates=new Set(['ready','failed','stopped']);
@@ -20,9 +21,11 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
   if(codex===undefined)codex=await findCodex();
   if(git===undefined)git=await findGit();
   workers ||= ['one','two'].map(id=>new CodexWorker({id,stateRoot,codex}));
+  const loadedSettings=await loadModelSettings(stateRoot);
+  let modelSettings=loadedSettings.settings;let settingsWarning=loadedSettings.warning;let settingsSaving=false;let settingsRevision=0;
   const token=randomBytes(32).toString('hex');let job=null;let shuttingDown=false;let runPreparing=false;let runEpoch=0;
   const isBusy=()=>runPreparing || Boolean(job && !terminalStates.has(job.publicState.status));
-  const state=()=>({workers:workers.map(w=>w.publicState),run:job?.publicState||null,repoDefault,capabilities:{git:Boolean(git),codex:Boolean(codex),windows:process.platform==='win32'},busy:isBusy()});
+  const state=()=>({version:'1.1.0',workers:workers.map(w=>({...w.publicState,modelSettings:{...modelSettings[w.id]}})),modelOptions:MODEL_OPTIONS,reasoningOptions:REASONING_OPTIONS,settingsWarning,settingsRevision,run:job?.publicState||null,repoDefault,capabilities:{git:Boolean(git),codex:Boolean(codex),windows:process.platform==='win32'},busy:isBusy()||settingsSaving});
   const json=(res,status,data)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));};
   const server=http.createServer(async(req,res)=>{
     const address=server.address();const allowedHost=`127.0.0.1:${address.port}`;const origin=`http://${allowedHost}`;
@@ -38,6 +41,18 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
         const chunks=[];let bytes=0;for await(const chunk of req){bytes+=chunk.length;if(bytes>64000)throw Error('Nội dung yêu cầu quá dài.');chunks.push(chunk);}
         const body=JSON.parse(Buffer.concat(chunks).toString('utf8')||'{}');
         const worker=workers.find(w=>w.id===body.worker);
+        if(pathname==='/api/settings'){
+          if(isBusy() || settingsSaving || shuttingDown)throw Error('Chờ nhiệm vụ kết thúc trước khi đổi model.');
+          if(!worker)throw Error('Chọn thẻ tài khoản 1 hoặc 2.');
+          const selected=validateModelSettings(body);
+          settingsSaving=true;
+          try {
+            const updated={...modelSettings,[worker.id]:selected};
+            await saveModelSettings(stateRoot,updated);
+            modelSettings=updated;settingsWarning=null;settingsRevision++;
+            return json(res,200,{ok:true,modelSettings:selected,state:{...state(),busy:isBusy()}});
+          } finally {settingsSaving=false;}
+        }
         if(pathname==='/api/login'){
           if(isBusy())throw Error('Dừng nhiệm vụ trước khi thay đổi tài khoản.');
           if(!worker)throw Error('Chọn thẻ tài khoản 1 hoặc 2.');
@@ -51,9 +66,11 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
           await worker.logout();return json(res,200,{ok:true});
         }
         if(pathname==='/api/run'){
-          if(isBusy())throw Error('Đang có nhiệm vụ chạy. Dừng hoặc chờ hoàn tất trước.');
+          if(isBusy() || settingsSaving)throw Error('Đang có nhiệm vụ chạy hoặc cấu hình đang lưu. Chờ hoàn tất trước.');
+          if(settingsWarning)throw Error(settingsWarning);
           runPreparing=true;
           const ticket=++runEpoch;
+          const runModels=structuredClone(modelSettings);
           try {
           if(!git || !codex)throw Error('Cần Git và Codex trên máy. Mở lại start.ps1 để kiểm tra cài đặt.');
           for(const w of workers)await w.refreshAccount();
@@ -63,7 +80,7 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
           if(!path.isAbsolute(repo))throw Error('Chọn đường dẫn đầy đủ tới thư mục BMH trên máy.');
           if(goal.length<5 || goal.length>12000)throw Error('Nhập mục tiêu từ 5 đến 12.000 ký tự.');
           repoDefault=repo;
-          job=jobFactory({workers,repo,goal,gitCommand:git,stateRoot,onEvent:async update=>{
+          job=jobFactory({workers,repo,goal,gitCommand:git,stateRoot,modelSettings:runModels,onEvent:async update=>{
             // Save task summaries only; authentication remains in Codex-managed account storage.
             try{await mkdir(path.join(stateRoot,'reports'),{recursive:true,mode:0o700});await writeFile(path.join(stateRoot,'reports',`${update.id}.json`),JSON.stringify(update,null,2),{mode:0o600});}catch{}
           }});
@@ -107,7 +124,7 @@ async function main() {
   const app=await createTeamServer({repoDefault});
   await new Promise((resolve,reject)=>{app.server.once('error',reject);app.server.listen(0,'127.0.0.1',resolve);});
   const url=`http://127.0.0.1:${app.server.address().port}/`;
-  process.stdout.write(`\nBMH Team v1.0.1: ${url}\nGiữ cửa sổ này mở. Đăng nhập hai tài khoản riêng trong trang vừa mở.\n`);
+  process.stdout.write(`\nBMH Team v1.1.0: ${url}\nGiữ cửa sổ này mở. Chọn model, mức suy luận và giao việc cho hai tài khoản.\n`);
   if(!args.includes('--no-browser')){
     const command=process.platform==='win32'?'rundll32.exe':process.platform==='darwin'?'open':'xdg-open';
     const openArgs=process.platform==='win32'?['url.dll,FileProtocolHandler',url]:[url];

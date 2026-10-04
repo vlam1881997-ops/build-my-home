@@ -17,6 +17,9 @@
   let previousPlan = '';
   let previousResults = '';
   const loginSignatures = new Map();
+  const selectSignatures = new Map();
+  let previousSettingsWarning = null;
+  const settingsPending = () => ['one', 'two'].some(id => pending.has(`settings:${id}`));
 
   const bounded = (value, max = 24000) => String(value ?? '').slice(0, max);
   const displayValue = (value, max = 48000) => bounded(typeof value === 'string' ? value : JSON.stringify(value, null, 2), max);
@@ -98,6 +101,20 @@
       const connected = loggedIn && Boolean(worker.connected);
       setText(field('email'), bounded(worker.account?.email || (loggedIn ? 'Đã đăng nhập ChatGPT' : 'Chưa đăng nhập'), 200));
       setText(field('plan'), worker.account?.planType ? `Gói ${bounded(worker.account.planType, 60)} · phiên Codex riêng` : loggedIn ? 'Phiên Codex đã có tài khoản.' : 'Dùng đăng nhập ChatGPT chính thức.');
+      for (const [key, options] of [['model', state.modelOptions], ['reasoningEffort', state.reasoningOptions]]) {
+        const select = card.querySelector(`[data-setting="${key}"]`);
+        const signature = JSON.stringify(options || []);
+        if (selectSignatures.get(select.id) !== signature) {
+          selectSignatures.set(select.id, signature);
+          select.replaceChildren(...(options || []).map(option => {
+            const element = document.createElement('option');
+            element.value = option.id; element.textContent = option.label; return element;
+          }));
+        }
+        if (!pending.has(`settings:${id}`)) select.value = worker.modelSettings?.[key] || '';
+        select.disabled = activeRun() || state.busy || settingsPending() || pending.has('run') || connectionError;
+      }
+      setText(field('model-save'), pending.has(`settings:${id}`) ? 'Đang lưu lựa chọn…' : `${worker.modelSettings?.model || '—'} · ${worker.modelSettings?.reasoningEffort || '—'}`);
       const duplicate = repeatedAccount && id === 'two';
       setText(field('status'), pending.has(`login:${id}`) ? 'Đang mở đăng nhập' : duplicate ? 'Trùng tài khoản' : connected ? 'Đã kết nối' : worker.login ? 'Chờ đăng nhập' : loggedIn ? 'Chờ kết nối' : 'Chưa kết nối');
       field('status').classList.toggle('connected', connected && !duplicate);
@@ -193,6 +210,7 @@
       if (currentStage === index) element.setAttribute('aria-current', 'step'); else element.removeAttribute('aria-current');
     }
     if (!run) return;
+    setText($('run-models'), Object.entries(run.modelSettings || {}).map(([id, selected]) => `${workerNames[id] || id}: ${selected.model} · ${selected.reasoningEffort}`).join(' / '));
     if (previousRunId !== run.id) {
       previousRunId = run.id;
       previousEvents = '';
@@ -217,6 +235,8 @@
 
   function render() {
     if (!state) return;
+    if (state.settingsWarning && state.settingsWarning !== previousSettingsWarning) notice(state.settingsWarning, true);
+    previousSettingsWarning = state.settingsWarning;
     const accountCount = renderAccounts();
     const gitReady = capability('git', 'Git');
     const codexReady = capability('codex', 'Codex');
@@ -224,7 +244,7 @@
     const repeatedAccount = accountEmails.length === 2 && accountEmails[0] === accountEmails[1];
     if (!repoTouched && !$('repo-path').value && state.repoDefault) $('repo-path').value = state.repoDefault;
     const working = activeRun();
-    const canStart = accountCount === 2 && !repeatedAccount && gitReady && codexReady && !working && !state.busy && !pending.has('run') && !connectionError;
+    const canStart = accountCount === 2 && !repeatedAccount && gitReady && codexReady && !working && !state.busy && !state.settingsWarning && !settingsPending() && !pending.has('run') && !connectionError;
     $('run-button').disabled = !canStart;
     // Preserve the decorative arrow while updating the action label.
     const actionLabel = pending.has('run') ? 'Đang chuẩn bị…' : working ? 'Đội đang làm việc…' : 'Phân việc & làm song song';
@@ -237,7 +257,7 @@
     $('stop-button').disabled = pending.has('stop');
     $('repo-path').disabled = working;
     $('goal').disabled = working;
-    setText($('run-hint'), working ? 'Ông có thể theo dõi tiến độ bên dưới hoặc dừng công việc.' : repeatedAccount ? 'Hai thẻ đang dùng cùng email. Đăng xuất thẻ thứ hai rồi chọn tài khoản khác.' : accountCount < 2 ? 'Đăng nhập đủ hai tài khoản để bắt đầu.' : !gitReady || !codexReady ? 'Hoàn tất Git và Codex CLI trước khi bắt đầu.' : state.busy ? 'Đang chuẩn bị kết nối, ông chờ một chút.' : 'Tạo nhánh cục bộ để xem lại; chưa tự ghép main hay triển khai web.');
+    setText($('run-hint'), working ? 'Ông có thể theo dõi tiến độ bên dưới hoặc dừng công việc.' : state.settingsWarning ? state.settingsWarning : settingsPending() ? 'Đang lưu model. Chờ một chút trước khi giao việc.' : repeatedAccount ? 'Hai thẻ đang dùng cùng email. Đăng xuất thẻ thứ hai rồi chọn tài khoản khác.' : accountCount < 2 ? 'Đăng nhập đủ hai tài khoản để bắt đầu.' : !gitReady || !codexReady ? 'Hoàn tất Git và Codex CLI trước khi bắt đầu.' : state.busy ? 'Đang chuẩn bị kết nối, ông chờ một chút.' : 'Tạo nhánh cục bộ để xem lại; chưa tự ghép main hay triển khai web.');
     renderRun();
   }
 
@@ -245,7 +265,8 @@
     if (stateInFlight) return;
     stateInFlight = true;
     try {
-      state = await request('/api/state');
+      const incoming = await request('/api/state');
+      if (!state || (incoming.settingsRevision || 0) >= (state.settingsRevision || 0)) state = incoming;
       if (connectionError) notice('Đã nối lại với bộ điều phối trên máy.');
       connectionError = false;
       render();
@@ -262,6 +283,7 @@
     render();
     try {
       const result = await request(path, body);
+      if (result.state) { state = result.state; render(); }
       if (success) notice(typeof success === 'function' ? success(result) : success);
       await refresh();
     } catch (error) { notice(error.message, true); }
@@ -275,6 +297,17 @@
     if (!['one', 'two'].includes(worker)) return;
     if (button.dataset.action === 'login') mutate(`login:${worker}`, '/api/login', { worker }, 'Mở liên kết OpenAI trong thẻ tài khoản và hoàn tất đăng nhập.');
     if (button.dataset.action === 'logout') mutate(`logout:${worker}`, '/api/logout', { worker }, 'Phiên tài khoản này đã được đăng xuất khỏi BMH Team.');
+  });
+  document.addEventListener('change', event => {
+    const select = event.target.closest('select[data-setting]');
+    if (!select || select.disabled) return;
+    const card = select.closest('[data-account]');
+    const worker = card?.dataset.account;
+    if (!['one', 'two'].includes(worker)) return;
+    const model = card.querySelector('[data-setting="model"]').value;
+    const reasoningEffort = card.querySelector('[data-setting="reasoningEffort"]').value;
+    mutate(`settings:${worker}`, '/api/settings', { worker, model, reasoningEffort }, 'Đã lưu model và mức suy luận cho tài khoản này.')
+      .finally(() => { if (!select.disabled && document.activeElement === document.body) select.focus({ preventScroll: true }); });
   });
   $('repo-path').addEventListener('input', () => { repoTouched = true; });
   $('run-form').addEventListener('submit', event => {

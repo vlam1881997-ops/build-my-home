@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="bmh-team-token" content="__BMH_TOKEN__">
   <meta name="color-scheme" content="light">
-  <title>BMH Team v1.0.1 · Hai tài khoản, một dự án</title>
+  <title>BMH Team v1.1.0 · Hai tài khoản, một dự án</title>
   <link rel="stylesheet" href="/style.css">
   <script src="/app.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <a class="brand" href="/" aria-label="BMH Team v1.0.1 trang chính"><span class="brand-icon" aria-hidden="true">B</span><span>BMH <b>TEAM</b></span><span class="release-tag">v1.0.1</span></a>
+      <a class="brand" href="/" aria-label="BMH Team v1.1.0 trang chính"><span class="brand-icon" aria-hidden="true">B</span><span>BMH <b>TEAM</b></span><span class="release-tag">v1.1.0</span></a>
       <span class="local-badge"><i aria-hidden="true"></i> Chạy trên máy ông</span>
     </header>
     <main>
@@ -27,10 +27,11 @@
         <div class="section-heading"><h2 id="accounts-title">1. Nối hai tài khoản ChatGPT</h2><span id="account-count" class="muted">Đang kiểm tra…</span></div>
         <p id="account-warning" class="notice notice-error" role="alert" hidden>Hai thẻ đang dùng cùng một tài khoản. Đăng xuất thẻ thứ hai, bấm Đăng nhập rồi mở liên kết OpenAI trong hồ sơ Chrome khác hoặc cửa sổ ẩn danh để chọn tài khoản thứ hai.</p>
         <div class="account-grid">
-          <article class="account-card account-one" data-account="one"><div class="card-top"><span class="account-avatar" aria-hidden="true">01</span><span class="connection-pill" data-field="status">Đang kiểm tra</span></div><h3>Tài khoản thứ nhất</h3><p class="account-email" data-field="email">Chưa đăng nhập</p><p class="account-plan" data-field="plan">Dùng đăng nhập ChatGPT chính thức.</p><div class="login-flow" data-field="login" hidden></div><p class="account-error" data-field="error" hidden></p><div class="card-actions"><button type="button" class="button button-secondary" data-action="login" data-worker="one">Đăng nhập</button><button type="button" class="button button-text" data-action="logout" data-worker="one" hidden>Đăng xuất</button></div></article>
-          <article class="account-card account-two" data-account="two"><div class="card-top"><span class="account-avatar" aria-hidden="true">02</span><span class="connection-pill" data-field="status">Đang kiểm tra</span></div><h3>Tài khoản thứ hai</h3><p class="account-email" data-field="email">Chưa đăng nhập</p><p class="account-plan" data-field="plan">Mỗi tài khoản có phiên Codex riêng.</p><div class="login-flow" data-field="login" hidden></div><p class="account-error" data-field="error" hidden></p><div class="card-actions"><button type="button" class="button button-secondary" data-action="login" data-worker="two">Đăng nhập</button><button type="button" class="button button-text" data-action="logout" data-worker="two" hidden>Đăng xuất</button></div></article>
+          <article class="account-card account-one" data-account="one"><div class="card-top"><span class="account-avatar" aria-hidden="true">01</span><span class="connection-pill" data-field="status">Đang kiểm tra</span></div><h3>Tài khoản thứ nhất</h3><p class="account-email" data-field="email">Chưa đăng nhập</p><p class="account-plan" data-field="plan">Dùng đăng nhập ChatGPT chính thức.</p><div class="model-controls"><div><label for="model-one">Model giao việc</label><select id="model-one" data-setting="model" disabled aria-describedby="model-note"><option>Đang tải…</option></select></div><div><label for="effort-one">Mức suy luận</label><select id="effort-one" data-setting="reasoningEffort" disabled aria-describedby="model-note"><option>Đang tải…</option></select></div></div><p class="model-save" data-field="model-save" role="status"></p><div class="login-flow" data-field="login" hidden></div><p class="account-error" data-field="error" hidden></p><div class="card-actions"><button type="button" class="button button-secondary" data-action="login" data-worker="one">Đăng nhập</button><button type="button" class="button button-text" data-action="logout" data-worker="one" hidden>Đăng xuất</button></div></article>
+          <article class="account-card account-two" data-account="two"><div class="card-top"><span class="account-avatar" aria-hidden="true">02</span><span class="connection-pill" data-field="status">Đang kiểm tra</span></div><h3>Tài khoản thứ hai</h3><p class="account-email" data-field="email">Chưa đăng nhập</p><p class="account-plan" data-field="plan">Mỗi tài khoản có phiên Codex riêng.</p><div class="model-controls"><div><label for="model-two">Model giao việc</label><select id="model-two" data-setting="model" disabled aria-describedby="model-note"><option>Đang tải…</option></select></div><div><label for="effort-two">Mức suy luận</label><select id="effort-two" data-setting="reasoningEffort" disabled aria-describedby="model-note"><option>Đang tải…</option></select></div></div><p class="model-save" data-field="model-save" role="status"></p><div class="login-flow" data-field="login" hidden></div><p class="account-error" data-field="error" hidden></p><div class="card-actions"><button type="button" class="button button-secondary" data-action="login" data-worker="two">Đăng nhập</button><button type="button" class="button button-text" data-action="logout" data-worker="two" hidden>Đăng xuất</button></div></article>
         </div>
-        <p class="section-note">Đăng nhập từng tài khoản trên trang OpenAI. Ông không cần đưa mật khẩu hay API key vào bảng này.</p>
+        <p id="model-note" class="section-note">GPT-6.1 Sol + High được chọn sẵn. Astra dành cho việc khó nhất. Quyền dùng model tùy tài khoản; mức suy luận cao có thể chạy lâu hơn.</p>
+        <p class="section-note">Đăng nhập từng tài khoản trên trang OpenAI. Model được lưu tự động cho mỗi thẻ.</p>
       </section>
 
       <section class="work-section panel" aria-labelledby="work-title">
@@ -50,7 +51,7 @@
         <ol class="stage-list" aria-label="Tiến độ công việc"><li data-stage="0"><span>1</span>Chuẩn bị</li><li data-stage="1"><span>2</span>Phân việc</li><li data-stage="2"><span>3</span>Hai Codex làm</li><li data-stage="3"><span>4</span>Ghép code</li><li data-stage="4"><span>5</span>Kiểm tra</li><li data-stage="5"><span>6</span>Sẵn sàng</li></ol>
         <div id="run-empty" class="empty-state"><span aria-hidden="true">◇</span><p>Nhận một mục tiêu, trả về một nhánh để ông xem lại.</p><small>Code được làm trong các worktree riêng. Công việc này chưa tự cập nhật main hay Vercel.</small></div>
         <div id="run-content" hidden>
-          <p id="active-goal" class="active-goal"></p>
+          <p id="active-goal" class="active-goal"></p><p id="run-models" class="run-models"></p>
           <div id="run-error" class="notice notice-error" role="alert" hidden></div>
           <div id="run-result" class="result-box" hidden><strong id="result-title">Nhánh đã chuẩn bị</strong><dl><div><dt>Nhánh</dt><dd id="result-branch"></dd></div><div><dt>Thư mục xem lại</dt><dd id="result-path"></dd></div></dl><p>Ông xem diff và kết quả kiểm tra trước khi ghép vào main.</p></div>
           <details id="plan-details"><summary>Phần việc của từng tài khoản</summary><pre id="plan-output"></pre></details>
@@ -60,7 +61,7 @@
         </div>
       </section>
     </main>
-    <footer>BMH Team v1 là bộ điều phối riêng cho dự án BMH, dùng Codex CLI chính thức của OpenAI. Mỗi tài khoản dùng hạn mức Codex riêng theo gói đủ điều kiện.</footer>
+    <footer>BMH Team v1.1.0 là bộ điều phối riêng cho dự án BMH, dùng Codex CLI chính thức của OpenAI. Mỗi tài khoản dùng hạn mức Codex riêng theo gói đủ điều kiện.</footer>
   </div>
 </body>
 </html>

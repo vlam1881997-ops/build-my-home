@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,rm} from 'node:fs/promises';
+import {mkdtemp,rm,readFile,writeFile} from 'node:fs/promises';
 import os from 'node:os';import path from 'node:path';
 import {EventEmitter} from 'node:events';
 import http from 'node:http';
@@ -22,7 +22,7 @@ async function fixture(t,{emails=['one@example.test','two@example.test'],jobFact
   const url=`http://127.0.0.1:${app.server.address().port}`;
   t.after(async()=>{await app.close();await rm(stateRoot,{recursive:true,force:true});});
   const post=(route,body,extra={})=>fetch(url+route,{method:'POST',headers:{'Content-Type':'application/json','X-BMH-Team':app.token,Origin:url,...extra},body:JSON.stringify(body)});
-  return {app,url,workers,post};
+  return {app,url,workers,post,stateRoot};
 }
 
 test('local dashboard injects session token, bounds routes and exposes no credentials',async t=>{
@@ -67,4 +67,44 @@ test('two concurrent run requests cannot create overlapping jobs',async t=>{
   const f=await fixture(t,{jobFactory:()=>({publicState:{id:'fixture-job',status:'working',events:[]},start(){count++;return new Promise(resolve=>resolveJob=resolve);},async stop(){this.publicState.status='stopped';resolveJob?.();},note(){}})});
   const pending=await Promise.all([f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'First goal'}),f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Second goal'})]);
   assert.deepEqual(pending.map(r=>r.status).sort(),[202,400]);assert.equal(count,1);await f.post('/api/stop',{});
+});
+test('model selection is authenticated, validated, saved separately and restored after restart',async t=>{
+  const f=await fixture(t);const selection={worker:'one',model:'gpt-6-astra',reasoningEffort:'xhigh'};
+  assert.equal((await f.post('/api/settings',selection,{'X-BMH-Team':''})).status,403);
+  assert.equal((await f.post('/api/settings',{...selection,model:'not-supported'})).status,400);
+  assert.equal((await f.post('/api/settings',{...selection,worker:'other'})).status,400);
+  const response=await f.post('/api/settings',selection);assert.equal(response.status,200);
+  const updated=await response.json();assert.equal(updated.state.workers[0].modelSettings.model,'gpt-6-astra');
+  assert.equal(updated.state.busy,false);assert.equal(updated.state.settingsRevision,1);
+  assert.equal(f.workers[0].account.email,'one@example.test');assert.equal(f.workers[0].logins,0);
+  const saved=JSON.parse(await readFile(path.join(f.stateRoot,'model-settings.json'),'utf8'));
+  assert.equal(saved.workers.one.model,'gpt-6-astra');assert.equal(saved.workers.two.model,'gpt-6.1-sol');
+  const other=await createTeamServer({stateRoot:f.stateRoot,workers:[new FakeWorker('one','one@example.test'),new FakeWorker('two','two@example.test')],codex:{command:'fixture'},git:'fixture'});
+  assert.deepEqual(other.state().workers[0].modelSettings,{model:'gpt-6-astra',reasoningEffort:'xhigh'});
+  assert.equal(JSON.stringify(other.state()).includes('access_token'),false);
+});
+test('job receives both saved choices and rejects model changes until the job ends',async t=>{
+  let options,resolveJob;
+  const f=await fixture(t,{jobFactory:args=>{options=args;return {publicState:{id:'models-job',status:'working',modelSettings:args.modelSettings,events:[]},start(){return new Promise(resolve=>resolveJob=resolve);},async stop(){this.publicState.status='stopped';resolveJob?.();},note(){}};}});
+  await f.post('/api/settings',{worker:'one',model:'gpt-6-astra',reasoningEffort:'xhigh'});
+  await f.post('/api/settings',{worker:'two',model:'gpt-6.1-sol',reasoningEffort:'medium'});
+  const started=await f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Measured design with chosen models'});assert.equal(started.status,202);
+  assert.deepEqual(options.modelSettings,{one:{model:'gpt-6-astra',reasoningEffort:'xhigh'},two:{model:'gpt-6.1-sol',reasoningEffort:'medium'}});
+  assert.equal((await f.post('/api/settings',{worker:'one',model:'gpt-6-sol',reasoningEffort:'high'})).status,400);
+  assert.equal(f.app.state().run.modelSettings.one.model,'gpt-6-astra');
+  await f.post('/api/stop',{});
+  assert.equal((await f.post('/api/settings',{worker:'one',model:'gpt-6.1-sol',reasoningEffort:'high'})).status,200);
+  assert.equal(options.modelSettings.one.model,'gpt-6-astra');
+});
+test('corrupt persisted model settings block a run until a visible choice is saved',async t=>{
+  const root=await mkdtemp(path.join(os.tmpdir(),'bmh-bad-settings-'));t.after(()=>rm(root,{recursive:true,force:true}));
+  await writeFile(path.join(root,'model-settings.json'),'broken JSON');
+  const app=await createTeamServer({stateRoot:root,workers:[new FakeWorker('one','one@example.test'),new FakeWorker('two','two@example.test')],codex:{command:'fixture'},git:'fixture'});
+  await new Promise(resolve=>app.server.listen(0,'127.0.0.1',resolve));t.after(()=>app.close());
+  const url=`http://127.0.0.1:${app.server.address().port}`;
+  const post=(route,body)=>fetch(url+route,{method:'POST',headers:{'Content-Type':'application/json','X-BMH-Team':app.token},body:JSON.stringify(body)});
+  assert.match(app.state().settingsWarning,/Chọn lại/);
+  assert.equal((await post('/api/run',{repo:'/tmp/fixture',goal:'Measured upgrade'})).status,400);
+  assert.equal((await post('/api/settings',{worker:'one',model:'gpt-6.1-sol',reasoningEffort:'high'})).status,200);
+  assert.equal(app.state().settingsWarning,null);
 });

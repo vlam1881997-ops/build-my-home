@@ -1,4 +1,4 @@
-# BMH Team v1.0.1
+# BMH Team v1.1.0
 
 Bộ điều phối của dự án BMH trên máy Windows: **hai tài khoản ChatGPT riêng, một mục tiêu, hai phiên Codex làm song song**. Công cụ dùng các lệnh ổn định `codex login`, `codex login status` và `codex exec` của Codex CLI chính thức, tạo worktree riêng, ghép kết quả vào một nhánh cục bộ và chạy kiểm tra. BMH Team là phần mềm riêng của dự án, không phải sản phẩm do OpenAI phát hành.
 
@@ -13,7 +13,20 @@ Bộ điều phối của dự án BMH trên máy Windows: **hai tài khoản Ch
 
    Chính sách này chỉ áp dụng cho phiên PowerShell vừa mở. Launcher nhận Git từ GitHub Desktop và kiểm tra Codex CLI đúng phiên bản `0.158.0`. Nếu cần, nó cài gói chính thức `@openai/codex@0.158.0` cùng các thành phần phù hợp với Windows vào `%LOCALAPPDATA%\BMHTeam\runtime\codex-0.158.0`. Máy cần Node.js 64-bit (`x64` hoặc `arm64`).
 3. **Đăng nhập lần lượt hai tài khoản.** Trên bảng vừa mở, bấm **Đăng nhập** ở thẻ thứ nhất, mở liên kết OpenAI và hoàn tất đăng nhập. Khi thẻ báo đã kết nối, làm tiếp thẻ thứ hai. Mở liên kết của tài khoản thứ hai trong hồ sơ Chrome khác hoặc cửa sổ ẩn danh để không chọn nhầm tài khoản thứ nhất. Không nhập mật khẩu hay API key vào BMH Team. Giữ cửa sổ PowerShell mở.
-4. **Giao một mục tiêu.** Kiểm tra thư mục BMH, nhập việc cần hoàn thiện và bấm **Phân việc & làm song song**. Bộ điều phối chia nhiệm vụ, chạy hai phiên, ghép code và kiểm tra. Khi sẵn sàng, mở thư mục/nhánh được báo, xem diff và kết quả. **Main và Vercel hiện tại chưa đổi**; chỉ triển khai sau khi ông chủ động ghép nhánh qua quy trình GitHub của dự án.
+4. **Chọn model và giao một mục tiêu.** Mỗi thẻ có **Model giao việc** và **Mức suy luận**, tự lưu ngay khi đổi. Kiểm tra thư mục BMH, nhập việc cần hoàn thiện và bấm **Phân việc & làm song song**. Bộ điều phối chia nhiệm vụ, chạy hai phiên, ghép code và kiểm tra. Khi sẵn sàng, mở thư mục/nhánh được báo, xem diff và kết quả. **Main và Vercel hiện tại chưa đổi**; chỉ triển khai sau khi ông chủ động ghép nhánh qua quy trình GitHub của dự án.
+
+## Chọn model khi giao việc
+
+- Chọn sẵn **GPT-6.1 Sol + High** cho cả hai thẻ. Chọn **GPT-6 Astra** cho việc khó nhất, hoặc **GPT-6 Sol** nếu phù hợp quyền tài khoản. Có thể đặt hai thẻ khác nhau.
+- Mức suy luận: **High**, **Extra High** hoặc **Medium**. Mức cao thường tốn thêm thời gian và hạn mức. Danh sách là lựa chọn cấu hình, không phải kiểm tra quyền dùng model của tài khoản.
+- Mỗi lần chạy truyền rõ `--model` và `-c model_reasoning_effort` vào lệnh `codex exec`. Tài khoản 1 lập kế hoạch bằng model đã chọn trên thẻ 1; hai phần việc sau đó dùng model tương ứng. Cấu hình trong repo không hạ lựa chọn này xuống model khác.
+- Bảng tiến độ, nhật ký và báo cáo giữ model đã giao cho từng phần việc. Trong khi nhiệm vụ đang chạy, bộ chọn bị khóa; đổi sau khi kết thúc để áp dụng cho lượt tiếp theo.
+- Lựa chọn được lưu ở `%LOCALAPPDATA%\BMHTeam\model-settings.json`; hai phiên đăng nhập vẫn nằm trong thư mục riêng hiện có. Mở gói nâng cấp ở thư mục mới để dùng lại đăng nhập. Không chép gói lên repo đang làm nếu muốn tránh thay đổi chưa commit.
+- Khi tài khoản/CLI chưa hỗ trợ model, mức suy luận hoặc đã hết quota, nhiệm vụ dừng và báo lỗi. Không tự chuyển xuống model khác, tài khoản khác hay API tính phí.
+
+Để nâng cấp từ v1.0.1: dừng nhiệm vụ đang chạy nếu có, đóng cửa sổ khởi chạy cũ, giải nén **BMH-Team-Windows-v1.1.0.zip** sang thư mục mới rồi mở **MO-BMH-TEAM.cmd** bên trong. Trong bảng mới, chọn thư mục repo Git thật, ví dụ `D:\KBL\build-my-home`; không chọn thư mục giải nén gói công cụ.
+
+Nguồn chính thức: [chọn model](https://learn.chatgpt.com/docs/models) và [cấu hình theo lần chạy](https://learn.chatgpt.com/docs/developer-settings). Các test dùng tiến trình mô phỏng, không gọi suy luận tính hạn mức và không xác nhận mọi tài khoản đã có quyền vào từng model.
 
 ## Phạm vi thực tế
 
@@ -29,10 +42,10 @@ Bản v1.0.1 sửa bước khởi chạy trên Windows: kiểm tra phiên bản 
 
 Tài liệu OpenAI về [các lệnh ổn định](https://learn.chatgpt.com/docs/developer-commands), [chế độ thực thi không tương tác](https://learn.chatgpt.com/docs/non-interactive-mode) và [sandbox Windows](https://learn.chatgpt.com/docs/windows/windows-sandbox).
 
-Chạy kiểm tra công cụ từ thư mục gốc của gói/repo:
+Chạy kiểm tra công cụ từ thư mục gốc của repo:
 
 ```sh
 node --test tools/bmh-team/test/*.test.mjs
 ```
 
-Nếu đang đứng trong thư mục `tools/bmh-team`, chạy `node --test test/*.test.mjs`.
+Trong thư mục `tools/bmh-team` hoặc thư mục gói Windows đã giải nén, chạy `node --test test/*.test.mjs`.

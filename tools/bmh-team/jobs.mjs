@@ -4,6 +4,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { randomBytes } from 'node:crypto';
+import {DEFAULT_MODEL_SETTINGS,validateModelSettings} from './models.mjs';
 
 const ORIGIN = 'vlam1881997-ops/build-my-home';
 const SCHEMA = {
@@ -54,10 +55,12 @@ async function optionalRead(filename) { try { return await fs.readFile(filename,
 
 /** Local-only job: fetch defaults true. fetch:false is exclusively for offline fixture tests. */
 export class TeamJob extends EventEmitter {
-  constructor({ workers, repo, goal, gitCommand = 'git', stateRoot = path.join(os.homedir(), '.bmh-team', 'jobs'), onEvent, fetch = true, workerTimeoutMs = 20 * 60_000, commandTimeoutMs = 5 * 60_000 }) {
+  constructor({ workers, repo, goal, gitCommand = 'git', stateRoot = path.join(os.homedir(), '.bmh-team', 'jobs'), onEvent, fetch = true, workerTimeoutMs = 20 * 60_000, commandTimeoutMs = 5 * 60_000, modelSettings }) {
     super();
     if (!Array.isArray(workers) || workers.length !== 2 || workers.some(w => !w?.id || typeof w.run !== 'function' || typeof w.interrupt !== 'function') || workers[0].id === workers[1].id) throw new Error('Exactly two distinct workers are required.');
     this.workers = workers; this.repo = path.resolve(repo); this.goal = String(goal || '').trim();
+    this.modelSettings=Object.fromEntries(workers.map(worker=>[worker.id,Object.freeze(validateModelSettings(modelSettings?.[worker.id] || DEFAULT_MODEL_SETTINGS))]));
+    Object.freeze(this.modelSettings);
     if (!this.goal || this.goal.length > 20_000) throw new Error('Provide a goal of 1–20,000 characters.');
     this.gitCommand = gitCommand; this.stateRoot = path.resolve(stateRoot);
     if (inside(this.repo, this.stateRoot)) throw new Error('Worktrees must be stored outside the source repository.');
@@ -67,7 +70,7 @@ export class TeamJob extends EventEmitter {
     this.path = path.join(this.stateRoot, this.id, 'integration'); this.error = null; this.events = [];
     this.children = new Set(); this.timers = new Set(); this.aborted = false; this.failing = false; this.started = false; this.activePromise = null;
   }
-  get publicState() { return structuredClone({ id: this.id, status: this.status, goal: this.goal, plan: this.plan, results: this.results, artifacts: this.artifacts, branch: this.branch, path: this.path, error: this.error, events: this.events }); }
+  get publicState() { return structuredClone({ id: this.id, status: this.status, goal: this.goal, modelSettings:this.modelSettings, plan: this.plan, results: this.results, artifacts: this.artifacts, branch: this.branch, path: this.path, error: this.error, events: this.events }); }
   note(message, worker) {
     this.events.push({ at: new Date().toISOString(), ...(worker ? { worker } : {}), message: scrub(message) });
     if (this.events.length > 200) this.events.shift();
@@ -132,7 +135,9 @@ export class TeamJob extends EventEmitter {
     this.assertActive(); let timer; let onStop;
     const timeout = new Promise((_, reject) => { timer = setTimeout(() => { void Promise.resolve().then(() => worker.interrupt()).catch(() => {}); reject(new Error(`Account ${worker.id} timed out.`)); }, this.workerTimeoutMs); this.timers.add(timer); });
     const stopped = new Promise((_, reject) => { onStop = () => reject(new Error('Job stopped.')); this.once('stop', onStop); });
-    try { return await Promise.race([worker.run(prompt, { ...options, timeoutMs: this.workerTimeoutMs }), timeout, stopped]); }
+    const selected=this.modelSettings[worker.id];
+    this.note(`Giao bằng ${selected.model} · ${selected.reasoningEffort}`,worker.id);
+    try { return await Promise.race([worker.run(prompt, { ...options, ...selected, timeoutMs: this.workerTimeoutMs }), timeout, stopped]); }
     finally { clearTimeout(timer); this.timers.delete(timer); this.removeListener('stop', onStop); }
   }
   validatePlan(value, scripts) {

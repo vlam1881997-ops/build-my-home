@@ -48,6 +48,16 @@ test('two workers use separate worktrees and combine only into checked integrati
   assert.equal(await git(result.path, 'branch', '--show-current'), result.branch);
   assert.ok(result.events.some(event => event.message.startsWith('Check 1/')));
 });
+test('planning and parallel edits retain each chosen model from the job snapshot',async t=>{
+  const fix=await fixture(t);const observed=[];
+  const workers=mockWorkers(plan()).map(worker=>{const run=worker.run.bind(worker);worker.run=async(prompt,options)=>{observed.push({worker:worker.id,readOnly:options.readOnly,model:options.model,reasoningEffort:options.reasoningEffort});return run(prompt,options);};return worker;});
+  const settings={one:{model:'gpt-6-astra',reasoningEffort:'xhigh'},two:{model:'gpt-6.1-sol',reasoningEffort:'high'}};
+  const job=create(fix,workers,{modelSettings:settings});settings.one.model='gpt-6-sol';
+  const result=await job.start();assert.equal(result.status,'ready',result.error);
+  assert.deepEqual(observed.filter(item=>item.worker==='one').map(item=>[item.model,item.reasoningEffort]),[['gpt-6-astra','xhigh'],['gpt-6-astra','xhigh']]);
+  assert.deepEqual(observed.find(item=>item.worker==='two'),{worker:'two',readOnly:false,model:'gpt-6.1-sol',reasoningEffort:'high'});
+  assert.equal(result.modelSettings.one.model,'gpt-6-astra');assert.equal(await git(fix.repo,'rev-parse','main'),fix.base);
+});
 
 for (const [name, value] of [
   ['ownership overlap', plan({ second: ['one.txt'] })],
