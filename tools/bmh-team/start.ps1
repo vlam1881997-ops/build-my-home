@@ -22,16 +22,45 @@ function Find-Codex {
   return $null
 }
 
-function Get-CodexVersion([string]$Executable) {
-  if (-not $Executable) { return $null }
+function Get-CodexProbe([string]$Executable) {
+  if (-not $Executable) { return [PSCustomObject]@{ ok = $false; version = $null; error = "Codex has not been installed in this folder."; repairPackage = $null } }
   try {
-    $versionOutput = (& $Executable --version 2>&1 | Out-String).Trim()
-    if ($LASTEXITCODE -eq 0 -and $versionOutput -match '\bcodex(?:-cli)?\s+(\d+\.\d+\.\d+)\b') {
-      return $Matches[1]
-    }
+    # The Node helper captures native stderr before PowerShell sees it. Windows
+    # PowerShell 5.1 must not treat a harmless CLI warning as a failed version.
+    $probeOutput = (& $bmhNode $bmhProbeScript --probe $Executable | Out-String).Trim()
+    return ($probeOutput | ConvertFrom-Json)
   }
-  catch { return $null }
-  return $null
+  catch {
+    return [PSCustomObject]@{ ok = $false; version = $null; error = "CLI check failed: $($_.Exception.Message)"; repairPackage = $null }
+  }
+}
+
+function Show-CodexFailure($Probe) {
+  Write-Host ""
+  Write-Host "Codex could not start. The actual check result follows:" -ForegroundColor Yellow
+  if ($Probe.error) { Write-Host $Probe.error -ForegroundColor Yellow }
+  if ($Probe.stdout) { Write-Host $Probe.stdout }
+  if ($Probe.stderr) { Write-Host $Probe.stderr }
+  try {
+    New-Item -ItemType Directory -Force -Path $bmhRuntimeRoot | Out-Null
+    $bmhProbeLog = Join-Path $bmhRuntimeRoot "last-cli-check.json"
+    $Probe | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $bmhProbeLog -Encoding UTF8
+    Write-Host "Diagnostic file: $bmhProbeLog"
+  }
+  catch { Write-Host "The diagnostic file could not be saved." }
+}
+
+function Install-CodexPackage([string]$PackageSpec) {
+  # Check the native command exit code explicitly. npm warnings are not a
+  # terminating PowerShell error and must stay visible in this window.
+  $previousErrorPreference = $ErrorActionPreference
+  try {
+    $ErrorActionPreference = "Continue"
+    & $bmhNpm install --global --prefix $bmhCodexPrefix --include=optional --no-audit --no-fund $PackageSpec
+    $installExit = $LASTEXITCODE
+  }
+  finally { $ErrorActionPreference = $previousErrorPreference }
+  if ($installExit -ne 0) { Stop-WithMessage "Codex installation did not complete. Review the npm error above." }
 }
 
 function Stop-WithMessage([string]$Message) {
@@ -42,7 +71,7 @@ function Stop-WithMessage([string]$Message) {
 }
 
 Write-Host ""
-Write-Host "BMH Team v1 - Two ChatGPT accounts, one local project" -ForegroundColor Cyan
+Write-Host "BMH Team v1.0.1 - Two ChatGPT accounts, one local project" -ForegroundColor Cyan
 Write-Host "Keep this window open while using the dashboard."
 
 $bmhNode = Find-Executable "node"
@@ -55,6 +84,14 @@ if ($LASTEXITCODE -ne 0 -or $bmhNodeVersion -notmatch '^v(\d+)\.') {
 }
 if ([int]$Matches[1] -lt 22) {
   Stop-WithMessage "Node.js 22 or newer is required. Current version: $bmhNodeVersion"
+}
+$bmhNodeArch = (& $bmhNode -p "process.arch").Trim()
+if ($LASTEXITCODE -ne 0 -or @("x64", "arm64") -notcontains $bmhNodeArch) {
+  Stop-WithMessage "Codex needs 64-bit Node.js on Windows. Install Node.js 22 x64 (or ARM64 on an ARM PC), then open this launcher again. Detected: $bmhNodeArch"
+}
+$bmhProbeScript = Join-Path $PSScriptRoot "runtime.mjs"
+if (-not (Test-Path -LiteralPath $bmhProbeScript)) {
+  Stop-WithMessage "runtime.mjs is missing. Extract the complete BMH Team v1.0.1 package before starting it."
 }
 
 $bmhGit = Find-Executable "git"
@@ -79,10 +116,12 @@ $bmhRuntimeRoot = if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA "BMHTeam\
 $bmhCodexPrefix = Join-Path $bmhRuntimeRoot "codex-$bmhPinnedVersion"
 $bmhPrivateCodex = Join-Path $bmhCodexPrefix "codex.cmd"
 $bmhCodex = Find-Codex
-if ((Get-CodexVersion $bmhCodex) -ne $bmhPinnedVersion) {
+$bmhProbe = Get-CodexProbe $bmhCodex
+if (-not $bmhProbe.ok) {
   $bmhCodex = if (Test-Path -LiteralPath $bmhPrivateCodex) { $bmhPrivateCodex } else { $null }
+  $bmhProbe = Get-CodexProbe $bmhCodex
 }
-if ((Get-CodexVersion $bmhCodex) -ne $bmhPinnedVersion) {
+if (-not $bmhProbe.ok) {
   Write-Host ""
   Write-Host "BMH Team v1 uses official Codex CLI $bmhPinnedVersion." -ForegroundColor Yellow
   Write-Host "Installing the pinned official npm package in a private BMH Team folder."
@@ -90,12 +129,18 @@ if ((Get-CodexVersion $bmhCodex) -ne $bmhPinnedVersion) {
   $bmhNpm = Find-Executable "npm.cmd"
   if (-not $bmhNpm) { $bmhNpm = Find-Executable "npm" }
   if (-not $bmhNpm) { Stop-WithMessage "npm was not found. Install the complete Node.js distribution and run this launcher again." }
-  & $bmhNpm install --global --prefix $bmhCodexPrefix "@openai/codex@$bmhPinnedVersion"
-  if ($LASTEXITCODE -ne 0) { Stop-WithMessage "Codex installation did not complete. Review the npm error above." }
+  Install-CodexPackage "@openai/codex@$bmhPinnedVersion"
   $bmhCodex = $bmhPrivateCodex
+  $bmhProbe = Get-CodexProbe $bmhCodex
+  if (-not $bmhProbe.ok -and $bmhProbe.repairPackage) {
+    Write-Host "Installing the missing official Windows Codex package for this CPU." -ForegroundColor Yellow
+    Install-CodexPackage $bmhProbe.repairPackage
+    $bmhProbe = Get-CodexProbe $bmhCodex
+  }
 }
-if ((Get-CodexVersion $bmhCodex) -ne $bmhPinnedVersion) {
-  Stop-WithMessage "Codex CLI $bmhPinnedVersion could not be started. Review the installation error above and run the launcher again."
+if (-not $bmhProbe.ok) {
+  Show-CodexFailure $bmhProbe
+  Stop-WithMessage "Codex CLI $bmhPinnedVersion is not ready. Send the actual error shown above if it still cannot start."
 }
 $env:BMH_TEAM_CODEX = $bmhCodex
 Write-Host "Codex CLI $bmhPinnedVersion is ready." -ForegroundColor Green

@@ -85,8 +85,11 @@
 
   function renderAccounts() {
     const workers = state.workers || [];
-    const count = workers.filter(w => w.account && w.connected).length;
-    setText($('account-count'), `${count}/2 tài khoản đã nối`);
+    const emails = workers.filter(w => w.account && w.connected).map(w => w.account.email?.trim().toLowerCase()).filter(Boolean);
+    const repeatedAccount = emails.length === 2 && emails[0] === emails[1];
+    const count = new Set(emails).size;
+    setText($('account-count'), `${count}/2 tài khoản khác nhau`);
+    $('account-warning').hidden = !repeatedAccount;
     for (const id of ['one', 'two']) {
       const worker = workers.find(w => w.id === id) || { id, connected: false, account: null, login: null };
       const card = document.querySelector(`[data-account="${id}"]`);
@@ -95,8 +98,10 @@
       const connected = loggedIn && Boolean(worker.connected);
       setText(field('email'), bounded(worker.account?.email || (loggedIn ? 'Đã đăng nhập ChatGPT' : 'Chưa đăng nhập'), 200));
       setText(field('plan'), worker.account?.planType ? `Gói ${bounded(worker.account.planType, 60)} · phiên Codex riêng` : loggedIn ? 'Phiên Codex đã có tài khoản.' : 'Dùng đăng nhập ChatGPT chính thức.');
-      setText(field('status'), pending.has(`login:${id}`) ? 'Đang mở đăng nhập' : connected ? 'Đã kết nối' : worker.login ? 'Chờ đăng nhập' : loggedIn ? 'Chờ kết nối' : 'Chưa kết nối');
-      field('status').classList.toggle('connected', connected);
+      const duplicate = repeatedAccount && id === 'two';
+      setText(field('status'), pending.has(`login:${id}`) ? 'Đang mở đăng nhập' : duplicate ? 'Trùng tài khoản' : connected ? 'Đã kết nối' : worker.login ? 'Chờ đăng nhập' : loggedIn ? 'Chờ kết nối' : 'Chưa kết nối');
+      field('status').classList.toggle('connected', connected && !duplicate);
+      field('status').classList.toggle('failed', duplicate);
       field('status').classList.toggle('running', Boolean(worker.login || pending.has(`login:${id}`)));
       field('error').hidden = !worker.error;
       setText(field('error'), bounded(worker.error, 1800));

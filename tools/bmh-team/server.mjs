@@ -1,7 +1,7 @@
 import http from 'node:http';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,access} from 'node:fs/promises';
 import {randomBytes,timingSafeEqual} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import {CodexWorker,privateStateRoot,findCodex,findGit,scrub} from './core.mjs';
@@ -102,11 +102,12 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
 
 async function main() {
   const args=process.argv.slice(2);const arg=name=>{const at=args.indexOf(name);return at<0?null:args[at+1];};
-  const repoDefault=arg('--repo') || path.resolve(toolRoot,'../..');
+  let repoDefault=arg('--repo') || '';
+  if(!repoDefault){const candidate=path.resolve(toolRoot,'../..');try{await access(path.join(candidate,'.git'));await access(path.join(candidate,'package.json'));repoDefault=candidate;}catch{}}
   const app=await createTeamServer({repoDefault});
   await new Promise((resolve,reject)=>{app.server.once('error',reject);app.server.listen(0,'127.0.0.1',resolve);});
   const url=`http://127.0.0.1:${app.server.address().port}/`;
-  process.stdout.write(`\nBMH Team v1: ${url}\nGiữ cửa sổ này mở. Đăng nhập hai tài khoản riêng trong trang vừa mở.\n`);
+  process.stdout.write(`\nBMH Team v1.0.1: ${url}\nGiữ cửa sổ này mở. Đăng nhập hai tài khoản riêng trong trang vừa mở.\n`);
   if(!args.includes('--no-browser')){
     const command=process.platform==='win32'?'rundll32.exe':process.platform==='darwin'?'open':'xdg-open';
     const openArgs=process.platform==='win32'?['url.dll,FileProtocolHandler',url]:[url];
