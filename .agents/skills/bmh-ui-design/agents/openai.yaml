@@ -1,0 +1,14 @@
+interface:
+  display_name: BMH · Thiết kế giao diện
+  short_description: Giao diện BMH gọn, rõ và dễ dùng trên điện thoại
+  default_prompt: Dùng $bmh-ui-design để đơn giản hóa giao diện BMH và giữ các chức
+    năng cần thiết dễ tìm.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
