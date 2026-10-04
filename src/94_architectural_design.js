@@ -24,7 +24,7 @@
   const W=e.buildWidth-t,D=e.buildDepth-t,x0=(e.originX??e.side??0)+t/2,y0=(e.originY??e.front??0)+t/2;
   const floors=Number(p.site.floors),fail=text=>({ok:false,reason:text,program});
   if(![W,D,x0,y0].every(Number.isFinite)||W<3.35||D<6||!Number.isInteger(floors)||floors<1||floors>10)return fail('Khung xây dựng chưa đủ để bố trí phòng và lối đi. Kiểm tra ranh, khoảng lùi và số tầng.');
-  if(program.bedrooms>20||program.bathrooms>20)return fail('Số phòng vượt phạm vi tự bố trí. Cần triển khai công năng riêng.');
+  if(!program.floorProgram&&(program.bedrooms>20||program.bathrooms>20))return fail('Số phòng vượt phạm vi tự bố trí. Cần triển khai công năng riêng.');
   if(program.floorProgram&&B.floorProgramError(program.floorProgram))return fail(B.floorProgramError(program.floorProgram));
   if(!program.floorProgram&&program.bathrooms<floors)return fail('Chọn công năng từng tầng để quyết định tầng nào có WC; không tự thêm ngoài yêu cầu.');
   if(program.elevator&&floors===1)return fail('Nhà một tầng chưa có điểm dừng trên để bố trí thang máy. Điều chỉnh số tầng hoặc bỏ lựa chọn này.');
@@ -106,6 +106,7 @@
   if(program.elevator&&!wide)return fail('Bề ngang này chưa bố trí được WC, sảnh và thang máy với lối vào riêng. Tăng bề ngang hoặc thiết kế khối thang riêng.');
   const plan={rooms,openings,fixtures:[],outdoor:B.programOutdoorZones?.({...program,mode:'custom'})||[],lockedRoomIds:[],lockedFloors:[]};
   if(B.createWorshipFixtures)plan.fixtures=B.createWorshipFixtures(plan,program);
+  if(program.floorProgram&&plan.fixtures.length!==program.floorProgram.filter(f=>f.worship!=='none').length)return fail('Chưa có vị trí bàn thờ dự trù không chắn cửa tại các tầng yêu cầu. Điều chỉnh công năng hoặc đặt trực tiếp sau khi chọn mặt bằng.');
   if(!(B.customerBaseLayoutValid||B.layoutValid)(rooms))return fail('Phương án vượt ranh hoặc chồng phòng. Giữ mặt bằng hiện tại.');
   const geometryErrors=B.withPlan(plan,()=>[...B.measuredGeometryIssues(),...B.elevatorIssues().filter(i=>i.sev==='error')]);
   if(geometryErrors.length)return fail(geometryErrors[0].text);

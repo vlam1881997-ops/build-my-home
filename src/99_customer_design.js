@@ -80,6 +80,7 @@
  B.fixtureFits=(q,plan=B.state.project.plan)=>{
   const r=plan.rooms.find(r=>r.id===q.roomId),margin=B.measuredWallThickness(false)/2+.025;
   if(!r||q.kind!=='altar'||q.floor!==r.floor||![q.x,q.y,q.w,q.d,q.h].every(Number.isFinite)||q.w<.3||q.d<.2||q.h<.3||q.h>B.projectLevels().clearHeight||q.x<r.x+margin-.001||q.y<r.y+margin-.001||q.x+q.w>r.x+r.w-margin+.001||q.y+q.d>r.y+r.h-margin+.001)return false;
+  if((plan.fixtures||[]).some(other=>other.id!==q.id&&other.floor===q.floor&&overlap(q,other,.02)))return false;
   return !B.withPlan(plan,()=>plan.openings.filter(o=>o.roomId===r.id&&o.kind==='door').some(o=>{const g=B.openingGeometry(o);return g&&overlap(q,{x:g.x-.5,y:g.y-.5,w:1,d:1});}));
  };
  B.altarAtSide=(r,side='north',dims={})=>{
@@ -118,15 +119,15 @@
   const plan=B.planSnapshot(),q=(kind==='opening'?plan.openings:kind==='fixture'?plan.fixtures||[]:plan.rooms).find(x=>x.id===id);if(!q)return false;
   const owner=kind==='room'?q:plan.rooms.find(r=>r.id===q.roomId);if(!owner||B.isRoomLocked(owner.id))return void B.toast('Phòng hoặc tầng đang khóa.');
   if(kind==='opening'&&B.sharedWallNeighbors(plan.rooms,owner,q.side).some(r=>B.isRoomLocked(r.id)))return void B.toast('Phòng phía bên kia tường đang khóa.');
-  if(kind==='room'&&q.type==='elevator'&&B.deleteElevatorShaft)return B.deleteElevatorShaft(B.elevatorSpec(q).shaftId);
+  if(kind==='room'&&q.type==='elevator'&&B.deleteElevatorShaft){ui().selected=q.id;return B.deleteElevatorShaft();}
   if(kind==='room'){plan.rooms=plan.rooms.filter(r=>r.id!==id);plan.openings=plan.openings.filter(o=>o.roomId!==id);plan.fixtures=(plan.fixtures||[]).filter(f=>f.roomId!==id);}
   else if(kind==='opening')plan.openings=plan.openings.filter(o=>o.id!==id);else plan.fixtures=plan.fixtures.filter(f=>f.id!==id);
   return B.commitDirectPlan(plan,{selectedOpening:'',selectedFixture:'',selected:kind==='room'?plan.rooms.find(r=>r.floor===ui().floor)?.id||'':owner.id});
  };
  const rotate=B.rotateSelectedRoom;B.rotateSelectedRoom=()=>{
-  const r=B.selectedRoom();if(!r||!B.planFixtures(r.id).length)return rotate();if(B.isRoomLocked(r.id))return void B.toast('Phòng hoặc tầng đang khóa.');
-  const plan=B.planSnapshot(),cx=r.x+r.w/2,cy=r.y+r.h/2,turn={north:'east',east:'south',south:'west',west:'north'},next={...r,x:cx-r.h/2,y:cy-r.w/2,w:r.h,h:r.w,furnitureRotation:((r.furnitureRotation||0)+90)%360};plan.rooms=plan.rooms.map(q=>q.id===r.id?next:q);
-  plan.fixtures=plan.fixtures.map(q=>q.roomId===r.id?{...q,x:cx+cy-q.y-q.d,y:cy+q.x-cx,w:q.d,d:q.w,side:turn[q.side]}:q);
+  const r=B.selectedRoom();if(!r||r.type==='elevator')return rotate();if(B.isRoomLocked(r.id))return void B.toast('Phòng hoặc tầng đang khóa.');
+  const plan=B.planSnapshot(),cx=r.x+r.w/2,cy=r.y+r.h/2,turn={north:'east',east:'south',south:'west',west:'north'},next={...r,x:cx-r.h/2,y:cy-r.w/2,w:r.h,h:r.w,furnitureRotation:((r.furnitureRotation||0)+90)%360,stairDirection:((r.type==='stairs'?B.stairSpec(r).direction:r.stairDirection||0)+90)%360};plan.rooms=plan.rooms.map(q=>q.id===r.id?next:q);
+  plan.fixtures=(plan.fixtures||[]).map(q=>q.roomId===r.id?{...q,x:cx+cy-q.y-q.d,y:cy+q.x-cx,w:q.d,d:q.w,side:turn[q.side]}:q);
   for(const o of plan.openings.filter(o=>o.roomId===r.id)){if(B.sharedWallNeighbors(B.state.project.plan.rooms,r,o.side).some(q=>B.isRoomLocked(q.id)))return false;if(['east','west'].includes(o.side))o.offset=1-o.offset;o.side=turn[o.side];}
   if(!B.withPlan(plan,()=>plan.openings.filter(o=>o.roomId===r.id).every(o=>B.openingFits(o)&&!B.sharedWallNeighbors(plan.rooms,next,o.side).some(q=>B.isRoomLocked(q.id))))){B.toast('Ô mở hoặc tường chung không phù hợp sau xoay.');return false;}
   return B.commitDirectPlan(plan,{selected:r.id},{translateFixtures:false});
@@ -148,11 +149,13 @@
   if(!B.openingFits(o)||o.height<.3)return void B.toast('Ô mở không vừa cạnh tường hoặc trùng cửa. Chọn vị trí khác.');
   const plan=B.planSnapshot();plan.openings.push(o);return B.commitDirectPlan(plan,{selected:r.id,selectedOpening:o.id,selectedFixture:''})?o:false;
  };
+ B.placeOpeningAt=(kind,roomId,side,point)=>B.directOpeningAt(kind,roomId,side,point);
+ const inspectorOpening=B.addOpeningFromInspector;B.addOpeningFromInspector=values=>{const r=B.selectedRoom();if(!r)return false;if(B.sharedWallNeighbors(B.state.project.plan.rooms,r,values.side).some(q=>B.isRoomLocked(q.id))){B.toast('Phòng bên kia tường đang khóa.');return false;}const plan=B.planSnapshot();plan.openings.push({id:'candidate-opening',roomId:r.id,floor:r.floor,kind:values.kind==='window'?'window':'door',side:values.side,width:Number(values.width),offset:Number(values.offset)});if(!(plan.fixtures||[]).every(q=>B.fixtureFits(q,plan))){B.toast('Ô mở mới chắn vị trí bàn thờ.');return false;}return inspectorOpening(values);};
  B.addDirectRoom=(a,b,type=ui().drawRoomType)=>{if(B.isFloorLocked(ui().floor))return false;const snap=n=>B.roundTo(n,ui().snap),x=snap(Math.min(a.x,b.x)),y=snap(Math.min(a.y,b.y)),r={id:B.uid('r'),floor:ui().floor,type,name:roomTypes.find(([k])=>k===type)?.[1]||'Phòng',x,y,w:snap(Math.abs(a.x-b.x)),h:snap(Math.abs(a.y-b.y))};if(r.w<.6||r.h<.6)return false;const plan=B.planSnapshot();plan.rooms.push(r);return B.commitDirectPlan(plan,{selected:r.id,selectedOpening:'',selectedFixture:'',directTool:'select'})?r:false;};
  B.addDirectAltar=(roomId,side)=>{const r=B.state.project.plan.rooms.find(r=>r.id===roomId);if(!r||B.isRoomLocked(r.id))return false;const q=B.altarAtSide(r,side),plan=B.planSnapshot();plan.fixtures||=[];if(plan.fixtures.some(f=>f.roomId===r.id&&overlap(q,f,.08)))return void B.toast('Vị trí đang có bàn thờ. Chọn cạnh khác.');plan.fixtures.push(q);return B.commitDirectPlan(plan,{selected:r.id,selectedOpening:'',selectedFixture:q.id})?q:false;};
  B.directEditHtml=()=>{
   const u=ui(),r=B.selectedRoom(),o=B.state.project.plan.openings.find(o=>o.id===u.selectedOpening),q=B.planFixtures().find(q=>q.id===u.selectedFixture),kind=o?'opening':q?'fixture':'',item=o||q;
-  const input=(key,label,value,min=.01,max='')=>'<label>'+label+'<input type="number" data-direct-field="'+key+'" value="'+value+'" min="'+min+'" '+(max!==''?'max="'+max+'"':'')+' step=".01"></label>';
+  const input=(key,label,value,min=.01,max='')=>'<label>'+label+'<input type="number" data-direct-field="'+key+'" value="'+Number(Number(value).toFixed(3))+'" min="'+min+'" '+(max!==''?'max="'+max+'"':'')+' step=".01"></label>';
   const tools=[['select','Chọn / kéo / chỉnh'],['room','Vẽ phòng / lối đi'],['door','Thêm cửa đi'],['window','Thêm cửa sổ'],['passage','Thêm lối mở không cánh'],['altar','Thêm bàn thờ'],['erase','Xóa trực tiếp']];
   return '<section class="customer-direct-editor"><div class="customer-direct-tools"><label>Thao tác trên bản vẽ<select data-direct-tool>'+tools.map(([k,n])=>'<option value="'+k+'" '+(u.directTool===k?'selected':'')+'>'+n+'</option>').join('')+'</select></label>'+(u.directTool==='room'?'<label>Không gian cần vẽ<select data-direct-draw-type>'+roomTypes.map(([k,n])=>'<option value="'+k+'" '+(u.drawRoomType===k?'selected':'')+'>'+n+'</option>').join('')+'</select></label>':'')+'</div><p>'+(u.directTool==='room'?'Kéo một hình chữ nhật hoặc chạm hai góc trong vùng trống. Esc để hủy.':u.directTool==='select'?'Chọn cửa, cửa sổ hoặc bàn thờ ngay trên bản vẽ để sửa. Kéo phòng để di chuyển.':u.directTool==='erase'?'Chạm đối tượng cần xóa. Có thể hoàn tác.':'Chạm vị trí trong phòng; BMH lấy cạnh tường gần nhất.')+'</p>'+(item?'<div class="customer-direct-inspector" data-direct-kind="'+kind+'" data-direct-id="'+esc(item.id)+'"><b>'+esc(o?(o.passage?'Lối mở':o.kind==='window'?'Cửa sổ':'Cửa đi'):q.name)+'</b><div>'+ (o?input('width','Rộng / m',o.width,.5)+input('height','Cao / m',o.height??(o.kind==='door'?2.1:1.4),.3,B.projectLevels().clearHeight)+input('sill','Bậu / m',o.kind==='door'?0:o.sill??.9,0)+input('offset','Vị trí cạnh · 0–1',o.offset??.5,0,1):input('x','X / m',q.x,0)+input('y','Y / m',q.y,0)+input('w','Rộng theo X / m',q.w,.3)+input('d','Sâu theo Y / m',q.d,.2)+input('h','Cao / m',q.h,.3,B.projectLevels().clearHeight)+'<label>Lưng bàn thờ<select data-altar-side>'+sides.map(([k,n])=>'<option value="'+k+'" '+(q.side===k?'selected':'')+'>'+n+'</option>').join('')+'</select></label>')+'</div><button data-direct-delete>Xóa '+(o?'ô mở':'bàn thờ')+'</button>'+(q?'<small>Kích thước dự trù, chưa phải mẫu bàn thờ của hãng.</small>':'')+'</div>':r&&roomTypes.some(([k])=>k===r.type)?'<label class="customer-room-function">Công năng '+esc(r.name)+'<select data-direct-room-type>'+roomTypes.map(([k,n])=>'<option value="'+k+'" '+(r.type===k?'selected':'')+'>'+n+'</option>').join('')+'</select></label>':'')+'</section>';
  };
@@ -166,9 +169,16 @@
  };
  const normalize=B.normalizeState;B.normalizeState=()=>{normalize();const u=ui();if(!['select','room','door','window','passage','altar','erase'].includes(u.directTool))u.directTool='select';if(!roomTypes.some(([k])=>k===u.drawRoomType))u.drawRoomType='bed';const p=B.state.project.plan;p.fixtures=(p.fixtures||[]).filter(q=>q&&q.kind==='altar'&&p.rooms.some(r=>r.id===q.roomId)&&[q.x,q.y,q.w,q.d,q.h].every(Number.isFinite));if(!p.openings.some(o=>o.id===u.selectedOpening))u.selectedOpening='';if(!p.fixtures.some(q=>q.id===u.selectedFixture))u.selectedFixture='';B.state.ui.guidedPanels||={};for(const key of ['style-output','worship-review'])if(typeof B.state.ui.guidedPanels[key]!=='boolean')B.state.ui.guidedPanels[key]=false;};
  B.normalizeState();
+ const editOpening=B.editOpening;if(editOpening)B.editOpening=(id,changes)=>{const o=B.state.project.plan.openings.find(o=>o.id===id),room=o&&B.state.project.plan.rooms.find(r=>r.id===o.roomId);if(!o||!room)return false;const side=changes.side||o.side;if(B.sharedWallNeighbors(B.state.project.plan.rooms,room,o.side).some(r=>B.isRoomLocked(r.id))||B.sharedWallNeighbors(B.state.project.plan.rooms,room,side).some(r=>B.isRoomLocked(r.id))){B.toast('Phòng bên kia tường đang khóa.');return false;}const plan=B.planSnapshot();Object.assign(plan.openings.find(q=>q.id===id),changes);if(!(plan.fixtures||[]).every(q=>B.fixtureFits(q,plan))){B.toast('Ô mở mới chắn vị trí bàn thờ.');return false;}return editOpening(id,changes);};
  const snapshot=B.customerDesignSnapshot;B.customerDesignSnapshot=()=>{const result=snapshot();result.project.fixtures=B.planFixtures().map(q=>Object.fromEntries(['id','kind','name','roomId','floor','x','y','w','d','h','side','provisional'].filter(k=>q[k]!==undefined).map(k=>[k,clone(q[k])])));result.project.designIntent={style:B.styleOutputReview(),floorProgram:B.requestedFloorProgram(),worship:B.worshipReview()};return result;};
  const files=B.customerPackageFiles;B.customerPackageFiles=(s,...args)=>[...files(s,...args),['phong-cach-vat-lieu-cong-nang.json',JSON.stringify(s.project.designIntent,null,2)]];
- for(const [name,index]of [['screen1',0],['screen5',3],['screen7',5],['screen10',9]]){const screen=B[name];B[name]=()=>{const content=screen();return name==='screen1'?content+B.styleOutputHtml():B.styleOutputHtml()+(name==='screen5'&&ui().view==='plan'?B.directEditHtml()+B.worshipReviewHtml():'')+content;};B.SCREENS[index]=B[name];}
+ for(const [name,index]of [['screen1',0],['screen5',3],['screen7',5],['screen10',9]]){const screen=B[name];B[name]=()=>{
+  const content=screen();if(name==='screen1')return content+B.styleOutputHtml();
+  if(name!=='screen5'||ui().view!=='plan'||typeof document.createElement!=='function')return B.styleOutputHtml()+content;
+  const t=document.createElement('template');t.innerHTML=content;const editor=document.createElement('template');editor.innerHTML=B.directEditHtml();const controls=editor.content.firstElementChild,inspector=controls.querySelector('.customer-direct-inspector'),roomFunction=controls.querySelector('.customer-room-function'),side=t.content.querySelector('.v6-inspector'),main=t.content.querySelector('.v6-plan-main');
+  if(inspector&&side)side.prepend(inspector);if(roomFunction&&side)side.prepend(roomFunction);const canvas=main?.querySelector('.v6-plan-canvas');if(canvas)canvas.before(controls);else return B.styleOutputHtml()+B.directEditHtml()+B.worshipReviewHtml()+content;
+  main?.insertAdjacentHTML('beforeend',B.worshipReviewHtml());return B.styleOutputHtml()+t.innerHTML;
+ };B.SCREENS[index]=B[name];}
  const family=B.screen4;B.screen4=()=>family()+'<section class="customer-family-program"><b>Chọn công năng theo từng tầng</b><p>Phòng ngủ, WC và không gian thờ ở tầng bạn muốn.</p><button data-customer-program-open>Mở công năng từng tầng →</button></section>';B.SCREENS[2]=B.screen4;
 
  document.addEventListener('change',e=>{
@@ -187,7 +197,8 @@
   }
  });
  // Intercept legacy room coordinate inputs to move owned fixtures atomically.
- document.addEventListener('change',e=>{const t=e.target,key=t.dataset?.roomField,r=B.selectedRoom();if(!['x','y','w','h'].includes(key)||!r||r.type==='elevator')return;e.stopImmediatePropagation();if(B.isRoomLocked(r.id))return;const plan=B.planSnapshot(),value=Number(t.value);if(t.value===''||!Number.isFinite(value))return;plan.rooms.find(q=>q.id===r.id)[key]=B.roundTo(value,ui().snap);B.commitDirectPlan(plan,{selected:r.id});},true);
+ document.addEventListener('change',e=>{const t=e.target,key=t.dataset?.roomField||t.dataset?.v6Room,r=B.selectedRoom();if(!['x','y','w','h'].includes(key)||!r||r.type==='elevator')return;e.stopImmediatePropagation();if(B.isRoomLocked(r.id))return;const plan=B.planSnapshot(),value=Number(t.value);if(t.value===''||!Number.isFinite(value))return;plan.rooms.find(q=>q.id===r.id)[key]=t.dataset.v6Room?value:B.roundTo(value,ui().snap);if(!B.commitDirectPlan(plan,{selected:r.id}))B.render({preserveScroll:true});},true);
+ document.addEventListener('change',e=>{const t=e.target,key=t.dataset?.openingField;if(!key)return;e.stopImmediatePropagation();const value=['width','offset'].includes(key)?Number(t.value):t.value;if(t.value===''||typeof value==='number'&&!Number.isFinite(value))return;B.editOpening?.(t.dataset.openingId,{[key]:value});B.render({preserveScroll:true});},true);
  document.addEventListener('click',e=>{
   const t=e.target.closest?.('[data-program-floor],[data-return-style],[data-direct-delete],[data-customer-program-open]');if(!t)return;
   if(t.hasAttribute('data-program-floor')){B.state.ui.programFloor=Number(t.dataset.programFloor);update();}
@@ -197,6 +208,8 @@
  });
  let drawing=null,anchor=null,ignoreClickUntil=0;
  const cancelDraw=()=>{drawing=null;anchor=null;document.querySelectorAll('.direct-room-preview,.direct-room-anchor').forEach(e=>e.remove());};
+ document.addEventListener('change',e=>{if(e.target.matches?.('[data-guided-floor],[data-floor],[data-guided-plan-view]'))cancelDraw();},true);
+ document.addEventListener('click',e=>{if(e.target.closest?.('[data-nav]'))cancelDraw();},true);
  const point=e=>{const svg=B.$('#plannerSvg');return svg?B.svgPoint(e,svg):null;};
  const drawPreview=b=>{const svg=B.$('#plannerSvg'),target=svg?.querySelector('#planDrawing')||svg;if(!target||!anchor)return;target.querySelector('.direct-room-preview')?.remove();const r=document.createElementNS('http://www.w3.org/2000/svg','rect');for(const [k,v]of Object.entries({x:Math.min(anchor.x,b.x),y:Math.min(anchor.y,b.y),width:Math.abs(b.x-anchor.x),height:Math.abs(b.y-anchor.y),class:'direct-room-preview'}))r.setAttribute(k,v);target.append(r);};
  const selectItem=(kind,id)=>{const q=(kind==='opening'?B.state.project.plan.openings:B.planFixtures()).find(q=>q.id===id);if(!q)return;Object.assign(ui(),{selected:q.roomId,selectedOpening:kind==='opening'?id:'',selectedFixture:kind==='fixture'?id:''});update();};
