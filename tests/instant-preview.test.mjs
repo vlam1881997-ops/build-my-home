@@ -8,7 +8,7 @@ import {renderFinishDescription,renderRequestPayload} from '../api/gemini-render
 function client({mount=async()=>{}}={}){
  const b={state:{ui:{sceneFocus:'room:living'},project:{style:'Japandi',site:{width:5,depth:8,floors:1},materials:{choices:{floor:'approved-floor',paint:'approved-paint'},finish:{rooms:{}}},plan:{rooms:[{id:'living',name:'Khách',type:'living',floor:0,x:0,y:0,w:5,h:4},{id:'bed',name:'Ngủ',type:'bed',floor:0,x:0,y:4,w:5,h:4}],openings:[]}}},screen7:()=>'<section class="interior-collections">',SCREENS:[],esc:String,$:()=>null,save(){},render(){},mountStudio3D:mount,disposeStudio3D(){}};
  b.finishPalette=id=>id?b.state.project.materials.finish.rooms[id]:b.state.project.materials.finish.exterior;
- const context={BMH:b,document:{addEventListener(){},querySelectorAll:()=>[],createElement(){const canvas={};canvas.getContext=()=>({createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData(data){canvas.pixels=data.data;}});return canvas;}},window:{},console,setTimeout,clearTimeout,cancelAnimationFrame(){},requestAnimationFrame:()=>1,performance:{now:()=>200},structuredClone};
+ const context={BMH:b,document:{addEventListener(){},querySelectorAll:()=>[],createElement(){const canvas={toDataURL(){return canvas.reference?.toDataURL()||'';}};canvas.getContext=()=>({drawImage(reference){canvas.reference=reference;},createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData(data){canvas.pixels=data.data;}});return canvas;}},window:{},console,setTimeout,clearTimeout,cancelAnimationFrame(){},requestAnimationFrame:()=>1,performance:{now:()=>200},structuredClone};
  for(const file of ['43_scene_assets.js','85_interior_collections.js','86_visual_materials.js','46_architectural_render.js'])vm.runInNewContext(fs.readFileSync('src/'+file,'utf8'),context);
  return {b,context};
 }
@@ -75,9 +75,9 @@ test('AI image caching matches the captured view as well as the design',async()=
  const {b,context}=client();let reference='first-view',requests=0;
  b.MATERIALS={};b.cinematicSignature=()=> 'same-design';b.finishHash=value=>value;b.toast=()=>{};
  b.cinematicRender={loading:false,views:{'same-design':'old-image'},referenceHashes:{'same-design':'old-view'}};
- b.studio3d={scene:{userData:{}},renderFrame(){},renderer:{domElement:{toDataURL:()=>reference}}};
+ b.studio3d={scene:{userData:{}},renderFrame(){},renderer:{domElement:{width:2560,height:1600,toDataURL:()=>reference}}};
  context.fetch=async()=>{requests++;return {ok:true,json:async()=>({image:'new-image',mimeType:'image/png'})};};
- const source=fs.readFileSync('src/45_studio3d.js','utf8');vm.runInNewContext(source.slice(source.indexOf('BMH.generateCinematicRender = async () => {')),context);
+ const source=fs.readFileSync('src/45_studio3d.js','utf8');vm.runInNewContext(source.slice(source.indexOf('BMH.cinematicReferenceImage=')),context);
  await b.generateCinematicRender();assert.equal(requests,1,'a different captured view requires a new image');
  await b.generateCinematicRender();assert.equal(requests,1,'the identical captured view reuses its image');
  reference='rotated-view';await b.generateCinematicRender();assert.equal(requests,2,'rotating the camera cannot reuse the previous image');
@@ -86,9 +86,9 @@ test('AI image caching matches the captured view as well as the design',async()=
 test('an AI reply from an earlier camera is rejected and its hero image becomes hidden',async()=>{
  const {b,context}=client();let reply;
  b.MATERIALS={};b.cinematicSignature=()=> 'same-design';b.finishHash=value=>value;b.toast=()=>{};b.cinematicRender={loading:false,views:{}};
- b.studio3d={state:{yaw:.2,pitch:.3,dist:5,target:new THREE.Vector3(1,2,3)},scene:{userData:{}},renderFrame(){},renderer:{domElement:{toDataURL:()=> 'camera-reference'}}};
+ b.studio3d={state:{yaw:.2,pitch:.3,dist:5,target:new THREE.Vector3(1,2,3)},scene:{userData:{}},renderFrame(){},renderer:{domElement:{width:2560,height:1600,toDataURL:()=> 'camera-reference'}}};
  const source=fs.readFileSync('src/45_studio3d.js','utf8');vm.runInNewContext(source.slice(source.indexOf('BMH.cinematicCameraKey=()=>'),source.indexOf('BMH.generateCinematicRender = async () => {')),context);
- vm.runInNewContext(source.slice(source.indexOf('BMH.generateCinematicRender = async () => {')),context);
+ vm.runInNewContext(source.slice(source.indexOf('BMH.cinematicReferenceImage=')),context);
  const key=b.cinematicCameraKey();b.cinematicRender.views['same-design']='old-image';b.cinematicRender.cameraKeys={'same-design':key};assert.equal(b.currentCinematicImage(),'old-image');
  context.fetch=()=>new Promise(resolve=>reply=resolve);const pending=b.generateCinematicRender();await Promise.resolve();b.studio3d.state.yaw+=.3;assert.equal(b.currentCinematicImage(),'');
  const hero={hidden:false};b.$=()=>hero;b.refreshCinematicHero();assert.equal(hero.hidden,true);

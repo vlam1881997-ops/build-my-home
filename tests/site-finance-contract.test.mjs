@@ -151,11 +151,11 @@ test('image endpoint honors explicit disable and returns the Gemini image with a
     const enabled=res();await renderHandler(req,enabled);
     assert.equal(enabled.code,200);
     assert.equal(enabled.body.mimeType,'image/png');
-    assert.match(upstream.url,/\/v1beta\/interactions$/);
+    assert.match(upstream.url,/\/v1beta\/models\/gemini-9-flash-image:generateContent$/);
     const body=JSON.parse(upstream.options.body);
-    assert.equal(body.model,'gemini-9-flash-image');
-    assert.equal(body.input[1].type,'image');
-    assert.equal(body.response_format.image_size,'1K');
+    assert.equal(body.contents[0].parts[1].inlineData.mimeType,'image/jpeg');
+    assert.deepEqual(body.generationConfig.responseModalities,['TEXT','IMAGE']);
+    assert.equal(JSON.stringify(enabled.body).includes('server-test-key'),false);
     assert.equal(upstream.options.headers['x-goog-api-key'],'server-test-key');
     assert.equal(enabled.body.image.length,128);
   }finally{
@@ -171,8 +171,8 @@ test('cinematic capture completes even when the loading view disposes WebGL',asy
     MATERIALS:{floor:[{id:'tile',name:'Gạch nhám'}]},
     $:()=>({}),toast:()=>{},render:()=>{renderCount++;BMH.studio3d=null;}};
   const fetch=async(url,options)=>{posted={url,body:JSON.parse(options.body)};return {ok:true,json:async()=>({image:'B'.repeat(128),mimeType:'image/png',generatedAt:'2026-09-26T00:00:00Z'})};};
-  vm.runInNewContext(fs.readFileSync(new URL('../src/45_studio3d.js',import.meta.url),'utf8'),{BMH,window:{},fetch,JSON,Math,Number,Object,Date});
-  BMH.studio3d={renderer:{domElement:{toDataURL:()=> 'data:image/jpeg;base64,'+'A'.repeat(128)}}};
+  vm.runInNewContext(fs.readFileSync(new URL('../src/45_studio3d.js',import.meta.url),'utf8'),{BMH,window:{},document:{createElement(){const canvas={toDataURL(){return canvas.reference.toDataURL();},getContext(){return {drawImage(reference){canvas.reference=reference;}};}};return canvas;}},fetch,JSON,Math,Number,Object,Date});
+  BMH.studio3d={renderer:{domElement:{width:2560,height:1600,toDataURL:()=> 'data:image/jpeg;base64,'+'A'.repeat(128)}}};
   await BMH.generateCinematicRender();
   assert.equal(posted.url,'/api/gemini-render');
   assert.equal(posted.body.project.materials.choices.floor,'Gạch nhám');
