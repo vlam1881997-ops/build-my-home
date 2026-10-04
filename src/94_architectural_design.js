@@ -35,7 +35,7 @@
   if(upperCount<0)return fail('Cần ít nhất một phòng ngủ tầng trệt cho người thân đã khai báo.');
   const beds=Array.from({length:Math.max(0,upperCount)},(_,i)=>i===0?'Phòng ngủ chính':p.household.children?.[i-1]?.name?'Phòng '+p.household.children[i-1].name:'Phòng ngủ '+(i+1));
   const extraBaths=Math.max(0,program.bathrooms-floors),names=Array.from({length:floors},()=>[]);
-  if(program.floorProgram){for(let f=0;f<floors;f++){const v=program.floorProgram[f];if(v.garage)names[f].push(['Gara','garage']);if(v.living)names[f].push(['Phòng khách','living']);if(v.kitchen)names[f].push(['Bếp + ăn','kitchen']);for(let i=0;i<v.bedrooms;i++)names[f].push(['Phòng ngủ '+(i+1),'bed']);if(v.office)names[f].push(['Phòng làm việc','office']);if(v.worship==='room')names[f].push(['Phòng thờ','worship']);for(let i=1;i<v.bathrooms;i++)names[f].push(['WC bổ sung '+(i+1),'bath']);}}else{
+  if(program.floorProgram){for(let f=0;f<floors;f++){const v=program.floorProgram[f];if(v.garage)names[f].push(['Gara','garage']);if(v.living)names[f].push(['Phòng khách','living']);if(v.kitchen)names[f].push(['Bếp + ăn','kitchen']);for(let i=0;i<v.bedrooms;i++)names[f].push(['Phòng ngủ '+(i+1),'bed']);if(v.office)names[f].push(['Phòng làm việc','office']);if(v.worship==='room')names[f].push(['Phòng thờ','worship']);for(let i=1;i<v.bathrooms;i++)names[f].push(['WC bổ sung '+(i+1),'bath']);for(const r of v.extraRooms||[])for(let i=0;i<r.count;i++)names[f].push([r.name+(r.count>1?' '+(i+1):''),r.type,{programRoomId:r.id,minArea:r.minArea}]);}}else{
   names[0].push(...(program.garage?[['Gara','garage']]:[]),['Phòng khách','living'],['Bếp + ăn','kitchen']);
   if(groundBeds)names[0].push(['Phòng ông bà','bed']);
   if(program.office)names[0].push(['Phòng làm việc','office']);
@@ -44,9 +44,9 @@
   else beds.forEach((n,i)=>names[1+i%(floors-1)].push([n,'bed']));
   for(let i=0;i<extraBaths;i++)names[i%floors].push(['WC bổ sung '+(i+1),'bath']);
   }
-  const minDepth=type=>({living:3.0,kitchen:2.8,bed:2.95,garage:5.5,office:2.6,worship:2.4,bath:2.2})[type]||2.6;
+  const minDepth=item=>Math.max(({living:3.0,kitchen:2.8,bed:2.95,garage:5.5,office:2.6,worship:2.4,bath:2.2,laundry:1.8,storage:1.5,gym:2.6,hobby:2.4,custom:2.0})[item[1]]||2.6,Number(item[2]?.minArea||0)/bank);
   const rows=names.map(list=>wide?Array.from({length:Math.max(1,Math.ceil(list.length/2))},(_,i)=>[list[i*2],list[i*2+1]]):list.map(x=>[x]));
-  if(rows.some(row=>row.reduce((n,pair)=>n+Math.max(...pair.filter(Boolean).map(x=>minDepth(x[1])),2.6),0)>mainD+.001))return fail('Chưa đủ chiều sâu cho số phòng yêu cầu với kích thước sử dụng được. Giảm công năng, tăng số tầng hoặc điều chỉnh khoảng lùi.');
+  if(rows.some(row=>row.reduce((n,pair)=>n+Math.max(...pair.filter(Boolean).map(x=>minDepth(x)),2.6),0)>mainD+.001))return fail('Chưa đủ chiều sâu cho số phòng yêu cầu với kích thước sử dụng được. Giảm công năng, tăng số tầng hoặc điều chỉnh khoảng lùi.');
   if(program.garage&&bank<3)return fail('Bề ngang gara chưa đủ cho chỗ đỗ mẫu. Cần kích thước xe và lối vào thực tế.');
   if(program.elevator&&bank-1.8<1.35&&wide)return fail('Khối thang máy và vệ sinh chưa đủ chỗ. Cần phân chia công năng riêng cho bề ngang này.');
   if(program.elevator&&!wide&&bank-1.8<1.35)return fail('Khối thang máy 1,80 m để lại WC quá hẹp. Tăng bề ngang hoặc điều chỉnh công năng.');
@@ -58,16 +58,16 @@
    if(widthFit<.5)return;openings.push(o);return o;
   };
   for(let f=0;f<floors;f++){
-   const wc=!program.floorProgram||program.floorProgram[f].bathrooms>0,wcType=wc?'bath':'utility',wcName=wc?'WC T'+(f+1):'Giặt / kỹ thuật T'+(f+1);
+   const wc=!program.floorProgram||program.floorProgram[f].bathrooms>0,wcType=wc?'bath':'utility',wcName=wc?'WC T'+(f+1):'Khoang kỹ thuật T'+(f+1);
    const hx=x0+bank,hall=add(f,'Sảnh / hành lang T'+(f+1),'corridor',hx,y0,hallW,D);
    if(f===0)opening(hall,'door','north',1.0,.5,{height:2.4});
-   const list=rows[f].length?rows[f]:[[null]],minimum=list.map(pair=>Math.max(...pair.filter(Boolean).map(x=>minDepth(x[1])),2.6));
+   const list=rows[f].length?rows[f]:[[null]],minimum=list.map(pair=>Math.max(...pair.filter(Boolean).map(x=>minDepth(x)),2.6));
    const weights=list.map(pair=>pair.some(x=>x?.[1]===(strategy==='climate'?'living':strategy==='balanced'?'kitchen':'bed'))?1.5:1);
    const remaining=mainD-minimum.reduce((a,b)=>a+b,0),weightSum=weights.reduce((a,b)=>a+b,0);let cursor=y0;
    list.forEach((pair,i)=>{
     const depth=minimum[i]+remaining*weights[i]/weightSum;
     for(let side=0;side<(wide?2:1);side++){
-     const item=pair[side]||(program.floorProgram?['Không gian linh hoạt','corridor']:['Sinh hoạt chung','living']),x=side?hx+hallW:x0,r=add(f,item[0],item[1],x,cursor,bank,depth);
+     const item=pair[side]||(program.floorProgram?['Không gian linh hoạt','corridor']:['Sinh hoạt chung','living']),x=side?hx+hallW:x0,r=add(f,item[0],item[1],x,cursor,bank,depth);if(item[2])r.programRoomId=item[2].programRoomId;
      opening(r,'door',side?'west':'east',r.type==='bath'?.8:.9,.76);
      if(r.type==='garage')opening(r,'door','north',2.8,.5,{height:2.4});
      else if(i===0)opening(r,'window','north',r.type==='living'?Math.min(2.4,bank-.4):1.5,.5,{height:r.type==='living'?1.65:1.4,sill:r.type==='living'?.65:.9});
@@ -78,7 +78,7 @@
    if(wide){
     const stairs=add(f,'Cầu thang','stairs',x0,y0+mainD,bank,coreD);
     if(multi){stairs.stairShape='u';stairs.stairDirection=0;opening(stairs,'door','east',.9,.94);}
-    else {stairs.type='utility';stairs.name='Giặt / kỹ thuật';opening(stairs,'door','east',.9);}
+    else {stairs.type='utility';stairs.name='Khoang kỹ thuật';opening(stairs,'door','east',.9);}
     const right=hx+hallW;
     if(program.elevator){
      const landing=add(f,'Sảnh thang máy','corridor',right,y0+mainD,1.8,coreD-2.2);opening(landing,'door','west',.9);
@@ -87,7 +87,7 @@
      lift.elevator={shaftId:'design-lift',doorSide:'west',cabinWidth:1.1,cabinDepth:1.3,doorWidth:.8,pitDepth:null,headroom:null,model:''};const o=B.elevatorLanding(lift);if(o)openings.push({...o,id:'design-o'+(++oid)});
     }else{
      const bath=add(f,wcName,wcType,right,y0+mainD,bank,2.2);opening(bath,'door','west',.8);opening(bath,'window','east',.65,.5,{height:.55,sill:1.7});
-     if(coreD>2.3){const laundry=add(f,'Giặt / kỹ thuật','utility',right,y0+mainD+2.2,bank,coreD-2.2);opening(laundry,'door','west',.9);}
+     if(coreD>2.3){const laundry=add(f,'Khoang kỹ thuật','utility',right,y0+mainD+2.2,bank,coreD-2.2);opening(laundry,'door','west',.9);}
     }
    }else{
     const bw=program.elevator?bank-1.8:bank,bath=add(f,wcName,wcType,x0,y0+mainD,bw,2.2);

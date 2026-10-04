@@ -11,9 +11,9 @@ export function rankGeminiModels(models,{kind='text',configured='',fallback='',a
  });
  // Automatic text routing stays on the Flash family to avoid upgrading to
  // a more expensive Pro model without the owner choosing it.
- const automatic=kind==='text'?order.filter(id=>/flash/.test(id)):order;
+ const automatic=order.filter(id=>/flash/.test(id));
  const pins=[configured,fallback].filter(x=>ids.includes(x));
- return [...new Set(auto?[...automatic,...pins]:[...pins])].slice(0,4);
+ return [...new Set(auto?[...pins.filter(id=>id===configured),...automatic,...pins]:[...pins])].slice(0,2);
 }
 export async function availableGeminiModels(key,{force=false,timeoutMs=6000}={}){
  const now=Date.now(),old=catalogs.get(key);if(!force&&old&&now-old.at<15*60*1000)return old.models;

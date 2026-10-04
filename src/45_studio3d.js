@@ -169,7 +169,7 @@ BMH.mountStudio3D = async () => {
   const roomFocus=focus.startsWith('room:')?BMH.state.project.plan.rooms.find(r=>r.id===focus.slice(5)):null;
   const floorFocus=focus.startsWith('floor:')?BMH.clamp(Number(focus.split(':')[1])||0,0,floors-1):null;
   const visibleFloors=roomFocus?[Number(roomFocus.floor)]:floorFocus!==null?[floorFocus]:Array.from({length:floors},(_,f)=>f);
-  const interiorCamera=roomFocus&&['living','bed','kitchen','bath'].includes(roomFocus.type)&&BMH.state.ui.roomCamera==='inside'?BMH.roomInteriorCamera(roomFocus):null,insideRoom=!!interiorCamera;
+  const interiorCamera=roomFocus&&!['stairs','elevator','corridor','balcony'].includes(roomFocus.type)&&BMH.state.ui.roomCamera==='inside'?BMH.roomInteriorCamera(roomFocus):null,insideRoom=!!interiorCamera;
   const wallHeight=fh-BMH.projectLevels().slab;
   for(const f of visibleFloors){
     const geometry=BMH.scenePlanGeometry(roomFocus?{rooms:[roomFocus],openings:BMH.state.project.plan.openings,wallContext:BMH.state.project.plan.rooms}:BMH.state.project.plan,f);
@@ -293,12 +293,13 @@ BMH.cinematicCameraKey=()=>{
 };
 BMH.currentCinematicImage=()=>{const key=BMH.cinematicSignature(),camera=BMH.cinematicCameraKey();return camera&&BMH.cinematicRender.cameraKeys?.[key]===camera?BMH.cinematicRender.views[key]||'':'';};
 BMH.refreshCinematicHero=()=>{const node=BMH.$('[data-cinematic-hero]');if(!node)return;const image=BMH.currentCinematicImage();node.hidden=!image;if(image&&node.querySelector('img')?.getAttribute('src')!==image)node.querySelector('img').src=image;};
+BMH.cinematicReferenceImage=canvas=>{const out=document.createElement('canvas'),ratio=Math.min(1,1280/Math.max(canvas.width,canvas.height));out.width=Math.max(1,Math.round(canvas.width*ratio));out.height=Math.max(1,Math.round(canvas.height*ratio));out.getContext('2d').drawImage(canvas,0,0,out.width,out.height);return out.toDataURL('image/jpeg',.78);};
 BMH.generateCinematicRender = async () => {
   if(BMH.cinematicRender.loading)return;
   BMH.cinematicRender.loading=true;
   const scene=BMH.studio3d,viewer=BMH.architectViewer,architect=viewer?.three;
   const signature=BMH.cinematicSignature();let screenshot;
-  try{if(scene?.scene?.userData?.furnitureLoads)await Promise.allSettled(scene.scene.userData.furnitureLoads);if(scene?.scene?.userData?.surfaceLoads)await Promise.allSettled(scene.scene.userData.surfaceLoads);if(viewer?.furnitureReady)await viewer.furnitureReady;if(signature!==BMH.cinematicSignature()||(scene&&scene!==BMH.studio3d)||(viewer&&viewer!==BMH.architectViewer))throw new Error('Góc nhìn đã đổi. Hãy tạo lại phối cảnh.');if(scene?.scene)(scene.renderFrame||(()=>scene.renderer.render(scene.scene,scene.camera)))();architect?.render?.(true);screenshot=scene?scene.renderer.domElement.toDataURL('image/jpeg',.8):architect?.renderer?architect.renderer.domElement.toDataURL('image/jpeg',.8):await BMH.capturePlanReference();}catch(err){BMH.cinematicRender.loading=false;BMH.cinematicRender.error=err.message||'Không tạo được ảnh tham chiếu.';BMH.toast(BMH.cinematicRender.error);return;}
+  try{if(scene?.scene?.userData?.furnitureLoads)await Promise.allSettled(scene.scene.userData.furnitureLoads);if(scene?.scene?.userData?.surfaceLoads)await Promise.allSettled(scene.scene.userData.surfaceLoads);if(viewer?.furnitureReady)await viewer.furnitureReady;if(signature!==BMH.cinematicSignature()||(scene&&scene!==BMH.studio3d)||(viewer&&viewer!==BMH.architectViewer))throw new Error('Góc nhìn đã đổi. Hãy tạo lại phối cảnh.');if(scene?.scene)(scene.renderFrame||(()=>scene.renderer.render(scene.scene,scene.camera)))();architect?.render?.(true);screenshot=scene?BMH.cinematicReferenceImage(scene.renderer.domElement):architect?.renderer?BMH.cinematicReferenceImage(architect.renderer.domElement):await BMH.capturePlanReference();}catch(err){BMH.cinematicRender.loading=false;BMH.cinematicRender.error=err.message||'Không tạo được ảnh tham chiếu.';BMH.toast(BMH.cinematicRender.error);return;}
   const referenceHash=BMH.finishHash?.(screenshot),cached=BMH.cinematicRender.views?.[signature],cameraKey=BMH.cinematicCameraKey?.()||'';
   if(referenceHash&&cached&&BMH.cinematicRender.referenceHashes?.[signature]===referenceHash){BMH.cinematicRender.loading=false;BMH.cinematicRender.dataUrl=cached;BMH.cinematicRender.signature=signature;(BMH.cinematicRender.cameraKeys||={})[signature]=cameraKey;BMH.cinematicRender.error='';BMH.rememberFinishCamera?.();BMH.render({preserveScroll:true});return;}
   const p=BMH.state.project;

@@ -36,6 +36,7 @@ document.addEventListener('pointerdown',e=>{
 BMH.FURNITURE_DIMENSIONS={"bedDouble": {"w": 1.912, "h": 0.75, "d": 2.25}, "bedSingle": {"w": 1.142, "h": 0.75, "d": 2.25}, "loungeDesignSofa": {"w": 2.24, "h": 0.8, "d": 0.82}, "loungeChair": {"w": 0.98, "h": 0.92, "d": 0.82}, "tableCoffee": {"w": 1.322, "h": 0.46, "d": 0.8}, "table": {"w": 1.683, "h": 0.6535, "d": 0.8947}, "chair": {"w": 0.4, "h": 0.94, "d": 0.4}, "cabinetTelevision": {"w": 1.6, "h": 0.62, "d": 0.5}, "televisionModern": {"w": 1.3696, "h": 0.9095, "d": 0.2568}, "kitchenSink": {"w": 0.86, "h": 0.98, "d": 0.9}, "kitchenStove": {"w": 0.86, "h": 0.9, "d": 0.9}, "kitchenFridge": {"w": 0.86, "h": 1.84, "d": 0.5839}, "bathroomSink": {"w": 0.68, "h": 1.12, "d": 0.58}, "toilet": {"w": 0.6251, "h": 0.9019, "d": 0.9544}, "shower": {"w": 1.1236, "h": 2.1881, "d": 1.1636}, "bookcaseClosedWide": {"w": 1.6, "h": 1.58, "d": 0.5}, "desk": {"w": 1.469, "h": 0.7688, "d": 0.7846}, "chairDesk": {"w": 0.6699, "h": 1.2152, "d": 0.6286}, "pottedPlant": {"w": 0.4241, "h": 1.308, "d": 0.4829}, "cabinetBed": {"w": 0.532, "h": 0.4664, "d": 0.43}};
 BMH.FURNITURE_DIMENSIONS.sideTable={w:.40,h:.65,d:.40};
 BMH.FURNITURE_DIMENSIONS.floorLamp={w:.40,h:1.62,d:.40};
+BMH.FURNITURE_DIMENSIONS.washingMachine={w:.60,h:.85,d:.65};
 BMH.roomFurnitureLayout=r=>{
  const rotation=((Number(r.furnitureRotation)||0)%360+360)%360,odd=rotation%180===90,W=odd?r.h:r.w,D=odd?r.w:r.h,items=[];
  const transform=(x,y)=>rotation===90?{x:r.w-y,y:x}:rotation===180?{x:r.w-x,y:r.h-y}:rotation===270?{x:y,y:r.h-x}:{x,y};
@@ -53,6 +54,9 @@ BMH.roomFurnitureLayout=r=>{
  if(r.type==='kitchen'){add('kitchenSink',.55,.62);add('kitchenStove',1.55,.62);add('kitchenFridge',W-.6,.5);if(add('table',W/2,D*.65)){add('chair',W/2-1.1,D*.65,90);add('chair',W/2+1.1,D*.65,270);add('chair',W/2,D*.65+.8,180);}}
  if(r.type==='office'){if(add('desk',W/2,.55))add('chairDesk',W/2,1.45);add('bookcaseClosedWide',W/2,D-.4);}
  if(r.type==='utility'){add('cabinetBed',.42,.38);add('kitchenSink',W-.6,.6);}
+ if(r.type==='laundry'){for(const [x,y,turn]of [[.48,.55,0],[W-.48,.55,0],[.48,D-.55,180],[W-.48,D-.55,180]])if(add('washingMachine',x,y,turn))break;add('kitchenSink',W/2,D-.6,180);add('bookcaseClosedWide',W/2,.4);}
+ if(r.type==='storage'){add('bookcaseClosedWide',W/2,.4);add('bookcaseClosedWide',W/2,D-.4,180);}
+ if(r.type==='hobby'){if(add('desk',W/2,.55))add('chairDesk',W/2,1.45);add('bookcaseClosedWide',W/2,D-.4);}
  // Worship fittings require a customer's specification; no invented altar model.
  if(r.type==='bath'){
   const toilets=[[.48,.63,0],[.60,.45,90],[W-.60,.45,270],[.48,D-.63,180],[W-.48,D-.63,180],[.60,D/2,90],[W-.60,D/2,270]];

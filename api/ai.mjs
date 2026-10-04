@@ -192,7 +192,8 @@ async function handler(req,res){
             throw openErr;
           }
         }
-        if(action==='brief'&&recoverableAIError(gemErr))return send(res,200,{ok:true,provider:'local-fallback',model:'local-brief-parser-v1',degraded:true,notice:'Gemini đang chạm hạn mức. Hệ thống dùng bộ phân tích cục bộ để Step 1 vẫn hoạt động.',result:localBriefFallback(prompt,project)});
+        if(action==='brief'&&recoverableAIError(gemErr))return send(res,200,{ok:true,provider:'local-fallback',model:'local-brief-parser-v1',degraded:true,notice:(gemErr.message||'Gemini đang chạm hạn mức.')+' Bản tóm tắt dưới đây dùng bộ phân tích cục bộ.',result:localBriefFallback(prompt,project)});
+        if(gemErr.code==='GEMINI_QUOTA_EXHAUSTED')throw gemErr;
         if(Number(gemErr?.statusCode)===429)throw Object.assign(new Error('AI cloud đang chạm hạn mức tạm thời. Hãy thử lại sau hoặc cấu hình thêm provider dự phòng.'),{statusCode:429,details:{code:'ai_quota',model:gemErr?.model||geminiEnv().primary}});
         throw gemErr;
       }
