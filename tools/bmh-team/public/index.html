@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="bmh-team-token" content="__BMH_TOKEN__">
+  <meta name="color-scheme" content="light">
+  <title>BMH Team · Hai tài khoản, một dự án</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="BMH Team trang chính"><span class="brand-icon" aria-hidden="true">B</span><span>BMH <b>TEAM</b></span></a>
+      <span class="local-badge"><i aria-hidden="true"></i> Chạy trên máy ông</span>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div><p class="eyebrow">CÙNG HOÀN THIỆN BUILD MY HOME</p><h1 id="page-title">Hai tài khoản.<br><span>Một đội làm việc.</span></h1><p class="intro-copy">Giao một mục tiêu. Bộ điều phối chia phần việc cho hai Codex, ghép kết quả và chạy kiểm tra trong repo BMH trên máy.</p></div>
+        <div class="team-mark" aria-hidden="true"><div class="orbit orbit-one">01</div><span class="orbit-link">↔</span><div class="orbit orbit-two">02</div><span class="orbit-caption">LÀM SONG SONG</span></div>
+      </section>
+
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+      <section class="account-section" aria-labelledby="accounts-title">
+        <div class="section-heading"><h2 id="accounts-title">1. Nối hai tài khoản ChatGPT</h2><span id="account-count" class="muted">Đang kiểm tra…</span></div>
+        <div class="account-grid">
+          <article class="account-card account-one" data-account="one"><div class="card-top"><span class="account-avatar" aria-hidden="true">01</span><span class="connection-pill" data-field="status">Đang kiểm tra</span></div><h3>Tài khoản thứ nhất</h3><p class="account-email" data-field="email">Chưa đăng nhập</p><p class="account-plan" data-field="plan">Dùng đăng nhập ChatGPT chính thức.</p><div class="login-flow" data-field="login" hidden></div><p class="account-error" data-field="error" hidden></p><div class="card-actions"><button type="button" class="button button-secondary" data-action="login" data-worker="one">Đăng nhập</button><button type="button" class="button button-text" data-action="logout" data-worker="one" hidden>Đăng xuất</button></div></article>
+          <article class="account-card account-two" data-account="two"><div class="card-top"><span class="account-avatar" aria-hidden="true">02</span><span class="connection-pill" data-field="status">Đang kiểm tra</span></div><h3>Tài khoản thứ hai</h3><p class="account-email" data-field="email">Chưa đăng nhập</p><p class="account-plan" data-field="plan">Mỗi tài khoản có phiên Codex riêng.</p><div class="login-flow" data-field="login" hidden></div><p class="account-error" data-field="error" hidden></p><div class="card-actions"><button type="button" class="button button-secondary" data-action="login" data-worker="two">Đăng nhập</button><button type="button" class="button button-text" data-action="logout" data-worker="two" hidden>Đăng xuất</button></div></article>
+        </div>
+        <p class="section-note">Đăng nhập từng tài khoản trên trang OpenAI. Ông không cần đưa mật khẩu hay API key vào bảng này.</p>
+      </section>
+
+      <section class="work-section panel" aria-labelledby="work-title">
+        <div class="section-heading"><h2 id="work-title">2. Giao việc một lần</h2><div class="capabilities"><span id="git-status">Git · kiểm tra</span><span id="codex-status">Codex · kiểm tra</span></div></div>
+        <form id="run-form">
+          <label for="repo-path">Thư mục dự án BMH</label>
+          <input id="repo-path" name="repo" type="text" spellcheck="false" autocomplete="off" placeholder="C:\Users\Tên ông\Documents\GitHub\build-my-home" required>
+          <p class="field-hint">Trong GitHub Desktop: Repository → Show in Explorer, rồi sao chép đường dẫn thư mục.</p>
+          <label for="goal">Ông muốn hoàn thiện điều gì?</label>
+          <textarea id="goal" name="goal" rows="5" maxlength="12000" placeholder="Ví dụ: Hoàn thiện lựa chọn vật liệu và đồng bộ vào bản vẽ/3D. Giữ đầy đủ 10 tab, đơn giản giao diện và không tự triển khai lên web." required></textarea>
+          <div class="submit-row"><div><button type="submit" id="run-button" class="button button-primary" disabled><span aria-hidden="true">↗</span> Phân việc & làm song song</button><p id="run-hint" class="field-hint">Đăng nhập đủ hai tài khoản để bắt đầu.</p></div><button type="button" id="stop-button" class="button button-stop" hidden>Dừng công việc</button></div>
+        </form>
+        <div id="setup-box" class="setup-box" hidden><p id="setup-hint">Máy cần Git và Codex CLI trước khi bắt đầu.</p><button type="button" id="setup-button" class="button button-secondary">Kiểm tra thiết lập Windows</button></div>
+      </section>
+
+      <section class="progress-section panel" aria-labelledby="progress-title">
+        <div class="section-heading"><h2 id="progress-title">3. Xem đội đang làm tới đâu</h2><span id="run-status" class="connection-pill">Chưa có công việc</span></div>
+        <ol class="stage-list" aria-label="Tiến độ công việc"><li data-stage="0"><span>1</span>Chuẩn bị</li><li data-stage="1"><span>2</span>Phân việc</li><li data-stage="2"><span>3</span>Hai Codex làm</li><li data-stage="3"><span>4</span>Ghép code</li><li data-stage="4"><span>5</span>Kiểm tra</li><li data-stage="5"><span>6</span>Sẵn sàng</li></ol>
+        <div id="run-empty" class="empty-state"><span aria-hidden="true">◇</span><p>Nhận một mục tiêu, trả về một nhánh để ông xem lại.</p><small>Code được làm trong các worktree riêng. Công việc này chưa tự cập nhật main hay Vercel.</small></div>
+        <div id="run-content" hidden>
+          <p id="active-goal" class="active-goal"></p>
+          <div id="run-error" class="notice notice-error" role="alert" hidden></div>
+          <div id="run-result" class="result-box" hidden><strong id="result-title">Nhánh đã chuẩn bị</strong><dl><div><dt>Nhánh</dt><dd id="result-branch"></dd></div><div><dt>Thư mục xem lại</dt><dd id="result-path"></dd></div></dl><p>Ông xem diff và kết quả kiểm tra trước khi ghép vào main.</p></div>
+          <details id="plan-details"><summary>Phần việc của từng tài khoản</summary><pre id="plan-output"></pre></details>
+          <details id="result-details"><summary>Kết quả của hai Codex</summary><div id="worker-results" class="worker-results"></div></details>
+          <div class="log-heading"><h3>Nhật ký công việc</h3><span id="log-count" class="muted"></span></div>
+          <ol id="event-log" class="event-log" aria-label="Nhật ký công việc"></ol>
+        </div>
+      </section>
+    </main>
+    <footer>Mỗi tài khoản dùng hạn mức Codex riêng theo gói đủ điều kiện. Công cụ này điều phối phiên Codex trên máy, không nối lịch sử của hai cuộc trò chuyện ChatGPT.</footer>
+  </div>
+</body>
+</html>
