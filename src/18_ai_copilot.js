@@ -4,6 +4,38 @@
 BMH.ai={open:false,loading:false,mode:'review',error:'',result:null,model:'',provider:'',notice:'',lastAction:'',prompt:'',imageName:'',inflight:null};
 
 BMH.aiConfigured=()=>!!BMH.cloud?.config?.aiConfigured;
+// A separate allowlist for web research. Never reuse aiContext or send free-form file text.
+BMH.designResearchContext=()=>{
+  const p=BMH.state.project,s=p.site||{},scan=p.aiScan?.result||{},a=scan.building||{},finish=p.homeFinish||{};
+  const n=(v,max,integer=false)=>typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=max&&(!integer||Number.isInteger(v))?v:null;
+  const styleId=name=>(BMH.HOUSE_STYLES||[]).find(x=>x.name===name)?.id||null;
+  const refs=Array.isArray(p.sourceRefs)?p.sourceRefs:[],shell=BMH.state.ui.homeMode==='finish';
+  const rows=Array.isArray(p.designStudio?.program?.floors)?p.designStudio.program.floors:[];
+  const target=n(p.finance?.targetBudget,1e12);
+  const analysis=shell?Object.values(finish.analyses||{}).some(x=>x?.result):Object.keys(scan).length>0;
+  return {
+    houseType:shell?'shell':BMH.state.ui.homeMode==='design'?'new':'unconfirmed',styleId:styleId(p.style),
+    site:{widthM:n(s.width,200),depthM:n(s.depth,500),floors:n(s.floors,20,true),dimensionsStatus:shell&&BMH.state.ui.onboardingComplete!==false&&finish.geometryKey&&finish.geometryKey===BMH.finishGeometryKey?.()?'customer_confirmed':'unconfirmed'},
+    budget:{targetMinVnd:target>0?target:null,targetMaxVnd:target>0?target:null,status:target>0?'customer_target':'unconfirmed'},
+    floorProgram:rows.slice(0,20).map((f,i)=>({floor:i,bedrooms:n(f?.bedrooms,20,true),bathrooms:n(f?.bathrooms,20,true),living:f?.living===true,kitchen:f?.kitchen===true,office:f?.office===true,garage:f?.garage===true,worship:['none','room','living'].includes(f?.worship)?f.worship:'unconfirmed',extraRooms:(Array.isArray(f?.extraRooms)?f.extraRooms:[]).slice(0,20).map(q=>({type:['laundry','storage','office','gym','hobby','custom'].includes(q?.type)?q.type:'custom',count:n(q?.count,20,true),minAreaM2:n(q?.minArea,200)}))})),
+    references:{imageCount:Math.min(6,refs.filter(x=>x.kind==='image').length+(shell?(finish.photos||[]).length:0)),videoCount:Math.min(6,refs.filter(x=>x.kind==='video').length),pdfCount:Math.min(6,refs.filter(x=>x.kind==='pdf').length),analysis:{available:analysis,status:'unconfirmed',styleId:styleId(a.style),estimatedFloors:n(a.estimated_floors,20,true)}}
+  };
+};
+BMH.designResearchProfileKey=()=>{
+  const p=BMH.state.project;
+  // Local-only identities invalidate a response after an upload/project changes; never sent to Search.
+  return JSON.stringify({context:BMH.designResearchContext(),refs:(p.sourceRefs||[]).map(x=>[x.id,x.name,x.status]),scanAt:p.aiScan?.scannedAt,photos:(p.homeFinish?.photos||[]).map(x=>x.id),finishGeometry:p.homeFinish?.geometryKey});
+};
+BMH.designResearchCall=async(context=BMH.designResearchContext())=>{
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
+  try{
+    const r=await (BMH.aiFetch||fetch)('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({action:'design-research',researchContext:context})});
+    let data={};try{data=await r.json();}catch{}
+    if(!r.ok||!data.ok)throw new Error('Chưa nghiên cứu được mẫu. Thư viện BMH vẫn chọn được.');
+    return data.result;
+  }catch(err){throw new Error(err?.name==='AbortError'?'Nghiên cứu quá thời gian chờ. Thư viện BMH vẫn chọn được.':'Mạng hoặc Search chưa sẵn sàng. Thư viện BMH vẫn chọn được.');}
+  finally{clearTimeout(timer);}
+};
 BMH.aiContext=({lightweight=false}={})=>{
   const p=BMH.state.project,safe=(label,fn,fallback={})=>{try{return fn()||fallback;}catch(err){console.warn('[BMH aiContext] '+label+' unavailable',err);return fallback;}};
   const e=safe('estimate',()=>BMH.estimate(),{}),needs=safe('householdNeeds',()=>BMH.householdNeeds?.(),{});
@@ -91,7 +123,7 @@ BMH.extractExplicitRequirements=text=>{
 };
 BMH.applyExplicitRequirements=(text,{save=true}={})=>{
   const req=BMH.extractExplicitRequirements(text),p=BMH.state.project,h=p.household,s=p.site,f=p.finance,labels=[];
-  p.brief=p.brief||{};p.brief.userRequirements={...req,sourceText:String(text||'').slice(0,1000),updatedAt:new Date().toISOString()};
+  p.brief=p.brief||{};p.brief.userRequirements={...(p.brief.userRequirements?.designReference?{designReference:p.brief.userRequirements.designReference}:{}),...req,sourceText:String(text||'').slice(0,1000),updatedAt:new Date().toISOString()};
   if(req.people){h.requestedSize=req.people;labels.push(req.people+' người');}
   if(req.floors){s.floors=req.floors;labels.push(req.floors+' tầng');}
   if(req.budget_vnd>=100000000&&req.budget_vnd<=20000000000){f.targetBudget=Math.round(req.budget_vnd);labels.push(BMH.money(f.targetBudget));}

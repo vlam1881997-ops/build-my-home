@@ -8,6 +8,7 @@ import guestCheckoutHandler from '../server/_guest_checkout.mjs';
 import {send,jsonBody,apiError} from '../server/_lib.mjs';
 import {geminiGenerate,geminiEnv} from '../server/_gemini.mjs';
 import {runSiteIntelligence} from '../server/_site_intelligence.mjs';
+import {runDesignResearch} from '../server/_design_research.mjs';
 
 const OPENAI_MODEL=String(process.env.OPENAI_MODEL||'gpt-5.6-terra').trim();
 const OPENAI_URL='https://api.openai.com/v1/responses';
@@ -156,7 +157,13 @@ async function handler(req,res){
   if(operation==='checkout'||operation==='checkout-notify')return guestCheckoutHandler(req,res);
   try{
     if(req.method==='OPTIONS')return send(res,200,{ok:true});if(req.method!=='POST')return send(res,405,{ok:false,error:'Method not allowed'});
-    const body=await jsonBody(req),action=String(body.action||'review').toLowerCase();if(!['brief','review','cost','whatif','vision','fengshui','site'].includes(action))return send(res,400,{ok:false,error:'AI action không hợp lệ.'});
+    const body=await jsonBody(req),action=String(body.action||'review').toLowerCase();if(!['brief','review','cost','whatif','vision','fengshui','site','design-research'].includes(action))return send(res,400,{ok:false,error:'AI action không hợp lệ.'});
+    // Keep research out of cleanProject, free-text prompts and provider fallback routing.
+    if(action==='design-research'){
+      try{rateLimit(req);}catch{return send(res,200,{ok:true,provider:'design-research',result:{status:'call_limit',notice:'Đã đủ lượt nghiên cứu. Thư viện BMH vẫn chọn được.',allowLibrary:true,options:[],sources:[],searchedAt:null}});}
+      const scope=String(req.headers?.['x-forwarded-for']||req.headers?.['x-real-ip']||'unknown').split(',')[0].trim();
+      return send(res,200,{ok:true,provider:'design-research',result:await runDesignResearch(body.researchContext,{scope})});
+    }
     const prompt=String(body.prompt||'').trim().slice(0,6000),project=cleanProject(body.project||{}),image=String(body.image_data_url||'');
     try{rateLimit(req);}catch(limitErr){if(action==='brief')return send(res,200,{ok:true,provider:'local-fallback',model:'local-brief-parser-v1',degraded:true,notice:'AI cloud đang bận. Hệ thống dùng bộ phân tích cục bộ để Step 1 vẫn hoạt động.',result:localBriefFallback(prompt,project)});throw limitErr;}
     if(action==='site'){

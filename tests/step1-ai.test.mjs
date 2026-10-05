@@ -59,3 +59,53 @@ test('text generation goes directly to the content API and zero quota stops mode
  global.fetch=async(url)=>{calls.push(String(url));const list=String(url).includes('/models?');return {status:list?200:429,ok:list,text:async()=>JSON.stringify(list?{models:['gemini-9-flash','gemini-8-flash'].map(name=>({name:'models/'+name,supportedGenerationMethods:['generateContent']}))}:{error:{message:'Quota exceeded for metric generate_content_free_tier_requests, limit: 0'}})};};
  try{await assert.rejects(geminiGenerate({parts:[{text:'Short request'}]}),e=>e.code==='GEMINI_QUOTA_EXHAUSTED'&&e.statusCode===429);assert.equal(calls.length,2);assert.ok(calls[1].endsWith(':generateContent'));assert.ok(!calls.some(u=>u.endsWith('/interactions')));}finally{global.fetch=old;if(key===undefined)delete process.env.GEMINI_API_KEY;else process.env.GEMINI_API_KEY=key;if(transport===undefined)delete process.env.GEMINI_TRANSPORT;else process.env.GEMINI_TRANSPORT=transport;}
 });
+
+async function researchEnv(overrides,run){
+ const values={GEMINI_API_KEY:'fixture-research-api',GEMINI_MODEL:'gemini-fixture-pinned',GEMINI_FALLBACK_MODEL:'gemini-fixture-other',GEMINI_AUTO_UPGRADE:'true',GEMINI_TRANSPORT:'',GEMINI_API_VERSION:'auto',GEMINI_DESIGN_RESEARCH_ENABLED:'true',GEMINI_SEARCH_ENABLED:'true',GEMINI_DESIGN_RESEARCH_QUOTA:'allowed',BMH_AI_QUOTA_READY:'false',...overrides},prior={};
+ for(const [key,value] of Object.entries(values)){prior[key]=process.env[key];process.env[key]=value;}
+ const oldFetch=global.fetch;
+ try{return await run();}finally{global.fetch=oldFetch;for(const [key,value] of Object.entries(prior))if(value===undefined)delete process.env[key];else process.env[key]=value;}
+}
+async function researchRequest(body,ip='127.0.0.201'){
+ let status,payload;const res={status(n){status=n;return this;},setHeader(){return this;},end(raw){payload=JSON.parse(raw);return this;}};
+ await handler({method:'POST',headers:{'x-forwarded-for':ip},body:{action:'design-research',...body}},res);return {status,payload};
+}
+const researchProfile={houseType:'new',styleId:'japandi',site:{widthM:5,depthM:20,floors:2,dimensionsStatus:'unconfirmed'},budget:{targetMinVnd:1.2e9,targetMaxVnd:1.2e9,status:'customer_target'},references:{imageCount:1,analysis:{available:true}},floorProgram:[]};
+
+test('research endpoint uses only its allowlist and returns provider metadata evidence without raw responses',async()=>researchEnv({},async()=>{
+ const calls=[],claim='Hiên sâu giúp che nắng.',result=JSON.stringify({options:[{title:'Hiên thoáng',claims:[claim],url:'https://invented.example.com/fake',limitations:['Chưa đo thực địa.']},{title:'Sân xanh',claims:['Cần kiểm tra diện tích sân.'],limitations:[]}]});
+ global.fetch=async(url,options)=>{calls.push({url:String(url),body:JSON.parse(options.body)});return {ok:true,status:200,text:async()=>JSON.stringify({candidates:[{content:{parts:[{text:result}]},groundingMetadata:{groundingChunks:[{web:{uri:'https://architecture.example.com/real',title:'Nguồn thực từ fixture metadata'}}],groundingSupports:[{segment:{text:claim},groundingChunkIndices:[0]}]}}],privateProviderField:'PRIVATE-RAW'})};};
+ const project=Object.defineProperty({},'finance',{get(){throw new Error('cleanProject must not run');}});
+ const request={researchContext:{...researchProfile,finance:{income:99,bank:'PRIVATE-BANK'},birth:1988,references:{...researchProfile.references,fileName:'PRIVATE-FILE',content:'PRIVATE-TEXT'}},project,prompt:'PRIVATE-PROMPT',image_data_url:'PRIVATE-IMAGE'};
+ const [a,b]=await Promise.all([researchRequest(request),researchRequest(request)]);assert.equal(a.status,200);assert.deepEqual(a,b);assert.equal(calls.length,1);
+ assert.ok(calls[0].url.endsWith('/models/gemini-fixture-pinned:generateContent'));assert.deepEqual(calls[0].body.tools,[{googleSearch:{}}]);assert.doesNotMatch(JSON.stringify(calls[0].body),/PRIVATE|income|bank|birth|1988/);
+ const output=a.payload.result;assert.equal(output.status,'ready');assert.equal(output.options.length,2);assert.equal(output.sources[0].url,'https://architecture.example.com/real');assert.equal(output.options[0].claims[0].verified,true);assert.equal(output.options[1].claims[0].verified,false);assert.ok(Number.isFinite(Date.parse(output.searchedAt)));assert.ok(output.options[0].fitReasons.length);assert.ok(output.limitations.length);
+ assert.doesNotMatch(JSON.stringify(a.payload),/PRIVATE|invented|fixture-research-api|"raw"|"usage"/);
+}));
+
+test('research endpoint needs independent Search/quota permission and always leaves library available',async()=>{
+ for(const flag of [{GEMINI_SEARCH_ENABLED:'false'},{GEMINI_DESIGN_RESEARCH_QUOTA:'unknown'},{GEMINI_API_KEY:''}])await researchEnv(flag,async()=>{
+  let calls=0;global.fetch=async()=>{calls++;throw new Error('No external request permitted');};const {status,payload}=await researchRequest({researchContext:researchProfile},'127.0.0.202');assert.equal(status,200);assert.equal(payload.result.allowLibrary,true);assert.equal(payload.result.options.length,0);assert.equal(payload.result.searchedAt,null);assert.equal(calls,0);
+ });
+});
+
+test('research quota rejection is one request on the configured model, with no model/provider/transport retry',async()=>researchEnv({GEMINI_API_KEY:'fixture-research-quota'},async()=>{
+ const urls=[];global.fetch=async url=>{urls.push(String(url));return {ok:false,status:429,text:async()=>JSON.stringify({error:{message:'Quota exceeded, limit: 10. PRIVATE-KEY'}})};};
+ const first=await researchRequest({researchContext:researchProfile},'127.0.0.203'),second=await researchRequest({researchContext:{...researchProfile,styleId:'tropical'}},'127.0.0.204');
+ assert.equal(urls.length,1);assert.ok(urls[0].endsWith('/models/gemini-fixture-pinned:generateContent'));assert.equal(first.payload.result.status,'quota');assert.equal(second.payload.result.status,'quota_or_permission_blocked');assert.equal(first.payload.result.allowLibrary,true);assert.equal(process.env.GEMINI_MODEL,'gemini-fixture-pinned');assert.doesNotMatch(JSON.stringify(first.payload),/PRIVATE-KEY/);
+}));
+
+test('configured research keeps the selected transport and does not discover or substitute models on errors',async()=>{
+ const {geminiGenerate}=await import('../server/_gemini.mjs');
+ for(const transport of ['', 'interactions'])await researchEnv({GEMINI_TRANSPORT:transport},async()=>{
+  const calls=[];global.fetch=async(url,options)=>{calls.push({url:String(url),body:JSON.parse(options.body)});return {ok:false,status:404,text:async()=>JSON.stringify({error:{message:'Search/model unavailable'}})};};
+  await assert.rejects(geminiGenerate({parts:[{text:'Fixture only'}],configuredOnly:true,tools:[{type:'google_search'}]}),e=>e.statusCode===404);assert.equal(calls.length,1);
+  if(transport){assert.ok(calls[0].url.endsWith('/interactions'));assert.equal(calls[0].body.model,'gemini-fixture-pinned');}else assert.ok(calls[0].url.endsWith('/models/gemini-fixture-pinned:generateContent'));
+ });
+});
+
+test('configured research aborts its only provider call on deadline',async()=>researchEnv({},async()=>{
+ const {geminiGenerate}=await import('../server/_gemini.mjs');let calls=0;
+ global.fetch=async(_,options)=>{calls++;return new Promise((resolve,reject)=>{options.signal.addEventListener('abort',()=>reject(Object.assign(new Error('aborted'),{name:'AbortError'})),{once:true});});};
+ await assert.rejects(geminiGenerate({parts:[{text:'Fixture timeout'}],configuredOnly:true,timeoutMs:1550,tools:[{type:'google_search'}]}),e=>e.statusCode===504);assert.equal(calls,1);
+}));

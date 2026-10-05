@@ -100,14 +100,15 @@ async function postGenerateContent(model,{normalized,systemInstruction,schema,ma
   return {r,data};
 }
 
-export async function geminiGenerate({parts,input,systemInstruction='',schema,maxOutputTokens=2200,thinkingLevel='low',timeoutMs=60000,tools=[]}){
+export async function geminiGenerate({parts,input,systemInstruction='',schema,maxOutputTokens=2200,thinkingLevel='low',timeoutMs=60000,tools=[],configuredOnly=false}){
   const env=geminiEnv();
   if(!env.key)throw Object.assign(new Error('Gemini chưa cấu hình GEMINI_API_KEY trên server.'),{statusCode:503});
   const normalized=Array.isArray(input)?input:normalizeInput(parts);
   if(!normalized.length)throw Object.assign(new Error('Gemini không có dữ liệu đầu vào.'),{statusCode:400});
   await reserveAiUsage();
   const interactions=process.env.GEMINI_TRANSPORT==='interactions',combos=[];
-  for(const model of await resolveGeminiModels(env))for(const apiVersion of interactions?apiVersions():['v1beta'])combos.push({model,apiVersion});
+  // Research honours the current pin without discovery, alias upgrades or retries.
+  for(const model of configuredOnly?[env.primary]:await resolveGeminiModels(env))for(const apiVersion of configuredOnly?[apiVersions()[0]]:interactions?apiVersions():['v1beta'])combos.push({model,apiVersion});
   let lastErr=null,quotaModel='',deadline=Date.now()+timeoutMs;
   for(let i=0;i<combos.length;i++){
     const {model,apiVersion}=combos[i];
@@ -125,7 +126,7 @@ export async function geminiGenerate({parts,input,systemInstruction='',schema,ma
     let accepted=false;
     try{
       let {r,data}=await (interactions?postInteraction(apiVersion,model,payload,env.key,ctl.signal):postGenerateContent(model,{normalized,systemInstruction,schema,maxOutputTokens,thinkingLevel,tools},env.key,ctl.signal));
-      if([400,404].includes(r.status)&&! /API_KEY_INVALID|api.?key.*(?:invalid|not valid)/i.test(String(data.error?.message||'')))({r,data}=await (interactions?postGenerateContent(model,{normalized,systemInstruction,schema,maxOutputTokens,thinkingLevel,tools},env.key,ctl.signal):postInteraction(apiVersion,model,payload,env.key,ctl.signal)));
+      if(!configuredOnly&&[400,404].includes(r.status)&&! /API_KEY_INVALID|api.?key.*(?:invalid|not valid)/i.test(String(data.error?.message||'')))({r,data}=await (interactions?postGenerateContent(model,{normalized,systemInstruction,schema,maxOutputTokens,thinkingLevel,tools},env.key,ctl.signal):postInteraction(apiVersion,model,payload,env.key,ctl.signal)));
       if(!r.ok){
         const err=geminiProviderError(r.status,data,model);
         const msg=String(data?.error?.message||'').toLowerCase(),more=i<combos.length-1;
