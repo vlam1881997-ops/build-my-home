@@ -4,9 +4,9 @@
   const token = document.querySelector('meta[name="bmh-team-token"]')?.content || '';
   const $ = id => document.getElementById(id);
   const pending = new Set();
-  const terminal = new Set(['ready', 'complete', 'completed', 'done', 'stopped', 'cancelled', 'canceled', 'error', 'failed']);
-  const statusNames = { preparing: 'Chuẩn bị', queued: 'Chuẩn bị', planning: 'Phân việc', running: 'Hai Codex đang làm', working: 'Hai Codex đang làm', integrating: 'Ghép code', merging: 'Ghép code', checking: 'Kiểm tra', testing: 'Kiểm tra', ready: 'Sẵn sàng xem lại', complete: 'Sẵn sàng xem lại', completed: 'Sẵn sàng xem lại', done: 'Sẵn sàng xem lại', stopped: 'Đã dừng', cancelled: 'Đã dừng', canceled: 'Đã dừng', error: 'Cần xử lý', failed: 'Cần xử lý' };
-  const stageIndex = { preparing: 0, queued: 0, planning: 1, running: 2, working: 2, integrating: 3, merging: 3, checking: 4, testing: 4, ready: 5, complete: 5, completed: 5, done: 5 };
+  const terminal = new Set(['ready', 'published', 'complete', 'completed', 'done', 'stopped', 'cancelled', 'canceled', 'error', 'failed']);
+  const statusNames = { preparing: 'Chuẩn bị', queued: 'Chuẩn bị', planning: 'Phân việc', running: 'Hai Codex đang làm', working: 'Hai Codex đang làm', integrating: 'Ghép code', merging: 'Ghép code', checking: 'Kiểm tra', testing: 'Kiểm tra', publishing: 'Đẩy lên main', published: 'Đã lên main', ready: 'Sẵn sàng xem lại', complete: 'Sẵn sàng xem lại', completed: 'Sẵn sàng xem lại', done: 'Sẵn sàng xem lại', stopped: 'Đã dừng', cancelled: 'Đã dừng', canceled: 'Đã dừng', error: 'Cần xử lý', failed: 'Cần xử lý' };
+  const stageIndex = { preparing: 0, queued: 0, planning: 1, running: 2, working: 2, integrating: 3, merging: 3, checking: 4, testing: 4, publishing: 5, published: 5, ready: 5, complete: 5, completed: 5, done: 5 };
   const workerNames = { one: 'Tài khoản 1', two: 'Tài khoản 2', coordinator: 'Điều phối' };
   let state = null;
   let stateInFlight = false;
@@ -365,9 +365,15 @@
     renderResults(run.results);
     renderEvents(run.events);
     $('run-result').hidden = run.workspaceReady !== true || (!run.branch && !run.path);
-    setText($('result-title'), currentStage === 5 ? 'Code đã sẵn sàng để xem lại' : terminal.has(status) ? 'Thư mục công việc để kiểm tra' : 'Nhánh đang làm việc');
+    setText($('result-title'), status==='published' ? 'Đã đẩy commit lên main' : currentStage === 5 ? 'Code đã kiểm tra xong' : terminal.has(status) ? 'Thư mục công việc để kiểm tra' : 'Nhánh đang làm việc');
     setText($('result-branch'), bounded(run.branch || '—', 500));
     setText($('result-path'), bounded(run.path || '—', 1000));
+    $('published-row').hidden = !run.publishedCommit;
+    setText($('result-published'), bounded(run.publishedCommit || '', 80));
+    setText($('result-guidance'), status==='published'
+      ? 'Đã gửi commit lên origin/main. Vercel sẽ tự build/deploy nếu đã nối Git; trạng thái hoàn tất cần xác nhận trong Vercel.'
+      : status==='ready' ? 'Các kiểm tra đạt nhưng tự đẩy bị tắt trong chế độ này; xem nhánh và diff trước khi ghép main.'
+      : 'Sau khi kiểm tra đạt, BMH Team tự đẩy lên main bằng fast-forward. Nếu GitHub chặn quyền, nhánh vẫn được giữ lại.');
   }
 
   function render() {
@@ -404,7 +410,7 @@
     $('stop-button').disabled = pending.has('stop');
     $('repo-path').disabled = working || runPending();
     $('goal').disabled = working || runPending();
-    setText($('run-hint'), reportWarning || (working ? 'Ông có thể theo dõi tiến độ bên dưới hoặc dừng công việc.' : state.settingsWarning ? state.settingsWarning : settingsPending() ? 'Đang lưu model. Chờ một chút trước khi giao việc.' : repeatedAccount ? 'Hai thẻ đang dùng cùng email. Đăng xuất thẻ thứ hai rồi chọn tài khoản khác.' : accountCount < 2 ? 'Đăng nhập đủ hai tài khoản để bắt đầu.' : !gitReady || !codexReady ? 'Hoàn tất Git và Codex CLI trước khi bắt đầu.' : !modelsReady || modelsPending() ? 'Chờ danh sách Codex và chọn model, mức suy luận hợp lệ ở cả hai thẻ.' : state.busy || loginPending() ? 'Đang chuẩn bị kết nối, ông chờ một chút.' : 'Tạo nhánh cục bộ để xem lại; chưa tự ghép main hay triển khai web.'));
+    setText($('run-hint'), reportWarning || (working ? 'Ông có thể theo dõi tiến độ bên dưới hoặc dừng công việc.' : state.settingsWarning ? state.settingsWarning : settingsPending() ? 'Đang lưu model. Chờ một chút trước khi giao việc.' : repeatedAccount ? 'Hai thẻ đang dùng cùng email. Đăng xuất thẻ thứ hai rồi chọn tài khoản khác.' : accountCount < 2 ? 'Đăng nhập đủ hai tài khoản để bắt đầu.' : !gitReady || !codexReady ? 'Hoàn tất Git và Codex CLI trước khi bắt đầu.' : !modelsReady || modelsPending() ? 'Chờ danh sách Codex và chọn model, mức suy luận hợp lệ ở cả hai thẻ.' : state.busy || loginPending() ? 'Đang chuẩn bị kết nối, ông chờ một chút.' : 'Sau khi build/test đạt, BMH Team tự push main; GitHub xác nhận quyền ở bước cuối.'));
     renderRun();
   }
 

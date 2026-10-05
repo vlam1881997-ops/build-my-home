@@ -71,7 +71,7 @@ function Stop-WithMessage([string]$Message) {
 }
 
 Write-Host ""
-Write-Host "BMH Team v1.1.4 - Two ChatGPT accounts, one local project" -ForegroundColor Cyan
+Write-Host "BMH Team v1.2.0 - Two ChatGPT accounts, one local project" -ForegroundColor Cyan
 Write-Host "Keep this window open while using the dashboard."
 
 $bmhNode = Find-Executable "node"
@@ -91,7 +91,7 @@ if ($LASTEXITCODE -ne 0 -or @("x64", "arm64") -notcontains $bmhNodeArch) {
 }
 $bmhProbeScript = Join-Path $PSScriptRoot "runtime.mjs"
 if (-not (Test-Path -LiteralPath $bmhProbeScript)) {
-  Stop-WithMessage "runtime.mjs is missing. Extract the complete BMH Team v1.1.4 package before starting it."
+  Stop-WithMessage "runtime.mjs is missing. Extract the complete BMH Team v1.2.0 package before starting it."
 }
 
 $bmhGit = Find-Executable "git"

@@ -1,14 +1,18 @@
-# BMH Team v1.1.4
+# BMH Team v1.2.0
 
-Bộ điều phối của dự án BMH trên máy Windows: **hai tài khoản ChatGPT riêng, một mục tiêu, hai phiên Codex làm song song**. Công cụ dùng các lệnh ổn định `codex login`, `codex login status` và `codex exec` của Codex CLI chính thức, tạo worktree riêng, ghép kết quả vào một nhánh cục bộ và chạy kiểm tra. BMH Team là phần mềm riêng của dự án, không phải sản phẩm do OpenAI phát hành.
+Bộ điều phối của dự án BMH trên máy Windows: **hai tài khoản ChatGPT riêng, một mục tiêu, hai phiên Codex làm song song**. Công cụ dùng Codex CLI chính thức, tạo worktree riêng và kiểm tra kết quả tích hợp.
 
-**v1.1.4 giữ các nâng cấp của v1.1.3 và tự sửa một lỗi lập kế hoạch trước khi giao hai tài khoản:** nếu TK1 chọn sai định dạng lệnh node test, BMH Team yêu cầu chính TK1 lập lại danh sách kiểm tra đúng một lần, kèm đường dẫn test có thật trong repo. Tài khoản vẫn dùng nguyên model/mức suy luận đã chọn. Nếu lần sửa vẫn sai, công cụ dừng trước khi tạo worktree của TK1/TK2.
+**v1.2.0 tự đẩy commit đã kiểm thử lên `origin/main`:** trước khi gọi hai tài khoản, Git thử kết nối đường push bằng `--dry-run`, không thay đổi remote. Sau khi ghép hai phần việc, BMH Team luôn chạy build, các kiểm tra của kế hoạch và `npm run test` nếu repo khai báo script test. Chỉ khi mọi lệnh đều đạt, `main` chưa đổi và commit tích hợp là fast-forward thì bộ điều phối mới push thường lên `main`; GitHub xác nhận quyền cập nhật thật ở lần push này. Công cụ không force, không bỏ qua bảo vệ nhánh và không đưa `dist/`/`public/` build ra vào commit. Vercel tự build nếu dự án đã nối Git với production branch `main`; BMH Team không thể xác nhận deployment Vercel thành công chỉ từ lệnh push.
+
+Kết nối ChatGPT/GitHub/Vercel không tự đăng nhập Git trên Windows. Máy cần Git Credential Manager/Git CLI đã xác thực bằng tài khoản có quyền ghi vào `main`. Nếu GitHub yêu cầu Pull Request hoặc `main` đổi trong lúc chạy, BMH Team dừng và giữ nhánh tích hợp; nó không force hay ghi đè.
+
+v1.2.0 vẫn giữ model riêng theo từng tài khoản, tiếp tục phần đã làm và yêu cầu TK1 sửa kế hoạch node test sai định dạng đúng một lần.
 
 **v1.1.3 cho phép tiếp tục phần đã làm và sửa giới hạn thời gian cho nhiệm vụ dài:** hoạt động từ Codex gia hạn thời gian chờ, trong giới hạn tối đa của mỗi phiên. Khi lượt trước thất bại hoặc dừng, công cụ tìm báo cáo đã lưu và các worktree còn hợp lệ để hiện **Tiếp tục phần đã làm**. Model và mức suy luận vẫn lấy từ danh sách riêng của mỗi tài khoản; công cụ không tự hạ model. Hai phiên đăng nhập, lựa chọn và báo cáo giữ ở `%LOCALAPPDATA%\BMHTeam`.
 
 ## Tiếp tục lượt bị hết thời gian hoặc đã dừng
 
-1. Đóng bộ điều phối cũ sau khi lượt chạy đã dừng. Giải nén **BMH-Team-Windows-v1.1.4.zip** vào thư mục mới **ngoài `D:\KBL\build-my-home`**, rồi mở **MO-BMH-TEAM.cmd**. Giữ nguyên `%LOCALAPPDATA%\BMHTeam` và các thư mục công việc cũ để dùng lại đăng nhập, model, báo cáo và code.
+1. Đóng bộ điều phối cũ sau khi lượt chạy đã dừng. Giải nén **BMH-Team-Windows-v1.2.0.zip** vào thư mục mới **ngoài `D:\KBL\build-my-home`**, rồi mở **MO-BMH-TEAM.cmd**. Giữ nguyên `%LOCALAPPDATA%\BMHTeam` và các thư mục công việc cũ để dùng lại đăng nhập, model, báo cáo và code.
 2. Điền repo thật **`D:\KBL\build-my-home`**. Chờ cả hai thẻ kết nối và tải danh sách model. Kiểm tra lựa chọn đã lưu; **Ultra/max được giữ khi vẫn hợp lệ**. Nếu ông chủ động đổi lựa chọn trước khi tiếp tục, lượt mới dùng chính lựa chọn vừa lưu.
 3. Thẻ **Công việc trước vẫn còn** hiển thị mục tiêu đã lưu, lý do dừng, số phần việc hoàn tất và thư mục đã làm. Bấm **Tiếp tục phần đã làm**. Không cần Fetch lại hay dán mục tiêu một lần nữa. Mục tiêu khác đang gõ trong ô nhập không bị thay bằng mục tiêu cũ.
 
@@ -16,7 +20,7 @@ Công cụ kiểm tra báo cáo, kế hoạch và phạm vi file, repo, nhánh, 
 
 Tiếp tục tự động áp dụng cho lượt bị ngắt trước bước commit/gộp. Những nhánh đã commit hoặc bắt đầu gộp được giữ để xem lại kết quả và lỗi, không tự đặt lại lịch sử Git. Với báo cáo v1.1.3, phần đã hoàn thành có nội dung khớp bản lưu được dùng lại; báo cáo v1.1.2 được tài khoản phụ trách kiểm tra từ diff hiện có trước khi hoàn thiện.
 
-Nút chỉ mở khi có hai tài khoản khác nhau, model hợp lệ, repo đã nhập và bộ điều phối đang rảnh, kết nối được. Thẻ chỉ xuất hiện khi có báo cáo thất bại/dừng với kế hoạch và worktree cũ còn tồn tại. Nếu kiểm tra phát hiện nhánh, đường dẫn hoặc thay đổi không hợp lệ, công cụ báo lỗi và giữ nguyên file để xem lại. **Code chưa tự ghép vào `main` hay triển khai Vercel.** Muốn bắt đầu mục tiêu khác, dùng **Giao mục tiêu mới** ở phần nhập bên dưới; đây là lượt mới theo chế độ lấy mã nguồn đang chọn.
+Nút chỉ mở khi có hai tài khoản khác nhau, model hợp lệ, repo đã nhập và bộ điều phối đang rảnh, kết nối được. Thẻ khôi phục xuất hiện khi lượt lỗi/dừng còn đủ kế hoạch và worktree. Lượt mới tự push `main` sau khi các cổng kiểm tra đạt. Muốn bắt đầu mục tiêu khác, dùng **Giao mục tiêu mới** ở phần nhập bên dưới.
 
 ## Khi TK1 lập kế hoạch chọn sai node test
 
@@ -37,7 +41,7 @@ Hoạt động từ tiến trình gia hạn thời gian chờ, vẫn giữ giớ
 
 ## Khi màn hình báo Git thất bại, mã thoát 128
 
-1. Dừng lượt cũ nếu đang chạy, đóng cửa sổ khởi chạy, giải nén **BMH-Team-Windows-v1.1.4.zip** vào một thư mục mới ngoài repo rồi mở **MO-BMH-TEAM.cmd**. Giữ nguyên `%LOCALAPPDATA%\BMHTeam` để dùng lại hai phiên đăng nhập và model đã chọn.
+1. Dừng lượt cũ nếu đang chạy, đóng cửa sổ khởi chạy, giải nén **BMH-Team-Windows-v1.2.0.zip** vào một thư mục mới ngoài repo rồi mở **MO-BMH-TEAM.cmd**. Giữ nguyên `%LOCALAPPDATA%\BMHTeam` để dùng lại hai phiên đăng nhập và model đã chọn.
 2. Trong GitHub Desktop, chọn đúng repo **`D:\KBL\build-my-home`** và bấm **Fetch origin** ngay trước khi giao việc. Nếu Desktop báo lỗi, xử lý đăng nhập/quyền truy cập theo thông báo của Desktop trước.
 3. Trong BMH Team, điền **`D:\KBL\build-my-home`**, chọn **GitHub Desktop — đã Fetch origin**, giữ mục tiêu công việc rồi bấm **Phân việc & làm song song**.
 
@@ -54,7 +58,15 @@ Chế độ Desktop chỉ nhận `FETCH_HEAD` có commit khớp `origin/main` v�
 
    Chính sách này chỉ áp dụng cho phiên PowerShell vừa mở. Launcher nhận Git từ GitHub Desktop và kiểm tra Codex CLI đúng phiên bản `0.160.0`. Nếu cần, nó cài gói chính thức `@openai/codex@0.160.0` cùng các thành phần phù hợp với Windows vào `%LOCALAPPDATA%\BMHTeam\runtime\codex-0.160.0`. Máy cần Node.js 64-bit (`x64` hoặc `arm64`).
 3. **Đăng nhập lần lượt hai tài khoản.** Trên bảng vừa mở, bấm **Đăng nhập** ở thẻ thứ nhất, mở liên kết OpenAI và hoàn tất đăng nhập. Khi thẻ báo đã kết nối, làm tiếp thẻ thứ hai. Mở liên kết của tài khoản thứ hai trong hồ sơ Chrome khác hoặc cửa sổ ẩn danh để không chọn nhầm tài khoản thứ nhất. Không nhập mật khẩu hay API key vào BMH Team. Giữ cửa sổ PowerShell mở.
-4. **Chọn model và giao một mục tiêu.** Sau khi đăng nhập, mỗi thẻ tự tải danh sách model của chính phiên Codex. Chọn **Model giao việc** và **Mức suy luận** trong danh sách, tự lưu ngay khi đổi. Nếu lựa chọn cũ báo không được hỗ trợ, chọn lại trên từng thẻ; có thể bấm **Làm mới model** để tải lại. Nút giao việc chỉ mở khi cả hai lựa chọn hợp lệ. Kiểm tra thư mục BMH và bộ chọn **Lấy mã nguồn mới**, nhập việc cần hoàn thiện rồi bấm **Phân việc & làm song song**. Bộ điều phối chia nhiệm vụ, chạy hai phiên, ghép code và kiểm tra. Khi sẵn sàng, mở thư mục/nhánh được báo, xem diff và kết quả. **Main và Vercel hiện tại chưa đổi**; chỉ triển khai sau khi ông chủ động ghép nhánh qua quy trình GitHub của dự án.
+4. **Chọn model và giao một mục tiêu.** Sau khi đăng nhập, mỗi thẻ tự tải danh sách model của chính phiên Codex. Chọn **Model giao việc** và **Mức suy luận**; lựa chọn tự lưu. BMH Team thử kết nối Git trước khi gọi hai tài khoản, chia hai phần việc, ghép code, build và kiểm tra. Khi tất cả đều đạt, nó tự đẩy commit đã kiểm thử lên `origin/main` bằng push fast-forward không force.
+
+### Tự đẩy lên `main` và Vercel
+
+- Trước khi gọi model, BMH Team dùng `git push --dry-run` để thử kết nối GitHub mà không thay đổi remote. Lần push thật sau khi test mới xác nhận quyền ghi `main` và chính sách nhánh. Nếu Git từ chối, nhánh tích hợp vẫn được giữ lại để xử lý. Đăng nhập Git Credential Manager/Git CLI trên Windows bằng tài khoản được cấp quyền ghi vào repo; phiên đăng nhập ChatGPT/Vercel không thay thế credential Git cục bộ.
+- Nếu repo khai báo `build`, script build luôn chạy. Khi tự publish bật (mặc định) và repo có script `test`, toàn bộ `npm run test` cũng chạy sau các kiểm tra của kế hoạch; script test có giới hạn 20 phút. File sinh trong `dist/` và `public/` được giữ để xem, không commit.
+- Ngay trước push, BMH Team so `origin/main` với commit nguồn ban đầu. Nếu `main` đã đổi hoặc GitHub từ chối do quyền/bảo vệ nhánh, công cụ dừng và giữ nhánh tích hợp; không force/rebase.
+- Push thành công cập nhật `main` trên GitHub. Vercel tự triển khai nếu **Production Branch** là `main` và tích hợp Git hoạt động. BMH Team hiển thị commit đã push nhưng không tuyên bố deploy hoàn tất; xác nhận trạng thái build trong Vercel.
+- Working copy `D:\KBL\build-my-home` không bị checkout/reset. Muốn cập nhật local sau push, chọn `main` trong GitHub Desktop rồi **Fetch origin → Pull origin**.
 
 ## Chọn cách lấy mã nguồn
 
@@ -70,7 +82,7 @@ Chế độ Desktop chỉ nhận `FETCH_HEAD` có commit khớp `origin/main` v�
 - **Mức suy luận** chỉ hiện các mức model đang chọn hỗ trợ. Khi ông đổi model, công cụ giữ mức hiện có nếu model mới hỗ trợ; nếu không, nó chọn và hiển thị mức mặc định model mới trả về, rồi lưu chính xác cả hai giá trị. Mức cao có thể chạy lâu hơn và dùng thêm hạn mức.
 - Cả hai danh sách phải tải thành công và cả hai lựa chọn phải hợp lệ trước khi giao việc. Nếu danh sách tải lỗi, đọc cảnh báo tại thẻ và bấm **Làm mới model**. Danh sách khả dụng không thay thế kiểm tra hạn mức: lỗi quyền truy cập hoặc quota khi suy luận vẫn sẽ dừng nhiệm vụ và báo lỗi.
 - Mỗi lần chạy truyền rõ `--model` và `-c model_reasoning_effort` vào `codex exec`. Tài khoản 1 lập kế hoạch bằng lựa chọn trên thẻ 1; hai phần việc dùng lựa chọn tương ứng. Model được chụp lại trong báo cáo của nhiệm vụ và bị khóa khi đang chạy.
-- Lựa chọn được lưu ở `%LOCALAPPDATA%\BMHTeam\model-settings.json`; hai phiên đăng nhập vẫn nằm trong các thư mục riêng. Nâng cấp bằng cách dừng nhiệm vụ nếu có, đóng bộ điều phối cũ, giải nén **BMH-Team-Windows-v1.1.4.zip** vào thư mục mới **ngoài repo dự án**, rồi mở **MO-BMH-TEAM.cmd**. Chọn repo Git thật như `D:\KBL\build-my-home`, không chọn thư mục giải nén công cụ. Phiên đăng nhập được dùng lại; kiểm tra model hợp lệ trước khi giao việc hoặc tiếp tục lượt cũ.
+- Lựa chọn được lưu ở `%LOCALAPPDATA%\BMHTeam\model-settings.json`; hai phiên đăng nhập vẫn nằm trong các thư mục riêng. Nâng cấp bằng cách dừng nhiệm vụ nếu có, đóng bộ điều phối cũ, giải nén **BMH-Team-Windows-v1.2.0.zip** vào thư mục mới **ngoài repo dự án**, rồi mở **MO-BMH-TEAM.cmd**. Chọn repo Git thật như `D:\KBL\build-my-home`, không chọn thư mục giải nén công cụ. Phiên đăng nhập được dùng lại; kiểm tra model hợp lệ trước khi giao việc hoặc tiếp tục lượt cũ.
 
 Nguồn chính thức: [Codex app-server và `model/list`](https://learn.chatgpt.com/docs/app-server), [chọn model](https://learn.chatgpt.com/docs/models) và [cấu hình theo lần chạy](https://learn.chatgpt.com/docs/developer-settings). Các test dùng tiến trình/đầu ra mô phỏng; kết quả không xác nhận suy luận thật trên hai tài khoản của người sử dụng.
 
@@ -81,7 +93,7 @@ Bản v1.0.1 sửa bước khởi chạy trên Windows: kiểm tra phiên bản 
 - Hai phiên dùng quyền Codex và hạn mức của từng tài khoản có gói đủ điều kiện. Không cần API key; công cụ không né hạn mức, không tự đổi tài khoản khi hết quota và không tự mua lượt dùng.
 - Tài khoản được đăng nhập bằng cơ chế chính thức của Codex CLI. Dữ liệu đăng nhập giữ ở thư mục Codex riêng trên máy; token không được gửi xuống giao diện web. Dashboard chỉ lắng nghe loopback.
 - Trên Windows, hai phiên dùng sandbox `unelevated` được Codex hỗ trợ để chạy không cần quyền quản trị. Khả năng cách ly hệ thống và mạng của chế độ này yếu hơn sandbox `elevated`. Nếu máy chặn môi trường thực thi, công cụ báo lỗi để xử lý; nó không tự chuyển sang quyền truy cập toàn máy.
-- Công cụ điều phối việc sửa code cục bộ. Nó không tự đăng nhập GitHub/Vercel, không push, không tạo PR, không merge main và không triển khai production.
+- Công cụ điều phối việc sửa code cục bộ, rồi tự push commit đã kiểm thử lên GitHub `main` khi Git cục bộ có quyền. Vercel deployment do Git integration khởi chạy; trạng thái deployment được kiểm tra riêng trên Vercel.
 - Nút **Dừng công việc** yêu cầu dừng các phiên đang chạy. Các thay đổi đã tạo được giữ lại để xem lại; không có thao tác xóa repo đang làm.
 - Hai lịch sử trò chuyện ChatGPT không được nối vào nhau. Ông giao việc ở BMH Team; hai phiên Codex nhận phần việc từ bộ điều phối trên máy.
 - Đăng nhập tài khoản thật, GitHub Desktop trên Windows và suy luận Codex sử dụng hạn mức chưa được kiểm chứng từ đầu đến cuối trên máy của ông. Kiểm tra tự động dùng repo Git tạm và tiến trình/đầu ra mô phỏng; trạng thái kết nối trong ứng dụng được xác nhận từ CLI khi ông đăng nhập thực tế.

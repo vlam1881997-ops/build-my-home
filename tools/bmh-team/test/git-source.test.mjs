@@ -66,4 +66,6 @@ test('network and lock diagnostics give actionable help without disabling protec
   assert.match(network.summary,/chứng chỉ/);assert.match(network.help,/không tắt SSL/);
   const locked=gitFailureDiagnostic({operation:'worktree',exitCode:128,output:'fatal: cannot lock ref: another git process'});
   assert.match(locked.summary,/bị khóa/);assert.match(locked.help,/không xóa khóa/);
+  const protectedBranch=gitFailureDiagnostic({operation:'push',exitCode:1,output:'remote: error GH006: Protected branch update failed'});
+  assert.match(protectedBranch.summary,/nhánh được bảo vệ/);assert.match(protectedBranch.help,/không tắt bảo vệ main/);
 });

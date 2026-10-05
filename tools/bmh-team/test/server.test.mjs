@@ -78,7 +78,7 @@ test('two concurrent run requests cannot create overlapping jobs',async t=>{
 test('source modes are explicit and invalid values cannot start a job or request offline execution',async t=>{
   const selected=[];
   const f=await fixture(t,{jobFactory:options=>{selected.push(options);return {publicState:{id:'fixture-source',status:'ready'},start:async()=>{},stop:async()=>{}};}});
-  const state=await (await fetch(f.url+'/api/state')).json();assert.equal(state.version,'1.1.4');assert.equal(state.sourceModeDefault,'fetch');
+  const state=await (await fetch(f.url+'/api/state')).json();assert.equal(state.version,'1.2.0');assert.equal(state.sourceModeDefault,'fetch');
   assert.deepEqual(state.sourceModeOptions.map(item=>item.id),['fetch','desktop']);
   for(const mode of ['offline','fixture',false,null])assert.equal((await f.post('/api/run',{repo:'/tmp/fixture-repo',goal:'Use source safely',sourceMode:mode})).status,400);
   assert.equal(selected.length,0);

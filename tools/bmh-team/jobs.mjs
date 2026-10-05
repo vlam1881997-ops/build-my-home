@@ -18,13 +18,13 @@ const SCHEMA = {
       type: 'object', additionalProperties: false, required: ['title', 'instructions', 'ownedPaths'],
       properties: { title: { type: 'string' }, instructions: { type: 'string' }, ownedPaths: { type: 'array', minItems: 1, items: { type: 'string' } } }
     } },
-    checks: { type: 'array', minItems: 1, items: {
+    checks: { type: 'array', minItems: 1, maxItems: 10, items: {
       type: 'object', additionalProperties: false, required: ['program', 'args'],
       properties: { program: { type: 'string', enum: ['node', 'npm'] }, args: { type: 'array', items: { type: 'string' } } }
     } }
   }
 };
-const INVARIANTS = `BMH invariants: measured 2D drawings and 3D use the same geometry, units, floor program, openings and materials. Preserve the customer's selected style, existing 10 tabs, banking/material features and persisted projects. Do not invent construction-ready structural accuracy. Read docs/BMH-CUSTOMER-DESIGN.md when present. Do not call paid external APIs, install global dependencies, log in, add accounts or delegate to subagents. Do not commit, push, merge, deploy, reset or change Git refs. Do not write secrets or credentials. Make only the assigned literal files; report actual changes and limits.`;
+const INVARIANTS = `BMH invariants: measured 2D drawings and 3D use the same geometry, units, floor program, openings and materials. Preserve the customer's selected style, existing 10 tabs, banking/material features and persisted projects. Do not invent construction-ready structural accuracy. Read docs/BMH-CUSTOMER-DESIGN.md when present. Do not call paid external APIs, install global dependencies, log in, add accounts or delegate to subagents. Worker accounts must not commit, push, merge, deploy, reset or change Git refs; after both workers and all verification pass, the BMH Team coordinator may publish the checked integration commit to origin/main. Do not write secrets or credentials. Make only the assigned literal files; report actual changes and limits.`;
 
 function scrub(value) {
   return redactProcessText(value).slice(0, 6000);
@@ -56,7 +56,7 @@ async function optionalRead(filename) { try { return await fs.readFile(filename,
 /** Local-only job. Desktop mode requires matching recent FETCH_HEAD evidence.
  * fetch:false remains exclusively for offline fixture tests. */
 export class TeamJob extends EventEmitter {
-  constructor({ workers, repo, goal, gitCommand = 'git', stateRoot = path.join(os.homedir(), '.bmh-team', 'jobs'), onEvent, fetch = true, sourceMode = 'fetch', workerTimeoutMs, workerIdleTimeoutMs, commandTimeoutMs = 5 * 60_000, modelSettings, resumeSnapshot }) {
+  constructor({ workers, repo, goal, gitCommand = 'git', stateRoot = path.join(os.homedir(), '.bmh-team', 'jobs'), onEvent, fetch = true, sourceMode = 'fetch', workerTimeoutMs, workerIdleTimeoutMs, commandTimeoutMs = 5 * 60_000, modelSettings, resumeSnapshot, autoPublish = true }) {
     super();
     if (!Array.isArray(workers) || workers.length !== 2 || workers.some(w => !w?.id || typeof w.run !== 'function' || typeof w.interrupt !== 'function') || workers[0].id === workers[1].id) throw new Error('Exactly two distinct workers are required.');
     this.resumeSnapshot=resumeSnapshot?structuredClone(resumeSnapshot):null;
@@ -67,17 +67,18 @@ export class TeamJob extends EventEmitter {
     if (!this.goal || this.goal.length > 20_000) throw new Error('Provide a goal of 1–20,000 characters.');
     this.gitCommand = gitCommand; this.stateRoot = path.resolve(stateRoot);
     if (inside(this.repo, this.stateRoot)) throw new Error('Worktrees must be stored outside the source repository.');
-    this.onEvent = onEvent; this.fetch = fetch; this.sourceMode=validateSourceMode(sourceMode); this.workerTimeoutMs = workerTimeoutMs; this.workerIdleTimeoutMs=workerIdleTimeoutMs; this.commandTimeoutMs = commandTimeoutMs;
+    if(typeof autoPublish!=='boolean')throw new Error('Automatic publishing must be explicitly enabled or disabled.');
+    this.onEvent = onEvent; this.fetch = fetch; this.sourceMode=validateSourceMode(sourceMode); this.workerTimeoutMs = workerTimeoutMs; this.workerIdleTimeoutMs=workerIdleTimeoutMs; this.commandTimeoutMs = commandTimeoutMs; this.autoPublish=autoPublish;
     this.id = `${Date.now()}-${randomBytes(4).toString('hex')}`;
     this.worktreeId=this.resumeSnapshot?worktreeId(this.resumeSnapshot):this.id;
     this.resumedFrom=this.resumeSnapshot?jobId(this.resumeSnapshot.id):null;
     this.status = 'preparing'; this.plan = null; this.results = []; this.artifacts = []; this.branch = `bmh-team/${this.worktreeId}/integration`;
     this.path = path.join(this.stateRoot, this.worktreeId, 'integration'); this.error = null; this.events = [];
-    this.diagnostic=null; this.source=null; this.workspaceReady=false;
+    this.diagnostic=null; this.source=null; this.workspaceReady=false; this.publishedCommit=null; this.publishedAt=null;
     this.checkpoint=null; this.timing=null;
     this.children = new Set(); this.timers = new Set(); this.aborted = false; this.failing = false; this.started = false; this.activePromise = null;
   }
-  get publicState() { return structuredClone({ id: this.id, repo:this.repo, worktreeId:this.worktreeId, resumedFrom:this.resumedFrom, status: this.status, goal: this.goal, modelSettings:this.modelSettings, sourceMode:this.sourceMode, source:this.source, workspaceReady:this.workspaceReady, diagnostic:this.diagnostic, plan: this.plan, results: this.results, artifacts: this.artifacts, branch: this.branch, path: this.path, error: this.error, events: this.events, checkpoint:this.checkpoint, timing:this.timing }); }
+  get publicState() { return structuredClone({ id: this.id, repo:this.repo, worktreeId:this.worktreeId, resumedFrom:this.resumedFrom, status: this.status, goal: this.goal, modelSettings:this.modelSettings, sourceMode:this.sourceMode, source:this.source, workspaceReady:this.workspaceReady, autoPublish:this.autoPublish, publishedCommit:this.publishedCommit, publishedAt:this.publishedAt, diagnostic:this.diagnostic, plan: this.plan, results: this.results, artifacts: this.artifacts, branch: this.branch, path: this.path, error: this.error, events: this.events, checkpoint:this.checkpoint, timing:this.timing }); }
   note(message, worker) {
     this.events.push({ at: new Date().toISOString(), ...(worker ? { worker } : {}), message: scrub(message) });
     if (this.events.length > 200) this.events.shift();
@@ -174,7 +175,7 @@ export class TeamJob extends EventEmitter {
     finally { clearTimeout(timer);clearTimeout(idleTimer);this.timers.delete(timer);this.timers.delete(idleTimer);worker.removeListener?.('activity',onActivity);this.removeListener('stop',onStop);budget.status='finished'; }
   }
   validatePlan(value, scripts) {
-    if (!value || typeof value.summary !== 'string' || !Array.isArray(value.tasks) || value.tasks.length !== 2 || !Array.isArray(value.checks) || !value.checks.length || value.checks.length > 12) throw new Error('Plan must contain exactly two tasks and at least one verification command.');
+    if (!value || typeof value.summary !== 'string' || !Array.isArray(value.tasks) || value.tasks.length !== 2 || !Array.isArray(value.checks) || !value.checks.length || value.checks.length > 10) throw new Error('Plan must contain exactly two tasks and 1–10 verification commands.');
     const ownership = new Set();
     const tasks = value.tasks.map(task => {
       if (typeof task.title !== 'string' || !task.title.trim() || typeof task.instructions !== 'string' || !task.instructions.trim() || !Array.isArray(task.ownedPaths) || !task.ownedPaths.length || task.ownedPaths.length > 100) throw new Error('Each task needs a title, instructions and exact owned filenames.');
@@ -203,6 +204,8 @@ export class TeamJob extends EventEmitter {
       const withoutBuild = checks.filter(check => !(check.program === 'npm' && check.args[0] === 'run' && check.args[1] === 'build'));
       checks.splice(0, checks.length, { program: 'npm', args: ['run', 'build'] }, ...withoutBuild);
     }
+    if (this.autoPublish && typeof scripts.test === 'string' && !checks.some(check => check.program === 'npm' && check.args[0] === 'run' && check.args[1] === 'test')) checks.push({program:'npm',args:['run','test']});
+    if(checks.length>12)throw new Error('The build and full test suite exceed the 12-command verification limit; shorten the planner checks.');
     return { summary: value.summary.slice(0, 2000), tasks, checks };
   }
   async verifyLiteral(cwd, filename, allowMissing = false) {
@@ -321,7 +324,15 @@ export class TeamJob extends EventEmitter {
         this.source=await desktopFetchEvidence({repo:this.repo,commonDir,baseCommit:base,git:args=>this.git(args)});
         this.note(`Dùng origin/main ${base.slice(0,12)} vừa Fetch qua GitHub Desktop lúc ${this.source.fetchedAt}.`);
       } else this.source={mode:this.fetch?'fetch':'fixture',baseCommit:base,fetchedAt:this.fetch?new Date().toISOString():null};
+      if(this.autoPublish) {
+        this.note('Thử kết nối GitHub qua đường push trước khi gọi hai tài khoản; quyền ghi main sẽ được xác nhận ở lệnh push cuối sau khi toàn bộ test qua.');
+        await this.git(['push','--dry-run','origin',`${base}:refs/heads/main`],this.repo,{logName:'push-preflight.log'});
+      }
       await this.git(['worktree', 'add', '-b', this.branch, this.path, base]);
+    }
+    if(this.autoPublish && this.resumeSnapshot) {
+      this.note('Thử lại kết nối GitHub qua đường push trước khi tiếp tục hai tài khoản.');
+      await this.git(['push','--dry-run','origin',`${base}:refs/heads/main`],this.repo,{logName:'push-preflight.log'});
     }
     const paths=this.workers.map((_,index)=>path.join(this.stateRoot,this.worktreeId,`account-${index+1}`));
     const branches=this.workers.map((_,index)=>`bmh-team/${this.worktreeId}/account-${index+1}`);
@@ -425,7 +436,8 @@ export class TeamJob extends EventEmitter {
       if (check.program === 'npm' && combinedPackage.scripts?.[check.args[1]] !== scripts[check.args[1]]) throw new Error('A verification script changed during the job; review it before running.');
       if (check.program === 'node') for (const filename of check.args.slice(1)) await this.verifyLiteral(this.path, filename);
       this.note(`Check ${index + 1}/${this.plan.checks.length}: ${check.program} ${check.args.join(' ')}`);
-      await this.command(check.program, check.args, this.path, { logName: `check-${index + 1}.log` });
+      const timeoutMs=check.program==='npm' && check.args[0]==='run' && check.args[1]==='test' ? Math.max(this.commandTimeoutMs,20*60_000) : this.commandTimeoutMs;
+      await this.command(check.program, check.args, this.path, { timeoutMs, logName: `check-${index + 1}.log` });
     }
     this.assertActive();
     await this.git(['diff', '--check', '--', '.', ':(exclude)dist', ':(exclude)public'], this.path);
@@ -436,7 +448,20 @@ export class TeamJob extends EventEmitter {
     if (postCheckFiles.some(filename => !/^(?:dist|public)\/.+/.test(filename))) throw new Error('Verification changed source or produced files outside dist/public. Review the integration worktree before continuing.');
     this.artifacts = postCheckFiles;
     if (this.artifacts.length) this.note(`Preserved ${this.artifacts.length} generated dist/public artifact(s) for review; they are not committed.`);
-    this.phase('ready', 'Both tasks and their checks passed. Review the local integration branch; nothing was pushed, merged into main or deployed.');
+    if(this.autoPublish) {
+      this.assertActive();
+      const remoteText=await this.git(['ls-remote','--refs','origin','refs/heads/main'],this.path,{logName:'publish-target.log'});
+      const remoteLine=remoteText.split(/\r?\n/).map(line=>line.trim()).find(line=>line.endsWith('\trefs/heads/main'));
+      const remoteCommit=remoteLine?.split(/\s+/,1)[0];
+      if(!/^[a-f0-9]{40,64}$/i.test(remoteCommit || ''))throw new Error('Không xác định được origin/main hiện tại; nhánh tích hợp vẫn được giữ, chưa đẩy.');
+      if(remoteCommit.toLowerCase()!==base.toLowerCase())throw new Error(`origin/main đã đổi từ ${base.slice(0,12)} sang ${remoteCommit.slice(0,12)} trong lúc làm. BMH Team không ghi đè hoặc tự rebase; nhánh tích hợp vẫn được giữ để xử lý.`);
+      const commit=await this.git(['rev-parse','HEAD'],this.path);
+      await this.git(['merge-base','--is-ancestor',base,commit],this.path);
+      this.phase('publishing','Các kiểm tra đều đạt; đang đẩy commit đã kiểm thử lên origin/main bằng fast-forward, không force.');
+      await this.git(['push','--porcelain','origin',`${commit}:refs/heads/main`],this.path,{logName:'publish.log'});
+      this.publishedCommit=commit;this.publishedAt=new Date().toISOString();
+      this.phase('published',`Đã đẩy ${commit.slice(0,12)} lên origin/main. Nếu Vercel đang nối Git với main, Vercel sẽ tự nhận build/deploy; trạng thái deployment cần xem ở Vercel.`);
+    } else this.phase('ready', 'Both tasks and their checks passed. Review the local integration branch; nothing was pushed, merged into main or deployed.');
     return this.publicState;
   }
   async availableTestFiles(cwd) {

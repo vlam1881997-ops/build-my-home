@@ -39,7 +39,7 @@ function mockWorkers(value, { extra = false, hang = false, noChanges = false, on
     return 'Completed assigned file.';
   } }));
 }
-function create(fix, workers, extras = {}) { return new TeamJob({ ...fix, goal: 'Improve the selected feature', workers, fetch: false, modelSettings:fixtureSettings(), ...extras }); }
+function create(fix, workers, extras = {}) { return new TeamJob({ ...fix, goal: 'Improve the selected feature', workers, fetch: false, autoPublish:false, modelSettings:fixtureSettings(), ...extras }); }
 
 test('two workers use separate worktrees and combine only into checked integration branch', async t => {
   const fix = await fixture(t); const paths = []; const workers = mockWorkers(plan(), { onRun: (cwd, index) => { paths[index] = cwd; } });
@@ -49,6 +49,43 @@ test('two workers use separate worktrees and combine only into checked integrati
   assert.equal(await fs.readFile(path.join(result.path, 'one.txt'), 'utf8'), 'new one\n');
   assert.equal(await git(result.path, 'branch', '--show-current'), result.branch);
   assert.ok(result.events.some(event => event.message.startsWith('Check 1/')));
+});
+
+test('automatic publishing checks GitHub write access before account work starts',async t=>{
+  const fix=await fixture(t);let workerCalls=0;const job=create(fix,mockWorkers(plan(),{onRun(){workerCalls++;}}),{autoPublish:true});
+  const actual=job.git.bind(job);job.git=async(args,...rest)=>{
+    if(args[0]==='push' && args.includes('--dry-run')){const error=new Error('Repository not found');error.gitDiagnostic={operation:'push',summary:'Git push preflight failed.'};throw error;}
+    return actual(args,...rest);
+  };
+  const result=await job.start();assert.equal(result.status,'failed');assert.equal(workerCalls,0);assert.equal(result.workspaceReady,false);assert.equal(result.diagnostic.operation,'push');
+  await assert.rejects(fs.stat(result.path),{code:'ENOENT'});assert.equal(await git(fix.repo,'rev-parse','main'),fix.base);
+});
+
+test('automatic publishing sends the tested commit to main without force after build and full tests',async t=>{
+  const fix=await fixture(t);await fs.writeFile(path.join(fix.repo,'package.json'),JSON.stringify({scripts:{build:"node -e \"require('node:fs').mkdirSync('dist',{recursive:true})\"",test:'node --test test/result.test.mjs'}}));
+  await git(fix.repo,'add','package.json');await git(fix.repo,'commit','-m','Add verified scripts');fix.base=await git(fix.repo,'rev-parse','HEAD');await git(fix.repo,'update-ref','refs/remotes/origin/main',fix.base);
+  const pushCalls=[];let pushedCommit=null;const job=create(fix,mockWorkers(plan()),{autoPublish:true});const actual=job.git.bind(job);
+  job.git=async(args,cwd=fix.repo,options)=>{
+    if(args[0]==='push' && args.includes('--dry-run')){pushCalls.push(args);return '';}
+    if(args[0]==='ls-remote')return `${fix.base}\trefs/heads/main`;
+    if(args[0]==='push'){pushCalls.push(args);pushedCommit=await actual(['rev-parse','HEAD'],cwd);return '';}
+    return actual(args,cwd,options);
+  };
+  const result=await job.start();assert.equal(result.status,'published',result.error);assert.equal(result.publishedCommit,pushedCommit);assert.equal(result.plan.checks[0].args[1],'build');assert.ok(result.plan.checks.some(check=>check.program==='npm' && check.args[1]==='test'));
+  assert.equal(pushCalls.length,2);assert.ok(pushCalls[1].includes(`${pushedCommit}:refs/heads/main`));assert.ok(!pushCalls[1].some(arg=>arg==='--force'||arg.startsWith('--force=')));
+  assert.equal(await git(fix.repo,'rev-parse','main'),fix.base);assert.ok(result.events.some(event=>event.message.includes('origin/main')));
+});
+
+test('automatic publishing never pushes when the full verification fails',async t=>{
+  const fix=await fixture(t,{checkFails:true});let realPushes=0;const job=create(fix,mockWorkers(plan()),{autoPublish:true});const actual=job.git.bind(job);
+  job.git=async(args,...rest)=>{if(args[0]==='push' && args.includes('--dry-run'))return '';if(args[0]==='push')realPushes++;return actual(args,...rest);};
+  const result=await job.start();assert.equal(result.status,'failed');assert.match(result.error,/command failed/);assert.equal(realPushes,0);assert.equal(await git(fix.repo,'rev-parse','main'),fix.base);
+});
+
+test('automatic publishing stops if main changes during verification',async t=>{
+  const fix=await fixture(t);let realPushes=0;const job=create(fix,mockWorkers(plan()),{autoPublish:true});const actual=job.git.bind(job);
+  job.git=async(args,...rest)=>{if(args[0]==='push' && args.includes('--dry-run'))return '';if(args[0]==='ls-remote')return `${'f'.repeat(40)}\trefs/heads/main`;if(args[0]==='push')realPushes++;return actual(args,...rest);};
+  const result=await job.start();assert.equal(result.status,'failed');assert.match(result.error,/origin\/main đã đổi/);assert.equal(realPushes,0);assert.equal(await git(fix.repo,'rev-parse','main'),fix.base);assert.equal(await git(result.path,'branch','--show-current'),result.branch);
 });
 test('planning and parallel edits retain each chosen model from the job snapshot',async t=>{
   const fix=await fixture(t);const observed=[];
