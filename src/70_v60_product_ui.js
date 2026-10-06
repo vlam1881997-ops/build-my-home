@@ -397,6 +397,10 @@ BMH.v6SelectDesignReference=id=>{
   p.brief=p.brief||{};p.brief.userRequirements=p.brief.userRequirements||{};
   // userRequirements is already a persisted dynamic field; no state-schema change is needed.
   p.brief.userRequirements.designReference={...copy,contextKey:BMH.designResearchProfileKey(),selectedAt:new Date().toISOString()};
+  if(p.designEvidence){
+    const sources=copy.sources.length?copy.sources:[{url:null,title:'Thư viện hình khối BMH'}];
+    for(const source of sources)p.designEvidence.research.push({id:BMH.uid('research-evidence'),kind:'design-reference',sourceUrl:source.url,sourceTitle:source.title,publisher:copy.origin==='library'?'BMH':null,retrievedAt:copy.searchedAt||null,effectiveAt:null,scope:{contextKey:BMH.designResearchProfileKey()},sourceType:copy.origin==='library'?'library':'ai',verifiedState:copy.origin==='library'?'provided':'cited',value:{referenceId:copy.id,styleId:copy.styleId,title:copy.title,reasons:copy.fitReasons,constraints:copy.limitations,selectedAsIntent:true},unit:null,notes:'Mẫu tham chiếu; không thay số đo, vật liệu hoặc ngân sách.'});
+  }
   BMH.save();BMH.render({preserveScroll:true});BMH.toast('Đã lưu mẫu tham chiếu thiết kế.');return true;
 };
 BMH.v6DesignEvidenceHtml=option=>{

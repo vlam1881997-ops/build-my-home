@@ -141,7 +141,7 @@ BMH.lotCorners = (site=BMH.state.project.site) => {
   const v=(ang,len)=>({e:Math.sin(ang)*len,n:Math.cos(ang)*len}),w=v(right,hw),d=v(back,hd),c={lat:Number(site.lat),lng:Number(site.lng)};
   return [[w.e+d.e,w.n+d.n],[-w.e+d.e,-w.n+d.n],[-w.e-d.e,-w.n-d.n],[w.e-d.e,w.n-d.n]].map(([e,n])=>BMH.meterOffset(c.lat,c.lng,e,n));
 };
-BMH.lotPath = (site=BMH.state.project.site) => site.lotMode==='custom'?Array.isArray(site.lotPoints)?site.lotPoints:[]:BMH.lotCorners(site);
+BMH.lotPath = (site=BMH.state.project.site) => BMH.state.ui.location?.drawingLot?(BMH.lotDraft||[]):site.lotSource==='survey-local'?[]:site.lotMode==='custom'?Array.isArray(site.lotPoints)?site.lotPoints:[]:BMH.lotCorners(site);
 BMH.syncMapHud = (zoom) => {const z=BMH.$('#mapHudZoom');if(z)z.textContent=`Zoom ${Math.round(Number(zoom)||BMH.state.project.site.mapZoom||17)}`;};
 BMH.clearMapExtras = () => {
   if(BMH.mapEngine==='leaflet'&&BMH.map){(BMH.mapContext||[]).forEach(x=>{try{BMH.map.removeLayer(x)}catch(_){}});(BMH.mapLotPoints||[]).forEach(x=>{try{BMH.map.removeLayer(x)}catch(_){}});}
@@ -154,9 +154,10 @@ BMH.updateMapContext = () => {
     if(BMH.mapEngine==='leaflet'&&window.L&&BMH.map){[250,500].forEach((r,i)=>BMH.mapContext.push(L.circle([s.lat,s.lng],{radius:r,color:i?'#6b8068':'#7b8ea1',weight:1,opacity:.55,fillOpacity:.02,dashArray:i?'7 6':'3 5',interactive:false}).addTo(BMH.map)));}
     if(BMH.mapEngine==='google'&&window.google?.maps&&BMH.map){[250,500].forEach((r,i)=>BMH.mapContext.push(new google.maps.Circle({center:{lat:s.lat,lng:s.lng},radius:r,strokeColor:i?'#6b8068':'#7b8ea1',strokeOpacity:.55,strokeWeight:1,fillOpacity:.01,map:BMH.map,clickable:false})));}
   }
-  if(s.lotMode==='custom'&&Array.isArray(s.lotPoints)){
-    if(BMH.mapEngine==='leaflet'&&window.L&&BMH.map)s.lotPoints.slice(0,12).forEach((pt,i)=>BMH.mapLotPoints.push(L.circleMarker([pt.lat,pt.lng],{radius:5,color:'#fff',weight:2,fillColor:i===0?'#b95f43':'#53735a',fillOpacity:1,interactive:false}).addTo(BMH.map)));
-    if(BMH.mapEngine==='google'&&window.google?.maps&&BMH.map)s.lotPoints.slice(0,12).forEach((pt,i)=>BMH.mapLotPoints.push(new google.maps.Marker({position:pt,map:BMH.map,label:{text:String(i+1),color:'#fff',fontSize:'10px'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:7,fillColor:i===0?'#b95f43':'#53735a',fillOpacity:1,strokeColor:'#fff',strokeWeight:2},clickable:false})));
+  const contextPoints=BMH.state.ui.location?.drawingLot?(BMH.lotDraft||[]):s.lotSource==='survey-local'?[]:s.lotPoints;
+  if(Array.isArray(contextPoints)&&(s.lotMode==='custom'||BMH.state.ui.location?.drawingLot)){
+    if(BMH.mapEngine==='leaflet'&&window.L&&BMH.map)contextPoints.slice(0,12).forEach((pt,i)=>BMH.mapLotPoints.push(L.circleMarker([pt.lat,pt.lng],{radius:5,color:'#fff',weight:2,fillColor:i===0?'#b95f43':'#53735a',fillOpacity:1,interactive:false}).addTo(BMH.map)));
+    if(BMH.mapEngine==='google'&&window.google?.maps&&BMH.map)contextPoints.slice(0,12).forEach((pt,i)=>BMH.mapLotPoints.push(new google.maps.Marker({position:pt,map:BMH.map,label:{text:String(i+1),color:'#fff',fontSize:'10px'},icon:{path:google.maps.SymbolPath.CIRCLE,scale:7,fillColor:i===0?'#b95f43':'#53735a',fillOpacity:1,strokeColor:'#fff',strokeWeight:2},clickable:false})));
   }
 };
 BMH.updateLotOverlay = () => {
@@ -166,28 +167,29 @@ BMH.updateLotOverlay = () => {
   BMH.updateMapContext();
 };
 BMH.updateLotDrawStatus = () => {
-  const n=BMH.state.project.site.lotPoints?.length||0,el=BMH.$('#lotDrawStatus');if(el)el.textContent=BMH.state.ui.location?.drawingLot?`Đang vẽ · ${n} điểm · cần tối thiểu 3 điểm`:(BMH.state.project.site.lotMode==='custom'?`Ranh tùy chỉnh · ${n} điểm`:'Lô chữ nhật theo kích thước');
+  const n=(BMH.state.ui.location?.drawingLot?BMH.lotDraft:BMH.state.project.site.lotPoints)?.length||0,el=BMH.$('#lotDrawStatus');if(el)el.textContent=BMH.state.ui.location?.drawingLot?`Đang vẽ · ${n} điểm · cần tối thiểu 3 điểm`:(BMH.state.project.site.lotMode==='custom'?`Ranh tùy chỉnh · ${n} điểm`:'Lô chữ nhật theo kích thước');
 };
-BMH.startLotDraw = () => {if(!['leaflet','google'].includes(BMH.mapEngine)){BMH.toast('Cần bản đồ tương tác để vẽ ranh; bản nhúng dự phòng không đủ chính xác. Hãy thử tải lại bản đồ.');return;}const s=BMH.state.project.site;s.lotMode='custom';s.lotPoints=[];BMH.state.ui.location.drawingLot=true;s.showLotOverlay=true;BMH.save();BMH.render();BMH.toast('Chế độ vẽ ranh tham khảo: bấm lần lượt các góc lô đất trên bản đồ.');};
+BMH.startLotDraw = () => {if(!['leaflet','google'].includes(BMH.mapEngine)){BMH.toast('Cần bản đồ tương tác để vẽ ranh; bản nhúng dự phòng không đủ chính xác. Hãy thử tải lại bản đồ.');return;}const s=BMH.state.project.site;BMH.lotDraft=[];BMH.state.ui.location.drawingLot=true;s.showLotOverlay=true;BMH.save();BMH.render();BMH.toast('Chế độ vẽ ranh tham khảo: bấm lần lượt các góc lô đất trên bản đồ.');};
 BMH.handleMapClick = (lat,lng,source='Chọn trên bản đồ') => {
-  if(BMH.state.ui.location?.drawingLot){const s=BMH.state.project.site;if((s.lotPoints?.length||0)>=12){BMH.toast('Tối đa 12 điểm cho ranh đất sơ bộ.');return;}s.lotMode='custom';s.lotPoints=[...(s.lotPoints||[]),{lat:Number(lat),lng:Number(lng)}];BMH.save();BMH.updateLotOverlay();BMH.updateLotDrawStatus();return;}
+  if(BMH.state.ui.location?.drawingLot){const s=BMH.state.project.site;if((BMH.lotDraft?.length||0)>=12){BMH.toast('Tối đa 12 điểm cho ranh đất sơ bộ.');return;}BMH.lotDraft=[...(BMH.lotDraft||[]),{lat:Number(lat),lng:Number(lng)}];BMH.updateLotOverlay();BMH.updateLotDrawStatus();return;}
   BMH.applyCoordinates(lat,lng,source);
 };
 BMH.finishLotDraw = () => {
-  const s=BMH.state.project.site,pts=s.lotPoints||[];if(pts.length<3)return BMH.toast('Cần ít nhất 3 điểm để hoàn tất ranh đất.');
+  const s=BMH.state.project.site,pts=BMH.lotDraft||[];if(pts.length<3)return BMH.toast('Cần ít nhất 3 điểm để hoàn tất ranh đất.');
   if(!BMH.polygonIsSimple(pts))return BMH.toast('Ranh đất có cạnh cắt nhau hoặc đỉnh trùng. Hãy vẽ các góc liên tiếp quanh thửa đất.');
-  const stats=BMH.siteParcelStats(s);if(!Number.isFinite(stats.area)||stats.area<5||stats.area>100_000)return BMH.toast('Diện tích ranh bất thường; hãy đặt lại các góc theo đúng thứ tự quanh lô đất.');
+  const stats={area:BMH.polygonAreaMeters(pts)};if(!Number.isFinite(stats.area)||stats.area<5||stats.area>100_000)return BMH.toast('Diện tích ranh bất thường; hãy đặt lại các góc theo đúng thứ tự quanh lô đất.');
   const centroid=pts.reduce((a,p)=>({lat:a.lat+p.lat/pts.length,lng:a.lng+p.lng/pts.length}),{lat:0,lng:0});
-  s.lat=centroid.lat;s.lng=centroid.lng;s.geoSource='Ranh đất vẽ trên bản đồ';s.pinAddressNeedsReview=true;s.lotMode='custom';s.lotSource='drawn';s.shape='Không đều';
+  s.lat=centroid.lat;s.lng=centroid.lng;s.geoSource='Ranh đất vẽ trên bản đồ';s.pinAddressNeedsReview=true;s.lotMode='custom';s.lotPoints=structuredClone(pts);s.lotSource='drawn';s.boundaryEvidenceId='';s.useParcelGeometry=false;s.shape='Không đều';
   BMH.state.ui.location.drawingLot=false;BMH.liveWeather=null;BMH.save();BMH.render();BMH.loadSiteIntelligence?.(true);BMH.toast(`Ranh vẽ ước tính ${Math.round(stats.area)} m². Kích thước thiết kế chưa thay đổi; cần đối chiếu hồ sơ địa chính.`);
 };
-BMH.clearCustomLot = () => {const s=BMH.state.project.site;s.lotMode='rect';s.lotPoints=[];s.lotSource='dimensions';BMH.state.ui.location.drawingLot=false;BMH.save();BMH.render();BMH.toast('Đã trở lại lô chữ nhật theo mặt tiền × chiều sâu.');};
+BMH.clearCustomLot = () => {const s=BMH.state.project.site;s.lotMode='rect';s.lotPoints=[];s.lotSource='dimensions';s.boundaryEvidenceId='';s.useParcelGeometry=false;BMH.state.ui.location.drawingLot=false;BMH.save();BMH.render();BMH.toast('Đã trở lại lô chữ nhật theo mặt tiền × chiều sâu.');};
 BMH.importParcelGeoJSON = async file => {
   if(!file||file.size>2_000_000)throw new Error('Tệp GeoJSON cần nhỏ hơn 2 MB.');
   const data=JSON.parse(await file.text());
   const feature=data.type==='FeatureCollection'?data.features?.find(x=>x.geometry?.type==='Polygon'):data.type==='Feature'?data:data;
   const geometry=feature?.geometry||feature;
-  if(geometry?.type!=='Polygon'||!Array.isArray(geometry.coordinates?.[0]))throw new Error('Chỉ nhận một polygon GeoJSON theo WGS84 (kinh độ, vĩ độ).');
+  if(data.crs||feature?.crs)throw new Error('GeoJSON chỉ nhận WGS84. Giữ VN-2000 và tham số CRS trong nguồn khu đất, không tự chuyển hệ.');
+  if(geometry?.type!=='Polygon'||geometry.coordinates?.length!==1||!Array.isArray(geometry.coordinates?.[0]))throw new Error('Chỉ nhận một polygon GeoJSON theo WGS84 (kinh độ, vĩ độ).');
   const ring=geometry.coordinates[0];
   if(ring.length<4||ring.length>257)throw new Error('Ranh đất cần từ 3 đến 256 đỉnh.');
   const points=ring.map(pair=>({lng:Number(pair?.[0]),lat:Number(pair?.[1])}));
@@ -197,7 +199,7 @@ BMH.importParcelGeoJSON = async file => {
   const area=BMH.polygonAreaMeters(points);
   if(points.length<3||area<5||area>100_000)throw new Error('Diện tích polygon bất thường. Kiểm tra hệ tọa độ và thứ tự kinh độ, vĩ độ.');
   const center=points.reduce((a,p)=>({lat:a.lat+p.lat/points.length,lng:a.lng+p.lng/points.length}),{lat:0,lng:0}),s=BMH.state.project.site;
-  Object.assign(s,{lotMode:'custom',lotPoints:points,lotSource:'geojson-user',showLotOverlay:true,shape:'Không đều'});
+  Object.assign(s,{lotMode:'custom',lotPoints:points,lotSource:'geojson-user',boundaryEvidenceId:'',useParcelGeometry:false,showLotOverlay:true,shape:'Không đều'});
   BMH.state.ui.location.drawingLot=false;
   BMH.applyCoordinates(center.lat,center.lng,'Ranh GeoJSON do người dùng cung cấp',{render:true});
   BMH.toast(`Đã nhập polygon ~${Math.round(area)} m². Cần đối chiếu bản trích lục có giá trị pháp lý.`);
@@ -274,8 +276,64 @@ BMH.siteIntelClientKey=(s=BMH.state.project.site)=>(Number(s.lat)||0).toFixed(4)
 BMH.sitePinConfirmed=(s=BMH.state.project.site)=>Number.isFinite(Number(s.lat))&&Number.isFinite(Number(s.lng))&&/^(Ghim |Kéo ghim|Chọn trên |Địa chỉ ·|GPS thiết bị|Ranh đất vẽ|Ranh GeoJSON|Tọa độ tùy chỉnh)/.test(String(s.geoSource||''));
 BMH.siteIntelLoading=false;
 BMH.siteIntelScanId=0;
+BMH.siteEvidenceKinds={boundary:'Ranh / số đo khảo sát',dimensions:'Kích thước nhà / đất',planning:'Quy hoạch / lộ giới',setbacks:'Khoảng lùi',supplier:'Nhà cung cấp'};
+BMH.siteEvidenceStatus=row=>row.verifiedState==='stale'?'Cần đối chiếu lại':row.sourceType==='map'?'Bản đồ tham khảo':'Đã cung cấp · chưa rà soát';
+BMH.siteEvidencePanel=()=>{
+ const p=BMH.state.project,s=p.site,rows=p.designEvidence?.site||[],esc=BMH.esc,review=BMH.parcelBoundaryReview?.(s),g=BMH.parcelGeometry?.(s);
+ const planning=rows.filter(e=>e.kind==='planning'&&e.verifiedState!=='stale'),status=planning.length?'Đã có tài liệu · chờ đối chiếu phạm vi':'Chưa có tài liệu quy hoạch';
+ const input=(name,label,extra='')=>'<label><span>'+label+'</span><input name="'+name+'" '+extra+'></label>';
+ return '<section class="v6-card site-evidence-panel" aria-labelledby="siteEvidenceTitle"><span class="studio-eyebrow">NGUỒN KHU ĐẤT</span><h3 id="siteEvidenceTitle">Số đo có căn cứ, nguồn lưu cùng dự án</h3><p><b>'+esc(g?.basis==='measured'?'Đang đọc tọa độ mặt bằng theo mét':s.useParcelGeometry?(g?'Đang dùng ranh bản đồ ước tính':'Nguồn ranh cần đối chiếu lại'):'Đang dùng rộng × sâu khách nhập')+'</b>. Ghim bản đồ chỉ xác định vị trí. Khoảng lùi hiện tại là giả định phương án cho đến khi đối chiếu hồ sơ.</p><p data-planning-status>'+esc(status)+'. Diện tích được phép xây: <b>chưa xác minh</b>.</p>'+(review&&!review.valid?'<p role="alert" class="architecture-warning">'+esc(review.errors.join(' '))+'</p>':'')
+ +'<details data-evidence-editor><summary>Thêm nguồn, số đo hoặc nhà cung cấp</summary><form data-site-evidence-form><div class="v6-fields"><label><span>Loại thông tin</span><select name="kind" data-evidence-kind>'+Object.entries(BMH.siteEvidenceKinds).map(([id,label])=>'<option value="'+id+'">'+label+'</option>').join('')+'</select></label><label><span>Nguồn do ai cung cấp</span><select name="sourceType"><option value="customer">Khách hàng nhập</option><option value="survey">Hồ sơ khảo sát</option><option value="authority">Tài liệu cơ quan</option><option value="quote">Nhà cung cấp / báo giá</option><option value="map">Bản đồ tham khảo</option></select></label>'+input('sourceTitle','Tên / số hiệu tài liệu','required maxlength="240" placeholder="Ví dụ: Trích đo thửa đất, số hồ sơ…"')+input('publisher','Đơn vị phát hành','maxlength="240"')+input('sourceUrl','Liên kết nguồn (nếu có)','type="url" placeholder="https://…"')+input('effectiveAt','Ngày tài liệu / báo giá','type="date"')+'</div>'
+ +'<div data-evidence-group="boundary"><div class="v6-fields"><label><span>Hệ tọa độ của số đo</span><select name="sourceCrs"><option value="LOCAL_METRES">Mặt bằng theo mét, có mốc đo</option><option value="VN-2000">VN-2000 · chỉ lưu dữ liệu gốc</option><option value="WGS84">WGS84 · ranh bản đồ tham khảo</option><option value="UNKNOWN">Chưa rõ hệ tọa độ</option></select></label>'+input('surveyReference','Mốc đo / số hiệu bản trích đo','maxlength="240" placeholder="A là gốc đo, x dọc cạnh AB…"')+'</div><label>Tọa độ mặt bằng x, y (m) · mỗi đỉnh một dòng<textarea name="localVertices" rows="5" placeholder="0, 0&#10;5, 0&#10;5, 20&#10;0, 20"></textarea></label><small>Nhập đúng thứ tự quanh ranh và chọn cạnh mặt tiền bên dưới. Hướng Bắc vẫn theo hướng khách đã chọn. Không tự chuyển VN-2000 hoặc đo kích thước từ ghim.</small><details><summary>Tọa độ gốc / thông tin chuyển hệ</summary><label>Dữ liệu gốc<textarea name="rawCoordinates" rows="3"></textarea></label>'+input('transformReference','Tài liệu CRS / tham số chuyển hệ','maxlength="500"')+'</details></div>'
+ +'<div class="v6-fields" data-evidence-group="dimensions" hidden>'+input('width','Rộng theo hồ sơ (m)','type="number" step="any" min="2" max="30"')+input('depth','Sâu theo hồ sơ (m)','type="number" step="any" min="4" max="80"')+'</div>'
+ +'<div class="v6-fields" data-evidence-group="setbacks" hidden>'+input('setbackFront','Lùi mặt tiền (m)','type="number" step="any" min="0"')+input('setbackRear','Lùi sau (m)','type="number" step="any" min="0"')+input('setbackSide','Lùi các cạnh bên (m)','type="number" step="any" min="0"')+'</div>'
+ +'<div data-evidence-group="supplier" hidden><div class="v6-fields">'+input('name','Tên nhà cung cấp','maxlength="240"')+input('address','Địa chỉ trong nguồn','maxlength="500"')+input('lat','Vĩ độ (nếu có)','type="number" step="any" min="-90" max="90"')+input('lng','Kinh độ (nếu có)','type="number" step="any" min="-180" max="180"')+'</div><small>Chưa có tọa độ thì chưa tính khoảng cách. Ghi giá, phạm vi vận chuyển và ngày báo giá trong ghi chú; không coi tên cửa hàng là báo giá.</small></div>'
+ +'<label>Phạm vi tài liệu / ghi chú cần đối chiếu<textarea name="notes" rows="2" maxlength="4000" placeholder="Số thửa, tờ bản đồ, quyết định, phạm vi áp dụng…"></textarea></label><p data-evidence-error role="alert" hidden></p><button class="v6-primary" type="submit">Lưu nguồn và số đo</button><p>Nguồn được lưu với vị trí và ranh hiện tại. Khách nhập tài liệu không đồng nghĩa cơ quan hoặc kỹ sư đã duyệt.</p></form></details>'
+ +(rows.length?'<details data-evidence-list><summary>Nguồn đã lưu ('+rows.length+')</summary>'+rows.slice().reverse().map(row=>'<article class="site-evidence-entry"><b>'+esc(row.sourceTitle||BMH.siteEvidenceKinds[row.kind]||row.kind)+'</b><p>'+esc(BMH.siteEvidenceKinds[row.kind]||row.kind)+' · '+esc(BMH.siteEvidenceStatus(row))+' · '+esc(row.publisher||'Khách cung cấp')+'</p><small>Nhận: '+esc(row.retrievedAt?new Date(row.retrievedAt).toLocaleDateString('vi-VN'):'chưa rõ')+' · Ngày tài liệu: '+esc(row.effectiveAt||'chưa rõ')+'</small>'+(row.sourceUrl?'<p><a href="'+esc(row.sourceUrl)+'" target="_blank" rel="noopener noreferrer">Mở nguồn ↗</a></p>':'')+(row.notes?'<p>'+esc(row.notes)+'</p>':'')+(row.staleReason?'<p class="architecture-warning">'+esc(row.staleReason)+'</p>':'')+(row.kind==='supplier'?'<p>'+esc(row.value?.name||'')+' · '+esc(row.value?.address||'Chưa có địa chỉ')+' · '+(row.value?.distanceKm==null?'Chưa đủ tọa độ tính khoảng cách':esc(row.value.distanceKm)+' km đường chim bay lúc ghi nguồn')+'</p>':'')+(row.kind==='boundary'&&row.unit==='m'&&row.value?.localVertices?.length?'<button data-evidence-boundary="'+esc(row.id)+'">Dùng số đo này cho vị trí hiện tại</button>':'')+'</article>').join('')+'</details>':'')+'</section>';
+};
+BMH.activateBoundaryEvidence=id=>{
+ const p=BMH.state.project,row=p.designEvidence.site.find(e=>e.id===id),review=BMH.validateParcelVertices(row?.value?.localVertices);
+ if(!row||row.unit!=='m'||row.value.sourceCrs!=='LOCAL_METRES'||!row.value.surveyReference||!['customer','survey'].includes(row.sourceType)||!review.valid)throw new Error(review.errors?.join(' ')||'Thiếu nguồn và mốc đo theo mét.');
+ const geometry=BMH.parcelGeometryFromReview({...review,points:row.value.localVertices,basis:'measured'},{...p.site,frontEdge:0});BMH.assertParcelSize(geometry);
+ Object.assign(p.site,{lotMode:'custom',lotSource:'survey-local',boundaryEvidenceId:id,frontEdge:0,useParcelGeometry:false});
+ row.verifiedState='provided';delete row.staleReason;row.scope=BMH.siteEvidenceScope();
+ const g=BMH.parcelGeometry();Object.assign(p.site,{width:g.width,depth:g.depth,useParcelGeometry:true});row.scope=BMH.siteEvidenceScope();BMH.save();return row;
+};
+BMH.saveSiteEvidence=data=>{
+ const p=BMH.state.project,s=p.site,kind=String(data.kind||''),sourceType=String(data.sourceType||'customer'),value={},title=String(data.sourceTitle||'').trim();
+ if(!BMH.siteEvidenceKinds[kind]||!title||!['customer','survey','authority','quote','map'].includes(sourceType))throw new Error('Cần chọn loại nguồn và nhập tên/số hiệu tài liệu.');
+ const url=String(data.sourceUrl||'').trim();if(url&&!BMH.evidenceUrl(url))throw new Error('Liên kết nguồn không hợp lệ hoặc chứa thông tin truy cập riêng.');
+ const date=String(data.effectiveAt||'');if(date&&(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date))||new Date(date).toISOString().slice(0,10)!==date))throw new Error('Ngày tài liệu không hợp lệ.');
+ const numeric=(key,min,max)=>{const v=data[key];if(v===undefined||String(v).trim()==='')return null;const n=Number(v);if(!Number.isFinite(n)||n<min||n>max)throw new Error('Kiểm tra số đo '+key+' và đơn vị mét.');return n;};
+ if(kind==='boundary'){
+  Object.assign(value,{sourceCrs:String(data.sourceCrs||'UNKNOWN'),surveyReference:String(data.surveyReference||'').trim(),rawCoordinates:String(data.rawCoordinates||''),transformReference:String(data.transformReference||''),localVertices:[],edgeMeasurements:[],restrictionAreas:[],verificationState:'unverified'});
+  if(String(data.localVertices||'').trim()){
+   if(value.sourceCrs!=='LOCAL_METRES')throw new Error('Chỉ dùng tọa độ mặt bằng đã đo theo mét. VN-2000 cần đủ hồ sơ chuyển hệ; lưu nguyên dữ liệu gốc ở mục bên dưới.');
+   if(!value.surveyReference||!['customer','survey'].includes(sourceType))throw new Error('Cần mốc đo và nguồn khách hàng/khảo sát để dùng số đo mặt bằng.');
+   value.localVertices=String(data.localVertices).trim().split(/\r?\n/).filter(line=>line.trim()).map(line=>{const pair=line.trim().split(/[,;\s]+/).filter(Boolean);return pair.length===2?{x:Number(pair[0]),y:Number(pair[1])}:{x:NaN,y:NaN};});
+   const review=BMH.validateParcelVertices(value.localVertices);if(!review.valid)throw new Error(review.errors.join(' '));value.edgeMeasurements=review.edgeMeasurements;
+   BMH.assertParcelSize(BMH.parcelGeometryFromReview({...review,points:value.localVertices,basis:'measured'},{...s,frontEdge:0}));
+  }
+ }else if(kind==='dimensions'){value.width=numeric('width',2,30);value.depth=numeric('depth',4,80);if(value.width===null||value.depth===null)throw new Error('Cần cả rộng và sâu theo hồ sơ.');}
+ else if(kind==='setbacks'){value.setbackFront=numeric('setbackFront',0,s.depth*.45);value.setbackRear=numeric('setbackRear',0,s.depth*.35);value.setbackSide=numeric('setbackSide',0,s.width*.25);if(Object.values(value).some(v=>v===null))throw new Error('Cần đủ ba khoảng lùi theo nguồn.');}
+ else if(kind==='supplier'){value.name=String(data.name||'').trim();value.address=String(data.address||'').trim();value.lat=numeric('lat',-90,90);value.lng=numeric('lng',-180,180);if(!value.name)throw new Error('Cần tên nhà cung cấp trong nguồn.');value.distanceKm=value.lat!==null&&value.lng!==null?+BMH.haversineKm(s,value).toFixed(2):null;}
+ const row={id:BMH.uid('site-evidence'),kind,sourceUrl:url||null,sourceTitle:title.slice(0,240),publisher:String(data.publisher||'').trim()||null,retrievedAt:new Date().toISOString(),effectiveAt:date||null,scope:BMH.siteEvidenceScope(),sourceType,verifiedState:'provided',value,unit:kind==='boundary'?(value.localVertices.length?'m':null):['dimensions','setbacks'].includes(kind)?'m':null,notes:String(data.notes||'').trim()||null};
+ // All validation occurs before changing the project or history.
+ if(kind==='dimensions'||kind==='setbacks')Object.assign(s,value);
+ p.designEvidence.site.push(row);
+ if(kind==='boundary'&&value.localVertices.length)BMH.activateBoundaryEvidence(row.id);
+ else {row.scope=BMH.siteEvidenceScope();BMH.save();}
+ return row;
+};
+document.addEventListener('change',event=>{const form=event.target.closest?.('[data-site-evidence-form]');if(form&&event.target.matches('[data-evidence-kind]'))form.querySelectorAll('[data-evidence-group]').forEach(group=>group.hidden=group.dataset.evidenceGroup!==event.target.value);});
+document.addEventListener('submit',event=>{
+ const form=event.target;if(!form.matches?.('[data-site-evidence-form]'))return;event.preventDefault();
+ try{BMH.saveSiteEvidence(Object.fromEntries(new FormData(form)));BMH.render({preserveScroll:true});BMH.toast('Đã lưu nguồn. Bản vẽ dùng số đo hiện tại; quy hoạch và hồ sơ kỹ thuật vẫn cần đối chiếu.');}
+ catch(error){const node=form.querySelector('[data-evidence-error]');node.hidden=false;node.textContent=error.message;node.scrollIntoView({block:'nearest'});}
+});
+document.addEventListener('click',event=>{const button=event.target.closest?.('[data-evidence-boundary]');if(!button)return;try{BMH.activateBoundaryEvidence(button.dataset.evidenceBoundary);BMH.render({preserveScroll:true});BMH.toast('Đã dùng số đo mặt bằng này cho vị trí hiện tại.');}catch(error){BMH.toast(error.message);}});
 BMH.loadSiteIntelligence=async(force=false)=>{
-  const s=BMH.state.project.site,si=BMH.state.project.siteIntelligence||{},key=BMH.siteIntelClientKey(s),fresh=si.key===key&&Date.now()-(Date.parse(si.fetchedAt||'')||0)<12*60*60*1000;
+  const s=BMH.state.project.site,si=BMH.state.project.siteIntelligence||{},key=BMH.siteIntelClientKey(s),scopeKey=BMH.siteEvidenceContextKey(),project=BMH.state.project,fresh=si.key===key&&si.siteScopeKey===scopeKey&&Date.now()-(Date.parse(si.fetchedAt||'')||0)<12*60*60*1000;
   if(!BMH.sitePinConfirmed(s))return;
   if(BMH.siteIntelLoading||(!force&&fresh))return;
   const scanId=++BMH.siteIntelScanId,controller=new AbortController();BMH.siteIntelController=controller;
@@ -283,14 +341,14 @@ BMH.loadSiteIntelligence=async(force=false)=>{
   if(BMH.state.ui.step===2)BMH.render({preserveScroll:true});
   try{
     const locationLabelCurrent=!s.pinAddressNeedsReview;
-    const res=await (BMH.aiFetch||fetch)('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({action:'site',lat:s.lat,lng:s.lng,address:locationLabelCurrent?s.address||'':'',district:locationLabelCurrent?s.district||'':'',province:locationLabelCurrent?s.province||'':'',road_width_m:s.road||0,force})});
+    const res=await (BMH.aiFetch||fetch)('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({action:'site',lat:s.lat,lng:s.lng,address:locationLabelCurrent?s.address||'':'',district:locationLabelCurrent?s.district||'':'',province:locationLabelCurrent?s.province||'':'',road_width_m:s.road||0,siteScopeKey:scopeKey,force})});
     let data={};try{data=await res.json();}catch(_){}
-    if(scanId!==BMH.siteIntelScanId||key!==BMH.siteIntelClientKey())return;
+    if(scanId!==BMH.siteIntelScanId||project!==BMH.state.project||key!==BMH.siteIntelClientKey()||scopeKey!==BMH.siteEvidenceContextKey())return;
     if(!res.ok)throw new Error(data?.error||('HTTP '+res.status));
-    BMH.state.project.siteIntelligence={...data,status:'ready',key:data.key||key};
+    BMH.state.project.siteIntelligence={...data,status:'ready',key:data.key||key,siteScopeKey:scopeKey};
     BMH.save();
   }catch(err){
-    if(scanId!==BMH.siteIntelScanId||controller.signal.aborted)return;
+    if(scanId!==BMH.siteIntelScanId||controller.signal.aborted||project!==BMH.state.project||scopeKey!==BMH.siteEvidenceContextKey())return;
     BMH.state.project.siteIntelligence={...si,key,status:'error',fetchedAt:new Date().toISOString(),warnings:[String(err.message||err)]};
     BMH.save();
   }finally{

@@ -91,15 +91,25 @@
    if(spans.some(q=>q.floor===o.floor&&q.o===span.o&&Math.abs(q.c-span.c)<.001&&Math.min(q.b,span.b)-Math.max(q.a,span.a)>.001))add('Ô mở '+o.id+' trùng một ô khác trên cùng tường.');
    spans.push({...span,floor:o.floor});
   }
+  if(p.site.useParcelGeometry){
+   const boundary=B.parcelBoundaryReview?.();if(boundary&&!boundary.valid)boundary.errors.forEach(add);
+   for(let floor=0;floor<l.floors;floor++){
+    const invalid=B.scenePlanGeometry(p.plan,floor).walls.some(w=>{const half=w.thickness/2;return !B.roomInsideParcel({x:w.horizontal?w.a:w.axis-half,y:w.horizontal?w.axis-half:w.a,w:w.horizontal?w.b-w.a:w.thickness,h:w.horizontal?w.thickness:w.b-w.a});});
+    if(invalid)add('Tầng '+(floor+1)+': mặt ngoài tường vượt ranh/khoảng lùi đã nhập.');
+   }
+   const roof=B.sceneRoofSpec();
+   if(roof?.faces.some(face=>{const xs=face.map(v=>v[0]),ys=face.map(v=>v[2]);return !B.roomInsideParcel({x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs),h:Math.max(...ys)-Math.min(...ys)});}))add('Mái đua vượt ranh/khoảng lùi đã nhập. Chỉnh mái hoặc mặt bằng trước khi bàn giao.');
+  }
   return issues;
  };
  B.drawingRevision=()=>{
   const p=B.state.project,d=B.measuredDesignSettings(),s=p.site;
-  const input=JSON.stringify({units:'m',site:[s.width,s.depth,s.floors,s.floorHeight,s.slabThickness,s.ceilingDrop,s.frontDirection,s.useParcelGeometry,s.lotPoints],plan:{rooms:p.plan.rooms,openings:p.plan.openings,outdoor:p.plan.outdoor},style:p.style,design:d,materials:p.materials.choices,finish:p.materials.finish});
+  const input=JSON.stringify({units:'m',site:[s.width,s.depth,s.floors,s.floorHeight,s.slabThickness,s.ceilingDrop,s.frontDirection,s.useParcelGeometry,s.lotMode,s.lotSource,s.lotPoints,s.frontEdge,s.setbackFront,s.setbackRear,s.setbackSide,s.boundaryEvidenceId],boundary:B.siteBoundaryKey?.(),siteContext:B.siteEvidenceContextKey?.(),technical:p.constructionDesign?.inputs,technicalElements:p.constructionDesign?.elements,plan:{rooms:p.plan.rooms,openings:p.plan.openings,outdoor:p.plan.outdoor},style:p.style,design:d,materials:p.materials.choices,finish:p.materials.finish});
   let hash=2166136261;for(let i=0;i<input.length;i++)hash=Math.imul(hash^input.charCodeAt(i),16777619);return (hash>>>0).toString(16).toUpperCase().padStart(8,'0');
  };
+ const inputKey=B.designInputKey;if(inputKey)B.designInputKey=()=>inputKey()+'|site-evidence:'+B.siteEvidenceContextKey?.();
  const signature=B.cinematicSignature;B.cinematicSignature=focus=>signature(focus)+'|measured:'+B.drawingRevision();
- const structure=B.studioStructureKey;B.studioStructureKey=()=>structure()+'|measured-structure:'+JSON.stringify(B.measuredDesignSettings());
+ const structure=B.studioStructureKey;B.studioStructureKey=()=>structure()+'|measured-structure:'+JSON.stringify([B.measuredDesignSettings(),B.siteGeometryKey?.()]);
  let quantityCache;
  B.measuredQuantities=()=>{
   const p=B.state.project,key=B.drawingRevision();if(quantityCache?.project===p&&quantityCache.key===key)return quantityCache.value;
@@ -128,10 +138,12 @@
  B.materialQuantity=category=>{const q=B.measuredQuantities();return ({floor:q.floorFinish,paint:q.paintArea,door:q.doorArea+q.windowArea})[category]||0;};
  B.wallFinishArea=()=>B.measuredQuantities().paintArea;
  B.measuredDesignReview=()=>{
-  const errors=[...B.measuredGeometryIssues(),...(B.elevatorIssues?.()||[]).filter(i=>i.sev==='error')],q=B.measuredQuantities(),roof=B.roofDesignSpec(),warnings=[];
+  const errors=[...B.measuredGeometryIssues(),...(B.stairAlignmentIssues?.()||[]).filter(i=>i.sev==='error'),...(B.elevatorIssues?.()||[]).filter(i=>i.sev==='error')],q=B.measuredQuantities(),roof=B.roofDesignSpec(),warnings=[];
   if(!q.roof)warnings.push('Mái dốc trên mặt bằng không chữ nhật chưa được dựng. Chia khối mái với KTS hoặc chọn mái bằng; không tự lấp khoảng khuyết.');
   if(B.state.project.plan.rooms.some(r=>r.x<B.measuredWallThickness(false)/2||r.y<B.measuredWallThickness(false)/2||r.x+r.w>B.state.project.site.width-B.measuredWallThickness(false)/2||r.y+r.h>B.state.project.site.depth-B.measuredWallThickness(false)/2))warnings.push('Mốc phòng sát ranh đất: kiểm tra mặt ngoài tường, khoảng lùi và phần mái đua.');
   warnings.push(...(B.elevatorIssues?.()||[]).filter(i=>i.sev!=='error').map(i=>i.text));
+  warnings.push(...(B.stairAlignmentIssues?.()||[]).filter(i=>i.sev!=='error').map(i=>i.text));
+  for(const review of B.state.project.constructionDesign?.reviews||[])if(review.reviewedRevision!==q.revision)warnings.push('Hồ sơ rà soát '+(review.discipline||'kỹ thuật')+' thuộc phiên bản cũ; cần rà soát lại.');
   return {revision:q.revision,errors,warnings,geometryValid:errors.length===0,roof,quantities:q,missing:['Khảo sát ranh/cao độ và địa chất','Kết cấu móng, cột, dầm, sàn','Tuyến điện nước, tải thiết bị và chi tiết chống thấm','Quy hoạch/giấy phép và hồ sơ chuyên môn được duyệt']};
  };
  B.roofSheetSvg=()=>{
@@ -149,7 +161,10 @@
  const planSheet=B.drawingSheetSvg;B.drawingSheetSvg=(...args)=>planSheet(...args).replace('Tường ngoài 220 / tường chung 120 mm (mô hình).','Tường ngoài '+Math.round(B.measuredWallThickness(false)*1000)+' / tường chung '+Math.round(B.measuredWallThickness(true)*1000)+' mm (mô hình).');
  const zip=B.zipStored;B.zipStored=files=>{const svg=files.filter(([name,data])=>name.endsWith('.svg')&&typeof data==='string');if(svg.some(([,data])=>data.includes('data-sheet-code="KT-MD"'))&&!svg.some(([,data])=>data.includes('data-sheet-code="KT-MAI"')))files=[...files,[(files.some(([name])=>name.startsWith('ban-ve/'))?'ban-ve/':'')+'mat-bang-mai.svg',B.roofSheetSvg()]];return zip(files);};
  const snapshot=B.customerDesignSnapshot;B.customerDesignSnapshot=()=>{
-  const s=snapshot(),r=B.measuredDesignReview();s.project.measuredDesign=structuredClone(B.measuredDesignSettings());s.quantities=structuredClone(r.quantities);s.checks.push(...r.errors.map(i=>({severity:'error',text:i.text})),...r.warnings.map(text=>({severity:'warn',text})));s.requiredTechnicalDocuments=r.missing;return s;
+  // Explicit design-only allowlist: no raw documents, notes, household, account or finance data.
+  const s=snapshot(),r=B.measuredDesignReview(),site=B.state.project.site,g=site.useParcelGeometry?B.parcelGeometry?.():null;
+  s.project.siteBasis={schemaVersion:1,units:'m',basis:g?.basis||(site.useParcelGeometry?'invalid-boundary':'customer-dimensions'),vertices:g?structuredClone(g.points):null,frontEdge:site.frontEdge||0,setbacks:{front:site.setbackFront,rear:site.setbackRear,side:site.setbackSide,status:'entered-assumptions'},planningStatus:'unverified',sources:(B.state.project.designEvidence?.site||[]).filter(e=>['boundary','dimensions','setbacks','planning'].includes(e.kind)).map(e=>({id:e.id,kind:e.kind,sourceUrl:B.evidenceUrl?.(e.sourceUrl)||null,sourceType:e.sourceType,retrievedAt:e.retrievedAt,effectiveAt:e.effectiveAt,verifiedState:e.verifiedState}))};
+  s.project.measuredDesign=structuredClone(B.measuredDesignSettings());s.quantities=structuredClone(r.quantities);s.checks.push(...r.errors.map(i=>({severity:'error',text:i.text})),...r.warnings.map(text=>({severity:'warn',text})));s.requiredTechnicalDocuments=r.missing;return s;
  };
  const files=B.customerPackageFiles;B.customerPackageFiles=(s,sheets,html)=>[...files(s,sheets,html),['khoi-luong-mo-hinh.csv',B.csv([['Mã thiết kế','Tầng','Phòng','Diện tích mốc phòng m²','Sàn có ô thang m²','Sàn hoàn thiện m²','Trần m²'],...s.quantities.floors.flatMap(f=>f.rooms.map(r=>[s.revision,f.floor+1,r.name,r.grossArea,r.slabArea,r.floorFinish,r.ceilingFinish]))])]];
  B.measuredDesignPanel=()=>{

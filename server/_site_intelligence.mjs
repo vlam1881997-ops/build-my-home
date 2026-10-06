@@ -61,10 +61,10 @@ function classify(elements,lat,lng){
   for(const e of elements){
     const p=centerOf(e);if(!p)continue;const t=e.tags||{},km=hav(origin,p),name=placeName(e);
     if(t.shop==='building_materials'||t.shop==='hardware'||t.trade==='building_supplies'){
-      if(name)suppliers.push({name,category:t.shop==='hardware'?'Kim khí / hardware':'Vật liệu xây dựng',lat:p.lat,lng:p.lng,distanceKm:+km.toFixed(2),address:addr(e),phone:safe(t.phone||t['contact:phone']||'',40),website:webUrl(e)});
+      if(name)suppliers.push({name,category:t.shop==='hardware'?'Kim khí / hardware':'Vật liệu xây dựng',lat:p.lat,lng:p.lng,distanceKm:+km.toFixed(2),address:addr(e),phone:safe(t.phone||t['contact:phone']||'',40),website:webUrl(e),source:'OpenStreetMap',sourceUrl:'https://www.openstreetmap.org/'+e.type+'/'+e.id,retrievedAt:new Date().toISOString(),verifiedState:'provided',locationState:'coordinates',distanceBasis:'straight-line'});
     }
     if(t.craft==='builder'||t.office==='construction_company'){
-      if(name)builders.push({name,category:'Đơn vị xây dựng',lat:p.lat,lng:p.lng,distanceKm:+km.toFixed(2),address:addr(e),phone:safe(t.phone||t['contact:phone']||'',40),website:webUrl(e)});
+      if(name)builders.push({name,category:'Đơn vị xây dựng',lat:p.lat,lng:p.lng,distanceKm:+km.toFixed(2),address:addr(e),phone:safe(t.phone||t['contact:phone']||'',40),website:webUrl(e),source:'OpenStreetMap',sourceUrl:'https://www.openstreetmap.org/'+e.type+'/'+e.id,retrievedAt:new Date().toISOString(),verifiedState:'provided',locationState:'coordinates',distanceBasis:'straight-line'});
     }
     if(t.highway)roads.push({name:name||safe(t.ref||t.highway,100),type:safe(t.highway,40),distanceKm:+km.toFixed(2)});
     if(t.waterway||t.natural==='water')waters.push({name:name||safe(t.waterway||'Mặt nước',100),type:safe(t.waterway||t.natural,40),distanceKm:+km.toFixed(2)});
@@ -95,13 +95,13 @@ function deterministic(site,places,elev){
 export async function runSiteIntelligence(body={}){
   const lat=Number(body.lat),lng=Number(body.lng);
   if(!Number.isFinite(lat)||!Number.isFinite(lng)||lat<-90||lat>90||lng<-180||lng>180)throw Object.assign(new Error('Tọa độ khu đất không hợp lệ.'),{statusCode:400});
-  const key=lat.toFixed(4)+','+lng.toFixed(4)+':'+(Number(body.road_width_m)||0),now=Date.now(),cached=cache.get(key);
+  const key=lat.toFixed(4)+','+lng.toFixed(4)+':'+(Number(body.road_width_m)||0),siteScopeKey=/^[a-f0-9]{1,16}$/.test(String(body.siteScopeKey||''))?String(body.siteScopeKey):'',cacheKey=JSON.stringify([lat,lng,Number(body.road_width_m)||0,siteScopeKey,safe(body.address),safe(body.district),safe(body.province)]),now=Date.now(),cached=cache.get(cacheKey);
   if(body.force!==true&&cached&&now-cached.at<CACHE_TTL)return {cached:true,...cached.payload};
   const [osm,elev,googlePlaces]=await Promise.all([overpass(lat,lng).then(elements=>({ok:true,elements})).catch(()=>({ok:false,elements:[]})),elevation(lat,lng),nearbyMaterialPlaces(lat,lng)]);
   const elements=osm.elements;
   const places=classify(elements,lat,lng),screen=deterministic({road_width_m:body.road_width_m},places,elev);
   let ai=null,citations=[],aiError='';
-  if(geminiEnv().key){
+  if(geminiEnv().key&&process.env.GEMINI_SITE_SEARCH_ENABLED==='true'&&process.env.GEMINI_SEARCH_ENABLED==='true'&&process.env.GEMINI_SITE_SEARCH_QUOTA==='allowed'){
     const loc=[safe(body.address,220),safe(body.district,120),safe(body.province,120),'Việt Nam'].filter(Boolean).join(', ');
     const prompt=[
       'Đánh giá sơ bộ khu đất phục vụ xây nhà tại Việt Nam dựa trên dữ liệu dưới đây và Google Search.',
@@ -119,7 +119,7 @@ export async function runSiteIntelligence(body={}){
       'Mức phụ phí vận chuyển sàng lọc từ engine hiện tại: '+screen.transport.surchargePct+'% — chỉ điều chỉnh nếu có lý do rõ và giữ trong 0-18%.'
     ].join('\n');
     try{
-      const g=await geminiGenerate({parts:[{text:prompt}],systemInstruction:'Bạn là Site Intelligence của Build My Home. Đánh giá có nguồn, thận trọng với rủi ro ngập và chỉ đề xuất doanh nghiệp có bằng chứng công khai.',schema:SCHEMA,maxOutputTokens:2600,thinkingLevel:'medium',timeoutMs:85000,tools:[{type:'google_search'}]});
+      const g=await geminiGenerate({parts:[{text:prompt}],systemInstruction:'Bạn là Site Intelligence của Build My Home. Đánh giá có nguồn, thận trọng với rủi ro ngập và chỉ đề xuất doanh nghiệp có bằng chứng công khai.',schema:SCHEMA,maxOutputTokens:2600,thinkingLevel:'medium',timeoutMs:25000,configuredOnly:true,tools:[{type:'google_search'}]});
       ai=g.result;citations=(g.citations||[]).slice(0,10);
     }catch(err){aiError=err?.statusCode===401||err?.statusCode===403?'Gemini từ chối key hoặc quyền dự án; kiểm tra key server trên Vercel.':err?.message||'Quét web chưa hoàn tất.';}
   }
@@ -127,17 +127,24 @@ export async function runSiteIntelligence(body={}){
   const citedPlaces=items=>(items||[]).filter(x=>{
     try{const host=new URL(x.website).hostname.replace(/^www\./,'');return /^https:\/\//i.test(x.website)&&[...citedDomains].some(d=>host===d||host.endsWith('.'+d));}catch{return false;}
   }).map(x=>({...x,sourceUrl:x.website}));
-  const verifiedWebSuppliers=await Promise.all(citedPlaces(ai?.supplier_recommendations).slice(0,8).map(async x=>{try{const p=await publicPage(x.website),text=visibleText(p.html),digits=s=>String(s||'').replace(/\D/g,'');const phone=digits(x.phone);return {...x,phone:phone.length>=8&&digits(text).includes(phone)?x.phone:'',address:x.address&&text.toLowerCase().includes(x.address.toLowerCase())?x.address:'',sourceUrl:p.url};}catch{return {...x,phone:'',address:''};}}));
+  const verifyWebPlaces=async rows=>(await Promise.all(citedPlaces(rows).slice(0,8).map(async x=>{
+    try{
+      const p=await publicPage(x.website),text=visibleText(p.html),fold=v=>String(v||'').normalize('NFKC').toLowerCase().replace(/\s+/g,' ').trim(),digits=s=>String(s||'').replace(/\D/g,''),phone=digits(x.phone);
+      if(!fold(x.name)||!fold(text).includes(fold(x.name)))return null;
+      return {...x,phone:phone.length>=8&&digits(text).includes(phone)?x.phone:'',address:x.address&&fold(text).includes(fold(x.address))?x.address:'',sourceUrl:p.url,retrievedAt:new Date().toISOString(),verifiedState:'provided',locationState:'unverified',distanceKm:null};
+    }catch{return null;}
+  }))).filter(Boolean);
+  const verifiedWebSuppliers=await verifyWebPlaces(ai?.supplier_recommendations),verifiedWebBuilders=await verifyWebPlaces(ai?.builder_recommendations);
   const payload={
-    fetchedAt:new Date().toISOString(),key,elevation_m:elev,
+    fetchedAt:new Date().toISOString(),key,siteScopeKey,elevation_m:elev,planning:{status:'unverified',buildableAreaM2:null,notice:'Dữ liệu vùng và Search không xác nhận quy hoạch/lộ giới của thửa đất.'},capabilities:{places:googlePlaces.configured===true,searchAllowed:process.env.GEMINI_SITE_SEARCH_ENABLED==='true'&&process.env.GEMINI_SITE_SEARCH_QUOTA==='allowed'},
     flood:{...screen.flood,aiLevel:citations.length&&['medium','high'].includes(ai?.flood?.level)?ai.flood.level:'',aiReason:citations.length&&['medium','high'].includes(ai?.flood?.level)?safe(ai.flood.reason,500):'',sourceDate:citations.length?safe(ai?.flood?.source_date,40):''},
     access:{...screen.access,aiLevel:citations.length?ai?.access?.level||'':'',aiReason:citations.length?safe(ai?.access?.reason,500):''},
     transport:{...screen.transport,aiLevel:citations.length?ai?.transport?.level||'':'',aiReason:citations.length?safe(ai?.transport?.reason,500):'',aiSurchargePct:citations.length?Number(ai?.transport?.surcharge_pct)||0:0},
     suppliers:[...googlePlaces.places,...places.suppliers.filter(x=>!googlePlaces.places.some(p=>p.name.toLowerCase()===x.name.toLowerCase()))].sort((a,b)=>a.distanceKm-b.distanceKm).slice(0,20),builders:places.builders,
-    webSuppliers:verifiedWebSuppliers,webBuilders:citedPlaces(ai?.builder_recommendations).slice(0,6),
+    webSuppliers:verifiedWebSuppliers,webBuilders:verifiedWebBuilders,
     citations,sources:[...(googlePlaces.places.length?['Google Places']:[]),...(osm.ok?['OpenStreetMap / Overpass']:[]),...(elev!=null?['Open-Meteo Elevation']:[]),...(ai&&citations.length?['Gemini + Google Search grounding']:[])],
     sourceStatus:{osm:osm.ok?'verified':'unavailable',elevation:elev!=null?'verified':'unavailable',web:ai&&citations.length?'cited':'unverified'},
     aiSummary:citations.length?safe(ai?.summary,1200):'',warnings:[...(googlePlaces.error?[googlePlaces.error]:[]),...(aiError?[aiError]:[]),...(!osm.ok?['Không lấy được dữ liệu OpenStreetMap; danh sách đường và nhà cung cấp chưa đầy đủ.']:[]),...(citations.length?ai?.warnings||[]:[]).map(x=>safe(x,300))].slice(0,8)
   };
-  cache.set(key,{at:now,payload});return {cached:false,...payload};
+  for(const [id,row] of cache)if(now-row.at>=CACHE_TTL)cache.delete(id);if(cache.size>=80)cache.delete(cache.keys().next().value);cache.set(cacheKey,{at:now,payload});return {cached:false,...payload};
 }

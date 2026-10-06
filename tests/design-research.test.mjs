@@ -13,6 +13,12 @@ function groundedFixture(){
   return {model:env.primary,result,citations:[{url:'https://invented.example.com/ignored'}],raw:{candidates:[{groundingMetadata:{groundingChunks:[{web:{uri:'https://architecture.example.com/porch',title:'Hiên'}},{web:{uri:'https://architecture.example.com/courtyard',title:'Sân trong'}},{web:{uri:'javascript:alert(1)',title:'Unsafe'}}],groundingSupports:[{segment:{text:claimA},groundingChunkIndices:[0]},{segment:{text:claimB},groundingChunkIndices:[1]}]}}]}};
 }
 const makeRunner=overrides=>createDesignResearchRunner({getEnv:()=>env,getSettings:()=>settings,...overrides});
+test('current Interactions model_output annotations bind sources without trusting model-written URLs',()=>{
+ const f=groundedFixture(),start=f.result.indexOf(claimA);
+ f.raw={steps:[{type:'model_output',content:[{type:'text',text:f.result,annotations:[{type:'url_citation',url:'https://architecture.example.com/porch',title:'Provider source',start_index:start,end_index:start+claimA.length}]}]}]};
+ const result=normalizeDesignResearch(f,designResearchContext(profile),'2026-10-06T00:00:00Z');
+ assert.equal(result.status,'ready');assert.equal(result.options[0].claims[0].verified,true);assert.equal(result.options[0].claims[1].verified,false);assert.equal(result.sources[0].url,'https://architecture.example.com/porch');
+});
 
 test('server context accepts only typed design facts and never file/private/free-text content',()=>{
   const input={...structuredClone(profile),name:'PRIVATE-NAME',household:{birth:1988},finance:{income:88,loan:99,bank:'PRIVATE-BANK'},prompt:'PRIVATE-PROMPT',styleId:'Japandi PRIVATE-PHONE',missing:['PRIVATE-FILE'],site:{...profile.site,address:'PRIVATE-ADDRESS',lat:11},references:{...profile.references,files:[{name:'PRIVATE-PASSPORT',text:'PRIVATE-BIRTH'}],analysis:{...profile.references.analysis,notes:'PRIVATE-ANALYSIS',estimatedWidth:12}}};

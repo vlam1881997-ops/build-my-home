@@ -6,7 +6,9 @@ BMH.defaultState = () => ({
     name:'Nhà của mình', source:'suggest', style:'Hiện đại', briefIdea:'',
     brief:{provider:'',model:'',notice:'',updatedAt:'',result:{},aiSuggestions:{},userRequirements:{}},
     sourceRefs:[],
-    site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',pinAddressNeedsReview:false,mapEngine:'free',mapStyle:'hybrid',mapZoom:17,mapCenter:{},showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotSource:'dimensions',lotPoints:[],useParcelGeometry:false,frontEdge:0,floorHeight:3.4,slabThickness:.14,ceilingDrop:.2,deedArea:0,deedReference:'',frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
+    designEvidence:{schemaVersion:1,research:[],site:[],fengSources:[],materialSources:[],context:{}},
+    constructionDesign:{schemaVersion:1,inputs:{},elements:[],reviews:[],issues:[]},
+    site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',pinAddressNeedsReview:false,mapEngine:'free',mapStyle:'hybrid',mapZoom:17,mapCenter:{},showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotSource:'dimensions',boundaryEvidenceId:'',lotPoints:[],useParcelGeometry:false,frontEdge:0,floorHeight:3.4,slabThickness:.14,ceilingDrop:.2,deedArea:0,deedReference:'',frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
     siteIntelligence:{key:'',status:'idle',fetchedAt:'',elevation_m:null,flood:{level:'Chưa đánh giá',score:0,note:'',waterwayDistanceKm:null,riverSignal:null},access:{level:'Chưa đánh giá',score:0,note:'',majorRoadDistanceKm:null,majorRoadName:'',majorRoadType:''},transport:{level:'Chưa đánh giá',surchargePct:0,note:''},suppliers:[],builders:[],webSuppliers:[],webBuilders:[],citations:[],sources:[],aiSummary:'',warnings:[]},
     finance:{cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,targetBudget:0,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12,rateMeta:{bankId:'VCB',status:'preset',verified:false,product:'',sourceDate:'',fetchedAt:'',provider:'',model:'',introRate:0,postRate:0,promoMonths:0,citations:[],note:''}},
     household:{ownerBirth:1988,ownerGender:'Nam',partnerEnabled:true,partnerBirth:1990,partnerGender:'Nữ',requestedSize:0,children:[{id:'c1',name:'Con 1',birth:2012,room:'Riêng'}],relatives:[{id:'p1',name:'Ba',birth:1962,mobility:'Hạn chế nhẹ'},{id:'p2',name:'Mẹ',birth:1964,mobility:'Bình thường'}]},
@@ -43,7 +45,7 @@ BMH.defaultState = () => ({
   meta:{savedAt:null,createdAt:null,localProjectId:'',cloudProjectId:'',cloudOwnerId:'',cloudRevision:null,cloudUpdatedAt:null}
 });
 
-BMH.DYNAMIC_STATE_PATHS=new Set(['ui.guidedPanels','project.materials.choices','project.materials.finish','project.designStudio','project.homeFinish','project.site.mapCenter','project.aiScan.result','project.dataEngine.materialOverrides','project.dataEngine.costSources','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence','project.costPlan.pricing','project.costPlan.extras','project.dossier.stageProgress']);
+BMH.DYNAMIC_STATE_PATHS=new Set(['ui.guidedPanels','project.designEvidence','project.constructionDesign','project.materials.choices','project.materials.finish','project.designStudio','project.homeFinish','project.site.mapCenter','project.aiScan.result','project.dataEngine.materialOverrides','project.dataEngine.costSources','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence','project.costPlan.pricing','project.costPlan.extras','project.dossier.stageProgress']);
 BMH.mergeState = (base, incoming) => {
   const isPlain=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
   if(!isPlain(incoming)) return structuredClone(base);
@@ -78,6 +80,51 @@ BMH.loadState = () => {
   return base;
 };
 BMH.state = BMH.loadState();
+// Evidence is stored with the project; it is never a legal or engineering approval.
+BMH.evidenceHash=value=>{const text=JSON.stringify(value);let hash=2166136261;for(let i=0;i<text.length;i++)hash=Math.imul(hash^text.charCodeAt(i),16777619);return (hash>>>0).toString(16);};
+BMH.evidenceUrl=value=>{try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password&&!Array.from(u.searchParams.keys()).some(k=>/token|secret|password|api.?key/i.test(k))?u.href:null;}catch{return null;}};
+BMH.evidenceValue=value=>{
+  if(value===null||typeof value==='boolean'||typeof value==='string'||typeof value==='number'&&Number.isFinite(value))return value;
+  if(Array.isArray(value))return value.map(BMH.evidenceValue);
+  if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).filter(([k])=>!['__proto__','constructor','prototype'].includes(k)&&!/api.?key|access.?token|password|secret/i.test(k)).map(([k,v])=>[k,BMH.evidenceValue(v)]));
+  return null;
+};
+BMH.normalizeDesignEvidence=project=>{
+  const plain=v=>v&&typeof v==='object'&&!Array.isArray(v),prior=plain(project.designEvidence)?project.designEvidence:{};
+  project.designEvidence={...prior,schemaVersion:1,context:plain(prior.context)?prior.context:{}};
+  for(const group of ['research','site','fengSources','materialSources'])project.designEvidence[group]=(Array.isArray(prior[group])?prior[group]:[]).filter(plain).map((row,i)=>{
+    const out=BMH.evidenceValue(row);
+    for(const key of ['sourceTitle','publisher','retrievedAt','effectiveAt','unit','notes'])if(typeof out[key]!=='string')out[key]=null;
+    out.id=typeof out.id==='string'&&out.id?out.id:'legacy-'+group+'-'+i;
+    out.kind=typeof out.kind==='string'?out.kind:group;
+    out.sourceUrl=BMH.evidenceUrl(out.sourceUrl);
+    out.scope=plain(out.scope)?out.scope:{};
+    out.sourceType=typeof out.sourceType==='string'?out.sourceType:'customer';
+    out.verifiedState=['unverified','provided','cited','reviewed','stale'].includes(out.verifiedState)?out.verifiedState:'unverified';
+    out.value=out.value??null;return out;
+  });
+  const technical=plain(project.constructionDesign)?BMH.evidenceValue(project.constructionDesign):{};
+  project.constructionDesign={...technical,schemaVersion:1,inputs:plain(technical.inputs)?technical.inputs:{},elements:Array.isArray(technical.elements)?technical.elements:[],reviews:Array.isArray(technical.reviews)?technical.reviews:[],issues:Array.isArray(technical.issues)?technical.issues:[]};
+};
+BMH.siteLocationKey=(s=BMH.state.project.site)=>BMH.evidenceHash([s.lat,s.lng,s.country,s.province,s.district,s.address]);
+BMH.siteBoundaryKey=(p=BMH.state.project)=>{
+  const s=p.site,e=p.designEvidence?.site?.find(e=>e.id===s.boundaryEvidenceId);
+  return BMH.evidenceHash([s.lotMode,s.lotSource,s.lotPoints,s.boundaryEvidenceId,s.deedReference,e?.sourceUrl,e?.effectiveAt,e?.value]);
+};
+BMH.siteGeometryKey=(p=BMH.state.project)=>{const s=p.site;return BMH.evidenceHash([BMH.siteBoundaryKey(p),s.width,s.depth,s.frontEdge,s.frontDirection,s.useParcelGeometry,s.setbackFront,s.setbackRear,s.setbackSide,s.floorHeight,s.slabThickness,s.ceilingDrop]);};
+BMH.siteEvidenceContextKey=(p=BMH.state.project)=>BMH.evidenceHash([BMH.siteLocationKey(p.site),BMH.siteGeometryKey(p),p.designEvidence?.site?.filter(e=>['boundary','planning','setbacks'].includes(e.kind)).map(e=>[e.id,e.sourceUrl,e.effectiveAt,e.value])]);
+BMH.siteEvidenceScope=()=>({locationKey:BMH.siteLocationKey(),boundaryKey:BMH.siteBoundaryKey(),geometryKey:BMH.siteGeometryKey(),lat:BMH.state.project.site.lat,lng:BMH.state.project.site.lng});
+BMH.syncSiteEvidence=()=>{
+  const p=BMH.state.project,e=p.designEvidence;if(!e)return;
+  const locationKey=BMH.siteLocationKey(),boundaryKey=BMH.siteBoundaryKey(),geometryKey=BMH.siteGeometryKey(),contextKey=BMH.siteEvidenceContextKey();
+  for(const row of e.site){
+    const scope=row.scope||{},locationChanged=scope.locationKey&&scope.locationKey!==locationKey,boundaryChanged=['planning','setbacks','supplier'].includes(row.kind)&&scope.boundaryKey&&scope.boundaryKey!==boundaryKey,geometryChanged=['planning','setbacks'].includes(row.kind)&&scope.geometryKey&&scope.geometryKey!==geometryKey;
+    if(locationChanged||boundaryChanged||geometryChanged){row.verifiedState='stale';row.staleReason=locationChanged?'Vị trí/địa chỉ đã thay đổi.':boundaryChanged?'Ranh hoặc hồ sơ gốc đã thay đổi.':'Kích thước, hướng hoặc khoảng lùi đã thay đổi.';}
+  }
+  const si=p.siteIntelligence;
+  if(si?.status==='ready'&&((si.siteScopeKey&&si.siteScopeKey!==contextKey)||(e.context?.locationKey&&e.context.locationKey!==locationKey)||(e.context?.contextKey&&e.context.contextKey!==contextKey))){p.siteIntelligence={...BMH.defaultState().project.siteIntelligence,status:'stale',warnings:['Vị trí, ranh hoặc nguồn khu đất đã thay đổi. Cần tra lại nhà cung cấp và dữ liệu vùng.']};}
+  e.context={locationKey,boundaryKey,geometryKey,contextKey};
+};
 BMH.normalizeState = () => {
   const base=BMH.defaultState();
   if(!BMH.state||typeof BMH.state!=='object')BMH.state=base;
@@ -178,7 +225,8 @@ BMH.normalizeState = () => {
   BMH.state.ui.architectureEngine='existing'; // Migrate saved experimental viewers to the supported renderer.
   if(!Array.isArray(s.lotPoints))s.lotPoints=[];
   s.lotPoints=s.lotPoints.filter(p=>p&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng))).slice(0,256).map(p=>({lat:Number(p.lat),lng:Number(p.lng)}));
-  if(!['dimensions','drawn','geojson-user'].includes(s.lotSource))s.lotSource=s.lotMode==='custom'?'drawn':'dimensions';
+  if(!['dimensions','drawn','geojson-user','survey-local'].includes(s.lotSource))s.lotSource=s.lotMode==='custom'?'drawn':'dimensions';
+  s.boundaryEvidenceId=String(s.boundaryEvidenceId||'');
   s.deedArea=BMH.clamp(Number(s.deedArea)||0,0,100000);
   s.deedReference=String(s.deedReference||'').slice(0,160);
   s.targetCoverage=BMH.clamp(Number(s.targetCoverage)||.68,.45,.90);
@@ -206,6 +254,7 @@ BMH.normalizeState = () => {
   ui.zoom=BMH.clamp(Number(ui.zoom)||1,.75,2.5);
   if(typeof BMH.state.ui.sceneExploded!=='boolean')BMH.state.ui.sceneExploded=false;
   if(!['cut','full'].includes(BMH.state.ui.modelWalls))BMH.state.ui.modelWalls='cut';
+  BMH.normalizeDesignEvidence(BMH.state.project);BMH.syncSiteEvidence();
 };
 BMH.normalizeState();
 BMH.syncHouseholdSize=()=>{
@@ -215,7 +264,7 @@ BMH.syncHouseholdSize=()=>{
   h.requestedSize=Math.max(actual,requested);
   return h.requestedSize;
 };
-BMH.save = () => { BMH.state.version=BMH.VERSION; BMH.state.meta.savedAt=new Date().toISOString(); try{localStorage.setItem(BMH.STORAGE_KEY,JSON.stringify(BMH.state));BMH.localSaveFailed=false;}catch(e){if(!BMH.localSaveFailed)BMH.toast(BMH.projects?.db?'Lưu nhanh bị giới hạn. Đang lưu vào kho dự án trên thiết bị.':'Trình duyệt hạn chế lưu nhanh. Mở Dự án để tải bản sao.');BMH.localSaveFailed=true;} };
+BMH.save = () => { BMH.syncSiteEvidence();BMH.state.version=BMH.VERSION; BMH.state.meta.savedAt=new Date().toISOString(); try{localStorage.setItem(BMH.STORAGE_KEY,JSON.stringify(BMH.state));BMH.localSaveFailed=false;}catch(e){if(!BMH.localSaveFailed)BMH.toast(BMH.projects?.db?'Lưu nhanh bị giới hạn. Đang lưu vào kho dự án trên thiết bị.':'Trình duyệt hạn chế lưu nhanh. Mở Dự án để tải bản sao.');BMH.localSaveFailed=true;} };
 BMH.get = path => path.split('.').reduce((o,k)=>o?.[k],BMH.state);
 BMH.set = (path,value,{render=true}={}) => { const keys=path.split('.'); let o=BMH.state; for(let i=0;i<keys.length-1;i++){if(!o[keys[i]]||typeof o[keys[i]]!=='object')o[keys[i]]={};o=o[keys[i]];} o[keys.at(-1)]=value; BMH.save(); if(render) BMH.render(); };
 BMH.isUnlocked = () => BMH.DEFER_PAYMENT===true || (BMH.state.access.paid===true && (BMH.state.access.source==='server-verified' || (BMH.DEV && String(BMH.state.access.source||'').startsWith('dev'))));
