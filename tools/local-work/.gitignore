@@ -1,0 +1,6 @@
+config.local.json
+.env
+.env.local
+.local-work/
+*.log
+node_modules/
