@@ -9,6 +9,7 @@ BMH.elevatorIssues=()=>BMH.elevatorShafts().flatMap(r=>{
  const s=BMH.elevatorSpec(r),group=BMH.elevatorRooms(r),issues=[],add=(sev,text)=>issues.push({sev,text:r.name+': '+text});
  if(group.some(q=>['x','y','w','h'].some(k=>Math.abs(q[k]-r[k])>.001)))add('error','Giếng thang bị lệch giữa các tầng. Cần đồng bộ vị trí và kích thước.');
  if(new Set(s.stops).size!==s.stops.length)add('error','Một tầng có nhiều ô cùng giếng thang.');
+ if(s.stops.length>1&&Array.from({length:s.stops.at(-1)-s.stops[0]+1},(_,i)=>s.stops[0]+i).some(f=>!s.stops.includes(f)))add('error','Giếng bị gián đoạn tại tầng trung gian. Bổ sung ô giếng và lỗ sàn liên tục trước khi bàn giao.');
  if(Array.from({length:Number(BMH.state.project.site.floors)},(_,f)=>f).some(f=>!s.stops.includes(f)))add('warn','Chưa có ô giếng tại tất cả các tầng. Chọn Đồng bộ các tầng để bổ sung.');
  if(s.cabinWidth<=0||s.cabinDepth<=0||s.cabinWidth>r.w-.24||s.cabinDepth>r.h-.24)add('error','Cabin vượt phần giếng dự trù. Tăng giếng hoặc sửa kích thước cabin theo hãng.');
  if(s.doorWidth<=0||s.doorWidth>Math.min(s.cabinWidth,['north','south'].includes(s.doorSide)?r.w:r.h)-.08)add('error','Cửa tầng không vừa cabin hoặc cạnh giếng.');

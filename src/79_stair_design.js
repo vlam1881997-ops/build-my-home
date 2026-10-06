@@ -19,6 +19,19 @@ BMH.stairGeometry=r=>{
  for(let n=1;n<=s.second;n++)add(s.W-.1-s.flightWidth,.1+s.landing+(n-1)*s.tread,s.flightWidth,s.tread,mid,n===s.second?s.rise-mid:n*s.riser);
  return parts;
 };
+BMH.stairAlignmentIssues=()=>{
+ const stairs=BMH.state.project.plan.rooms.filter(r=>r.type==='stairs'),levels=BMH.projectLevels(),issues=[];
+ for(const room of stairs){
+  if(room.floor>=levels.floors-1)continue;
+  const upper=stairs.find(r=>r.floor===room.floor+1&&['x','y','w','h'].every(k=>Math.abs(r[k]-room[k])<.001));
+  if(!upper)issues.push({sev:'error',text:room.name+': tầng '+(room.floor+2)+' chưa có ô thang/chiếu nghỉ thẳng với tầng dưới.'});
+  else if((room.stairShape||'u')!==(upper.stairShape||'u')||(room.stairDirection??(room.w>=room.h?90:0))!==(upper.stairDirection??(upper.w>=upper.h?90:0)))issues.push({sev:'error',text:room.name+': hướng hoặc dạng thang không đồng nhất giữa các tầng.'});
+  const spec=BMH.stairSpec(room);if(spec.warning)issues.push({sev:'warn',text:room.name+': '+spec.warning});
+ }
+ return issues;
+};
+const stairAlignmentPlannerIssues=BMH.plannerIssues;
+BMH.plannerIssues=()=>[...(stairAlignmentPlannerIssues?.()||[]),...BMH.stairAlignmentIssues()];
 // Floor slabs must leave the lower flight's well open, including offset wells.
 BMH.slabPanels=(r,holes=[])=>{
  let panels=[{x:r.x,y:r.y,w:r.w,d:r.h}];

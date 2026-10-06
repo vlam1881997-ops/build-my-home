@@ -13,3 +13,17 @@
 .v6-plan-tools .architecture-spec{margin:20px 0 0;padding:20px 0 0;border:0;border-top:1px solid #d9e1dc;border-radius:0;box-shadow:none;background:transparent}.v6-plan-tools{align-self:start;min-width:0}.architecture-spec>p{line-height:1.6}.architecture-table input{max-width:90px}.light-model-preview .light-model-controls select{max-width:220px;padding:8px;background:white}.light-model-preview~.v61-3d-tip{display:none}.drawing-export-note{font-size:13px;color:#596a60}
 
 .light-preview-active .v61-3d-top,.light-preview-active .v61-3d-hud,.light-preview-active .v61-3d-tip,.light-preview-active .studio-3d-fallback{display:none!important}.web-product.selected{border:2px solid #437152}.material-chosen{padding:12px;background:#eaf3e6;border-radius:8px}.material-search-row select{min-width:140px;max-width:100%;padding:10px;border:1px solid #cbcbbf;border-radius:8px}.product-no-image b{font-size:36px}.material-search-row label{display:flex;align-items:center;gap:8px;font-size:14px}.material-search-row label input{flex:none;min-width:0}.material-research{padding:18px 0;border:0}
+.site-evidence-panel{padding:24px;border:1px solid #dbe3d9;border-radius:18px;background:#fcfdfb}
+.site-evidence-panel .v6-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.site-evidence-panel details{margin-top:16px;border-top:1px solid #dbe3d9;padding-top:12px}
+.site-evidence-panel summary{cursor:pointer;min-height:44px;padding:10px 0;font-weight:650}
+.site-evidence-panel form{display:grid;gap:16px;margin-top:16px}
+.site-evidence-panel label{display:grid;gap:8px;min-width:0}
+.site-evidence-panel input,.site-evidence-panel select,.site-evidence-panel textarea{width:100%;max-width:100%;min-height:44px;box-sizing:border-box;padding:12px;border:1px solid #cad7ca;border-radius:10px;background:#fff;color:#213b31;font:inherit}
+.site-evidence-panel textarea{resize:vertical}
+.site-evidence-panel [hidden]{display:none!important}
+.site-evidence-panel [role=alert]{color:#93452f;background:#fff4ee;padding:12px;border-radius:10px}
+.site-evidence-panel button{min-height:44px}
+.site-evidence-panel a,.site-evidence-panel p,.site-evidence-panel small{overflow-wrap:anywhere}
+.site-evidence-entry{padding:16px 0;border-bottom:1px solid #dbe3d9}
+@media(max-width:600px){.site-evidence-panel .v6-fields{grid-template-columns:1fr}}

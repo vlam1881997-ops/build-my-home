@@ -71,7 +71,7 @@ export function normalizeDesignResearch(response,context,searchedAt){
     const segment=segmentText(support.segment);if(segment&&ids.length)supports.push({segment,ids});
   }
   // Interactions annotations are read only from provider text outputs, never from generated JSON.
-  for(const out of list(raw.outputs))if(out?.type==='text'){
+  for(const out of [...list(raw.outputs),...list(raw.steps).filter(s=>s?.type==='model_output').flatMap(s=>list(s.content))])if(out?.type==='text'){
     for(const citation of list(out.annotations||out.citations))if(['url_citation','urlCitation'].includes(citation?.type)){
       const id=addSource(citation.url,citation.title),segment=segmentText(citation,out.text||outputText);
       if(id&&segment)supports.push({segment,ids:[id]});
