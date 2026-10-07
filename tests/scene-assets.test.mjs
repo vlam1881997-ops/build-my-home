@@ -6,6 +6,27 @@ import * as BaseThree from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 const THREE={...BaseThree,RoundedBoxGeometry};
 
+test('batched window profiles and thin panes remain inside the measured opening on all four sides',()=>{
+ const {b}=client();b.projectLevels=()=>({slab:.14,clearHeight:3.06});
+ for(const side of ['north','south','east','west'])for(const width of [.8,2.4]){
+  const opening={id:'window',kind:'window',roomId:'r',floor:1,side,width,height:1.5,sill:.65},horizontal=['north','south'].includes(side),span={o:horizontal?'h':'v',a:1.317,b:1.317+width,c:2.75};b.openingWallSpan=()=>span;
+  const parts=b.windowAssembly(opening),frame=parts.filter(p=>p.finish==='frame'),glass=parts.filter(p=>p.finish==='glass'),base=3.4;
+  assert.equal(glass.length,width>1.25?2:1);assert.ok(glass.every(p=>Math.abs((horizontal?p.d:p.w)-.008)<1e-9));
+  const boxes=new THREE.Mesh(b.sceneJoinedBoxes(THREE,parts,{W:8,D:18,base}),new THREE.MeshStandardMaterial()),bounds=new THREE.Box3().setFromObject(boxes),axis=horizontal?'x':'z',offset=horizontal?4:9;
+  assert.ok(Math.abs(bounds.min[axis]-(span.a-offset))<1e-6);assert.ok(Math.abs(bounds.max[axis]-(span.b-offset))<1e-6);assert.ok(Math.abs(bounds.min.y-(base+.14+.65))<1e-6);assert.ok(Math.abs(bounds.max.y-(base+.14+.65+1.5))<1e-6);
+  for(const p of parts){assert.ok([p.x,p.y,p.z,p.w,p.h,p.d].every(Number.isFinite));assert.ok(p.w>0&&p.h>0&&p.d>0);assert.equal(p.openingId,opening.id);}
+  assert.ok(frame.length>=8);assert.ok(boxes.geometry.attributes.normal.array.every(Number.isFinite));boxes.geometry.dispose();boxes.material.dispose();
+ }
+ b.openingWallSpan=()=>null;assert.equal(b.windowAssembly({kind:'window'}).length,0);assert.equal(b.windowAssembly({kind:'door'}).length,0);
+});
+test('a narrow furnished living room has a body-clear eye-height camera without changing its furniture',()=>{
+ const {b}=client();b.projectLevels=()=>({slab:.14,floorHeight:3.4,clearHeight:3.06,ceilingDrop:.2});
+ const room={id:'living',type:'living',floor:0,x:.11,y:1.61,w:3.29,h:6.378};b.state.project.plan.rooms=[room];
+ for(const rotation of [0,90,180,270]){room.furnitureRotation=rotation;const items=b.roomFurnitureLayout(room),before=JSON.stringify(items),camera=b.roomInteriorCamera(room,items);assert.ok(camera,'rotation '+rotation);
+  const height=(camera.targetHeight??1.15)+Math.sin(camera.pitch)*camera.distance;assert.ok(height>1.3&&height<1.9);assert.equal(b.interiorCameraIsClear(room,{...camera.camera,height},items),true);assert.equal(JSON.stringify(items),before);
+ }
+});
+
 test('soft upholstery keeps finite geometry and its piping follows cushion rotations',()=>{
  const {b}=client(),m=b.sceneAssetMaterials(THREE,new THREE.Scene());
  for(const name of ['loungeDesignSofa','bedDouble']){
@@ -100,6 +121,13 @@ test('live finish changes preserve measured geometry and keep another room isola
  for(let i=0;i<24;i++){b.applyVisualMaterial('floor',i%2?'oak-floor':'walnut-floor','a');assert.equal(b.refreshStudioFinishes('floor','a'),true);}assert.ok(scene.userData.finishMaterials.size<=6,'retired finish sets do not grow per selection');
  b.state.project.plan.rooms[0].w=5;b.applyVisualMaterial('floor','ivory-tile','a');assert.equal(b.refreshStudioFinishes('floor','a'),false,'a geometry edit requires rebuilding');
 });
+test('changing the slab top finish retains the five body faces, geometry, renderer and other room',()=>{
+ const {b,scene}=liveFinishClient(),floor=scene.children[0],other=scene.children[1],body=new THREE.MeshStandardMaterial({color:'#dad5cb'}),original=other.material,positions=floor.geometry.attributes.position.array,renderer=b.studio3d.renderer;
+ floor.material=[body,body,floor.material,body,body,body];floor.userData.finishFace=2;
+ assert.equal(b.applyVisualMaterial('floor','white-marble','a'),true);assert.equal(b.refreshStudioFinishes('floor','a'),true);assert.equal(floor.material[2].userData.visualMaterial,'white-marble');
+ for(const i of [0,1,3,4,5])assert.equal(floor.material[i],body);assert.equal(floor.geometry.attributes.position.array,positions);assert.equal(b.studio3d.renderer,renderer);assert.equal(other.material,original);
+ assert.equal(b.applyVisualMaterial('floor','walnut-floor','a'),true);assert.equal(b.refreshStudioFinishes('floor','a'),true);assert.equal(floor.material[2].userData.visualMaterial,'walnut-floor');for(const i of [0,1,3,4,5])assert.equal(floor.material[i],body);
+});
 test('unknown model finishes fall back before changing any mesh, and stale supplier bindings are omitted',()=>{
  const {b,scene}=liveFinishClient(),floor=scene.children[0],old=floor.material,model=new THREE.Group();model.userData={roomId:'a',source:'glb'};scene.add(model);b.studio3d.structureKey=b.studioStructureKey();
  b.applyVisualMaterial('floor','ivory-tile','a');assert.equal(b.refreshStudioFinishes('floor','a'),false);assert.equal(floor.material,old);
@@ -163,6 +191,7 @@ test('surface channels keep colour separate from relief and roughness across fin
 
 test('room camera selects clear space inside the room for all furniture orientations',()=>{
   const {b}=client();
+  b.projectLevels=()=>({floorHeight:3.4,slab:.14,ceilingDrop:.2});
   for(const type of ['living','bed','kitchen','bath'])for(const rotation of [0,90,180,270]){
     const r={id:'r',floor:0,type,x:1,y:1,w:5,h:5,furnitureRotation:rotation},items=b.roomFurnitureLayout(r),view=b.roomInteriorCamera(r,items);assert.ok(view,type);
     assert.ok(view.camera.x>=r.x+.12&&view.camera.x<=r.x+r.w-.12);assert.ok(view.camera.y>=r.y+.12&&view.camera.y<=r.y+r.h-.12);

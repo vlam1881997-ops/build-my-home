@@ -24,20 +24,21 @@
   s.scene.traverse(mesh=>{
    let parent=mesh,id;while(parent&&!id){id=parent.userData.roomId;parent=parent.parent;}
    if(mesh.userData.source==='glb'&&target.has(id)){unknown=true;return;}
-   if(!mesh.isMesh||Array.isArray(mesh.material))return;
-   const slot=mesh.material?.userData.finishSlot;if(!slots.includes(slot))return;
+   if(!mesh.isMesh)return;
    if(mesh.userData.kind==='wall')id=focused?.id||(mesh.userData.roomIds||[]).find(id=>p.materials.finish?.rooms?.[id]);
    if(!target.has(id)&&!(role==='wall'&&!roomId&&!id))return;
-   const old=mesh.material,source=materials(id)[slot];if(!source||source===old)return;
+   const faces=Array.isArray(mesh.material)?mesh.material.map((old,index)=>({old,index})):[{old:mesh.material,index:null}];
+   for(const {old,index}of faces){const slot=old?.userData.finishSlot;if(!slots.includes(slot))continue;
+   const source=materials(id)[slot];if(!source||source===old)continue;
    // A cutaway wall owns its clipping plane; never attach it to a shared room material.
    const next=old.clippingPlanes?.length||old.userData.bmhWallView?source.clone():source;
    if(next!==source){next.clippingPlanes=old.clippingPlanes;next.clipShadows=old.clipShadows;next.side=old.side;}
-   B.prepareModelMaterial?.(next,old,mesh,s.scene);changes.push({mesh,old,next,owned:next!==source});
+   B.prepareModelMaterial?.(next,old,mesh,s.scene);changes.push({mesh,index,old,next,owned:next!==source});}
   });
   if(unknown){for(const {next,owned}of changes)if(owned)next.dispose();return false;}
   if(!changes.length)return false;
   const retired=new Set();
-  for(const {mesh,old,next}of changes){mesh.material=next;B.sceneSurfaceUvs(mesh.geometry,next,mesh.position);retired.add(old);}
+  for(const {mesh,index,old,next}of changes){if(index===null)mesh.material=next;else mesh.material[index]=next;B.sceneSurfaceUvs(mesh.geometry,next,mesh.position);retired.add(old);}
   const used=new Set();s.scene.traverse(o=>{for(const m of Array.isArray(o.material)?o.material:o.material?[o.material]:[])used.add(m);});
   // Retain templates that still serve a mesh; release obsolete selections without releasing shared textures.
   for(const [cacheKey,entry]of s.scene.userData.finishMaterials||[]){if(Object.values(entry).some(m=>used.has(m)))continue;s.scene.userData.finishMaterials.delete(cacheKey);for(const m of Object.values(entry))if(m?.isMaterial)retired.add(m);}

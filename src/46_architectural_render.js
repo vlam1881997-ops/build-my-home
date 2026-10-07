@@ -1,12 +1,12 @@
 /* Progressive architectural rendering of the customer's measured scene. */
-BMH.ARCH_RENDER_REVISION='customer-measured-daylight-7';
+BMH.ARCH_RENDER_REVISION='customer-measured-assemblies-8';
 BMH.ARCH_RENDER_PRESETS={draft:{width:640,samples:16,bounces:4,budgetMs:12000},fine:{width:960,samples:128,bounces:8,budgetMs:30000},print:{width:1920,samples:512,bounces:10,budgetMs:120000}};
 BMH.archRenderModules=null;
 BMH.archRenderStatus=text=>{const node=BMH.$('#architecturalRenderStatus');if(node&&node.textContent!==text)node.textContent=text;};
 // Bake presentation clipping in world space. The plan and original wall meshes remain untouched.
 BMH.renderMeshGeometry=(THREE,mesh,{purpose='photograph'}={})=>{
  const source=mesh.geometry,material=Array.isArray(mesh.material)?mesh.material[0]:mesh.material,planes=material?.clippingPlanes||[];let local=source.clone();
- if(purpose!=='model'&&source.type==='BoxGeometry'&&THREE.RoundedBoxGeometry&&!(source instanceof THREE.RoundedBoxGeometry)){const p=source.parameters;local.dispose();local=new THREE.RoundedBoxGeometry(p.width,p.height,p.depth,2,Math.min(.004,Math.min(p.width,p.height,p.depth)*.12));BMH.sceneSurfaceUvs?.(local,material,mesh.position);}
+ if(purpose!=='model'&&!Array.isArray(mesh.material)&&source.type==='BoxGeometry'&&THREE.RoundedBoxGeometry&&!(source instanceof THREE.RoundedBoxGeometry)){const p=source.parameters;local.dispose();local=new THREE.RoundedBoxGeometry(p.width,p.height,p.depth,2,Math.min(.004,Math.min(p.width,p.height,p.depth)*.12));BMH.sceneSurfaceUvs?.(local,material,mesh.position);}
  const world=local.applyMatrix4(mesh.matrixWorld);
  if(!planes.length)return world;
  const geometry=world.index?world.toNonIndexed():world,attrs=geometry.attributes,positions=[],normals=[],uvs=[],caps=planes.map(()=>[]);
@@ -126,6 +126,7 @@ BMH.sharpStudioFrame=async(longEdge)=>{
   const designKey=BMH.cinematicSignature?.()||'',cameraKey=BMH.cinematicCameraKey?.()||'',revision=BMH.drawingRevision?.()||'',view=BMH.state.ui.sceneFocus||'all';
   const THREE=await BMH.ensureThree();if(BMH.studio3d!==s)return null;
   const renderer=s.renderer,size=renderer.getSize(new THREE.Vector2()),ratio=renderer.getPixelRatio(),target=renderer.getRenderTarget(),aoEnabled=s.ao?.enabled,fxaaSize=s.fxaa?.material.uniforms.resolution.value.clone(),shadowAutoUpdate=renderer.shadowMap?.autoUpdate;
+  const multisamples=[s.composer?.renderTarget1,s.composer?.renderTarget2].filter(Boolean).map(target=>({target,samples:target.samples}));
   const edge=BMH.clamp(Number(longEdge)||Number(BMH.state.ui.sharpResolution)||1280,640,2560),aspect=size.x/size.y,pixels=edge>1920?5000000:edge>1280?3000000:1800000,limit=Math.min(edge,renderer.capabilities.maxTextureSize,Math.sqrt(pixels*Math.max(aspect,1/aspect)));
   const width=Math.max(1,Math.floor(aspect>=1?limit:limit*aspect)),height=Math.max(1,Math.floor(aspect>=1?limit/aspect:limit));let encoded;
   // Keep the exact camera and colour pipeline. Supersampling sharpens edges;
@@ -134,11 +135,15 @@ BMH.sharpStudioFrame=async(longEdge)=>{
    // The scene and lights have not moved: reuse valid shadow maps for both
    // snapshot and restoration instead of drawing all shadow casters twice.
    if(renderer.shadowMap?.enabled&&!renderer.shadowMap.needsUpdate){let ready=true;s.scene.traverse(o=>{if(o.isLight&&o.castShadow&&(!o.shadow?.map||o.shadow.needsUpdate))ready=false;});if(ready)renderer.shadowMap.autoUpdate=false;}
+   // The large raster already supplies extra edge pixels. Avoid multiplying
+   // its memory by four MSAA samples on a phone; restore the interactive view.
+   for(const {target}of multisamples)target.samples=0;
    renderer.setPixelRatio(1);renderer.setSize(width,height,false);renderer.setRenderTarget(null);
    if(s.composer){s.composer.setSize(width,height);if(s.ao)s.ao.enabled=false;s.fxaa?.material.uniforms.resolution.value.set(1/width,1/height);s.composer.render();}else renderer.render(s.scene,s.camera);
    encoded=new Promise(resolve=>renderer.domElement.toBlob(resolve,'image/png'));
   }finally{
    try{
+    for(const {target,samples}of multisamples)target.samples=samples;
     renderer.setPixelRatio(ratio);renderer.setSize(size.x,size.y,false);renderer.setRenderTarget(target);
     if(s.composer){s.composer.setSize(size.x,size.y);if(s.ao)s.ao.enabled=aoEnabled;if(fxaaSize)s.fxaa.material.uniforms.resolution.value.copy(fxaaSize);}
     if(BMH.studio3d===s){if(s.archRender?.samples>0)s.archRender.denoise.render(renderer);else s.renderFrame();}

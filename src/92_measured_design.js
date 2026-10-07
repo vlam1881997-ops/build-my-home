@@ -106,7 +106,7 @@
  };
  B.drawingRevision=()=>{
   const p=B.state.project,d=B.measuredDesignSettings(),s=p.site;
-  const input=JSON.stringify({units:'m',site:[s.width,s.depth,s.floors,s.floorHeight,s.slabThickness,s.ceilingDrop,s.frontDirection,s.useParcelGeometry,s.lotMode,s.lotSource,s.lotPoints,s.frontEdge,s.setbackFront,s.setbackRear,s.setbackSide,s.boundaryEvidenceId],boundary:B.siteBoundaryKey?.(),siteContext:B.siteEvidenceContextKey?.(),technical:p.constructionDesign?.inputs,technicalElements:p.constructionDesign?.elements,plan:{rooms:p.plan.rooms,openings:p.plan.openings,outdoor:p.plan.outdoor},style:p.style,design:d,materials:p.materials.choices,productCodes:B.materialSelectionIdentity?.(),finish:p.materials.finish});
+  const input=JSON.stringify({units:'m',modelSchema:'measured-openings-facade-1',site:[s.width,s.depth,s.floors,s.floorHeight,s.slabThickness,s.ceilingDrop,s.frontDirection,s.useParcelGeometry,s.lotMode,s.lotSource,s.lotPoints,s.frontEdge,s.setbackFront,s.setbackRear,s.setbackSide,s.boundaryEvidenceId],boundary:B.siteBoundaryKey?.(),siteContext:B.siteEvidenceContextKey?.(),technical:p.constructionDesign?.inputs,technicalElements:p.constructionDesign?.elements,plan:{rooms:p.plan.rooms,openings:p.plan.openings,outdoor:p.plan.outdoor},style:p.style,design:d,materials:p.materials.choices,productCodes:B.materialSelectionIdentity?.(),finish:p.materials.finish});
   let hash=2166136261;for(let i=0;i<input.length;i++)hash=Math.imul(hash^input.charCodeAt(i),16777619);return (hash>>>0).toString(16).toUpperCase().padStart(8,'0');
  };
  const inputKey=B.designInputKey;if(inputKey)B.designInputKey=()=>inputKey()+'|site-evidence:'+B.siteEvidenceContextKey?.();
