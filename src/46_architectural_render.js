@@ -1,5 +1,5 @@
 /* Progressive architectural rendering of the customer's measured scene. */
-BMH.ARCH_RENDER_REVISION='customer-measured-export-6';
+BMH.ARCH_RENDER_REVISION='customer-measured-daylight-7';
 BMH.ARCH_RENDER_PRESETS={draft:{width:640,samples:16,bounces:4,budgetMs:12000},fine:{width:960,samples:128,bounces:8,budgetMs:30000},print:{width:1920,samples:512,bounces:10,budgetMs:120000}};
 BMH.archRenderModules=null;
 BMH.archRenderStatus=text=>{const node=BMH.$('#architecturalRenderStatus');if(node&&node.textContent!==text)node.textContent=text;};

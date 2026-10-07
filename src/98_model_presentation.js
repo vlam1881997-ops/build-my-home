@@ -6,7 +6,7 @@
  const B=BMH,esc=B.esc,materialPatches=new WeakMap(),thumbs=new Map();
  const template=html=>{const t=document.createElement('template');t.innerHTML=html;return t;};
  const normalize=B.normalizeState;
- B.normalizeState=()=>{normalize();const u=B.state.ui;u.modelLook=u.modelLook==='materials'?'materials':'neon';u.modelWalls=['auto','cut','full'].includes(u.modelWalls)?u.modelWalls:'auto';u.modelRoomId=String(u.modelRoomId||'');u.modelLightLevel=B.clamp(Number.isFinite(Number(u.modelLightLevel))?Number(u.modelLightLevel):75,0,100);};
+ B.normalizeState=()=>{normalize();const u=B.state.ui;u.exteriorCamera=['front','overview'].includes(u.exteriorCamera)?u.exteriorCamera:'front';u.modelLook=u.modelLook==='materials'?'materials':'neon';u.modelWalls=['auto','cut','full'].includes(u.modelWalls)?u.modelWalls:'auto';u.modelRoomId=String(u.modelRoomId||'');u.modelLightLevel=B.clamp(Number.isFinite(Number(u.modelLightLevel))?Number(u.modelLightLevel):75,0,100);};
  B.modelLook=()=>B.state.ui.modelLook==='materials'?'materials':'neon';
  B.modelExplodeGap=height=>Math.max(1.8,Math.min(3,Number(height)*.72));
  B.modelVisibleRooms=()=>{const u=B.state.ui,rooms=B.state.project.plan.rooms,f=u.sceneFocus||'all';return f.startsWith('room:')?rooms.filter(r=>'room:'+r.id===f):f.startsWith('floor:')?rooms.filter(r=>r.floor===Number(f.slice(6))):rooms;};

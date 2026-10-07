@@ -26,7 +26,9 @@
   if(spec.surface==='metal'){for(let x=0;x<256;x+=32){c.fillStyle='#8a8a8a';c.fillRect(x,0,3,256);c.fillStyle='#e4e4e4';c.fillRect(x+3,0,3,256);}}
   if(spec.surface==='thatch'){for(let i=0;i<320;i++){const x=(i*73)%256,y=(i*131)%256;c.strokeStyle=i%2?'#ddd':'#999';c.beginPath();c.moveTo(x,y);c.lineTo(x+7,y+18);c.stroke();}}
   const map=new THREE.CanvasTexture(canvas);map.wrapS=map.wrapT=THREE.RepeatWrapping;map.colorSpace=THREE.SRGBColorSpace;
-  const material=new THREE.MeshStandardMaterial({color:spec.color,map,roughness:spec.surface==='metal'?.45:.88,metalness:spec.surface==='metal'?.4:0,side:THREE.DoubleSide});material.userData={finishSlot:'roof',visualOnly:true,roofSurface:spec.surface};return material;
+  // The finish shares the exact measured top of the slab. Depth bias prevents
+  // coplanar flicker without moving roof vertices or changing areas/dimensions.
+  const material=new THREE.MeshStandardMaterial({color:spec.color,map,roughness:spec.surface==='metal'?.45:.88,metalness:spec.surface==='metal'?.4:0,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});material.userData={finishSlot:'roof',visualOnly:true,roofSurface:spec.surface};return material;
  };
  B.roofSurfaceUvs=(THREE,geometry,polygon)=>{
   const origin=new THREE.Vector3(...polygon[0]),u=new THREE.Vector3(...polygon[1]).sub(origin).normalize();let normal;

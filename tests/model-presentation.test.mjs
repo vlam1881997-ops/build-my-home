@@ -29,7 +29,7 @@ test('room inspection cannot reuse a selected room from another floor or a remov
  const b=client();b.state.ui.modelRoomId='r';assert.equal(b.modelSelectedRoom().id,'r');b.state.ui.sceneFocus='floor:1';assert.equal(b.modelSelectedRoom(),null);b.state.ui.sceneFocus='floor:0';b.state.project.plan.rooms.splice(0);assert.equal(b.modelSelectedRoom(),null);
 });
 test('look, wall view, room and light preferences survive the real loader schema',()=>{
- const saved={ui:{modelLook:'materials',modelWalls:'full',modelRoomId:'living',modelLightLevel:31}},ctx={location:{hostname:'localhost'},localStorage:{getItem:()=>JSON.stringify(saved),setItem(){}},document:{addEventListener(){},querySelector:()=>null},window:{},structuredClone,console,setTimeout,clearTimeout,URL};
+ const saved={ui:{modelLook:'materials',modelWalls:'full',modelRoomId:'living',modelLightLevel:31,exteriorCamera:'overview'}},ctx={location:{hostname:'localhost'},localStorage:{getItem:()=>JSON.stringify(saved),setItem(){}},document:{addEventListener(){},querySelector:()=>null},window:{},structuredClone,console,setTimeout,clearTimeout,URL};
  vm.createContext(ctx);for(const file of ['00_boot','01_vn34_catalog','15_data_engine','10_state'])vm.runInContext(fs.readFileSync('src/'+file+'.js','utf8').replace('const BMH =','var BMH ='),ctx);
  for(const [key,value] of Object.entries(saved.ui))assert.equal(ctx.BMH.state.ui[key],value);
 });
