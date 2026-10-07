@@ -78,7 +78,7 @@
   const {THREE,scene}=c,groups={architecture:[],furniture:[]},seen={architecture:new Set(),furniture:new Set()},meshes=[];scene.updateMatrixWorld(true);let count=0;
   scene.traverse(o=>{if(o.isMesh&&!o.userData.presentationOnly&&o.visible&&o.geometry?.attributes.position&&o.userData.kind!=='contact-shadow')meshes.push(o);});
   for(const mesh of meshes){
-   const architecture=['wall','floor-slab','door-frame','window-frame','ceiling-slab','roof','roof-gable','facade-detail'].includes(mesh.userData.kind)||ancestor(mesh,'kind')==='door-leaf';
+   const architecture=['wall','floor-slab','door-frame','window-frame','window-glass','ceiling-slab','roof','roof-gable','facade-detail'].includes(mesh.userData.kind)||ancestor(mesh,'kind')==='door-leaf';
    if(!architecture&&(!ancestor(mesh,'model')&&!ancestor(mesh,'kind')||mesh.geometry.attributes.position.count>4000))continue;
    if(['foliage','upholstery-seam'].includes(mesh.userData.kind))continue;
    const world=mesh.material?.clippingPlanes?.length?B.renderMeshGeometry(THREE,mesh):mesh.geometry.clone().applyMatrix4(mesh.matrixWorld);if(!world.attributes.position.count){world.dispose();continue;}
@@ -108,7 +108,7 @@
    if(!o.isMesh)return;
    if(viewOpen&&(ui.modelWalls!=='cut'||ui.sceneExploded))for(const m of Array.isArray(o.material)?o.material:[o.material])if(m?.clippingPlanes?.length)m.clippingPlanes=[];
    let parent=o;while(parent&&parent.userData.kind!=='door-leaf')parent=parent.parent;
-   const wall=viewOpen&&(o.userData.kind==='wall'||o.userData.kind==='door-frame'||o.userData.kind==='window-frame'||parent);
+   const wall=viewOpen&&(o.userData.kind==='wall'||o.userData.kind==='door-frame'||o.userData.kind==='window-frame'||o.userData.kind==='window-glass'||parent);
    let old=Array.isArray(o.material)?null:o.material;
    if(old&&ancestor(o,'model')==='floorLamp'&&old.userData.finishSlot==='linen'){const next=old.clone();next.userData.bmhPresentationEmitter=true;retired.add(old);o.material=old=next;}
    if(wall&&old){const m=old.clone();retired.add(old);m.userData.bmhWallView={transparent:old.transparent,depthWrite:old.depthWrite,side:old.side};if(ui.modelWalls!=='cut'||ui.sceneExploded)m.clippingPlanes=[];o.material=m;state.walls.push(o);}
@@ -141,8 +141,14 @@
    patch.alpha.value=alpha;
   }
   if(st.selectedKey!==key){st.selectedKey=key;for(const o of [...st.selection.children]){st.selection.remove(o);o.geometry.dispose();o.material.dispose();}
-   if(selected){const {THREE}=s,r=selected,levels=B.projectLevels(),base=ui.sceneFocus==='all'?r.floor*(levels.floorHeight+st.context.explode):0;for(const p of B.slabPanels(r,B.stairFloorHoles(r.floor))){const mesh=new THREE.Mesh(new THREE.PlaneGeometry(p.w,p.d),new THREE.MeshBasicMaterial({color:0x31d2e8,transparent:true,opacity:.12,depthWrite:false,toneMapped:false,side:THREE.DoubleSide}));mesh.rotation.x=-Math.PI/2;mesh.position.set(p.x+p.w/2-site.width/2,base+levels.slab+.013,p.y+p.d/2-site.depth/2);st.selection.add(mesh);}}
+   if(selected){const {THREE}=s,r=selected,levels=B.projectLevels(),base=ui.sceneFocus==='all'?r.floor*(levels.floorHeight+st.context.explode):0;for(const p of B.slabPanels(r,B.stairFloorHoles(r.floor))){
+    const mesh=new THREE.Mesh(new THREE.PlaneGeometry(p.w,p.d),new THREE.MeshBasicMaterial({color:0x31d2e8,transparent:true,opacity:.12,depthWrite:false,toneMapped:false,side:THREE.DoubleSide}));mesh.rotation.x=-Math.PI/2;mesh.position.set(p.x+p.w/2-site.width/2,base+levels.slab+.013,p.y+p.d/2-site.depth/2);st.selection.add(mesh);
+    const outline=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([[p.x,p.y],[p.x+p.w,p.y],[p.x+p.w,p.y+p.d],[p.x,p.y+p.d]].map(([x,z])=>new THREE.Vector3(x-site.width/2,base+levels.slab+.018,z-site.depth/2))),new THREE.LineBasicMaterial({color:0x31d2e8,transparent:true,opacity:.65,depthWrite:false,toneMapped:false}));st.selection.add(outline);
+   }}
   }
+  // A selection overlay must not recolour the actual material being reviewed.
+  st.selection.visible=!(ui.sceneFocus?.startsWith('room:')&&ui.designView==='room'&&ui.roomCamera==='inside');
+  for(const item of st.selection.children)if(item.isMesh)item.visible=B.modelLook()==='neon';
  };
 
  B.modelRoomInspectorHtml=()=>{

@@ -3,6 +3,55 @@ BMH.roomSurfaceStyle=id=>{
  const p=BMH.state.project,r=p.plan.rooms.find(r=>r.id===id),surface=BMH.finishPalette?.(id)?.surface;
  return ['wood','tile','stone'].includes(surface)?surface:/Japandi/i.test(p.style||'')&&['living','bed'].includes(r?.type)?'wood':'tile';
 };
+
+// Generic window profiles occupy the existing measured opening. No new opening,
+// manufacturer specification or change to the customer's plan is inferred.
+BMH.windowAssembly=opening=>{
+ const span=BMH.openingWallSpan?.(opening);if(!span||opening.kind!=='window')return [];
+ const levels=BMH.projectLevels(),width=span.b-span.a,sill=Number(opening.sill??.9),height=Math.min(Number(opening.height)||1.4,levels.clearHeight-sill);
+ if(width<.2||height<.2)return [];
+ const parts=[],border=Math.min(.055,width*.1,height*.1),sash=.028,depth=.075,base=levels.slab+sill,panes=width>1.25?2:1;
+ const add=(part,along,up,w,h,normal,d,finish='frame')=>parts.push({part,kind:finish==='glass'?'window-glass':'window-frame',openingId:opening.id,roomId:opening.roomId,floor:opening.floor,finish,x:span.o==='h'?span.a+along:span.c+normal-d/2,y:base+up,z:span.o==='h'?span.c+normal-d/2:span.a+along,w:span.o==='h'?w:d,h,d:span.o==='h'?d:w,generic:true});
+ add('jamb-left',0,0,border,height,0,depth);add('jamb-right',width-border,0,border,height,0,depth);
+ add('head',border,height-border,width-border*2,border,0,depth);add('sill',border,0,width-border*2,border,0,depth);
+ const paneWidth=(width-border*2)/panes,paneHeight=height-border*2;
+ for(let i=0;i<panes;i++){
+  const start=border+i*paneWidth,normal=(i%2?1:-1)*.012;
+  add('sash-left-'+i,start,border,sash,paneHeight,normal,.038);add('sash-right-'+i,start+paneWidth-sash,border,sash,paneHeight,normal,.038);
+  add('sash-top-'+i,start+sash,height-border-sash,paneWidth-sash*2,sash,normal,.038);add('sash-bottom-'+i,start+sash,border,paneWidth-sash*2,sash,normal,.038);
+  add('pane-'+i,start+sash,border+sash,paneWidth-sash*2,paneHeight-sash*2,normal,.008,'glass');
+ }
+ return parts;
+};
+
+// Batch small profiles into one mesh per material rather than one draw per box.
+BMH.sceneJoinedBoxes=(THREE,parts,{W,D,base=0})=>{
+ const values={position:[],normal:[],uv:[]},indices=[];let offset=0;
+ for(const p of parts){
+  const box=new THREE.BoxGeometry(p.w,p.h,p.d);box.translate(p.x+p.w/2-W/2,base+p.y+p.h/2,p.z+p.d/2-D/2);
+  for(const key of Object.keys(values))values[key].push(...box.attributes[key].array);
+  for(const i of box.index.array)indices.push(offset+i);offset+=box.attributes.position.count;box.dispose();
+ }
+ const geometry=new THREE.BufferGeometry();for(const key of Object.keys(values))geometry.setAttribute(key,new THREE.Float32BufferAttribute(values[key],key==='uv'?2:3));geometry.setIndex(indices);return geometry;
+};
+
+// A small analytic daylight environment gives glass and metal a horizon to
+// reflect. It is presentation lighting, not the survey's real surroundings.
+BMH.architecturalSkyEnvironment=(THREE,renderer)=>{
+ if(typeof document.createElement!=='function')return null;
+ const key='architectural-sky-v1',templates=BMH.skyTextureTemplates||=new Map();let faces=templates.get(key);
+ if(!faces){
+  faces=Array.from({length:6},(_,face)=>{const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const ctx=canvas.getContext('2d');if(!ctx?.createImageData)return null;
+   const pixels=ctx.createImageData(128,128);
+   for(let y=0;y<128;y++)for(let x=0;x<128;x++){
+    const u=(x+.5)/64-1,v=(y+.5)/64-1,dir=[[1,-v,-u],[-1,-v,u],[u,1,v],[u,-1,-v],[u,-v,1],[-u,-v,-1]][face],height=dir[1]/Math.hypot(...dir),t=Math.pow(Math.abs(height),.55),horizon=[224,227,220],pole=height>=0?[133,166,192]:[121,112,96],i=(y*128+x)*4;
+    for(let c=0;c<3;c++)pixels.data[i+c]=horizon[c]*(1-t)+pole[c]*t;pixels.data[i+3]=255;
+   }ctx.putImageData(pixels,0,0);return canvas;
+  });if(faces.some(x=>!x))return null;templates.set(key,faces);
+ }
+ const cube=new THREE.CubeTexture(faces);cube.colorSpace=THREE.SRGBColorSpace;cube.needsUpdate=true;
+ const generator=new THREE.PMREMGenerator(renderer);try{return generator.fromCubemap(cube);}finally{cube.dispose();generator.dispose();}
+};
 BMH.sceneSurfaceTexture = (THREE, kind, channel='color') => {
  if(typeof document==='undefined'||typeof document.createElement!=='function')return null;
  const templates=BMH.surfaceTextureTemplates||=new Map(),key=kind+':'+channel;
@@ -221,6 +270,27 @@ BMH.roomInteriorCamera = (room, items = BMH.roomFurnitureLayout(room)) => {
     if(items.some(i=>blocksView(camera,i)))continue;
     return {yaw,pitch,distance,target,camera};
   }
+  // The long-room orbit may miss every usable point in a narrow furnished
+  // living room. Search bounded, body-clear eye positions before falling back
+  // to an overhead inspection; do not remove or move the customer's furniture.
+  const levels=BMH.projectLevels(),eye=Math.min(1.65,levels.floorHeight-(levels.ceilingDrop||0)-.18),targetHeight=Math.min(1.1,eye-.15),targets=[target,{x:room.x+room.w/2,y:room.y+room.h/2}];let best=null;
+  const obstructs=(camera,aim,item)=>{
+   let enter=0,leave=1;
+   for(const [axis,start,end]of [['x',item.x-.025,item.x+item.w+.025],['y',item.y-.025,item.y+item.d+.025],['height',levels.slab+(item.base||0)-.025,levels.slab+(item.base||0)+(item.h||0)+.025]]){
+    const from=axis==='height'?eye:camera[axis],to=axis==='height'?targetHeight:aim[axis],delta=to-from;
+    if(Math.abs(delta)<1e-8){if(from<start||from>end)return false;continue;}
+    const a=(start-from)/delta,b=(end-from)/delta;enter=Math.max(enter,Math.min(a,b));leave=Math.min(leave,Math.max(a,b));if(enter>leave)return false;
+   }return enter<.98&&leave>.02;
+  };
+  for(const u of [.08,.18,.32,.5,.68,.82,.92])for(const v of [.08,.18,.32,.5,.68,.82,.92]){
+   const camera={x:room.x+room.w*u,y:room.y+room.h*v,height:eye};
+   if(!BMH.interiorCameraIsClear(room,camera,items)||items.some(i=>(i.base||0)<eye&&(i.h||0)>.15&&camera.x>i.x-.10&&camera.x<i.x+i.w+.10&&camera.y>i.y-.10&&camera.y<i.y+i.d+.10))continue;
+   for(const aim of targets){const dx=camera.x-aim.x,dy=camera.y-aim.y,horizontal=Math.hypot(dx,dy);if(horizontal<.7||items.some(i=>obstructs(camera,aim,i)))continue;
+    const alignment=(Math.cos(angle)*dy+Math.sin(angle)*dx)/horizontal,score=horizontal+Math.max(0,alignment)*.6;
+    if(!best||score>best.score)best={score,camera,target:aim,targetHeight,yaw:Math.atan2(dx,dy),pitch:Math.atan2(eye-targetHeight,horizontal),distance:Math.hypot(horizontal,eye-targetHeight)};
+   }
+  }
+  if(best)return best;
   return null;
 };
 

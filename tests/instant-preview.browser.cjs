@@ -35,7 +35,7 @@ const root=path.resolve(__dirname,'..'),output=process.env.BMH_BROWSER_OUTPUT,po
  for(const id of ['white-marble','walnut-floor','grey-concrete','ivory-terrazzo']){
   const started=Date.now();await page.locator('[data-visual-material-select="floor"]').selectOption(id);await ready();await page.evaluate(()=>Promise.allSettled(BuildMyHome.studio3d.scene.userData.surfaceLoads||[]));
   await samePose();
-  const result=await page.evaluate(()=>{const B=BuildMyHome,s=B.studio3d;s.renderFrame();return {id:B.finishPalette(B.state.ui.sceneFocus.slice(5)).visualMaterials.floor,image:s.renderer.domElement.toDataURL(),floor:s.scene.children.find(o=>o.userData.kind==='floor-slab').material.userData.visualMaterial};});
+  const result=await page.evaluate(()=>{const B=BuildMyHome,s=B.studio3d;s.renderFrame();return {id:B.finishPalette(B.state.ui.sceneFocus.slice(5)).visualMaterials.floor,image:s.renderer.domElement.toDataURL(),floor:s.scene.children.find(o=>o.userData.kind==='floor-slab').material[2].userData.visualMaterial};});
   assert.equal(result.id,id);assert.equal(result.floor,id);pixels.push(result.image);console.log(JSON.stringify({finish:id,changeMs:Date.now()-started}));
  }
  assert.equal(new Set(pixels).size,4,'different surfaces visibly change rendered pixels');
