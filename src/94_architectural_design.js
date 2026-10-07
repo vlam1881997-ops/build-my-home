@@ -210,6 +210,7 @@
  const decorate=B.decorateStudioScene;
  B.decorateStudioScene=options=>{
   decorate?.(options);if(options.focus!=='all')return;
+  if(B.addArchitecturalFacade){B.addArchitecturalFacade(options,B.facadeComponents());return;}
   const {addBox,roomMaterial,mats,W,D,explode}=options;
   for(const p of B.facadeComponents()){const material=roomMaterial(p.role,p.roomId,mats[p.role]||mats.accent),mesh=addBox(p.w,p.h,p.d,p.x+p.w/2-W/2,p.y+p.h/2+p.floor*explode,p.z+p.d/2-D/2,material);mesh.userData={kind:'facade-detail',componentId:p.id,componentKind:p.kind,floor:p.floor,roomId:p.roomId,measuredBox:{...p}};}
  };

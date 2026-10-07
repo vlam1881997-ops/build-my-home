@@ -43,11 +43,11 @@
   // Retain templates that still serve a mesh; release obsolete selections without releasing shared textures.
   for(const [cacheKey,entry]of s.scene.userData.finishMaterials||[]){if(Object.values(entry).some(m=>used.has(m)))continue;s.scene.userData.finishMaterials.delete(cacheKey);for(const m of Object.values(entry))if(m?.isMaterial)retired.add(m);}
   for(const m of retired)if(!used.has(m)&&![...(s.scene.userData.finishMaterials?.values()||[])].some(entry=>Object.values(entry).includes(m)))m.dispose();
-  B.pendingFinishCamera=null;B.customerFrameCache=null;s.renderFrame();B.refreshCinematicHero();
+  B.pendingFinishCamera=null;B.customerFrameCache=null;(s.requestRender||s.renderFrame).call(s);B.refreshCinematicHero();
   s.lastFinishUpdate={role,meshes:changes.length,ms:Math.round(performance.now()-started)};
   B.refreshStudioBrief();
   const status=document.querySelector('[data-finish-update-status]');if(status)status.textContent='Đã cập nhật '+({floor:'sàn',wall:'tường',accent:'gỗ & tủ',fabric:'sofa & vải'}[role])+'.';
-  Promise.allSettled(s.scene.userData.surfaceLoads||[]).then(()=>{if(B.studio3d===s&&s.project===B.state.project&&!s.scene.userData.disposed)s.renderFrame();});
+  Promise.allSettled(s.scene.userData.surfaceLoads||[]).then(()=>{if(B.studio3d===s&&s.project===B.state.project&&!s.scene.userData.disposed)(s.requestRender||s.renderFrame).call(s);});
   return true;
  };
  const categories={floor:{role:'floor',profile:'ivory-tile',label:'Sàn'},paint:{role:'wall',profile:'ivory-paint',label:'Sơn tường'},cabinetry:{role:'accent',profile:'natural-oak',label:'Gỗ & tủ'}};

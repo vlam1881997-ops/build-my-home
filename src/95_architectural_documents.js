@@ -109,12 +109,12 @@
    const rooms=B.floorRooms(f),g=B.scenePlanGeometry(p.plan,f),base=f*l.floorHeight;
    const eligible=g.walls.filter(w=>w.horizontal===v.horizontal&&w.roomIds.length===1&&rooms.some(r=>r.id===w.roomIds[0]&&Math.abs((v.horizontal?(v.near?r.y:r.y+r.h):(v.near?r.x:r.x+r.w))-w.axis)<.001)),xs=[...new Set(eligible.flatMap(w=>[w.a,w.b]))].sort((a,b)=>a-b);
    for(let i=1;i<xs.length;i++){const a=xs[i-1],b=xs[i],mid=(a+b)/2,w=eligible.filter(w=>mid>=w.a&&mid<=w.b).sort((a,b)=>v.near?a.axis-b.axis:b.axis-a.axis)[0];if(!w)continue;
-    const color=B.finishPalette(w.roomIds[0]).wall||B.houseStyle()?.wall||'#e9e5dc';
+    const color=B.facadeFinishPalette?.().wall||B.finishPalette(w.roomIds[0]).wall||B.houseStyle()?.wall||'#e9e5dc';
     body+=box(a,base,b-a,l.slab,'#e1e4e6')+box(a,base+l.slab,b-a,l.floorHeight-l.slab,color,'fill-opacity=".22"');
     if(w.kind!=='wall'){const z=base+l.slab+(w.sill||0),h=w.height;body+=box(a,z,b-a,h,w.kind==='window'?'#e6edf1':'#e6ded1','data-opening-id="'+attr(w.openingId)+'"');const P=point(mid,z),Q=point(mid,z+h);body+=line(P.x,P.y,Q.x,Q.y,.2);if(w.kind==='window'){const c=point(a,z+h*.65),d=point(b,z+h*.65);body+=line(c.x,c.y,d.x,d.y,.17);}body+=text((P.x+Q.x)/2,Q.y-1.2,B.openingCode(p.plan.openings.find(o=>o.id===w.openingId)),2.15,'middle');}
    }
   }
-  for(const c of B.facadeComponents().filter(c=>c.projectionSide?c.projectionSide===side:side==='front')){body+=box(v.horizontal?c.x:c.z,c.y,v.horizontal?c.w:c.d,c.h,c.color,'fill-opacity=".40" data-facade-component="'+attr(c.id)+'"');}
+  for(const c of B.facadeComponents().filter(c=>c.projectionSide?c.projectionSide===side:side==='front')){const extra='fill-opacity=".40" data-facade-component="'+attr(c.id)+'"';body+=c.polygon?polygon(c.polygon.map(([u,y])=>point((v.horizontal?c.x:c.z)+u,c.y+y)),c.color,.22,ink,extra):box(v.horizontal?c.x:c.z,c.y,v.horizontal?c.w:c.d,c.h,c.color,extra);}
   if(roof){const projected=hull([...roof.corners,...roof.ridge].map(vv=>point(v.horizontal?vv[0]:vv[2],vv[1])));body+=polygon(projected,B.roofSurfaceSpec().color,.25,ink,'fill-opacity=".16" data-projection-roof="1"');for(const face of roof.faces)for(let i=0;i<face.length;i++){const a=face[i],b=face[(i+1)%face.length],A=point(v.horizontal?a[0]:a[2],a[1]),C=point(v.horizontal?b[0]:b[2],b[1]);body+=line(A.x,A.y,C.x,C.y,.15,light);}}
   const bounds=B.sceneFootprintBounds(p.plan.rooms),wall=B.measuredWallThickness(false),start=(v.horizontal?bounds?.x:bounds?.y)??0,length=(v.horizontal?bounds?.width:bounds?.depth)??span,left=start-wall/2,right=start+length+wall/2;
   const bottom=point(0,0);body+=line(ox-7,bottom.y,ox+span*k+7,bottom.y,.35)+dim(point(left,0),point(right,0),8,Math.round((right-left)*1000));
