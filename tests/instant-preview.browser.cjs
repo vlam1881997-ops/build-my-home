@@ -1,13 +1,15 @@
 /* Real WebGL verification: immediate PNG, visible finish changes, collection geometry and saved choices. */
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),{spawn}=require('node:child_process'),{chromium}=require('playwright');
 let browser,server;
+async function isolate(context){await context.route('**/*',route=>{const r=route.request(),u=new URL(r.url());if(['http:','https:'].includes(u.protocol)&&(u.origin!==new URL(origin).origin||!['GET','HEAD'].includes(r.method())||u.pathname.startsWith('/api/')&&u.pathname!=='/api/config'))return route.fulfill({status:503,contentType:'application/json',body:'{"error":"Isolated fixture"}'});return route.continue();});}
+
 const root=path.resolve(__dirname,'..'),output=process.env.BMH_BROWSER_OUTPUT,port=process.env.BMH_BROWSER_PORT||'3052',origin=process.env.BMH_BROWSER_URL||'http://127.0.0.1:'+port;
 (async()=>{
  if(!process.env.BMH_BROWSER_URL){server=spawn(process.execPath,['scripts/dev.cjs'],{cwd:root,env:{...process.env,PORT:port},stdio:['ignore','pipe','pipe']});
  await new Promise((resolve,reject)=>{server.stdout.on('data',b=>{if(b.toString().includes('local:'))resolve();});server.stderr.on('data',b=>process.stderr.write(b));server.on('error',reject);server.on('exit',code=>reject(new Error('Server exited '+code)));});}
  browser=await chromium.launch({executablePath:process.env.BMH_CHROMIUM_EXECUTABLE||undefined,args:['--no-sandbox','--disable-dev-shm-usage','--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader']});
  const context=await browser.newContext({viewport:{width:1280,height:1000},serviceWorkers:'block'}),page=await context.newPage(),errors=[];let heavyRequests=0,aiRequests=0;
- page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(/(?:GL_|WebGL: )INVALID|Shader Error/.test(m.text()))errors.push(m.text());});
+ await isolate(context);page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(/(?:GL_|WebGL: )INVALID|Shader Error/.test(m.text()))errors.push(m.text());});
  page.on('request',r=>{if(r.url().endsWith('/pathtracer.js'))heavyRequests++;if(r.url().includes('/api/gemini-render'))aiRequests++;});
  await page.goto(origin);await page.waitForFunction(()=>window.__BMH_BOOT_OK);
  const ids=await page.evaluate(()=>{const B=BuildMyHome;B.state.ui.onboardingComplete=true;B.generateDesignKits();B.applyDesignKit('B');const living=B.state.project.plan.rooms.find(r=>r.type==='living'),bed=B.state.project.plan.rooms.find(r=>r.type==='bed');B.state.ui.sceneFocus='room:'+living.id;B.state.ui.roomCamera='inside';B.navigateTo(6);return {living:living.id,bed:bed.id};});
@@ -53,7 +55,7 @@ const root=path.resolve(__dirname,'..'),output=process.env.BMH_BROWSER_OUTPUT,po
  assert.equal(await page.evaluate(()=>JSON.stringify(BuildMyHome.state.project.plan)),plan);
  assert.equal(heavyRequests,0);assert.deepEqual(errors,[]);await context.close();
  const mobile=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'}),phone=await mobile.newPage();
- phone.on('pageerror',e=>errors.push(e.message));await phone.goto(origin);await phone.waitForFunction(()=>window.__BMH_BOOT_OK);
+ await isolate(mobile);phone.on('pageerror',e=>errors.push(e.message));await phone.goto(origin);await phone.waitForFunction(()=>window.__BMH_BOOT_OK);
  await phone.evaluate(()=>{const B=BuildMyHome;B.state.ui.onboardingComplete=true;B.state.ui.sceneFocus='room:r1';B.state.ui.roomCamera='inside';B.navigateTo(6);});
  await phone.waitForFunction(()=>BuildMyHome.studio3d?.renderer&&document.querySelector('#studio3dStage.three-ready'));
  await phone.locator('[data-visual-material="white-marble"]').click();await phone.waitForFunction(()=>BuildMyHome.studio3d?.renderer&&document.querySelector('#studio3dStage.three-ready'));

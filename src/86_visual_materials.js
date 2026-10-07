@@ -14,6 +14,7 @@ BMH.mountStudio3D=async()=>{
  const task=(async()=>{
   await finishMount();const s=BMH.studio3d,ui=BMH.state.ui;
   if(!pose||!s?.state||pose.project!==BMH.state.project||pose.focus!==ui.sceneFocus||pose.preset!==ui.roomCamera||pose.exterior!==ui.exteriorCamera)return;
+  s.state.resetCameraValidation?.();
   Object.assign(s.state,{yaw:pose.yaw,pitch:pose.pitch,dist:pose.dist,framed:true});s.state.target.fromArray(pose.target);s.state.updateCamera();
   if(BMH.pendingFinishCamera===pose)BMH.pendingFinishCamera=null;
  })();
@@ -39,21 +40,59 @@ BMH.VISUAL_MATERIALS=[
  {id:'olive-velvet',role:'fabric',name:'Nhung olive',color:'#6f7962',kind:'velvet',scale:[.15,.15],roughness:.88,normalStrength:.08,detail:'Nhung xanh olive, sợi mịn và ánh sheen dịu.'},
  {id:'cognac-leather',role:'fabric',name:'Da cognac',color:'#a66738',kind:'leather',scale:[.15,.15],roughness:.57,normalStrength:.16,detail:'Da màu cognac, hạt da nhỏ, ánh satin nhẹ.'}
 ];
+BMH.catalogSurfaceSlots={floor:'floor',paint:'wall',cabinetry:'accent'};
+BMH.catalogSelectedProduct=category=>{const id=BMH.state.project.materials.choices?.[category],q=BMH.state.project.dataEngine?.materialOverrides?.[id]?.product,x=q||BMH.materialResearch?.products?.find(x=>x.id===id);return x&&x.id===id&&x.category===category?x:null;};
+BMH.createCatalogMaterialBinding=(product,profileId,{roomId=null}={})=>{
+ const slot=BMH.catalogSurfaceSlots[product?.category],profile=BMH.VISUAL_MATERIALS.find(x=>x.id===profileId&&x.role===slot);if(!product?.id||!profile)return null;
+ return {id:product.id,profileId:profile.id,productId:product.id,sku:product.sku||null,specification:product.specification||product.spec||null,quantityUnit:BMH.materialUnit?.(product.priceEvidence?.quantityUnit??product.unit)??product.unit??null,styleIds:[BMH.houseStyle?.()?.id].filter(Boolean),surfaceSlot:slot,roomId,visualProfileId:profile.id,textureAssetId:null,realWorldScale:[...profile.scale],exactness:'generic'};
+};
+BMH.catalogBindingStatus=(category,binding,product,palette=null)=>{
+ const fail=reason=>({valid:false,status:binding?'stale':'missing',reason,exactness:'generic'}),slot=BMH.catalogSurfaceSlots[category];if(!binding)return fail('Chưa gắn sản phẩm với bề mặt.');if(!slot||!product||product.category!==category)return fail('Sản phẩm đã đổi; cần chọn lại bề mặt.');
+ const profile=BMH.VISUAL_MATERIALS.find(x=>x.id===binding.visualProfileId&&x.role===slot),unit=BMH.materialUnit?.(product.priceEvidence?.quantityUnit??product.unit)??product.unit??null;
+ if(binding.productId!==product.id||binding.id!==product.id||!Object.hasOwn(binding,'sku')||binding.sku!==(product.sku||null)||!Object.hasOwn(binding,'specification')||binding.specification!==(product.specification||product.spec||null)||!Object.hasOwn(binding,'quantityUnit')||binding.quantityUnit!==unit)return fail('Mã hàng, quy cách hoặc đơn vị đã đổi; chọn lại bề mặt.');
+ if(!profile||binding.surfaceSlot!==slot||binding.profileId!==profile.id||!Array.isArray(binding.realWorldScale)||binding.realWorldScale.length!==profile.scale.length||!binding.realWorldScale.every((v,i)=>v===profile.scale[i])||binding.textureAssetId!==null)return fail('Bề mặt hoặc tỷ lệ mô phỏng đã đổi; cần chọn lại.');
+ if(palette&&palette.visualMaterials?.[slot]!==profile.id)return fail('Bề mặt phòng đã được chỉnh riêng.');return {valid:true,status:'generic',reason:'Bề mặt BMH mô phỏng; đối chiếu mẫu và mã hàng tại hãng.',exactness:'generic'};
+};
+BMH.validatePaletteBindings=(roomId,palette={})=>{
+ const f=BMH.state.project.materials.finish||{},room=roomId?f.rooms?.[roomId]||{}:{},global=f.exterior||{},bindings={...global.catalogMaterials,...room.catalogMaterials},result={...palette,visualMaterials:{...palette.visualMaterials},catalogMaterials:{},materialBindingStatuses:{}},collection=BMH.interiorCollection?.(roomId);
+ const automatic={...global.styleRoles,...room.styleRoles};for(const [role,usesStyle] of Object.entries(automatic))if(usesStyle===true){const profile=BMH.VISUAL_MATERIALS.find(x=>x.id===collection?.visualMaterials?.[role]&&x.role===role);if(profile){result.visualMaterials[role]=profile.id;result[role]=profile.color;if(role==='floor')result.surface='auto';}}
+ for(const [category,binding] of Object.entries(bindings)){
+  const role=BMH.catalogSurfaceSlots[category];if(!role)continue;if(roomId&&!room.catalogMaterials?.[category]&&room.explicitRoles?.[role])continue;
+  const product=BMH.catalogSelectedProduct(category),status=BMH.catalogBindingStatus(category,binding,product,palette);if(room.catalogMaterials?.[category]&&binding.roomId!==roomId){status.valid=false;status.status='stale';status.reason='Liên kết thuộc phòng khác; cần chọn lại bề mặt.';}result.materialBindingStatuses[category]=status;
+  if(status.valid)result.catalogMaterials[category]=binding;else{const profile=BMH.VISUAL_MATERIALS.find(x=>x.id===collection?.visualMaterials?.[role]&&x.role===role);if(profile){result.visualMaterials[role]=profile.id;result[role]=profile.color;if(role==='floor')result.surface=profile.surface;}else{delete result.visualMaterials[role];if(role==='wall')result.wall=BMH.houseStyle?.()?.wall||collection?.wall||'#f2efe8';}}
+ }
+ return result;
+};
 const visualPalette=BMH.finishPalette;
 BMH.finishPalette=roomId=>{
  const palette=visualPalette?.(roomId)||{},profiles=Object.fromEntries(Object.entries(palette.visualMaterials||{}).map(([role,id])=>[role,BMH.VISUAL_MATERIALS.find(p=>p.id===id&&p.role===role)]).filter(([,p])=>p));
- return {...palette,...(profiles.floor?{surface:profiles.floor.surface}:{})};
+ return BMH.validatePaletteBindings(roomId,{...palette,...(profiles.floor?{surface:profiles.floor.surface}:{})});
 };
+BMH.clearCatalogSurface=(row,role)=>{const bindings={...row.catalogMaterials};for(const category of Object.keys(bindings))if(BMH.catalogSurfaceSlots[category]===role)delete bindings[category];return bindings;};
 BMH.applyVisualMaterial=(role,id,roomId=null)=>{
- const profile=BMH.VISUAL_MATERIALS.find(p=>p.id===id&&p.role===role),p=BMH.state.project;
- if(!profile||roomId&&!p.plan.rooms.some(r=>r.id===roomId))return false;
- BMH.rememberFinishCamera();
- const f=p.materials.finish||={exterior:null,rooms:{}};f.rooms||={};
- const rooms=roomId?p.plan.rooms.filter(r=>r.id===roomId):p.plan.rooms.filter(r=>!['stairs','elevator','balcony'].includes(r.type));
- for(const room of rooms){const previous=BMH.finishPalette(room.id);f.rooms[room.id]={...previous,[role]:profile.color,visualMaterials:{...previous.visualMaterials,[role]:id},...(role==='floor'?{surface:profile.surface}:{})};}
- if(!roomId)f.exterior={...f.exterior,[role]:profile.color,visualMaterials:{...f.exterior?.visualMaterials,[role]:id},...(role==='floor'?{surface:profile.surface}:{})};
+ const profile=BMH.VISUAL_MATERIALS.find(p=>p.id===id&&p.role===role),p=BMH.state.project;if(!profile||roomId&&!p.plan.rooms.some(r=>r.id===roomId))return false;
+ BMH.rememberFinishCamera();const f=p.materials.finish||={exterior:null,rooms:{}};f.rooms||={};const rooms=roomId?p.plan.rooms.filter(r=>r.id===roomId):p.plan.rooms.filter(r=>!['stairs','elevator','balcony'].includes(r.type));
+ for(const room of rooms){const previous=BMH.finishPalette(room.id),raw=f.rooms[room.id]||{};f.rooms[room.id]={...previous,[role]:profile.color,visualMaterials:{...previous.visualMaterials,[role]:id},explicitRoles:{...raw.explicitRoles,[role]:true},styleRoles:{...raw.styleRoles,[role]:false},catalogMaterials:BMH.clearCatalogSurface(raw,role),...(role==='floor'?{surface:profile.surface}:{})};}
+ if(!roomId){const raw=f.exterior||{};f.exterior={...raw,[role]:profile.color,visualMaterials:{...raw.visualMaterials,[role]:id},explicitRoles:{...raw.explicitRoles,[role]:true},styleRoles:{...raw.styleRoles,[role]:false},catalogMaterials:BMH.clearCatalogSurface(raw,role),...(role==='floor'?{surface:profile.surface}:{})};}
  BMH.state.ui.renderMode='interactive';BMH.finishInvalidate?.();BMH.save();return true;
 };
+BMH.applyCatalogMaterial=(category,profileId,{roomId=null,scope=roomId?'room':'unassigned'}={})=>{
+ const p=BMH.state.project,product=BMH.catalogSelectedProduct(category),role=BMH.catalogSurfaceSlots[category],profile=BMH.VISUAL_MATERIALS.find(x=>x.id===profileId&&x.role===role);if(!product||!profile||!['room','unassigned','all'].includes(scope)||scope==='room'&&!p.plan.rooms.some(r=>r.id===roomId&&!['stairs','elevator','balcony'].includes(r.type)))return false;
+ const f=p.materials.finish||={exterior:null,rooms:{}};f.rooms||={};const authored=row=>!!row&&(row.explicitRoles?row.explicitRoles[role]===true:!!row.visualMaterials?.[role]||Object.hasOwn(row,role)),rooms=p.plan.rooms.filter(r=>!['stairs','elevator','balcony'].includes(r.type)&&(scope!=='room'||r.id===roomId)).filter(r=>scope!=='unassigned'||!authored(f.rooms[r.id]));if(!rooms.length)return false;
+ BMH.rememberFinishCamera();const write=(raw,previous,id)=>({...raw,...previous,[role]:profile.color,visualMaterials:{...previous.visualMaterials,[role]:profile.id},explicitRoles:{...raw.explicitRoles,[role]:true},styleRoles:{...raw.styleRoles,[role]:false},catalogMaterials:{...raw.catalogMaterials,[category]:BMH.createCatalogMaterialBinding(product,profile.id,{roomId:id})},...(role==='floor'?{surface:profile.surface}:{})});
+ for(const r of rooms){const raw=f.rooms[r.id]||{};f.rooms[r.id]=write(raw,BMH.finishPalette(r.id),r.id);}if(scope==='all'||scope==='unassigned'&&!authored(f.exterior)){const raw=f.exterior||{};f.exterior=write(raw,raw,null);}
+ BMH.state.ui.renderMode='interactive';BMH.finishInvalidate?.();BMH.save();return true;
+};
+BMH.applyFinishColor=(role,color,roomId=null)=>{
+ const p=BMH.state.project;if(!['floor','wall','accent','fabric'].includes(role)||!/^#[0-9a-f]{6}$/i.test(color)||roomId&&!p.plan.rooms.some(r=>r.id===roomId))return false;
+ BMH.rememberFinishCamera();const f=p.materials.finish||={exterior:null,rooms:{}};f.rooms||={};const rooms=p.plan.rooms.filter(r=>!['stairs','elevator','balcony'].includes(r.type)&&(!roomId||r.id===roomId)),write=(raw,palette)=>({...palette,[role]:color,explicitRoles:{...raw.explicitRoles,[role]:true},styleRoles:{...raw.styleRoles,[role]:false},catalogMaterials:BMH.clearCatalogSurface(raw,role)});for(const r of rooms)f.rooms[r.id]=write(f.rooms[r.id]||{},BMH.finishPalette(r.id));if(!roomId)f.exterior=write(f.exterior||{},f.exterior||{});BMH.state.ui.renderMode='interactive';BMH.finishInvalidate?.();BMH.save();return true;
+};
+BMH.applyFinishSurface=(surface,roomId=null)=>{
+ if(!['auto','wood','tile','stone'].includes(surface))return false;if(surface!=='auto')return BMH.applyVisualMaterial('floor',{wood:'oak-floor',tile:'ivory-tile',stone:'sand-travertine'}[surface],roomId);
+ const p=BMH.state.project;if(roomId&&!p.plan.rooms.some(r=>r.id===roomId))return false;BMH.rememberFinishCamera();const f=p.materials.finish||={exterior:null,rooms:{}};f.rooms||={};const rooms=p.plan.rooms.filter(r=>!['stairs','elevator','balcony'].includes(r.type)&&(!roomId||r.id===roomId)),write=(raw,palette)=>{const visualMaterials={...palette.visualMaterials};delete visualMaterials.floor;const row={...palette,surface:'auto',visualMaterials,explicitRoles:{...raw.explicitRoles,floor:true},styleRoles:{...raw.styleRoles,floor:true},catalogMaterials:BMH.clearCatalogSurface(raw,'floor')};delete row.floor;return row;};for(const r of rooms)f.rooms[r.id]=write(f.rooms[r.id]||{},BMH.finishPalette(r.id));if(!roomId)f.exterior=write(f.exterior||{},f.exterior||{});BMH.state.ui.renderMode='interactive';BMH.finishInvalidate?.();BMH.save();return true;
+};
+// Legacy colour/surface controls use the same finish boundary and in-place renderer path.
+document.addEventListener('change',event=>{const t=event.target,color=t.dataset?.designColor,surface=t.hasAttribute?.('data-design-surface');if(!color&&!surface)return;const room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===BMH.state.ui.sceneFocus),role=color||'floor',changed=color?BMH.applyFinishColor(color,t.value,room?.id):BMH.applyFinishSurface(t.value,room?.id);if(!changed)return;event.stopImmediatePropagation();if(!BMH.refreshStudioFinishes?.(role,room?.id))BMH.render({preserveScroll:true});},true);
 BMH.visualMaterialContext=roomId=>{
  const palette=BMH.finishPalette(roomId),collection=roomId?BMH.interiorCollection(roomId):null;
  return {collection:collection?{id:collection.id,name:collection.name,note:collection.note,shape:collection.shape,table:collection.table}:null,palette:Object.fromEntries(['wall','floor','accent','fabric','pillow','rug'].map(role=>[role,palette[role]]).filter(([,value])=>/^#[0-9a-f]{6}$/i.test(value||''))),surface:palette.surface||'auto',surfaces:Object.entries(palette.visualMaterials||{}).flatMap(([role,id])=>{const p=BMH.VISUAL_MATERIALS.find(p=>p.id===id&&p.role===role);return p?[{role,id,name:p.name,color:palette[role]||p.color,kind:p.kind,scale:p.scale,roughness:p.roughness,detail:p.detail}]:[];})};

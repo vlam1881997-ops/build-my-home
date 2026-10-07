@@ -51,23 +51,23 @@
  };
  const categories={floor:{role:'floor',profile:'ivory-tile',label:'Sàn'},paint:{role:'wall',profile:'ivory-paint',label:'Sơn tường'},cabinetry:{role:'accent',profile:'natural-oak',label:'Gỗ & tủ'}};
  B.selectedShowroomProduct=category=>{
-  const id=B.state.project.materials.choices[category];
-  const product=B.state.project.dataEngine?.materialOverrides?.[id]?.product||B.materialResearch?.products.find(x=>x.id===id);
-  return product?.category===category?product:null;
+  const id=B.state.project.materials.choices[category],product=B.state.project.dataEngine?.materialOverrides?.[id]?.product||B.materialResearch?.products.find(x=>x.id===id);
+  return product&&product.id===id&&product.category===category?product:null;
  };
  B.showroomFinishInfo=roomId=>{
-  const palette=B.finishPalette(roomId),bindings={...B.state.project.materials.finish?.exterior?.catalogMaterials,...B.state.project.materials.finish?.rooms?.[roomId]?.catalogMaterials};
+  const palette=B.finishPalette(roomId),bindings=palette.catalogMaterials||{};
   return Object.entries(categories).flatMap(([category,config])=>{
    const binding=bindings[category],product=B.selectedShowroomProduct(category);
-   if(!binding||!product||binding.id!==product.id||palette.visualMaterials?.[config.role]!==binding.profileId)return [];
-   const profile=B.VISUAL_MATERIALS.find(p=>p.id===binding.profileId&&p.role===config.role);
-   return profile?[{category,id:product.id,name:product.name,sku:product.sku||'',profileId:profile.id,profileName:profile.name}]:[];
+   if(!binding||!product||!B.catalogBindingStatus?.(category,binding,product,palette).valid)return [];
+   const profile=B.VISUAL_MATERIALS.find(p=>p.id===(binding.visualProfileId||binding.profileId)&&p.role===config.role);
+   return profile?[{category,id:product.id,name:product.name,sku:product.sku||'',profileId:profile.id,profileName:profile.name,exactness:'generic'}]:[];
   });
  };
  B.showroomPreviewHtml=category=>{
   const config=categories[category],product=B.selectedShowroomProduct(category);if(!config||!product)return '';
-  const esc=B.esc,room=regularRooms()[0],applied=B.showroomFinishInfo(room?.id).find(x=>x.category===category),profile=B.VISUAL_MATERIALS.find(p=>p.id===(applied?.profileId||config.profile));
-  return '<section class="showroom-preview" aria-label="Vật liệu đã chọn và bề mặt 3D"><i class="finish-swatch finish-'+profile.kind+'" style="--finish-color:'+profile.color+'" aria-hidden="true"></i><div><span>'+esc(config.label)+' đã chọn</span><h3>'+esc(product.name)+'</h3><small>'+esc(product.sku||'Dòng sản phẩm')+'</small><label>Bề mặt mô phỏng<select data-showroom-profile="'+category+'">'+B.VISUAL_MATERIALS.filter(p=>p.role===config.role).map(p=>'<option value="'+p.id+'" '+(p.id===profile.id?'selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select></label><p>Chọn bề mặt gần với mẫu của hãng. Mã hàng và báo giá giữ theo sản phẩm đã chọn.</p><button type="button" data-showroom-3d="'+category+'" '+(!room?'disabled':'')+'>Áp dụng & xem 3D →</button>'+(!room?'<small>Tạo phòng ở mục Bản vẽ để xem vật liệu trong 3D.</small>':'')+'</div></section>';
+  const esc=B.esc,rooms=regularRooms(),room=rooms.find(r=>'room:'+r.id===B.state.ui.sceneFocus)||rooms.find(r=>r.type==='living')||rooms[0],palette=B.finishPalette(room?.id),applied=B.showroomFinishInfo(room?.id).find(x=>x.category===category),profile=B.VISUAL_MATERIALS.find(p=>p.id===(applied?.profileId||config.profile)),binding=palette.catalogMaterials?.[category],status=B.catalogBindingStatus?.(category,binding,product,palette);
+  const scope='<label>Phạm vi áp dụng<select data-showroom-scope="'+category+'"><option value="unassigned">Phòng chưa chọn riêng</option>'+rooms.map(r=>'<option value="room:'+esc(r.id)+'">Tầng '+(r.floor+1)+' · '+esc(r.name)+'</option>').join('')+'<option value="all">Toàn nhà · thay bề mặt đã chọn</option></select></label>';
+  return '<section class="showroom-preview" aria-label="Vật liệu đã chọn và bề mặt 3D"><i class="finish-swatch finish-'+profile.kind+'" style="--finish-color:'+profile.color+'" aria-hidden="true"></i><div><span>'+esc(config.label)+' đã chọn</span><h3>'+esc(product.name)+'</h3><small>'+esc(product.sku||'Chưa có mã hàng')+'</small><label>Bề mặt mô phỏng<select data-showroom-profile="'+category+'">'+B.VISUAL_MATERIALS.filter(p=>p.role===config.role).map(p=>'<option value="'+p.id+'" '+(p.id===profile.id?'selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select></label>'+scope+'<p>Bề mặt mô phỏng chung, chưa phải ảnh hoặc texture đúng mã hàng. Báo giá giữ theo sản phẩm đã chọn.</p>'+(status?.status==='stale'?'<p role="status">'+esc(status.reason)+'</p>':'')+'<button type="button" data-showroom-3d="'+category+'" '+(!room?'disabled':'')+'>Áp dụng & xem 3D →</button>'+(!room?'<small>Tạo phòng ở mục Bản vẽ để xem vật liệu trong 3D.</small>':'')+'</div></section>';
  };
  const catalog=B.materialCatalogHtml;if(catalog)B.materialCatalogHtml=category=>{const preview=B.showroomPreviewHtml(category),alternatives=catalog(category);return preview+(preview&&B.guidedDetails?B.guidedDetails('showroom:'+category,'So sánh sản phẩm khác',alternatives):alternatives);};
  const studio=B.screen7;B.screen7=()=>{
@@ -78,12 +78,11 @@
  document.addEventListener('change',e=>{const select=e.target;if(!select.matches?.('[data-showroom-profile]'))return;const profile=B.VISUAL_MATERIALS.find(p=>p.id===select.value),swatch=select.closest('.showroom-preview')?.querySelector('.finish-swatch');if(profile&&swatch){swatch.className='finish-swatch finish-'+profile.kind;swatch.style.setProperty('--finish-color',profile.color);}});
  document.addEventListener('click',e=>{
   const button=e.target.closest?.('[data-showroom-3d]');if(!button)return;
-  const category=button.getAttribute('data-showroom-3d'),config=categories[category],product=B.selectedShowroomProduct(category),profileId=button.closest('.showroom-preview')?.querySelector('[data-showroom-profile]')?.value,rooms=regularRooms();
-  if(!config||!product||!rooms.length||!B.applyVisualMaterial(config.role,profileId))return;
-  const exterior=B.state.project.materials.finish.exterior;exterior.catalogMaterials={...exterior.catalogMaterials,[category]:{id:product.id,profileId}};
-  for(const room of rooms){const f=B.state.project.materials.finish.rooms[room.id];f.catalogMaterials={...f.catalogMaterials,[category]:{id:product.id,profileId}};}
-  const current=rooms.find(r=>'room:'+r.id===B.state.ui.sceneFocus)||rooms.find(r=>r.type==='living')||rooms[0];
-  B.state.ui.designView='room';B.state.ui.sceneFocus='room:'+current.id;B.state.ui.roomCamera='inside';B.save();B.navigateTo(6);
+  const category=button.getAttribute('data-showroom-3d'),config=categories[category],product=B.selectedShowroomProduct(category),preview=button.closest('.showroom-preview'),profileId=preview?.querySelector('[data-showroom-profile]')?.value,target=preview?.querySelector('[data-showroom-scope]')?.value||'unassigned',rooms=regularRooms(),roomId=target.startsWith('room:')?target.slice(5):undefined,scope=roomId?'room':target;
+  if(!config||!product||!rooms.length)return;
+  if(!B.applyCatalogMaterial?.(category,profileId,{roomId,scope})){B.toast('Chọn phòng cần áp dụng; các bề mặt đã chọn riêng được giữ lại.');return;}
+  const current=rooms.find(r=>r.id===roomId)||rooms.find(r=>B.showroomFinishInfo(r.id).some(x=>x.category===category))||rooms.find(r=>r.type==='living')||rooms[0];
+  B.state.ui.designView='room';B.state.ui.sceneFocus='room:'+current.id;B.state.ui.roomCamera='inside';B.state.ui.modelLook='materials';B.save();B.navigateTo(6);
  });
  const status=B.projectSaveStatus;if(status)B.projectSaveStatus=()=>{status();const p=B.projects,node=document.querySelector('.guided-footer>span');if(node){node.textContent=p.error?'Chưa lưu được. Mở Dự án để tải bản sao.':p.busy?'Đang lưu thiết kế trên thiết bị…':p.dirty?'Có thay đổi · Đang chờ lưu…':'Thiết kế đã lưu trên thiết bị.';node.dataset.state=p.error?'error':p.busy||p.dirty?'pending':'saved';}};
 })();

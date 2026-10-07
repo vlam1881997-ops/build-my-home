@@ -24,6 +24,20 @@ function client(saved){
 }
 const boundary={kind:'boundary',sourceType:'survey',sourceTitle:'Fixture trích đo',publisher:'Đơn vị khảo sát fixture',sourceUrl:'https://example.com/survey',effectiveAt:'2026-10-01',sourceCrs:'LOCAL_METRES',surveyReference:'A gốc đo; AB mặt tiền',localVertices:'0, 0\n5, 0\n5, 20\n0, 20'};
 const json=v=>JSON.parse(JSON.stringify(v));
+test('material metadata and per-room choices persist; revision responds to product identity, not price',()=>{
+ const B=client(),p=B.state.project;
+ p.materials.choices.floor='fixture-tile';
+ p.dataEngine.materialOverrides['fixture-tile']={value:null,product:{id:'fixture-tile',category:'floor',sku:'TILE-600',spec:'600×600',unit:'m²',priceEvidence:{amountVnd:null,quantityUnit:'m²',quotedAt:null,retrievedAt:'2026-10-07',sourceUrl:'https://example.com/tile',includesVat:null,includesLabour:false,includesTransport:null}}};
+ p.materials.finish.rooms.r1={visualMaterials:{floor:'oak-floor'},explicitRoles:{floor:true},catalogMaterials:{floor:{productId:'fixture-tile',sku:'TILE-600',visualProfileId:'oak-floor',exactness:'generic',realWorldScale:[.2,1.4]}}};
+ p.designStudio.extraRooms=[{id:'laundry',floor:1,name:'Giặt',width:2.4,depth:2.2}];
+ const revision=B.drawingRevision();p.dataEngine.materialOverrides['fixture-tile'].value=200000;assert.equal(B.drawingRevision(),revision);
+ p.dataEngine.materialOverrides['fixture-tile'].product.sku='TILE-800';assert.notEqual(B.drawingRevision(),revision);
+ const restored=client(json(B.state));assert.deepEqual(json(restored.state.project.materials),json(p.materials));assert.equal(restored.state.project.dataEngine.materialOverrides['fixture-tile'].product.priceEvidence.amountVnd,null);assert.equal(restored.state.project.designStudio.extraRooms[0].width,2.4);
+ p.dataEngine.materialOverrides['fixture-tile'].product.priceEvidence.amountVnd=0;assert.equal(client(json(B.state)).state.project.dataEngine.materialOverrides['fixture-tile'].product.priceEvidence.amountVnd,0);
+});
+test('fresh projects show materials and automatic wall view; saved explicit views survive normalization',()=>{
+ const B=client();assert.equal(B.state.ui.modelLook,'materials');assert.equal(B.state.ui.modelWalls,'auto');B.state.ui.modelLook='neon';assert.equal(client(json(B.state)).state.ui.modelLook,'neon');assert.equal(client(json(B.state)).state.ui.modelWalls,'auto');
+});
 test('measured boundary stays in metres and does not alter pin, rooms, materials or private inputs',()=>{
  const B=client(),p=B.state.project,keep=json({lat:p.site.lat,lng:p.site.lng,plan:p.plan,style:p.style,materials:p.materials,finance:p.finance,household:p.household}),row=B.saveSiteEvidence(boundary),g=B.parcelGeometry();
  assert.equal(g.area,100);assert.equal(g.width,5);assert.equal(g.depth,20);assert.equal(g.basis,'measured');assert.equal(row.unit,'m');assert.equal(row.verifiedState,'provided');assert.equal(p.site.boundaryEvidenceId,row.id);

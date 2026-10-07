@@ -9,6 +9,7 @@ import {send,jsonBody,apiError} from '../server/_lib.mjs';
 import {geminiGenerate,geminiEnv} from '../server/_gemini.mjs';
 import {runSiteIntelligence} from '../server/_site_intelligence.mjs';
 import {runDesignResearch} from '../server/_design_research.mjs';
+import {runFengResearch} from '../server/_feng_sources.mjs';
 
 const OPENAI_MODEL=String(process.env.OPENAI_MODEL||'gpt-5.6-terra').trim();
 const OPENAI_URL='https://api.openai.com/v1/responses';
@@ -22,17 +23,6 @@ function rateLimit(req){
   if(aiBuckets.size>500)for(const [k,v] of aiBuckets)if(now-v.start>AI_WINDOW_MS)aiBuckets.delete(k);
 }
 
-
-const FENG_SCHEMA={
-  type:'object',additionalProperties:false,
-  properties:{
-    headline:{type:'string'},summary:{type:'string'},confidence:{type:'integer',minimum:0,maximum:100},
-    family:{type:'array',maxItems:12,items:{type:'object',additionalProperties:false,properties:{role:{type:'string'},birth:{type:'integer'},kua:{type:'integer'},group:{type:'string'},good_directions:{type:'array',items:{type:'string'},maxItems:4},notes:{type:'array',items:{type:'string'},maxItems:5}},required:['role','birth','kua','group','good_directions','notes']}},
-    home_recommendations:{type:'array',maxItems:10,items:{type:'object',additionalProperties:false,properties:{area:{type:'string'},recommendation:{type:'string'},rationale:{type:'string'},priority:{type:'string',enum:['low','medium','high']}},required:['area','recommendation','rationale','priority']}},
-    conflicts:{type:'array',maxItems:8,items:{type:'string'}},
-    caveats:{type:'array',maxItems:8,items:{type:'string'}}
-  },required:['headline','summary','confidence','family','home_recommendations','conflicts','caveats']
-};
 
 const RESULT_SCHEMA={
   type:'object',additionalProperties:false,
@@ -158,6 +148,13 @@ async function handler(req,res){
   try{
     if(req.method==='OPTIONS')return send(res,200,{ok:true});if(req.method!=='POST')return send(res,405,{ok:false,error:'Method not allowed'});
     const body=await jsonBody(req),action=String(body.action||'review').toLowerCase();if(!['brief','review','cost','whatif','vision','fengshui','site','design-research'].includes(action))return send(res,400,{ok:false,error:'AI action không hợp lệ.'});
+    // Cultural research has its own strict context and free-quota guard. Never clean the full project here.
+    if(action==='fengshui'){
+      try{rateLimit(req);}catch{return send(res,200,{ok:true,provider:'feng-research',result:{status:'call_limit',notice:'Đã đủ lượt nghiên cứu. Công thức tham khảo cục bộ vẫn dùng được.',allowLocal:true,sources:[],claims:[],retrievedAt:null}});}
+      const scope=String(req.headers?.['x-forwarded-for']||req.headers?.['x-real-ip']||'unknown').split(',')[0].trim();
+      const result=await runFengResearch(body.fengContext,{scope});
+      return send(res,200,{ok:true,provider:'feng-research',result,citations:result.sources?.map(s=>({url:s.url,title:s.title}))||[]});
+    }
     // Keep research out of cleanProject, free-text prompts and provider fallback routing.
     if(action==='design-research'){
       try{rateLimit(req);}catch{return send(res,200,{ok:true,provider:'design-research',result:{status:'call_limit',notice:'Đã đủ lượt nghiên cứu. Thư viện BMH vẫn chọn được.',allowLibrary:true,options:[],sources:[],searchedAt:null}});}
@@ -174,11 +171,11 @@ async function handler(req,res){
       try{
         const parts=[];if(action==='vision'&&/^data:image\/(png|jpe?g|webp);base64,/i.test(image)&&image.length<12_000_000){const m=image.match(/^data:([^;]+);base64,(.+)$/i);if(m)parts.push({inline_data:{mime_type:m[1],data:m[2]}});}
         parts.push({text:`Yêu cầu: ${prompt||'(không có câu hỏi bổ sung)'}\n\nDữ liệu dự án JSON:\n${JSON.stringify(project)}`});
-        const grounded=action==='fengshui';
+        const grounded=false;
         const {result,model,apiVersion,usage,citations}=await geminiGenerate({
           parts,
           systemInstruction:`Bạn là Build My Home AI Decision Engine. ${actionInstruction(action)} Trả lời tiếng Việt rõ ràng, ngắn gọn, có hành động cụ thể.`,
-          schema:grounded?FENG_SCHEMA:RESULT_SCHEMA,
+          schema:RESULT_SCHEMA,
           maxOutputTokens:grounded?3200:2200,
           thinkingLevel:grounded?'medium':(action==='review'||action==='cost'?'medium':'low'),
           timeoutMs:grounded?80000:65000,
@@ -187,10 +184,7 @@ async function handler(req,res){
         return send(res,200,{ok:true,provider:'gemini',model,apiVersion,autoUpgrade:geminiEnv().auto,usage,result,citations:citations||[],grounded});
       }catch(gemErr){
         if(gemErr.code?.startsWith('AI_'))throw gemErr;
-        if(action==='fengshui'&&[401,403].includes(Number(gemErr?.statusCode))){
-          throw Object.assign(new Error('Gemini Search grounding bị từ chối bởi API key hoặc dự án. Hãy kiểm tra quyền, gói sử dụng và hạn mức trong Google AI Studio; phần công thức gia đình vẫn xem được mà không cần AI web.'),{statusCode:503,details:{code:'grounding_access_denied'}});
-        }
-        if(action!=='fengshui'&&recoverableAIError(gemErr)&&String(process.env.OPENAI_API_KEY||'').trim()){
+        if(recoverableAIError(gemErr)&&String(process.env.OPENAI_API_KEY||'').trim()){
           try{
             const out=await openAIFallback({action,prompt,project,image});
             return send(res,200,{ok:true,...out,fallbackFrom:'gemini',notice:'Gemini đang giới hạn tạm thời; yêu cầu đã được chuyển sang OpenAI fallback.'});
@@ -205,7 +199,6 @@ async function handler(req,res){
         throw gemErr;
       }
     }
-    if(action==='fengshui')throw Object.assign(new Error('Nghiên cứu phong thủy có nguồn cần GEMINI_API_KEY và Google Search grounding trên server.'),{statusCode:503});
     try{
       const out=await openAIFallback({action,prompt,project,image});return send(res,200,{ok:true,...out});
     }catch(openErr){

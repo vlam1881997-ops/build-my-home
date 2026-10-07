@@ -78,7 +78,7 @@ test('customer API capability, account and quota boundaries',async t=>{
    const ambiguous=withAiUsage(async()=>{await reserveAiUsage();beginAiProviderCall();throw Error('Network timeout');},'image');await assert.rejects(invoke(ambiguous,{headers}));assert.equal(calls.findLast(x=>x.path.endsWith('bmh_ai_settle')).body.p_used,true);
   });
   await t.test('all production generation entry points stop before a provider when quota is exhausted',async()=>{
-   process.env.GEMINI_API_KEY='fixture-key';process.env.GEMINI_IMAGE_ENABLED='true';quotaResult={accepted:false,code:'AI_LIMIT_REACHED'};calls.length=0;
+   process.env.GEMINI_API_KEY='fixture-key';process.env.GEMINI_IMAGE_ENABLED='true';process.env.GEMINI_SEARCH_ENABLED='true';process.env.GEMINI_MATERIAL_SEARCH_QUOTA='allowed';quotaResult={accepted:false,code:'AI_LIMIT_REACHED'};calls.length=0;
    const image='data:image/jpeg;base64,'+'A'.repeat(128);
    const routes=[
     [ai,'/api/ai',{action:'review',project:{}}],

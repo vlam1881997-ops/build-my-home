@@ -156,9 +156,27 @@ BMH.addWindowDrapery=(THREE,scene,r,base,site,overview=false)=>{
 // A camera inside a television/cabinet can otherwise produce a dark, unusable image.
 BMH.interiorCameraIsClear=(room,point,items=BMH.roomFurnitureLayout(room))=>{
  const margin=.08,levels=BMH.projectLevels(),height=point.height;
+ if(![point.x,point.y,height].every(Number.isFinite)||['stairs','elevator'].includes(room.type))return false;
  if(point.x<room.x+.12||point.x>room.x+room.w-.12||point.y<room.y+.12||point.y>room.y+room.h-.12)return false;
  if(!Number.isFinite(height)||height<levels.slab+.12||height>levels.floorHeight-(levels.ceilingDrop||0)-.12)return false;
+ if((BMH.stairFloorHoles?.(room.floor)||[]).some(h=>point.x>h.x-.08&&point.x<h.x+h.w+.08&&point.y>h.y-.08&&point.y<h.y+(h.d??h.h)+.08))return false;
+ if((BMH.planFixtures?.()||[]).some(q=>q.roomId===room.id&&height>levels.slab+(Number(q.base)||0)-margin&&height<levels.slab+(Number(q.base)||0)+q.h+margin&&point.x>q.x-margin&&point.x<q.x+q.w+margin&&point.y>q.y-margin&&point.y<q.y+q.d+margin))return false;
  return !items.some(i=>height>levels.slab+(i.base||0)-margin&&height<levels.slab+(i.base||0)+(i.h||0)+margin&&point.x>i.x-margin&&point.x<i.x+i.w+margin&&point.y>i.y-margin&&point.y<i.y+i.d+margin);
+};
+// Test the whole movement, including native orbit/pan/pinch controls. A clear
+// destination alone would allow a large pointer movement through a wardrobe.
+BMH.measuredWalkPathIsClear=(room,from,to,items=BMH.roomFurnitureLayout(room),{walking=false}={})=>{
+ if(!from||!to||![from.x,from.y,from.height,to.x,to.y,to.height].every(Number.isFinite))return false;
+ const distance=Math.hypot(to.x-from.x,to.y-from.y,to.height-from.height),steps=Math.max(1,Math.ceil(distance/.04));
+ if(steps>2500)return false;
+ for(let i=0;i<=steps;i++){
+  const t=i/steps,p={x:from.x+(to.x-from.x)*t,y:from.y+(to.y-from.y)*t,height:from.height+(to.height-from.height)*t};
+  if(!BMH.interiorCameraIsClear(room,p,items))return false;
+  // Walking has a body below the camera; low tables and fitted equipment
+  // occupy that path even when an orbiting camera can see above them.
+  if(walking&&items.some(q=>(q.base||0)<1.55&&(q.h||0)>.15&&p.x>q.x-.10&&p.x<q.x+q.w+.10&&p.y>q.y-.10&&p.y<q.y+q.d+.10))return false;
+ }
+ return true;
 };
 BMH.roomInteriorCamera = (room, items = BMH.roomFurnitureLayout(room)) => {
   const rotation = Number(room.furnitureRotation) || 0, angle = -rotation*Math.PI/180;

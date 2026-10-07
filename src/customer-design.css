@@ -29,3 +29,14 @@
 @media(max-width:600px){.customer-moodboard{padding:14px;border-radius:16px}.customer-moodboard-heading{display:block}.customer-moodboard-heading label{display:block;width:100%;margin-top:12px}.customer-moodboard-heading h2{font-size:20px}.customer-inspiration-grid{gap:10px}.customer-inspiration-grid figure>img{height:115px}.customer-inspiration-grid figure .style-concept{min-height:115px;height:115px}.customer-inspiration-grid figcaption{font-size:10px;padding:8px}.customer-picked-finishes{grid-template-columns:1fr 1fr;padding:10px}.customer-room-walk{padding:14px}.customer-room-walk-head{flex-wrap:wrap;gap:10px}.customer-room-walk-head>div{flex-basis:100%}.customer-room-walk-head label{flex:1;width:auto}.customer-room-walk-cards>button{flex-basis:158px}.customer-room-walk-cards>button>div{height:96px}.customer-style-details>summary{font-size:12px}.customer-extra-rooms article{gap:8px;padding:10px}.customer-extra-rooms article>label:nth-child(2){grid-column:2/4}.customer-extra-rooms h3{font-size:16px}}
 
 .customer-moodboard-heading label{display:grid;gap:7px;font-size:13px}.customer-moodboard-heading select{display:block;box-sizing:border-box;width:100%;min-height:42px;padding:9px 12px;background:#fff;color:#344d3d;border:1px solid #d2dbcd;border-radius:10px;font:inherit}
+
+/* Exact room dimensions remain optional and compact. */
+.customer-extra-rooms article .customer-room-request-details{grid-column:1/-1;margin:2px 0 0;padding:10px;border:0;background:#f6f8f1;min-width:0}
+.customer-room-request-details>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.customer-room-request-details>small{display:block;font-size:11px;line-height:1.6;margin-top:10px;color:#62755e}
+.customer-walk-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.customer-walk-controls button,.customer-room-walk-head>button{border:1px solid #cbd9c5;background:#f4f7ef;border-radius:9px;padding:10px 12px;min-height:44px;font:inherit;color:#3e5840;cursor:pointer}
+.customer-walk-controls [role=status]{flex-basis:100%;font-size:12px;color:#685b35}
+.customer-walk-controls button:focus-visible,.customer-room-walk button:focus-visible{outline:3px solid #168594;outline-offset:3px}
+.customer-room-walk-head{flex-wrap:wrap}
+@media(max-width:600px){.customer-room-request-details>div{grid-template-columns:1fr 1fr}.customer-room-request-details>div>label:last-child{grid-column:1/-1}.customer-room-walk-head>button{flex:1}.customer-walk-controls button{flex:1 1 calc(50% - 8px)}.customer-extra-rooms input,.customer-extra-rooms select{font-size:16px;min-height:44px}}

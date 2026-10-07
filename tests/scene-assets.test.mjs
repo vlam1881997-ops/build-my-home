@@ -103,7 +103,7 @@ test('live finish changes preserve measured geometry and keep another room isola
 test('unknown model finishes fall back before changing any mesh, and stale supplier bindings are omitted',()=>{
  const {b,scene}=liveFinishClient(),floor=scene.children[0],old=floor.material,model=new THREE.Group();model.userData={roomId:'a',source:'glb'};scene.add(model);b.studio3d.structureKey=b.studioStructureKey();
  b.applyVisualMaterial('floor','ivory-tile','a');assert.equal(b.refreshStudioFinishes('floor','a'),false);assert.equal(floor.material,old);
- b.state.project.materials.choices.floor='p';b.state.project.dataEngine={materialOverrides:{p:{product:{id:'p',category:'floor',name:'Gạch hãng',sku:'SKU-600',finance:'PRIVATE'}}}};b.state.project.materials.finish.rooms.a.catalogMaterials={floor:{id:'p',profileId:'ivory-tile'}};
+ b.state.project.materials.choices.floor='p';b.state.project.dataEngine={materialOverrides:{p:{product:{id:'p',category:'floor',name:'Gạch hãng',sku:'SKU-600',finance:'PRIVATE'}}}};b.state.project.materials.finish.rooms.a.catalogMaterials={floor:b.createCatalogMaterialBinding(b.state.project.dataEngine.materialOverrides.p.product,'ivory-tile',{roomId:'a'})};
  const info=b.showroomFinishInfo('a');assert.equal(info.length,1);assert.equal(info[0].sku,'SKU-600');assert.equal('finance'in info[0],false);b.applyVisualMaterial('floor','oak-floor','a');assert.equal(b.showroomFinishInfo('a').length,0);b.applyVisualMaterial('floor','ivory-tile','a');b.state.project.materials.choices.floor='other';assert.equal(b.showroomFinishInfo('a').length,0);
 });
 
@@ -178,6 +178,14 @@ test('indoor camera clearance rejects a TV at eye height, walls and the ceiling 
  assert.equal(b.interiorCameraIsClear(room,{x:table.x+table.w/2,y:table.y+table.d/2,height:1.5},items),true);
  assert.equal(b.interiorCameraIsClear(room,{x:-.1,y:2,height:1.5},items),false);
  assert.equal(b.interiorCameraIsClear(room,{x:1,y:2,height:b.projectLevels().floorHeight},items),false);
+});
+
+test('measured indoor paths reject tunnelling through furniture, slab holes and altar fixtures',()=>{
+ const {b}=client(),room={id:'r',floor:1,type:'living',x:0,y:0,w:6,h:5};b.projectLevels=()=>({floorHeight:3.4,slab:.14,ceilingDrop:.2});b.planFixtures=()=>[];b.stairFloorHoles=()=>[];
+ const tall=[{x:2.7,y:1,w:.6,d:3,h:2.2,base:0}],from={x:1,y:2,height:1.6},to={x:5,y:2,height:1.6};assert.equal(b.interiorCameraIsClear(room,from,tall),true);assert.equal(b.interiorCameraIsClear(room,to,tall),true);assert.equal(b.measuredWalkPathIsClear(room,from,to,tall),false,'valid endpoints cannot cross the measured wardrobe');
+ assert.equal(b.measuredWalkPathIsClear(room,{x:1,y:.5,height:1.6},{x:5,y:.5,height:1.6},tall),true);
+ const low=[{x:2.7,y:1,w:.6,d:3,h:.55,base:0}];assert.equal(b.measuredWalkPathIsClear(room,from,to,low),true,'an orbiting camera can be above a table');assert.equal(b.measuredWalkPathIsClear(room,from,to,low,{walking:true}),false,'walking body cannot pass through that table');
+ b.stairFloorHoles=()=>[{x:2.7,y:1,w:.6,h:3}];assert.equal(b.measuredWalkPathIsClear(room,from,to,[]),false);b.stairFloorHoles=()=>[];b.planFixtures=()=>[{id:'altar',roomId:'r',floor:1,x:2.7,y:1,w:.6,d:3,h:1.7}];assert.equal(b.measuredWalkPathIsClear(room,from,to,[]),false);assert.equal(b.measuredWalkPathIsClear(room,from,{...to,x:7},[]),false);assert.equal(b.measuredWalkPathIsClear(room,from,{...to,x:NaN},[]),false);
 });
 
 test('unavailable rounded geometry keeps a bounded detailed fallback',()=>{

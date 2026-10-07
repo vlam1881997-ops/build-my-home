@@ -18,6 +18,10 @@
  const finance=B.screen2;
  B.screen2=()=>{const t=template(finance()),picker=t.content.querySelector('.v64-bank-picker');if(picker){picker.dataset.guidedPanel='bank-picker';picker.open=Boolean(B.state.ui.guidedPanels?.['bank-picker']);}return t.innerHTML;};B.SCREENS[7]=B.screen2;
 
+ // Family input remains direct; occasional land data and the cultural method open on demand.
+ const family=B.screen4;
+ B.screen4=()=>{const t=template(family()),root=t.content.querySelector('.v6-s4');if(!root)return t.innerHTML;root.classList.add('guided-family-page');const land=wrap(root.querySelector('.v6-land'),'family-land','Khu đất & địa chất sơ bộ');land?.classList.add('guided-family-land');wrap(root.querySelector('.v70-feng-family'),'family-feng-method','Cung phi từng thành viên & phương pháp');return t.innerHTML;};B.SCREENS[2]=B.screen4;
+
  const planner=B.screen5;
  B.screen5=()=>{
   const t=template(planner()),root=t.content.querySelector('.v6-s5'),ui=B.state.ui.planner,p=B.state.project,floor=Number(ui.floor)||0,selected=B.selectedRoom();if(!root)return t.innerHTML;

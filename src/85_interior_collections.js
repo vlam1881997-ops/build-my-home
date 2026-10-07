@@ -29,10 +29,10 @@ BMH.finishPalette=roomId=>{const original=collectionFinish?.(roomId);if(!roomId)
 BMH.applyInteriorCollection=(id,roomId=null)=>{
  const c=BMH.INTERIOR_COLLECTIONS.find(c=>c.id===id),p=BMH.state.project;if(!c||roomId&&!p.plan.rooms.some(r=>r.id===roomId))return false;
  BMH.rememberFinishCamera?.();
- const f=p.materials.finish||=( {exterior:null,rooms:{}} );f.rooms||={};f.interior||={default:'',rooms:{}};f.interior.rooms||={};
+ const f=p.materials.finish||=( {exterior:null,rooms:{}} );f.rooms||={};f.interior||={default:'',rooms:{}};f.interior.rooms||={};f.interior.authored||={};
  const target=roomId?p.plan.rooms.filter(r=>r.id===roomId):p.plan.rooms.filter(r=>!['stairs','elevator','balcony'].includes(r.type));
- for(const r of target){f.interior.rooms[r.id]=id;f.rooms[r.id]={...f.rooms[r.id],wall:c.wall,floor:c.floor,accent:c.accent,fabric:c.fabric,pillow:c.pillow,rug:c.rug,surface:r.type==='bath'?'stone':c.surface,visualMaterials:{...c.visualMaterials,...(r.type==='bath'?{floor:'sand-travertine'}:{})}};}
- if(!roomId){f.interior.default=id;f.exterior={...f.exterior,wall:c.wall,floor:c.floor,accent:c.accent,fabric:c.fabric,pillow:c.pillow,rug:c.rug,surface:c.surface,visualMaterials:{...c.visualMaterials}};}
+ for(const r of target){f.interior.rooms[r.id]=id;if(roomId)f.interior.authored[r.id]='manual';f.rooms[r.id]={...f.rooms[r.id],catalogMaterials:{},styleRoles:{floor:false,wall:false,accent:false,fabric:false},explicitRoles:{...f.rooms[r.id]?.explicitRoles,floor:true,wall:true,accent:true,fabric:true},wall:c.wall,floor:c.floor,accent:c.accent,fabric:c.fabric,pillow:c.pillow,rug:c.rug,surface:r.type==='bath'?'stone':c.surface,visualMaterials:{...c.visualMaterials,...(r.type==='bath'?{floor:'sand-travertine'}:{})}};}
+ if(!roomId){f.interior.default=id;f.exterior={...f.exterior,catalogMaterials:{},styleRoles:{floor:false,wall:false,accent:false,fabric:false},explicitRoles:{...f.exterior?.explicitRoles,floor:true,wall:true,accent:true,fabric:true},wall:c.wall,floor:c.floor,accent:c.accent,fabric:c.fabric,pillow:c.pillow,rug:c.rug,surface:c.surface,visualMaterials:{...c.visualMaterials}};}
  BMH.finishInvalidate?.();BMH.save();return true;
 };
 BMH.interiorCollectionsHtml=()=>{
