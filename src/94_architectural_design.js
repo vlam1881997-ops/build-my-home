@@ -35,7 +35,7 @@
   if(upperCount<0)return fail('Cần ít nhất một phòng ngủ tầng trệt cho người thân đã khai báo.');
   const beds=Array.from({length:Math.max(0,upperCount)},(_,i)=>i===0?'Phòng ngủ chính':p.household.children?.[i-1]?.name?'Phòng '+p.household.children[i-1].name:'Phòng ngủ '+(i+1));
   const extraBaths=Math.max(0,program.bathrooms-floors),names=Array.from({length:floors},()=>[]);
-  if(program.floorProgram){for(let f=0;f<floors;f++){const v=program.floorProgram[f];if(v.garage)names[f].push(['Gara','garage']);if(v.living)names[f].push(['Phòng khách','living']);if(v.kitchen)names[f].push(['Bếp + ăn','kitchen']);for(let i=0;i<v.bedrooms;i++)names[f].push(['Phòng ngủ '+(i+1),'bed']);if(v.office)names[f].push(['Phòng làm việc','office']);if(v.worship==='room')names[f].push(['Phòng thờ','worship']);for(let i=1;i<v.bathrooms;i++)names[f].push(['WC bổ sung '+(i+1),'bath']);for(const r of v.extraRooms||[])for(let i=0;i<r.count;i++)names[f].push([r.name+(r.count>1?' '+(i+1):''),r.type,{programRoomId:r.id,minArea:r.minArea}]);}}else{
+  if(program.floorProgram){for(let f=0;f<floors;f++){const v=program.floorProgram[f];if(v.garage)names[f].push(['Gara','garage']);if(v.living)names[f].push(['Phòng khách','living']);if(v.kitchen)names[f].push(['Bếp + ăn','kitchen']);for(let i=0;i<v.bedrooms;i++)names[f].push(['Phòng ngủ '+(i+1),'bed']);if(v.office)names[f].push(['Phòng làm việc','office']);if(v.worship==='room')names[f].push(['Phòng thờ','worship']);for(let i=1;i<v.bathrooms;i++)names[f].push(['WC bổ sung '+(i+1),'bath']);for(const r of v.extraRooms||[])for(let i=0;i<r.count;i++)names[f].push([r.name+(r.count>1?' '+(i+1):''),r.type,{programRoomId:r.id,minArea:r.minArea,width:r.width,depth:r.depth}]);}}else{
   names[0].push(...(program.garage?[['Gara','garage']]:[]),['Phòng khách','living'],['Bếp + ăn','kitchen']);
   if(groundBeds)names[0].push(['Phòng ông bà','bed']);
   if(program.office)names[0].push(['Phòng làm việc','office']);
@@ -44,9 +44,11 @@
   else beds.forEach((n,i)=>names[1+i%(floors-1)].push([n,'bed']));
   for(let i=0;i<extraBaths;i++)names[i%floors].push(['WC bổ sung '+(i+1),'bath']);
   }
-  const minDepth=item=>Math.max(({living:3.0,kitchen:2.8,bed:2.95,garage:5.5,office:2.6,worship:2.4,bath:2.2,laundry:1.8,storage:1.5,gym:2.6,hobby:2.4,custom:2.0})[item[1]]||2.6,Number(item[2]?.minArea||0)/bank);
+  const useDepth=item=>({living:3.0,kitchen:2.8,bed:2.95,garage:5.5,office:2.6,worship:2.4,bath:2.2,laundry:1.8,storage:1.5,gym:2.6,hobby:2.4,custom:2.0})[item[1]]||2.6;
+  const minDepth=item=>Number(item[2]?.depth)>0?Number(item[2].depth):Math.max(useDepth(item),Number(item[2]?.minArea||0)/(Number(item[2]?.width)>0?Number(item[2].width):bank));
+  for(const item of names.flat()){const v=item[2];if(!v)continue;const width=Number(v.width)>0?Number(v.width):bank,depth=minDepth(item);if(width>bank+.001||depth<useDepth(item)-.001||width*depth<Number(v.minArea||0)-.001)return fail(item[0]+': số đo yêu cầu chưa vừa bề ngang hoặc diện tích tối thiểu. Giữ yêu cầu để bạn điều chỉnh.');}
   const rows=names.map(list=>wide?Array.from({length:Math.max(1,Math.ceil(list.length/2))},(_,i)=>[list[i*2],list[i*2+1]]):list.map(x=>[x]));
-  if(rows.some(row=>row.reduce((n,pair)=>n+Math.max(...pair.filter(Boolean).map(x=>minDepth(x)),2.6),0)>mainD+.001))return fail('Chưa đủ chiều sâu cho số phòng yêu cầu với kích thước sử dụng được. Giảm công năng, tăng số tầng hoặc điều chỉnh khoảng lùi.');
+  if(rows.some(row=>row.reduce((n,pair)=>n+Math.max(...pair.filter(Boolean).map(x=>minDepth(x)),0),0)>mainD+.001))return fail('Chưa đủ chiều sâu cho số phòng yêu cầu với kích thước sử dụng được. Giảm công năng, tăng số tầng hoặc điều chỉnh khoảng lùi.');
   if(program.garage&&bank<3)return fail('Bề ngang gara chưa đủ cho chỗ đỗ mẫu. Cần kích thước xe và lối vào thực tế.');
   if(program.elevator&&bank-1.8<1.35&&wide)return fail('Khối thang máy và vệ sinh chưa đủ chỗ. Cần phân chia công năng riêng cho bề ngang này.');
   if(program.elevator&&!wide&&bank-1.8<1.35)return fail('Khối thang máy 1,80 m để lại WC quá hẹp. Tăng bề ngang hoặc điều chỉnh công năng.');
@@ -61,16 +63,16 @@
    const wc=!program.floorProgram||program.floorProgram[f].bathrooms>0,wcType=wc?'bath':'utility',wcName=wc?'WC T'+(f+1):'Khoang kỹ thuật T'+(f+1);
    const hx=x0+bank,hall=add(f,'Sảnh / hành lang T'+(f+1),'corridor',hx,y0,hallW,D);
    if(f===0)opening(hall,'door','north',1.0,.5,{height:2.4});
-   const list=rows[f].length?rows[f]:[[null]],minimum=list.map(pair=>Math.max(...pair.filter(Boolean).map(x=>minDepth(x)),2.6));
-   const weights=list.map(pair=>pair.some(x=>x?.[1]===(strategy==='climate'?'living':strategy==='balanced'?'kitchen':'bed'))?1.5:1);
+   const list=rows[f].length?rows[f]:program.floorProgram?[]:[[null]],minimum=list.map(pair=>Math.max(...pair.filter(Boolean).map(x=>minDepth(x))));
+   const weights=list.map(pair=>pair.filter(Boolean).every(x=>Number(x[2]?.depth)>0)?0:pair.some(x=>x?.[1]===(strategy==='climate'?'living':strategy==='balanced'?'kitchen':'bed'))?1.5:1);
    const remaining=mainD-minimum.reduce((a,b)=>a+b,0),weightSum=weights.reduce((a,b)=>a+b,0);let cursor=y0;
    list.forEach((pair,i)=>{
-    const depth=minimum[i]+remaining*weights[i]/weightSum;
+    const depth=minimum[i]+(weightSum?remaining*weights[i]/weightSum:0);
     for(let side=0;side<(wide?2:1);side++){
-     const item=pair[side]||(program.floorProgram?['Không gian linh hoạt','corridor']:['Sinh hoạt chung','living']),x=side?hx+hallW:x0,r=add(f,item[0],item[1],x,cursor,bank,depth);if(item[2])r.programRoomId=item[2].programRoomId;
+     const item=pair[side]||(!program.floorProgram?['Sinh hoạt chung','living']:null);if(!item)continue;const width=Number(item[2]?.width)>0?Number(item[2].width):bank,roomDepth=Number(item[2]?.depth)>0?Number(item[2].depth):depth,x=side?hx+hallW:hx-width,r=add(f,item[0],item[1],x,cursor,width,roomDepth);if(item[2])r.programRoomId=item[2].programRoomId;
      opening(r,'door',side?'west':'east',r.type==='bath'?.8:.9,.76);
      if(r.type==='garage')opening(r,'door','north',2.8,.5,{height:2.4});
-     else if(i===0)opening(r,'window','north',r.type==='living'?Math.min(2.4,bank-.4):1.5,.5,{height:r.type==='living'?1.65:1.4,sill:r.type==='living'?.65:.9});
+     else if(i===0)opening(r,'window','north',r.type==='living'?Math.min(2.4,width-.4):1.5,.5,{height:r.type==='living'?1.65:1.4,sill:r.type==='living'?.65:.9});
      // Side windows require the side boundary to be open; this remains a brief assumption.
      if(r.type!=='corridor')opening(r,'window',side?'east':'west',r.type==='bath'?.65:1.4,.38,r.type==='bath'?{height:.55,sill:1.7}:{});
     }cursor+=depth;
@@ -140,34 +142,59 @@
  document.addEventListener('change',e=>{if(!e.target.matches?.('[data-architect-program]'))return;const n=Number(e.target.value);if(!Number.isInteger(n)||n<1||n>20)return;const s=B.designState();s.program={...(s.program||{}),mode:'custom',[e.target.dataset.architectProgram]:n};B.save();});
  // Automatic eaves remain inside the declared parcel; explicit edits stay explicit.
  const roofSpec=B.roofDesignSpec;
- B.roofDesignSpec=()=>{const spec=roofSpec();if(B.measuredDesignSettings().roof.overhang>=0)return spec;const p=B.state.project,b=B.sceneFootprintBounds(B.floorRooms(Number(p.site.floors)-1));if(!b)return spec;return {...spec,overhang:Math.max(0,Math.min(spec.overhang,b.x,b.y,p.site.width-b.x-b.width,p.site.depth-b.y-b.depth))};};
+ B.roofDesignSpec=()=>{let spec=roofSpec();const p=B.state.project,d=B.measuredDesignSettings().roof;if(!B.houseStyle()&&/pháp|french/i.test(p.style)&&d.type==='auto')spec={...spec,type:'hip',name:'Mái bốn dốc',pitchDeg:d.pitchDeg||30,overhang:d.overhang>=0?d.overhang:.25,source:'Gợi ý hình khối Pháp; có thể chỉnh thông số mái'};if(d.overhang>=0)return spec;const b=B.sceneFootprintBounds(B.floorRooms(Number(p.site.floors)-1));if(!b)return spec;return {...spec,overhang:Math.max(0,Math.min(spec.overhang,b.x,b.y,p.site.width-b.x-b.width,p.site.depth-b.y-b.depth))};};
  B.facadeComponents=()=>{
-  const p=B.state.project,l=B.projectLevels(),s=B.houseStyle(),id=s?.id||'modern',parts=[];
-  const add=(floor,roomId,kind,x,y,z,w,h,d,role='accent')=>{if(w<=0||h<=0||d<=0)return;const finish=B.finishPalette(roomId);parts.push({id:'facade-'+parts.length,floor,roomId,kind,x,y,z,w,h,d,role,color:finish[role]||s?.accent||'#746959'});};
+  const p=B.state.project,l=B.projectLevels(),s=B.houseStyle(),id=s?.id||(/pháp|french/i.test(p.style)?'french':'modern'),parts=[],componentIds=new Set();
+  const add=(floor,roomId,kind,x,y,z,w,h,d,role='accent')=>{
+   // Decorative profiles are architectural finish, not inferred columns or
+   // structural beams. Clip projections to the entered site; no implicit
+   // permission to build over a boundary or change a measured opening.
+   if(![x,y,z,w,h,d].every(Number.isFinite))return;const x2=Math.min(Number(p.site.width),x+w),z2=Math.min(Number(p.site.depth),z+d);x=Math.max(0,x);z=Math.max(0,z);w=x2-x;d=z2-z;if(w<=.005||h<=.005||d<=.005)return;const finish=B.finishPalette(roomId)||{},componentId='facade-'+floor+'-'+(roomId||'house')+'-'+kind+'-'+[x,y,z,w,h,d].map(n=>Math.round(n*1000)).join('-');if(componentIds.has(componentId))return;componentIds.add(componentId);parts.push({id:componentId,floor,roomId,kind,x,y,z,w,h,d,role,styleId:id,generic:true,structural:false,color:finish[role]||s?.accent||'#746959'});
+  };
   for(let f=0;f<l.floors;f++){
    const g=B.scenePlanGeometry(p.plan,f),base=f*l.floorHeight;
    for(const wall of g.walls.filter(w=>w.roomIds.length===1)){
     const r=p.plan.rooms.find(r=>r.id===wall.roomIds[0]),front=wall.horizontal&&Math.abs(wall.axis-r.y)<.001;if(!front)continue;
     const z=wall.axis-wall.thickness/2,mid=(wall.a+wall.b)/2,len=wall.b-wall.a;
     if(wall.kind==='wall'&&len>.36){
-     if(['classic','neo','indochine','artdeco'].includes(id)){
-      const width=Math.min(.28,len-.12);for(const x of [wall.a+.06,wall.b-width-.06])add(f,r.id,'pilaster',x,base+l.slab,z-.08,width,l.floorHeight-l.slab-.18,.08);
+     if(['classic','neo','french','indochine','artdeco'].includes(id)){
+      const ornate=['classic','french'].includes(id),width=Math.min(ornate?.30:.22,len-.12),projection=ornate?.105:.075;
+      for(const x of [wall.a+.06,wall.b-width-.06]){
+       add(f,r.id,'pilaster',x,base+l.slab+.10,z-projection,width,l.floorHeight-l.slab-.30,projection,'wall');
+       if(['classic','neo','french'].includes(id)){
+        add(f,r.id,'pilaster-base',x-.035,base+l.slab,z-projection-.03,width+.07,.13,projection+.03,'wall');
+        add(f,r.id,'pilaster-capital',x-.045,base+l.floorHeight-.24,z-projection-.045,width+.09,.13,projection+.045,'wall');
+        if(ornate)add(f,r.id,'pilaster-flute',x+width*.42,base+l.slab+.25,z-projection-.01,width*.16,l.floorHeight-l.slab-.62,.015);
+       }
+      }
      }else if(!['minimal','bauhaus'].includes(id)&&len>.55){
       const width=Math.min(.42,len-.2),height=l.floorHeight-l.slab-.22;
       for(let x=mid-width/2;x<mid+width/2-.02;x+=.075)add(f,r.id,'wood-slat',x,base+l.slab+.1,z-.04,.035,height,.04);
      }
     }
     if(wall.kind==='window'){
-     const capDepth=['japanese','tropical','vietnamese'].includes(id)?.34:.18;
+     const capDepth=id==='tropical'?.42:id==='japanese'?.36:id==='japandi'?.24:.18;
      add(f,r.id,'window-hood',wall.a-.05,base+l.slab+wall.sill+wall.height+.04,z-capDepth,len+.1,.07,capDepth);
      add(f,r.id,'window-sill',wall.a-.04,base+l.slab+wall.sill-.05,z-.12,len+.08,.05,.12);
+     if(['classic','neo','french'].includes(id)){
+      for(const x of [wall.a-.07,wall.b+.015])add(f,r.id,'window-surround',x,base+l.slab+wall.sill,z-.06,.055,wall.height,.06,'wall');
+      add(f,r.id,'window-pediment',wall.a-.08,base+l.slab+wall.sill+wall.height+.12,z-.08,len+.16,id==='neo'?.05:.09,.08,'wall');
+     }
+     if(['japandi','japanese','tropical'].includes(id)){
+      const blades=id==='tropical'?4:2;for(let i=0;i<blades;i++)add(f,r.id,'shade-blade',wall.a-.04,base+l.slab+wall.sill+wall.height+.14+i*.085,z-capDepth,len+.08,.025,capDepth);
+     }
      if(['indochine','mediterranean','tuscan'].includes(id))for(const end of [wall.a-.17,wall.b+.03])for(let h=.07;h<wall.height;h+=.11)add(f,r.id,'shutter',end,base+l.slab+wall.sill+h,z-.035,.14,.05,.035);
     }
     if(wall.kind==='door'&&f===0){
      const space=Math.max(0,z),depth=Math.min(.45,space);if(depth>.12)add(f,r.id,'entry-canopy',wall.a-.1,base+l.slab+wall.height+.10,z-depth,len+.2,.10,depth,'wall');
     }
    }
-   const b=B.sceneFootprintBounds(g.rooms);if(b&&['classic','neo','indochine','artdeco','vietnamese'].includes(id))add(f,null,'cornice',b.x,base+l.floorHeight-.12,b.y-B.measuredWallThickness(false)/2-.04,b.width,.12,.08,'wall');
+   const b=B.sceneFootprintBounds(g.rooms);if(b){const z=b.y-B.measuredWallThickness(false)/2;
+    if(['classic','neo','french','indochine','artdeco','vietnamese'].includes(id)){
+     add(f,null,'cornice',b.x,base+l.floorHeight-.12,z-.065,b.width,.12,.10,'wall');
+     if(['classic','french'].includes(id))add(f,null,'cornice-step',b.x-.04,base+l.floorHeight-.035,z-.11,b.width+.08,.065,.15,'wall');
+    }else if(['modern','contemporary','minimal','bauhaus'].includes(id))add(f,null,'horizontal-band',b.x,base+l.floorHeight-.10,z-.04,b.width,.07,.06,id==='minimal'?'wall':'accent');
+   }
   }
   const roof=B.sceneRoofSpec(),b=B.sceneFootprintBounds(B.floorRooms(l.floors-1)),top=l.floors*l.floorHeight+l.slab;
   if(roof&&b?.rectangular&&roof.eave>top+.001){const t=B.measuredWallThickness(false),f=l.floors-1,h=roof.eave-top;

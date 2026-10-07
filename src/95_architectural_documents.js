@@ -13,7 +13,7 @@
   const tick=p=>line(p.x-1,p.y+1,p.x+1,p.y-1,.23),tx=(A.x+C.x)/2+nx*1.2,ty=(A.y+C.y)/2+ny*1.2;
   return '<g class="sheet-dimension" data-mm="'+attr(label)+'">'+line(a.x+nx*.8,a.y+ny*.8,A.x+nx*1.3,A.y+ny*1.3,.13,light)+line(b.x+nx*.8,b.y+ny*.8,C.x+nx*1.3,C.y+ny*1.3,.13,light)+line(A.x,A.y,C.x,C.y,.15)+tick(A)+tick(C)+text(tx,ty,label,2.25,'middle',angle?'transform="rotate('+angle+' '+tx+' '+ty+')"':'')+'</g>';
  };
- const words=(value,max)=>{const lines=[''];for(const word of String(value||'').split(/\s+/)){if((lines.at(-1)+' '+word).trim().length>max&&lines.at(-1))lines.push(word);else lines[lines.length-1]+=(lines.at(-1)?' ':'')+word;}return lines;};
+ const words=(value,max)=>B.drawingWrap(value,max);
  const blockText=(x,y,value,max=36,size=2.4)=>words(value,max).map((s,i)=>text(x,y+i*4,s,size)).join('');
  const paperFrame=B.sheetFrame;
  B.sheetFrame=options=>{
@@ -21,15 +21,15 @@
   return paperFrame(options).replace('BUILD MY HOME / ','BMH DESIGN / ').replace('#24342c',ink).replaceAll('#26342e',ink).replace('BẢNG THỐNG KÊ',options.scaleLabel||'BẢNG THỐNG KÊ');
  };
  const sheet=({code,title,scale,scaleLabel,body,sidebar='',caption='',floor})=>{
-  const svg=B.sheetFrame({code,title,scale,scaleLabel,content:body,sidebar,caption});
-  return svg.replace('<g font-family=', '<g font-family=').replace('data-sheet-code="'+code+'"','data-sheet-code="'+code+'" data-floor="'+(floor??'')+'" data-document-version="2"');
+  const svg=B.sheetFrame({code,title,scale,scaleLabel,content:body,sidebar,caption,floor});
+  return svg.replace('<g font-family=', '<g font-family=').replace('data-sheet-code="'+code+'"','data-sheet-code="'+code+'" data-document-version="3"');
  };
  const groupTitle=(x,y,title)=>line(x,y+2,x+73,y+2,.28,blue)+text(x,y,title,2.9,'start','font-weight="bold"');
  const scaleBar=(x,y,scale)=>{const k=1000/scale;let s=text(x,y-2,'THƯỚC TỶ LỆ · m',2.1);for(let i=0;i<4;i++)s+=rect(x+i*k,y,k,1.4,i%2?'white':ink,.15)+text(x+i*k,y+5,i,2.1,'middle');return s+text(x+4*k,y+5,'4',2.1,'middle');};
  const compass=(x,y,rotation)=>'<g transform="translate('+x+' '+y+')"><circle r="5.5" fill="none" stroke="'+light+'" stroke-width=".2"/><g transform="rotate('+rotation+')"><path d="M0 -5L1.8 3L0 1L-1.8 3Z" fill="'+blue+'"/>'+line(0,-5,0,4,.2,blue)+'</g>'+text(0,-8,'BẮC',2.2,'middle')+'</g>';
  const quantityRoom=r=>B.measuredQuantities().floors.find(f=>f.floor===r.floor)?.rooms.find(q=>q.roomId===r.id);
  B.architecturalRoomSchedule=(floor=0)=>B.floorRooms(floor).map((r,i)=>({code:'P'+String(i+1).padStart(2,'0'),...r,net:quantityRoom(r)?.floorFinish??null}));
- B.architecturalFurnitureSchedule=(floor=0)=>B.floorRooms(floor).flatMap(r=>B.roomFurnitureLayout(r).map((p,i)=>({code:'N'+String(B.floorRooms(floor).slice(0,B.floorRooms(floor).indexOf(r)).reduce((a,r)=>a+B.roomFurnitureLayout(r).length,0)+i+1).padStart(2,'0'),...p,name:({washingMachine:'Máy giặt · mẫu 600 × 650',bedDouble:'Giường đôi',bedSingle:'Giường đơn',loungeDesignSofa:'Sofa',loungeChair:'Ghế thư giãn',tableCoffee:'Bàn trà',cabinetTelevision:'Kệ TV',televisionModern:'TV',table:'Bàn ăn',chair:'Ghế ăn',kitchenSink:'Chậu / tủ bếp',kitchenStove:'Bếp nấu',kitchenFridge:'Tủ lạnh',bathroomSink:'Lavabo',toilet:'Bồn cầu',shower:'Tắm kính',bookcaseClosedWide:'Tủ / kệ',cabinetBed:'Tủ đầu giường',desk:'Bàn làm việc',chairDesk:'Ghế làm việc',sideTable:'Bàn phụ',floorLamp:'Đèn đứng',pottedPlant:'Chậu cây'})[p.model]||p.model,room:r.name})));
+ B.architecturalFurnitureSchedule=(floor=0)=>B.floorRooms(floor).flatMap(r=>B.roomFurnitureLayout(r).map((p,i)=>({code:'N'+String(B.floorRooms(floor).slice(0,B.floorRooms(floor).indexOf(r)).reduce((a,r)=>a+B.roomFurnitureLayout(r).length,0)+i+1).padStart(2,'0'),...p,name:({washingMachine:'Máy giặt · mẫu 600 × 650',bedDouble:'Giường đôi',bedSingle:'Giường đơn',loungeDesignSofa:'Sofa',loungeChair:'Ghế thư giãn',tableCoffee:'Bàn trà',cabinetTelevision:'Kệ TV',televisionModern:'TV',table:'Bàn ăn',chair:'Ghế ăn',kitchenSink:'Chậu / tủ bếp',kitchenStove:'Bếp nấu',kitchenFridge:'Tủ lạnh',bathroomSink:'Lavabo',toilet:'Bồn cầu',shower:'Tắm kính',bookcaseClosedWide:'Tủ / kệ',cabinetBed:'Tủ đầu giường',desk:'Bàn làm việc',chairDesk:'Ghế làm việc',sideTable:'Bàn phụ',floorLamp:'Đèn đứng',pottedPlant:'Chậu cây'})[p.model]||p.model,room:r.name,roomId:r.id})));
  const planLayout=floor=>{
   const site=B.state.project.site,W=Number(site.width),D=Number(site.depth),rotate=D>W*1.35,spanW=rotate?D:W,spanH=rotate?W:D;
   const scale=B.drawingScale(spanW+2.2,spanH+3,308,188),k=1000/scale,ox=22+(288-spanW*k)/2,oy=40+(185-spanH*k)/2;
@@ -37,20 +37,23 @@
   const box=(x,y,w,h,fill='none',width=.18,color=ink,extra='')=>{const a=point(x,y),b=point(x+w,y+h);return rect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(a.x-b.x),Math.abs(a.y-b.y),fill,width,color,extra);};
   return {W,D,rotate,scale,k,ox,oy,point,box,spanW,spanH};
  };
+ const parcelForSheet=()=>B.state.project.site.useParcelGeometry?B.parcelGeometry?.():null;
+ const parcelOutline=p=>{const g=parcelForSheet();return g?polygon(g.points.map(q=>p.point(q.x,q.y)),'none',.22,light,'stroke-dasharray="2 1" data-parcel-basis="'+attr(g.basis)+'" data-parcel-point-count="'+g.points.length+'"'):p.box(0,0,p.W,p.D,'none',.22,light,'stroke-dasharray="2 1" data-parcel-basis="customer-dimensions"');};
+ const planNorth=p=>{const parcel=parcelForSheet(),bearing=Number.isFinite(parcel?.bearing)?parcel.bearing:B.directionAngle(B.state.project.site.frontDirection||'Nam'),basis=parcel?.basis==='map'?'map-orientation':'customer-direction';return '<g data-north-bearing="'+n(bearing)+'" data-north-basis="'+basis+'">'+compass(302,39,-bearing+(p.rotate?-90:0))+text(302,51,basis==='map-orientation'?'Theo bản đồ':'Hướng đã nhập',1.8,'middle')+'</g>';};
  const roomLabel=(r,code,p,interior)=>{
   const a=p.point(r.x,r.y),b=p.point(r.x+r.w,r.y+r.h),left=Math.min(a.x,b.x),top=Math.min(a.y,b.y),w=Math.abs(b.x-a.x),h=Math.abs(b.y-a.y),items=B.roomFurnitureLayout(r);
-  const candidates=[[.5,.55],[.5,.8],[.5,.3],[.25,.65],[.75,.65],[.5,.92]],f=2.45,rows=words(r.name.toUpperCase(),Math.max(10,Math.floor((w-3)/(f*.53)))),labelW=Math.min(w-2,Math.max(12,...rows.map(s=>s.length*f*.53))+2),labelH=(rows.length+1)*3.35+3;
+  const candidates=[[.5,.55],[.5,.8],[.5,.3],[.25,.65],[.75,.65],[.5,.92]],f=2.45,nameRows=words(r.name.toUpperCase(),Math.max(4,Math.floor((w-3)/(f*.57)))),maxRows=Math.max(1,Math.min(5,Math.floor((h-8)/3.35))),small=w<14||h<11,rows=small?[code]:nameRows.length>maxRows?(maxRows===1?[code]:[...nameRows.slice(0,maxRows-1),'… '+code]):nameRows,labelW=Math.max(0,Math.min(w-1,Math.max(5,...rows.map(s=>s.length*f*.57))+1)),labelH=(rows.length+(small?0:1))*3.35+2;
   let chosen=candidates[0],best=Infinity;
   for(const c of candidates){const x=r.x+r.w*(p.rotate?1-c[1]:c[0]),y=r.y+r.h*(p.rotate?c[0]:c[1]),clear=items.reduce((sum,i)=>sum+(x>i.x-.2&&x<i.x+i.w+.2&&y>i.y-.2&&y<i.y+i.d+.2?1:0),0);if(clear<best){best=clear;chosen=c;}}
   const cx=left+w*chosen[0],cy=Math.max(top+labelH/2+.5,Math.min(top+h-labelH/2-.5,top+h*chosen[1])),q=quantityRoom(r),area=['stairs','elevator'].includes(r.type)?r.w*r.h:q?.floorFinish;
-  return '<g class="architectural-room-label" data-room-id="'+attr(r.id)+'">'+rect(cx-labelW/2,cy-labelH/2,labelW,labelH,'white',0,'white')+rows.map((s,i)=>text(cx,cy-labelH/2+3.4+i*3.35,s,f,'middle','font-weight="bold"')).join('')+text(cx,cy+labelH/2-1.4,code+' · '+(area??r.w*r.h).toFixed(2)+' m²',2.2,'middle')+'</g>';
+  return '<g class="architectural-room-label" data-room-id="'+attr(r.id)+'"><title>'+esc(r.name+' · tên đầy đủ: bảng diện tích T'+(r.floor+1))+'</title>'+rect(cx-labelW/2,cy-labelH/2,labelW,labelH,'white',0,'white')+rows.map((s,i)=>text(cx,cy-labelH/2+3.4+i*3.35,s,f,'middle','font-weight="bold"')).join('')+(small?'':text(cx,cy+labelH/2-1.4,code+' · '+(area??r.w*r.h).toFixed(2)+' m²',2.2,'middle'))+'</g>';
  };
  const planOpenings=(floor,p)=>{
   const openings=B.state.project.plan.openings.filter(o=>o.floor===floor);let body='';
-  for(const o of openings){const span=B.openingWallSpan(o);if(!span)continue;const a=p.point(span.o==='h'?span.a:span.c,span.o==='h'?span.c:span.a),b=p.point(span.o==='h'?span.b:span.c,span.o==='h'?span.c:span.b),dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy),nx=-dy/len,ny=dx/len;
+  for(const o of openings){const span=B.openingWallSpan(o);if(!span)continue;body+='<g pointer-events="none" data-opening-id="'+attr(o.id)+'" data-room-reference="'+attr(o.roomId)+'" data-span-orientation="'+attr(span.o)+'" data-span-start-m="'+n(span.a)+'" data-span-end-m="'+n(span.b)+'" data-wall-axis-m="'+n(span.c)+'" data-offset="'+n(o.offset||0)+'">';const a=p.point(span.o==='h'?span.a:span.c,span.o==='h'?span.c:span.a),b=p.point(span.o==='h'?span.b:span.c,span.o==='h'?span.c:span.b),dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy),nx=-dy/len,ny=dx/len;
    if(o.kind==='door'&&o.passage){body+='<g data-opening-id="'+attr(o.id)+'" data-door-motion="passage">'+line(a.x,a.y,b.x,b.y,.14,light,'1 .7')+'</g>';}else if(o.kind==='door'){const leaf=B.doorLeafGeometry(o);if(leaf){const h=p.point(leaf.hinge.x,leaf.hinge.y),open=p.point(leaf.open.x,leaf.open.y),closed=p.point(leaf.closed.x,leaf.closed.y),rad=leaf.width*p.k;body+=line(h.x,h.y,open.x,open.y,.20)+'<path d="M'+n(closed.x)+' '+n(closed.y)+' A'+n(rad)+' '+n(rad)+' 0 0 '+leaf.sweep+' '+n(open.x)+' '+n(open.y)+'" fill="none" stroke="'+light+'" stroke-width=".15" data-opening-id="'+attr(o.id)+'"/>';}else{body+='<g data-opening-id="'+attr(o.id)+'" data-door-motion="sliding">'+line(a.x,a.y,b.x,b.y,.3,blue)+line(a.x+nx*.7,a.y+ny*.7,(a.x+b.x)/2+nx*.7,(a.y+b.y)/2+ny*.7,.18)+line((a.x+b.x)/2-nx*.7,(a.y+b.y)/2-ny*.7,b.x-nx*.7,b.y-ny*.7,.18)+'</g>';}}
    else for(const off of [-.04,0,.04])body+=line(a.x+nx*off*p.k,a.y+ny*off*p.k,b.x+nx*off*p.k,b.y+ny*off*p.k,.17,o.sill>1.2?light:blue,o.sill>1.2?'1 .6':'');
-   const mx=(a.x+b.x)/2+nx*2.6,my=(a.y+b.y)/2+ny*2.6,code=B.openingCode(o);body+=rect(mx-3.1,my-1.8,6.2,3.6,'white',.12,light)+text(mx,my+.75,code,2.1,'middle');
+   const mx=(a.x+b.x)/2+nx*2.6,my=(a.y+b.y)/2+ny*2.6,code=B.openingCode(o);body+=rect(mx-3.1,my-1.8,6.2,3.6,'white',.12,light)+text(mx,my+.75,code,2.1,'middle')+'</g>';
   }return '<g class="architectural-openings">'+body+'</g>';
  };
  const planDimensions=(floor,p)=>{
@@ -68,8 +71,10 @@
  B.sectionCutY=()=>{const stair=B.state.project.plan.rooms.find(r=>r.type==='stairs'&&r.floor===0),part=stair&&B.stairGeometry(stair)[0];return part?part.y+part.d/2:Number(B.state.project.site.depth)/2;};
  B.architecturalPlanSheet=(floor=0,interior=false)=>{
   const p=planLayout(floor),rooms=B.floorRooms(floor),schedule=B.architecturalRoomSchedule(floor),g=B.scenePlanGeometry(B.state.project.plan,floor),q=B.measuredQuantities().floors.find(f=>f.floor===floor),code=(interior?'NT-':'KT-')+String(floor+1).padStart(2,'0');let body='';
-  body+=p.box(0,0,p.W,p.D,'white',.22,light,'stroke-dasharray="2 1"');
-  for(const r of rooms){const f=B.finishPalette(r.id),fill=interior?(f.floor||'#eeeae3'):'white';body+=p.box(r.x,r.y,r.w,r.h,fill,0,'white','fill-opacity="'+(interior?'.18':'1')+'" data-room-reference="'+attr(r.id)+'"');}
+  const parcel=B.state.project.site.useParcelGeometry?B.parcelGeometry?.():null,holes=B.stairFloorHoles(floor);
+  body+=parcelOutline(p);
+  for(const r of rooms){const f=B.finishPalette(r.id),fill=interior?(f.floor||'#eeeae3'):'white';for(const panel of B.slabPanels(r,holes))body+=p.box(panel.x,panel.y,panel.w,panel.d,fill,0,'white','pointer-events="none" fill-opacity="'+(interior?'.18':'1')+'" data-room-reference="'+attr(r.id)+'" data-slab-panel="1" data-model-x="'+n(panel.x)+'" data-model-y="'+n(panel.y)+'" data-model-width="'+n(panel.w)+'" data-model-depth="'+n(panel.d)+'"');}
+  for(const [i,hole]of holes.entries()){body+=p.box(hole.x,hole.y,hole.w,hole.h,'none',.17,blue,'stroke-dasharray="1.4 .7" data-floor-void="'+i+'" data-model-x="'+n(hole.x)+'" data-model-y="'+n(hole.y)+'" data-model-width="'+n(hole.w)+'" data-model-depth="'+n(hole.h)+'"');const a=p.point(hole.x,hole.y),b=p.point(hole.x+hole.w,hole.y+hole.h);body+=line(a.x,a.y,b.x,b.y,.12,light,'1 .7');}
   body+=planDimensions(floor,p);
   // Measured furniture symbols retain their model coordinates and orientation.
   const matrix=p.rotate?'matrix(0 '+(-p.k)+' '+p.k+' 0 '+p.ox+' '+(p.oy+p.W*p.k)+')':'matrix('+p.k+' 0 0 '+p.k+' '+p.ox+' '+p.oy+')';
@@ -77,21 +82,21 @@
   for(const w of g.walls){
    if(w.kind==='door'||w.kind==='window'&&(w.sill||0)<1.2)continue;
    const t=w.thickness,x=w.horizontal?w.a:w.axis-t/2,y=w.horizontal?w.axis-t/2:w.a;
-   body+=p.box(x,y,w.horizontal?w.b-w.a:t,w.horizontal?t:w.b-w.a,'#3e454b',.22,ink,'data-wall-cut="1"');
+   body+=p.box(x,y,w.horizontal?w.b-w.a:t,w.horizontal?t:w.b-w.a,'#3e454b',.22,ink,'pointer-events="none" data-wall-cut="1" data-wall-room-ids="'+attr(w.roomIds.join(','))+'" data-model-x="'+n(x)+'" data-model-y="'+n(y)+'" data-model-width="'+n(w.horizontal?w.b-w.a:t)+'" data-model-depth="'+n(w.horizontal?t:w.b-w.a)+'"');
   }
   body+=planOpenings(floor,p);
   for(const [i,r]of rooms.entries())body+=roomLabel(r,schedule[i].code,p,interior);
   const cut=(a,b,label)=>{const A=p.point(...a),C=p.point(...b);return line(A.x,A.y,C.x,C.y,.25,blue,'3 .8 .4 .8')+circle(A.x,A.y,2.3)+circle(C.x,C.y,2.3)+text(A.x,A.y+.8,label,2.1,'middle')+text(C.x,C.y+.8,label,2.1,'middle');};
   body+=cut([B.sectionCutX(),-.25],[B.sectionCutX(),p.D+.25],'A')+cut([-.25,B.sectionCutY()],[p.W+.25,B.sectionCutY()],'B');
   const front=p.point(p.W/2,-.45);body+=text(front.x,front.y,'MẶT TIỀN / LỐI VÀO',2.4,'middle',p.rotate?'transform="rotate(-90 '+front.x+' '+front.y+')"':'');
-  body+=compass(302,39,-B.directionAngle(B.state.project.site.frontDirection||'Nam')+(p.rotate?-90:0))+scaleBar(22,236,p.scale);
+  body+=planNorth(p)+scaleBar(22,236,p.scale);
   body+=text(90,237,interior?'Nội thất từ đúng vị trí và kích thước trong mô hình 3D.':'Nét cắt tường đậm · nét cửa / nội thất mảnh · đường cắt A–A / B–B.',2.3);
   let sidebar=groupTitle(330,29,interior?'BỐ TRÍ / NỘI THẤT':'CÔNG NĂNG / DIỆN TÍCH')+blockText(330,39,B.state.project.style,34,2.6)+text(330,52,'Sàn bố trí: '+(q?.grossArea||0).toFixed(2)+' m²')+text(330,59,'Sàn hoàn thiện: '+(q?.floorFinish||0).toFixed(2)+' m²');
   sidebar+=text(330,70,'MÃ / KHÔNG GIAN',2.2,'start','font-weight="bold"')+text(407,70,'m²',2.2,'end','font-weight="bold"')+line(330,73,408,73,.2);
-  schedule.slice(0,15).forEach((r,i)=>{const y=80+i*8.3;sidebar+=text(330,y,r.code+' · '+r.name.slice(0,25),2.2)+text(407,y,(['stairs','elevator'].includes(r.type)?r.w*r.h:r.net??r.w*r.h).toFixed(2),2.2,'end')+line(330,y+2,408,y+2,.10,'#cbd0d4');});
+  schedule.slice(0,15).forEach((r,i)=>{const y=80+i*8.3;sidebar+=text(330,y,r.code+' · '+(r.name.length>25?r.name.slice(0,24)+'…':r.name),2.2)+text(407,y,(['stairs','elevator'].includes(r.type)?r.w*r.h:r.net??r.w*r.h).toFixed(2),2.2,'end')+line(330,y+2,408,y+2,.10,'#cbd0d4');});
   const bottom=Math.max(186,84+Math.min(schedule.length,15)*8.3);
   sidebar+=blockText(330,bottom,'Diện tích sàn hoàn thiện trừ phần tường và ô thang. Ô thang / giếng ghi diện tích mốc bố trí.',38,2.15)+blockText(330,bottom+17,'Trục và chuỗi kích thước theo mốc phòng. Xem bảng cửa và bản vẽ chi tiết.',38,2.15);
-  if(schedule.length>15)sidebar+=text(330,241,'Xem bảng diện tích để đủ '+schedule.length+' phòng.',2.2);
+  sidebar+=text(330,241,'Tên đầy đủ: bảng diện tích T'+(floor+1)+'.',2.2);
   return sheet({code,title:(interior?'MẶT BẰNG NỘI THẤT':'MẶT BẰNG KIẾN TRÚC')+' · TẦNG '+(floor+1),scale:p.scale,body,sidebar,floor,caption:'Đơn vị kích thước mm; diện tích m². Tường ngoài '+Math.round(B.measuredWallThickness(false)*1000)+' / trong '+Math.round(B.measuredWallThickness(true)*1000)+' mm. Trục tham chiếu kiến trúc; chưa phải trục kết cấu.'});
  };
  B.drawingSheetSvg=floor=>B.architecturalPlanSheet(floor??B.state.ui.planner.floor,false);
@@ -122,13 +127,13 @@
  B.elevationSvg=side=>B.architecturalElevationSheet(side||'front');
  B.architecturalSectionSheet=(axis='x')=>{
   const p=B.state.project,l=B.projectLevels(),roof=B.sceneRoofSpec(),cut=axis==='x'?B.sectionCutX():B.sectionCutY(),span=axis==='x'?p.site.depth:p.site.width,total=Math.max(l.floors*l.floorHeight+l.slab,roof?roof.eave+roof.rise:0),scale=B.drawingScale(span+4,total+3,300,194),k=1000/scale,ox=22+(290-span*k)/2,oy=38+(197-total*k)/2;
-  const point=(u,z)=>({x:ox+u*k,y:oy+(total-z)*k}),box=(u,z,w,h,fill='#c5cbd0',extra='')=>{const a=point(u,z+h);return rect(a.x,a.y,w*k,h*k,fill,.22,ink,extra);},intersects=q=>axis==='x'?cut>q.x+.001&&cut<q.x+q.w-.001:cut>q.y+.001&&cut<q.y+(q.h??q.d)-.001;let body='';
+  const point=(u,z)=>({x:ox+u*k,y:oy+(total-z)*k}),box=(u,z,w,h,fill='#c5cbd0',extra='')=>{const a=point(u,z+h);return rect(a.x,a.y,w*k,h*k,fill,.22,ink,extra);},intersects=q=>axis==='x'?cut>q.x+.001&&cut<q.x+q.w-.001:cut>q.y+.001&&cut<q.y+(q.d??q.h)-.001;let body='';
   for(let floor=0;floor<l.floors;floor++){
    const rooms=B.floorRooms(floor),g=B.scenePlanGeometry(p.plan,floor),base=floor*l.floorHeight;
    for(const r of rooms.filter(intersects)){
     for(const q of B.slabPanels(r,B.stairFloorHoles(floor)).filter(intersects))body+=box(axis==='x'?q.y:q.x,base,axis==='x'?q.d:q.w,l.slab,'#646f77','data-section-slab="'+floor+'"');
     if(floor===l.floors-1)for(const q of B.slabPanels(r,B.stairFloorHoles(floor+1)).filter(intersects))body+=box(axis==='x'?q.y:q.x,base+l.floorHeight,axis==='x'?q.d:q.w,l.slab,'#646f77');
-    const u=axis==='x'?r.y:r.x,length=axis==='x'?r.h:r.w,center=point(u+length/2,base+l.floorHeight*.51);body+=text(center.x,center.y,r.name,2.35,'middle');
+    const u=axis==='x'?r.y:r.x,length=axis==='x'?r.h:r.w,center=point(u+length/2,base+l.floorHeight*.51);const fullLabelLines=words(r.name,Math.max(8,Math.floor((length*k-4)/(2.35*.57)))),maxLabelLines=Math.max(1,Math.floor(l.clearHeight*k/3.2)-2),roomCode=B.architecturalRoomSchedule(floor).find(q=>q.id===r.id)?.code||r.id,labelLines=fullLabelLines.length>maxLabelLines?[...fullLabelLines.slice(0,Math.max(0,maxLabelLines-1)),'… '+roomCode]:fullLabelLines;body+='<g data-section-room-id="'+attr(r.id)+'"><title>'+esc(r.name)+'</title>'+labelLines.map((s,i)=>text(center.x,center.y+(i-(labelLines.length-1)/2)*3.2,s,2.35,'middle')).join('')+'</g>';
     if(r.type==='stairs')for(const q of B.stairGeometry(r).filter(intersects))body+=box(axis==='x'?q.y:q.x,base+l.slab+q.base,axis==='x'?q.d:q.w,q.h,'#c8c1b4','data-section-stair="'+attr(r.id)+'"');
     else if(r.type==='elevator'){const A=point(u+.12,base),C=point(u+.12,base+l.floorHeight),D=point(u+length-.12,base),E=point(u+length-.12,base+l.floorHeight);body+=line(A.x,A.y,C.x,C.y,.3)+line(D.x,D.y,E.x,E.y,.3);if(floor===0){const s=B.elevatorSpec(r),depth=axis==='x'?s.cabinDepth:s.cabinWidth;body+=box(u+(length-depth)/2,base+l.slab,depth,2.1,'#e4ecee','data-section-elevator="'+attr(r.id)+'"');}}
     else{const H=point(u+length/2,base+l.floorHeight*.40),a=point(u+.08,base+l.floorHeight-l.ceilingDrop),b=point(u+length-.08,base+l.floorHeight-l.ceilingDrop);body+=line(a.x,a.y,b.x,b.y,.12,light,'1 .6')+text(H.x,H.y,'Htt '+l.clearHeight.toFixed(3)+' m',2.15,'middle');}
@@ -141,19 +146,19 @@
   for(let f=0;f<=l.floors;f++){const z=f*l.floorHeight,A=point(0,z),C=point(span,z);body+=line(A.x,A.y,C.x,C.y,.12,light,'2 1')+text(ox-3,A.y-1.1,f?'+'+z.toFixed(3):'±0.000',2.3,'end');if(f<l.floors)body+=dim(C,point(span,z+l.floorHeight),-10,Math.round(l.floorHeight*1000));}
   const bounds=B.sceneFootprintBounds(p.plan.rooms),wall=B.measuredWallThickness(false),start=(axis==='x'?bounds?.y:bounds?.x)??0,length=(axis==='x'?bounds?.depth:bounds?.width)??span;
   body+=dim(point(start-wall/2,0),point(start+length+wall/2,0),8,Math.round((length+wall)*1000))+scaleBar(22,237,scale);
-  const name=axis==='x'?'A–A':'B–B',sidebar=groupTitle(330,29,'MẶT CẮT / CAO ĐỘ')+text(330,42,'Đường cắt '+name)+text(330,53,(axis==='x'?'x':'y')+' = '+cut.toFixed(3)+' m')+text(330,67,'Cao tầng '+l.floorHeight.toFixed(3)+' m')+text(330,77,'Sàn '+Math.round(l.slab*1000)+' mm')+text(330,87,'Hạ trần '+Math.round(l.ceilingDrop*1000)+' mm')+blockText(330,108,'Ô sàn, vế thang và vị trí phòng được cắt từ hình học thật. Nét đậm là phần bị cắt.',36,2.4)+blockText(330,164,'Móng, dầm, cột và thép chưa được thiết kế. Không tự thêm cấu kiện chịu lực vào bản vẽ này.',36,2.4);
+  const name=axis==='x'?'A–A':'B–B',sidebar=groupTitle(330,29,'MẶT CẮT / CAO ĐỘ')+text(330,42,'Đường cắt '+name)+text(330,53,(axis==='x'?'x':'y')+' = '+cut.toFixed(3)+' m')+text(330,67,'Cao tầng '+l.floorHeight.toFixed(3)+' m')+text(330,77,'Sàn '+Math.round(l.slab*1000)+' mm')+text(330,87,'Hạ trần '+Math.round(l.ceilingDrop*1000)+' mm')+blockText(330,108,'Ô sàn, vế thang và vị trí phòng được cắt từ hình học thật. Nét đậm là phần bị cắt.',36,2.4)+blockText(330,164,'Móng, dầm, cột và thép chưa được thiết kế. Không tự thêm cấu kiện chịu lực vào bản vẽ này.',36,2.4)+text(330,231,'Tên đầy đủ: bảng diện tích.',2.15);
   return sheet({code:axis==='x'?'KT-MC':'KT-MC-02',title:'MẶT CẮT '+name,scale,body:'<g class="projection-content">'+body+'</g>',sidebar,caption:'Htt: chiều cao thông thủy. Cao độ tầng trệt ±0.000. Hình cắt kiến trúc dùng chung sàn / ô thang / mái với mô hình; kết cấu cần hồ sơ riêng.'});
  };
  B.sectionSvg=()=>B.architecturalSectionSheet('x');
  const originalRoofSheet=B.roofSheetSvg;
  B.roofSheetSvg=()=>{
-  const roof=B.sceneRoofSpec();if(!roof)return originalRoofSheet();const p=planLayout(0),spec=B.roofDesignSpec(),surface=B.roofSurfaceSpec(),bounds=B.sceneFootprintBounds(B.floorRooms(B.projectLevels().floors-1));let body=p.box(0,0,p.W,p.D,'white',.2,light,'stroke-dasharray="2 1"');
+  const roof=B.sceneRoofSpec();if(!roof)return originalRoofSheet();const p=planLayout(0),spec=B.roofDesignSpec(),surface=B.roofSurfaceSpec(),bounds=B.sceneFootprintBounds(B.floorRooms(B.projectLevels().floors-1));let body=parcelOutline(p);
   roof.faces.forEach((face,i)=>{body+=polygon(face.map(q=>p.point(q[0],q[2])),surface.color,.25,ink,'fill-opacity=".12" data-roof-face="'+i+'"');const high=face.filter(q=>q[1]>roof.eave+.001),low=face.filter(q=>q[1]<=roof.eave+.001);if(high.length&&low.length){const avg=ps=>[ps.reduce((s,q)=>s+q[0],0)/ps.length,ps.reduce((s,q)=>s+q[2],0)/ps.length],a=avg(high),b=avg(low),A=p.point(a[0]*.65+b[0]*.35,a[1]*.65+b[1]*.35),C=p.point(a[0]*.35+b[0]*.65,a[1]*.35+b[1]*.65),dx=C.x-A.x,dy=C.y-A.y,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len;body+=line(A.x,A.y,C.x,C.y,.24,blue)+polygon([{x:C.x,y:C.y},{x:C.x-ux*2-uy*.8,y:C.y-uy*2+ux*.8},{x:C.x-ux*2+uy*.8,y:C.y-uy*2-ux*.8}],blue,0,blue)+text((A.x+C.x)/2+uy*2,(A.y+C.y)/2-ux*2,spec.pitchDeg+'°',2.5,'middle');}});
   const t=B.measuredWallThickness(false);if(bounds)body+=p.box(bounds.x-t/2,bounds.y-t/2,bounds.width+t,bounds.depth+t,'none',.18,light,'stroke-dasharray="1.6 .8"');
   const minX=Math.min(...roof.corners.map(q=>q[0])),maxX=Math.max(...roof.corners.map(q=>q[0])),minY=Math.min(...roof.corners.map(q=>q[2])),maxY=Math.max(...roof.corners.map(q=>q[2]));
   body+=dim(p.point(minX,minY),p.point(maxX,minY),-8,Math.round((maxX-minX)*1000))+dim(p.point(minX,minY),p.point(minX,maxY),8,Math.round((maxY-minY)*1000));
   if(roof.ridge.length){const q=roof.ridge[0],a=p.point(q[0],q[2]);body+=circle(a.x,a.y,1.7)+text(a.x+3,a.y-2,'NÓC +'+(roof.eave+roof.rise).toFixed(3),2.5);}
-  body+=compass(302,39,-B.directionAngle(B.state.project.site.frontDirection||'Nam')+(p.rotate?-90:0))+scaleBar(22,236,p.scale)+text(90,237,'Mũi tên dốc mái · nét đứt: tường bên dưới.',2.35);
+  body+=planNorth(p)+scaleBar(22,236,p.scale)+text(90,237,'Mũi tên dốc mái · nét đứt: tường bên dưới.',2.35);
   const sidebar=groupTitle(330,29,'MÁI / VẬT LIỆU')+blockText(330,40,B.state.project.style,34,2.6)+text(330,59,spec.name)+text(330,70,'Dốc '+spec.pitchDeg+'°')+text(330,81,'Đua mái '+Math.round(spec.overhang*1000)+' mm')+text(330,92,'Diện tích mặt '+roof.area.toFixed(2)+' m²')+text(330,106,'Mép mái +'+roof.eave.toFixed(3)+' m')+text(330,117,'Đỉnh mái +'+(roof.eave+roof.rise).toFixed(3)+' m')+blockText(330,134,surface.name,34,2.5)+blockText(330,161,'Mặt mái, độ dốc và đỉnh dùng cùng hình học trong 3D. Chưa gồm chồng mí và phụ kiện.',36,2.35)+blockText(330,201,'Chưa thiết kế vì kèo, thoát nước, cấu tạo chống thấm và liên kết mái.',36,2.35);
   return sheet({code:'KT-MAI',title:'MẶT BẰNG MÁI',scale:p.scale,body,sidebar,caption:'Kích thước mm; cao độ m. Mái từ đỉnh 3D; diện tích theo mặt dốc, không cộng hệ số mái. Cấu tạo và thoát nước cần KTS/KS xác nhận.'});
  };
@@ -169,28 +174,27 @@
   const sidebar=groupTitle(330,29,'GIẾNG / XÁC NHẬN')+text(330,42,group.length+' điểm dừng')+text(330,53,'Cửa '+Math.round(s.doorWidth*1000)+' mm')+text(330,67,'Hố pit: '+(s.pitDepth===null?'Chưa xác nhận':Math.round(s.pitDepth*1000)+' mm'))+text(330,80,'Đỉnh giếng: '+(s.headroom===null?'Chưa xác nhận':Math.round(s.headroom*1000)+' mm'))+blockText(330,99,'Hãng / model: '+(s.model||'Chưa xác nhận'),33,2.5)+blockText(330,141,'Giếng và cabin là ô dự trù. Quy cách vách, tải trọng, ray, điện và thông số lắp đặt cần hồ sơ hãng.',35,2.4)+blockText(330,203,'Chưa phải hồ sơ lắp đặt thang máy.',35,2.5);
   return sheet({code:'KT-TM-'+String(index+1).padStart(2,'0'),title:'THANG MÁY / GIẾNG LIÊN THÔNG',scale:0,scaleLabel:'Theo từng hình',body,sidebar,caption:'Mặt bằng 1:'+planScale+'; sơ đồ cao độ 1:'+elevationScale+' trên A3, in 100%. Số đo giếng/cabin theo mô hình; kết cấu và cấu tạo lắp đặt cần hãng / KS xác nhận.'});
  };
- B.furnitureScheduleSheet=(floor=0,page=0)=>{
-  const all=B.architecturalFurnitureSchedule(floor),items=all.slice(page*24,(page+1)*24);let body=groupTitle(15,29,'THỐNG KÊ NỘI THẤT · TẦNG '+(floor+1));
-  const xs=[15,35,104,183,248,292,335,405];body+=rect(15,37,390,10,'#edf1f4',.2);
-  ['Mã','Đồ nội thất','Không gian','Mã mô hình','Rộng','Dài','Cao'].forEach((s,i)=>body+=text(xs[i]+2,43,s,2.6,'start','font-weight="bold"'));
-  items.forEach((q,i)=>{const y=47+i*7.6;body+=line(15,y+7.6,405,y+7.6,.13,'#b5bec6');[q.code,q.name,q.room,q.model,Math.round(q.w*1000),Math.round(q.d*1000),Math.round(q.h*1000)].forEach((s,j)=>body+=text(xs[j]+2,y+5,s,2.35));});
-  body+=text(15,245,'Kích thước mô hình mm; đồ đạc là mẫu tham khảo, chưa phải bản vẽ sản xuất / xác nhận SKU.',2.5);
-  return B.sheetFrame({code:'NT-TK-'+(floor+1)+'-'+(page+1),title:'BẢNG NỘI THẤT · TẦNG '+(floor+1),scale:0,content:body,page:page+1,pages:Math.max(1,Math.ceil(all.length/24))});
+ const tableSheet=({floor,page,rows,widths,headers,code,title,caption,minHeight=8,size=2.35})=>{
+  const pages=B.drawingTablePages(rows,{widths,size,minHeight,height:193,maxRows:24}),index=B.clamp(Number(page)||0,0,pages.length-1),xs=[15];widths.forEach(w=>xs.push(xs.at(-1)+w));let body=rect(15,31,390,10,'#edf1f4');
+  headers.forEach((v,i)=>body+=text(xs[i]+2,37,v,2.5,'start','font-weight="bold"'));let y=41;
+  for(const row of pages[index]){body+='<g data-schedule-id="'+attr(row.id)+'" data-room-reference="'+attr(row.roomId)+'">'+line(15,y+row.height,405,y+row.height,.13,light);row.cells.forEach((cell,j)=>cell.forEach((v,k)=>body+=text(xs[j]+2,y+5+k*size*1.42,v,size)));body+='</g>';y+=row.height;}
+  body+=text(15,243,caption,2.35);return B.sheetFrame({code:code+'-'+(floor+1)+'-'+(index+1),title:title+' · TẦNG '+(floor+1),floor,scale:0,content:body,page:index+1,pages:pages.length});
  };
- B.roomAreaScheduleSheet=(floor=0,page=0)=>{
-  const all=B.architecturalRoomSchedule(floor),rows=all.slice(page*24,(page+1)*24),xs=[15,36,148,201,255,315];let body=rect(15,31,390,10,'#edf1f4');
-  ['Mã','Không gian','Mốc rộng mm','Mốc sâu mm','Diện tích mốc m²','Sàn hoàn thiện m²'].forEach((v,i)=>body+=text(xs[i]+2,37,v,2.5,'start','font-weight="bold"'));
-  rows.forEach((r,i)=>{const y=41+i*8;body+=line(15,y+8,405,y+8,.13,light);[r.code,r.name,Math.round(r.w*1000),Math.round(r.h*1000),(r.w*r.h).toFixed(2),r.net===null?'—':r.net.toFixed(2)].forEach((v,j)=>body+=text(xs[j]+2,y+5.2,v,2.35));});
-  body+=text(15,244,'Mốc theo cạnh phòng trong mô hình. Sàn hoàn thiện trừ phần tường và ô thang; đối chiếu mặt bằng cùng mã dữ liệu.',2.4);
-  return B.sheetFrame({code:'KT-DT-'+(floor+1)+'-'+(page+1),title:'BẢNG DIỆN TÍCH · TẦNG '+(floor+1),scale:0,content:body,page:page+1,pages:Math.ceil(all.length/24)});
- };
+ const furnitureRows=floor=>B.architecturalFurnitureSchedule(floor).map(q=>({id:q.code,roomId:q.roomId,values:[q.code,q.name,q.room,q.model,Math.round(q.w*1000),Math.round(q.d*1000),Math.round(q.h*1000)]}));
+ const furnitureWidths=[20,69,79,65,44,43,70];
+ B.furnitureSchedulePages=floor=>B.drawingTablePages(furnitureRows(floor),{widths:furnitureWidths,size:2.35,minHeight:8,height:193,maxRows:24});
+ B.furnitureScheduleSheet=(floor=0,page=0)=>tableSheet({floor,page,rows:furnitureRows(floor),widths:furnitureWidths,headers:['Mã','Đồ nội thất','Không gian','Mã mô hình','Rộng mm','Dài mm','Cao mm'],code:'NT-TK',title:'BẢNG NỘI THẤT',caption:'Kích thước mô hình mm; đồ đạc là mẫu tham khảo, chưa phải bản vẽ sản xuất / xác nhận SKU.'});
+ const areaRows=floor=>B.architecturalRoomSchedule(floor).map(r=>({id:r.code,roomId:r.id,values:[r.code,r.name,Math.round(r.w*1000),Math.round(r.h*1000),(r.w*r.h).toFixed(2),r.net===null?'—':r.net.toFixed(2)]}));
+ const areaWidths=[21,112,53,54,60,90];
+ B.roomAreaSchedulePages=floor=>B.drawingTablePages(areaRows(floor),{widths:areaWidths,size:2.35,minHeight:8,height:193,maxRows:24});
+ B.roomAreaScheduleSheet=(floor=0,page=0)=>tableSheet({floor,page,rows:areaRows(floor),widths:areaWidths,headers:['Mã','Không gian','Mốc rộng mm','Mốc sâu mm','Diện tích mốc m²','Sàn hoàn thiện m²'],code:'KT-DT',title:'BẢNG DIỆN TÍCH',caption:'Mốc theo cạnh phòng. Sàn hoàn thiện trừ phần tường và ô thang; đối chiếu mặt bằng cùng mã dữ liệu.'});
  const legacySheets=B.architecturalSheets;
  B.architecturalSheets=()=>{
   const previous=legacySheets(),sheets=[];
   for(let f=0;f<Number(B.state.project.site.floors);f++){
    sheets.push({name:'Kiến trúc tầng '+(f+1),svg:B.drawingSheetSvg(f)},{name:'Nội thất tầng '+(f+1),svg:B.interiorSheetSvg(f)});
-   if(B.floorRooms(f).length>15)for(let page=0;page<Math.ceil(B.floorRooms(f).length/24);page++)sheets.push({name:'Bảng diện tích T'+(f+1)+' / '+(page+1),svg:B.roomAreaScheduleSheet(f,page)});
-   for(let page=0;page<Math.max(1,Math.ceil(B.architecturalFurnitureSchedule(f).length/24));page++)sheets.push({name:'Thống kê nội thất T'+(f+1)+' / '+(page+1),svg:B.furnitureScheduleSheet(f,page)});
+   for(let page=0;page<B.roomAreaSchedulePages(f).length;page++)sheets.push({name:'Bảng diện tích T'+(f+1)+' / '+(page+1),svg:B.roomAreaScheduleSheet(f,page)});
+   for(let page=0;page<B.furnitureSchedulePages(f).length;page++)sheets.push({name:'Thống kê nội thất T'+(f+1)+' / '+(page+1),svg:B.furnitureScheduleSheet(f,page)});
    sheets.push(...previous.filter(s=>s.svg.includes('data-sheet-code="KT-C'+(f+1)+'-')));
   }
   for(const side of ['front','back','right','left'])sheets.push({name:'Mặt đứng '+({front:'trước',back:'sau',right:'phải',left:'trái'})[side],svg:B.elevationSvg(side)});

@@ -2,6 +2,7 @@ import {lookup} from 'node:dns/promises';
 import {isIP} from 'node:net';
 import {publicHttps} from './_public_web.mjs';
 import {apiError} from './_lib.mjs';
+import catalog from '../assets/materials/official-catalog.json' with {type:'json'};
 const allowed=['dongtam.com.vn','jotun.com','eurowindow.biz','inax.com.vn','rangdong.com.vn','ancuong.com','vinhtuong.com','cadivi.vn','binhminhplastic.com.vn','ximanghatienkiengiang.vn','hoaphat.com.vn','hoasengroup.vn','sika.com','sika.scene7.com','storage.sudospaces.com'];
 const cache=new Map();
 export function officialImageUrl(value){const url=publicHttps(value);if(!url)return '';const u=new URL(url);return allowed.some(d=>u.hostname===d||u.hostname.endsWith('.'+d))&&!/\.svg(?:$|\?)/i.test(u.pathname)?url:'';}
@@ -10,6 +11,8 @@ export default async function materialImageHandler(req,res){
  try{
   if(req.method!=='GET')throw Object.assign(new Error('Method not allowed'),{statusCode:405});
   const url=officialImageUrl(req.query?.url||new URL(req.url,'https://buildmyhome.local').searchParams.get('url'));if(!url)throw Object.assign(new Error('Ảnh cần thuộc nguồn chính hãng được hỗ trợ.'),{statusCode:400});
+  const licensed=catalog.products.some(p=>p.imageUrl===url&&p.photoLicense?.verified===true&&p.photoLicense?.commercialUse===true&&publicHttps(p.photoLicense?.sourceUrl));
+  if(!licensed)throw Object.assign(new Error('Chưa xác minh quyền sử dụng thương mại của ảnh hãng. Mở trang sản phẩm để xem ảnh tại nguồn.'),{statusCode:403});
   let row=cache.get(url);
   if(!row||Date.now()-row.at>3600000){
    const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),8000);try{

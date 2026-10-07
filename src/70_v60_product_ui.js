@@ -272,9 +272,9 @@ BMH.v6SetupScreen=()=>{
   const body3='<section class="setup-card setup-family"><div class="setup-heading"><span>KHỞI TẠO DỰ ÁN · 3/3</span><h1>Ai sẽ sống trong ngôi nhà này?</h1><p>Khai báo thành viên trước khi tạo concept để AI hiểu số phòng, khả năng tiếp cận và nhu cầu sinh hoạt thực tế.</p></div><div class="setup-family-summary"><article><small>Thành viên hiện có</small><b>'+members.length+' người</b></article><article><small>Phòng ngủ gợi ý</small><b>'+Number(needs.bedrooms||1)+' phòng</b></article><article><small>WC gợi ý</small><b>'+Number(needs.bathrooms||1)+' phòng</b></article></div><div class="setup-family-actions"><button data-household-add="child">＋ Thêm con</button><button data-household-add="relative">＋ Thêm người thân</button>'+(h.partnerEnabled===false?'<button data-v6-partner="on">＋ Thêm bạn đời</button>':'')+'</div><div class="v6-people setup-people">'+personCards+'</div><div class="setup-review"><b>Hồ sơ nền sắp hoàn tất</b><span>'+BMH.v6Esc(s.district||s.province)+' · '+BMH.money(target)+' · '+members.length+' thành viên · '+s.floors+' tầng dự kiến</span></div></section>';
   const bodies=[body1,body2,body3];
   const visual=[
-    {img:'assets/rooms/facade-render.jpg',eyebrow:'01 · LOCATION INTELLIGENCE',title:'Bắt đầu từ nơi ngôi nhà sẽ thuộc về.',copy:'Vị trí, khí hậu và quy mô khu đất là nền tảng để mọi đề xuất phía sau có lý do.',pills:['Khí hậu vùng','Quy mô khu đất','Số tầng dự kiến']},
-    {img:'assets/design/hero-step1.jpg',eyebrow:'02 · FINANCIAL FRAME',title:'Đẹp đến đâu cũng phải nằm trong khả năng thực hiện.',copy:'Khóa một trần ngân sách thực tế trước khi AI tạo concept để tránh những phương án đẹp nhưng không thể xây.',pills:['Ngân sách mục tiêu','Thu nhập hộ gia đình','Không tự tăng ngân sách']},
-    {img:'assets/rooms/living-local.jpg',eyebrow:'03 · FAMILY DNA',title:'Ngôi nhà được thiết kế cho những người sẽ sống trong đó.',copy:'AI cần hiểu gia đình trước khi nghĩ về phòng, ánh sáng, sự riêng tư và cách mọi người gặp nhau mỗi ngày.',pills:['Thành viên','Phòng ngủ gợi ý','Nhu cầu sinh hoạt']}
+    {img:'assets/design/intake-location.webp',alt:'Minh họa khu đất và ngôi nhà',eyebrow:'01 · LOCATION INTELLIGENCE',title:'Bắt đầu từ nơi ngôi nhà sẽ thuộc về.',copy:'Vị trí, khí hậu và quy mô khu đất là nền tảng để mọi đề xuất phía sau có lý do.',pills:['Khí hậu vùng','Quy mô khu đất','Số tầng dự kiến']},
+    {img:'assets/design/intake-finance.webp',alt:'Minh họa lập ngân sách xây nhà',eyebrow:'02 · FINANCIAL FRAME',title:'Đẹp đến đâu cũng phải nằm trong khả năng thực hiện.',copy:'Khóa một trần ngân sách thực tế trước khi AI tạo concept để tránh những phương án đẹp nhưng không thể xây.',pills:['Ngân sách mục tiêu','Thu nhập hộ gia đình','Không tự tăng ngân sách']},
+    {img:'assets/design/intake-family.webp',alt:'Minh họa tổ ấm gia đình',eyebrow:'03 · FAMILY DNA',title:'Ngôi nhà được thiết kế cho những người sẽ sống trong đó.',copy:'AI cần hiểu gia đình trước khi nghĩ về phòng, ánh sáng, sự riêng tư và cách mọi người gặp nhau mỗi ngày.',pills:['Thành viên','Phòng ngủ gợi ý','Nhu cầu sinh hoạt']}
   ][stage-1];
   const progress=Math.round(stage/3*100);
   const stepper='<nav class="setup-stepper">'+BMH.v6SetupSteps.map((x,i)=>{const n=i+1;return '<button data-setup-jump="'+n+'" class="'+(stage===n?'active ':'')+(stage>n?'done':'')+'"><i>'+(stage>n?'✓':String(n).padStart(2,'0'))+'</i><span><b>'+x[1]+'</b><small>'+x[2]+'</small></span></button>';}).join('')+'</nav>';
@@ -282,7 +282,7 @@ BMH.v6SetupScreen=()=>{
   return '<div class="setup-shell">'
     +'<header class="setup-top"><div class="setup-brand"><img src="assets/icon.svg" alt=""><span><b>Build My Home</b><small>KIẾN TẠO TỔ ẤM, CÙNG AI</small></span></div><div class="setup-top-progress"><span><i style="width:'+progress+'%"></i></span><small>'+stage+' / 3</small></div><div class="v71-setup-files"><button data-export="json">↓ Lưu bản sao</button><button data-project-import>↑ Mở bản sao</button><input id="projectJsonUpload" type="file" accept="application/json,.json" hidden aria-label="Chọn bản sao dự án JSON"></div></header>'
     +'<main class="setup-main setup-premium">'
-      +'<aside class="setup-visual"><img src="'+visual.img+'" alt=""><div class="setup-visual-shade"></div><div class="setup-visual-copy"><span>'+visual.eyebrow+'</span><h2>'+visual.title+'</h2><p>'+visual.copy+'</p><div>'+visual.pills.map(x=>'<em>✓ '+x+'</em>').join('')+'</div></div><div class="setup-visual-signature"><i>✦</i><span><b>Build My Home AI</b><small>Hồ sơ nền trước · concept sau</small></span></div></aside>'
+      +'<aside class="setup-visual"><img src="'+visual.img+'" alt="'+visual.alt+'" width="1120" height="630"><span class="setup-illustration-label">Ảnh minh họa · BMH</span><div class="setup-visual-shade"></div><div class="setup-visual-copy"><span>'+visual.eyebrow+'</span><h2>'+visual.title+'</h2><p>'+visual.copy+'</p><div>'+visual.pills.map(x=>'<em>✓ '+x+'</em>').join('')+'</div></div><div class="setup-visual-signature"><i>✦</i><span><b>Build My Home AI</b><small>Hồ sơ nền trước · concept sau</small></span></div></aside>'
       +'<section class="setup-workspace"><div class="setup-workspace-inner">'+stepper+bodies[stage-1]+footer+'</div></section>'
     +'</main>'
   +'</div>';
@@ -293,36 +293,61 @@ BMH.v6ConceptPrompt=()=>{
   return 'Hãy tạo concept kiến trúc phù hợp cho khu đất '+BMH.num(s.width)+'×'+BMH.num(s.depth)+'m tại '+(s.district||s.province)+', '+s.floors+' tầng, ngân sách mục tiêu '+BMH.money(Number(f.targetBudget)||BMH.financeSummary().available)+', gia đình '+(needs.people||1)+' người. Phong cách đã chọn: '+p.style+'. '+(BMH.houseStyle()?.description||'')+' Tập trung vào hình khối, ánh sáng, cây xanh và trải nghiệm sống; không thay đổi dữ liệu nền nếu chưa được người dùng xác nhận.';
 };
 
-BMH.v6FengKey=()=>JSON.stringify({household:BMH.state.project.household,site:((s)=>({lat:s.lat,lng:s.lng,province:s.pinAddressNeedsReview?'':s.province,district:s.pinAddressNeedsReview?'':s.district,frontDirection:s.frontDirection,soil:s.soil,width:s.width,depth:s.depth,floors:s.floors}))(BMH.state.project.site)});
+BMH.v6FengKey=()=>JSON.stringify(BMH.fengResearchContext());
+BMH.v6FengRestoreResult=(key=BMH.v6FengKey())=>{
+  const rows=BMH.state.project.designEvidence?.fengSources||[];
+  const row=[...rows].reverse().find(r=>r.kind==='feng-research-response'&&r.verifiedState!=='stale'&&r.scope?.fengContextKey===key&&r.value?.result);
+  return row?structuredClone(row.value.result):null;
+};
+BMH.v6SaveFengResult=(result,key=BMH.v6FengKey())=>{
+  const evidence=BMH.state.project.designEvidence;if(!evidence||!result?.retrievedAt)return;
+  // Every completed response supersedes its predecessor, including the SAME context.
+  // Source IDs are local to the immutable response; they can never resolve to a newer URL.
+  for(const row of evidence.fengSources)if(row.kind==='feng-research-response'||row.kind==='feng-source')row.verifiedState='stale';
+  const responseId=BMH.uid('feng-response'),copy=structuredClone(result);
+  evidence.fengSources.push({id:responseId,kind:'feng-research-response',sourceUrl:null,sourceTitle:result.headline,publisher:null,retrievedAt:result.retrievedAt,effectiveAt:null,scope:{fengContextKey:key,responseId},sourceType:'ai',verifiedState:result.status==='ready'?'cited':'unverified',value:{result:copy},unit:null,notes:'Tham khảo văn hóa; không áp dụng thay đổi mặt bằng.'});
+  for(const source of result.sources||[])evidence.fengSources.push({id:responseId+'-'+source.id,kind:'feng-source',sourceUrl:source.url,sourceTitle:source.title,publisher:source.bibliography?.publisher||null,retrievedAt:source.retrievedAt,effectiveAt:null,scope:{fengContextKey:key,responseId,sourceId:source.id},sourceType:'web',verifiedState:source.pageStatus==='retrieved'?'cited':'unverified',value:{bibliography:source.bibliography,pageStatus:source.pageStatus,claims:(result.claims||[]).filter(c=>c.sourceIds?.includes(source.id))},unit:null,notes:'Chỉ metadata đã truy xuất; chương/trang chưa có nguồn để trống.'});
+  evidence.fengSources=evidence.fengSources.slice(-200);BMH.save();
+};
 BMH.v6RunFeng=async()=>{
-  const key=BMH.v6FengKey();
-  if(BMH.v6.feng.loading&&BMH.v6.feng.key===key)return;
-  if(!BMH.aiConfigured?.())await BMH.v6RefreshAIConfig({force:true});
-  if(!BMH.aiConfigured?.()){BMH.v6.feng={key,loading:false,error:'Server chưa xác nhận được GEMINI_API_KEY / OPENAI_API_KEY. Kết quả công thức và liên kết sách gốc bên dưới vẫn dùng được.',result:null,citations:[]};BMH.render({preserveScroll:true});return;}
-  if(BMH.cloud?.config?.aiProvider!=='Gemini'){BMH.v6.feng={key,loading:false,error:'Nghiên cứu có nguồn cần Gemini Search grounding trên server. Công thức cục bộ và nguồn sách vẫn hiển thị bên dưới.',result:null,citations:[]};BMH.render({preserveScroll:true});return;}
-  const requestId=BMH.v6.fengRequestId=(BMH.v6.fengRequestId||0)+1,s=BMH.state.project.site;
-  BMH.v6.feng={key,loading:true,error:'',result:null,citations:[]};BMH.render({preserveScroll:true});
+  const key=BMH.v6FengKey(),project=BMH.state.project;
+  if(BMH.v6.feng.loading&&BMH.v6.feng.key===key&&BMH.v6.feng.project===project)return;
+  const requestId=BMH.v6.fengRequestId=(BMH.v6.fengRequestId||0)+1;
+  BMH.v6.feng={key,project,loading:true,error:'',result:null,citations:[]};BMH.render({preserveScroll:true});
   try{
-    const prompt='Nghiên cứu phong thủy nhà ở bằng Google Search grounding. Hãy đối chiếu nhiều nguồn công khai, ưu tiên nguồn giải thích Bát trạch/Cung phi rõ ràng, không bịa sách hoặc tác giả. Tách rõ phần truyền thống tham khảo khỏi yêu cầu kiến trúc an toàn. Gia đình: '+JSON.stringify(BMH.v6Household().map(x=>({role:x.role,birth:Number(x.birth)||0,gender:x.gender})))+'; khu đất: '+JSON.stringify({lat:s.lat,lng:s.lng,province:s.pinAddressNeedsReview?'chưa xác nhận':s.province,district:s.pinAddressNeedsReview?'chưa xác nhận':s.district,frontDirection:s.frontDirection,width:s.width,depth:s.depth,floors:s.floors});
-    const data=await BMH.aiCall('fengshui',prompt);
-    if(requestId!==BMH.v6.fengRequestId||key!==BMH.v6FengKey())return;
-    const citations=(Array.isArray(data.citations)?data.citations:[]).filter(x=>/^https:\/\//i.test(String(x?.url||'')));
-    BMH.v6.feng={key,loading:false,error:citations.length?'':'AI web chưa trả nguồn công khai để kiểm chứng. Hãy thử lại sau; kết quả công thức cục bộ vẫn khả dụng.',result:citations.length?data.result||null:null,citations};
-  }catch(err){if(requestId!==BMH.v6.fengRequestId||key!==BMH.v6FengKey())return;BMH.v6.feng={key,loading:false,error:err.status===429?'AI web tạm hết lượt gọi. Phong thủy cục bộ vẫn cập nhật theo gia đình; thử nghiên cứu web sau.':err.message||String(err),result:null,citations:[]};}
+    const data=await BMH.aiCall('fengshui');
+    if(requestId!==BMH.v6.fengRequestId||project!==BMH.state.project||key!==BMH.v6FengKey())return;
+    BMH.v6SaveFengResult(data.result,key);
+    BMH.v6.feng={key,project,loading:false,error:'',result:data.result||null,citations:data.citations||[]};
+  }catch(err){if(requestId!==BMH.v6.fengRequestId||project!==BMH.state.project||key!==BMH.v6FengKey())return;BMH.v6.feng={key,project,loading:false,error:err.status===429?'Nghiên cứu web tạm hết lượt. Công thức cục bộ và lựa chọn bố trí vẫn dùng được.':err.message||String(err),result:null,citations:[]};}
   BMH.render({preserveScroll:true});
 };
-
-BMH.v6FengResult=()=>{
-  const st=BMH.v6.feng;
-  if(st.key&&st.key!==BMH.v6FengKey())return '<div class="v6-ai-research"><i>↻</i><div><b>Hồ sơ gia đình hoặc khu đất đã đổi</b><span>Kết quả web cũ không còn áp dụng. Bấm nghiên cứu đa nguồn để cập nhật; kết quả cục bộ phía trên đã dùng dữ liệu mới.</span></div></div>';
-  if(st.loading)return '<div class="v6-ai-research loading"><i>✦</i><div><b>AI đang nghiên cứu đa nguồn…</b><span>Google Search grounding đang đối chiếu các nguồn công khai.</span></div></div>';
-  if(st.error)return '<div class="v6-ai-research error"><i>!</i><div><b>Chưa nghiên cứu được</b><span>'+BMH.v6Esc(st.error)+'</span></div></div>';
-  if(!st.result)return '<div class="v6-ai-research"><i>✦</i><div><b>Chưa chạy nghiên cứu đa nguồn</b><span>Bấm nút bên trên để AI đối chiếu nguồn web hiện hành.</span></div></div>';
-  const r=st.result;
-  const rec=(r.home_recommendations||[]).slice(0,5).map(x=>'<article><b>'+BMH.v6Esc(x.area)+'</b><span>'+BMH.v6Esc(x.recommendation)+'</span><small>'+BMH.v6Esc(x.rationale)+'</small></article>').join('');
-  const src=(st.citations||[]).slice(0,6).map((x,i)=>'<a target="_blank" rel="noopener noreferrer" href="'+BMH.v6Esc(x.url)+'">'+(i+1)+'. '+BMH.v6Esc(x.title||'Nguồn web')+'</a>').join('');
-  return '<div class="v6-feng-result"><div><small>Diễn giải AI · cần đối chiếu nguồn bên dưới</small><h4>'+BMH.v6Esc(r.headline||'Kết quả nghiên cứu')+'</h4><p>'+BMH.v6Esc(r.summary||'')+'</p></div><section>'+rec+'</section>'+(src?'<footer><b>Nguồn web của lần nghiên cứu</b>'+src+'</footer>':'')+'</div>';
+BMH.v6FengControls=()=>{
+  const s=BMH.state.project.site,confirmed=BMH.fengResearchContext().site.directionStatus==='customer_confirmed',dirs=['Bắc','Đông Bắc','Đông','Đông Nam','Nam','Tây Nam','Tây','Tây Bắc'];
+  return '<div class="feng-input-confirmation"><label>Hướng mặt tiền theo hồ sơ<select data-v6-feng-direction>'+dirs.map(d=>'<option '+(d===s.frontDirection?'selected':'')+'>'+d+'</option>').join('')+'</select></label><label class="feng-check"><input type="checkbox" data-v6-feng-confirm '+(confirmed?'checked':'')+'> Tôi xác nhận hướng này để tham khảo</label><small>Xác nhận của chủ nhà; chưa phải số đo phương vị khảo sát. Giường, bếp và bàn thờ dự trù chưa được xem là vị trí đã chốt.</small></div>';
 };
+BMH.v6FengResult=()=>{
+  const key=BMH.v6FengKey(),st=BMH.v6.feng.project===BMH.state.project?BMH.v6.feng:{};
+  if(st.key&&st.key!==key)return '<div class="v6-ai-research"><i>↻</i><div><b>Hồ sơ đã đổi</b><span>Nguồn cũ không áp dụng cho hướng hoặc bố trí mới. Nghiên cứu lại khi muốn đối chiếu.</span></div></div>';
+  if(st.loading)return '<div class="v6-ai-research loading" role="status"><i>✦</i><div><b>Đang đối chiếu nguồn công khai…</b><span>Một lượt nghiên cứu có giới hạn thời gian; không thay đổi mặt bằng.</span></div></div>';
+  if(st.error)return '<div class="v6-ai-research error" role="status"><i>!</i><div><b>Nguồn web chưa sẵn sàng</b><span>'+BMH.v6Esc(st.error)+'</span></div></div>';
+  const r=st.result||BMH.v6FengRestoreResult(key);
+  if(!r)return '<div class="v6-ai-research"><i>✦</i><div><b>Tham khảo văn hóa theo hồ sơ</b><span>Nghiên cứu web chỉ chạy khi có quyền Search và hạn mức miễn phí được xác nhận. Bạn vẫn tự chọn vị trí phòng thờ ở phòng khách hoặc bất kỳ tầng phù hợp.</span></div></div>';
+  const esc=BMH.v6Esc,missingNames={confirmed_house_direction:'hướng nhà đã xác nhận',measured_dimensions:'số đo đất đã xác nhận',measured_rooms:'mặt bằng có số đo',member_kua:'cung phi từng thành viên',confirmed_bed_position:'vị trí/hướng giường đã chốt',confirmed_stove_position:'vị trí/hướng bếp đã chốt',confirmed_altar_position:'vị trí/hướng bàn thờ đã chốt'},areaNames={house:'Hướng nhà',room:'Hướng phòng',bed:'Giường',kitchen:'Bếp',altar:'Không gian thờ'};
+  const valid=(r.sources||[]).filter(s=>/^https:\/\//i.test(s.url||'')),sourceById=new Map(valid.map(s=>[s.id,s]));
+  const claims=(r.claims||[]).map(c=>'<article class="feng-source-claim"><small>'+esc(areaNames[c.area]||'Nhà')+' · '+esc(c.school||'Chưa rõ trường phái')+'</small><b>'+esc(c.recommendation)+'</b><span>'+esc(c.rationale||'')+'</span><div>'+((c.sourceIds||[]).filter(id=>sourceById.has(id)).map(id=>{const x=sourceById.get(id);return '<a target="_blank" rel="noopener noreferrer" href="'+esc(x.url)+'">'+esc(x.title)+' ↗</a>';}).join('')||'<em>Gợi ý chưa có nguồn truy xuất gắn với lời này.</em>')+'</div>'+((c.missingCriteria||[]).length?'<small>Còn thiếu: '+esc((c.missingCriteria||[]).map(k=>missingNames[k]||k).join(' · '))+'</small>':'')+'<small>Chủ nhà tự quyết định · không tự sửa bố trí.</small></article>').join('');
+  const sources=valid.map(x=>{const b=x.bibliography||{},field=(name,value)=>'<span><b>'+name+'</b> '+esc(value||'Chưa xác minh')+'</span>';return '<article class="feng-book-source"><a target="_blank" rel="noopener noreferrer" href="'+esc(x.url)+'">'+esc(x.title)+' ↗</a><div>'+field('Tên sách / tài liệu',b.title)+field('Tác giả',b.author)+field('Ấn bản',b.edition)+field('Nhà xuất bản',b.publisher)+field('Chương',b.chapter)+field('Trang',b.page)+'</div><small>'+esc(x.retrievedAt?'Truy xuất: '+x.retrievedAt:'Chưa truy xuất được trang nguồn')+' · liên kết nguồn không chứng minh quy tắc.</small></article>';}).join('');
+  const coverage=r.coverage||{},missing=(r.missingCriteria||[]).map(k=>missingNames[k]||k).join(' · ');
+  return '<div class="v6-feng-result"><div><small>Tham khảo văn hóa · mức bao phủ dữ liệu</small><h4>'+esc(r.headline||'Kết quả nghiên cứu')+'</h4><p>'+esc(r.notice||r.summary||'')+'</p><p>'+Number(coverage.linkedClaims||0)+' / '+Number(coverage.totalClaims||0)+' gợi ý có liên kết nguồn đã truy xuất; '+Number(coverage.enteredCriteria||0)+' / '+Number(coverage.totalCriteria||7)+' nhóm dữ liệu đã nhập. Không phải điểm đúng/sai phong thủy.</p>'+(missing?'<p class="feng-missing"><b>Còn thiếu:</b> '+esc(missing)+'</p>':'')+'</div><section>'+claims+'</section>'+(sources?'<details class="feng-source-details"><summary>Nguồn & metadata sách đã đối chiếu</summary>'+sources+'</details>':'')+'<details class="feng-source-details"><summary>Giới hạn của gợi ý</summary>'+(r.limitations||[]).map(x=>'<p>'+esc(x)+'</p>').join('')+'</details></div>';
+};
+document.addEventListener('change',e=>{
+  if(!e.target.matches?.('[data-v6-feng-direction],[data-v6-feng-confirm]'))return;
+  const p=BMH.state.project,rows=p.designEvidence?.site;if(!rows)return;
+  for(const r of rows)if(r.kind==='direction')r.verifiedState='stale';
+  if(e.target.matches('[data-v6-feng-direction]'))p.site.frontDirection=e.target.value;
+  else if(e.target.checked)rows.push({id:BMH.uid('direction'),kind:'direction',sourceUrl:null,sourceTitle:'Hướng mặt tiền do chủ nhà xác nhận',publisher:null,retrievedAt:null,effectiveAt:new Date().toISOString(),scope:{locationKey:BMH.siteLocationKey?.()},sourceType:'customer',verifiedState:'provided',value:{frontDirection:p.site.frontDirection,measured:false},unit:null,notes:'Thông tin chủ nhà nhập; chưa phải phương vị khảo sát.'});
+  BMH.save();BMH.render({preserveScroll:true});
+});
 BMH.v6FengFamily=()=>{
   const rows=BMH.v6Household().map(m=>{
     const f=BMH.fengIdentity(m.birth,m.gender);
@@ -754,7 +779,7 @@ BMH.screen4=()=>{
    +'<section class="v6-card v6-s4-head">'+BMH.v6Title(3,'ĐẤT · ĐỊA CHẤT · GIA ĐÌNH','Một nền đất tốt và một ngôi nhà hợp với người sống trong đó.','Phần kỹ thuật, nhu cầu gia đình và phong thủy được tách rõ để tránh trộn lẫn niềm tin với yêu cầu an toàn.')+'<div class="v6-kpi-row">'+BMH.v6Kpi('Diện tích đất',BMH.num(s.width*s.depth)+' m²')+BMH.v6Kpi('Thành viên',targetMembers+' người',pendingMembers?pendingMembers+' người chưa khai báo chi tiết':'Đã đủ hồ sơ')+BMH.v6Kpi('Số tầng',s.floors+' tầng')+BMH.v6Kpi('Hướng mặt tiền',BMH.v6Esc(s.frontDirection))+'</div></section>'
    +'<section class="v6-card v6-land">'+BMH.v6PanelTitle('▣','Khu đất & địa chất sơ bộ','Dùng để định hướng, không thay thế khảo sát hiện trường.')+'<div class="v6-fields two"><label><span>Ngang</span><div><input data-path="project.site.width" type="number" step=".1" value="'+s.width+'"><em>m</em></div></label><label><span>Sâu</span><div><input data-path="project.site.depth" type="number" step=".1" value="'+s.depth+'"><em>m</em></div></label><label><span>Số tầng</span><div><input data-path="project.site.floors" type="number" value="'+s.floors+'"><em>tầng</em></div></label><label><span>Đường tiếp cận</span><div><input data-path="project.site.road" type="number" step=".5" value="'+s.road+'"><em>m</em></div></label></div><div class="v6-soils">'+['Đất thịt đồng bằng','Đất cát','Đất sét','Đất yếu / bùn','Đất đá'].map((x,i)=>'<button data-soil="'+x+'" class="'+(s.soil===x?'active':'')+'"><i>'+['▰','▱','▧','▤','◆'][i]+'</i><b>'+x+'</b></button>').join('')+'</div><div class="v6-land-note"><b>'+BMH.v6Esc(p.climate)+'</b><span>Ngập: '+BMH.v6Esc(p.flood)+' · Bão/gió: '+BMH.v6Esc(p.storm)+' · Nhiệt: '+BMH.v6Esc(p.heat)+'</span></div></section>'
    +'<section class="v6-card v6-family">'+BMH.v6PanelTitle('♙','Thành viên gia đình',pendingMembers?'Hồ sơ yêu cầu '+targetMembers+' người · còn '+pendingMembers+' người chưa khai báo chi tiết.':'Đã đồng bộ đủ '+targetMembers+' thành viên.')+(pendingMembers?'<div class="v6-family-sync-warn"><i>!</i><span><b>Còn '+pendingMembers+' thành viên chưa khai báo</b><small>Hệ thống vẫn dùng tổng '+targetMembers+' người để tính nhu cầu phòng. Thêm hồ sơ chi tiết nếu muốn AI hiểu tuổi, giới tính và nhu cầu riêng.</small></span></div>':'')+'<div class="v6-people">'+members.map(BMH.v6PersonCard).join('')+'</div><div class="v6-person-actions"><button data-household-add="child">＋ Thêm con</button><button data-household-add="relative">＋ Thêm người thân</button>'+(h.partnerEnabled===false?'<button data-v6-partner="on">＋ Hiện bạn đời</button>':'')+'</div></section>'
-   +'<section class="v6-card v6-feng">'+BMH.v6PanelTitle('☯','Phong thủy gia đình + AI nghiên cứu web','Lớp tham khảo, có nguồn và luôn đứng sau an toàn/công năng.')+'<div class="v6-feng-base"><div>'+BMH.compass()+'</div><div><small>Kết quả công thức cục bộ</small><h3>'+BMH.v6Esc(feng.title)+'</h3><p>'+BMH.v6Esc(feng.note)+'</p><b>Hướng tham khảo: '+BMH.v6Esc((feng.dirs||[]).join(' · '))+'</b><button class="v6-primary" data-v6-feng>✦ AI nghiên cứu đa nguồn</button></div></div>'+BMH.v6FengFamily()+BMH.v6FengResult()+'</section>'
+   +'<section class="v6-card v6-feng">'+BMH.v6PanelTitle('☯','Phong thủy tham khảo có nguồn','Chủ nhà tự quyết định; gợi ý không thay công năng hoặc an toàn.')+BMH.v6FengControls()+'<div class="v6-feng-base"><div>'+BMH.compass()+'</div><div><small>Kết quả công thức cục bộ</small><h3>'+BMH.v6Esc(feng.title)+'</h3><p>'+BMH.v6Esc(feng.note)+'</p><b>Hướng tham khảo: '+BMH.v6Esc((feng.dirs||[]).join(' · '))+'</b><button class="v6-primary" data-v6-feng>✦ AI nghiên cứu đa nguồn</button></div></div>'+BMH.v6FengFamily()+BMH.v6FengResult()+'</section>'
    +'</div>';
 };
 

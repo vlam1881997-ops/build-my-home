@@ -4,6 +4,20 @@
 BMH.ai={open:false,loading:false,mode:'review',error:'',result:null,model:'',provider:'',notice:'',lastAction:'',prompt:'',imageName:'',inflight:null};
 
 BMH.aiConfigured=()=>!!BMH.cloud?.config?.aiConfigured;
+// Only derived cultural identities and measured, anonymous geometry are sent to source research.
+BMH.fengResearchContext=()=>{
+  const p=BMH.state.project,s=p.site||{},rooms=p.plan?.rooms||[],n=v=>typeof v==='number'&&Number.isFinite(v)?v:null;
+  const current=(p.designEvidence?.site||[]).filter(e=>e.verifiedState!=='stale'),direction=[...current].reverse().find(e=>e.kind==='direction'&&e.value?.frontDirection===s.frontDirection);
+  return {school:'Bát trạch',site:{frontDirection:s.frontDirection,directionStatus:direction?'customer_confirmed':'unconfirmed',widthM:n(s.width),depthM:n(s.depth),floors:n(s.floors),dimensionsStatus:current.some(e=>e.kind==='dimensions'&&e.value?.width===s.width&&e.value?.depth===s.depth)||s.lotSource==='survey-local'&&BMH.parcelBoundaryReview?.().valid?'customer_confirmed':'unconfirmed'},members:(BMH.v6Household?.()||[]).map(m=>{const f=BMH.fengIdentity?.(m.birth,m.gender);return {role:m.kind,kua:f?.kua??f?.number??null,group:f?.group||null};}),rooms:rooms.map((r,i)=>({id:'room-'+i,floor:n(r.floor),type:r.type,xM:n(r.x),yM:n(r.y),widthM:n(r.w),depthM:n(r.h),direction:null,directionStatus:'unconfirmed'})),positions:(p.plan?.fixtures||[]).filter(q=>['altar','bed','stove'].includes(q.kind)).map(q=>({type:q.kind,floor:n(q.floor),roomIndex:rooms.findIndex(r=>r.id===q.roomId),xM:n(q.x),yM:n(q.y),direction:q.frontDirection||null,status:q.customerPositioned===true?'customer_positioned':'proposed'}))};
+};
+BMH.fengResearchCall=async(context=BMH.fengResearchContext())=>{
+  const key=JSON.stringify(context);if(BMH.fengResearchInflight?.key===key)return BMH.fengResearchInflight.promise;
+  const promise=(async()=>{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),35000);try{
+    const r=await (BMH.aiFetch||fetch)('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({action:'fengshui',fengContext:context})});
+    let data={};try{data=await r.json();}catch{}if(!r.ok||!data.ok){const err=new Error('Nguồn web chưa sẵn sàng. Công thức cục bộ vẫn dùng được.');err.status=r.status;throw err;}return data;
+  }catch(err){if(err?.name==='AbortError')throw new Error('Nghiên cứu quá thời gian chờ. Công thức cục bộ vẫn dùng được.');throw err;}finally{clearTimeout(timer);}})();
+  BMH.fengResearchInflight={key,promise};try{return await promise;}finally{if(BMH.fengResearchInflight?.promise===promise)BMH.fengResearchInflight=null;}
+};
 // A separate allowlist for web research. Never reuse aiContext or send free-form file text.
 BMH.designResearchContext=()=>{
   const p=BMH.state.project,s=p.site||{},scan=p.aiScan?.result||{},a=scan.building||{},finish=p.homeFinish||{};
@@ -52,6 +66,7 @@ BMH.aiContext=({lightweight=false}={})=>{
 };
 
 BMH.aiCall=async(action,prompt='',extra={})=>{
+  if(action==='fengshui')return BMH.fengResearchCall();
   if(!BMH.aiConfigured())throw new Error('AI chưa được cấu hình trên server.');
   const stamp=String(BMH.state?.meta?.savedAt||''),key=action+'|'+String(prompt||'').trim()+'|'+stamp;
   if(BMH.ai.inflight?.key===key)return BMH.ai.inflight.promise;

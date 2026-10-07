@@ -25,7 +25,7 @@
  };
  B.architecturalPdfBytes=async(sheets=B.architecturalSheets())=>{
   if(!sheets.length)throw Error('Chưa có tờ bản vẽ');const {lib:L,fonts:data}=await B.drawingPdfResources(),doc=await L.PDFDocument.create();
-  doc.setTitle('BMH · Bộ bản vẽ kiến trúc A3');doc.setSubject('Phương án kiến trúc / nội thất theo dữ liệu đã nhập; hồ sơ thi công cần kiểm tra chuyên môn.');doc.setCreator('Build My Home · measured drawings');doc.setProducer('BMH / pdf-lib 1.17.1');
+  const revision=sheets[0].svg.match(/data-revision="([^"]+)"/)?.[1]||'unknown';doc.setTitle('BMH · Bộ bản vẽ kiến trúc A3 · '+revision);doc.setKeywords(['BMH',revision,'A3 420 × 297 mm','preliminary-architecture','model m / dimensions mm']);doc.setSubject('Phương án kiến trúc / nội thất theo dữ liệu đã nhập; hồ sơ thi công cần kiểm tra chuyên môn.');doc.setCreator('Build My Home · measured drawings');doc.setProducer('BMH / pdf-lib 1.17.1');
   const adapters=data.map(metricFont);let next=0;doc.registerFontkit({create:()=>adapters[next++]});const fonts=[];for(const d of data)fonts.push(await doc.embedFont(bytes(d.data),{subset:false,customName:d.postscriptName}));
   const iframe=document.createElement('iframe');iframe.setAttribute('aria-hidden','true');iframe.style.cssText='position:fixed;left:-10000px;top:0;width:1600px;height:1130px;border:0;pointer-events:none';document.body.append(iframe);
   try{

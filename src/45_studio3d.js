@@ -40,7 +40,7 @@ BMH.scenePlanGeometry = (plan, floor) => {
   for(const o of plan.openings||[]){
    const r=(plan.wallContext||rooms).find(r=>r.id===o.roomId);if(!r||Number(o.floor)!==floor||!['door','window'].includes(o.kind)||!['north','south','east','west'].includes(o.side))continue;
    const horizontal=['north','south'].includes(o.side),axis=round(horizontal?(o.side==='north'?r.y:r.y+r.h):(o.side==='west'?r.x:r.x+r.w)),edge=edges.get((horizontal?'h':'v')+':'+axis);if(!edge)continue;
-   const span=horizontal?r.w:r.h,width=Math.min(span,Math.max(.45,Number(o.width)||.9)),start=horizontal?r.x:r.y,offset=Number(o.offset),a=round(start+(span-width)*Math.min(1,Math.max(0,Number.isFinite(offset)?offset:.5))),b=round(a+width);
+   const span=horizontal?r.w:r.h,width=Math.min(span,Math.max(.45,Number(o.width)||.9)),start=horizontal?r.x:r.y,offset=Number(o.offset),measured=BMH.openingWallSpan?.(o,plan.wallContext||rooms),a=measured?.a??start+(span-width)*Math.min(1,Math.max(0,Number.isFinite(offset)?offset:.5)),b=measured?.b??a+width;
    if(!edge.ranges.some(([s,e])=>a<e&&b>s))continue;
    edge.openings.push({a,b,openingId:o.id,roomId:o.roomId,side:o.side,hinge:o.hinge,swing:o.swing,kind:o.kind,height:Number(o.height)||(o.kind==='window'?1.4:2.1),sill:o.kind==='window'?(Number.isFinite(Number(o.sill))?Number(o.sill):.9):0});
 
@@ -103,14 +103,14 @@ BMH.sceneRoofSpec=(explode=0)=>{
 BMH.disposeStudio3D = () => {
   const s=BMH.studio3d;if(!s)return;
   if(s.scene){s.scene.userData.disposed=true;for(const cancel of s.scene.userData.surfaceCancels||[])cancel();}
-  try{s.raf&&cancelAnimationFrame(s.raf);s.ro?.disconnect?.();const geometries=new Set(),materials=new Set(),textures=new Set();s.scene?.traverse?.(o=>{if(o.geometry)geometries.add(o.geometry);for(const m of Array.isArray(o.material)?o.material:o.material?[o.material]:[])materials.add(m);});for(const item of s.scene?.userData?.finishMaterials?.values?.()||[])for(const m of Object.values(item))materials.add(m);for(const t of s.scene?.userData?.surfaceTextures?.values?.()||[])if(t)textures.add(t);for(const m of materials){for(const key of ['map','normalMap','bumpMap','roughnessMap','metalnessMap','emissiveMap','aoMap'])if(m[key])textures.add(m[key]);m.dispose?.();}for(const g of geometries)g.dispose?.();for(const t of textures)t.dispose?.();s.scene?.userData?.environmentTarget?.dispose?.();for(const pass of s.composer?.passes||[]){pass.ssaoMaterial?.dispose?.();pass.noiseTexture?.dispose?.();pass.dispose?.();}s.composer?.dispose?.();s.renderer?.dispose?.();s.renderer?.domElement?.removeEventListener?.('pointerdown',s.onDown);window.removeEventListener('pointermove',s.onMove);window.removeEventListener('pointerup',s.onUp);window.removeEventListener('pointercancel',s.onUp);s.renderer?.domElement?.removeEventListener?.('wheel',s.onWheel);s.renderer?.domElement?.removeEventListener?.('webglcontextlost',s.onContextLost);}catch(_){}
+  try{s.raf&&cancelAnimationFrame(s.raf);s.ro?.disconnect?.();const geometries=new Set(),materials=new Set(),textures=new Set();s.scene?.traverse?.(o=>{if(o.geometry)geometries.add(o.geometry);for(const m of Array.isArray(o.material)?o.material:o.material?[o.material]:[])materials.add(m);});for(const item of s.scene?.userData?.finishMaterials?.values?.()||[])for(const m of Object.values(item))materials.add(m);for(const t of s.scene?.userData?.surfaceTextures?.values?.()||[])if(t)textures.add(t);for(const m of materials){for(const key of ['map','normalMap','bumpMap','roughnessMap','metalnessMap','emissiveMap','aoMap'])if(m[key])textures.add(m[key]);m.dispose?.();}for(const g of geometries)g.dispose?.();for(const t of textures)t.dispose?.();s.scene?.userData?.environmentTarget?.dispose?.();for(const pass of s.composer?.passes||[]){pass.ssaoMaterial?.dispose?.();pass.noiseTexture?.dispose?.();pass.dispose?.();}s.composer?.dispose?.();s.renderer?.dispose?.();s.renderer?.domElement?.removeEventListener?.('pointerdown',s.onDown);window.removeEventListener('pointermove',s.onMove);window.removeEventListener('pointerup',s.onUp);window.removeEventListener('pointercancel',s.onUp);s.renderer?.domElement?.removeEventListener?.('wheel',s.onWheel);s.renderer?.domElement?.removeEventListener?.('keydown',s.onKeyDown);s.renderer?.domElement?.removeEventListener?.('webglcontextlost',s.onContextLost);}catch(_){}
   BMH.studio3d=null;
 };
 BMH.mountStudio3D = async () => {
   const canvas=BMH.$('#studio3dCanvas'),stage=BMH.$('#studio3dStage');if(!canvas||!stage)return;
   BMH.disposeStudio3D();const THREE=await BMH.ensureThree();if(BMH.$('#studio3dCanvas')!==canvas)return;if(!THREE){stage.classList.add('three-failed');BMH.$('#studio3dLoading')?.remove();return;}
   const effects=await Promise.allSettled(['EffectComposer','RenderPass','SSAOPass','OutputPass','ShaderPass'].map(name=>import('./vendor/three/postprocessing/'+name+'.js')).concat([import('./vendor/three/shaders/FXAAShader.js')]));if(BMH.$('#studio3dCanvas')!==canvas)return;const FX=Object.assign({},...effects.filter(r=>r.status==='fulfilled').map(r=>r.value));
-  const palette=BMH.scenePalette(),scene=new THREE.Scene();scene.background=new THREE.Color(BMH.state.ui.sceneTheme==='night'?0x293330:0xefebe2);scene.fog=new THREE.Fog(scene.background,38,100);
+  const palette=BMH.scenePalette(),scene=new THREE.Scene();scene.userData.designRevision=BMH.drawingRevision?.()||'';scene.background=new THREE.Color(BMH.state.ui.sceneTheme==='night'?0x293330:0xefebe2);scene.fog=new THREE.Fog(scene.background,38,100);
   const camera=new THREE.PerspectiveCamera(42,1,.05,140);let renderer;
   try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,preserveDrawingBuffer:true});}catch{stage.classList.add('three-failed');BMH.$('#studio3dLoading')?.remove();return;}
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=BMH.state.ui.sceneTheme==='night'?1.1:1.05;
@@ -198,7 +198,7 @@ BMH.mountStudio3D = async () => {
       const near=(roomFocus||floorFocus!==null)&&(w.horizontal?w.axis<=Math.min(...geometry.rooms.map(r=>r.y))+.02:w.axis>=Math.max(...geometry.rooms.map(r=>r.x+r.w))-.02);
       const clipped=new Map();
       const viewMaterial=material=>{if(!(floorFocus!==null||roomFocus&&near&&!insideRoom)||!THREE.Plane)return material;if(!clipped.has(material)){const copy=material.clone();copy.clippingPlanes=[new THREE.Plane(new THREE.Vector3(0,-1,0),base+(roomFocus?.85:1.05))];copy.clipShadows=true;clipped.set(material,copy);}return clipped.get(material);};
-      const segment=(h,cy,material=wallMaterial)=>{const mesh=addBox(w.horizontal?len:wallT,h,w.horizontal?wallT:len,x,base+BMH.projectLevels().slab+cy,z,viewMaterial(material));mesh.userData={kind:'wall',roomIds:w.roomIds||[],floor:f,wallAxis:w.horizontal?'z':'x',wallCoordinate:w.axis,base,wallSurface:w.kind==='window'&&material===mats.glass?'window':'solid'};return mesh;};
+      const segment=(h,cy,material=wallMaterial)=>{const mesh=addBox(w.horizontal?len:wallT,h,w.horizontal?wallT:len,x,base+BMH.projectLevels().slab+cy,z,viewMaterial(material));mesh.userData={kind:'wall',roomIds:w.roomIds||[],openingId:w.openingId,openingRoomId:w.openingRoomId,floor:f,wallAxis:w.horizontal?'z':'x',wallCoordinate:w.axis,base,wallSurface:w.kind==='window'&&material===mats.glass?'window':'solid'};return mesh;};
       if(w.kind==='door'){
         const oh=Math.min(w.height,wallHeight);segment(wallHeight-oh,oh+(wallHeight-oh)/2);
       }else if(w.kind==='window'){
@@ -246,12 +246,16 @@ BMH.mountStudio3D = async () => {
    try{composer=new FX.EffectComposer(renderer);composer.setPixelRatio(1);composer.addPass(new FX.RenderPass(scene,camera));ao=new FX.SSAOPass(scene,camera,512,512,16);ao.kernelRadius=.18;ao.minDistance=.00005;ao.maxDistance=.005;const originalVisibility=ao.overrideVisibility.bind(ao);ao.overrideVisibility=()=>{originalVisibility();ground.visible=false;};composer.addPass(ao);fxaa=new FX.ShaderPass(FX.FXAAShader);composer.addPass(fxaa);composer.addPass(new FX.OutputPass());}catch(_){for(const pass of composer?.passes||[])pass.dispose?.();composer?.dispose?.();composer=null;}
   }
   const renderFrame=()=>{if(BMH.studio3d?.renderer===renderer&&BMH.studio3d.archRender)return;BMH.updateModelPresentation?.({scene,camera,THREE});if(composer)composer.render();else renderer.render(scene,camera);if(renderer.shadowMap.enabled&&sun.shadow.map)renderer.shadowMap.autoUpdate=false;const current=BMH.studio3d;if(current?.renderer===renderer){current.displayedCameraKey=BMH.cinematicCameraKey();current.displayedDesignKey=BMH.cinematicSignature();BMH.updateModelRoomLabels?.(current);}};
-  const indoorItems=insideRoom?BMH.roomFurnitureLayout(roomFocus):[];let clearIndoorPose=null;
+  const indoorItems=insideRoom?BMH.roomFurnitureLayout(roomFocus):[];let clearIndoorPose=null,lastIndoorPoint=null;
+  const indoorPoint=()=>({x:camera.position.x+W/2,y:camera.position.z+D/2,height:camera.position.y});
+  const resetCameraValidation=()=>{lastIndoorPoint=null;};
   const updateCamera=()=>{
    const position=()=>{const cp=Math.cos(state.pitch),sp=Math.sin(state.pitch),cy=Math.cos(state.yaw),sy=Math.sin(state.yaw);camera.position.set(state.target.x+state.dist*cp*sy,state.target.y+state.dist*sp,state.target.z+state.dist*cp*cy);};position();
    if(insideRoom){
-    if(!BMH.interiorCameraIsClear(roomFocus,{x:camera.position.x+W/2,y:camera.position.z+D/2,height:camera.position.y},indoorItems)&&clearIndoorPose){Object.assign(state,{yaw:clearIndoorPose.yaw,pitch:clearIndoorPose.pitch,dist:clearIndoorPose.dist});state.target.copy(clearIndoorPose.target);position();}
-    else clearIndoorPose={yaw:state.yaw,pitch:state.pitch,dist:state.dist,target:state.target.clone()};
+    const point=indoorPoint(),clear=BMH.interiorCameraIsClear(roomFocus,point,indoorItems)&&(!lastIndoorPoint||BMH.measuredWalkPathIsClear(roomFocus,lastIndoorPoint,point,indoorItems));
+    if(!clear&&clearIndoorPose){Object.assign(state,{yaw:clearIndoorPose.yaw,pitch:clearIndoorPose.pitch,dist:clearIndoorPose.dist});state.target.copy(clearIndoorPose.target);position();}
+    else if(clear)clearIndoorPose={yaw:state.yaw,pitch:state.pitch,dist:state.dist,target:state.target.clone()};
+    lastIndoorPoint=indoorPoint();
    }
    camera.lookAt(state.target);BMH.refreshCinematicHero?.();if(BMH.studio3d?.archRender)BMH.stopArchitecturalRender();const current=BMH.studio3d;if(current?.renderer===renderer&&!current.raf)current.raf=requestAnimationFrame(()=>{if(BMH.studio3d!==current)return;current.raf=0;renderFrame();});
   };updateCamera();
@@ -263,7 +267,7 @@ BMH.mountStudio3D = async () => {
     }
   };resize();const ro=new ResizeObserver(resize);ro.observe(stage);
   const pointers=new Map(),gesture=()=>{const [a,b]=[...pointers.values()];return b?{distance:Math.hypot(a.x-b.x,a.y-b.y),x:(a.x+b.x)/2,y:(a.y+b.y)/2}:null;};
-  const onDown=e=>{pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});state.pan=e.button===2||e.shiftKey;state.drag=true;state.lastX=e.clientX;state.lastY=e.clientY;state.gesture=gesture();canvas.setPointerCapture?.(e.pointerId);};
+  const onDown=e=>{canvas.focus?.({preventScroll:true});pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});state.pan=e.button===2||e.shiftKey;state.drag=true;state.lastX=e.clientX;state.lastY=e.clientY;state.gesture=gesture();canvas.setPointerCapture?.(e.pointerId);};
   const onMove=e=>{
     if(!pointers.has(e.pointerId))return;
     pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});const next=gesture();
@@ -274,15 +278,24 @@ BMH.mountStudio3D = async () => {
   const onUp=e=>{pointers.delete(e.pointerId);state.drag=pointers.size>0;state.gesture=gesture();const remaining=[...pointers.values()][0];if(remaining){state.lastX=remaining.x;state.lastY=remaining.y;}};
   const onWheel=e=>{e.preventDefault();state.dist=BMH.clamp(state.dist*(1+Math.sign(e.deltaY)*.08),state.minDist,60);updateCamera();};canvas.oncontextmenu=e=>e.preventDefault();canvas.addEventListener('pointerdown',onDown);window.addEventListener('pointermove',onMove);window.addEventListener('pointerup',onUp);window.addEventListener('pointercancel',onUp);canvas.addEventListener('wheel',onWheel,{passive:false});
   const animate=renderFrame;
-  state.updateCamera=updateCamera;state.defaultYaw=state.yaw;state.defaultDist=state.dist;state.defaultTarget=state.target.clone();
+  const moveWalk=(direction,step=.22)=>{
+   if(!insideRoom||!['forward','backward','left','right'].includes(direction)||BMH.studio3d?.scene!==scene)return false;
+   step=Math.min(.6,Math.max(.02,Number(step)||.22));const forward=direction==='forward'?1:direction==='backward'?-1:0,side=direction==='right'?1:direction==='left'?-1:0,dx=(-Math.sin(state.yaw)*forward+Math.cos(state.yaw)*side)*step,dz=(-Math.cos(state.yaw)*forward-Math.sin(state.yaw)*side)*step,from=indoorPoint(),to={...from,x:from.x+dx,y:from.y+dz};
+   if(!BMH.measuredWalkPathIsClear(roomFocus,from,to,indoorItems,{walking:true}))return false;
+   state.target.x+=dx;state.target.z+=dz;updateCamera();return true;
+  };
+  const onKeyDown=e=>{const direction={w:'forward',ArrowUp:'forward',s:'backward',ArrowDown:'backward',a:'left',ArrowLeft:'left',d:'right',ArrowRight:'right'}[e.key.length===1?e.key.toLowerCase():e.key];if(insideRoom&&direction&&!e.altKey&&!e.ctrlKey&&!e.metaKey){e.preventDefault();moveWalk(direction);}};
+  canvas.tabIndex=0;canvas.setAttribute('aria-label',insideRoom?'3D phòng · kéo để nhìn, WASD hoặc phím mũi tên để di chuyển trong phòng':'Mô hình 3D ngôi nhà');canvas.addEventListener('keydown',onKeyDown);
+  state.updateCamera=updateCamera;state.resetCameraValidation=resetCameraValidation;state.defaultYaw=state.yaw;state.defaultDist=state.dist;state.defaultTarget=state.target.clone();
   const onContextLost=e=>{e.preventDefault();if(BMH.$('#studio3dCanvas')!==canvas)return;BMH.disposeStudio3D();stage.classList.remove('three-ready');BMH.mountLightPreview?.('Đồ họa bị gián đoạn · chế độ tương thích');};canvas.addEventListener('webglcontextlost',onContextLost);
-  BMH.studio3d={THREE,project:BMH.state.project,structureKey:BMH.studioStructureKey?.(),scene,camera,renderer,composer,ao,fxaa,renderFrame,state,ro,onDown,onMove,onUp,onWheel,onContextLost,raf:0};animate();stage.classList.add('three-ready');BMH.$('#studio3dLoading')?.remove();
+  BMH.studio3d={THREE,project:BMH.state.project,structureKey:BMH.studioStructureKey?.(),scene,camera,renderer,composer,ao,fxaa,renderFrame,state,ro,onDown,onMove,onUp,onWheel,onKeyDown,onContextLost,moveWalk,resetCameraValidation,raf:0};animate();stage.classList.add('three-ready');BMH.$('#studio3dLoading')?.remove();
   Promise.allSettled(scene.userData.surfaceLoads||[]).then(()=>{if(BMH.studio3d?.scene===scene)renderFrame();});
   const furnitureLoads=scene.userData.furnitureLoads||[];
   if(furnitureLoads.length){const status=document.createElement('div');status.className='studio-model-status';status.setAttribute('role','status');status.textContent='Đang tải '+furnitureLoads.length+' mô hình nội thất…';stage.appendChild(status);Promise.all(furnitureLoads).then(results=>{if(BMH.studio3d?.scene!==scene)return;renderer.shadowMap.needsUpdate=true;const failed=results.filter(ok=>!ok).length;status.textContent=failed?failed+' món đang dùng mô hình đơn giản · thử tải lại để xem chi tiết':'Đã tải '+results.length+' mô hình nội thất';updateCamera();});}
   if(!visibleFloors.some(f=>BMH.floorRooms(f).length)){const message=document.createElement('div');message.className='studio-empty-floor';message.textContent='Tầng này chưa có phòng trong mặt bằng. Bổ sung ở Bước 4 để dựng 3D.';stage.appendChild(message);}
 };
-BMH.resetStudio3D = () => {const s=BMH.studio3d;if(!s)return;s.state.yaw=s.state.defaultYaw;s.state.pitch=s.state.defaultPitch;s.state.dist=s.state.defaultDist;s.state.target.copy(s.state.defaultTarget);s.state.updateCamera();};
+BMH.measuredWalkMove=(direction,step)=>BMH.studio3d?.moveWalk?.(direction,step)||false;
+BMH.resetStudio3D = () => {const s=BMH.studio3d;if(!s)return;s.resetCameraValidation?.();s.state.yaw=s.state.defaultYaw;s.state.pitch=s.state.defaultPitch;s.state.dist=s.state.defaultDist;s.state.target.copy(s.state.defaultTarget);s.state.updateCamera();};
 BMH.cinematicSignature = (focus=BMH.state.ui?.sceneFocus||'all') => {
   const p=BMH.state.project,ui=BMH.state.ui||{};
   return JSON.stringify({sceneDetail:BMH.ARCH_RENDER_REVISION||'continuous-stairs-and-landscape',theme:ui.sceneTheme||'day',exploded:!!ui.sceneExploded,outdoor:p.plan.outdoor||[],style:p.style,focus,viewPreset:focus.startsWith('room:')?(ui.roomCamera||'overview'):focus==='all'?(ui.exteriorCamera||'overview'):'overview',roomInspection:focus.startsWith('room:')?'open':undefined,finish:p.materials?.finish||{},site:{width:p.site.width,depth:p.site.depth,floors:p.site.floors,floorHeight:p.site.floorHeight,slabThickness:p.site.slabThickness,ceilingDrop:p.site.ceilingDrop,frontDirection:p.site.frontDirection},materials:p.materials?.choices||{},productCodes:Object.values(p.materials?.choices||{}).map(id=>[id,p.dataEngine?.materialOverrides?.[id]?.sku||'']),tier:p.materials?.tier,rooms:p.plan.rooms.map(r=>[r.id,r.floor,r.name,r.type,r.x,r.y,r.w,r.h,r.furnitureRotation,r.stairDirection,r.stairShape]),furniture:p.plan.rooms.flatMap(r=>BMH.roomFurnitureLayout?.(r)||[]),openings:(p.plan.openings||[]).map(o=>[o.floor,o.roomId,o.kind,o.side,o.offset,o.width,o.height,o.sill,o.hinge,o.swing])});

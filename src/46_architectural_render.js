@@ -1,12 +1,12 @@
 /* Progressive architectural rendering of the customer's measured scene. */
-BMH.ARCH_RENDER_REVISION='customer-sharp-raster-5';
+BMH.ARCH_RENDER_REVISION='customer-measured-export-6';
 BMH.ARCH_RENDER_PRESETS={draft:{width:640,samples:16,bounces:4,budgetMs:12000},fine:{width:960,samples:128,bounces:8,budgetMs:30000},print:{width:1920,samples:512,bounces:10,budgetMs:120000}};
 BMH.archRenderModules=null;
 BMH.archRenderStatus=text=>{const node=BMH.$('#architecturalRenderStatus');if(node&&node.textContent!==text)node.textContent=text;};
 // Bake presentation clipping in world space. The plan and original wall meshes remain untouched.
-BMH.renderMeshGeometry=(THREE,mesh)=>{
+BMH.renderMeshGeometry=(THREE,mesh,{purpose='photograph'}={})=>{
  const source=mesh.geometry,material=Array.isArray(mesh.material)?mesh.material[0]:mesh.material,planes=material?.clippingPlanes||[];let local=source.clone();
- if(source.type==='BoxGeometry'&&THREE.RoundedBoxGeometry&&!(source instanceof THREE.RoundedBoxGeometry)){const p=source.parameters;local.dispose();local=new THREE.RoundedBoxGeometry(p.width,p.height,p.depth,2,Math.min(.004,Math.min(p.width,p.height,p.depth)*.12));BMH.sceneSurfaceUvs?.(local,material,mesh.position);}
+ if(purpose!=='model'&&source.type==='BoxGeometry'&&THREE.RoundedBoxGeometry&&!(source instanceof THREE.RoundedBoxGeometry)){const p=source.parameters;local.dispose();local=new THREE.RoundedBoxGeometry(p.width,p.height,p.depth,2,Math.min(.004,Math.min(p.width,p.height,p.depth)*.12));BMH.sceneSurfaceUvs?.(local,material,mesh.position);}
  const world=local.applyMatrix4(mesh.matrixWorld);
  if(!planes.length)return world;
  const geometry=world.index?world.toNonIndexed():world,attrs=geometry.attributes,positions=[],normals=[],uvs=[],caps=planes.map(()=>[]);
@@ -25,24 +25,24 @@ BMH.renderMeshGeometry=(THREE,mesh)=>{
  }
  if(geometry!==world)geometry.dispose();world.dispose();const result=new THREE.BufferGeometry();result.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));result.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));result.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));result.computeBoundingBox();return result;
 };
-BMH.architecturalRenderScene=(THREE,source)=>{
- const ui=BMH.state.ui,room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===ui.sceneFocus),site=BMH.state.project.site,photographicRoom=room&&room.type!=='stairs'&&ui.roomCamera==='inside';
- const scene=new THREE.Scene(),materials=new Map(),ownedMaterials=new Set();source.updateMatrixWorld(true);
+BMH.architecturalRenderScene=(THREE,source,{purpose='photograph'}={})=>{
+ const measured=purpose==='model',ui=BMH.state.ui,room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===ui.sceneFocus),site=BMH.state.project.site,photographicRoom=!measured&&room&&room.type!=='stairs'&&ui.roomCamera==='inside';
+ const scene=new THREE.Scene(),materials=new Map(),ownedMaterials=new Set(),revision=BMH.drawingRevision?.()||source.userData.designRevision||'';source.updateMatrixWorld(true);
  source.traverse(o=>{
   if(!o.visible||o.userData.presentationOnly)return;for(let parent=o.parent;parent;parent=parent.parent)if(!parent.visible||parent.userData.presentationOnly)return;
   if(o.isMesh){
    if(photographicRoom&&o.userData.kind==='ceiling-slab')return;
    if(o.userData.kind==='contact-shadow')return;
-   const geometry=BMH.renderMeshGeometry(THREE,o);if(!geometry.attributes.position.count){geometry.dispose();return;}
+   const geometry=BMH.renderMeshGeometry(THREE,o,{purpose});if(!geometry.attributes.position.count){geometry.dispose();return;}
    const convert=m=>{if(materials.has(m))return materials.get(m);let copy=m.clone();copy.clippingPlanes=[];BMH.restoreModelMaterial?.(copy,m);
-    if(m.isMeshPhysicalMaterial&&m.transparent&&m.opacity<.85){const glass=new THREE.MeshPhysicalMaterial({color:m.color.clone().lerp(new THREE.Color('#ffffff'),.65),roughness:.015,transmission:.98,thickness:0,ior:1.45,metalness:0,side:THREE.DoubleSide});copy.dispose();copy=glass;}
+    if(!measured&&m.isMeshPhysicalMaterial&&m.transparent&&m.opacity<.85){const glass=new THREE.MeshPhysicalMaterial({color:m.color.clone().lerp(new THREE.Color('#ffffff'),.65),roughness:.015,transmission:.98,thickness:0,ior:1.45,metalness:0,side:THREE.DoubleSide});copy.dispose();copy=glass;}
     // The physical renderer supports normal maps; height maps stay on the fast viewer.
     // Broad photographic sources replace small preview emitters; their visible
     // measured geometry remains. Duplicate emitters cause rare bright paths.
     if(photographicRoom&&copy.emissive)copy.emissiveIntensity=0;
     copy.envMap=null;materials.set(m,copy);ownedMaterials.add(copy);return copy;};
-   const mesh=new THREE.Mesh(geometry,Array.isArray(o.material)?o.material.map(convert):convert(o.material));mesh.name=o.name;mesh.userData={...o.userData};scene.add(mesh);
-  }else if(o.isLight&&!o.isHemisphereLight&&o.intensity>0){if(photographicRoom&&(o.isPointLight||o.isDirectionalLight))return;const light=o.clone();light.castShadow=false;light.position.copy(o.getWorldPosition(new THREE.Vector3()));if(light.isDirectionalLight){if(BMH.state.ui.sceneFocus==='all'&&BMH.state.ui.sceneTheme!=='night')light.intensity=o.castShadow?3.2:.25;light.radius=.035;light.target.position.copy(o.target.getWorldPosition(new THREE.Vector3()));scene.add(light.target);}scene.add(light);}
+   const mesh=new THREE.Mesh(geometry,Array.isArray(o.material)?o.material.map(convert):convert(o.material));mesh.name=o.name;const inherited={};for(let parent=o.parent;parent;parent=parent.parent)for(const key of ['roomId','roomIds','openingId','fixtureId','shaftId','componentId','floor','designRevision'])if(inherited[key]===undefined&&parent.userData[key]!==undefined)inherited[key]=parent.userData[key];mesh.userData={designRevision:revision,...inherited,...o.userData};scene.add(mesh);
+  }else if(o.isLight&&!o.isHemisphereLight&&o.intensity>0){if(photographicRoom&&(o.isPointLight||o.isDirectionalLight))return;const light=o.clone();light.castShadow=false;light.position.copy(o.getWorldPosition(new THREE.Vector3()));if(light.isDirectionalLight){if(!measured&&BMH.state.ui.sceneFocus==='all'&&BMH.state.ui.sceneTheme!=='night')light.intensity=o.castShadow?3.2:.25;light.radius=.035;light.target.position.copy(o.target.getWorldPosition(new THREE.Vector3()));scene.add(light.target);}scene.add(light);}
  });
  // Eye-height photographs include the measured ceiling; open inspection views keep covers off.
  if(photographicRoom){
@@ -57,7 +57,7 @@ BMH.architecturalRenderScene=(THREE,source)=>{
    windowLight.position.set((horizontal?(span.a+span.b)/2:span.c+inward*.13)-site.width/2,levels.slab+(Number(opening.sill)||0)+height/2,(horizontal?span.c+inward*.13:(span.a+span.b)/2)-site.depth/2);windowLight.rotation.y={north:Math.PI,south:0,west:-Math.PI/2,east:Math.PI/2}[opening.side];windowLight.userData={kind:'render-lighting',openingId:opening.id};scene.add(windowLight);
   }
  }
- scene.background=source.background?.clone?.()||new THREE.Color('#ece9e0');scene.backgroundRotation=new THREE.Euler();scene.environmentRotation=new THREE.Euler();scene.backgroundIntensity=1;scene.environmentIntensity=1;scene.userData.ownedMaterials=ownedMaterials;return scene;
+ scene.background=source.background?.clone?.()||new THREE.Color('#ece9e0');scene.backgroundRotation=new THREE.Euler();scene.environmentRotation=new THREE.Euler();scene.backgroundIntensity=1;scene.environmentIntensity=1;scene.userData={purpose,units:'metres',designRevision:revision,ownedMaterials};return scene;
 };
 BMH.disposeArchitecturalRender=s=>{
  s=s||BMH.studio3d;if(!s)return;s.renderEpoch=(s.renderEpoch||0)+1;const r=s.archRender;if(!r)return;r.cancelled=true;cancelAnimationFrame(r.raf);
@@ -108,13 +108,14 @@ BMH.stopArchitecturalRender=()=>{const s=BMH.studio3d;BMH.disposeArchitecturalRe
 BMH.resumeArchitecturalRender=()=>{const r=BMH.studio3d?.archRender;if(!r?.paused||r.complete||r.cancelled||r.signature!==BMH.cinematicSignature())return false;r.paused=false;r.startedAt=performance.now();r.raf=requestAnimationFrame(r.draw);return true;};
 BMH.captureStudioPreview=async()=>{
  const s=BMH.studio3d;if(!s?.renderer){BMH.archRenderStatus('Mô hình đang tải. Khi thấy 3D, bạn có thể lấy ảnh ngay.');return false;}
+ const revision=BMH.drawingRevision?.()||'',designKey=BMH.cinematicSignature?.()||'',cameraKey=BMH.cinematicCameraKey?.()||'',view=BMH.state.ui.sceneFocus||'all';
  try{
   // A raster snapshot is immediately available, independent of the physical renderer.
   if(s.composer)s.composer.render();else s.renderer.render(s.scene,s.camera);
   const image=new Promise(resolve=>s.renderer.domElement.toBlob(resolve,'image/png'));
   if(s.archRender?.samples>0)s.archRender.denoise.render(s.renderer);
-  const blob=await image;if(!blob||BMH.studio3d!==s)return false;
-  BMH.download('BMH-'+(BMH.state.ui.sceneFocus||'all').replace(/[^a-z0-9_-]/gi,'-')+'-xem-nhanh.png',blob,'image/png');
+  const blob=await image;if(!blob||BMH.studio3d!==s||designKey!==(BMH.cinematicSignature?.()||'')||cameraKey!==(BMH.cinematicCameraKey?.()||''))return false;
+  BMH.download('BMH-'+view.replace(/[^a-z0-9_-]/gi,'-')+(revision?'-'+revision:'')+'-xem-nhanh.png',blob,'image/png');BMH.lastQuickExport={designRevision:revision,view,cameraKey,width:s.renderer.domElement.width,height:s.renderer.domElement.height};
   BMH.archRenderStatus('Đã lấy ảnh từ 3D đang xem. Chọn Làm nét ảnh nếu muốn tính thêm ánh sáng và phản xạ.');return true;
  }catch(error){console.warn('BMH quick image export',error);BMH.archRenderStatus('Chưa tải được ảnh. Thử lại khi mô hình đã hiện.');return false;}
 };
@@ -122,7 +123,7 @@ BMH.sharpStudioFrame=async(longEdge)=>{
  const s=BMH.studio3d;if(!s?.renderer)return null;
  if(s.sharpExport)return s.sharpExport;
   const work=(async()=>{
-  const designKey=BMH.cinematicSignature?.()||'',cameraKey=BMH.cinematicCameraKey?.()||'';
+  const designKey=BMH.cinematicSignature?.()||'',cameraKey=BMH.cinematicCameraKey?.()||'',revision=BMH.drawingRevision?.()||'',view=BMH.state.ui.sceneFocus||'all';
   const THREE=await BMH.ensureThree();if(BMH.studio3d!==s)return null;
   const renderer=s.renderer,size=renderer.getSize(new THREE.Vector2()),ratio=renderer.getPixelRatio(),target=renderer.getRenderTarget(),aoEnabled=s.ao?.enabled,fxaaSize=s.fxaa?.material.uniforms.resolution.value.clone(),shadowAutoUpdate=renderer.shadowMap?.autoUpdate;
   const edge=BMH.clamp(Number(longEdge)||Number(BMH.state.ui.sharpResolution)||1280,640,2560),aspect=size.x/size.y,pixels=edge>1920?5000000:edge>1280?3000000:1800000,limit=Math.min(edge,renderer.capabilities.maxTextureSize,Math.sqrt(pixels*Math.max(aspect,1/aspect)));
@@ -143,13 +144,13 @@ BMH.sharpStudioFrame=async(longEdge)=>{
     if(BMH.studio3d===s){if(s.archRender?.samples>0)s.archRender.denoise.render(renderer);else s.renderFrame();}
    }finally{if(renderer.shadowMap)renderer.shadowMap.autoUpdate=shadowAutoUpdate;}
   }
-  const blob=await encoded;return blob&&BMH.studio3d===s&&designKey===(BMH.cinematicSignature?.()||'')&&cameraKey===(BMH.cinematicCameraKey?.()||'')?{blob,width,height}:null;
+  const blob=await encoded;return blob&&BMH.studio3d===s&&designKey===(BMH.cinematicSignature?.()||'')&&cameraKey===(BMH.cinematicCameraKey?.()||'')?{blob,width,height,designRevision:revision,view,cameraKey}:null;
  })();s.sharpExport=work;try{return await work;}finally{if(s.sharpExport===work)s.sharpExport=null;}
 };
 BMH.captureSharpStudioPreview=async()=>{
  const started=performance.now();BMH.archRenderStatus('Đang xuất ảnh nét từ góc nhìn hiện tại…');
  const buttons=[...document.querySelectorAll('[data-sharp-download]')];buttons.forEach(b=>b.disabled=true);
- try{const frame=await BMH.sharpStudioFrame();if(!frame){BMH.archRenderStatus('Mở một góc 3D rồi xuất ảnh nét.');return false;}BMH.download('BMH-anh-net-nhanh-'+frame.width+'x'+frame.height+'.png',frame.blob,'image/png');BMH.lastSharpExport={width:frame.width,height:frame.height,elapsedMs:Math.round(performance.now()-started)};BMH.archRenderStatus('Đã xuất ảnh nét '+frame.width+' × '+frame.height+' px · '+(BMH.lastSharpExport.elapsedMs/1000).toFixed(1)+' giây.');return true;}
+ try{const frame=await BMH.sharpStudioFrame();if(!frame){BMH.archRenderStatus('Mở một góc 3D rồi xuất ảnh nét.');return false;}BMH.download('BMH-anh-net-nhanh-'+(frame.designRevision?frame.designRevision+'-':'')+frame.width+'x'+frame.height+'.png',frame.blob,'image/png');BMH.lastSharpExport={width:frame.width,height:frame.height,designRevision:frame.designRevision,view:frame.view,cameraKey:frame.cameraKey,elapsedMs:Math.round(performance.now()-started)};BMH.archRenderStatus('Đã xuất ảnh nét '+frame.width+' × '+frame.height+' px · '+(BMH.lastSharpExport.elapsedMs/1000).toFixed(1)+' giây.');return true;}
  catch(error){console.warn('BMH sharp snapshot',error);BMH.archRenderStatus('Chưa xuất được ảnh nét. Bạn vẫn có thể tải ảnh đang xem.');return false;}finally{buttons.forEach(b=>b.disabled=false);}
 };
 BMH.captureArchitecturalRender=async()=>{

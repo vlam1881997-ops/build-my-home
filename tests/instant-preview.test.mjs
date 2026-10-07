@@ -59,6 +59,10 @@ test('quick export preserves a running render and ignores a scene retired during
  const {b}=client();let encoded,downloaded=0,restored=0;const render={samples:2,denoise:{render(){restored++;}}},s={scene:{},camera:{},archRender:render,renderer:{render(){},domElement:{toBlob(done){encoded=done;}}}};
  b.studio3d=s;b.download=()=>downloaded++;const pending=b.captureStudioPreview();assert.equal(restored,1);assert.equal(s.archRender,render);b.studio3d=null;encoded({});assert.equal(await pending,false);assert.equal(downloaded,0);
 });
+test('quick PNG carries the measured revision and rejects a changed camera during encoding',async()=>{
+ const {b}=client();let finish,downloaded;let key='camera-1';b.drawingRevision=()=> 'REV-123';b.cinematicSignature=()=> 'design';b.cinematicCameraKey=()=>key;b.studio3d={scene:{},camera:{},renderer:{render(){},domElement:{width:800,height:500,toBlob(done){finish=done;}}}};b.download=(name,blob)=>downloaded={name,blob};
+ const pending=b.captureStudioPreview();key='camera-2';finish({type:'image/png'});assert.equal(await pending,false);assert.equal(downloaded,undefined);const next=b.captureStudioPreview(),blob={type:'image/png'};finish(blob);assert.equal(await next,true);assert.match(downloaded.name,/REV-123-xem-nhanh\.png$/);assert.equal(downloaded.blob,blob);assert.equal(b.lastQuickExport.designRevision,'REV-123');assert.equal(b.lastQuickExport.cameraKey,'camera-2');assert.equal(b.lastQuickExport.width,800);
+});
 test('reopening a saved quality view does not silently start expensive rendering',async()=>{
  const {b}=client();b.state.ui.renderMode='quality';await b.mountStudio3D();assert.equal(b.state.ui.renderMode,'interactive');assert.equal(b.archRenderModules,null);
 });

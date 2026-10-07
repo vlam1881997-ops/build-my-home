@@ -1,6 +1,6 @@
 BMH.defaultState = () => ({
   version: BMH.VERSION,
-  ui: {step:1, guidedPanels:{'style-output':false,'worship-review':false},programFloor:0,proposalFloor:0, renderMode:'interactive',renderQuality:'draft',sharpResolution:1280,designView:'exterior', presentationMode:false, designDrawing:'plan', roomCamera:'overview', homeMode:'design', onboardingComplete:false, onboardingStep:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', materialSearchLocal:false, location:{drawingLot:false}, planner:{directTool:'select',drawRoomType:'bed',selectedOpening:'',selectedFixture:'',floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',openingPage:0,stairDrawingId:'',sectionCutX:null,layout:'wide',textSize:'large',toolsOpen:false,inspectorOpen:false,legendOpen:true,showFurniture:true,showDimensions:true,showFeng:false,showBelow:false,showStructure:false,showEnvironment:false,showCirculation:false,showSectionLine:false,showClimate:false,showEnvelope:false}, architectureEngine:'existing', sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false, modelLook:'neon', modelWalls:'auto', modelRoomId:'', modelLightLevel:75},
+  ui: {step:1, guidedPanels:{'style-output':false,'worship-review':false},programFloor:0,proposalFloor:0, renderMode:'interactive',renderQuality:'draft',sharpResolution:1280,designView:'exterior', presentationMode:false, designDrawing:'plan', roomCamera:'overview', homeMode:'design', onboardingComplete:false, onboardingStep:1, sidebarCollapsed:false, designTab:'planner', materialCategory:'floor', materialSearchLocal:false, location:{drawingLot:false}, planner:{directTool:'select',drawRoomType:'bed',selectedOpening:'',selectedFixture:'',floor:0,selected:'r1',snap:.2,zoom:1,tool:'select',mode:'technical',view:'plan',openingPage:0,stairDrawingId:'',sectionCutX:null,layout:'wide',textSize:'large',toolsOpen:false,inspectorOpen:false,legendOpen:true,showFurniture:true,showDimensions:true,showFeng:false,showBelow:false,showStructure:false,showEnvironment:false,showCirculation:false,showSectionLine:false,showClimate:false,showEnvelope:false}, architectureEngine:'existing', sceneMode:'reference', sceneTheme:'day', sceneFocus:'all', sceneExploded:false, modelLook:'materials', modelWalls:'auto', modelRoomId:'', modelLightLevel:75},
   access: {paid:false, source:'none', paidAt:null, verifiedAt:null, orderCode:null},
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại', briefIdea:'',
@@ -125,6 +125,31 @@ BMH.syncSiteEvidence=()=>{
   if(si?.status==='ready'&&((si.siteScopeKey&&si.siteScopeKey!==contextKey)||(e.context?.locationKey&&e.context.locationKey!==locationKey)||(e.context?.contextKey&&e.context.contextKey!==contextKey))){p.siteIntelligence={...BMH.defaultState().project.siteIntelligence,status:'stale',warnings:['Vị trí, ranh hoặc nguồn khu đất đã thay đổi. Cần tra lại nhà cung cấp và dữ liệu vùng.']};}
   e.context={locationKey,boundaryKey,geometryKey,contextKey};
 };
+// Price amounts do not change a design; a changed SKU, specification or unit does.
+BMH.selectedMaterialIdentity=category=>{
+ const p=BMH.state.project,id=p.materials.choices[category],q=p.dataEngine?.materialOverrides?.[id],x=q?.product;
+ return {productId:id||'',sku:x?.sku??q?.sku??null,specification:x?.specification??x?.spec??q?.specification??null,quantityUnit:x?.priceEvidence?.quantityUnit??x?.unit??q?.unit??null};
+};
+BMH.materialSelectionIdentity=()=>Object.keys(BMH.state.project.materials.choices).sort().map(category=>({category,...BMH.selectedMaterialIdentity(category)}));
+BMH.normalizeMaterialMetadata=project=>{
+ const plain=v=>v&&typeof v==='object'&&!Array.isArray(v),m=project.materials;
+ if(!plain(m.finish))m.finish={exterior:null,rooms:{}};
+ if(!plain(m.finish.rooms))m.finish.rooms={};
+ m.finish.rooms=Object.fromEntries(Object.entries(m.finish.rooms).filter(([,v])=>plain(v)).map(([k,v])=>[k,BMH.evidenceValue(v)]));
+ m.finish.exterior=plain(m.finish.exterior)?BMH.evidenceValue(m.finish.exterior):null;
+ const sanitize=e=>{
+  const out=BMH.evidenceValue(e);out.amountVnd=typeof out.amountVnd==='number'&&Number.isFinite(out.amountVnd)&&out.amountVnd>=0?out.amountVnd:null;
+  out.sourceUrl=BMH.evidenceUrl(out.sourceUrl);
+  for(const k of ['quotedAt','retrievedAt','validUntil'])out[k]=typeof out[k]==='string'&&out[k]?out[k]:null;
+  for(const k of ['includesVat','includesLabour','includesTransport'])out[k]=typeof out[k]==='boolean'?out[k]:null;
+  return out;
+ };
+ for(const q of Object.values(project.dataEngine.materialOverrides)){
+  if(!plain(q))continue;
+  if(plain(q.priceEvidence))q.priceEvidence=sanitize(q.priceEvidence);
+  if(plain(q.product?.priceEvidence))q.product.priceEvidence=sanitize(q.product.priceEvidence);
+ }
+};
 BMH.normalizeState = () => {
   const base=BMH.defaultState();
   if(!BMH.state||typeof BMH.state!=='object')BMH.state=base;
@@ -179,7 +204,7 @@ BMH.normalizeState = () => {
   if(!Array.isArray(BMH.state.project.planVersions))BMH.state.project.planVersions=[];
   BMH.state.project.planVariants=BMH.state.project.planVariants.slice(0,3);
   BMH.state.project.planVersions=BMH.state.project.planVersions.slice(0,6);
-  if(!BMH.state.project.materials||typeof BMH.state.project.materials!=='object')BMH.state.project.materials=structuredClone(base.project.materials);
+  if(!BMH.state.project.materials||typeof BMH.state.project.materials!=='object'||Array.isArray(BMH.state.project.materials))BMH.state.project.materials=structuredClone(base.project.materials);
   if(!BMH.state.project.aiScan||typeof BMH.state.project.aiScan!=='object')BMH.state.project.aiScan=structuredClone(base.project.aiScan);
   else {const a=BMH.state.project.aiScan,b=base.project.aiScan;for(const [k,v] of Object.entries(b))if(!(k in a))a[k]=structuredClone(v);if(!a.result||typeof a.result!=='object'||Array.isArray(a.result))a.result={};if(!['reference','my_home'].includes(a.intent))a.intent='reference';}
   const materialCategories=new Set(['floor','cement','steel','waterproof','paint','mep','door','sanitary','roof','insulation','lighting','cabinetry']);
@@ -253,8 +278,8 @@ BMH.normalizeState = () => {
   if(typeof BMH.state.ui.location.drawingLot!=='boolean')BMH.state.ui.location.drawingLot=false;
   ui.zoom=BMH.clamp(Number(ui.zoom)||1,.75,2.5);
   if(typeof BMH.state.ui.sceneExploded!=='boolean')BMH.state.ui.sceneExploded=false;
-  if(!['cut','full'].includes(BMH.state.ui.modelWalls))BMH.state.ui.modelWalls='cut';
-  BMH.normalizeDesignEvidence(BMH.state.project);BMH.syncSiteEvidence();
+  if(!['auto','cut','full'].includes(BMH.state.ui.modelWalls))BMH.state.ui.modelWalls='auto';
+  BMH.normalizeMaterialMetadata(BMH.state.project);BMH.normalizeDesignEvidence(BMH.state.project);BMH.syncSiteEvidence();
 };
 BMH.normalizeState();
 BMH.syncHouseholdSize=()=>{
