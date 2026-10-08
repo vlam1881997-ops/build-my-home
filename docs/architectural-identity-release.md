@@ -10,6 +10,7 @@ The selected house style now controls measured facade composition rather than on
 - Living/bedroom wall treatments follow the actual room collection: timber flutes, panel mouldings, wainscoting, mineral panels or curved inserts. A manually mixed room retains its collection when the house style changes. Features occupy solid wall bays rather than glazing, doors or shaft voids.
 - Facade components and rug fringes are batched by material/floor/room. Camera, texture and finish updates within a tick share one frame and thumbnail readback. Identical ResizeObserver dimensions do not reallocate render targets. Synchronous PNG/model exports retain their existing ownership and restoration checks.
 - The GLB includes safe style/collection/component identifiers and the same architecture review as the design-only customer package. It excludes personal finance, payment, account and household fields.
+- Thin facade/window profiles use a tuned raster shadow bias to avoid self-shadow speckling. Preview lighting is presentation, not a verified sunlight study. The measured parts are unchanged.
 - No new paid provider, external asset download or dependency is added. Brick/concrete channels and profile geometry are authored locally. Rendering remains native Three.js; optional Gemini images are a separate explicit operation.
 
 ## Validation
