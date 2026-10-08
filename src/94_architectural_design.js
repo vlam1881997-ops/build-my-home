@@ -144,7 +144,7 @@
  const roofSpec=B.roofDesignSpec;
  B.roofDesignSpec=()=>{let spec=roofSpec();const p=B.state.project,d=B.measuredDesignSettings().roof;if(!B.houseStyle()&&/pháp|french/i.test(p.style)&&d.type==='auto')spec={...spec,type:'hip',name:'Mái bốn dốc',pitchDeg:d.pitchDeg||30,overhang:d.overhang>=0?d.overhang:.25,source:'Gợi ý hình khối Pháp; có thể chỉnh thông số mái'};if(d.overhang>=0)return spec;const b=B.sceneFootprintBounds(B.floorRooms(Number(p.site.floors)-1));if(!b)return spec;return {...spec,overhang:Math.max(0,Math.min(spec.overhang,b.x,b.y,p.site.width-b.x-b.width,p.site.depth-b.y-b.depth))};};
  B.facadeComponents=()=>{
-  const p=B.state.project,l=B.projectLevels(),s=B.houseStyle(),id=s?.id||(/pháp|french/i.test(p.style)?'french':'modern'),parts=[],componentIds=new Set();
+  const p=B.state.project,l=B.resolvedProjectLevels(),s=B.houseStyle(),id=s?.id||(/pháp|french/i.test(p.style)?'french':'modern'),parts=[],componentIds=new Set();
   const add=(floor,roomId,kind,x,y,z,w,h,d,role='accent')=>{
    // Decorative profiles are architectural finish, not inferred columns or
    // structural beams. Clip projections to the entered site; no implicit
@@ -152,7 +152,7 @@
    if(![x,y,z,w,h,d].every(Number.isFinite))return;const x2=Math.min(Number(p.site.width),x+w),z2=Math.min(Number(p.site.depth),z+d);x=Math.max(0,x);z=Math.max(0,z);w=x2-x;d=z2-z;if(w<=.005||h<=.005||d<=.005)return;const finish=B.finishPalette(roomId)||{},componentId='facade-'+floor+'-'+(roomId||'house')+'-'+kind+'-'+[x,y,z,w,h,d].map(n=>Math.round(n*1000)).join('-');if(componentIds.has(componentId))return;componentIds.add(componentId);parts.push({id:componentId,floor,roomId,kind,x,y,z,w,h,d,role,styleId:id,generic:true,structural:false,color:finish[role]||s?.accent||'#746959'});
   };
   for(let f=0;f<l.floors;f++){
-   const g=B.scenePlanGeometry(p.plan,f),base=f*l.floorHeight;
+   const g=B.scenePlanGeometry(p.plan,f),level=B.floorLevel(f),base=level.base;
    const timberStyles=['japandi','japanese','scandi','midcentury','craftsman','balinese','tropical'],timber=timberStyles.includes(id);
    const feature=timber?g.walls.filter(w=>w.roomIds.length===1&&w.horizontal&&w.kind==='wall'&&w.b-w.a>.65&&Math.abs(w.axis-Math.min(...g.rooms.map(r=>r.y)))<.001).sort((a,b)=>(b.b-b.a)-(a.b-a.a)||a.a-b.a)[0]:null;
    for(const wall of g.walls.filter(w=>w.roomIds.length===1)){
@@ -162,15 +162,15 @@
      if(['classic','neo','french','indochine','artdeco'].includes(id)){
       const ornate=['classic','french'].includes(id),width=Math.min(ornate?.30:.22,len-.12),projection=ornate?.105:.075;
       for(const x of [wall.a+.06,wall.b-width-.06]){
-       add(f,r.id,'pilaster',x,base+l.slab+.10,z-projection,width,l.floorHeight-l.slab-.30,projection,'wall');
+       add(f,r.id,'pilaster',x,base+l.slab+.10,z-projection,width,level.height-l.slab-.30,projection,'wall');
        if(['classic','neo','french'].includes(id)){
         add(f,r.id,'pilaster-base',x-.035,base+l.slab,z-projection-.03,width+.07,.13,projection+.03,'wall');
-        add(f,r.id,'pilaster-capital',x-.045,base+l.floorHeight-.24,z-projection-.045,width+.09,.13,projection+.045,'wall');
-        if(ornate)add(f,r.id,'pilaster-flute',x+width*.42,base+l.slab+.25,z-projection-.01,width*.16,l.floorHeight-l.slab-.62,.015);
+        add(f,r.id,'pilaster-capital',x-.045,base+level.height-.24,z-projection-.045,width+.09,.13,projection+.045,'wall');
+        if(ornate)add(f,r.id,'pilaster-flute',x+width*.42,base+l.slab+.25,z-projection-.01,width*.16,level.height-l.slab-.62,.015);
        }
       }
      }else if(wall===feature){
-      const width=Math.min(id==='tropical'?.82:.62,len-.18),height=l.floorHeight-l.slab-.22;
+      const width=Math.min(id==='tropical'?.82:.62,len-.18),height=level.height-l.slab-.22;
       // One timber bay, instead of unrelated strips between every opening.
       if(id==='japandi'||id==='scandi')add(f,r.id,'timber-panel',mid-width/2,base+l.slab+.1,z-.022,width,height,.025);
       else for(let x=mid-width/2;x<mid+width/2-.02;x+=.09)add(f,r.id,'wood-slat',x,base+l.slab+.1,z-.05,.045,height,.05);
@@ -196,12 +196,12 @@
    }
    const b=B.sceneFootprintBounds(g.rooms);if(b){const z=b.y-B.measuredWallThickness(false)/2;
     if(['classic','neo','french','indochine','artdeco','vietnamese'].includes(id)){
-     add(f,null,'cornice',b.x,base+l.floorHeight-.12,z-.065,b.width,.12,.10,'wall');
-     if(['classic','french'].includes(id))add(f,null,'cornice-step',b.x-.04,base+l.floorHeight-.035,z-.11,b.width+.08,.065,.15,'wall');
-    }else if(['modern','contemporary','minimal','bauhaus','japandi','scandi','industrial','brutalist'].includes(id))add(f,null,'horizontal-band',b.x,base+l.floorHeight-.075,z-.025,b.width,.06,.05,'wall');
+     add(f,null,'cornice',b.x,base+level.height-.12,z-.065,b.width,.12,.10,'wall');
+     if(['classic','french'].includes(id))add(f,null,'cornice-step',b.x-.04,base+level.height-.035,z-.11,b.width+.08,.065,.15,'wall');
+    }else if(['modern','contemporary','minimal','bauhaus','japandi','scandi','industrial','brutalist'].includes(id))add(f,null,'horizontal-band',b.x,base+level.height-.075,z-.025,b.width,.06,.05,'wall');
    }
   }
-  const roof=B.sceneRoofSpec(),b=B.sceneFootprintBounds(B.floorRooms(l.floors-1)),top=l.floors*l.floorHeight+l.slab;
+  const roof=B.sceneRoofSpec(),b=B.sceneFootprintBounds(B.floorRooms(l.floors-1)),top=l.roofBase+l.slab;
   if(roof&&b?.rectangular&&roof.eave>top+.001){const t=B.measuredWallThickness(false),f=l.floors-1,h=roof.eave-top;
    for(const [side,x,z,w,d]of [['front',b.x-t/2,b.y-t/2,b.width+t,t],['back',b.x-t/2,b.y+b.depth-t/2,b.width+t,t],['left',b.x-t/2,b.y+t/2,t,b.depth-t],['right',b.x+b.width-t/2,b.y+t/2,t,b.depth-t]]){add(f,null,'roof-eave-band',x,top,z,w,h,d,'wall');parts.at(-1).projectionSide=side;}
   }

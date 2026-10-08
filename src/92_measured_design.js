@@ -50,10 +50,10 @@
  };
  // One vertex set feeds WebGL, plan, elevation, section and roof takeoff.
  B.sceneRoofSpec=(explode=0)=>{
-  const p=B.state.project,l=B.projectLevels(),rooms=B.floorRooms(l.floors-1).filter(r=>[r.x,r.y,r.w,r.h].every(finite)&&r.w>0&&r.h>0),bounds=B.sceneFootprintBounds(rooms),spec=B.roofDesignSpec();
+  const p=B.state.project,l=B.resolvedProjectLevels(),rooms=B.floorRooms(l.floors-1).filter(r=>[r.x,r.y,r.w,r.h].every(finite)&&r.w>0&&r.h>0),bounds=B.sceneFootprintBounds(rooms),spec=B.roofDesignSpec();
   if(!bounds||!bounds.rectangular&&spec.type!=='flat')return null;
   const width=bounds.width+spec.overhang*2,depth=bounds.depth+spec.overhang*2,cx=bounds.cx,cz=bounds.cy;
-  const eave=(l.floors-1)*(l.floorHeight+explode)+l.floorHeight+l.slab+(spec.type==='flat'?0:.18),alongDepth=spec.ridge==='depth'||spec.ridge==='auto'&&depth>=width;
+  const eave=l.roofBase+(l.floors-1)*explode+l.slab+(spec.type==='flat'?0:.18),alongDepth=spec.ridge==='depth'||spec.ridge==='auto'&&depth>=width;
   const hw=width/2,hd=depth/2,c=[[cx-hw,eave,cz-hd],[cx+hw,eave,cz-hd],[cx+hw,eave,cz+hd],[cx-hw,eave,cz+hd]],tan=Math.tan(spec.pitchDeg*Math.PI/180);
   let rise=0,ridge=[],faces=[],gables=[];
   if(spec.type==='flat'){
@@ -76,7 +76,7 @@
   return {...spec,bounds,width,depth,eave,rise,corners:c,ridge,faces,gables,area:faces.reduce((n,f)=>n+B.polygonArea3D(f),0),gableArea:gables.reduce((n,f)=>n+B.polygonArea3D(f),0)};
  };
  B.measuredGeometryIssues=()=>{
-  const p=B.state.project,l=B.projectLevels(),issues=[],add=(text)=>issues.push({sev:'error',text}),ids=new Set(),openingIds=new Set(),spans=[];
+  const p=B.state.project,l=B.resolvedProjectLevels(),issues=(l.issues||[]).map(text=>({sev:'error',text})),add=(text)=>issues.push({sev:'error',text}),ids=new Set(),openingIds=new Set(),spans=[];
   for(const r of p.plan.rooms){
    if(!r.id||ids.has(r.id))add('Mã phòng bị thiếu/trùng: '+(r.id||'—'));ids.add(r.id);
    if(![r.x,r.y,r.w,r.h].every(finite)||r.w<=.2||r.h<=.2||!Number.isInteger(r.floor)||r.floor<0||r.floor>=l.floors){add((r.name||r.id)+': kích thước/tầng không hợp lệ.');continue;}
@@ -89,7 +89,7 @@
   for(const o of p.plan.openings){
    const r=p.plan.rooms.find(r=>r.id===o.roomId),span=r?B.openingWallSpan(o):null,h=o.height??(o.kind==='door'?2.1:1.4),s=o.kind==='door'?0:o.sill??.9;
    if(!o.id||openingIds.has(o.id))add('Mã cửa bị thiếu/trùng: '+(o.id||'—'));openingIds.add(o.id);
-   if(!r||o.floor!==r.floor||!span||!['door','window'].includes(o.kind)||!finite(o.width)||o.width<.45||o.width>(['north','south'].includes(o.side)?r.w:r.h)+.001||!finite(h)||h<=0||!finite(s)||s<0||h+s>l.floorHeight-l.slab+.001||o.offset!==undefined&&(!finite(o.offset)||o.offset<0||o.offset>1)){add('Ô mở '+(o.id||'—')+': kiểm tra phòng, rộng/cao/bậu và vị trí.');continue;}
+   if(!r||o.floor!==r.floor||!span||!['door','window'].includes(o.kind)||!finite(o.width)||o.width<.45||o.width>(['north','south'].includes(o.side)?r.w:r.h)+.001||!finite(h)||h<=0||!finite(s)||s<0||h+s>B.floorLevel(o.floor).clearHeight+.001||o.offset!==undefined&&(!finite(o.offset)||o.offset<0||o.offset>1)){add('Ô mở '+(o.id||'—')+': kiểm tra phòng, rộng/cao/bậu và vị trí.');continue;}
    if(spans.some(q=>q.floor===o.floor&&q.o===span.o&&Math.abs(q.c-span.c)<.001&&Math.min(q.b,span.b)-Math.max(q.a,span.a)>.001))add('Ô mở '+o.id+' trùng một ô khác trên cùng tường.');
    spans.push({...span,floor:o.floor});
   }
@@ -106,7 +106,7 @@
  };
  B.drawingRevision=()=>{
   const p=B.state.project,d=B.measuredDesignSettings(),s=p.site;
-  const input=JSON.stringify({units:'m',modelSchema:'measured-openings-facade-2',site:[s.width,s.depth,s.floors,s.floorHeight,s.slabThickness,s.ceilingDrop,s.frontDirection,s.useParcelGeometry,s.lotMode,s.lotSource,s.lotPoints,s.frontEdge,s.setbackFront,s.setbackRear,s.setbackSide,s.boundaryEvidenceId],boundary:B.siteBoundaryKey?.(),siteContext:B.siteEvidenceContextKey?.(),technical:B.constructionDesignIdentity?.(p)||{inputs:p.constructionDesign?.inputs,elements:p.constructionDesign?.elements},plan:{rooms:p.plan.rooms,openings:p.plan.openings,outdoor:p.plan.outdoor},style:p.style,design:d,materials:p.materials.choices,productCodes:B.materialSelectionIdentity?.(),finish:p.materials.finish});
+  const input=JSON.stringify({units:'m',modelSchema:'measured-openings-facade-2',site:[s.width,s.depth,s.floors,s.floorHeight,s.floorHeights,s.slabThickness,s.ceilingDrop,s.frontDirection,s.useParcelGeometry,s.lotMode,s.lotSource,s.lotPoints,s.frontEdge,s.setbackFront,s.setbackRear,s.setbackSide,s.boundaryEvidenceId],boundary:B.siteBoundaryKey?.(),siteContext:B.siteEvidenceContextKey?.(),technical:B.constructionDesignIdentity?.(p)||{inputs:p.constructionDesign?.inputs,elements:p.constructionDesign?.elements},plan:{rooms:p.plan.rooms,openings:p.plan.openings,outdoor:p.plan.outdoor},style:p.style,design:d,materials:p.materials.choices,productCodes:B.materialSelectionIdentity?.(),finish:p.materials.finish});
   let hash=2166136261;for(let i=0;i<input.length;i++)hash=Math.imul(hash^input.charCodeAt(i),16777619);return (hash>>>0).toString(16).toUpperCase().padStart(8,'0');
  };
  const inputKey=B.designInputKey;if(inputKey)B.designInputKey=()=>inputKey()+'|site-evidence:'+B.siteEvidenceContextKey?.();
@@ -115,7 +115,7 @@
  let quantityCache;
  B.measuredQuantities=()=>{
   const p=B.state.project,key=B.drawingRevision();if(quantityCache?.project===p&&quantityCache.key===key)return quantityCache.value;
-  const l=B.projectLevels(),floors=[],openingMap=new Map();let wallArea=0,interiorWall=0,exteriorWall=0;
+  const l=B.resolvedProjectLevels(),floors=[],openingMap=new Map();let wallArea=0,interiorWall=0,exteriorWall=0;
   for(let floor=0;floor<l.floors;floor++){
    const g=B.scenePlanGeometry(p.plan,floor),holes=B.stairFloorHoles(floor),nextHoles=B.stairFloorHoles(floor+1),wallRects=g.walls.map(w=>({x:w.horizontal?w.a:w.axis-w.thickness/2,y:w.horizontal?w.axis-w.thickness/2:w.a,w:w.horizontal?w.b-w.a:w.thickness,h:w.horizontal?w.thickness:w.b-w.a}));
    const floorWallRects=wallRects.filter((_,i)=>g.walls[i].kind!=='door');
@@ -124,14 +124,14 @@
     return {roomId:r.id,name:r.name,type:r.type,floor,grossArea:r.w*r.h,slabArea:area(slabPanels),floorFinish:['stairs','elevator'].includes(r.type)?0:area(floorPanels),ceilingFinish:['stairs','elevator'].includes(r.type)?0:area(ceilingPanels)};
    });
    for(const w of g.walls){
-    const len=w.b-w.a,H=l.floorHeight-l.slab,aperture=w.kind==='wall'?0:len*Math.max(0,Math.min(w.height,H-(w.sill||0))),net=len*H-aperture;
+    const len=w.b-w.a,H=B.floorLevel(floor).height-l.slab,aperture=w.kind==='wall'?0:len*Math.max(0,Math.min(w.height,H-(w.sill||0))),net=len*H-aperture;
     if(w.openingId){let item=openingMap.get(w.openingId);if(!item){item={id:w.openingId,floor,kind:w.kind,passage:!!p.plan.openings.find(o=>o.id===w.openingId)?.passage,area:0,width:0,height:w.height};openingMap.set(w.openingId,item);}item.area+=aperture;item.width+=len;}
     // Isolated lift enclosure is represented by elevatorGeometry, not masonry.
     const ids=w.roomIds.filter(id=>p.plan.rooms.find(r=>r.id===id)?.type!=='elevator');if(!ids.length)continue;
-    const visibleHeight=l.clearHeight,visibleOpening=w.kind==='wall'?0:len*Math.max(0,Math.min(w.height,visibleHeight-(w.sill||0)));
+    const visibleHeight=B.floorLevel(floor).clearHeight,visibleOpening=w.kind==='wall'?0:len*Math.max(0,Math.min(w.height,visibleHeight-(w.sill||0)));
     wallArea+=net;interiorWall+=(len*visibleHeight-visibleOpening)*ids.length;if(w.roomIds.length===1)exteriorWall+=net;
    }
-   floors.push({floor,grossArea:B.floorPlanArea(g.rooms,p.site),slabArea:rooms.reduce((n,r)=>n+r.slabArea,0),floorFinish:rooms.reduce((n,r)=>n+r.floorFinish,0),ceilingFinish:rooms.reduce((n,r)=>n+r.ceilingFinish,0),rooms});
+   floors.push({floor,level:B.floorLevel(floor),grossArea:B.floorPlanArea(g.rooms,p.site),slabArea:rooms.reduce((n,r)=>n+r.slabArea,0),floorFinish:rooms.reduce((n,r)=>n+r.floorFinish,0),ceilingFinish:rooms.reduce((n,r)=>n+r.ceilingFinish,0),rooms});
   }
   const roof=B.sceneRoofSpec(),openings=[...openingMap.values()],sum=field=>floors.reduce((n,f)=>n+f[field],0);
   const value={revision:key,units:'m²',floors,openings,grossArea:sum('grossArea'),slabArea:sum('slabArea'),floorFinish:sum('floorFinish'),ceilingFinish:sum('ceilingFinish'),wallArea,interiorWall,exteriorWall,paintArea:interiorWall+exteriorWall+(roof?.gableArea||0),doorArea:openings.filter(o=>o.kind==='door'&&!o.passage).reduce((n,o)=>n+o.area,0),windowArea:openings.filter(o=>o.kind==='window').reduce((n,o)=>n+o.area,0),roofArea:roof?.area??null,roof:roof?{type:roof.type,name:roof.name,pitchDeg:roof.pitchDeg,overhang:roof.overhang,width:roof.width,depth:roof.depth,eave:roof.eave,rise:roof.rise,area:roof.area,gableArea:roof.gableArea}:null,basis:{floor:'Sàn hữu dụng trong mô hình: trừ ô thang/giếng và phần tường chiếm chỗ; không gồm mặt bậc thang.',paint:'Mặt trong đến trần và mặt ngoài tường trừ ô cửa; gồm mặt ngoài đầu hồi. Chưa tính cạnh hồi ô mở, phào/giao góc, trần hoặc vùng ốp thay sơn.',roof:'Diện tích từng mặt dốc từ đỉnh 3D; chưa gồm chồng mí/phụ kiện.',openings:'Cửa theo ô mở, không cộng hai lần trên tường chung; quy cách khung/cánh cần báo giá.'}};
@@ -146,6 +146,7 @@
   warnings.push(...(B.elevatorIssues?.()||[]).filter(i=>i.sev!=='error').map(i=>i.text));
   warnings.push(...(B.stairAlignmentIssues?.()||[]).filter(i=>i.sev!=='error').map(i=>i.text));
   const technical=B.constructionReview?.();
+  if(!B.resolvedProjectLevels().uniform&&B.STUDIO_LEVELS_CONTRACT!==1)warnings.push('Cao tầng riêng đã có trong 2D; consumer 3D cần tích hợp hợp đồng cao độ trước khi xuất ảnh / GLB / gói có 3D.');
   if(technical?.unparsed)warnings.push('Có '+technical.unparsed+' mục kỹ thuật cũ chưa có cấu trúc; giữ dữ liệu để đối chiếu hồ sơ gốc.');
   for(const record of technical?.records||[])if(record.status==='stale')warnings.push('Hồ sơ rà soát '+(record.discipline||record.id)+' thuộc phiên bản cũ; cần rà soát lại.');else if(record.kind==='review'&&record.status!=='reviewed')warnings.push('Hồ sơ rà soát '+(record.discipline||record.id)+' chưa đủ thông tin KTS/KS, nguồn và phiên bản được duyệt.');
   return {revision:q.revision,errors,warnings,geometryValid:errors.length===0,roof,quantities:q,technical,missing:['Khảo sát ranh/cao độ và địa chất','Kết cấu móng, cột, dầm, sàn','Tuyến điện nước, tải thiết bị và chi tiết chống thấm','Quy hoạch/giấy phép và hồ sơ chuyên môn được duyệt']};
@@ -168,7 +169,7 @@
   // Explicit design-only allowlist: no raw documents, notes, household, account or finance data.
   const s=snapshot(),r=B.measuredDesignReview(),site=B.state.project.site,g=site.useParcelGeometry?B.parcelGeometry?.():null;
   s.project.siteBasis={schemaVersion:1,units:'m',basis:g?.basis||(site.useParcelGeometry?'invalid-boundary':'customer-dimensions'),vertices:g?structuredClone(g.points):null,frontEdge:site.frontEdge||0,setbacks:{front:site.setbackFront,rear:site.setbackRear,side:site.setbackSide,status:'entered-assumptions'},planningStatus:'unverified',sources:(B.state.project.designEvidence?.site||[]).filter(e=>['boundary','dimensions','setbacks','planning'].includes(e.kind)).map(e=>({id:e.id,kind:e.kind,sourceUrl:B.evidenceUrl?.(e.sourceUrl)||null,sourceType:e.sourceType,retrievedAt:e.retrievedAt,effectiveAt:e.effectiveAt,verifiedState:e.verifiedState}))};
-  s.project.measuredDesign=structuredClone(B.measuredDesignSettings());s.quantities=structuredClone(r.quantities);s.checks.push(...r.errors.map(i=>({severity:'error',text:i.text})),...r.warnings.map(text=>({severity:'warn',text})));s.requiredTechnicalDocuments=r.missing;return s;
+  s.project.measuredDesign=structuredClone(B.measuredDesignSettings());s.project.site||={};s.project.site.floorHeights=structuredClone(site.floorHeights||[]);s.quantities=structuredClone(r.quantities);s.checks.push(...r.errors.map(i=>({severity:'error',text:i.text})),...r.warnings.map(text=>({severity:'warn',text})));s.requiredTechnicalDocuments=r.missing;s.technicalReview=structuredClone(r.technical);s.project.levels=structuredClone(B.resolvedProjectLevels().levels);s.notice='HỒ SƠ PHƯƠNG ÁN — CHƯA DÙNG THI CÔNG. '+(s.notice||'');return s;
  };
  const files=B.customerPackageFiles;B.customerPackageFiles=(s,sheets,html)=>[...files(s,sheets,html),['khoi-luong-mo-hinh.csv',B.csv([['Mã thiết kế','Tầng','Phòng','Diện tích mốc phòng m²','Sàn có ô thang m²','Sàn hoàn thiện m²','Trần m²'],...s.quantities.floors.flatMap(f=>f.rooms.map(r=>[s.revision,f.floor+1,r.name,r.grossArea,r.slabArea,r.floorFinish,r.ceilingFinish]))])]];
  B.measuredDesignPanel=()=>{
@@ -181,10 +182,10 @@
  }
  // Preserve one undo timeline for room edits and measured roof/wall edits.
  const snapshots=new WeakMap(),push=B.pushPlanHistory,undo=B.undoPlan,redo=B.redoPlan;
- B.pushPlanHistory=()=>{push();const snap=B.planHistory.undo.at(-1);if(snap)snapshots.set(snap,{settings:structuredClone(B.measuredDesignSettings()),style:B.state.project.style});};
+ B.pushPlanHistory=()=>{push();const snap=B.planHistory.undo.at(-1);if(snap)snapshots.set(snap,{settings:structuredClone(B.measuredDesignSettings()),style:B.state.project.style,levels:Object.fromEntries(['floorHeight','floorHeights','slabThickness','ceilingDrop'].map(k=>[k,structuredClone(B.state.project.site[k]??(k==='floorHeights'?[]:null))]))});};
  const restore=(action,from,to)=>{
-  if(B.planHasLocks())return action();const target=B.planHistory[from].at(-1),data=target&&snapshots.get(target),current={settings:structuredClone(B.measuredDesignSettings()),style:B.state.project.style};
-  if(data){B.state.project.measuredDesign=structuredClone(data.settings);B.state.project.style=data.style;}action();const latest=B.planHistory[to].at(-1);if(target&&latest)snapshots.set(latest,current);
+  if(B.planHasLocks())return action();const target=B.planHistory[from].at(-1),data=target&&snapshots.get(target),current={settings:structuredClone(B.measuredDesignSettings()),style:B.state.project.style,levels:Object.fromEntries(['floorHeight','floorHeights','slabThickness','ceilingDrop'].map(k=>[k,structuredClone(B.state.project.site[k]??(k==='floorHeights'?[]:null))]))};
+  if(data){B.state.project.measuredDesign=structuredClone(data.settings);B.state.project.style=data.style;if(data.levels)Object.assign(B.state.project.site,structuredClone(data.levels));}action();const latest=B.planHistory[to].at(-1);if(target&&latest)snapshots.set(latest,current);
  };
  B.undoPlan=()=>restore(undo,'undo','redo');B.redoPlan=()=>restore(redo,'redo','undo');
  const selectStyle=B.selectHouseStyle;B.selectHouseStyle=id=>{const style=B.HOUSE_STYLES.find(s=>s.id===id);if(style&&style.name!==B.state.project.style)B.pushPlanHistory();return selectStyle(id);};
@@ -194,6 +195,7 @@
   if(B.planHasLocks())return B.toast('Mở khóa phòng/tầng trước khi đổi mái hoặc bề dày tường.');
   B.pushPlanHistory();settings[group][key]=value;B.customerFrameCache=null;B.save();B.render({preserveScroll:true});
  });
- const exportDesign=B.exportCustomerPackage;B.exportCustomerPackage=()=>{const r=B.measuredDesignReview();if(!r.geometryValid){B.toast('Sửa lỗi hình học trước khi xuất hồ sơ: '+r.errors[0].text);return Promise.resolve(false);}return exportDesign();};
- for(const name of ['exportPlanSvg','exportPlanDxf','exportStudioGlb','printArchitecturalDrawings','exportDrawingsBundle','exportDossierBundle']){const fn=B[name];if(!fn)continue;B[name]=(...args)=>{const r=B.measuredDesignReview();if(!r.geometryValid){B.toast('Sửa lỗi hình học trước khi xuất: '+r.errors[0].text);return false;}return fn(...args);};}
+ B.variableLevelsConsumerReady=()=>B.resolvedProjectLevels().uniform||B.STUDIO_LEVELS_CONTRACT===1;
+ const exportDesign=B.exportCustomerPackage;B.exportCustomerPackage=()=>{const r=B.measuredDesignReview();if(!r.geometryValid){B.toast('Sửa lỗi hình học trước khi xuất hồ sơ: '+r.errors[0].text);return Promise.resolve(false);}if(!B.variableLevelsConsumerReady()){B.toast('Gói có 3D cho cao tầng riêng đang chờ tích hợp. Có thể xuất hồ sơ A3 2D.');return Promise.resolve(false);}return exportDesign();};
+ for(const name of ['exportPlanSvg','exportPlanDxf','exportStudioGlb','printArchitecturalDrawings','exportDrawingsBundle','exportDossierBundle']){const fn=B[name];if(!fn)continue;B[name]=(...args)=>{const r=B.measuredDesignReview();if(!r.geometryValid){B.toast('Sửa lỗi hình học trước khi xuất: '+r.errors[0].text);return false;}if(name==='exportStudioGlb'&&!B.variableLevelsConsumerReady()){B.toast('GLB cao tầng riêng đang chờ consumer 3D tích hợp cao độ.');return false;}return fn(...args);};}
 })();

@@ -4,7 +4,7 @@ function client(){
  const ctx={BMH:B,localStorage:{getItem(){},setItem(){}},document:{addEventListener(){},querySelectorAll:()=>[]},window:{},structuredClone,queueMicrotask(){},console,Date,Blob,TextEncoder,Uint8Array};
  for(const f of ['10_state','20_calc','30_planner','35_dossier','40_exports','45_studio3d'])vm.runInNewContext(fs.readFileSync('src/'+f+'.js','utf8'),ctx);
  const source=fs.readFileSync('src/75_completion.js','utf8');vm.runInNewContext(source.slice(source.indexOf('BMH.sceneFootprintBounds='),source.indexOf('// Studio renders from this registry')),ctx);
- B.householdNeeds=()=>({bedrooms:4});B.buildableEnvelope=()=>({buildWidth:8,buildDepth:16.776470588235296,originX:.5,originY:2,front:2,side:.5});B.projectLevels=()=>{const s=B.state.project.site;return {floors:s.floors,floorHeight:s.floorHeight,slab:s.slabThickness,ceilingDrop:s.ceilingDrop,clearHeight:s.floorHeight-s.slabThickness-s.ceilingDrop};};B.roomInsideParcel=()=>true;B.planMetrics=plan=>({area:plan.rooms.reduce((s,r)=>s+r.w*r.h,0)});B.directionAngle=()=>180;
+ B.householdNeeds=()=>({bedrooms:4});B.buildableEnvelope=()=>({buildWidth:8,buildDepth:16.776470588235296,originX:.5,originY:2,front:2,side:.5});B.projectLevels=()=>B.siteLevels();B.roomInsideParcel=()=>true;B.planMetrics=plan=>({area:plan.rooms.reduce((s,r)=>s+r.w*r.h,0)});B.directionAngle=()=>180;
  for(const f of ['78_design_workflow','79_stair_design','81_design_studio','87_elevator_design','92_measured_design','94_architectural_design','95_architectural_documents'])vm.runInNewContext(fs.readFileSync('src/'+f+'.js','utf8'),ctx);
  const p=B.state.project;Object.assign(p.site,{width:9,depth:20,floors:2,floorHeight:3.4,slabThickness:.14,ceilingDrop:.2});p.style='Việt Nam đương đại';p.household={children:[{name:'Con'}],relatives:[{name:'Ông bà'}]};p.briefIdea='4 phòng ngủ, 2 WC, thang máy';p.designStudio={program:{mode:'custom',bedrooms:4,bathrooms:2,elevator:true}};p.materials={choices:{floor:'CUSTOM-SKU'},finish:{exterior:{wall:'#eee7d9',floor:'#d4b78e',accent:'#7b513b'},rooms:{}}};p.plan={rooms:[],openings:[],outdoor:[],lockedRoomIds:[],lockedFloors:[]};return B;
 }
@@ -29,7 +29,7 @@ test('A3 sheets include measured furniture, sliding lift doors, all four elevati
 
 function measuredFixture(b,floors=2,irregular=false){
  const p=b.state.project;Object.assign(p.site,{width:5,depth:20,floors,floorHeight:3.6,useParcelGeometry:irregular});p.plan={rooms:[],openings:[],outdoor:[],fixtures:[],lockedRoomIds:[],lockedFloors:[]};
- for(let floor=0;floor<floors;floor++)p.plan.rooms.push({id:'main-'+floor,floor,name:'Phòng sinh hoạt chung và làm việc của cả gia đình có tên riêng rất dài để đối chiếu bảng thống kê đầy đủ',type:'living',x:.2,y:.2,w:4.6,h:7.6},{id:'stairs-'+floor,floor,name:'Cầu thang',type:'stairs',x:.2,y:8,w:2.6,h:4},{id:'lift-'+floor,shaftId:'lift-measured',floor,name:'Giếng thang máy',type:'elevator',x:3,y:8,w:1.8,h:2},{id:'bed-'+floor,floor,name:'Phòng ngủ',type:'bed',x:.2,y:12.2,w:3.5,h:7.6});
+ for(let floor=0;floor<floors;floor++)p.plan.rooms.push({id:'main-'+floor,floor,name:'Phòng sinh hoạt chung và làm việc của cả gia đình có tên riêng rất dài để đối chiếu bảng thống kê đầy đủ',type:'living',x:.2,y:.2,w:4.6,h:7.6},{id:'stairs-'+floor,floor,name:'Cầu thang',type:'stairs',x:.2,y:8,w:2.6,h:4},{id:'lift-'+floor,elevator:{shaftId:'lift-measured'},floor,name:'Giếng thang máy',type:'elevator',x:3,y:8,w:1.8,h:2},{id:'bed-'+floor,floor,name:'Phòng ngủ',type:'bed',x:.2,y:12.2,w:3.5,h:7.6});
  p.plan.openings=[{id:'window-off-centre',floor:0,roomId:'main-0',kind:'window',side:'north',width:1.2,height:1.4,sill:.9,offset:.137}];
  if(irregular)b.parcelGeometry=()=>({points:[{x:0,y:0},{x:5,y:0},{x:5,y:11},{x:4,y:20},{x:0,y:20}],basis:'measured',bearing:180});
  return p;
@@ -43,4 +43,17 @@ test('two-floor 5×20 and irregular three-floor A3 sheets use exact parcel and a
 });
 test('every floor has full Vietnamese room/furniture/opening schedules with variable-height pagination',()=>{
  const b=client();measuredFixture(b,2);const fullName=b.floorRooms(0)[0].name;b.state.project.plan.openings=Array.from({length:42},(_,i)=>({id:'long-'+i,floor:0,roomId:'main-0',kind:'window',side:'north',width:1.2,height:1.4,sill:.9,offset:.137}));const pages=b.openingSchedulePages(0);assert.ok(pages.length>2);assert.equal(pages.flat().length,42);assert.equal(pages.flat()[0].cells[1].join(' '),fullName);assert.ok(pages.every(p=>p.reduce((s,r)=>s+r.height,0)<=200));const all=b.architecturalSheets(),area=all.filter(s=>s.svg.includes('data-sheet-code="KT-DT-')),furniture=all.filter(s=>s.svg.includes('data-sheet-code="NT-TK-'));assert.equal(area.length,2);assert.ok(furniture.length>=2);for(const [floor,s]of area.entries()){assert.match(s.svg,new RegExp('data-room-reference="main-'+floor+'"'));for(const word of fullName.split(' '))assert.ok(s.svg.includes(word));}assert.equal(b.furnitureSchedulePages(0).flat().filter(r=>r.roomId==='main-0')[0].cells[2].join(' '),fullName);
+});
+test('unequal floor datums and rises appear on A3 plans, four elevations, both sections and the lift sheet',()=>{
+ const b=client(),p=measuredFixture(b,3);p.site.floorHeights=[3.8,3.4,3.1];
+ for(const side of ['front','back','left','right']){const svg=b.architecturalElevationSheet(side);assert.match(svg,/\+3.800/);assert.match(svg,/\+7.200/);assert.match(svg,/\+10.300/);assert.match(svg,/>3100</);assert.doesNotMatch(svg,/NaN|undefined/);}
+ for(const axis of ['x','y']){const svg=b.architecturalSectionSheet(axis);assert.match(svg,/\+7.200/);assert.match(svg,/>3400</);assert.match(svg,/>3100</);assert.doesNotMatch(svg,/NaN|undefined/);}
+ assert.match(b.drawingSheetSvg(2),/Cốt \+7.200 m · cao tầng 3.100 m/);assert.match(b.elevatorDetailSheetSvg(p.plan.rooms.find(r=>r.id==='lift-0')),/T3 \+7.200/);
+ for(const sheet of b.architecturalSheets())assert.ok(sheet.svg.includes('data-revision="'+b.drawingRevision()+'"'));
+});
+test('A3 dossier includes cover, exact site, materials and sanitized technical register on the same revision',()=>{
+ const b=client(),p=measuredFixture(b,3);p.site.floorHeights=[3.8,3.4,3.1];p.constructionDesign.elements=[{id:'SYNTHETIC-C1',type:'column',status:'provided',sourceReference:'SYNTHETIC E-1',dimensions:{width:.3,depth:.3},rawDocument:'PRIVATE-RAW-DOCUMENT'}];p.household.ownerBirth=1977;p.finance.cash=987654321;
+ const sheets=b.architecturalSheets();for(const prefix of ['KT-BIA','KT-DAT','KT-VL-','KT-KD-'])assert.ok(sheets.some(s=>s.svg.includes('data-sheet-code="'+prefix)));
+ for(const s of sheets){assert.match(s.svg,/HỒ SƠ PHƯƠNG ÁN — CHƯA DÙNG THI CÔNG/);assert.match(s.svg,new RegExp('data-revision="'+b.drawingRevision()+'"'));assert.doesNotMatch(s.svg,/NaN|undefined|PRIVATE-RAW-DOCUMENT|987654321|ownerBirth/);}
+ const register=sheets.filter(s=>s.svg.includes('data-sheet-code="KT-KD-')).map(s=>s.svg).join('');assert.match(register,/SYNTHETIC-C1/);assert.match(register,/provided/);assert.match(register,/missing/);assert.match(b.architecturalSiteSheet().replace(/<[^>]+>/g,' ').replace(/\s+/g,' '),/không phải ranh pháp lý/);
 });

@@ -543,10 +543,25 @@ BMH.addRoom = type => { const defs={living:['Phòng khách',4,4],kitchen:['Bếp
 BMH.addOpening = kind => { const r=BMH.selectedRoom(); if(!r)return BMH.toast('Hãy chọn phòng trước.'); BMH.state.ui.planner.tool=kind; BMH.save(); BMH.render(); BMH.toast(`Đang dùng công cụ ${kind==='door'?'Cửa đi':'Cửa sổ'} — nhấp trực tiếp lên cạnh tường để đặt.`); };
 
 /* ===== V3.5 architectural documentation helpers ===== */
-BMH.projectLevels = () => {
-  const floors=Math.max(1,Number(BMH.state.project.site.floors)||1),floorHeight=3.4,slab=.14;
-  return {floors,floorHeight,slab,total:floors*floorHeight+.9};
+// Relative floor datums are derived from site dimensions; never a surveyed altitude.
+BMH.siteLevels = (s=BMH.state.project.site) => {
+  const floors=Math.max(1,Math.floor(Number(s.floors)||1)),floorHeight=Number(s.floorHeight)||3.4,slab=Number(s.slabThickness)||.14,ceilingDrop=Number(s.ceilingDrop)||0,overrides=Array.isArray(s.floorHeights)?s.floorHeights:[],issues=[],levels=[],elevations=[0];
+  for(let floor=0;floor<floors;floor++){
+    const supplied=overrides[floor]!==undefined&&overrides[floor]!==null,height=supplied?overrides[floor]:floorHeight;
+    if(!Number.isFinite(height)||height<2.4||height>6||height-slab-ceilingDrop<2.1)issues.push('Tầng '+(floor+1)+': cao tầng hoặc chiều cao thông thủy không hợp lệ.');
+    levels.push({id:'level-'+floor,floor,base:elevations[floor],height,slab,ceilingDrop,clearHeight:height-slab-ceilingDrop,status:'provisional',source:supplied?'customer-entered':'legacy-common-height'});
+    elevations.push(elevations[floor]+height);
+  }
+  const heights=levels.map(l=>l.height),roofBase=elevations.at(-1);
+  return {floors,floorHeight,slab,ceilingDrop,clearHeight:floorHeight-slab-ceilingDrop,heights,elevations,levels,roofBase,total:roofBase+.9,uniform:heights.every(h=>h===heights[0]),datum:'relative-provisional',issues};
 };
+BMH.projectLevels = () => BMH.siteLevels();
+BMH.resolvedProjectLevels = () => {
+  const l=BMH.projectLevels();if(l.levels&&l.elevations&&l.heights)return l;
+  // Compatibility for existing consumers which supply the legacy scalar contract.
+  return {...l,...BMH.siteLevels({...BMH.state.project.site,floors:l.floors,floorHeight:l.floorHeight,slabThickness:l.slab,ceilingDrop:l.ceilingDrop})};
+};
+BMH.floorLevel = floor => BMH.resolvedProjectLevels().levels[Number(floor)||0];
 BMH.elevationOpenings = floor => {
   const p=BMH.state.project, rooms=BMH.floorRooms(floor), frontSides=['north','south'];
   const list=p.plan.openings.filter(o=>o.floor===floor&&frontSides.includes(o.side));
