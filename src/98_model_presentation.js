@@ -153,18 +153,20 @@
 
  B.modelTraceability=()=>{
   const p=B.state.project||{},site=p.site||{},rooms=(p.plan?.rooms||[]).filter(r=>!['stairs','elevator','corridor','balcony','utility'].includes(r.type)),roles=['floor','wall','accent','fabric'];
-  const profiles=new Set();let bound=0;
-  for(const room of rooms){const palette=B.finishPalette?.(room.id)||{};for(const role of roles){const id=palette.visualMaterials?.[role];if(!id)continue;bound++;const profile=B.VISUAL_MATERIALS?.find(x=>x.id===id&&x.role===role);profiles.add(profile?.name||id);}}
+  const profiles=new Map();let bound=0;
+  const include=(palette,role)=>{const id=palette.visualMaterials?.[role],profile=B.VISUAL_MATERIALS?.find(x=>x.id===id&&x.role===role);if(!profile)return;bound++;profiles.set(profile.id,profile.name);};
+  for(const room of rooms){const palette=B.finishPalette?.(room.id)||{};for(const role of roles)include(palette,role);}
   const exterior=B.facadeFinishPalette?.()||p.materials?.finish?.exterior||{};
-  for(const role of ['wall','accent']){const id=exterior.visualMaterials?.[role];if(!id)continue;bound++;const profile=B.VISUAL_MATERIALS?.find(x=>x.id===id&&x.role===role);profiles.add(profile?.name||id);}
+  for(const role of ['wall','accent'])include(exterior,role);
   const total=rooms.length*roles.length+2,identity=B.architecturalIdentityReview?.(),style=B.houseStyle?.(),revision=B.drawingRevision?.()||'chưa có revision',measured=rooms.length>0&&Number(site.width)>0&&Number(site.depth)>0;
   return {
    styleName:identity?.name||style?.name||p.style||'Chưa chọn phong cách',
    styleRecognized:identity?.recognized??Boolean(style?.id),
    revision,
-   geometryLabel:measured?'Theo mặt bằng '+Number(site.width).toFixed(2).replace(/\.00$/,'')+' × '+Number(site.depth).toFixed(2).replace(/\.00$/,'')+' m':'Chưa có mặt bằng đo được',
-   materialLabel:rooms.length?(bound+'/'+total+' bề mặt đã gắn'):'Chưa có phòng để gắn vật liệu',
-   materialNames:[...profiles].slice(0,2),
+   geometryLabel:measured?'Khu đất '+Number(site.width).toFixed(2).replace(/\.00$/,'')+' × '+Number(site.depth).toFixed(2).replace(/\.00$/,'')+' m':'Chưa có mặt bằng đo được',
+   materialLabel:rooms.length?(bound+'/'+total+' lựa chọn bề mặt hợp lệ'):'Chưa có phòng để gắn vật liệu',
+   materialNames:[...profiles.values()].slice(0,2),
+   materialProfileIds:[...profiles.keys()],
    materialComplete:rooms.length>0&&bound===total
   };
  };
@@ -187,7 +189,7 @@
   const measured=root.querySelector('.measured-contract');if(measured){const details=template(B.guidedDetails('model-dimensions','Thông số mái, tường & đối chiếu','')).content.firstElementChild;measured.replaceWith(details);details.querySelector('.guided-details-body').append(measured);root.append(details);}
   const controls=t.content.querySelector('.design-view-controls');controls.querySelector('.model-scope-select')?.remove();
   controls.querySelector('[data-design-floor]')?.remove();
-  controls.insertAdjacentHTML('afterbegin','<label class="guided-select model-look-select">Chế độ<select data-model-look><option value="neon" '+(B.modelLook()==='neon'?'selected':'')+'>Bố trí kỹ thuật</option><option value="materials" '+(B.modelLook()==='materials'?'selected':'')+'>Vật liệu thực tế</option></select></label>');
+  controls.insertAdjacentHTML('afterbegin','<label class="guided-select model-look-select">Chế độ<select data-model-look><option value="neon" '+(B.modelLook()==='neon'?'selected':'')+'>Bố trí kỹ thuật</option><option value="materials" '+(B.modelLook()==='materials'?'selected':'')+'>Xem vật liệu</option></select></label>');
   const top=t.content.querySelector('.design-model-top>div:first-child');top.querySelector('b').textContent=ui.sceneFocus==='all'?(ui.sceneExploded?'Các tầng · góc xem tách lớp':'Ngôi nhà theo thiết kế'):'Tầng '+((B.modelVisibleRooms()[0]?.floor||0)+1)+' · '+(ui.sceneFocus.startsWith('room:')?B.modelVisibleRooms()[0]?.name:'bố trí & nội thất');
   const workspace=root.querySelector('.design-workspace');workspace?.insertAdjacentHTML('beforebegin',B.modelTraceabilityHtml());
   const wrap=document.createElement('div');wrap.className='model-scene-wrap';stage.replaceWith(wrap);wrap.insertAdjacentHTML('afterbegin',railHtml());wrap.append(stage);

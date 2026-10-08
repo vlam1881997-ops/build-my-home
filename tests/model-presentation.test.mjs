@@ -1,9 +1,16 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';import * as THREE from 'three';
-function client(){
+function client(visual=false){
  const rooms=[{id:'r',type:'living',name:'Khách',floor:0,x:0,y:0,w:4,h:4}],project={site:{width:4,depth:4,floors:1},plan:{rooms},materials:{finish:{rooms:{}}}},ui={sceneFocus:'floor:0',modelWalls:'auto',modelLook:'neon',modelLightLevel:75};
  const b={state:{ui,project},defaultState:()=>({ui:{},project}),normalizeState(){},SCREENS:[],screen7:()=>'',cinematicSignature:()=>'',studioStructureKey:()=>'',mountStudio3D:async()=>{},disposeStudio3D(){},refreshStudioFinishes(){},startArchitecturalRender(){},updateModelRoomLabels(){},clamp:(n,a,z)=>Math.max(a,Math.min(n,z)),projectLevels:()=>({floorHeight:3.4,slab:.14}),floorRooms:()=>rooms,roomFurnitureLayout:()=>[],stairFloorHoles:()=>[],slabPanels:r=>[{x:r.x,y:r.y,w:r.w,d:r.h}],esc:String,sceneSurfaceUvs(){}};
  const ctx={BMH:b,document:{addEventListener(){},querySelector:()=>null,querySelectorAll:()=>[]},console,Blob,structuredClone,Uint8Array,performance:{now:()=>0},window:{}};
- vm.runInNewContext(fs.readFileSync('src/46_architectural_render.js','utf8'),ctx);vm.runInNewContext(fs.readFileSync('src/98_model_presentation.js','utf8'),ctx);return b;
+ vm.runInNewContext(fs.readFileSync('src/46_architectural_render.js','utf8'),ctx);vm.runInNewContext(fs.readFileSync('src/98_model_presentation.js','utf8'),ctx);
+ if(visual){
+  const completion=fs.readFileSync('src/75_completion.js','utf8');
+  vm.runInNewContext(completion.slice(completion.indexOf('BMH.materialUnit='),completion.indexOf('BMH.materialProductIdentity=')),ctx);
+  b.render=()=>true;ctx.window.requestAnimationFrame=fn=>fn();
+  vm.runInNewContext(fs.readFileSync('src/101_visual_studio.js','utf8'),ctx);
+ }
+ return b;
 }
 function fixture(b){
  const scene=new THREE.Scene();scene.background=new THREE.Color('#eeeeee');scene.fog=new THREE.Fog('#eeeeee',30,100);const camera=new THREE.PerspectiveCamera();camera.position.set(5,5,-5);
@@ -33,7 +40,37 @@ test('3D traceability names the chosen style, measured revision and material bin
  const visualMaterials={floor:'oak-floor',wall:'ivory-paint',accent:'natural-oak',fabric:'cream-boucle'};p.materials.finish.exterior={visualMaterials:{wall:'ivory-paint',accent:'natural-oak'}};
  b.VISUAL_MATERIALS=Object.entries({...visualMaterials,exteriorWall:'ivory-paint',exteriorAccent:'natural-oak'}).map(([name,id])=>({id,role:name==='exteriorWall'?'wall':name==='exteriorAccent'?'accent':name,name:id}));
  b.finishPalette=()=>({visualMaterials});b.facadeFinishPalette=()=>p.materials.finish.exterior;b.houseStyle=()=>({id:'japandi',name:'Japandi'});b.architecturalIdentityReview=()=>({recognized:true,name:'Japandi'});b.drawingRevision=()=>'rev-PA03';
- const trace=b.modelTraceability(),html=b.modelTraceabilityHtml();assert.equal(trace.styleName,'Japandi');assert.equal(trace.geometryLabel,'Theo mặt bằng 5 × 20 m');assert.equal(trace.materialLabel,'6/6 bề mặt đã gắn');assert.equal(trace.materialComplete,true);assert.match(html,/Revision rev-PA03/);assert.match(html,/KTS\/KS xác nhận/);assert.doesNotMatch(html,/đã duyệt kết cấu|đủ điều kiện thi công/i);
+ const trace=b.modelTraceability(),html=b.modelTraceabilityHtml();assert.equal(trace.styleName,'Japandi');assert.equal(trace.geometryLabel,'Khu đất 5 × 20 m');assert.equal(trace.materialLabel,'6/6 lựa chọn bề mặt hợp lệ');assert.equal(trace.materialComplete,true);assert.match(html,/Revision rev-PA03/);assert.match(html,/KTS\/KS xác nhận/);assert.doesNotMatch(html,/đã duyệt kết cấu|đủ điều kiện thi công/i);
+});
+test('traceability excludes missing profiles, wrong surface roles and deleted rooms',()=>{
+ const b=client(true),p=b.state.project;
+ b.VISUAL_MATERIALS=[{id:'oak',role:'floor',name:'Sàn sồi'},{id:'paint',role:'wall',name:'Sơn'}];
+ b.finishPalette=()=>({visualMaterials:{floor:'oak',wall:'oak',accent:'missing',fabric:'missing'}});
+ p.materials.finish.rooms.deleted={visualMaterials:{floor:'orphan'}};
+ p.materials.finish.exterior={visualMaterials:{wall:'paint',accent:'missing'}};
+ const trace=b.modelTraceability();assert.equal(trace.materialLabel,'2/6 lựa chọn bề mặt hợp lệ');assert.equal(trace.materialComplete,false);assert.deepEqual([...trace.materialProfileIds],['oak','paint']);assert.equal(b.materialContext().surfaces,2);
+ p.plan.rooms=[];assert.equal(b.modelTraceability().materialComplete,false);assert.match(b.modelTraceability().materialLabel,/Chưa có phòng/);
+});
+test('showroom uses canonical price evidence, distinguishes missing from explicit zero and excludes expired prices',()=>{
+ const b=client(true),p=b.state.project;
+ const products={
+  floor:{id:'floor',unit:'m²',priceEvidence:{amountVnd:320000,priceType:'reference'}},
+  paint:{id:'paint',unit:'lít',priceEvidence:{amountVnd:null}},
+  door:{id:'door',unit:'bộ',priceEvidence:{amountVnd:0,priceType:'verified-zero'}},
+  stone:{id:'stone',unit:'m²',priceEvidence:{amountVnd:900000,validUntil:'2000-01-01'}},
+  lamp:{id:'lamp',unit:'bộ',priceEvidence:{amountVnd:0,priceType:'unverified'}},
+  misc:{id:'misc',priceEvidence:{amountVnd:200000}}
+ };
+ p.materials.choices=Object.fromEntries([...Object.keys(products),'entered'].map(id=>[id,id]));
+ p.dataEngine={materialOverrides:{entered:{value:450000,unit:'m²',source:'Nhà cung cấp',date:'2026-10-01'}}};
+ b.catalogSelectedProduct=category=>products[category];
+ const before=JSON.stringify(p),summary=b.materialContext();assert.equal(summary.products,7);assert.equal(summary.priced,3);assert.match(b.materialContextHtml(),/3\/7 nhóm có dữ liệu đơn giá; chưa xác nhận dự toán/);assert.equal(JSON.stringify(p),before);
+ p.dataEngine.materialOverrides.entered.value=null;assert.equal(b.materialContext().priced,2);
+ p.dataEngine.materialOverrides.entered.value=0;assert.equal(b.materialContext().priced,3);
+});
+test('visual navigation retains every route and does not claim a successful save',()=>{
+ const b=client(true);b.GUIDED_FUNCTIONS=['Ý tưởng','Khu đất','Gia đình','Bản vẽ','Vật liệu','3D','Dự toán','Ngân hàng','Thi công','Bàn giao'];b.state.ui.step=8;b.localSaveFailed=true;b.projects={error:'QuotaExceededError'};
+ const html=b.stepper();assert.equal((html.match(/data-nav=/g)||[]).length,10);assert.match(html,/Bước 8 \/ 10 · Ngân hàng/);assert.match(html,/data-nav="8" class="active" aria-current="page"/);assert.doesNotMatch(html,/Đã lưu/);assert.equal(b.render(),true,'render works without matchMedia');
 });
 test('look, wall view, room and light preferences survive the real loader schema',()=>{
  const saved={ui:{modelLook:'materials',modelWalls:'full',modelRoomId:'living',modelLightLevel:31,exteriorCamera:'overview'}},ctx={location:{hostname:'localhost'},localStorage:{getItem:()=>JSON.stringify(saved),setItem(){}},document:{addEventListener(){},querySelector:()=>null},window:{},structuredClone,console,setTimeout,clearTimeout,URL};
