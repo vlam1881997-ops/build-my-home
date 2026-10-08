@@ -1,0 +1,14 @@
+interface:
+  display_name: BMH · Chất lượng web/app
+  short_description: Kiểm tra luồng BMH, dữ liệu và bản phát hành thực tế
+  default_prompt: Dùng $bmh-webapp-quality để kiểm tra thay đổi BMH từ giao diện đến
+    tệp khách tải về.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

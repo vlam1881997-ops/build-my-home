@@ -1,0 +1,44 @@
+BMH – ĐỢT 1: MẪU NHÀ CÓ NGUỒN + CHỈNH BẢN VẼ DỄ DÙNG
+
+Làm trên nguồn BMH hiện có, không xây lại. Tài khoản/worker one là TK1; worker two là TK2. Giữ hai nhiệm vụ theo đúng thứ tự này. Đây chỉ là đợt 1; không gom toàn bộ 10 tab vào một job.
+
+Nếu repo có AGENTS.md và .agents/skills, đọc hướng dẫn BMH cùng các skill phù hợp. Nếu bộ tài liệu chưa có trong main, yêu cầu dưới đây là brief đầy đủ cho đợt này; không lấy việc thiếu tài liệu làm lý do bỏ việc.
+
+YÊU CẦU CHUNG
+Giữ nguyên màn lấy thông tin ban đầu, tệp khách đã tải, dự án đã lưu và 10 tab. Tab 7–10 giữ UI/nghiệp vụ hiện tại. Giữ phong cách/vật liệu và công năng từng tầng. Một bản vẽ/mô hình đo, không thay bằng ảnh AI. Không gọi API trả phí để kiểm thử, không ghi key ra trình duyệt, không thay account/model, dependency, push, merge hoặc deploy.
+
+NHIỆM VỤ TK1 / WORKER ONE
+Nâng tab 1 theo hồ sơ khách đã có: nhà mới/nhà thô, tệp đã tải, số đo, phong cách, tầng, ngân sách và dữ liệu chưa xác nhận. Cho xem nhiều mẫu theo các tiêu chí này; dùng thư viện 24 phong cách hiện tại làm đường dự phòng. Dùng transport Gemini đã có để tìm Google khi model/cấu hình có quota được cho phép; nguồn lấy từ metadata/provider thật, không tạo URL. Hiển thị nguồn, ngày tìm, lý do phù hợp và giới hạn. Ảnh mẫu dùng asset có quyền sử dụng; tìm Google không đồng nghĩa được lấy ảnh về bán.
+Giữ lựa chọn mẫu như ý định thiết kế; không tự ghi đè đất, mặt bằng hay ngân sách. Một hành động chính và bộ lọc ngắn, không thêm nhiều nút. Khi mạng/quota lỗi, phần chọn mẫu hiện có vẫn dùng được. Tách nguồn nghiên cứu khỏi dữ liệu tài chính/ngày sinh khách.
+Được sửa CHỈ các file:
+api/ai.mjs
+server/_gemini.mjs
+server/_gemini_models.mjs
+server/_design_research.mjs
+src/18_ai_copilot.js
+src/70_v60_product_ui.js
+tests/step1-ai.test.mjs
+tests/design-research.test.mjs
+Hai file design_research/design-research là file mới nếu cần. Trong 70_v60_product_ui chỉ sửa tab 1; giữ nguyên v6SetupScreen, validators, fields, Next/Back và các tab còn lại. Không sửa state/build/geometry/3D. Tái dùng hàm hiện có và bounded calls; mô phỏng nguồn/quota bằng fixture.
+
+NHIỆM VỤ TK2 / WORKER TWO
+Nâng direct editor tab 4 trên source 99_customer_design hiện có. Làm rõ đối tượng đang chọn, loại đối tượng, kích thước và thao tác phù hợp. Thêm/xóa phòng, cửa, cửa sổ, lối mở bằng cùng bộ công cụ gọn; dễ chọn trên điện thoại, numeric input chính xác khi cần. Giữ undo/redo, khóa tầng/phòng, tường chung và tọa độ SVG theo inverse screen matrix. Khi không đặt được, báo lý do và giữ nguyên thiết kế/lịch sử. Giữ dữ liệu per-floor, style, finish và fixtures.
+Được sửa CHỈ các file:
+src/99_customer_design.js
+src/customer-design.css
+tests/customer-design.test.mjs
+tests/customer-design.browser.cjs
+Trong 99 không chỉnh thuật toán phong thủy hay thay phong cách/vật liệu; nâng các handler direct editor và UI tương ứng. Không sửa 70, state, API, renderer/build/dependencies. Một cửa lệch tâm phải giữ đúng vị trí trong bản vẽ và mô hình 3D đang có.
+
+NGHIỆM THU SAU KHI GHÉP
+1. Chọn mẫu không làm mất hồ sơ/tệp; nguồn thật có ngày và lý do; lỗi/quota vẫn chọn được thư viện cũ.
+2. Thêm cửa lệch tâm → xóa → undo → redo giữ ID/số đo và kết quả 2D/3D; room/floor locks được tôn trọng.
+3. Thao tác sai không làm thay đổi mặt bằng; reload giữ style/material/per-floor program.
+4. Mười tab vẫn truy cập được, nhất là vật liệu/ngân hàng; intake không đổi hành vi.
+Bộ điều phối xây nguồn đã ghép một lần rồi chạy selected node --test:
+tests/step1-contract.test.cjs
+tests/step1-ai.test.mjs
+tests/setup-flow.test.cjs
+tests/design-research.test.mjs
+tests/customer-design.test.mjs
+Worker không chạy build/test làm ghi dist/public trong worktree riêng. Kiểm tra browser desktop/phone sau tích hợp khi có khả năng browser; thiếu thì ghi rõ, không báo UI đã kiểm chứng. Báo cáo file đã sửa, kết quả thật và phần chưa xác minh. Không tự hạ model hoặc chuyển tài khoản khi lỗi quota.

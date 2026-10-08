@@ -1,0 +1,14 @@
+interface:
+  display_name: BMH · Dựng 3D kiến trúc
+  short_description: Dựng 3D từ mặt bằng, tối ưu tốc độ và xuất GLB
+  default_prompt: Dùng $bmh-3d để dựng và kiểm tra mô hình BMH đúng số đo, vật liệu
+    và hiệu năng trên điện thoại.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

@@ -1,0 +1,14 @@
+interface:
+  display_name: BMH · Bản vẽ kiến trúc
+  short_description: Bản vẽ 2D có số đo và kiểm tra đồng bộ 3D
+  default_prompt: Dùng $bmh-drawings để hoàn thiện bản vẽ BMH, đồng bộ mặt bằng, mặt
+    cắt và mô hình 3D.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

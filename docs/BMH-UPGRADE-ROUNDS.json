@@ -1,0 +1,405 @@
+{
+  "format": "BMH-two-account-upgrade-plan",
+  "version": 1,
+  "preparedAt": "2026-10-04",
+  "baseline": "fdc57d471fe8019440aefa594af7a64544621bb6",
+  "status": "planned-not-executed",
+  "workers": {
+    "one": "TK1",
+    "two": "TK2"
+  },
+  "notes": [
+    "Reference for planner; no dashboard JSON-import feature is implied.",
+    "Run one bounded round/subtask at a time. Replan exact paths if current main changes; never silently overlap ownership.",
+    "BMH Team v1.1.0 starts every job from origin/main. Integrate the previous round into main before dependent rounds, or use a separate authorized continuation workflow. Selecting its local output folder does not resume the previous round.",
+    "Artifacts/skills are on a review branch until merged. A text mission can be used against current main without those files.",
+    "Paid providers are mocked during verification. Actual Windows/account/browser inference not verified by preparing this plan."
+  ],
+  "rounds": [
+    {
+      "id": "01",
+      "summary": "Tab 1 mẫu nhà có nguồn; Tab 4 chỉnh bản vẽ gọn.",
+      "tasks": [
+        {
+          "title": "TK1: ý tưởng và mẫu nhà theo hồ sơ",
+          "instructions": "Đọc BMHMISSION01. Dùng hồ sơ đang có và 24 phong cách; thêm nghiên cứu Google có nguồn qua Gemini hiện có với quota/cost guard. Giữ intake/tệp/state; chọn mẫu là ý định, không tự đổi đất/phòng/ngân sách. Tạo test design-research cho nguồn/quota/lỗi và lựa chọn mẫu. Chỉ sửa phần Tab1 trong 70, không các màn khác.",
+          "ownedPaths": [
+            "api/ai.mjs",
+            "server/_gemini.mjs",
+            "server/_gemini_models.mjs",
+            "server/_design_research.mjs",
+            "src/18_ai_copilot.js",
+            "src/70_v60_product_ui.js",
+            "tests/step1-ai.test.mjs",
+            "tests/design-research.test.mjs"
+          ]
+        },
+        {
+          "title": "TK2: direct editor 2D",
+          "instructions": "Đọc BMHMISSION01. Làm rõ chọn đối tượng/kích thước/thao tác thêm-xóa phòng/cửa/cửa sổ/lối mở trên điện thoại. Giữ inverse SVG transform, locks, undo/redo, ID và dữ liệu style/material/per-floor. Invalid edit không đổi model/history. Không sửa thuật toán phong thủy/style trong 99.",
+          "ownedPaths": [
+            "src/99_customer_design.js",
+            "src/customer-design.css",
+            "tests/customer-design.test.mjs",
+            "tests/customer-design.browser.cjs"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "program": "npm",
+          "args": [
+            "run",
+            "build"
+          ]
+        },
+        {
+          "program": "node",
+          "args": [
+            "--test",
+            "tests/step1-contract.test.cjs",
+            "tests/step1-ai.test.mjs",
+            "tests/setup-flow.test.cjs",
+            "tests/design-research.test.mjs",
+            "tests/customer-design.test.mjs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "summary": "Ranh khu đất, nguồn quy hoạch và contract dữ liệu đo.",
+      "tasks": [
+        {
+          "title": "TK1: nhập vị trí/nguồn và lưu extension",
+          "instructions": "Triển khai contract đã thống nhất trong BMHHOPDONG. Giữ vị trí ghim tách số đo khảo sát; provenance cho polygon, khoảng lùi và quyết định quy hoạch; thiếu dữ liệu ghi chưa xác minh. Đổi vị trí làm nguồn/supplier địa điểm cũ stale. Không scrape bản đồ như ranh pháp lý. Chuẩn bị extension designEvidence/constructionDesign có defaults/normalize/migration, lưu/import tương thích. Tìm nhà cung cấp quanh vị trí theo năng lực API hiện có và nguồn địa chỉ. Không bật Google Places trả phí từ Gemini key. Tạo fixture design-evidence cho reload/nguồn thiếu.",
+          "ownedPaths": [
+            "src/10_state.js",
+            "src/60_app.js",
+            "src/82_customer_projects.js",
+            "server/_site_intelligence.mjs",
+            "server/_places.mjs",
+            "tests/site-finance-contract.test.mjs",
+            "tests/customer-projects.test.cjs",
+            "tests/design-evidence.test.mjs"
+          ]
+        },
+        {
+          "title": "TK2: hình học theo ranh và số đo",
+          "instructions": "Đọc cùng contract trước consumer. Kiểm tra polygon tự cắt, cạnh/diện tích, mặt tiền/hướng bắc, phòng/tường/mái trong envelope có nguồn. Default setback chỉ là giả định; thiếu source không đổi thành pháp lý. Mở rộng revision dependencies cho khoảng lùi và hồ sơ kỹ thuật tương ứng. Giữ thang/giếng lỗ sàn xuyên tầng và reported geometry. Trường extension thiếu phải giữ pending, không tự điền.",
+          "ownedPaths": [
+            "src/76_architecture.js",
+            "src/30_planner.js",
+            "src/92_measured_design.js",
+            "src/79_stair_design.js",
+            "src/87_elevator_design.js",
+            "tests/architecture.test.mjs",
+            "tests/measured-design.test.mjs",
+            "tests/measured-design.browser.cjs"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "program": "npm",
+          "args": [
+            "run",
+            "build"
+          ]
+        },
+        {
+          "program": "node",
+          "args": [
+            "--test",
+            "tests/site-finance-contract.test.mjs",
+            "tests/customer-projects.test.cjs",
+            "tests/design-evidence.test.mjs",
+            "tests/architecture.test.mjs",
+            "tests/measured-design.test.mjs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "summary": "Vật liệu có giá/nguồn; hồ sơ kiến trúc có số đo.",
+      "tasks": [
+        {
+          "title": "TK1: catalog, báo giá và liên kết vật liệu",
+          "instructions": "Nâng catalog hiện có, không chỉ thêm thẻ. SKU/quy cách/đơn vị/ảnh hợp lệ/giá tham khảo hoặc báo giá có ngày/khu vực/VAT/nhân công/vận chuyển. Giá thiếu null, không 0. Bổ sung liên kết sản phẩm tới semantic visualProfile/surfaceSlot/texture scale theo contract; giữ finish người dùng. Thêm lựa chọn bền theo style/ngân sách. Không sửa nghiệp vụ tab7–10 trong 75; không bịa giá hãng. Tạo material-source fixture kiểm nguồn, stale SKU, giá thiếu/unit.",
+          "ownedPaths": [
+            "assets/materials/official-catalog.json",
+            "server/_material_search.mjs",
+            "server/_material_catalog.mjs",
+            "server/_material_discovery.mjs",
+            "server/_material_search_handler.mjs",
+            "server/_material_catalog_handler.mjs",
+            "server/_material_image.mjs",
+            "src/75_completion.js",
+            "src/85_interior_collections.js",
+            "src/86_visual_materials.js",
+            "tests/completion.test.mjs",
+            "tests/material-source.test.mjs"
+          ]
+        },
+        {
+          "title": "TK2: bản vẽ A3/SVG/DXF/PDF",
+          "instructions": "Nâng pipeline vector hiện có: nét tường, kích thước tổng/phân đoạn/cửa, north/scale/revision, ký hiệu, cao độ, mặt đứng/mặt cắt, bảng phòng/cửa/fixtures. Không làm lại PDF từ ảnh. Kiểm clipping, chữ Việt, page size, printed scale và opening/thang. Giữ cùng measured geometry, không biến sơ đồ cột/móng thành thiết kế kỹ thuật.",
+          "ownedPaths": [
+            "src/40_exports.js",
+            "src/95_architectural_documents.js",
+            "src/96_vector_pdf.js",
+            "src/architectural-documents.css",
+            "tests/drawing-contract.test.mjs",
+            "tests/architectural-dossier.test.mjs",
+            "tests/architectural-dossier.browser.cjs"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "program": "npm",
+          "args": [
+            "run",
+            "build"
+          ]
+        },
+        {
+          "program": "node",
+          "args": [
+            "--test",
+            "tests/completion.test.mjs",
+            "tests/material-source.test.mjs",
+            "tests/drawing-contract.test.mjs",
+            "tests/architectural-dossier.test.mjs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "summary": "Phong thủy có nguồn; 3D đúng phong cách/vật liệu.",
+      "tasks": [
+        {
+          "title": "TK1: tư vấn gia đình và thư mục sách",
+          "instructions": "Tìm và xác minh bibliographic nguồn sách/tác giả/ấn bản/URL/chương-trang nếu có; gắn nguồn/coverage với gợi ý hướng nhà/giường/bếp/thờ. Phân biệt nhiều trường phái và quan niệm văn hóa. Không bịa trích dẫn, không sao chép sách; không gửi dữ liệu tài chính/ngày sinh đầy đủ khi không cần. Giữ quyền lựa chọn theo tầng; không tự dịch phòng/cửa. Thông tin hướng còn thiếu giảm coverage. Tạo feng-sources fixture; không sửa 99/100.",
+          "ownedPaths": [
+            "api/ai.mjs",
+            "server/_feng_sources.mjs",
+            "server/_gemini.mjs",
+            "src/18_ai_copilot.js",
+            "src/70_v60_product_ui.js",
+            "tests/parcel-feng-pricing.test.mjs",
+            "tests/step1-ai.test.mjs",
+            "tests/feng-sources.test.mjs"
+          ]
+        },
+        {
+          "title": "TK2: whole-house 3D và phong cách",
+          "instructions": "Dùng profile/SKU đã ghép từ đợt3. Nâng silhouette mái/mặt tiền/ban công/cửa/nội thất theo style đã chọn, cùng hình học 2D; giữ explicit per-room finish. Chuyển vật liệu giữ camera/buffer; texture đúng scale. Full house/floor/explode/walk dễ hiểu; progressive first view, optional path tracing có hủy, không AI tự chạy. Đối chiếu 2D/3D và xuất PNG/GLB thực. Không đổi nguồn giá/profile schema riêng.",
+          "ownedPaths": [
+            "src/43_scene_assets.js",
+            "src/45_studio3d.js",
+            "src/46_architectural_render.js",
+            "src/94_architectural_design.js",
+            "src/98_model_presentation.js",
+            "src/model-presentation.css",
+            "src/99_customer_design.js",
+            "tests/scene-assets.test.mjs",
+            "tests/architectural-render.test.mjs",
+            "tests/model-presentation.test.mjs",
+            "tests/instant-preview.test.mjs",
+            "tests/model-presentation.browser.cjs",
+            "tests/instant-preview.browser.cjs"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "program": "npm",
+          "args": [
+            "run",
+            "build"
+          ]
+        },
+        {
+          "program": "node",
+          "args": [
+            "--test",
+            "tests/parcel-feng-pricing.test.mjs",
+            "tests/step1-ai.test.mjs",
+            "tests/feng-sources.test.mjs",
+            "tests/scene-assets.test.mjs",
+            "tests/architectural-render.test.mjs",
+            "tests/model-presentation.test.mjs",
+            "tests/instant-preview.test.mjs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "05",
+      "summary": "Hình minh họa và UX; phòng tự thêm theo từng tầng.",
+      "tasks": [
+        {
+          "title": "TK1: intake illustration và UI gọn",
+          "instructions": "Chỉ đổi illustration/presentation trong v6SetupScreen, không đổi fields/validator/navigation/hành vi intake. Tạo ba asset intake riêng, có quyền dùng thương mại và đúng tỷ lệ crop; giữ các ảnh đang dùng nơi khác. Dùng native image tool nếu thực có; skill không cấp công cụ render. Nâng hierarchy/filter/details ở tab1–6, một primary action/vùng. Giữ10routes và tab7–10 không redesign. Không tạo nút giả hoặc rebuild3D khi mở details.",
+          "ownedPaths": [
+            "src/70_v60_product_ui.js",
+            "src/89_guided_interface.js",
+            "src/90_product_polish.js",
+            "src/guided-interface.css",
+            "src/product-polish.css",
+            "assets/design/intake-location.webp",
+            "assets/design/intake-finance.webp",
+            "assets/design/intake-family.webp",
+            "tests/setup-flow.test.cjs"
+          ]
+        },
+        {
+          "title": "TK2: custom rooms, floor choices và walk",
+          "instructions": "Giữ phòng giặt/thờ/kho/làm việc/phòng tự đặt tên theo từng tầng, count/minarea, thêm/bỏ/đổi thông qua thực handlers. Thờ ở khách hoặc tầng2/3 do người dùng quyết định. Không tự sinh thêm phòng khi còn diện tích. Cho chọn tầng/phòng nhanh và walk tại hình học thật; lưu/snapshot cô lập project/revision. Ảnh moodboard minh họa khác ảnh dự án hiện tại. Đối chiếu lựa chọn style/material ban đầu.",
+          "ownedPaths": [
+            "src/99_customer_design.js",
+            "src/100_customer_experience.js",
+            "src/88_customer_studio.js",
+            "src/customer-design.css",
+            "src/customer-studio.css",
+            "tests/customer-design.test.mjs",
+            "tests/customer-design.browser.cjs",
+            "tests/customer-experience.browser.cjs",
+            "tests/customer-studio.browser.cjs"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "program": "npm",
+          "args": [
+            "run",
+            "build"
+          ]
+        },
+        {
+          "program": "node",
+          "args": [
+            "--test",
+            "tests/setup-flow.test.cjs",
+            "tests/customer-design.test.mjs",
+            "tests/customer-studio.test.mjs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "06",
+      "summary": "Phối hợp móng/cột/dầm/vách với hồ sơ kỹ sư.",
+      "tasks": [
+        {
+          "title": "TK1: nhập hồ sơ và trạng thái kỹ thuật",
+          "instructions": "Dùng construction-design skill và contract. Bổ sung form gọn/tài liệu cho khảo sát/địa chất/tải trọng/hệ chịu lực/cấp vật liệu/tài liệu kỹ sư/tiêu chuẩn áp dụng. Lưu provenance và reviews theo bộ môn/revision, nguồn thiếu null. Normalize/load/import bền. Sở hữu build registration cho 101_construction_inputs.js, 102_construction_elements.js và construction-design.css theo tên đã thống nhất; không tự đọc worktree TK2. Không biến checkbox thành review thật. Tạo construction-inputs fixture invalid/stale/reload.",
+          "ownedPaths": [
+            "src/10_state.js",
+            "src/82_customer_projects.js",
+            "src/101_construction_inputs.js",
+            "src/construction-design.css",
+            "scripts/build.cjs",
+            "tests/construction-inputs.test.mjs"
+          ]
+        },
+        {
+          "title": "TK2: cấu kiện đo và hồ sơ phối hợp",
+          "instructions": "Dựng cấu kiện từ kích thước/hồ sơ cung cấp, hoặc sơ bộ có nhãn. Phân biệt chịu lực/tường ngăn; cảnh báo collisions/unsupported load path, không tính sức chịu tải khi thiếu đầu vào. Không dùng suggestedColumns 0,22m theo góc phòng làm cột thực. Dùng 102_construction_elements.js cho adapter hình học, hiển thị số đo đúng 2D/3D/sections/schedules và invalidation; nguồn kết cấu chưa duyệt không ra bảng mua thép/móng. Build registration do TK1. Tạo construction-geometry fixture với supplied column/beam, offset door và shaft2floor.",
+          "ownedPaths": [
+            "src/102_construction_elements.js",
+            "src/30_planner.js",
+            "src/45_studio3d.js",
+            "src/94_architectural_design.js",
+            "src/95_architectural_documents.js",
+            "src/92_measured_design.js",
+            "tests/construction-geometry.test.mjs",
+            "tests/architectural-dossier.test.mjs"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "program": "npm",
+          "args": [
+            "run",
+            "build"
+          ]
+        },
+        {
+          "program": "node",
+          "args": [
+            "--test",
+            "tests/construction-inputs.test.mjs",
+            "tests/construction-geometry.test.mjs",
+            "tests/measured-design.test.mjs",
+            "tests/drawing-contract.test.mjs",
+            "tests/architectural-dossier.test.mjs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "07",
+      "summary": "Nối dự toán/tiến độ và nghiệm thu thương mại giữ tab7–10.",
+      "tasks": [
+        {
+          "title": "TK1: giá, ngân sách và dữ liệu dự án",
+          "instructions": "Giữ UI/nghiệp vụ tab7–10. Chỉ sửa adapter/regression do nâng cấp: quantity×unit price đúng scope, chưa giá không0, không cộng trùng khoản phần thô cũ với BOQ chi tiết, giá/thiết kế đổi hiện chênh mốc ngân sách. Giữ banking/repayment và stage actual costs/evidence. Tạo báo cáo release trạng thái năng lực/Gemini free caps/asset licences/cost/hosting phù hợp thương mại; không tự mua plan. Fixtures payment/provider mock; không tạo đơn thật.",
+          "ownedPaths": [
+            "src/20_calc.js",
+            "src/93_measured_cost.js",
+            "tests/parcel-feng-pricing.test.mjs",
+            "tests/customer-projects.test.cjs",
+            "tests/customer-cloud.test.mjs",
+            "tests/customer-studio.test.mjs",
+            "docs/BMH-UPGRADE-RELEASE-RESULT.md"
+          ]
+        },
+        {
+          "title": "TK2: hiệu năng và gói thiết kế khớp",
+          "instructions": "Kiểm3fixture gồm nhà5x20m2tầng, đấtkhôngchữnhật3tầng và nhàthôvới kíchthước được khách xác nhận. Sửa performance/resource/staleexport ở modules sở hữu; đo first visible/frame/material/PNG trên thiết bị thực, ghi cấu hình/latency. Full dossier PDF/DXF/GLB/PNG cùng geometry/revision/style/material. Không thay chức năng7–10. Kiểm browser phone/desktop các luồng thay đổi và10routes; API/paymentmock. Lập báo cáo thực: không đánh dấu commercial construction-certified bằng test pass.",
+          "ownedPaths": [
+            "src/45_studio3d.js",
+            "src/46_architectural_render.js",
+            "src/98_model_presentation.js",
+            "src/88_customer_studio.js",
+            "src/95_architectural_documents.js",
+            "tests/instant-preview.test.mjs",
+            "tests/architectural-dossier.test.mjs",
+            "tests/model-presentation.test.mjs",
+            "tests/model-presentation.browser.cjs",
+            "tests/customer-studio.browser.cjs",
+            "docs/BMH-UPGRADE-DESIGN-RESULT.md"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "program": "npm",
+          "args": [
+            "run",
+            "build"
+          ]
+        },
+        {
+          "program": "node",
+          "args": [
+            "--test",
+            "tests/parcel-feng-pricing.test.mjs",
+            "tests/customer-projects.test.cjs",
+            "tests/customer-cloud.test.mjs",
+            "tests/customer-studio.test.mjs",
+            "tests/instant-preview.test.mjs",
+            "tests/architectural-dossier.test.mjs",
+            "tests/model-presentation.test.mjs"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+interface:
+  display_name: BMH · Phối cảnh hình ảnh
+  short_description: Phối cảnh theo đúng mẫu, màu và góc thiết kế
+  default_prompt: Dùng $bmh-images để làm phối cảnh BMH theo mô hình hiện tại và bảng
+    vật liệu đã chọn.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

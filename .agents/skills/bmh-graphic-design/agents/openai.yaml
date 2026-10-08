@@ -1,0 +1,14 @@
+interface:
+  display_name: BMH · Thiết kế đồ họa
+  short_description: Đồ họa, biểu tượng và trình bày nhất quán cho BMH
+  default_prompt: Dùng $bmh-graphic-design để hoàn thiện đồ họa BMH và trình bày thiết
+    kế rõ ràng cho khách.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
