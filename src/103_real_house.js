@@ -59,7 +59,7 @@
  // The very same parts are rendered by Three and projected onto elevations.
  // Parcel clipping never fills a notch or an upper-floor terrace/shaft void.
  B.houseConstructionDetails=()=>{
-  const p=B.state.project,l=B.projectLevels(),roof=B.sceneRoofSpec(),parts=[];
+  const p=B.state.project,l=B.studioLevels(),roof=B.sceneRoofSpec(),parts=[];
   const add=(floor,kind,x,y,z,w,h,d,side,role='wall',openingId=null)=>{
    if(![x,y,z,w,h,d].every(finite)||w<.001||h<.001||d<.001)return;
    const ex=Math.min(p.site.width,x+w),ez=Math.min(p.site.depth,z+d);x=Math.max(0,x);z=Math.max(0,z);w=ex-x;d=ez-z;if(w<.001||d<.001)return;
@@ -78,7 +78,7 @@
   // Paint the jamb returns, below the measured window head and above its sill.
   // These millimetre skins never alter the saved opening or its clear size.
   for(let f=0;f<l.floors;f++)for(const w of B.scenePlanGeometry(p.plan,f).walls.filter(w=>w.kind!=='wall'&&w.roomIds.length===1)){
-   const r=p.plan.rooms.find(r=>r.id===w.roomIds[0]),near=w.horizontal?w.axis<r.y+r.h/2:w.axis<r.x+r.w/2,side=w.horizontal?(near?'front':'back'):(near?'left':'right'),base=f*l.floorHeight+l.slab+(w.sill||0),t=w.thickness,skin=.002;
+   const r=p.plan.rooms.find(r=>r.id===w.roomIds[0]),near=w.horizontal?w.axis<r.y+r.h/2:w.axis<r.x+r.w/2,side=w.horizontal?(near?'front':'back'):(near?'left':'right'),base=B.studioFloorLevel(f).base+l.slab+(w.sill||0),t=w.thickness,skin=.002;
    for(const u of [w.a-skin,w.b])add(f,'opening-jamb',w.horizontal?u:w.axis-t/2,base,w.horizontal?w.axis-t/2:u,w.horizontal?skin:t,w.height,w.horizontal?t:skin,side,'wall',w.openingId);
   }
   return parts;

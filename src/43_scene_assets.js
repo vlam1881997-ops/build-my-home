@@ -8,7 +8,7 @@ BMH.roomSurfaceStyle=id=>{
 // manufacturer specification or change to the customer's plan is inferred.
 BMH.windowAssembly=opening=>{
  const span=BMH.openingWallSpan?.(opening);if(!span||opening.kind!=='window')return [];
- const levels=BMH.projectLevels(),width=span.b-span.a,sill=Number(opening.sill??.9),height=Math.min(Number(opening.height)||1.4,levels.clearHeight-sill);
+ const levels=BMH.studioFloorLevel?.(opening.floor)??BMH.projectLevels(),width=span.b-span.a,sill=Number(opening.sill??.9),height=Math.min(Number(opening.height)||1.4,levels.clearHeight-sill);
  if(width<.2||height<.2)return [];
  const parts=[],border=Math.min(.055,width*.1,height*.1),sash=.028,depth=.075,base=levels.slab+sill,panes=width>1.25?2:1;
  const add=(part,along,up,w,h,normal,d,finish='frame')=>parts.push({part,kind:finish==='glass'?'window-glass':'window-frame',openingId:opening.id,roomId:opening.roomId,floor:opening.floor,finish,x:span.o==='h'?span.a+along:span.c+normal-d/2,y:base+up,z:span.o==='h'?span.c+normal-d/2:span.a+along,w:span.o==='h'?w:d,h,d:span.o==='h'?d:w,generic:true});
@@ -205,10 +205,10 @@ BMH.addWindowDrapery=(THREE,scene,r,base,site,overview=false)=>{
 // Keep an orbiting indoor camera out of measured walls, ceilings and furniture.
 // A camera inside a television/cabinet can otherwise produce a dark, unusable image.
 BMH.interiorCameraIsClear=(room,point,items=BMH.roomFurnitureLayout(room))=>{
- const margin=.08,levels=BMH.projectLevels(),height=point.height;
+ const margin=.08,levels=BMH.studioFloorLevel?.(room.floor)??BMH.projectLevels(),height=point.height;
  if(![point.x,point.y,height].every(Number.isFinite)||['stairs','elevator'].includes(room.type))return false;
  if(point.x<room.x+.12||point.x>room.x+room.w-.12||point.y<room.y+.12||point.y>room.y+room.h-.12)return false;
- if(!Number.isFinite(height)||height<levels.slab+.12||height>levels.floorHeight-(levels.ceilingDrop||0)-.12)return false;
+ if(!Number.isFinite(height)||height<levels.slab+.12||height>(levels.height??levels.floorHeight)-(levels.ceilingDrop||0)-.12)return false;
  if((BMH.stairFloorHoles?.(room.floor)||[]).some(h=>point.x>h.x-.08&&point.x<h.x+h.w+.08&&point.y>h.y-.08&&point.y<h.y+(h.d??h.h)+.08))return false;
  if((BMH.planFixtures?.()||[]).some(q=>q.roomId===room.id&&height>levels.slab+(Number(q.base)||0)-margin&&height<levels.slab+(Number(q.base)||0)+q.h+margin&&point.x>q.x-margin&&point.x<q.x+q.w+margin&&point.y>q.y-margin&&point.y<q.y+q.d+margin))return false;
  return !items.some(i=>height>levels.slab+(i.base||0)-margin&&height<levels.slab+(i.base||0)+(i.h||0)+margin&&point.x>i.x-margin&&point.x<i.x+i.w+margin&&point.y>i.y-margin&&point.y<i.y+i.d+margin);
@@ -274,7 +274,7 @@ BMH.roomInteriorCamera = (room, items = BMH.roomFurnitureLayout(room)) => {
   // The long-room orbit may miss every usable point in a narrow furnished
   // living room. Search bounded, body-clear eye positions before falling back
   // to an overhead inspection; do not remove or move the customer's furniture.
-  const levels=BMH.projectLevels(),eye=Math.min(1.65,levels.floorHeight-(levels.ceilingDrop||0)-.18),targetHeight=Math.min(1.1,eye-.15),targets=[target,{x:room.x+room.w/2,y:room.y+room.h/2}];let best=null;
+  const levels=BMH.studioFloorLevel?.(room.floor)??BMH.projectLevels(),eye=Math.min(1.65,(levels.height??levels.floorHeight)-(levels.ceilingDrop||0)-.18),targetHeight=Math.min(1.1,eye-.15),targets=[target,{x:room.x+room.w/2,y:room.y+room.h/2}];let best=null;
   const obstructs=(camera,aim,item)=>{
    let enter=0,leave=1;
    for(const [axis,start,end]of [['x',item.x-.025,item.x+item.w+.025],['y',item.y-.025,item.y+item.d+.025],['height',levels.slab+(item.base||0)-.025,levels.slab+(item.base||0)+(item.h||0)+.025]]){

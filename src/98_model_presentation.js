@@ -22,7 +22,7 @@
   return s.level*q*Math.sqrt(q)*(.2+.8*facing)*characteristic;
  };
  B.modelRoomLights=(r,base)=>{
-  const site=B.state.project.site,fh=B.projectLevels().floorHeight,items=B.roomFurnitureLayout?.(r)||[],lamps=items.filter(x=>/lamp|light|pendant/i.test(x.model||''));
+  const site=B.state.project.site,fh=B.studioFloorLevel?.(r.floor)?.height??B.projectLevels().floorHeight,items=B.roomFurnitureLayout?.(r)||[],lamps=items.filter(x=>/lamp|light|pendant/i.test(x.model||''));
   const points=lamps.length?lamps.slice(0,3).map(x=>({x:x.x+x.w/2-site.width/2,z:x.y+x.d/2-site.depth/2,y:base+B.projectLevels().slab+(Number(x.base)||0)+(Number(x.h)||1.62)*.89})):[{x:r.x+r.w*.53-site.width/2,z:r.y+r.h*.53-site.depth/2,y:base+Math.min(fh-.25,2.6)}];
   return points.map((p,i)=>({...p,level:/corridor|stairs|elevator/.test(r.type)?.38:.82,kind:'pendant',color:i?[.42,.68,1]:r.type==='bath'?[.62,.80,1]:[1,.66,.35]}));
  };
@@ -58,7 +58,7 @@
  const addLightSurface=c=>{
   const {THREE,scene,W,D,fh,explode,focus,roomFocus,floorFocus,visibleFloors}=c,pos=[],col=[];
   for(const f of visibleFloors)for(const r of (roomFocus?[roomFocus]:B.floorRooms(f))){
-   const base=roomFocus||floorFocus!==null?0:f*(fh+explode),slab=B.projectLevels().slab,lamps=B.modelRoomLights(r,base),holes=B.stairFloorHoles?.(f)||[],panels=B.slabPanels?.(r,holes)||[{x:r.x,y:r.y,w:r.w,d:r.h}];
+   const base=roomFocus||floorFocus!==null?0:(B.studioFloorLevel?.(f)?.base??f*fh)+f*explode,slab=B.projectLevels().slab,lamps=B.modelRoomLights(r,base),holes=B.stairFloorHoles?.(f)||[],panels=B.slabPanels?.(r,holes)||[{x:r.x,y:r.y,w:r.w,d:r.h}];
    for(const panel of panels){const nx=Math.max(1,Math.ceil(panel.w/.4)),nz=Math.max(1,Math.ceil(panel.d/.4));
     const vertex=(x,z)=>{const p=[x-W/2,base+slab+.009,z-D/2],light=[0,0,0];for(const lamp of lamps){const k=B.modelLightContribution(lamp,p,[0,1,0]);for(let ch=0;ch<3;ch++)light[ch]+=Math.pow(lamp.color[ch],1.5)*k;}pos.push(...p);col.push(...light.map(v=>1-Math.exp(-v*.7*1.6)));};
     for(let i=0;i<nx;i++)for(let j=0;j<nz;j++){const a=panel.x+panel.w*i/nx,b=panel.y+panel.d*j/nz,x=panel.x+panel.w*(i+1)/nx,z=panel.y+panel.d*(j+1)/nz;for(const p of [[a,b],[a,z],[x,z],[a,b],[x,z],[x,b]])vertex(...p);}
@@ -68,7 +68,7 @@
   const material=new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.75,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false,side:THREE.DoubleSide});
   const mesh=new THREE.Mesh(geometry,material);mesh.userData={kind:'model-room-light',presentationOnly:true};scene.add(mesh);scene.userData.modelPresentation.lightSurface=mesh;
   const lampLayer=new THREE.Group();lampLayer.userData={kind:'model-lamp-glows',presentationOnly:true};
-  const sources=[];for(const f of visibleFloors)for(const r of roomFocus?[roomFocus]:B.floorRooms(f)){if(!B.roomFurnitureLayout(r).some(i=>i.model==='floorLamp'))continue;const base=roomFocus||floorFocus!==null?0:f*(fh+explode);sources.push(...B.modelRoomLights(r,base));}
+  const sources=[];for(const f of visibleFloors)for(const r of roomFocus?[roomFocus]:B.floorRooms(f)){if(!B.roomFurnitureLayout(r).some(i=>i.model==='floorLamp'))continue;const base=roomFocus||floorFocus!==null?0:(B.studioFloorLevel?.(f)?.base??f*fh)+f*explode;sources.push(...B.modelRoomLights(r,base));}
   scene.add(lampLayer);scene.userData.modelPresentation.lampGlows=lampLayer;if(!sources.length)return;
   const canvas=document.createElement('canvas');canvas.width=canvas.height=64;const ctx=canvas.getContext('2d'),gradient=ctx.createRadialGradient(32,32,1,32,32,32);gradient.addColorStop(0,'rgba(255,232,188,.80)');gradient.addColorStop(.16,'rgba(255,193,102,.25)');gradient.addColorStop(1,'rgba(255,176,73,0)');ctx.fillStyle=gradient;ctx.fillRect(0,0,64,64);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
   const glowMaterial=new THREE.MeshBasicMaterial({map:texture,transparent:true,opacity:.6,depthWrite:false,toneMapped:false,blending:THREE.AdditiveBlending});
@@ -141,7 +141,7 @@
    patch.alpha.value=alpha;
   }
   if(st.selectedKey!==key){st.selectedKey=key;for(const o of [...st.selection.children]){st.selection.remove(o);o.geometry.dispose();o.material.dispose();}
-   if(selected){const {THREE}=s,r=selected,levels=B.projectLevels(),base=ui.sceneFocus==='all'?r.floor*(levels.floorHeight+st.context.explode):0;for(const p of B.slabPanels(r,B.stairFloorHoles(r.floor))){
+   if(selected){const {THREE}=s,r=selected,levels=B.projectLevels(),base=ui.sceneFocus==='all'?(B.studioFloorLevel?.(r.floor)?.base??r.floor*levels.floorHeight)+r.floor*st.context.explode:0;for(const p of B.slabPanels(r,B.stairFloorHoles(r.floor))){
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(p.w,p.d),new THREE.MeshBasicMaterial({color:0x31d2e8,transparent:true,opacity:.12,depthWrite:false,toneMapped:false,side:THREE.DoubleSide}));mesh.rotation.x=-Math.PI/2;mesh.position.set(p.x+p.w/2-site.width/2,base+levels.slab+.013,p.y+p.d/2-site.depth/2);st.selection.add(mesh);
     const outline=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([[p.x,p.y],[p.x+p.w,p.y],[p.x+p.w,p.y+p.d],[p.x,p.y+p.d]].map(([x,z])=>new THREE.Vector3(x-site.width/2,base+levels.slab+.018,z-site.depth/2))),new THREE.LineBasicMaterial({color:0x31d2e8,transparent:true,opacity:.65,depthWrite:false,toneMapped:false}));st.selection.add(outline);
    }}

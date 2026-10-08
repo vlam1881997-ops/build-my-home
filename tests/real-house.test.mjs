@@ -6,6 +6,24 @@ import crypto from 'node:crypto';
 import {designClient} from './fixtures/design-client.mjs';
 const client=()=>{const b=designClient({realHouse:true});assert.equal(b.autoPlanConcept(),true);return b;};
 
+test('3D facade and jambs consume cumulative floor bases from A without altering measured plan',()=>{
+ const b=client(),p=b.state.project,original=JSON.stringify(p.plan),heights=[3.8,3.4,3.1],bases=[0,3.8,7.2];
+ b.resolvedProjectLevels=()=>({...b.projectLevels(),roofBase:10.3,levels:heights.map((height,floor)=>({floor,base:bases[floor],height,slab:.14,ceilingDrop:.2,clearHeight:height-.34}))});
+ b.floorLevel=f=>b.resolvedProjectLevels().levels[f];b.selectHouseStyle('japandi');
+ const parts=b.facadeComponents(),jambs=b.houseConstructionDetails().filter(x=>x.kind==='opening-jamb');
+ for(let floor=0;floor<3;floor++){
+  const walls=parts.filter(x=>x.floor===floor&&x.kind==='exterior-finish');assert.ok(walls.length>0,'floor '+floor);
+  assert.ok(walls.every(x=>x.y>=bases[floor]+.14-1e-8),'facade base '+floor);
+  assert.ok(walls.every(x=>x.y+x.h<=bases[floor]+heights[floor]+1e-8),'facade head '+floor);
+  for(const x of jambs.filter(x=>x.floor===floor)){
+   const opening=p.plan.openings.find(o=>o.id===x.openingId);assert.ok(opening);assert.ok(Math.abs(x.y-(bases[floor]+.14+(opening.sill||0)))<1e-8);
+  }
+ }
+ const scene=new THREE.Scene();b.addArchitecturalFacade({THREE,scene,W:p.site.width,D:p.site.depth,explode:1.1},parts);
+ for(const mesh of scene.children)for(const id of mesh.userData.componentIds){const x=parts.find(q=>q.id===id),box=new THREE.Box3().setFromObject(mesh);assert.ok(box.min.y<=x.y+x.floor*1.1+1e-5&&box.max.y>=x.y+x.h+x.floor*1.1-1e-5);}
+ assert.equal(JSON.stringify(p.plan),original);
+});
+
 test('flat-roof parapets distinguish a suggestion, an actual height and an explicit removal without changing the plan',()=>{
  const b=client(),p=b.state.project;b.guidedDetails=(id,title,html)=>html;b.selectHouseStyle('japandi');const plan=JSON.stringify(p.plan),products=JSON.stringify(p.materials.choices),d=b.measuredDesignSettings();
  assert.equal(b.roofParapetSpec().height,.38);assert.equal(b.roofParapetSpec().source,'design-suggestion');assert.match(b.measuredDesignPanel(),/là gợi ý phương án/);

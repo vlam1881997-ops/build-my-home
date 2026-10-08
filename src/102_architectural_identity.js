@@ -39,7 +39,7 @@
  const palette=B.scenePalette;B.scenePalette=()=>{const value=palette(),raw=B.state.project.materials.finish?.exterior||{},rule=B.architecturalIdentity();return {...value,frame:hex(raw.frame)?parseInt(raw.frame.slice(1),16):['classic','neo','french','coastal'].includes(rule.id)?0xddd8c9:value.frame};};
  B.facadeComponentArea=part=>part.polygon?Math.abs(part.polygon.reduce((n,a,i)=>{const b=part.polygon[(i+1)%part.polygon.length];return n+a[0]*b[1]-b[0]*a[1];},0))/2:part.h*(part.horizontal===false?part.d:part.w);
  B.facadeComponents=()=>{
-  const p=B.state.project,l=B.projectLevels(),rule=B.architecturalIdentity(),finish=B.facadeFinishPalette(),parts=[],ids=new Set(),W=Number(p.site.width),D=Number(p.site.depth);
+  const p=B.state.project,l=B.studioLevels(),rule=B.architecturalIdentity(),finish=B.facadeFinishPalette(),parts=[],ids=new Set(),W=Number(p.site.width),D=Number(p.site.depth);
   const add=(floor,roomId,kind,x,y,z,w,h,d,role='accent',side='front',polygon=null,openingId=null)=>{
    if(![x,y,z,w,h,d].every(Number.isFinite)||w<=.001||h<=.001||d<=.001)return null;
    // A polygon is never distorted to fit a boundary. Omit an unavailable detail.
@@ -54,7 +54,7 @@
   const box=(f,w,kind,a,y,length,height,depth,role='accent',poly=null)=>{const q=face(w);if(!q)return null;const constant=q.near?q.axis-depth+.0006:q.axis-.0006;return add(f,q.r.id,kind,w.horizontal?a:constant,y,w.horizontal?constant:a,w.horizontal?length:depth,height,w.horizontal?depth:length,role,q.side,poly,w.openingId||null);};
   const arch=(width,rise,t)=>{const points=[],segments=20;for(let i=0;i<=segments;i++){const a=Math.PI-i*Math.PI/segments;points.push([width/2+width/2*Math.cos(a),t+rise*Math.sin(a)]);}for(let i=segments;i>=0;i--){const a=Math.PI-i*Math.PI/segments;points.push([width/2+(width/2-t)*Math.cos(a),t+Math.max(.01,rise-t)*Math.sin(a)]);}return points;};
   for(let f=0;f<l.floors;f++){
-   const g=B.scenePlanGeometry(p.plan,f),base=f*l.floorHeight,clear=l.floorHeight-l.slab,exterior=g.walls.filter(w=>w.roomIds.length===1),front=exterior.filter(w=>face(w)?.side==='front'),seen=new Set();
+   const g=B.scenePlanGeometry(p.plan,f),level=B.studioFloorLevel(f),base=level.base,clear=level.height-level.slab,exterior=g.walls.filter(w=>w.roomIds.length===1),front=exterior.filter(w=>face(w)?.side==='front'),seen=new Set();
    // A separate outside paint layer keeps room-specific paint inside the house.
    for(const w of exterior){
     const len=w.b-w.a,sill=w.kind==='window'?w.sill:0,top=w.kind==='wall'?0:(w.sill||0)+w.height;
@@ -70,11 +70,11 @@
     if(rule.id==='tudor'&&f>0){box(f,feature,'timber-post',start,y,.07,height,.035);box(f,feature,'timber-post',start+width-.07,y,.07,height,.035);box(f,feature,'timber-diagonal',start,y,width,height,.04,'accent',[[0,0],[.08,0],[width,height-.1],[width,height],[width-.08,height],[0,.1]]);}
     if(rule.band==='deco')for(let i=0;i<3;i++)box(f,feature,'deco-fin',start+i*width/3,y+(.12-i*.04),.055,height-(.12-i*.04),.075);
     if(['classic','neo','french','craftsman'].includes(rule.id)){
-     const locations=rule.id==='classic'?bays:bays.slice(0,2);for(const wall of locations){const t=Math.min(rule.id==='classic'?.22:.16,(wall.b-wall.a-.1)/2),at=wall.a+(wall.b-wall.a-t)/2;box(f,wall,'pilaster',at,base+l.slab,t,clear-.14,.07,'wall');box(f,wall,'pilaster-base',at-.035,base+l.slab,t+.07,.12,.10,'wall');box(f,wall,'pilaster-capital',at-.05,base+l.floorHeight-.24,t+.10,.11,.115,'wall');}
+     const locations=rule.id==='classic'?bays:bays.slice(0,2);for(const wall of locations){const t=Math.min(rule.id==='classic'?.22:.16,(wall.b-wall.a-.1)/2),at=wall.a+(wall.b-wall.a-t)/2;box(f,wall,'pilaster',at,base+l.slab,t,clear-.14,.07,'wall');box(f,wall,'pilaster-base',at-.035,base+l.slab,t+.07,.12,.10,'wall');box(f,wall,'pilaster-capital',at-.05,base+level.height-.24,t+.10,.11,.115,'wall');}
     }
    }
    for(const w of front.filter(w=>w.kind!=='wall')){
-    if(seen.has(w.openingId))continue;seen.add(w.openingId);const o=p.plan.openings.find(o=>o.id===w.openingId),span=o&&B.openingWallSpan(o);if(!span)continue;const a=span.a,len=span.b-span.a,bottom=base+l.slab+(w.sill||0),top=bottom+w.height,t=Math.min(rule.trim,len*.12),headroom=base+l.floorHeight-top-.12,accent=['frame','reveal','offset'].includes(rule.surround)&&rule.surface==='metal'?'frame':rule.surround==='classical'||rule.surround==='arched'&&rule.surface!=='wood'?'wall':'accent';
+    if(seen.has(w.openingId))continue;seen.add(w.openingId);const o=p.plan.openings.find(o=>o.id===w.openingId),span=o&&B.openingWallSpan(o);if(!span)continue;const a=span.a,len=span.b-span.a,bottom=base+l.slab+(w.sill||0),top=bottom+w.height,t=Math.min(rule.trim,len*.12),headroom=base+level.height-top-.12,accent=['frame','reveal','offset'].includes(rule.surround)&&rule.surface==='metal'?'frame':rule.surround==='classical'||rule.surround==='arched'&&rule.surface!=='wood'?'wall':'accent';
     if(t>.001){
      const low=Math.max(base+l.slab,bottom-t),revealHeight=top+t-low;
      box(f,w,'window-reveal',a-t,low,t,revealHeight,Math.max(.025,t),accent);box(f,w,'window-reveal',a+len,low,t,revealHeight,Math.max(.025,t),accent);
@@ -90,10 +90,10 @@
     if(rule.surround==='screen'&&headroom>.12){const blades=rule.id==='tropical'?4:2;for(let i=0;i<blades&&.08+i*.075<headroom;i++)box(f,w,'shade-blade',a-.06,top+.08+i*.075,len+.12,.027,rule.shade);}
     if(w.kind==='door'&&f===0&&rule.shade>.1&&headroom>.12)box(f,w,'entry-canopy',a-.16,top+.11,len+.32,.07,Math.min(.58,rule.shade+.14),['japanese','japandi','craftsman','vietnamese','balinese'].includes(rule.id)?'accent':'wall');
    }
-   for(const w of front){const depth=rule.band==='cornice'?.10:rule.band==='deco'?.12:rule.band==='horizontal'?.12:.035,h=rule.band==='cornice'?.11:rule.band==='deco'?.14:.055;box(f,w,rule.band==='cornice'?'cornice':'horizontal-band',w.a,base+l.floorHeight-h,w.b-w.a,h,depth,'wall');if(['classic','french','artdeco'].includes(rule.id))box(f,w,'cornice-step',w.a,base+l.floorHeight+.025,w.b-w.a,.055,depth+.04,rule.id==='artdeco'?'accent':'wall');}
+   for(const w of front){const depth=rule.band==='cornice'?.10:rule.band==='deco'?.12:rule.band==='horizontal'?.12:.035,h=rule.band==='cornice'?.11:rule.band==='deco'?.14:.055;box(f,w,rule.band==='cornice'?'cornice':'horizontal-band',w.a,base+level.height-h,w.b-w.a,h,depth,'wall');if(['classic','french','artdeco'].includes(rule.id))box(f,w,'cornice-step',w.a,base+level.height+.025,w.b-w.a,.055,depth+.04,rule.id==='artdeco'?'accent':'wall');}
    if(['barn','coastal','tudor'].includes(rule.id))for(const wall of front.filter(w=>w.kind==='wall'))for(let a=wall.a+.10;a<wall.b-.04;a+=rule.id==='barn'?.20:.30)box(f,wall,'vertical-joint',a,base+l.slab+.04,.016,clear-.08,.012,rule.id==='tudor'?'accent':'wall');
   }
-  const roof=B.sceneRoofSpec(),b=B.sceneFootprintBounds(B.floorRooms(l.floors-1)),top=l.floors*l.floorHeight+l.slab;
+  const roof=B.sceneRoofSpec(),b=B.sceneFootprintBounds(B.floorRooms(l.floors-1)),top=(l.roofBase??l.floors*l.floorHeight)+l.slab;
   if(roof&&b?.rectangular&&roof.eave>top+.001){const t=B.measuredWallThickness(false);for(const [side,x,z,w,d]of [['front',b.x-t/2,b.y-t/2,b.width+t,t],['back',b.x-t/2,b.y+b.depth-t/2,b.width+t,t],['left',b.x-t/2,b.y+t/2,t,b.depth-t],['right',b.x+b.width-t/2,b.y+t/2,t,b.depth-t]])add(l.floors-1,null,'roof-eave-band',x,top,z,w,roof.eave-top,d,'wall',side);}
   return parts;
  };
@@ -135,7 +135,7 @@
  // Wall treatments follow the room's collection, including a manually mixed
  // collection. They occupy solid wall bays, not doors, glazing or shaft voids.
  B.interiorFeatureComponents=r=>{
-  if(!['living','bed'].includes(r.type))return [];const c=B.interiorCollection(r.id),l=B.projectLevels(),parts=[],fixtures=B.planFixtures?.(r.id)||[],walls=B.scenePlanGeometry(B.state.project.plan,r.floor).walls.filter(w=>w.kind==='wall'&&w.roomIds.includes(r.id)&&w.b-w.a>1.15),side=w=>w.horizontal?(w.axis<r.y+r.h/2?'front':'back'):(w.axis<r.x+r.w/2?'left':'right');
+  if(!['living','bed'].includes(r.type))return [];const c=B.interiorCollection(r.id),l=B.studioFloorLevel(r.floor),parts=[],fixtures=B.planFixtures?.(r.id)||[],walls=B.scenePlanGeometry(B.state.project.plan,r.floor).walls.filter(w=>w.kind==='wall'&&w.roomIds.includes(r.id)&&w.b-w.a>1.15),side=w=>w.horizontal?(w.axis<r.y+r.h/2?'front':'back'):(w.axis<r.x+r.w/2?'left':'right');
   const candidates=walls.filter(w=>!fixtures.some(q=>({north:'front',south:'back',west:'left',east:'right'}[q.side])===side(w))).sort((a,b)=>(b.b-b.a)-(a.b-a.a)),wall=candidates[0];if(!wall)return parts;
   const near=['front','left'].includes(side(wall)),width=Math.min(2.45,wall.b-wall.a-.28),start=(wall.a+wall.b-width)/2,top=Math.min(2.45,l.clearHeight-.22),bottom=.28;
   const add=(kind,u,y,w,h,depth,role='accent',polygon=null)=>{const axis=wall.axis+(near?1:-1)*(wall.thickness||B.measuredWallThickness(wall.roomIds.length>1))/2,constant=near?axis+.005:axis-depth-.005;parts.push({id:'interior-'+r.id+'-'+kind+'-'+parts.length,kind,roomId:r.id,floor:r.floor,collectionId:c.id,x:wall.horizontal?u:constant,y:l.slab+y,z:wall.horizontal?constant:u,w:wall.horizontal?w:depth,h,d:wall.horizontal?depth:w,horizontal:wall.horizontal,role,generic:true,...(polygon?{polygon}: {})});};
@@ -153,7 +153,7 @@
  B.decorateStudioScene=options=>{
   decorate(options);const {THREE,scene,visibleFloors,roomFocus,floorFocus,W,D,fh,explode}=options;
   for(const f of visibleFloors)for(const r of B.floorRooms(f).filter(r=>!roomFocus||r.id===roomFocus.id)){
-   const parts=B.interiorFeatureComponents(r);if(!parts.length)continue;const base=roomFocus||floorFocus!==null?0:f*(fh+explode),materials=B.sceneAssetMaterials(THREE,scene,B.finishPalette(r.id)),groups=new Map();
+   const parts=B.interiorFeatureComponents(r);if(!parts.length)continue;const base=roomFocus||floorFocus!==null?0:B.studioFloorLevel(f).base+f*explode,materials=B.sceneAssetMaterials(THREE,scene,B.finishPalette(r.id)),groups=new Map();
    for(const p of parts){if(!groups.has(p.role))groups.set(p.role,[]);groups.get(p.role).push(p);}
    for(const [role,group]of groups){let material=materials[role==='accent'?'wood':role],clipped=floorFocus!==null||roomFocus&&B.state.ui.roomCamera!=='inside';if(clipped){material=material.clone();material.clippingPlanes=[new THREE.Plane(new THREE.Vector3(0,-1,0),base+(roomFocus?.85:1.05))];material.clipShadows=true;}
     const source=group[0].polygon?B.facadePolygonGeometry(THREE,{...group[0],floor:0,y:base+group[0].y},{W,D}):B.sceneJoinedBoxes(THREE,group,{W,D,base});B.sceneSurfaceUvs(source,material,{x:0,y:0,z:0});const mesh=new THREE.Mesh(source,material);mesh.castShadow=mesh.receiveShadow=true;mesh.userData={kind:'interior-feature',roomId:r.id,floor:f,collectionId:group[0].collectionId,componentIds:group.map(p=>p.id),measuredBoxes:group,generic:true};scene.add(mesh);
