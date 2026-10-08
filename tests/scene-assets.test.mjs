@@ -268,8 +268,9 @@ test('scene cleanup disposes shared maps and environment targets exactly once',(
   const {b,context}=client();vm.runInNewContext(fs.readFileSync('src/45_studio3d.js','utf8'),context);
   const scene=new THREE.Scene(),texture=new THREE.Texture(),material=new THREE.MeshStandardMaterial({map:texture,bumpMap:texture});const geometry=new THREE.BoxGeometry();
   scene.add(new THREE.Mesh(geometry,material),new THREE.Mesh(geometry,[material,material]));let textures=0,materials=0,geometries=0,environment=0,renderer=0;
+  const cached=material.clone();cached.addEventListener('dispose',()=>materials++);scene.userData.architecturalMaterials=new Map([['used',material],['cache-only',cached]]);
   texture.addEventListener('dispose',()=>textures++);material.addEventListener('dispose',()=>materials++);geometry.addEventListener('dispose',()=>geometries++);scene.userData.environmentTarget={dispose(){environment++}};
-  b.studio3d={scene,renderer:{dispose(){renderer++}}};b.disposeStudio3D();assert.deepEqual([textures,materials,geometries,environment,renderer],[1,1,1,1,1]);assert.equal(b.studio3d,null);
+  b.studio3d={scene,renderer:{dispose(){renderer++}}};b.disposeStudio3D();assert.deepEqual([textures,materials,geometries,environment,renderer],[1,2,1,1,1]);assert.equal(b.studio3d,null);
 });
 
 

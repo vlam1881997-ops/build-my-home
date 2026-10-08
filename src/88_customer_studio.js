@@ -22,8 +22,8 @@ BMH.exportStudioGlb=async()=>{
  try{
   const [THREE,module]=await Promise.all([BMH.ensureThree(),import('./vendor/three/exporters/GLTFExporter.js')]);if(BMH.studio3d!==s||signature!==BMH.cinematicSignature())return false;
   snapshot=BMH.architecturalRenderScene(THREE,s.scene,{purpose:'model'});snapshot.background=snapshot.environment=null;ownedMaterials=snapshot.userData.ownedMaterials;
-  snapshot.traverse(o=>{const data=o.userData||{};o.userData=Object.fromEntries(['kind','roomId','openingId','shaftId','fixtureId','componentId','floor','generic','provisional'].filter(k=>['string','number','boolean'].includes(typeof data[k])).map(k=>[k,data[k]]));if(Array.isArray(data.roomIds))o.userData.roomIds=data.roomIds.filter(id=>typeof id==='string');});
-  snapshot.userData={bmh:{units:'metres',status:'preliminary-architecture',revision,view:BMH.state.ui.sceneFocus||'all',style:BMH.state.project.style,finishes:BMH.customerDesignSnapshot().project.finishes}};
+  snapshot.traverse(o=>{const data=o.userData||{};o.userData=Object.fromEntries(['kind','roomId','openingId','shaftId','fixtureId','componentId','floor','generic','provisional','styleId','collectionId','facadeRole'].filter(k=>['string','number','boolean'].includes(typeof data[k])).map(k=>[k,data[k]]));for(const key of ['roomIds','componentIds'])if(Array.isArray(data[key]))o.userData[key]=data[key].filter(id=>typeof id==='string');});
+  snapshot.userData={bmh:{units:'metres',status:'preliminary-architecture',revision,view:BMH.state.ui.sceneFocus||'all',style:BMH.state.project.style,finishes:BMH.customerDesignSnapshot().project.finishes,architecture:BMH.architecturalIdentityReview?.()||null}};
   const glb=await new module.GLTFExporter().parseAsync(snapshot,{binary:true,onlyVisible:true,maxTextureSize:512});
   if(BMH.studio3d!==s||signature!==BMH.cinematicSignature())return false;
   BMH.download('BMH-mo-hinh-3D-'+(BMH.state.ui.sceneFocus||'all').replace(/[^a-z0-9_-]/gi,'-')+'-'+revision+'.glb',glb,'model/gltf-binary');BMH.toast('Đã tải GLB của mô hình đang xem · đơn vị mét.');return true;

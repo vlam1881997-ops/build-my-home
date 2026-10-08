@@ -66,6 +66,7 @@ BMH.sceneSurfaceTexture = (THREE, kind, channel='color') => {
   else if(kind==='marble'){const flow=y+x*.53+9*Math.sin(x*.041)+4*Math.sin(y*.027),vein=Math.pow(Math.max(0,Math.cos(flow*.12)),28);value=250-vein*64-n*3;height=.5+n*.002;rough=.44+vein*.12;}
   else if(kind==='travertine'){const band=Math.sin(y*.09+Math.sin(x*.014)*1.7),pore=n>.986&&Math.sin(x*.8+y*.37)>.1;value=239+band*9-(pore?38:0);height=pore?.24:.5+band*.005;rough=pore?.95:.86;}
   else if(kind==='concrete'){const cloud=Math.sin(x*.031)*Math.cos(y*.028)+Math.sin((x+y)*.064)*.3;value=241+cloud*7+(n-.5)*8;height=.5+(n-.5)*.015;rough=.95;}
+  else if(kind==='brick'){const row=Math.floor(y/128),cross=(x+row*128)%256,seam=y%128<7||cross<7;value=seam?216:235+(n-.5)*13+Math.sin(x*.17)*2;height=seam?.12:.58+(n-.5)*.04;rough=seam?.98:.92;}
   else if(kind==='terrazzo'){const cx=Math.floor(x/13),cy=Math.floor(y/13),seed=Math.sin(cx*19.13+cy*87.17)*43758.54,f=seed-Math.floor(seed),dx=x%13-(3+f*7),dy=y%13-(9-f*6),chip=dx*dx+(dy*.8)**2<7+f*10;value=chip?140+f*82:249;height=.5+(n-.5)*.002;rough=chip?.64:.8;}
   else if(kind==='boucle'){const loop=Math.sin(x*1.8)*Math.cos(y*1.6);value=241+loop*8+n*5;height=.5+loop*.11+n*.035;rough=.99;}
   else if(kind==='velvet'){value=245+Math.sin(y*.5)*2+n*3;height=.5+n*.015;rough=.9;}

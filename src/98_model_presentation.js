@@ -178,7 +178,7 @@
  const structure=B.studioStructureKey;B.studioStructureKey=()=>structure()+'|model-presentation:1';
  B.selectModelRoom=id=>{
   if(!B.modelVisibleRooms().some(r=>r.id===id))id='';B.state.ui.modelRoomId=id;B.save();
-  const old=document.querySelector('[data-model-room-panel]');old?.replaceWith(template(B.modelRoomInspectorHtml()).content);B.studio3d?.renderFrame();
+  const old=document.querySelector('[data-model-room-panel]');old?.replaceWith(template(B.modelRoomInspectorHtml()).content);(B.studio3d?.requestRender||B.studio3d?.renderFrame)?.call(B.studio3d);
   document.querySelectorAll('.model-room-labels button').forEach(el=>el.classList.toggle('selected',el.dataset.modelRoomInspect===id));
  };
  const updateLabels=B.updateModelRoomLabels;B.updateModelRoomLabels=s=>{updateLabels(s);for(const item of s?.roomLabels||[])item.el.classList.toggle('selected',item.room.id===B.state.ui.modelRoomId);};
@@ -196,12 +196,12 @@
    s.modelUp=e=>{if(!down||down.id!==e.pointerId||down.multi||Math.hypot(e.clientX-down.x,e.clientY-down.y)>5||B.studio3d!==s)return;down=null;const r=canvas.getBoundingClientRect();point.set((e.clientX-r.left)/r.width*2-1,1-(e.clientY-r.top)/r.height*2);picker.setFromCamera(point,s.camera);const floors=[];s.scene.traverse(o=>{if(o.userData.kind==='floor-slab'&&o.visible)floors.push(o);});const hit=picker.intersectObjects(floors,false)[0];if(hit)B.selectModelRoom(hit.object.userData.roomId);};
    canvas.addEventListener('pointerdown',s.modelDown);canvas.addEventListener('pointerup',s.modelUp);s.modelPickBound=true;
   }
-  B.applyModelLook(s);s.renderFrame();B.cacheModelThumbnail(s);
-  Promise.allSettled(s.scene.userData.surfaceLoads||[]).then(()=>{if(B.studio3d===s&&!s.scene.userData.disposed){s.renderFrame();B.cacheModelThumbnail(s);}});
-  if(s.scene.userData.furnitureLoads?.length)Promise.allSettled(s.scene.userData.furnitureLoads).then(()=>{if(B.studio3d!==s||s.scene.userData.disposed)return;const st=s.scene.userData.modelPresentation;s.scene.traverse(o=>{if(!o.isMesh||o.userData.presentationOnly)return;for(const m of Array.isArray(o.material)?o.material:[o.material])B.prepareModelMaterial(m,null,o,s.scene);});s.scene.remove(st.edges);for(const lines of st.edges.children){lines.geometry.dispose();lines.material.dispose();}buildEdges(st.context);st.edges.visible=B.modelLook()==='neon';s.renderer.shadowMap.needsUpdate=true;s.renderFrame();B.cacheModelThumbnail(s);});
+  B.applyModelLook(s);s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));
+  Promise.allSettled(s.scene.userData.surfaceLoads||[]).then(()=>{if(B.studio3d===s&&!s.scene.userData.disposed){s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));}});
+  if(s.scene.userData.furnitureLoads?.length)Promise.allSettled(s.scene.userData.furnitureLoads).then(()=>{if(B.studio3d!==s||s.scene.userData.disposed)return;const st=s.scene.userData.modelPresentation;s.scene.traverse(o=>{if(!o.isMesh||o.userData.presentationOnly)return;for(const m of Array.isArray(o.material)?o.material:[o.material])B.prepareModelMaterial(m,null,o,s.scene);});s.scene.remove(st.edges);for(const lines of st.edges.children){lines.geometry.dispose();lines.material.dispose();}buildEdges(st.context);st.edges.visible=B.modelLook()==='neon';s.renderer.shadowMap.needsUpdate=true;s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));});
  };
  const dispose=B.disposeStudio3D;B.disposeStudio3D=()=>{const s=B.studio3d;s?.renderer.domElement.removeEventListener('pointerdown',s.modelDown);s?.renderer.domElement.removeEventListener('pointerup',s.modelUp);return dispose();};
- const refresh=B.refreshStudioFinishes;B.refreshStudioFinishes=(role,id)=>{const ok=refresh(role,id);if(ok){const s=B.studio3d;B.applyModelLook(s);s.renderFrame();B.cacheModelThumbnail(s);}return ok;};
+ const refresh=B.refreshStudioFinishes;B.refreshStudioFinishes=(role,id)=>{const ok=refresh(role,id);if(ok){const s=B.studio3d;B.applyModelLook(s);s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));}return ok;};
  const start=B.startArchitecturalRender;B.startArchitecturalRender=()=>B.modelLook()==='neon'?B.captureSharpStudioPreview():start();
  document.addEventListener('click',e=>{
   const el=e.target.closest?.('[data-model-scope-btn],[data-model-floor],[data-model-room-inspect]');if(!el)return;
@@ -212,8 +212,8 @@
  document.addEventListener('change',e=>{
   const el=e.target,u=B.state.ui;
   if(el.matches?.('select[data-model-room-inspect]')){B.selectModelRoom(el.value);return;}
-  if(el.matches?.('[data-model-look]')){u.modelLook=el.value==='materials'?'materials':'neon';B.customerFrameCache=null;B.stopArchitecturalRender();B.save();const s=B.studio3d;if(s){B.applyModelLook(s);s.renderFrame();B.cacheModelThumbnail(s);}const badge=document.querySelector('[data-model-look-name]');if(badge)badge.textContent=B.modelLook()==='neon'?'NEON / 3D':'VẬT LIỆU / 3D';}
+  if(el.matches?.('[data-model-look]')){u.modelLook=el.value==='materials'?'materials':'neon';B.customerFrameCache=null;B.stopArchitecturalRender();B.save();const s=B.studio3d;if(s){B.applyModelLook(s);s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));}const badge=document.querySelector('[data-model-look-name]');if(badge)badge.textContent=B.modelLook()==='neon'?'NEON / 3D':'VẬT LIỆU / 3D';}
  });
- document.addEventListener('input',e=>{if(!e.target.matches?.('[data-model-light-level]'))return;const u=B.state.ui;u.modelLightLevel=B.clamp(Number(e.target.value),0,100);B.customerFrameCache=null;const st=B.studio3d?.scene.userData.modelPresentation;if(st)st.lightSurface.material.opacity=u.modelLightLevel/100;B.studio3d?.renderFrame();const out=document.querySelector('[data-model-light-value]');if(out)out.value=u.modelLightLevel+'%';});
+ document.addEventListener('input',e=>{if(!e.target.matches?.('[data-model-light-level]'))return;const u=B.state.ui;u.modelLightLevel=B.clamp(Number(e.target.value),0,100);B.customerFrameCache=null;const st=B.studio3d?.scene.userData.modelPresentation;if(st)st.lightSurface.material.opacity=u.modelLightLevel/100;(B.studio3d?.requestRender||B.studio3d?.renderFrame)?.call(B.studio3d);const out=document.querySelector('[data-model-light-value]');if(out)out.value=u.modelLightLevel+'%';});
  document.addEventListener('change',e=>{if(e.target.matches?.('[data-model-light-level]')){B.save();if(B.studio3d)B.cacheModelThumbnail(B.studio3d);}});
 })();
