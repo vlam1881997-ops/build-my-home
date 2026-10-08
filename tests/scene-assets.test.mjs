@@ -70,8 +70,9 @@ test('slow material downloads settle on the fallback, deduplicate photographs an
  const {b,context}=client();b.SCENE_TEXTURE_TIMEOUT=10;context.document.createElementNS=()=>({});context.document.createElement=()=>({getContext:()=>({createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData(){}})});
  const callbacks=[];class Loader{load(url,done){callbacks.push({url,done});}}
  const scene=new THREE.Scene(),m=b.sceneAssetMaterials({...THREE,TextureLoader:Loader},scene),before=m.wood.map.image;
- assert.equal(callbacks.length,9,'wood and vertical wood share the decoded photograph');
- assert.equal(new Set(callbacks.map(c=>c.url)).size,9);
+ assert.equal(callbacks.length,12,'four surface sets load three channels; wood and vertical wood share one photograph');
+ assert.equal(new Set(callbacks.map(c=>c.url)).size,12);
+ assert.equal(callbacks.filter(c=>c.url.includes('wood_table_001')).length,3);
  assert.ok((await Promise.all(scene.userData.surfaceLoads)).every(ok=>ok===false));
  for(const {done}of callbacks){const loaded=new THREE.Texture();loaded.image={width:512};done(loaded);}
  await Promise.resolve();assert.equal(m.wood.map.image,before);assert.equal(scene.userData.surfaceCancels.size,0);

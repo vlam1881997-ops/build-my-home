@@ -122,7 +122,7 @@
  };
  B.applyModelLook=s=>{
   const st=s.scene?.userData.modelPresentation;if(!st)return;const neon=B.modelLook()==='neon',c=st.context;st.look.value=neon?1:0;
-  s.scene.background=neon?new s.THREE.Color('#080f1e'):st.background.clone();s.scene.fog=neon?new s.THREE.Fog('#080f1e',35,105):st.fog;
+  s.scene.background=neon?new s.THREE.Color('#080f1e'):st.background.isTexture?st.background:st.background.clone();s.scene.fog=neon?new s.THREE.Fog('#080f1e',35,105):st.fog;
   c.ground.material.color.copy(neon?new s.THREE.Color('#101c32'):st.groundColor);c.displayBase.material.color.copy(neon?new s.THREE.Color('#172438'):st.baseColor);
   s.renderer.toneMappingExposure=neon?1:st.exposure;
   for(const item of st.lights){item.light.color.copy(item.color);item.light.intensity=neon?item.intensity*.65:item.intensity;}

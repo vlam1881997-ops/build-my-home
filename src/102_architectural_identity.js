@@ -100,7 +100,7 @@
  B.architecturalFacadeMaterial=(THREE,scene,role)=>{
   const finish=B.facadeFinishPalette(),rule=B.architecturalIdentity(),key=JSON.stringify([role,finish.wall,finish.accent,finish.visualMaterials,finish.facadeSurface,rule.id]),cache=scene.userData.architecturalMaterials||=new Map();if(cache.has(key))return cache.get(key);
   const shared=B.sceneAssetMaterials(THREE,scene,finish);let m;
-  if(role==='wall')m=shared.wall.clone();else if(role==='base')m=shared.stone.clone();else if(role==='frame')m=shared.metal.clone();else if(finish.manualAccent||finish.facadeSurface==='wood')m=shared.wood.clone();else if(finish.facadeSurface==='stone')m=shared.stone.clone();else if(finish.facadeSurface==='metal')m=shared.metal.clone();else m=shared.wall.clone();
+  if(role==='wall')m=shared.wall.clone();else if(role==='base')m=shared.stone.clone();else if(role==='frame')m=shared.metal.clone();else if(finish.manualAccent||finish.facadeSurface==='wood')m=(finish.manualAccent?shared.wood:shared.slattedWood).clone();else if(finish.facadeSurface==='stone')m=shared.stone.clone();else if(finish.facadeSurface==='metal')m=shared.metal.clone();else m=shared.wall.clone();
   m.color.set(role==='wall'?finish.wall:role==='base'?'#908c7c':role==='frame'?'#'+B.scenePalette().frame.toString(16).padStart(6,'0'):finish.accent);
   if(role==='frame'||role==='accent'&&finish.facadeSurface==='metal'){m.roughness=.42;m.metalness=.5;}if(role==='base'){m.roughness=.9;m.userData.surfaceScale=[.8,.8];}
   if(role==='accent'&&['brick','concrete'].includes(finish.facadeSurface)){for(const [slot,channel]of [['map','color'],['normalMap','normal'],['roughnessMap','roughness']]){const texture=B.sceneSurfaceTexture(THREE,finish.facadeSurface,channel);if(texture){texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.colorSpace=channel==='color'?THREE.SRGBColorSpace:THREE.NoColorSpace;m[slot]=texture;}}m.userData.surfaceScale=finish.facadeSurface==='brick'?[.44,.15]:[2,2];m.normalScale.setScalar(.10);m.roughness=.91;}
@@ -112,13 +112,13 @@
   if(!p.horizontal)g.rotateY(Math.PI/2);g.translate(p.x-W/2,p.y+p.floor*explode,p.z-D/2+(p.horizontal?0:p.d));return g;
  };
  B.addArchitecturalFacade=(options,parts)=>{
-  const {THREE,scene,W,D,explode}=options,groups=new Map();for(const p of parts){const key=p.floor+'|'+p.role+'|'+(p.kind==='exterior-finish'?'skin':'detail');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(p);}
+  const {THREE,scene,W,D,explode}=options,groups=new Map();for(const p of parts){const key=p.floor+'|'+p.role+'|'+(p.kind==='exterior-finish'?'skin':p.kind==='timber-panel-joint'?'micro':'detail');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(p);}
   for(const group of groups.values()){
    const first=group[0],material=B.architecturalFacadeMaterial(THREE,scene,first.role),boxes=group.filter(p=>!p.polygon),polygons=group.filter(p=>p.polygon),all=[];
    if(boxes.length)all.push(B.sceneJoinedBoxes(THREE,boxes,{W,D,base:first.floor*explode}));for(const p of polygons)all.push(B.facadePolygonGeometry(THREE,p,{W,D,explode}));
    const positions=[],normals=[],uvs=[];for(const source of all){const g=source.index?source.toNonIndexed():source;positions.push(...g.attributes.position.array);normals.push(...g.attributes.normal.array);uvs.push(...g.attributes.uv.array);if(g!==source)g.dispose();source.dispose();}
    const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));B.sceneSurfaceUvs(geometry,material,{x:0,y:0,z:0});
-   const mesh=new THREE.Mesh(geometry,material);mesh.castShadow=first.kind!=='exterior-finish';mesh.receiveShadow=true;mesh.userData={kind:'facade-detail',facadeFinish:true,facadeRole:first.role,facadeSkin:first.kind==='exterior-finish',floor:first.floor,styleId:first.styleId,componentIds:group.map(p=>p.id),measuredBoxes:group,generic:true,provisional:true};scene.add(mesh);
+   const mesh=new THREE.Mesh(geometry,material);mesh.castShadow=!['exterior-finish','timber-panel-joint'].includes(first.kind);mesh.receiveShadow=first.kind!=='timber-panel-joint';mesh.userData={kind:'facade-detail',facadeFinish:true,facadeRole:first.role,facadeSkin:first.kind==='exterior-finish',floor:first.floor,styleId:first.styleId,componentIds:group.map(p=>p.id),measuredBoxes:group,generic:true,provisional:true};scene.add(mesh);
   }
  };
  const refresh=B.refreshStudioFinishes;

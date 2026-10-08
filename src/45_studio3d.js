@@ -8,7 +8,7 @@ BMH.ensureThree = () => {
   // The light model is already interactive while this downloads. Keep waiting
   // so a slow connection can still upgrade to WebGL when the module arrives.
   BMH.threePromise=import('./vendor/three/three.module.js').then(async m=>{
-    if(m?.Scene&&m?.WebGLRenderer){const extras=await Promise.allSettled([import('./vendor/three/geometries/RoundedBoxGeometry.js'),import('./vendor/three/environments/RoomEnvironment.js')]);return {...m,...(extras[0].status==='fulfilled'?extras[0].value:{}),...(extras[1].status==='fulfilled'?extras[1].value:{})};}
+    if(m?.Scene&&m?.WebGLRenderer){const extras=await Promise.allSettled([import('./vendor/three/geometries/RoundedBoxGeometry.js'),import('./vendor/three/environments/RoomEnvironment.js'),import('./vendor/three/loaders/RGBELoader.js')]);return {...m,...Object.assign({},...extras.filter(r=>r.status==='fulfilled').map(r=>r.value))};}
     BMH.threePromise=null;return null;
   }).catch(()=>{BMH.threePromise=null;return null;});
   return BMH.threePromise;
@@ -247,7 +247,7 @@ BMH.mountStudio3D = async () => {
   const defaultPitch=roomFocus?(insideRoom?.13:.62):floorFocus!==null?.84:.38;
   const span=Math.hypot(focusedBounds?.width||W,focusedBounds?.depth||D),aspect=Math.max(.55,stage.getBoundingClientRect().width/Math.max(360,stage.getBoundingClientRect().height)),distance=span*(aspect<1?1.5:1.05);
   const state={yaw:floorFocus!==null?(aspect<1?Math.PI-.5:Math.PI/2+.3):focus==='all'?Math.PI+.42:Math.PI-.5,pitch:focus==='all'?.28:defaultPitch,dist:roomFocus?Math.max(4.2,Math.max(roomFocus.w,roomFocus.h)*(aspect<1?2.1:1.55)):Math.max(10,distance),target:centerRoom||new THREE.Vector3(focusedBounds?focusedBounds.cx-W/2:0,floorFocus!==null?.65:floors*fh*.45,focusedBounds?focusedBounds.cy-D/2:0),drag:false,lastX:0,lastY:0,defaultPitch:focus==='all'?.28:defaultPitch};
-  if(facadeCamera&&focusedBounds){state.yaw=Math.PI+.22;state.pitch=state.defaultPitch=.10;state.dist=Math.max(7,Math.max(focusedBounds.width,floors*fh)*1.7);state.target.set(focusedBounds.cx-W/2,Math.max(floors*fh,roof?roof.eave+roof.rise:0)*.46,focusedBounds.y-D/2);}
+  if(facadeCamera&&focusedBounds){state.yaw=Math.PI+.36;state.dist=Math.max(7,Math.max(focusedBounds.width,floors*fh)*1.7);state.target.set(focusedBounds.cx-W/2,Math.max(floors*fh,roof?(roof.envelopeTop??roof.eave+roof.rise):0)*.46,focusedBounds.y-D/2);state.pitch=state.defaultPitch=Math.asin(BMH.clamp((1.65-state.target.y)/state.dist,-.4,.3));}
   if(insideRoom){state.yaw=interiorCamera.yaw;state.dist=interiorCamera.distance;state.pitch=state.defaultPitch=interiorCamera.pitch;state.target.set(interiorCamera.target.x-W/2,interiorCamera.targetHeight??1.15,interiorCamera.target.y-D/2);camera.fov=58;}state.minDist=insideRoom?.45:roomFocus?1.5:4;
   let composer=null,ao=null,fxaa=null;
   const clippedScene=scene.children.some(o=>(Array.isArray(o.material)?o.material:[o.material]).some(m=>m?.clippingPlanes?.length));
@@ -262,6 +262,9 @@ BMH.mountStudio3D = async () => {
   const indoorPoint=()=>({x:camera.position.x+W/2,y:camera.position.z+D/2,height:camera.position.y});
   const resetCameraValidation=()=>{lastIndoorPoint=null;};
   const updateCamera=()=>{
+   // Automatic phone framing can move backwards. Keep the initial street eye
+   // above ground until the fit is finished; subsequent orbit remains free.
+   if(facadeCamera&&!state.framed)state.pitch=state.defaultPitch=Math.asin(BMH.clamp((1.65-state.target.y)/state.dist,-.4,.3));
    const position=()=>{const cp=Math.cos(state.pitch),sp=Math.sin(state.pitch),cy=Math.cos(state.yaw),sy=Math.sin(state.yaw);camera.position.set(state.target.x+state.dist*cp*sy,state.target.y+state.dist*sp,state.target.z+state.dist*cp*cy);};position();
    if(insideRoom){
     const point=indoorPoint(),clear=BMH.interiorCameraIsClear(roomFocus,point,indoorItems)&&(!lastIndoorPoint||BMH.measuredWalkPathIsClear(roomFocus,lastIndoorPoint,point,indoorItems));
@@ -274,7 +277,7 @@ BMH.mountStudio3D = async () => {
   let lastSize='';
   const resize=()=>{const r=stage.getBoundingClientRect(),w=Math.max(280,Math.floor(r.width)),h=Math.max(360,Math.floor(r.height)),size=w+'x'+h;if(size===lastSize)return;lastSize=size;renderer.setSize(w,h,false);if(composer){composer.setSize(w,h);fxaa.material.uniforms.resolution.value.set(1/w,1/h);}camera.aspect=w/h;camera.updateProjectionMatrix();updateCamera();
     if(!state.framed&&focusedBounds&&!insideRoom){
-      const b=frameBounds,height=focus==='all'?Math.max(floors*(fh+explode)+BMH.projectLevels().slab,roof?roof.eave+roof.rise:0):fh+(roomFocus?.type==='stairs'?.95:0);
+      const b=frameBounds,height=focus==='all'?Math.max(floors*(fh+explode)+BMH.projectLevels().slab,roof?(roof.envelopeTop??roof.eave+roof.rise):0):fh+(roomFocus?.type==='stairs'?.95:0);
       for(let n=0;n<6;n++){camera.updateMatrixWorld();let edge=0;for(const x of [b.x-.2,b.x+b.width+.2])for(const z of [b.y-.2,b.y+b.depth+.2])for(const y of [0,height]){const v=new THREE.Vector3(x-W/2,y,z-D/2).project(camera);edge=Math.max(edge,Math.abs(v.x)/.88,Math.abs(v.y)/.82);}if(edge<=1)break;state.dist*=Math.min(1.8,Math.max(1.08,edge));updateCamera();}
       state.framed=true;
     }
@@ -285,7 +288,7 @@ BMH.mountStudio3D = async () => {
     if(!pointers.has(e.pointerId))return;
     pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});const next=gesture();
     if(next&&state.gesture){const previous=state.gesture;if(next.distance>1)state.dist=BMH.clamp(state.dist*previous.distance/next.distance,state.minDist,60);state.target.x-=(next.x-previous.x)*state.dist*.001;state.target.z-=(next.y-previous.y)*state.dist*.001;}
-    else{const dx=e.clientX-state.lastX,dy=e.clientY-state.lastY;if(state.pan){state.target.x-=dx*state.dist*.001;state.target.z-=dy*state.dist*.001;}else{state.yaw-=dx*.006;state.pitch=BMH.clamp(state.pitch-dy*.004,insideRoom?-.2:.12,1.12);}}
+    else{const dx=e.clientX-state.lastX,dy=e.clientY-state.lastY;if(state.pan){state.target.x-=dx*state.dist*.001;state.target.z-=dy*state.dist*.001;}else{state.yaw-=dx*.006;state.pitch=BMH.clamp(state.pitch-dy*.004,insideRoom?-.2:facadeCamera?-.38:.12,1.12);}}
     state.lastX=e.clientX;state.lastY=e.clientY;state.gesture=next;updateCamera();
   };
   const onUp=e=>{pointers.delete(e.pointerId);state.drag=pointers.size>0;state.gesture=gesture();const remaining=[...pointers.values()][0];if(remaining){state.lastX=remaining.x;state.lastY=remaining.y;}};
