@@ -1,7 +1,7 @@
 require('./load-env.cjs')();
 const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..'),src=path.join(root,'src'),dist=path.join(root,'dist');
 const jsFiles=['00_boot.js','01_vn34_catalog.js','15_data_engine.js','10_state.js','17_cloud_payment.js','18_ai_copilot.js','19_gemini_scan.js','20_calc.js','30_planner.js','35_dossier.js','40_exports.js','43_scene_assets.js','44_house_styles.js','45_studio3d.js','46_architectural_render.js','50_screens.js','60_app.js','70_v60_product_ui.js','75_completion.js','76_architecture.js','77_architect3d.js','78_design_workflow.js','79_stair_design.js','80_home_finish.js','81_design_studio.js','82_customer_projects.js','83_customer_app.js','84_customer_service.js','85_interior_collections.js','86_visual_materials.js','87_elevator_design.js','88_customer_studio.js','89_guided_interface.js','90_product_polish.js','91_customer_cloud.js','92_measured_design.js','93_measured_cost.js','94_architectural_design.js','95_architectural_documents.js'];
-jsFiles.push('96_vector_pdf.js','97_project_dashboard.js','98_model_presentation.js','99_customer_design.js','100_customer_experience.js','101_visual_studio.js','102_architectural_identity.js');
+jsFiles.push('96_vector_pdf.js','97_project_dashboard.js','98_model_presentation.js','99_customer_design.js','100_customer_experience.js','101_visual_studio.js','102_architectural_identity.js','103_real_house.js');
 const banner=`/* Build My Home Official V6.2.0 Connected Project Preview
  * Existing calculation, Gemini, planner, 3D and dossier engines are retained.
  * V6.1 fixes the production gaps found in the screen recording: blank map, portrait planner fit, image-only 3D, tiny text and broken bank logos.
@@ -44,7 +44,7 @@ function vendorThree(file){
  for(const match of source.matchAll(/from ['"](\.[^'"]+\.js)['"]/g)){const dependency=path.posix.normalize(path.posix.join(path.posix.dirname(file),match[1]));if(dependency!=='three.module.js')vendorThree(dependency);}
  fs.writeFileSync(target,source);
 }
-for(const file of ['loaders/GLTFLoader.js','loaders/DRACOLoader.js','exporters/GLTFExporter.js','utils/BufferGeometryUtils.js','geometries/RoundedBoxGeometry.js','environments/RoomEnvironment.js','postprocessing/EffectComposer.js','postprocessing/RenderPass.js','postprocessing/SSAOPass.js','postprocessing/OutputPass.js','postprocessing/ShaderPass.js','shaders/FXAAShader.js'])vendorThree(file);
+for(const file of ['loaders/GLTFLoader.js','loaders/DRACOLoader.js','loaders/RGBELoader.js','exporters/GLTFExporter.js','utils/BufferGeometryUtils.js','geometries/RoundedBoxGeometry.js','environments/RoomEnvironment.js','postprocessing/EffectComposer.js','postprocessing/RenderPass.js','postprocessing/SSAOPass.js','postprocessing/OutputPass.js','postprocessing/ShaderPass.js','shaders/FXAAShader.js'])vendorThree(file);
 
 // A lazy physical-render bundle uses the same Three instance as the fast viewer.
 const traced=require('esbuild').buildSync({entryPoints:[path.join(src,'render-pathtracer-entry.mjs')],bundle:true,format:'esm',platform:'browser',external:['three'],write:false,legalComments:'inline',minify:true});

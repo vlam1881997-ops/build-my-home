@@ -4,7 +4,17 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import * as BaseThree from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+import {PathTracingSceneGenerator} from 'three-gpu-pathtracer/src/core/PathTracingSceneGenerator.js';
 const THREE={...BaseThree,RoundedBoxGeometry};
+test('the pinned path tracer retains slab face finishes and the materials of following walls and glass',()=>{
+ const b=client();b.state.ui.sceneFocus='all';const source=new THREE.Scene(),body=new THREE.MeshStandardMaterial({color:'#e2ddd3'}),top=new THREE.MeshStandardMaterial({color:'#8c592c'}),wall=new THREE.MeshStandardMaterial({color:'#e8e4dc'}),glass=new THREE.MeshPhysicalMaterial({transmission:.72});
+ for(const [x,material]of [[0,[body,body,top,body,body,body]],[10,wall],[20,glass]]){const mesh=new THREE.Mesh(new THREE.BoxGeometry(2,.2,2),material);mesh.position.x=x;mesh.userData.kind=x===0?'floor-slab':x===10?'wall':'window-glass';source.add(mesh);}
+ const photo=b.architecturalRenderScene(THREE,source),generator=new PathTracingSceneGenerator(photo);generator.generateBVH=false;const {geometry,materials}=generator.generate(),position=geometry.attributes.position,indices=geometry.attributes.materialIndex;
+ assert.ok(photo.children.filter(o=>o.isMesh).every(o=>!Array.isArray(o.material)));
+ const used=new Set(Array.from(geometry.index.array));assert.ok(used.size>0);for(const i of used){const m=materials[indices.getX(i)],x=position.getX(i);if(x>15)assert.equal(m.transmission,.72);else if(x>5)assert.equal(m.color.getHex(),wall.color.getHex());else assert.equal(m.color.getHex(),position.getY(i)>.09&&geometry.attributes.normal.getY(i)>.9?top.color.getHex():body.color.getHex());}
+ const model=b.architecturalRenderScene(THREE,source,{purpose:'model'}),slab=model.children.find(o=>o.userData.kind==='floor-slab');assert.equal(slab.material.length,6);assert.equal(slab.geometry.groups.length,6);assert.equal(slab.material[2].color.getHex(),top.color.getHex());
+ assert.equal(source.children[0].geometry.groups.length,6);assert.equal(source.children[0].material[2],top);
+});
 function client(){
  const b={state:{ui:{sceneFocus:'room:r',roomCamera:'inside'},project:{site:{width:5,depth:8},plan:{rooms:[{id:'r',type:'living',floor:0,x:0,y:0,w:5,h:4}],openings:[]}}},$:()=>null,save(){},mountStudio3D:async()=>{},disposeStudio3D(){},projectLevels:()=>({floorHeight:3.4,slab:.14,ceilingDrop:.2}),stairFloorHoles:()=>[],slabPanels:r=>[{x:r.x,y:r.y,w:r.w,d:r.h}]};
  const context={BMH:b,document:{addEventListener(){},querySelectorAll:()=>[]},cancelAnimationFrame(){},console};vm.runInNewContext(fs.readFileSync('src/46_architectural_render.js','utf8'),context);return b;

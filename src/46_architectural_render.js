@@ -3,6 +3,15 @@ BMH.ARCH_RENDER_REVISION='customer-measured-assemblies-8';
 BMH.ARCH_RENDER_PRESETS={draft:{width:640,samples:16,bounces:4,budgetMs:12000},fine:{width:960,samples:128,bounces:8,budgetMs:30000},print:{width:1920,samples:512,bounces:10,budgetMs:120000}};
 BMH.archRenderModules=null;
 BMH.archRenderStatus=text=>{const node=BMH.$('#architecturalRenderStatus');if(node&&node.textContent!==text)node.textContent=text;};
+// The pinned path tracer merges one material per mesh. A six-face slab array
+// would otherwise shift every following material index in its flattened list.
+// Split only the photographic copy; the measured model keeps its face groups.
+BMH.photographicMaterialMeshes=(THREE,geometry,material)=>{
+ if(!Array.isArray(material))return [new THREE.Mesh(geometry,material)];
+ const groups=new Map(),sourceIndex=geometry.index;
+ for(const group of geometry.groups){const m=material[group.materialIndex];if(!m)continue;if(!groups.has(m))groups.set(m,[]);const indices=groups.get(m),end=Math.min(group.start+group.count,sourceIndex?.count??geometry.attributes.position.count);for(let i=group.start;i<end;i++)indices.push(sourceIndex?sourceIndex.getX(i):i);}
+ const meshes=[];for(const [m,indices]of groups){const part=new THREE.BufferGeometry();for(const [key,attribute]of Object.entries(geometry.attributes))part.setAttribute(key,attribute.clone());part.setIndex(indices);meshes.push(new THREE.Mesh(part,m));}geometry.dispose();return meshes;
+};
 // Bake presentation clipping in world space. The plan and original wall meshes remain untouched.
 BMH.renderMeshGeometry=(THREE,mesh,{purpose='photograph'}={})=>{
  const source=mesh.geometry,material=Array.isArray(mesh.material)?mesh.material[0]:mesh.material,planes=material?.clippingPlanes||[];let local=source.clone();
@@ -29,7 +38,7 @@ BMH.architecturalRenderScene=(THREE,source,{purpose='photograph'}={})=>{
  const measured=purpose==='model',ui=BMH.state.ui,room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===ui.sceneFocus),site=BMH.state.project.site,photographicRoom=!measured&&room&&room.type!=='stairs'&&ui.roomCamera==='inside';
  const scene=new THREE.Scene(),materials=new Map(),ownedMaterials=new Set(),revision=BMH.drawingRevision?.()||source.userData.designRevision||'';source.updateMatrixWorld(true);
  source.traverse(o=>{
-  if(!o.visible||o.userData.presentationOnly)return;for(let parent=o.parent;parent;parent=parent.parent)if(!parent.visible||parent.userData.presentationOnly)return;
+  if(!o.visible||o.userData.presentationOnly&&(measured||o.userData.kind!=='display-ground'))return;for(let parent=o.parent;parent;parent=parent.parent)if(!parent.visible||parent.userData.presentationOnly)return;
   if(o.isMesh){
    if(photographicRoom&&o.userData.kind==='ceiling-slab')return;
    if(o.userData.kind==='contact-shadow')return;
@@ -41,7 +50,7 @@ BMH.architecturalRenderScene=(THREE,source,{purpose='photograph'}={})=>{
     // measured geometry remains. Duplicate emitters cause rare bright paths.
     if(photographicRoom&&copy.emissive)copy.emissiveIntensity=0;
     copy.envMap=null;materials.set(m,copy);ownedMaterials.add(copy);return copy;};
-   const mesh=new THREE.Mesh(geometry,Array.isArray(o.material)?o.material.map(convert):convert(o.material));mesh.name=o.name;const inherited={};for(let parent=o.parent;parent;parent=parent.parent)for(const key of ['roomId','roomIds','openingId','fixtureId','shaftId','componentId','floor','designRevision'])if(inherited[key]===undefined&&parent.userData[key]!==undefined)inherited[key]=parent.userData[key];mesh.userData={designRevision:revision,...inherited,...o.userData};scene.add(mesh);
+   const material=Array.isArray(o.material)?o.material.map(convert):convert(o.material),meshes=measured?[new THREE.Mesh(geometry,material)]:BMH.photographicMaterialMeshes(THREE,geometry,material),inherited={};for(let parent=o.parent;parent;parent=parent.parent)for(const key of ['roomId','roomIds','openingId','fixtureId','shaftId','componentId','floor','designRevision'])if(inherited[key]===undefined&&parent.userData[key]!==undefined)inherited[key]=parent.userData[key];for(const mesh of meshes){mesh.name=o.name;mesh.userData={designRevision:revision,...inherited,...o.userData};scene.add(mesh);}
   }else if(o.isLight&&!o.isHemisphereLight&&o.intensity>0){if(photographicRoom&&(o.isPointLight||o.isDirectionalLight))return;const light=o.clone();light.castShadow=false;light.position.copy(o.getWorldPosition(new THREE.Vector3()));if(light.isDirectionalLight){if(!measured&&BMH.state.ui.sceneFocus==='all'&&BMH.state.ui.sceneTheme!=='night')light.intensity=o.castShadow?3.2:.25;light.radius=.035;light.target.position.copy(o.target.getWorldPosition(new THREE.Vector3()));scene.add(light.target);}scene.add(light);}
  });
  // Eye-height photographs include the measured ceiling; open inspection views keep covers off.
@@ -57,7 +66,7 @@ BMH.architecturalRenderScene=(THREE,source,{purpose='photograph'}={})=>{
    windowLight.position.set((horizontal?(span.a+span.b)/2:span.c+inward*.13)-site.width/2,levels.slab+(Number(opening.sill)||0)+height/2,(horizontal?span.c+inward*.13:(span.a+span.b)/2)-site.depth/2);windowLight.rotation.y={north:Math.PI,south:0,west:-Math.PI/2,east:Math.PI/2}[opening.side];windowLight.userData={kind:'render-lighting',openingId:opening.id};scene.add(windowLight);
   }
  }
- scene.background=source.background?.clone?.()||new THREE.Color('#ece9e0');scene.backgroundRotation=new THREE.Euler();scene.environmentRotation=new THREE.Euler();scene.backgroundIntensity=1;scene.environmentIntensity=1;scene.userData={purpose,units:'metres',designRevision:revision,ownedMaterials};return scene;
+ scene.background=source.background?.isTexture?source.background:source.background?.clone?.()||new THREE.Color('#ece9e0');scene.backgroundRotation=new THREE.Euler();scene.environmentRotation=new THREE.Euler();scene.backgroundIntensity=1;scene.environmentIntensity=1;scene.userData={purpose,units:'metres',designRevision:revision,ownedMaterials};return scene;
 };
 BMH.disposeArchitecturalRender=s=>{
  s=s||BMH.studio3d;if(!s)return;s.renderEpoch=(s.renderEpoch||0)+1;const r=s.archRender;if(!r)return;r.cancelled=true;cancelAnimationFrame(r.raf);
@@ -80,8 +89,8 @@ BMH.startArchitecturalRender=async()=>{
   if(BMH.studio3d!==s||s.renderEpoch!==epoch||signature!==BMH.cinematicSignature())return false;
   const modules=await (BMH.archRenderModules||(BMH.archRenderModules=import('./vendor/three/pathtracer.js').catch(e=>{BMH.archRenderModules=null;throw e;}))),THREE=await BMH.ensureThree();
   if(BMH.studio3d!==s||s.renderEpoch!==epoch||signature!==BMH.cinematicSignature())return false;
-  const preset=BMH.ARCH_RENDER_PRESETS[BMH.state.ui.renderQuality]||BMH.ARCH_RENDER_PRESETS.draft,scene=BMH.architecturalRenderScene(THREE,s.scene),environment=new modules.GradientEquirectTexture(128);
-  environment.topColor.set(BMH.state.ui.sceneTheme==='night'?'#60718e':'#e6eff8');environment.bottomColor.set(BMH.state.ui.sceneTheme==='night'?'#1c242c':'#c4c8c2');environment.exponent=1;environment.update();scene.environment=environment;scene.environmentIntensity=BMH.state.ui.sceneTheme==='night'?.35:BMH.state.ui.sceneFocus==='all'?.75:1.7;
+  const preset=BMH.ARCH_RENDER_PRESETS[BMH.state.ui.renderQuality]||BMH.ARCH_RENDER_PRESETS.draft,scene=BMH.architecturalRenderScene(THREE,s.scene),environment=s.scene.userData.houseHDR?.clone()||new modules.GradientEquirectTexture(128);
+  if(!s.scene.userData.houseHDR){environment.topColor.set(BMH.state.ui.sceneTheme==='night'?'#60718e':'#e6eff8');environment.bottomColor.set(BMH.state.ui.sceneTheme==='night'?'#1c242c':'#c4c8c2');environment.exponent=1;environment.update();}scene.environment=environment;scene.environmentIntensity=BMH.state.ui.sceneTheme==='night'?.35:BMH.state.ui.sceneFocus==='all'?.75:1.7;
   s.archRender={scene,environment,preset,signature,raf:0,cancelled:false,samples:0,complete:false,paused:false,startedAt:performance.now()};
   const tracer=new modules.WebGLPathTracer(s.renderer);s.archRender.tracer=tracer;const denoise=new modules.FullScreenQuad(new modules.DenoiseMaterial({sigma:1.6,kSigma:1,threshold:.12}));s.archRender.denoise=denoise;
   tracer.bounces=preset.bounces;tracer.transmissiveBounces=6;tracer.filterGlossyFactor=.35;tracer.textureSize.set(512,512);tracer.tiles.set(4,4);tracer.minSamples=1;tracer.renderDelay=0;tracer.fadeDuration=0;tracer.rasterizeScene=false;tracer.renderToCanvas=false;
