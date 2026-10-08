@@ -24,6 +24,46 @@ function client(saved){
 }
 const boundary={kind:'boundary',sourceType:'survey',sourceTitle:'Fixture trích đo',publisher:'Đơn vị khảo sát fixture',sourceUrl:'https://example.com/survey',effectiveAt:'2026-10-01',sourceCrs:'LOCAL_METRES',surveyReference:'A gốc đo; AB mặt tiền',localVertices:'0, 0\n5, 0\n5, 20\n0, 20'};
 const json=v=>JSON.parse(JSON.stringify(v));
+const professionalReview=B=>({id:'synthetic-review',discipline:'structure',status:'reviewed',reviewer:{name:'Synthetic engineer fixture',role:'engineer'},reportReference:'TEST-ONLY-KS-01',reviewedAt:'2026-10-08',reviewedRevision:B.drawingRevision(),dependencies:['project.site','project.plan','project.materials']});
+test('construction schema migration preserves legacy measurements, nulls, zeroes and stable IDs without inventing engineering data',()=>{
+ const B=client(),saved=json(B.state),plan=json(saved.project.plan),materials=json(saved.project.materials);
+ saved.project.constructionDesign={schemaVersion:1,inputs:{loading:{value:0,unit:'kN/m²',reference:'TEST-ONLY-INPUT'},soil:{value:null,unit:'kPa'}},elements:[{id:'supplied-column',semanticType:'column',status:'provided',source:{reference:'TEST-ONLY-KS-01'},dimensions:{width:.25,depth:.4},floor:1},{semanticType:'beam',status:'provisional',dimensions:{width:null,depth:null},floor:1}],reviews:[],issues:[]};
+ const restored=client(saved),c=restored.state.project.constructionDesign;
+ assert.equal(c.schemaVersion,2);assert.deepEqual(json(restored.state.project.plan),plan);assert.deepEqual(json(restored.state.project.materials),materials);
+ assert.equal(c.inputs.loading.value,0);assert.equal(c.inputs.soil.value,null);assert.equal(c.inputs.soil.reviewState,'missing');assert.equal(c.elements[0].id,'supplied-column');assert.equal(c.elements[0].reviewState,'provided');assert.equal(c.elements[1].dimensions.width,null);
+ assert.deepEqual(json(client(json(restored.state)).state.project.constructionDesign),json(c),'migration remains idempotent and keeps generated legacy IDs');
+});
+test('a reviewed checkbox or incomplete professional evidence stays awaiting review and retains the declaration',()=>{
+ const B=client();for(const change of [{reviewer:null},{reviewer:{name:'Fixture',role:'OWNER'}},{reportReference:null},{reviewedAt:null},{reviewedAt:'2026-02-31'},{reviewedRevision:null}]){
+  B.state.project.constructionDesign.reviews=[{...professionalReview(B),...change}];B.normalizeConstructionDesign(B.state.project);
+  const row=B.state.project.constructionDesign.reviews[0];assert.equal(row.reviewState,'awaiting-review');assert.equal(row.declaredReviewState,'reviewed');assert.equal(B.constructionReview().reviewed,0);
+ }
+ B.state.project.constructionDesign.elements=[{id:'no-source',status:'provided',dimensions:{width:.25}}];B.normalizeConstructionDesign(B.state.project);assert.equal(B.state.project.constructionDesign.elements[0].reviewState,'provisional');
+});
+test('unstructured legacy technical records remain stored and pending instead of being discarded or approved',()=>{
+ const B=client(),saved=json(B.state);saved.project.constructionDesign={schemaVersion:1,inputs:{legacyLoading:0},elements:[null,'Legacy technical note',17],reviews:['Legacy review note'],issues:[]};
+ const restored=client(saved),c=restored.state.project.constructionDesign;assert.deepEqual(json(c.elements),saved.project.constructionDesign.elements);assert.deepEqual(json(c.reviews),saved.project.constructionDesign.reviews);assert.equal(c.inputs.legacyLoading,0);assert.equal(restored.constructionReview().unparsed,5);assert.equal(restored.constructionReview().pending,5);assert.equal(restored.constructionReview().reviewed,0);assert.ok(restored.measuredDesignReview().warnings.some(w=>/mục kỹ thuật cũ/.test(w)));
+ assert.deepEqual(json(client(json(restored.state)).state.project.constructionDesign),json(c));
+});
+test('professional review metadata and stale propagation never create a self-invalidating design revision',()=>{
+ const B=client(),p=B.state.project,before=B.drawingRevision();p.constructionDesign.reviews=[professionalReview(B)];B.save();
+ assert.equal(B.constructionReview().reviewed,1);assert.equal(B.drawingRevision(),before);assert.equal(p.constructionDesign.reviews[0].reviewState,'reviewed');
+ p.plan.rooms[0].w+=.1;const changed=B.drawingRevision();assert.notEqual(changed,before);B.save();assert.equal(p.constructionDesign.reviews[0].reviewState,'stale');assert.equal(p.constructionDesign.reviews[0].reviewedRevision,before);assert.equal(B.drawingRevision(),changed);
+ B.save();assert.equal(B.drawingRevision(),changed);assert.equal(B.measuredDesignReview().technical.stale,1);assert.ok(B.measuredDesignReview().warnings.some(w=>/thuộc phiên bản cũ/.test(w)));
+ const restored=client(json(B.state));assert.equal(restored.state.project.constructionDesign.reviews[0].reviewState,'stale');assert.equal(restored.state.project.constructionDesign.reviews[0].reviewedRevision,before);
+});
+test('price and personal finance preserve review validity while SKU and technical dimensions stale the review',()=>{
+ const B=client(),p=B.state.project;p.materials.choices.floor='technical-fixture';p.dataEngine.materialOverrides['technical-fixture']={value:100000,product:{sku:'TEST-TILE-A',unit:'m²'}};
+ p.constructionDesign.elements=[{id:'technical-beam',semanticType:'beam',status:'provided',source:{reference:'TEST-ONLY-KS-02'},dimensions:{width:.2,depth:.4}}];B.normalizeConstructionDesign(p);
+ p.constructionDesign.reviews=[professionalReview(B)];const before=B.drawingRevision();p.dataEngine.materialOverrides['technical-fixture'].value=150000;p.finance.cash+=500000;B.save();assert.equal(B.drawingRevision(),before);assert.equal(B.constructionReview().reviewed,1);
+ p.dataEngine.materialOverrides['technical-fixture'].product.sku='TEST-TILE-B';B.save();assert.equal(B.constructionReview().stale,1);
+ p.constructionDesign.reviews=[professionalReview(B)];p.constructionDesign.elements[0].dimensions.depth=.45;const changed=B.drawingRevision();B.save();assert.notEqual(changed,before);assert.equal(B.constructionReview().stale,1);assert.equal(B.drawingRevision(),changed);
+});
+test('reviewing a supplied technical element changes review state without changing its geometry or source identity',()=>{
+ const B=client(),p=B.state.project;p.constructionDesign.elements=[{id:'element-reviewed',semanticType:'column',status:'provided',source:{reference:'TEST-ONLY-KS-03'},dimensions:{width:.3,depth:.3}}];B.normalizeConstructionDesign(p);const before=B.drawingRevision(),row=p.constructionDesign.elements[0];
+ Object.assign(row,professionalReview(B),{id:row.id,reviewState:'reviewed',reportReference:row.source.reference});const withReport=B.drawingRevision();row.reviewedRevision=withReport;B.save();
+ assert.equal(row.reviewState,'reviewed');assert.equal(B.drawingRevision(),withReport);row.dimensions.width=.35;const changed=B.drawingRevision();B.save();assert.equal(row.reviewState,'stale');assert.equal(B.drawingRevision(),changed);assert.notEqual(changed,before);
+});
 test('material metadata and per-room choices persist; revision responds to product identity, not price',()=>{
  const B=client(),p=B.state.project;
  p.materials.choices.floor='fixture-tile';

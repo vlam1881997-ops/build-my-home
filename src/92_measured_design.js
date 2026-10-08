@@ -106,7 +106,7 @@
  };
  B.drawingRevision=()=>{
   const p=B.state.project,d=B.measuredDesignSettings(),s=p.site;
-  const input=JSON.stringify({units:'m',modelSchema:'measured-openings-facade-1',site:[s.width,s.depth,s.floors,s.floorHeight,s.slabThickness,s.ceilingDrop,s.frontDirection,s.useParcelGeometry,s.lotMode,s.lotSource,s.lotPoints,s.frontEdge,s.setbackFront,s.setbackRear,s.setbackSide,s.boundaryEvidenceId],boundary:B.siteBoundaryKey?.(),siteContext:B.siteEvidenceContextKey?.(),technical:p.constructionDesign?.inputs,technicalElements:p.constructionDesign?.elements,plan:{rooms:p.plan.rooms,openings:p.plan.openings,outdoor:p.plan.outdoor},style:p.style,design:d,materials:p.materials.choices,productCodes:B.materialSelectionIdentity?.(),finish:p.materials.finish});
+  const input=JSON.stringify({units:'m',modelSchema:'measured-openings-facade-2',site:[s.width,s.depth,s.floors,s.floorHeight,s.slabThickness,s.ceilingDrop,s.frontDirection,s.useParcelGeometry,s.lotMode,s.lotSource,s.lotPoints,s.frontEdge,s.setbackFront,s.setbackRear,s.setbackSide,s.boundaryEvidenceId],boundary:B.siteBoundaryKey?.(),siteContext:B.siteEvidenceContextKey?.(),technical:B.constructionDesignIdentity?.(p)||{inputs:p.constructionDesign?.inputs,elements:p.constructionDesign?.elements},plan:{rooms:p.plan.rooms,openings:p.plan.openings,outdoor:p.plan.outdoor},style:p.style,design:d,materials:p.materials.choices,productCodes:B.materialSelectionIdentity?.(),finish:p.materials.finish});
   let hash=2166136261;for(let i=0;i<input.length;i++)hash=Math.imul(hash^input.charCodeAt(i),16777619);return (hash>>>0).toString(16).toUpperCase().padStart(8,'0');
  };
  const inputKey=B.designInputKey;if(inputKey)B.designInputKey=()=>inputKey()+'|site-evidence:'+B.siteEvidenceContextKey?.();
@@ -145,8 +145,10 @@
   if(B.state.project.plan.rooms.some(r=>r.x<B.measuredWallThickness(false)/2||r.y<B.measuredWallThickness(false)/2||r.x+r.w>B.state.project.site.width-B.measuredWallThickness(false)/2||r.y+r.h>B.state.project.site.depth-B.measuredWallThickness(false)/2))warnings.push('Mốc phòng sát ranh đất: kiểm tra mặt ngoài tường, khoảng lùi và phần mái đua.');
   warnings.push(...(B.elevatorIssues?.()||[]).filter(i=>i.sev!=='error').map(i=>i.text));
   warnings.push(...(B.stairAlignmentIssues?.()||[]).filter(i=>i.sev!=='error').map(i=>i.text));
-  for(const review of B.state.project.constructionDesign?.reviews||[])if(review.reviewedRevision!==q.revision)warnings.push('Hồ sơ rà soát '+(review.discipline||'kỹ thuật')+' thuộc phiên bản cũ; cần rà soát lại.');
-  return {revision:q.revision,errors,warnings,geometryValid:errors.length===0,roof,quantities:q,missing:['Khảo sát ranh/cao độ và địa chất','Kết cấu móng, cột, dầm, sàn','Tuyến điện nước, tải thiết bị và chi tiết chống thấm','Quy hoạch/giấy phép và hồ sơ chuyên môn được duyệt']};
+  const technical=B.constructionReview?.();
+  if(technical?.unparsed)warnings.push('Có '+technical.unparsed+' mục kỹ thuật cũ chưa có cấu trúc; giữ dữ liệu để đối chiếu hồ sơ gốc.');
+  for(const record of technical?.records||[])if(record.status==='stale')warnings.push('Hồ sơ rà soát '+(record.discipline||record.id)+' thuộc phiên bản cũ; cần rà soát lại.');else if(record.kind==='review'&&record.status!=='reviewed')warnings.push('Hồ sơ rà soát '+(record.discipline||record.id)+' chưa đủ thông tin KTS/KS, nguồn và phiên bản được duyệt.');
+  return {revision:q.revision,errors,warnings,geometryValid:errors.length===0,roof,quantities:q,technical,missing:['Khảo sát ranh/cao độ và địa chất','Kết cấu móng, cột, dầm, sàn','Tuyến điện nước, tải thiết bị và chi tiết chống thấm','Quy hoạch/giấy phép và hồ sơ chuyên môn được duyệt']};
  };
  B.roofSheetSvg=()=>{
   const roof=B.sceneRoofSpec(),q=B.measuredQuantities(),t=B.sheetText,scale=B.drawingScale((roof?.width||B.state.project.site.width)+3,(roof?.depth||B.state.project.site.depth)+3),font=scale*.0025;
