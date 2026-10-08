@@ -28,6 +28,13 @@ test('batching repetitive rug details preserves triangle count, world bounds and
 test('room inspection cannot reuse a selected room from another floor or a removed room',()=>{
  const b=client();b.state.ui.modelRoomId='r';assert.equal(b.modelSelectedRoom().id,'r');b.state.ui.sceneFocus='floor:1';assert.equal(b.modelSelectedRoom(),null);b.state.ui.sceneFocus='floor:0';b.state.project.plan.rooms.splice(0);assert.equal(b.modelSelectedRoom(),null);
 });
+test('3D traceability names the chosen style, measured revision and material bindings without claiming engineering approval',()=>{
+ const b=client(),p=b.state.project;Object.assign(p.site,{width:5,depth:20});p.style='Japandi';
+ const visualMaterials={floor:'oak-floor',wall:'ivory-paint',accent:'natural-oak',fabric:'cream-boucle'};p.materials.finish.exterior={visualMaterials:{wall:'ivory-paint',accent:'natural-oak'}};
+ b.VISUAL_MATERIALS=Object.entries({...visualMaterials,exteriorWall:'ivory-paint',exteriorAccent:'natural-oak'}).map(([name,id])=>({id,role:name==='exteriorWall'?'wall':name==='exteriorAccent'?'accent':name,name:id}));
+ b.finishPalette=()=>({visualMaterials});b.facadeFinishPalette=()=>p.materials.finish.exterior;b.houseStyle=()=>({id:'japandi',name:'Japandi'});b.architecturalIdentityReview=()=>({recognized:true,name:'Japandi'});b.drawingRevision=()=>'rev-PA03';
+ const trace=b.modelTraceability(),html=b.modelTraceabilityHtml();assert.equal(trace.styleName,'Japandi');assert.equal(trace.geometryLabel,'Theo mặt bằng 5 × 20 m');assert.equal(trace.materialLabel,'6/6 bề mặt đã gắn');assert.equal(trace.materialComplete,true);assert.match(html,/Revision rev-PA03/);assert.match(html,/KTS\/KS xác nhận/);assert.doesNotMatch(html,/đã duyệt kết cấu|đủ điều kiện thi công/i);
+});
 test('look, wall view, room and light preferences survive the real loader schema',()=>{
  const saved={ui:{modelLook:'materials',modelWalls:'full',modelRoomId:'living',modelLightLevel:31,exteriorCamera:'overview'}},ctx={location:{hostname:'localhost'},localStorage:{getItem:()=>JSON.stringify(saved),setItem(){}},document:{addEventListener(){},querySelector:()=>null},window:{},structuredClone,console,setTimeout,clearTimeout,URL};
  vm.createContext(ctx);for(const file of ['00_boot','01_vn34_catalog','15_data_engine','10_state'])vm.runInContext(fs.readFileSync('src/'+file+'.js','utf8').replace('const BMH =','var BMH ='),ctx);

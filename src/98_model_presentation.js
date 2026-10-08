@@ -151,6 +151,29 @@
   for(const item of st.selection.children)if(item.isMesh)item.visible=B.modelLook()==='neon';
  };
 
+ B.modelTraceability=()=>{
+  const p=B.state.project||{},site=p.site||{},rooms=(p.plan?.rooms||[]).filter(r=>!['stairs','elevator','corridor','balcony','utility'].includes(r.type)),roles=['floor','wall','accent','fabric'];
+  const profiles=new Set();let bound=0;
+  for(const room of rooms){const palette=B.finishPalette?.(room.id)||{};for(const role of roles){const id=palette.visualMaterials?.[role];if(!id)continue;bound++;const profile=B.VISUAL_MATERIALS?.find(x=>x.id===id&&x.role===role);profiles.add(profile?.name||id);}}
+  const exterior=B.facadeFinishPalette?.()||p.materials?.finish?.exterior||{};
+  for(const role of ['wall','accent']){const id=exterior.visualMaterials?.[role];if(!id)continue;bound++;const profile=B.VISUAL_MATERIALS?.find(x=>x.id===id&&x.role===role);profiles.add(profile?.name||id);}
+  const total=rooms.length*roles.length+2,identity=B.architecturalIdentityReview?.(),style=B.houseStyle?.(),revision=B.drawingRevision?.()||'chưa có revision',measured=rooms.length>0&&Number(site.width)>0&&Number(site.depth)>0;
+  return {
+   styleName:identity?.name||style?.name||p.style||'Chưa chọn phong cách',
+   styleRecognized:identity?.recognized??Boolean(style?.id),
+   revision,
+   geometryLabel:measured?'Theo mặt bằng '+Number(site.width).toFixed(2).replace(/\.00$/,'')+' × '+Number(site.depth).toFixed(2).replace(/\.00$/,'')+' m':'Chưa có mặt bằng đo được',
+   materialLabel:rooms.length?(bound+'/'+total+' bề mặt đã gắn'):'Chưa có phòng để gắn vật liệu',
+   materialNames:[...profiles].slice(0,2),
+   materialComplete:rooms.length>0&&bound===total
+  };
+ };
+ B.modelTraceabilityHtml=()=>{
+  const x=B.modelTraceability(),materials=x.materialNames.length?x.materialNames.join(' · '):'Chọn tại tab Vật liệu';
+  return '<aside class="model-traceability" data-model-traceability aria-label="Nguồn dữ liệu của mô hình 3D"><div><span>PHONG CÁCH</span><b>'+esc(x.styleName)+'</b><small class="'+(x.styleRecognized?'is-ready':'is-review')+'">'+(x.styleRecognized?'✓ Hình khối theo thư viện BMH':'Cần đối chiếu ảnh tham khảo')+'</small></div><div><span>BẢN VẼ NGUỒN</span><b>'+esc(x.geometryLabel)+'</b><small>Revision '+esc(x.revision)+'</small></div><div><span>VẬT LIỆU 3D</span><b>'+esc(x.materialLabel)+'</b><small class="'+(x.materialComplete?'is-ready':'is-review')+'">'+esc(materials)+'</small></div><p>Đồng bộ để duyệt thiết kế; kết cấu, MEP và hồ sơ thi công vẫn cần KTS/KS xác nhận.</p></aside>';
+ };
+ B.refreshModelTraceability=()=>{const old=document.querySelector('[data-model-traceability]');if(!old)return false;old.replaceWith(template(B.modelTraceabilityHtml()).content.firstElementChild);return true;};
+
  B.modelRoomInspectorHtml=()=>{
   const r=B.modelSelectedRoom(),rooms=B.modelVisibleRooms().filter(r=>r.type!=='corridor'),palette=B.finishPalette?.(r?.id)||{},items=r?B.roomFurnitureLayout(r):[],ui=B.state.ui;
   return '<section class="model-room-inspector" data-model-room-panel><span class="model-eyebrow">KHÔNG GIAN ĐANG XEM</span><label>Chọn phòng<select data-model-room-inspect><option value="">'+(r?'Bỏ chọn phòng':'Chạm một phòng trong 3D')+'</option>'+rooms.map(x=>'<option value="'+esc(x.id)+'" '+(x.id===r?.id?'selected':'')+'>'+esc(x.name)+' · T'+(x.floor+1)+'</option>').join('')+'</select></label>'+(r?'<h2>'+esc(r.name)+'</h2><div class="model-room-dimensions"><b>'+(r.w*r.h).toFixed(1)+'<small>m²</small></b><span>'+r.w.toFixed(2)+' × '+r.h.toFixed(2)+' m<small>Tầng '+(r.floor+1)+' · '+items.length+' món nội thất</small></span></div><div class="model-finish-swatches">'+[['wall','Sơn'],['floor','Sàn'],['accent','Gỗ'],['fabric','Vải']].map(([k,t])=>'<span><i style="background:'+esc(palette[k]||'#d1c4b2')+'"></i>'+t+'</span>').join('')+'</div>'+(ui.sceneFocus==='room:'+r.id?'<button data-model-floor="'+r.floor+'" class="model-room-action">← Trở về tầng '+(r.floor+1)+'</button>':'<button data-design-room="'+esc(r.id)+'" class="model-room-action">Xem riêng phòng này ↗</button>'):'<h2>Khám phá ngôi nhà</h2><p>Chạm vào sàn hoặc tên phòng để xem số đo và vật liệu ở đây.</p>')+'<details class="model-light-settings"><summary>Ánh sáng trình bày</summary><label>Cường độ <output data-model-light-value>'+ui.modelLightLevel+'%</output><input type="range" min="0" max="100" value="'+ui.modelLightLevel+'" data-model-light-level aria-label="Cường độ ánh sáng trình bày"></label><p>Hiệu ứng giúp đọc không gian. Chọn “Vật liệu” để xem màu và bề mặt đã chọn.</p><a href="assets/licenses/neonplan3d-MIT.txt" target="_blank" rel="noopener">NeonPlan 3D · MIT</a></details></section>';
@@ -164,10 +187,11 @@
   const measured=root.querySelector('.measured-contract');if(measured){const details=template(B.guidedDetails('model-dimensions','Thông số mái, tường & đối chiếu','')).content.firstElementChild;measured.replaceWith(details);details.querySelector('.guided-details-body').append(measured);root.append(details);}
   const controls=t.content.querySelector('.design-view-controls');controls.querySelector('.model-scope-select')?.remove();
   controls.querySelector('[data-design-floor]')?.remove();
-  controls.insertAdjacentHTML('afterbegin','<label class="guided-select model-look-select">Hiển thị<select data-model-look><option value="neon" '+(B.modelLook()==='neon'?'selected':'')+'>Neon · nhìn rõ bố trí</option><option value="materials" '+(B.modelLook()==='materials'?'selected':'')+'>Vật liệu · màu & bề mặt</option></select></label>');
+  controls.insertAdjacentHTML('afterbegin','<label class="guided-select model-look-select">Chế độ<select data-model-look><option value="neon" '+(B.modelLook()==='neon'?'selected':'')+'>Bố trí kỹ thuật</option><option value="materials" '+(B.modelLook()==='materials'?'selected':'')+'>Vật liệu thực tế</option></select></label>');
   const top=t.content.querySelector('.design-model-top>div:first-child');top.querySelector('b').textContent=ui.sceneFocus==='all'?(ui.sceneExploded?'Các tầng · góc xem tách lớp':'Ngôi nhà theo thiết kế'):'Tầng '+((B.modelVisibleRooms()[0]?.floor||0)+1)+' · '+(ui.sceneFocus.startsWith('room:')?B.modelVisibleRooms()[0]?.name:'bố trí & nội thất');
+  const workspace=root.querySelector('.design-workspace');workspace?.insertAdjacentHTML('beforebegin',B.modelTraceabilityHtml());
   const wrap=document.createElement('div');wrap.className='model-scene-wrap';stage.replaceWith(wrap);wrap.insertAdjacentHTML('afterbegin',railHtml());wrap.append(stage);
-  stage.insertAdjacentHTML('beforeend','<div class="model-view-badge"><i></i><span data-model-look-name>'+(B.modelLook()==='neon'?'NEON / 3D':'VẬT LIỆU / 3D')+'</span><small>Cùng số đo với bản vẽ</small></div>');
+  stage.insertAdjacentHTML('beforeend','<div class="model-view-badge"><i></i><span data-model-look-name>'+(B.modelLook()==='neon'?'BỐ TRÍ / 3D':'VẬT LIỆU / 3D')+'</span><small>Cùng hình học · '+esc(B.drawingRevision())+'</small></div>');
   const caption=stage.querySelector('.design-model-caption');if(caption)caption.innerHTML='<span>KÉO ĐỂ XOAY · CHỤM ĐỂ ZOOM</span><b>'+(ui.sceneExploded?'Khoảng tách chỉ phục vụ cách xem':'Chạm sàn / tên phòng để xem chi tiết')+'</b>';
   const brief=t.content.querySelector('.design-brief');brief?.insertAdjacentHTML('afterbegin',B.modelRoomInspectorHtml());
   const preview=brief?.querySelector('.guided-collection-preview');if(preview){const d=document.createElement('details');d.className='model-reference-preview';d.innerHTML='<summary>Xem phòng mẫu của bộ nội thất</summary>';preview.replaceWith(d);d.append(preview);}
@@ -201,7 +225,7 @@
   if(s.scene.userData.furnitureLoads?.length)Promise.allSettled(s.scene.userData.furnitureLoads).then(()=>{if(B.studio3d!==s||s.scene.userData.disposed)return;const st=s.scene.userData.modelPresentation;s.scene.traverse(o=>{if(!o.isMesh||o.userData.presentationOnly)return;for(const m of Array.isArray(o.material)?o.material:[o.material])B.prepareModelMaterial(m,null,o,s.scene);});s.scene.remove(st.edges);for(const lines of st.edges.children){lines.geometry.dispose();lines.material.dispose();}buildEdges(st.context);st.edges.visible=B.modelLook()==='neon';s.renderer.shadowMap.needsUpdate=true;s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));});
  };
  const dispose=B.disposeStudio3D;B.disposeStudio3D=()=>{const s=B.studio3d;s?.renderer.domElement.removeEventListener('pointerdown',s.modelDown);s?.renderer.domElement.removeEventListener('pointerup',s.modelUp);return dispose();};
- const refresh=B.refreshStudioFinishes;B.refreshStudioFinishes=(role,id)=>{const ok=refresh(role,id);if(ok){const s=B.studio3d;B.applyModelLook(s);s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));}return ok;};
+ const refresh=B.refreshStudioFinishes;B.refreshStudioFinishes=(role,id)=>{const ok=refresh(role,id);if(ok){const s=B.studio3d;B.applyModelLook(s);B.refreshModelTraceability();s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));}return ok;};
  const start=B.startArchitecturalRender;B.startArchitecturalRender=()=>B.modelLook()==='neon'?B.captureSharpStudioPreview():start();
  document.addEventListener('click',e=>{
   const el=e.target.closest?.('[data-model-scope-btn],[data-model-floor],[data-model-room-inspect]');if(!el)return;
@@ -212,7 +236,7 @@
  document.addEventListener('change',e=>{
   const el=e.target,u=B.state.ui;
   if(el.matches?.('select[data-model-room-inspect]')){B.selectModelRoom(el.value);return;}
-  if(el.matches?.('[data-model-look]')){u.modelLook=el.value==='materials'?'materials':'neon';B.customerFrameCache=null;B.stopArchitecturalRender();B.save();const s=B.studio3d;if(s){B.applyModelLook(s);s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));}const badge=document.querySelector('[data-model-look-name]');if(badge)badge.textContent=B.modelLook()==='neon'?'NEON / 3D':'VẬT LIỆU / 3D';}
+  if(el.matches?.('[data-model-look]')){u.modelLook=el.value==='materials'?'materials':'neon';B.customerFrameCache=null;B.stopArchitecturalRender();B.save();const s=B.studio3d;if(s){B.applyModelLook(s);s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));}const badge=document.querySelector('[data-model-look-name]');if(badge)badge.textContent=B.modelLook()==='neon'?'BỐ TRÍ / 3D':'VẬT LIỆU / 3D';}
  });
  document.addEventListener('input',e=>{if(!e.target.matches?.('[data-model-light-level]'))return;const u=B.state.ui;u.modelLightLevel=B.clamp(Number(e.target.value),0,100);B.customerFrameCache=null;const st=B.studio3d?.scene.userData.modelPresentation;if(st)st.lightSurface.material.opacity=u.modelLightLevel/100;(B.studio3d?.requestRender||B.studio3d?.renderFrame)?.call(B.studio3d);const out=document.querySelector('[data-model-light-value]');if(out)out.value=u.modelLightLevel+'%';});
  document.addEventListener('change',e=>{if(e.target.matches?.('[data-model-light-level]')){B.save();if(B.studio3d)B.cacheModelThumbnail(B.studio3d);}});
