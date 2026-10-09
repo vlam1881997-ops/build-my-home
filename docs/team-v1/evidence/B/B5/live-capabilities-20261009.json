@@ -1,0 +1,18 @@
+{
+  "url": "https://www.huiminhbach.id.vn/api/config",
+  "checkedOn": "2026-10-09",
+  "scope": "read-only public production flags; not B branch deployment",
+  "flags": {
+    "aiConfigured": true,
+    "geminiConfigured": true,
+    "imageConfigured": true,
+    "placesConfigured": false,
+    "cloudConfigured": false,
+    "aiUsageEnabled": false,
+    "paymentConfigured": false,
+    "guestServiceEnabled": false
+  },
+  "productionCloudPaymentAcceptance": false,
+  "secretsIncluded": false,
+  "realOrdersCreated": 0
+}

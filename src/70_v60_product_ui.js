@@ -566,9 +566,14 @@ BMH.v64BankInitials=b=>{
 BMH.v65Norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
 BMH.v65LoadBankLogos=async()=>{
   if(BMH.v6.bankLogosLoaded||BMH.v6.bankLogosLoading)return;
+  // A failed directory request must not restart on every render of tab 8.
+  // Keep the vector fallback and allow a later visit to retry after ten minutes.
+  if(Date.now()-Number(BMH.v6.bankLogosFailedAt||0)<10*60*1000)return;
   BMH.v6.bankLogosLoading=true;
   try{
-    const r=await fetch('/api/bank-directory'),data=await r.json();
+    const r=await fetch('/api/bank-directory');
+    if(!r.ok)throw Error('Bank directory HTTP '+r.status);
+    const data=await r.json();
     const rows=Array.isArray(data?.data)?data.data:[],logos={...BMH.v6.bankLogos};
     for(const b of BMH.BANKS){
       if(b.img){logos[b.id]=b.img;continue;}
@@ -585,8 +590,8 @@ BMH.v65LoadBankLogos=async()=>{
       }
       if(best?.logo&&bestScore>=40)logos[b.id]=best.logo;
     }
-    BMH.v6.bankLogos=logos;BMH.v6.bankLogosLoaded=true;
-  }catch(err){console.warn('[BMH bank logos]',err);}
+    BMH.v6.bankLogos=logos;BMH.v6.bankLogosLoaded=true;BMH.v6.bankLogosFailedAt=0;
+  }catch(err){BMH.v6.bankLogosFailedAt=Date.now();console.warn('[BMH bank logos]',err);}
   finally{BMH.v6.bankLogosLoading=false;if(BMH.state.ui.step===8)BMH.render({preserveScroll:true});}
 };
 BMH.v6BankMark=b=>{

@@ -31,7 +31,7 @@
  ];
  B.ARCHITECTURAL_IDENTITIES=Object.fromEntries(rules.map(([id,name,surface,surround,band,trim,shade,arch,color,grid])=>[id,{id,name,surface,surround,band,trim,shade,arch,color,grid}]));
  B.architecturalIdentity=()=>B.ARCHITECTURAL_IDENTITIES[B.houseStyle()?.id]||{id:null,name:'Phong cách riêng',surface:'plaster',surround:'none',band:'quiet',trim:0,shade:0,arch:0,color:'#c8c2b6',grid:0};
- const authored=(raw,role)=>raw.styleRoles?.[role]!==true&&(raw.explicitRoles?.[role]===true||hex(raw[role])||!!raw.visualMaterials?.[role]||Object.values(raw.catalogMaterials||{}).some(v=>v.surfaceSlot===role));
+ const authored=(raw,role)=>raw.styleRoles?.[role]!==true&&(raw.explicitRoles?raw.explicitRoles[role]===true||Object.values(raw.catalogMaterials||{}).some(v=>v.surfaceSlot===role):hex(raw[role])||!!raw.visualMaterials?.[role]||Object.values(raw.catalogMaterials||{}).some(v=>v.surfaceSlot===role));
  B.facadeFinishPalette=()=>{
   const p=B.state.project,raw=p.materials.finish?.exterior||{},resolved=B.finishPalette(),rule=B.architecturalIdentity(),manualAccent=authored(raw,'accent'),manualWall=authored(raw,'wall');
   return {...resolved,wall:manualWall?resolved.wall:B.houseStyle()?.wall||resolved.wall,accent:manualAccent?resolved.accent:rule.color,visualMaterials:{...resolved.visualMaterials,...(!manualAccent?{accent:''}:{}),...(!manualWall?{wall:'ivory-paint'}:{})},facadeSurface:manualAccent?'selected':rule.surface,manualAccent,manualWall};

@@ -20,6 +20,7 @@ export default function handler(req,res){
     // Customer cloud requires the revision-checked schema. Legacy payOS stays
     // disabled; guest MoMo has separate readiness and never locks design steps.
     cloudConfigured:customer.cloud,
+    mediaConfigured:customer.cloud&&process.env.BMH_MEDIA_READY==='true',
     aiUsage:{mode:customer.quota?'account':'public',enabled:customer.quota},
     paymentConfigured:false,
     guestService:service.enabled?{enabled:true,title:service.title,amount:service.price,sandbox:service.momo.environment==='sandbox'}:{enabled:false}

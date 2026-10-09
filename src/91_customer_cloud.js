@@ -1,3 +1,61 @@
+/* Team B evidence extensions. Keep the base dossier normalizer's allowlist,
+ * then restore only these validated report/private-media fields by stable ID.
+ * A's base normalizer predates these fields; no second evidence store. */
+(()=>{
+ const B=BMH,day=value=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(value||''))return '';const d=new Date(value+'T00:00:00Z');return Number.isFinite(d.getTime())&&d.toISOString().slice(0,10)===value?value:'';};
+ B.teamBEvidenceReport=raw=>{
+  if(!raw||typeof raw!=='object'||!['photo','inspection-note','defect','correction'].includes(raw.reportType)||!['open','reported-resolved'].includes(raw.reportStatus))return null;
+  return {floor:Number.isInteger(raw.floor)&&raw.floor>=0?raw.floor:null,roomId:String(raw.roomId||'').slice(0,80),reportType:raw.reportType,reportStatus:raw.reportStatus,responsible:String(raw.responsible||'').slice(0,100),note:String(raw.note||'').slice(0,1000),observedAt:day(raw.observedAt),designRevision:String(raw.designRevision||'').slice(0,200),source:'user-report',engineeringAccepted:false};
+ };
+ B.restoreTeamBEvidenceFields=(rows,incoming)=>{
+  const saved=new Map((Array.isArray(incoming)?incoming:[]).filter(x=>x&&typeof x==='object').map(x=>[x.id,x]));
+  for(const row of rows||[]){const raw=saved.get(row.id);if(!raw)continue;
+   const report=B.teamBEvidenceReport(raw.report);if(report)row.report=report;
+   if(Array.isArray(raw.reportHistory))row.reportHistory=raw.reportHistory.slice(-20).flatMap(h=>{const r=B.teamBEvidenceReport(h);return r?[{at:String(h.at||'').slice(0,40),...r}]:[];});
+   if(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\/[A-Za-z0-9_-]{1,80}-[a-f0-9]{64}\.(jpg|png|webp|pdf)$/.test(raw.cloudKey||'')&&/^[a-f0-9]{64}$/.test(raw.cloudSha256||'')){
+    for(const key of ['cloudKey','cloudSha256','cloudProjectId','cloudUploadedAt'])row[key]=String(raw[key]||'').slice(0,280);
+   }
+  }
+ };
+ const normalize=B.normalizeState;B.normalizeState=()=>{const rows=structuredClone(B.state.project.dossier?.evidence||[]);const result=normalize();B.restoreTeamBEvidenceFields(B.state.project.dossier.evidence,rows);return result;};
+ // Initial load already ran the older normalizer before this script executes.
+ // Recover extensions only from the exact snapshot it selected, never another project.
+ if(B.localStateLoaded&&typeof localStorage!=='undefined')for(const key of [B.STORAGE_KEY,...(B.LEGACY_STORAGE_KEYS||[])]){
+  try{const raw=JSON.parse(localStorage.getItem(key)||'null');if(raw?.meta?.savedAt===B.state.meta.savedAt&&String(raw.meta.localProjectId||'')===String(B.state.meta.localProjectId||'')){B.restoreTeamBEvidenceFields(B.state.project.dossier.evidence,raw.project?.dossier?.evidence);break;}}catch(_){}
+ }
+})();
+
+/* Project-scoped local media keys. Legacy bytes are claimed atomically by the
+ * first project that actually references them; duplicate imported IDs cannot
+ * read a different project's new bytes. Copies explicitly copy local media. */
+(()=>{
+ const B=BMH,get=B.evidenceGet,put=B.evidencePut,remove=B.evidenceRemoveBytes;
+ B.projectMediaScope=async()=>{
+  const project=B.state.project;let id=B.state.meta.localProjectId||B.projects?.activeId;
+  if(!id&&B.saveCustomerProject)id=await B.saveCustomerProject();
+  if(!id||B.state.project!==project)throw Error('Dự án đã đổi hoặc chưa lưu được trên thiết bị.');
+  return String(id);
+ };
+ B.projectMediaKey=(scope,id)=>'project:'+scope+':'+id;
+ B.evidencePut=async(id,blob)=>put(B.projectMediaKey(await B.projectMediaScope(),id),blob);
+ B.evidenceGet=async id=>{
+  const project=B.state.project,scope=await B.projectMediaScope(),key=B.projectMediaKey(scope,id),local=await get(key);
+  if(B.state.project!==project)throw Error('Dự án đã đổi.');if(local)return local;
+  if(![...(project.dossier.evidence||[]),...(project.sourceRefs||[])].some(r=>r.id===id))return null;
+  const db=await B.evidenceDb();
+  return new Promise((resolve,reject)=>{const tx=db.transaction('files','readwrite'),store=tx.objectStore('files'),claimId='legacy-claim:'+id,claim=store.get(claimId);let blob=null;
+   claim.onsuccess=()=>{if(claim.result&&claim.result.projectId!==scope)return;const request=store.get(id);request.onsuccess=()=>{if(!request.result?.blob)return;blob=request.result.blob;store.put({id:claimId,projectId:scope});store.put({id:key,blob});};};
+   tx.oncomplete=()=>B.state.project===project?resolve(blob):reject(Error('Dự án đã đổi.'));tx.onabort=()=>reject(Error('Không khôi phục được tệp cũ.'));tx.onerror=()=>{};
+  });
+ };
+ B.evidenceRemoveBytes=async id=>remove(B.projectMediaKey(await B.projectMediaScope(),id));
+ if(B.newCustomerProject){const create=B.newCustomerProject;B.newCustomerProject=async options=>{
+  const copyId=options?.copyId,source=copyId?await B.projectGet(copyId):null,ids=source?[...(source.state.project.dossier.evidence||[]),...(source.state.project.sourceRefs||[])].map(r=>r.id):[],media=[];
+  for(const id of ids){const blob=await get(B.projectMediaKey(copyId,id));const image=await B.styleReferenceStore?.get(id,{scope:copyId,legacy:false});if(blob||image)media.push({id,blob,image});}
+  const scope=await create(options);for(const row of media){if(row.blob)await put(B.projectMediaKey(scope,row.id),row.blob);if(row.image)await B.styleReferenceStore.put(row.id,row.image,{scope});}return scope;
+ };}
+})();
+
 /* Optional customer account. Local design, cloud receipts and AI allowance are separate. */
 (()=>{
  const B=BMH,c=B.cloud,esc=B.esc;
@@ -192,4 +250,45 @@
   }
   B.paintProjectLibrary();
  })();
+})();
+
+/* Team B / B5: opt-in private evidence transfer, backed by the existing project
+ * revision. A failed upload never deletes local bytes or changes entitlement. */
+(()=>{
+ const B=BMH,c=B.cloud;
+ const same=(project,epoch,id)=>B.state.project===project&&c.epoch===epoch&&B.state.meta.cloudProjectId===id;
+ const refs=p=>[...(p.dossier.evidence||[]),...(p.sourceRefs||[])];
+ const dataUrl=blob=>new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('Không đọc được tệp.'));reader.readAsDataURL(blob);});
+ B.uploadProjectEvidence=async id=>{
+  const project=B.state.project,epoch=c.epoch,projectId=B.state.meta.cloudProjectId,record=refs(project).find(r=>r.id===id);
+  if(!record)throw Error('Tệp không còn trong dự án.');
+  if(!c.verified||!c.config?.mediaConfigured||!projectId||B.state.meta.cloudOwnerId!==c.user?.id)throw Error('Lưu dự án lên tài khoản và mở kho tệp trước.');
+  if(c.syncStatus==='conflict')throw Error('Xử lý xung đột thiết kế trước khi tải tệp.');
+  if(!await B.cloudSaveProject({createIfMissing:false}))throw Error(c.error||'Chưa đồng bộ thiết kế.');
+  if(!same(project,epoch,projectId))throw Error('Dự án / tài khoản đã đổi.');
+  let blob=await B.evidenceGet(id);
+  if(!blob&&B.styleReferenceStore){const preview=await B.styleReferenceStore.get(id);if(preview)blob=await (await fetch(preview)).blob();}
+  if(!blob)throw Error('Tệp gốc chưa có trên thiết bị này.');
+  if(blob.size>2*1024*1024)throw Error('Tệp đồng bộ tối đa 2 MB. Giữ bản gốc trong ZIP; dùng ảnh thu nhỏ hoặc PDF nhỏ hơn.');
+  const base64=String(await dataUrl(blob)).split(',')[1];
+  const result=await B.cloudApi('/api/projects?operation=media',{method:'POST',auth:true,body:{projectId,evidenceId:id,expectedRevision:B.state.meta.cloudRevision,type:blob.type,base64}});
+  if(!same(project,epoch,projectId)||!refs(project).includes(record))throw Error('Dự án / tệp đã đổi; kết quả cũ không áp dụng.');
+  Object.assign(record,result.file);B.save();const saved=await B.cloudSaveProject({createIfMissing:false});
+  if(!saved)throw Error('Bytes đã tải; metadata chưa đồng bộ. Bản trên máy còn nguyên. Thử lưu dự án lại.');
+  return result.file;
+ };
+ const get=B.evidenceGet;B.evidenceGet=async id=>{
+  const local=await get(id);if(local)return local;
+  const project=B.state.project,epoch=c.epoch,projectId=B.state.meta.cloudProjectId,record=refs(project).find(r=>r.id===id);
+  if(!record?.cloudKey||record.cloudProjectId!==projectId||!c.verified||!c.config?.mediaConfigured)return null;
+  const result=await B.cloudApi('/api/projects?operation=media&projectId='+encodeURIComponent(projectId)+'&evidenceId='+encodeURIComponent(id),{auth:true});
+  const response=await fetch(result.url);if(!response.ok)throw Error('Không tải được tệp từ tài khoản.');const blob=await response.blob();
+  if(blob.size>2*1024*1024)throw Error('Tệp tải về vượt dung lượng cho phép.');
+  if(result.sha256){const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer())),v=>v.toString(16).padStart(2,'0')).join('');if(hash!==result.sha256)throw Error('Tệp tải về không khớp bản đã lưu.');}
+  if(!same(project,epoch,projectId))throw Error('Dự án / tài khoản đã đổi.');
+  await B.evidencePut(id,blob);return blob;
+ };
+ document.addEventListener('click',async e=>{const button=e.target.closest?.('[data-cloud-media-upload]');if(!button)return;button.disabled=true;
+  try{await B.uploadProjectEvidence(button.dataset.cloudMediaUpload);B.toast('Đã đồng bộ tệp riêng của dự án.');}catch(error){B.toast(error.message);}finally{button.disabled=false;B.render({preserveScroll:true});}
+ });
 })();

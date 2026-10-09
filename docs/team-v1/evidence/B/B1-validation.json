@@ -1,0 +1,27 @@
+{
+  "sourceCommit": "3c2b25992a28276a200b8fc4e74e7dc7a2f4c0a7",
+  "runtime": "v22.23.3",
+  "build": "passed",
+  "syntax": "passed",
+  "checks": [
+    {
+      "command": "npm test",
+      "cases": 397,
+      "pass": 397,
+      "fail": 0
+    },
+    {
+      "command": "node --test tests/team-b-style-materials.test.mjs plus four related suites",
+      "cases": 79,
+      "pass": 79,
+      "fail": 0,
+      "newBCases": 11,
+      "note": "Contains 68 existing cases also covered by npm test; do not add both totals."
+    }
+  ],
+  "browserEvidence": "B1-browser/result.json",
+  "publishedFilesHashVerified": 16,
+  "scopeAcceptance": "B1 in_progress / G1 pending",
+  "pr": "https://github.com/vlam1881997-ops/build-my-home/pull/36",
+  "servicesMocked": true
+}
