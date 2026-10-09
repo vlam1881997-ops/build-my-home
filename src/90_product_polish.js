@@ -20,16 +20,16 @@
   if(!slots||B.state.ui.step!==6||!s?.THREE||s.project!==p||!s.renderer.domElement.isConnected||s.scene.userData.disposed||s.archRender||s.sharpExport||!s.structureKey||s.structureKey!==key)return false;
   const target=new Set((roomId?p.plan.rooms.filter(r=>r.id===roomId):regularRooms()).map(r=>r.id)),changes=[],sets=new Map();let unknown=false;
   const focused=p.plan.rooms.find(r=>'room:'+r.id===B.state.ui.sceneFocus);
-  const materials=id=>{if(!sets.has(id))sets.set(id,B.sceneAssetMaterials(s.THREE,s.scene,{...B.finishPalette(id),...(id?{surface:B.roomSurfaceStyle(id)}:{})}));return sets.get(id);};
+  const materials=(id,item)=>{const key=item?.id||id;if(!sets.has(key))sets.set(key,B.sceneAssetMaterials(s.THREE,s.scene,{...(item&&B.furnitureFinishPalette?B.furnitureFinishPalette(item):B.finishPalette(id)),...(id?{surface:B.roomSurfaceStyle(id)}:{})}));return sets.get(key);};
   s.scene.traverse(mesh=>{
-   let parent=mesh,id;while(parent&&!id){id=parent.userData.roomId;parent=parent.parent;}
+   let parent=mesh,id,furniture;while(parent){id||=parent.userData.roomId;if(parent.userData.kind==='furniture')furniture=parent.userData.placement;parent=parent.parent;}
    if(mesh.userData.source==='glb'&&target.has(id)){unknown=true;return;}
    if(!mesh.isMesh)return;
    if(mesh.userData.kind==='wall')id=focused?.id||(mesh.userData.roomIds||[]).find(id=>p.materials.finish?.rooms?.[id]);
    if(!target.has(id)&&!(role==='wall'&&!roomId&&!id))return;
    const faces=Array.isArray(mesh.material)?mesh.material.map((old,index)=>({old,index})):[{old:mesh.material,index:null}];
    for(const {old,index}of faces){const slot=old?.userData.finishSlot;if(!slots.includes(slot))continue;
-   const source=materials(id)[slot];if(!source||source===old)continue;
+   const source=materials(id,furniture)[slot];if(!source||source===old)continue;
    // A cutaway wall owns its clipping plane; never attach it to a shared room material.
    const next=old.clippingPlanes?.length||old.userData.bmhWallView?source.clone():source;
    if(next!==source){next.clippingPlanes=old.clippingPlanes;next.clipShadows=old.clipShadows;next.side=old.side;}

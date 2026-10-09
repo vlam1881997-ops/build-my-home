@@ -100,7 +100,7 @@
  B.render=opts=>{const project=B.state.project;if(renderedProject===project){const panels=B.state.ui.guidedPanels||={};let changed=false;for(const d of document.querySelectorAll('[data-guided-panel]')){if(panels[d.dataset.guidedPanel]!==d.open){panels[d.dataset.guidedPanel]=d.open;changed=true;}}if(changed)B.save();}const result=render(opts);renderedProject=project;return result;};
  const closeMenus=except=>document.querySelectorAll('[data-guided-menu][open]').forEach(d=>{if(d!==except&&!d.contains(except))d.open=false;});
  document.addEventListener('click',e=>{const picker=document.querySelector('.v64-bank-picker[open]');if(picker&&(e.target.closest?.('[data-bank]')||!picker.contains(e.target)))picker.open=false;},true);
- document.addEventListener('click',e=>{const d=e.target.closest?.('[data-guided-menu]');closeMenus(d);});
+ document.addEventListener('click',e=>{const d=e.target.closest?.('[data-guided-menu]');closeMenus(d);if(d&&e.target.closest?.('[data-camera-preset],[data-view-load]')){d.open=false;d.querySelector('summary')?.focus({preventScroll:true});}});
  document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const selector='[data-guided-menu][open],.v64-bank-picker[open]',d=document.activeElement?.closest?.(selector)||document.querySelector(selector);if(d){e.preventDefault();closeMenus(null);d.open=false;d.querySelector('summary')?.focus();}});
  document.addEventListener('change',e=>{
   const input=e.target,ui=B.state.ui,p=ui.planner;

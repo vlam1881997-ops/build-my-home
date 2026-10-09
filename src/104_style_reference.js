@@ -17,7 +17,18 @@
   request.onerror=()=>reject(Error('Không đọc hoặc lưu được ảnh tham khảo.'));
   tx.onabort=()=>reject(Error('Không lưu được ảnh tham khảo.'));
  }));
- B.styleReferenceStore={get:id=>transaction('readonly',store=>store.get(id)),put:(id,data)=>transaction('readwrite',store=>store.put(data,id))};
+ B.styleReferenceStore={
+  put:async(id,data,options={})=>{const scope=options.scope||await B.projectMediaScope();return transaction('readwrite',store=>store.put(data,B.projectMediaKey(scope,id)));},
+  get:async(id,options={})=>{
+   const project=B.state.project,scope=options.scope||await B.projectMediaScope(),key=B.projectMediaKey(scope,id),data=await transaction('readonly',store=>store.get(key));
+   if(data||options.legacy===false)return data;
+   if(![...(project.sourceRefs||[]),...(B.v6?.uploads||[])].some(r=>r.id===id))return null;
+   const db=await open();return new Promise((resolve,reject)=>{const tx=db.transaction('images','readwrite'),store=tx.objectStore('images'),claimId='legacy-claim:'+id,claim=store.get(claimId);let legacy=null;
+    claim.onsuccess=()=>{if(claim.result&&claim.result!==scope)return;const request=store.get(id);request.onsuccess=()=>{if(!request.result)return;legacy=request.result;store.put(scope,claimId);store.put(legacy,key);};};
+    tx.oncomplete=()=>B.state.project===project?resolve(legacy):reject(Error('Dự án đã đổi.'));tx.onabort=()=>reject(Error('Không khôi phục được ảnh cũ.'));tx.onerror=()=>{};
+   });
+  }
+ };
  const preview=B.v6FilePreview;
  B.v6FilePreview=async file=>{
   const item=await preview(file);
@@ -85,7 +96,7 @@
  const ray=(event,s)=>{const rect=s.renderer.domElement.getBoundingClientRect(),p=new s.THREE.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),raycaster=new s.THREE.Raycaster();raycaster.setFromCamera(p,s.camera);return raycaster;};
  document.addEventListener('pointerdown',e=>{
   if(e.target.id!=='studio3dCanvas'||BMH.state.ui.step!==6)return;const s=B.studio3d;if(!s)return;
-  const hits=ray(e,s).intersectObjects(s.scene.children,true),group=hits.length&&groupFor(hits[0].object);if(!group)return;
+  const hits=ray(e,s).intersectObjects(s.scene.children,true),hit=hits.find(h=>{if(!h.object.isMesh)return false;for(let o=h.object;o;o=o.parent)if(!o.visible||o.userData.presentationOnly)return false;const m=Array.isArray(h.object.material)?h.object.material[h.face?.materialIndex||0]:h.object.material;if(m?.opacity===0)return false;const clipped=m?.clippingPlanes?.map(p=>p.distanceToPoint(h.point)<0)||[];return !(m?.clipIntersection?clipped.length&&clipped.every(Boolean):clipped.some(Boolean));}),group=hit&&groupFor(hit.object);if(!group)return;
   const item=B.resolvedFurniture().find(i=>i.id===group.userData.furnitureId);if(!item)return;
   e.preventDefault();e.stopImmediatePropagation();B.state.ui.planner.selectedFurniture=item.id;B.state.ui.planner.selected=item.roomId;
   const plane=new s.THREE.Plane(new s.THREE.Vector3(0,1,0),-group.position.y),point=ray(e,s).ray.intersectPlane(plane,new s.THREE.Vector3());
@@ -140,6 +151,7 @@
   if(floor!==null&&(!Number.isInteger(floor)||floor<0||floor>=p.site.floors)||roomId&&(!room||room.floor!==floor))return false;
   if(!['photo','inspection-note','defect','correction'].includes(input.reportType)||!['open','reported-resolved'].includes(input.reportStatus))return false;
   const report={floor,roomId,reportType:input.reportType,reportStatus:input.reportStatus,responsible:String(input.responsible||'').trim().slice(0,100),note:String(input.note||'').trim().slice(0,1000),observedAt:/^\d{4}-\d{2}-\d{2}$/.test(input.observedAt||'')?input.observedAt:'',designRevision:B.drawingRevision(),source:'user-report',engineeringAccepted:false};
+  if(input.observedAt&&B.teamBEvidenceReport&&B.teamBEvidenceReport(report).observedAt!==input.observedAt)return false;
   item.report=report;item.reportHistory=[...(item.reportHistory||[]).slice(-19),{at:new Date().toISOString(),...structuredClone(report)}];B.save();return true;
  };
  B.supervisionReports=()=>({revision:B.drawingRevision(),rows:(B.state.project.dossier.evidence||[]).map(i=>({id:i.id,name:i.name,stage:i.stage,report:i.report||null,stale:!!(i.report?.designRevision&&i.report.designRevision!==B.drawingRevision()),cloud:!!i.cloudKey})),certified:false});
