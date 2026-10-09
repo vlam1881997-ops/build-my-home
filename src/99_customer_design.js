@@ -351,7 +351,7 @@
  const plan=()=>B.state.project.plan;
  const room=id=>plan().rooms.find(r=>r.id===id);
  const selected=()=>B.state.ui.planner.selectedFurniture||'';
- B.furnitureContractReady=()=>Array.isArray(B.defaultState().project.plan.furniture)&&Array.isArray(plan().furniture);
+ B.furnitureContractReady=()=>Array.isArray(B.defaultState().project.plan.furniture)&&(!('furniture' in plan())||Array.isArray(plan().furniture));
  B.furnitureRecordValid=i=>!!(i&&typeof i.id==='string'&&i.id&&room(i.roomId)&&Number.isInteger(i.floor)&&['present','removed'].includes(i.placementStatus)&&models[i.modelId]&&[i.pose?.x,i.pose?.y,i.pose?.z,i.pose?.rotationDeg,i.size?.width,i.size?.depth,i.size?.height].every(Number.isFinite)&&i.size.width>0&&i.size.depth>0&&i.size.height>0&&i.pose.z>=0);
  B.furnitureFootprint=i=>{
   const a=angle(i.pose.rotationDeg)*Math.PI/180,c=Math.cos(a),s=Math.sin(a),w=i.size.width/2,d=i.size.depth/2;
@@ -392,7 +392,7 @@
   return [...new Set(out)];
  };
  const reject=message=>{B.state.ui.planner.furnitureNotice=message;B.toast(message);return false;};
- const materialize=roomId=>{if(!plan().furniture.some(i=>i.roomId===roomId))plan().furniture.push(...B.generatedFurniture(room(roomId)));};
+ const materialize=roomId=>{plan().furniture||=[];if(!plan().furniture.some(i=>i.roomId===roomId))plan().furniture.push(...B.generatedFurniture(room(roomId)));};
  const changed=()=>{B.rememberFinishCamera?.();B.save();B.render({preserveScroll:true});};
  B.editFurniture=(id,changes,{render=true}={})=>{
   if(!B.furnitureContractReady())return reject('Chưa ghép schema nội thất C01; không lưu thay đổi chưa thể khôi phục.');

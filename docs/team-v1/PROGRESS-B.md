@@ -3,8 +3,8 @@
 Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 - role: B
 - status: in_progress
-- active_task: B2
-- active_substep: B2 editor/adapter và footprint thật đã code; tiếp tục 3D selection/export B3; C01 chờ A tích hợp
+- active_task: B6
+- active_substep: B2–B6 source đã có các phần độc lập; đang browser QA và 24-style capture; C01/C04/config còn chờ tích hợp
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-v1-24
 - source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff (520 remote blob bytes đã đối chiếu trong checkout mới; giữ WIP cũ nguyên)
@@ -15,10 +15,10 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 ## Checklist
 - [ ] B1 — 24 hồ sơ phong cách và danh mục vật liệu phù hợp — in_progress (hồ sơ/ma trận/runtime bridge đã có; SKU/spec/sample/ảnh chưa duyệt)
 - [ ] B2 — Chỉnh nội thất từng món và lưu lựa chọn — in_progress (editor/adapter/8 tests; schema C01 chưa tích hợp)
-- [ ] B3 — 3D nhà thật cho đủ 24 phong cách — not_started
-- [ ] B4 — Giao diện xuyên 10 tab và bàn giao trước thi công — not_started
-- [ ] B5 — Cloud, tài khoản, ảnh/tệp, quota và thu tiền — not_started
-- [ ] B6 — Giao diện giám sát và nghiệm thu khách hàng cuối — not_started
+- [ ] B3 — 3D nhà thật cho đủ 24 phong cách — in_progress
+- [ ] B4 — Giao diện xuyên 10 tab và bàn giao trước thi công — in_progress
+- [ ] B5 — Cloud, tài khoản, ảnh/tệp, quota và thu tiền — in_progress
+- [ ] B6 — Giao diện giám sát và nghiệm thu khách hàng cuối — in_progress
 
 ## Kết quả thực và file đã đổi
 - Đã chạy inventory trên fixture/source hiện có, không gọi API: 24 phong cách, 10 bộ nội thất, 9 bộ được ánh xạ, 17 profile bề mặt; catalog 92 sản phẩm, 59 SKU, 0 giá số trong catalog đóng gói.
@@ -67,3 +67,13 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - 49/49 tests B2+B1+customer-design đạt; 8 B2 mới. C01 reload dùng proposed schema trong fixture, chưa gọi là production migration.
 - C01 request: evidence/B/B2/C01-A-REQUEST.md. Current A remote vẫn 3c7f510; editor writes deliberately disabled without persistent default array.
 - Tiếp theo B3: real 3D hit/drag + GLB IDs/size; B4 routing, B5 media, B6 evidence QA.
+
+## B2–B6 source checkpoint — 09/10/2026
+- B2: exact-angle editor/history/tombstones, 2D drag; C01 default-array fixture, A schema integration pending.
+- B3: real canvas raycast/drag, per-item measured GLB scaling and stable export IDs/poses; A3 revision/DXF integration and 24 visual approvals pending.
+- B4: semantic routes, once-only saved-index/deep-link migration, tab9 design handover before tab10 construction. Domain screen function names preserved.
+- B5: private immutable image/PDF upload/sign/read through existing projects API; revision/ownership checks, local bytes preserved, public media readiness flag. New SQL NOT applied; no credentials/config authority in environment.
+- B6: existing evidence array gains location/responsible/defect/report history and explicit user-report (never certification), upload UI; A6 attachment-free journal/WBS/signed decision adapter pending.
+- Tests: Node22.23.3 full existing npm test 397/397; 31 new B1/B2/B5/B4/B6 checks pass, real browser capture being completed. No real AI/payment/provider call.
+- C01/C03/C04 and operating handoffs in evidence/B/B2..B6; no new front-end module/build/dependency, media uses existing API function.
+- No task marked done; no main/production claim. Next: finish desktop/phone drag/export/reload, capture 24 exterior/interior candidates, record visual failures and test final integrated tree with A.

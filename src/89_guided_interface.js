@@ -87,7 +87,7 @@
   try{const source=s.renderer.domElement,scale=Math.min(1,960/Math.max(source.width,source.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(source.width*scale));canvas.height=Math.max(1,Math.round(source.height*scale));canvas.getContext('2d').drawImage(source,0,0,canvas.width,canvas.height);B.customerFrameCache={project:B.state.project,revision:B.drawingRevision(),designKey:B.cinematicSignature(),cameraKey:B.cinematicCameraKey(),dataUrl:canvas.toDataURL('image/png'),width:canvas.width,height:canvas.height};return true;}catch{return false;}
  };
  B.cachedCustomerFrame=()=>{const f=B.customerFrameCache;if(!B.customerFrameMatches(f))return null;const data=atob(f.dataUrl.split(',')[1]),bytes=Uint8Array.from(data,c=>c.charCodeAt(0));return {blob:new Blob([bytes],{type:'image/png'}),width:f.width,height:f.height};};
- const navigate=B.navigateTo;B.navigateTo=step=>{if(B.state.ui.step===6&&Number(step)===10){B.rememberFinishCamera();B.cacheCustomerFrame();}return navigate(step);};
+ const navigate=B.navigateTo;B.navigateTo=step=>{if(B.state.ui.step===6&&Number(step)===(B.workflowRoutes?.handover||10)){B.rememberFinishCamera();B.cacheCustomerFrame();}return navigate(step);};
  const dossier=B.screen10;
  B.screen10=()=>{
   const p=B.state.project,rooms=p.plan.rooms,frame=B.customerFrameMatches(B.customerFrameCache)?B.customerFrameCache:null,sheets=rooms.length?B.architecturalSheets():[],issues=B.plannerIssues(),errors=issues.filter(i=>i.sev==='error');

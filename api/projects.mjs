@@ -1,9 +1,13 @@
+import {projectMediaHandler} from '../server/_team_b_media.mjs';
 import {send,jsonBody,authUser,supabaseFetch,apiError} from '../server/_lib.mjs';
 import {requireCustomerCloud} from '../server/_customer_config.mjs';
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const fields='id,name,version,revision,created_at,updated_at';
 const validRevision=n=>Number.isSafeInteger(n)&&n>=1;
-export default async function handler(req,res){try{
+export default async function handler(req,res){
+ const operation=req.query?.operation||new URL(req.url||'/', 'https://bmh.local').searchParams.get('operation');
+ if(operation==='media')return projectMediaHandler(req,res);
+ try{
  if(req.method==='OPTIONS')return send(res,200,{ok:true});
  if(!['GET','POST','DELETE'].includes(req.method))return send(res,405,{ok:false,error:'Method not allowed'});
  requireCustomerCloud();const {user,token}=await authUser(req);

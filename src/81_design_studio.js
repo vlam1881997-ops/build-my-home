@@ -116,7 +116,7 @@ document.addEventListener('click',e=>{
  if(d.designKit){if(BMH.applyDesignKit(d.designKit))document.querySelector?.('.v6-plan-main')?.scrollIntoView({block:'start'});return;}
  if('designRestore'in d)return void BMH.restoreDesignKit();
  if('designAccept'in d)return void BMH.acceptDesign();
- if('designService'in d){if(BMH.designSatisfied())BMH.navigateTo(10);return;}
+ if('designService'in d){if(BMH.designSatisfied())BMH.navigateTo(BMH.workflowRoutes?.handover||10);return;}
  if('designClearApproval'in d){delete BMH.designState().approval;BMH.save();BMH.render({preserveScroll:true});return;}
  if(d.exteriorCamera){BMH.state.ui.exteriorCamera=d.exteriorCamera;BMH.save();BMH.render({preserveScroll:true});return;}
  if(d.roomCamera){BMH.state.ui.roomCamera=d.roomCamera;BMH.save();BMH.render({preserveScroll:true});return;}
