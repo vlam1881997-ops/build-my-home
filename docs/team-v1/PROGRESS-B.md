@@ -3,8 +3,8 @@
 Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 - role: B
 - status: in_progress
-- active_task: B1
-- active_substep: đã có 24 hồ sơ/240 vai trò và runtime C02; còn chốt catalog/sample/asset và acceptance
+- active_task: B2
+- active_substep: B2 editor/adapter và footprint thật đã code; tiếp tục 3D selection/export B3; C01 chờ A tích hợp
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-v1-24
 - source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff (520 remote blob bytes đã đối chiếu trong checkout mới; giữ WIP cũ nguyên)
@@ -14,7 +14,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 
 ## Checklist
 - [ ] B1 — 24 hồ sơ phong cách và danh mục vật liệu phù hợp — in_progress (hồ sơ/ma trận/runtime bridge đã có; SKU/spec/sample/ảnh chưa duyệt)
-- [ ] B2 — Chỉnh nội thất từng món và lưu lựa chọn — not_started
+- [ ] B2 — Chỉnh nội thất từng món và lưu lựa chọn — in_progress (editor/adapter/8 tests; schema C01 chưa tích hợp)
 - [ ] B3 — 3D nhà thật cho đủ 24 phong cách — not_started
 - [ ] B4 — Giao diện xuyên 10 tab và bàn giao trước thi công — not_started
 - [ ] B5 — Cloud, tài khoản, ảnh/tệp, quota và thu tiền — not_started
@@ -60,3 +60,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Checkpoint tiếp: facade cũng xét explicitRoles để cache sàn không khóa vật liệu mặt ngoài; Node22 79/79 ca đạt. Browser evidence ở checkpoint trước; sửa predicate này có ca logic + regression geometry riêng, không tuyên bố duyệt 24 hình.
 
 - PR bàn giao: https://github.com/vlam1881997-ops/build-my-home/pull/36 (draft; B1 vẫn in_progress). Head source 3c2b259; 16 file remote khớp byte với local. Node22 npm test 397/397 đạt, 11 ca B mới chạy riêng. Vercel status success cho source 3c2b259 là deployment PR, không phải production main. CI GitHub lúc ghi đang in_progress.
+
+## B2 checkpoint — 09/10/2026
+- User yêu cầu triển khai toàn B2–B6, không dừng vì một dependency. Đang tiếp tục phần độc lập.
+- B2 source: 99_customer_design, 78_design_workflow, 88_customer_studio, customer-design.css; single plan.furniture consumer, exact-angle SAT, door/fixture checks, tombstones, precision editor + 2D drag.
+- 49/49 tests B2+B1+customer-design đạt; 8 B2 mới. C01 reload dùng proposed schema trong fixture, chưa gọi là production migration.
+- C01 request: evidence/B/B2/C01-A-REQUEST.md. Current A remote vẫn 3c7f510; editor writes deliberately disabled without persistent default array.
+- Tiếp theo B3: real 3D hit/drag + GLB IDs/size; B4 routing, B5 media, B6 evidence QA.

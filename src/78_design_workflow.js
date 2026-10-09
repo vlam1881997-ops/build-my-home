@@ -110,9 +110,9 @@ BMH.addRoomSceneFurniture=(r,base,THREE,scene,mats,site)=>{
  const material=(color,roughness=.75)=>new THREE.MeshStandardMaterial({color,roughness});
  const wood=mats.accent,cloth=material(0xd4c8b8,.96),white=material(0xf4f1e9,.35),dark=mats.dark;
  for(const [index,i] of BMH.roomFurnitureLayout(r).entries()){
-  const d=BMH.FURNITURE_DIMENSIONS[i.model],g=new THREE.Group();g.position.set(i.x+i.w/2-site.width/2,base+i.base,i.y+i.d/2-site.depth/2);g.rotation.y=-i.rotation*Math.PI/180;
+  const d=i.size?{w:i.size.width,d:i.size.depth,h:i.size.height}:BMH.FURNITURE_DIMENSIONS[i.model],g=new THREE.Group();g.position.set((i.pose?.x??i.x+i.w/2)-site.width/2,base+i.base,(i.pose?.y??i.y+i.d/2)-site.depth/2);g.rotation.y=-i.rotation*Math.PI/180;
   const detailed=BMH.createRoomAsset?.(i.model,d,THREE,BMH.sceneAssetMaterials?.(THREE,scene,BMH.finishPalette?.(r.id)||{})||{});
-  if(detailed){g.add(detailed);g.name='furniture-'+r.id+'-'+index;g.userData={id:g.name,kind:'furniture',roomId:r.id,floor:r.floor,model:i.model,source:'parametric',placement:{...i},generic:true};scene.add(g);BMH.addFurnitureContact(THREE,scene,i,base,site);continue;}
+  if(detailed){g.add(detailed);g.name=i.id||'furniture-'+r.id+'-'+index;g.userData={id:g.name,furnitureId:g.name,kind:'furniture',roomId:r.id,floor:r.floor,model:i.model,source:'parametric',placement:{...i},generic:true};scene.add(g);BMH.addFurnitureContact(THREE,scene,i,base,site);continue;}
   const box=(w,h,depth,x,y,z,m=wood)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,depth),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;g.add(o);return o;};
   const legs=(top,w=d.w,depth=d.d)=>{for(const x of [-w/2+.08,w/2-.08])for(const z of [-depth/2+.08,depth/2-.08])box(.045,top,.045,x,top/2,z,dark);};
   if(/bedDouble|bedSingle/.test(i.model)){box(d.w,.22,d.d,0,.2,0);box(d.w,.13,d.d-.08,0,.38,0,white);box(d.w,.07,d.d*.65,0,.49,d.d*.15,cloth);box(d.w,d.h,.10,0,d.h/2,-d.d/2+.05);for(const x of [-d.w*.24,d.w*.24])box(d.w*.38,.1,.4,x,.49,-d.d*.32,white);}
@@ -124,7 +124,7 @@ BMH.addRoomSceneFurniture=(r,base,THREE,scene,mats,site)=>{
   else if(/television/i.test(i.model)){box(d.w,d.h,.05,0,d.h/2,0,dark);}
   else if(/pottedPlant/.test(i.model)){const pot=new THREE.Mesh(new THREE.CylinderGeometry(.15,.1,.32,18),white);pot.position.y=.16;g.add(pot);for(let n=0;n<5;n++){const leaf=new THREE.Mesh(new THREE.SphereGeometry(.16,12,8),mats.green);leaf.scale.set(.65,2,1);leaf.position.set(Math.sin(n)*.13,.6+n*.1,Math.cos(n)*.12);g.add(leaf);}}
   else {box(d.w,d.h,d.d,0,d.h/2,0,/bathroom|Sink/.test(i.model)?white:wood);if(/Fridge/.test(i.model)){box(d.w,.015,.015,0,d.h*.65,d.d/2+.015,dark);box(.04,.5,.04,d.w*.3,d.h*.4,d.d/2+.04,mats.frame);}else if(/Sink/.test(i.model)){box(d.w*.65,.025,d.d*.5,0,d.h+.012,0,dark);box(.035,.2,.035,d.w*.22,d.h+.1,-d.d*.2,mats.frame);}else if(/Stove/.test(i.model)){for(const x of [-d.w*.2,d.w*.2])for(const z of [-d.d*.2,d.d*.2])box(.16,.02,.16,x,d.h+.01,z,dark);}else if(/bookcase/.test(i.model)){for(let n=1;n<4;n++)box(d.w,.025,.03,0,d.h*n/4,d.d/2+.01,dark);}}
-  g.userData={kind:'furniture',roomId:r.id,floor:r.floor,model:i.model,source:'procedural'};scene.add(g);BMH.replaceSceneFurniture(g,i.model,THREE,scene);
+  g.name=i.id||'furniture-'+r.id+'-'+index;g.userData={id:g.name,furnitureId:g.name,kind:'furniture',roomId:r.id,floor:r.floor,model:i.model,placement:{...i},source:'procedural',generic:true};scene.add(g);BMH.replaceSceneFurniture(g,i.model,THREE,scene);
  }
  if(r.type==='stairs'){
   const s=BMH.stairSpec(r),g=new THREE.Group(),W=s.alongX?r.h:r.w,D=s.alongX?r.w:r.h;g.position.set(r.x+r.w/2-site.width/2,base,r.y+r.h/2-site.depth/2);g.rotation.y=-s.direction*Math.PI/180;
