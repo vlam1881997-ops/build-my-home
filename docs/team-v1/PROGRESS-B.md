@@ -3,12 +3,12 @@
 Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 - role: B
 - status: in_progress
-- active_task: B6
-- active_substep: B2–B6 independent implementation đã qua desktop/phone; 48 ảnh24style đã chụp/đối chiếu; đang lưu source/evidence và kiểm preview; C01/C04/config + visual acceptance còn chờ
+- active_task: B3
+- active_substep: B2–B6 independent source/evidence đã lưu; next B3 style-specific refinement trên measured fixtures; C01/C04/config và deployed visual acceptance còn pending
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-v1-24
 - source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff (520 remote blob bytes đã đối chiếu trong checkout mới; giữ WIP cũ nguyên)
-- last_verified_commit: 3c2b25992a28276a200b8fc4e74e7dc7a2f4c0a7 (source B1: Node22 397 ca npm test + 11 ca mới; browser desktop/phone và byte hashes đã kiểm; chưa nghiệm thu integration gate)
+- last_verified_commit: 90dcc4e19a6b70075a7c34aec8f5fffb65770416 (source B2–B6: Node22 397+35 ca; desktop/phone fixture; CI238 và Vercel success; integration gate còn pending)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -92,3 +92,13 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Handoff tập trung: evidence/B/B2-B6-HANDOFF.md; validation/source hashes/result trong evidence/B/B2-B6-browser. Phiên sau đọc đây để tiếp tục đúng việc, không làm lại editor hoặc registry.
 
 - Resume: lượt tải76file trước bị ngắt khi chưa cập nhật ref; remoteB vẫn f8b497d8db6d53ca8f884b906bead50ec8dfd074. Source/evidence local còn đủ. Lưu code/checkpoint trước, chia nhỏ lượt tải bằng chứng; không báo lượt chưa xong là đã push.
+
+## Published resume checkpoint
+- Source90dcc4e đã push; GitHub CI238 completed/success, Vercel success. Evidence59file đã push tại cd0eb8ae3b67021613d1c80169b1294ea5b604d2; hash Git blob của toàn bộ ảnh được đối chiếu. Lượt upload bị ngắt không mất blob; đã tham chiếu lại đúng hash và cập nhật branch thành công.
+- B5 hardening tiếp: yêu cầu evidence/sourceRef đã lưu trong project trước POST bytes; nội dung tệp đã đồng bộ immutable (đổi bản gốc thì thêm tệp mới). Timestamp uploadedAt giữ qua normalize. Hai ca backend mới; UI không hiển thị mã C01/A6 cho khách nữa.
+- Raw GLB3.5MB chưa được lưu lên GitHub; glb-validation.json ghi SHA256/nodeID/pose/size và cách tái tạo từ browser test. Không nói binary đã publish. Image59file đã publish đầy đủ, không cần tải lại.
+- Still pending: A C01/schema/history/revision/DXF/BOQ and C03/C04 signed work records; Node runtime alignment; Supabase/cloud/media migrations and merchant credentials/provider tests; style-specific visual refinement/review, exact SKU/licence/prices. No main/production change.
+
+- Latest targeted changes: official Node22.23.3 full397/397 +37 B checks passed (434 total). Previewcd0eb8a is READY but curl follows to Vercel login page; HTTP200 was NOT treated as app success. Authenticated Vercel fetch connector failed; no protection settings changed, deployed interactive acceptance pending. Previous desktop/phone isolated fixture evidence retained; latest changes limited to backend guard/timestamp/UI wording.
+
+- Resume next: không tải lại59ảnh/checkpointcd0eb8a. Đọc B2-B6-HANDOFF.md và24contact sheets; tiếp tục B3 mặt đứng/nội thất đặc trưng còn quá giống, phối hợp A3 measured fixtures. Preview protected access denied403 by Vercel connection; CLI fallback unavailable, không đổi protection.
