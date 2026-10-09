@@ -4,11 +4,11 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: B3 source verified locally; approval service recovered and scoped GitHub tree prepared; publish checkpoint/CI/main/Vercel verification next
+- active_substep: B3 material illustrations/prices/measured finishes released main03c0b9f; desktop/phone production UI passed; next style-specific facade/roof/interior assets and exact SKU/24 visual acceptance
 - target_branch: codex/b-v1-24
 - actual_branch: codex/review-ab-c08 (local isolated review); remote resume codex/b-v1-24
 - source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff (520 remote blob bytes đã đối chiếu trong checkout mới; giữ WIP cũ nguyên)
-- last_verified_commit: 42d8653f68cc7cb4efd94ad0887c2f09401ed5e0 (main A+B same tree b79d4758; Node22 457/457, native desktop/phone, exports, production public UI; commercial gates pending)
+- last_verified_commit: 03c0b9f4228fc197dbd18d039fc9fb16549c9b89 (PR38 merged; Node22 460/460; native desktop/phone/editor/GLB; public bundles/catalog/illustration match and live desktop/phone10tabs/material prices/3D passed; commercial gates pending)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -139,3 +139,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 
 ### Publication resumed
 - Service recovered on the next user turn. Same scoped create_tree operation succeeded; no bypass or alternate credentials. Source tree prepared; branch/PR/CI/production steps must still be verified separately.
+
+### B3 released — 09/10/2026
+- Source f5c3201 published; PR38 merged main03c0b9f. CI247/248 completed/success; GitHub Vercel status for main reports Deployment has completed.
+- Public app.js1684874B/styles.css587899B/catalog/floor.svg HTTPS200 exactly match tested bytes/SHA256. Native public-response UI desktop1440×1000/phone390×844 passed: all10routes, actual37deg editor, illustrations/dated prices, material cut mode neutral23caps and bounded finish meshes, quote/bank/handover/supervision, zero pageerrors. Test providers isolated, NodeHTTPS verifiesTLS; no protection/TLS bypass.
+- Evidence: B3-material-realism/PRODUCTION-VERIFICATION.json + production-ui-smoke.json. Private Vercel deployment list403 this turn; CLI unavailable; not retried or replaced with identity probes. No private deployment metadata/runtime-log clean claim.
+- Test correction: first production smoke expected cut caps while default auto-wall mode used no clipping planes. Explicit material/cut wall view then passed23neutralcaps on both devices; no source change was necessary.
+- Current upgrade delivered. Whole B3/24styles/price coverage/exactSKU/professional/provider gates stay pending. Continue from integrated source, not B-only legacy checkout; next style-specific facade/roof/interior assets and supplier evidence.
