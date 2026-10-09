@@ -14,6 +14,10 @@ Giữ đầy đủ 10 tab, chọn vật liệu, ngân hàng và các dự án đ
 
 Đọc `docs/BMH-CUSTOMER-DESIGN.md`, hướng dẫn repo và các test liên quan trước khi sửa. Không nhập mật khẩu, token hay API key vào file bàn giao, mã nguồn hoặc trò chuyện.
 
+## Phân công thực thi 24 phong cách và tiếp tục phiên
+
+Đọc [docs/team-v1/README.md](team-v1/README.md). AI A nhận [TASK-A.md](team-v1/TASK-A.md), AI B nhận [TASK-B.md](team-v1/TASK-B.md); mỗi vai trò có nhánh và sổ tiến độ riêng. Mở phiên mới phải đọc checkpoint trên nhánh vai trò đang làm, không lấy checkpoint cũ trên main để ghi đè WIP. File nhiệm vụ là hướng dẫn lấy repo và thực thi, không phải gói mã nguồn để chép đè.
+
 ## Làm song song bằng BMH Team
 
 1. Trong GitHub Desktop, lấy bản mới của `build-my-home`, chọn **Repository → Show in Explorer** và sao chép đường dẫn. Đây phải là repo Git thực tế, không phải thư mục Downloads hoặc thư mục chỉ giải nén ZIP.
