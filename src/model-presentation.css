@@ -8,6 +8,15 @@
 .model-traceability small.is-ready { color:#2e7552; }
 .model-traceability small.is-review { color:#9b601e; }
 .model-traceability>p { grid-column:1/-1; margin:0; padding:9px 16px; border-top:1px solid #e2e7df; background:#f7f8f3; color:#6a766e; font-size:9px; line-height:1.5; }
+.model-render-prompt { display:flex; align-items:center; justify-content:space-between; gap:22px; margin:12px 0 16px; padding:22px 26px; border:1px solid #cad9cd; border-radius:16px; background:linear-gradient(110deg,#e7eee3,#f7f3ea); color:#233e32; }
+.model-render-prompt>div { min-width:0; max-width:650px; }
+.model-render-prompt span { color:#617d61; font-size:10px; font-weight:750; letter-spacing:1.4px; }
+.model-render-prompt h2 { margin:5px 0 8px; font-size:clamp(20px,2.1vw,29px); line-height:1.15; }
+.model-render-prompt p { margin:0; max-width:650px; color:#607164; font-size:12px; line-height:1.65; }
+.model-render-prompt [data-cinematic-render] { flex:0 0 auto; min-height:48px; padding:12px 18px; border-radius:10px; border:0; background:#24543c; color:#fff; font-weight:700; cursor:pointer; }
+.model-render-prompt [data-cinematic-render]:disabled { opacity:.65; cursor:wait; }
+.model-generated-hero { margin:14px 0 0; }
+.model-generated-hero[hidden] { display:none!important; }
 .guided-studio.model-presentation-workspace .design-workspace { grid-template-columns:minmax(0,1fr) 280px; gap:16px; }
 .model-presentation-workspace .design-model { border-radius:16px; overflow:hidden; border-color:#cfdaea; }
 .model-presentation-workspace .design-model-top { background:#f8fafc; color:#27405f; }
@@ -74,6 +83,8 @@ body:has(.model-presentation-workspace) .guided-footer { position:static!importa
 @media(min-width:1550px) { .guided-studio.model-presentation-workspace .design-canvas { height:650px; }.model-floor-rail { max-height:650px; } }
 @media(max-width:1000px) { .guided-studio.model-presentation-workspace .design-workspace { grid-template-columns:minmax(0,1fr) 250px; }.model-scene-wrap { grid-template-columns:70px minmax(0,1fr); }.guided-studio.model-presentation-workspace .design-canvas { height:530px; }.model-floor-rail { max-height:530px; padding:12px 5px; } }
 @media(max-width:760px) {
+ .model-render-prompt { display:grid; gap:14px; padding:18px; }
+ .model-render-prompt [data-cinematic-render] { width:100%; }
  .model-traceability { grid-template-columns:1fr; margin:10px 0 14px; }
  .model-traceability>div { padding:10px 12px; border-right:0; border-bottom:1px solid #e2e7df; }
  .model-traceability b,.model-traceability small { white-space:normal; }

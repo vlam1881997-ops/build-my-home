@@ -195,10 +195,17 @@
   controls.insertAdjacentHTML('afterbegin','<label class="guided-select model-look-select">Chế độ<select data-model-look><option value="neon" '+(B.modelLook()==='neon'?'selected':'')+'>Bố trí kỹ thuật</option><option value="materials" '+(B.modelLook()==='materials'?'selected':'')+'>Xem vật liệu</option></select></label>');
   const top=t.content.querySelector('.design-model-top>div:first-child');top.querySelector('b').textContent=ui.sceneFocus==='all'?(ui.sceneExploded?'Các tầng · góc xem tách lớp':'Ngôi nhà theo thiết kế'):'Tầng '+((B.modelVisibleRooms()[0]?.floor||0)+1)+' · '+(ui.sceneFocus.startsWith('room:')?B.modelVisibleRooms()[0]?.name:'bố trí & nội thất');
   const workspace=root.querySelector('.design-workspace');workspace?.insertAdjacentHTML('beforebegin',B.modelTraceabilityHtml());
+  const brief=t.content.querySelector('.design-brief'),renderButton=brief?.querySelector('[data-cinematic-render]');
+  if(workspace&&renderButton){
+   const prompt=document.createElement('section');prompt.className='model-render-prompt';
+   prompt.innerHTML='<div><span>PHỐI CẢNH CỦA PHƯƠNG ÁN NÀY</span><h2>Xem ngôi nhà gần với thực tế hơn</h2><p>Mô hình 3D bên dưới giữ kích thước để kiểm tra. Ảnh AI dùng góc nhìn, phong cách và vật liệu đang chọn; hãy đối chiếu ảnh với bản vẽ trước khi chốt.</p></div>';
+   prompt.append(renderButton);workspace.before(prompt);
+   const hero=root.querySelector('[data-cinematic-hero]');if(hero){hero.classList.add('model-generated-hero');prompt.before(hero);}
+  }
   const wrap=document.createElement('div');wrap.className='model-scene-wrap';stage.replaceWith(wrap);wrap.insertAdjacentHTML('afterbegin',railHtml());wrap.append(stage);
   stage.insertAdjacentHTML('beforeend','<div class="model-view-badge"><i></i><span data-model-look-name>'+(B.modelLook()==='neon'?'BỐ TRÍ / 3D':'VẬT LIỆU / 3D')+'</span><small>Cùng hình học · '+esc(B.drawingRevision())+'</small></div>');
   const caption=stage.querySelector('.design-model-caption');if(caption)caption.innerHTML='<span>KÉO ĐỂ XOAY · CHỤM ĐỂ ZOOM</span><b>'+(ui.sceneExploded?'Khoảng tách chỉ phục vụ cách xem':'Chạm sàn / tên phòng để xem chi tiết')+'</b>';
-  const brief=t.content.querySelector('.design-brief');brief?.insertAdjacentHTML('afterbegin',B.modelRoomInspectorHtml());
+  brief?.insertAdjacentHTML('afterbegin',B.modelRoomInspectorHtml());
   const preview=brief?.querySelector('.guided-collection-preview');if(preview){const d=document.createElement('details');d.className='model-reference-preview';d.innerHTML='<summary>Xem phòng mẫu của bộ nội thất</summary>';preview.replaceWith(d);d.append(preview);}
   return t.innerHTML;
  };B.SCREENS[5]=B.screen7;
