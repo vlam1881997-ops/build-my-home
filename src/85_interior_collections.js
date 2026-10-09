@@ -55,10 +55,10 @@ BMH.collectionArtTexture=(THREE,c)=>{
 const collectionDecorate=BMH.decorateStudioScene;
 BMH.decorateStudioScene=options=>{
  collectionDecorate(options);
- const {THREE,scene,visibleFloors,roomFocus,floorFocus,W,D,fh,explode,focus}=options,levels=BMH.projectLevels();
+ const {THREE,scene,visibleFloors,roomFocus,floorFocus,W,D,fh,explode,focus}=options,levels=BMH.studioLevels();
  for(const f of visibleFloors)for(const r of BMH.floorRooms(f).filter(r=>!roomFocus||r.id===roomFocus.id)){
   if(!['living','bed'].includes(r.type))continue;
-  const base=roomFocus||floorFocus!==null?0:f*(fh+explode),finish=BMH.finishPalette(r.id),c=BMH.interiorCollection(r.id),materials=BMH.sceneAssetMaterials(THREE,scene,finish),items=BMH.roomFurnitureLayout(r);
+  const base=roomFocus||floorFocus!==null?0:BMH.studioFloorLevel(f).base+f*explode,finish=BMH.finishPalette(r.id),c=BMH.interiorCollection(r.id),materials=BMH.sceneAssetMaterials(THREE,scene,finish),items=BMH.roomFurnitureLayout(r);
   const table=items.find(i=>i.model==='tableCoffee'),bed=items.find(i=>/^bed/.test(i.model));
   // Place the rug under the actual seating/bed group rather than in an empty room centre.
   for(const old of [...scene.children])if(old.userData.kind==='finish-detail'&&old.userData.roomId===r.id&&old.geometry?.parameters?.height===.012){scene.remove(old);old.geometry.dispose();}

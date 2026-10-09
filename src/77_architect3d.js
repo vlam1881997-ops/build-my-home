@@ -1,15 +1,16 @@
 /* Architect3D adapter, pinned upstream 52d9a6f7c8a13e6372efb4aadb181ffc6a066091. */
 BMH.architectDocument=(focus='all')=>{
-  const p=BMH.state.project,l=BMH.projectLevels();
+  const p=BMH.state.project,l=BMH.studioLevels?.()??BMH.projectLevels();
   const focusedRoom=focus.startsWith('room:')?p.plan.rooms.find(r=>r.id===focus.slice(5)):null;
   const level=f=>{
-    const corners={},walls=[],ids=new Map(),corner=(x,y)=>{const key=x.toFixed(4)+','+y.toFixed(4);if(!ids.has(key)){const id='c'+ids.size;ids.set(key,id);corners[id]={x:x*100,y:y*100,elevation:(l.floorHeight-l.slab)*100};}return ids.get(key);};
+    const measured=BMH.studioFloorLevel?.(f)??{height:l.floorHeight,slab:l.slab};
+    const corners={},walls=[],ids=new Map(),corner=(x,y)=>{const key=x.toFixed(4)+','+y.toFixed(4);if(!ids.has(key)){const id='c'+ids.size;ids.set(key,id);corners[id]={x:x*100,y:y*100,elevation:(measured.height-measured.slab)*100};}return ids.get(key);};
     const segments=focusedRoom?(f===focusedRoom.floor?['north','south','east','west'].map(side=>({o:['north','south'].includes(side)?'h':'v',a:['north','south'].includes(side)?focusedRoom.x:focusedRoom.y,b:['north','south'].includes(side)?focusedRoom.x+focusedRoom.w:focusedRoom.y+focusedRoom.h,c:side==='north'?focusedRoom.y:side==='south'?focusedRoom.y+focusedRoom.h:side==='west'?focusedRoom.x:focusedRoom.x+focusedRoom.w})):[]):BMH.wallSegments(f);
     segments.forEach(s=>{const c1=corner(s.o==='h'?s.a:s.c,s.o==='h'?s.c:s.a),c2=corner(s.o==='h'?s.b:s.c,s.o==='h'?s.c:s.b);walls.push({corner1:c1,corner2:c2,wallType:'STRAIGHT',thickness:15});});
     const items=p.plan.openings.filter(o=>o.floor===f&&(!focusedRoom||o.roomId===focusedRoom.id)).flatMap(o=>{const s=BMH.openingWallSpan(o);if(!s)return [];const v=BMH.openingReview(o);return [{id:o.id,item_name:o.kind,item_type:10,xpos:(s.o==='h'?(s.a+s.b)/2:s.c)*100,zpos:(s.o==='h'?s.c:(s.a+s.b)/2)*100,ypos:(v.sill+v.height/2)*100,rotation:s.o==='h'?0:Math.PI/2,scale_x:1,scale_y:1,scale_z:1,fixed:true,opening:{kind:o.kind,width:o.width*100,height:v.height*100,sill:v.sill*100,hinge:o.hinge||'left',swing:90,style:'plain'}}];});
     const furniture={bed:'bedDouble',living:'loungeDesignSofa',bath:'toilet',kitchen:'kitchenSink'};
     BMH.floorRooms(f).filter(r=>!focusedRoom||r.id===focusedRoom.id).forEach(r=>{const name=furniture[r.type];if(!name||Math.min(r.w,r.h)<2.3)return;items.push({id:'furniture-'+r.id,item_name:name,item_type:1,format:'gltf',model_url:'models/'+name+'.glb',xpos:(r.x+r.w/2)*100,zpos:(r.y+r.h/2)*100,ypos:0,rotation:0,scale_x:200,scale_y:200,scale_z:200,fixed:true});});
-    return {name:'Tầng '+(f+1),height:l.floorHeight*100,floorplan:{version:'2.0.0',units:'cm',corners,walls,rooms:{},wallTextures:[],floorTextures:{},newFloorTextures:{}},items};
+    return {name:'Tầng '+(f+1),height:measured.height*100,floorplan:{version:'2.0.0',units:'cm',corners,walls,rooms:{},wallTextures:[],floorTextures:{},newFloorTextures:{}},items};
   };
   const levels=Array.from({length:l.floors},(_,f)=>level(f));
   // Bounding-box pitched roofs are unsuitable for concave footprints; omit until designed.
@@ -33,7 +34,8 @@ BMH.mountStudio3D=async()=>{
     // These optional upstream textures are disabled; use the bundled neutral map.
     assets.resolve=name=>resolveAsset(['rooms/textures/walllightmap.png','rooms/textures/Ground_4K.ktx2'].includes(name)?'rooms/textures/wallmap.png':name);
     const renderProfile=A.createRenderProfile('studio',{environment:false,groundTexture:false,wallLightMapIntensity:0,shadowMapSize:1024,hemisphereIntensity:.8});
-    const viewer=new A.BlueprintJS({threeElement:host,widget:true,assets,renderProfile,configuration:new A.Configuration({wallHeight:(BMH.projectLevels().floorHeight-BMH.projectLevels().slab)*100})});BMH.architectViewer=viewer;
+    const firstLevel=BMH.studioFloorLevel?.(0)??BMH.projectLevels();
+    const viewer=new A.BlueprintJS({threeElement:host,widget:true,assets,renderProfile,configuration:new A.Configuration({wallHeight:((firstLevel.height??firstLevel.floorHeight)-firstLevel.slab)*100})});BMH.architectViewer=viewer;
     const controls=document.createElement('div');controls.className='architect3d-controls';
     controls.innerHTML='<label>Xem không gian <select data-scene-focus><option value="all" '+(focus==='all'?'selected':'')+'>Toàn bộ nhà</option>'+doc.levels.map((l,i)=>'<option value="floor:'+i+'" '+(focus==='floor:'+i?'selected':'')+'>Tầng '+(i+1)+'</option>').join('')+BMH.state.project.plan.rooms.map(r=>'<option value="room:'+BMH.esc(r.id)+'" '+(focus==='room:'+r.id?'selected':'')+'>T'+(r.floor+1)+' · '+BMH.esc(r.name)+'</option>').join('')+'</select></label><button type="button" data-architect-reset>Đặt lại góc nhìn</button><button type="button" data-architect-export>Tải mô hình JSON</button><span role="status" data-architect-status></span>';
     stage.appendChild(controls);

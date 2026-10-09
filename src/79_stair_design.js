@@ -1,8 +1,8 @@
 /* Two-flight stairs with a landing; one geometry for drawings and both viewers. */
 const stairStraightSpec=BMH.stairSpec;
 BMH.stairSpec=r=>{
- const shape=r.stairShape||'u';if(shape==='straight')return {...stairStraightSpec(r),shape};
- const direction=r.stairDirection??(r.w>=r.h?90:0),alongX=direction%180===90,W=alongX?r.h:r.w,D=alongX?r.w:r.h,rise=BMH.projectLevels().floorHeight,count=Math.ceil(rise/.18),first=Math.ceil(count/2),second=count-first;
+ const shape=r.stairShape||'u';if(shape==='straight'){const spec=stairStraightSpec(r),rise=BMH.floorLevel?.(r.floor)?.height??BMH.projectLevels().floorHeight,count=Math.ceil(rise/.18);return {...spec,shape,rise,count,riser:rise/count,tread:spec.run/count,warning:spec.run/count<.25?'Chiều chạy thang thẳng chưa đủ mặt bậc 0,25 m; cần KTS rà soát.':''};}
+ const direction=r.stairDirection??(r.w>=r.h?90:0),alongX=direction%180===90,W=alongX?r.h:r.w,D=alongX?r.w:r.h,rise=BMH.floorLevel?.(r.floor)?.height??BMH.projectLevels().floorHeight,count=Math.ceil(rise/.18),first=Math.ceil(count/2),second=count-first;
  const flightWidth=Math.min(.9,Math.max(.3,(W-.35)/2)),landing=flightWidth,run=D-.2-landing,tread=run/Math.max(1,first-1,second-1),riser=rise/count;
  const warning=flightWidth<.9||tread<.25||run<=0?'Không đủ chỗ cho thang chữ U với vế 0,90 m và mặt bậc 0,25 m. Đổi hướng chạy hoặc tăng ô thang; cần KTS kiểm tra chiếu nghỉ và khoảng thông đầu.':'';
  return {shape,direction,alongX,W,D,rise,count,first,second,flightWidth,landing,run,tread,riser,warning};

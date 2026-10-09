@@ -55,8 +55,8 @@ BMH.architecturalRenderScene=(THREE,source,{purpose='photograph'}={})=>{
  });
  // Eye-height photographs include the measured ceiling; open inspection views keep covers off.
  if(photographicRoom){
-  const levels=BMH.projectLevels(),material=materials.values().next().value?.clone()||new THREE.MeshStandardMaterial({color:'#eee8df',roughness:.92});material.color.set('#eee8df');material.map=null;material.normalMap=null;ownedMaterials.add(material);
-  const ceilingY=levels.floorHeight-(levels.ceilingDrop||0);
+  const levels=BMH.studioFloorLevel?.(room.floor)||BMH.projectLevels(),material=materials.values().next().value?.clone()||new THREE.MeshStandardMaterial({color:'#eee8df',roughness:.92});material.color.set('#eee8df');material.map=null;material.normalMap=null;ownedMaterials.add(material);
+  const ceilingY=(levels.height??levels.floorHeight)-(levels.ceilingDrop||0);
   for(const p of BMH.slabPanels(room,BMH.stairFloorHoles(room.floor+1))){const mesh=new THREE.Mesh(new THREE.BoxGeometry(p.w,levels.slab,p.d),material);mesh.position.set(p.x+p.w/2-site.width/2,ceilingY+levels.slab/2,p.y+p.d/2-site.depth/2);mesh.userData={kind:'ceiling-slab',roomId:room.id,floor:room.floor};scene.add(mesh);}
   // Broad photographic fill converges cleanly; daylight comes from the actual
   // opening locations rather than a small, bright emitter in the room centre.
