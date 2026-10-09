@@ -6,9 +6,9 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 - active_task: B3
 - active_substep: A+B bbbd70f đã review native C01/C02/C03/C04; CSS báo giá/vay phone đã sửa; next B3 style-specific refinement và dữ liệu/config thương mại còn pending
 - target_branch: codex/b-v1-24
-- actual_branch: codex/b-v1-24
+- actual_branch: codex/review-ab-c08 (local isolated review); remote resume codex/b-v1-24
 - source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff (520 remote blob bytes đã đối chiếu trong checkout mới; giữ WIP cũ nguyên)
-- last_verified_commit: 90dcc4e19a6b70075a7c34aec8f5fffb65770416 (source B2–B6: Node22 397+35 ca; desktop/phone fixture; CI238 và Vercel success; integration gate còn pending)
+- last_verified_commit: 42d8653f68cc7cb4efd94ad0887c2f09401ed5e0 (main A+B same tree b79d4758; Node22 457/457, native desktop/phone, exports, production public UI; commercial gates pending)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -111,3 +111,11 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Final export:32 vectorA3/SVG,3DXFmm,10outputhashes, GLBworldbounds/inverse37°/3unequalfloors đạt. 32 trang PDF của source xuất không đổi đã render/decode và xem8montages. Binary GLB/evidence ảnh mới vẫn scratch; các JSONvalidation được commit.
 - Vercel đúng project đổi nodeVersion24→22; protection/env/cloud/payment không đổi. Source sẽ gộp theo yêu cầu hiện tại, không nhận commercial100% hoặc thi công-ready. Chi tiết còn thiếu và next6workstreams: evidence/B/AB-C08-review/COMMERCIAL-READINESS.md.
 - Source/progress ở checkpoint review mới lấy từ git log/PR37; last verified source A bbbd70f, patch final gắn source hashes riêng. Sau merge ghi lại main/live bằng chứng thực, không thay pending từ số tests.
+
+### Mốc đã gộp và live — 09/10/2026
+- Main42d8653 chứa A bbbd70f/B ce28e327 và reviewb79d4758. PR36/37 merged, CI246 success, VercelproductionREADY; JS/CSS publicdomain khớp bundle. Live publicresponses UI qua transportNodeHTTPSkiểmTLS desktop/phone10tab/editor37°/báogiá/vay/handover/supervision đạt; không bypass/protectionchange hay gọi paidproviders.
+- B branch checkpoint này fast-forward từ ce28e327, parentmain42d8653, chỉ thêm evidence/progress. Khi làm tiếp, lấy headB/currentmain và đọc source/docs đã tích hợp; không khôi phục sourceB cũ chưa có A1.
+- Nextconcrete: B3 style-specific roof/facade/interior/PBR/assets, khớp24profile và measuredfixtureA3. C01/nativeconsumer đã kiểm; C02 quote/coverage/UI, cloud/payment/quotas và professional/customervisualacceptance còn pending.
+- Bằng chứng: evidence/B/AB-C08-review/PRODUCTION-VERIFICATION.json và production-ui-smoke.json. Không đánh dấu G1–G6 thương mại done.
+
+- Observability: runtime logs403, CLI Vercel không có; giữ server-error scan pending. Không thử connection/bypass khác.
