@@ -6,6 +6,8 @@ Web đang sử dụng: https://www.huiminhbach.id.vn/
 
 ## Mục tiêu sản phẩm
 
+**Phạm vi bản thương mại v1 đã khóa ngày 09/10/2026:** hoàn thiện đúng 24 phong cách hiện có và vật liệu phù hợp cho từng phong cách. Đọc [BMH-COMMERCIAL-V1-SCOPE.md](BMH-COMMERCIAL-V1-SCOPE.md) trước khi nhận việc. Đây là phạm vi nghiệm thu chung cho cả hai Codex, thay thế các kế hoạch mở rộng phong cách trước đó. Giữ đầy đủ luồng khách hàng và 10 tab; chỉ mở rộng phong cách/tính năng sau khi bản này có người dùng và có yêu cầu mới. Hoàn thành phần việc hay gộp hai nhánh chưa đồng nghĩa đạt bản thương mại.
+
 Khách nhập kích thước đất/nhà, nhu cầu theo từng tầng, phong cách, vật liệu và ngân sách. BMH phải dùng cùng dữ liệu đo đạc cho bản vẽ 2D, mô hình 3D, khối lượng và dự toán; sau đó theo dõi tiến độ công trình. Đầu ra giữ đúng phong cách và vật liệu đã chọn, có minh họa dễ hiểu và cho phép sửa cửa, cửa sổ, lối đi, phòng ngay trên bản vẽ. Khách tự thêm phòng giặt, phòng thờ hoặc phòng tùy ý theo từng tầng. Phong thủy là điểm tư vấn, không được thay đổi lựa chọn của khách âm thầm.
 
 Giữ đầy đủ 10 tab, chọn vật liệu, ngân hàng và các dự án đã lưu. Giao diện cần đơn giản nhưng tính năng nâng cao vẫn phải tìm thấy. Ưu tiên tốc độ xem 3D/vật liệu; chỉ gọi render AI khi người dùng yêu cầu. Không biến hình minh họa thành bằng chứng kích thước hay hồ sơ kết cấu đã được kỹ sư xác nhận. Các thông tin công trình và giá chưa xác minh phải giữ đúng trạng thái của chúng.
