@@ -1,0 +1,161 @@
+{
+  "baselineMain": "42d8653f68cc7cb4efd94ad0887c2f09401ed5e0",
+  "baselineB": "b04de86802c99baa5f2119e6154f8e553cb822a1",
+  "runtime": "Node22.23.3",
+  "browser": "Chromium153.0.8010.0",
+  "npmTest": {
+    "passed": 460,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "nativeBrowser": {
+    "desktop": true,
+    "phone": true,
+    "nativeContract": true,
+    "schemaInjection": false,
+    "servicesIsolated": true,
+    "measuredGlbVertexBoundsChecked": true,
+    "rotatedFurnitureDeg": 37,
+    "glb": {
+      "bytes": 3805908,
+      "sha256": "2445b832969627c65e8ffa5e0edaf196f9da43b86fc6d40a91bde3792e5b3435",
+      "committedBinary": false
+    }
+  },
+  "materialStory": "showroom-result.json",
+  "visualOwnerApproval24Styles": false,
+  "exactSupplierImages": false,
+  "catalog": {
+    "products": 95,
+    "referencePrices": 13,
+    "recentlyCheckedWeb": 6,
+    "historicPublished": 7,
+    "unknownPrices": 82,
+    "illustrationAssets": 13
+  },
+  "source": {
+    "assets/materials/official-catalog.json": {
+      "bytes": 139087,
+      "sha256": "03a357b61c3682329f90af7d4b37f02450dd030dbccea685280d841b125d4548"
+    },
+    "server/_material_catalog.mjs": {
+      "bytes": 6294,
+      "sha256": "e6c482d781a77c192e19d7027bbadc1c247ad4a1a5aa94b0612cbb6cbaa36ead"
+    },
+    "src/102_architectural_identity.js": {
+      "bytes": 28551,
+      "sha256": "0059d5ee9b20b2009ef7b9380ebda5ce4a76d60f70c0d944bd5ddb27d5a4b2bd"
+    },
+    "src/43_scene_assets.js": {
+      "bytes": 46770,
+      "sha256": "c950a0ffb8bcde1bfe21ae760257b00e8802938667ffb3136e6a63b635480f32"
+    },
+    "src/75_completion.js": {
+      "bytes": 40205,
+      "sha256": "bc9e2d5147258f39c2a1a6ee97df941eed412afcde35223ad1a069b098302749"
+    },
+    "src/86_visual_materials.js": {
+      "bytes": 20541,
+      "sha256": "90e36820345c31e34c18f9e9fa549f5d74b9a2cd1a5bc6a24f74e7d8ba5d5806"
+    },
+    "src/90_product_polish.js": {
+      "bytes": 13366,
+      "sha256": "a49d076b2b179507685f81ab38d7aaeb605d94f553076f9789076b967b1e4195"
+    },
+    "src/98_model_presentation.js": {
+      "bytes": 35806,
+      "sha256": "a6683fbbdf1263abf792a87923409d6174ed676c69b0eb3341a506ef4850a6c2"
+    },
+    "src/product-polish.css": {
+      "bytes": 9122,
+      "sha256": "080c43576a5c0df41344de3bd26f84758b7dd9251ec7f4fc122c24d4cb9d2cab"
+    },
+    "tests/completion.test.mjs": {
+      "bytes": 14851,
+      "sha256": "8d86f9aa7ce3e8a3161e87c86c2d5f098846014f431c41ba0ef2367d58c940e7"
+    },
+    "tests/material-source.test.mjs": {
+      "bytes": 21757,
+      "sha256": "365bc2c18d2a1ce65962f0e0602ccb49832ed6928e2360098c14f7077c0361d7"
+    },
+    "tests/real-house.test.mjs": {
+      "bytes": 7990,
+      "sha256": "88305a06300a034b50eb4789cd57c2b073b1c726267827a4a206c951f89cd108"
+    },
+    "tests/team-b-release.browser.cjs": {
+      "bytes": 18338,
+      "sha256": "6121f6c9944e6d12f2fe36dcbd7b3c323433f1292c02c2a9d878f55928d417d2"
+    },
+    "tests/team-b-style-materials.browser.cjs": {
+      "bytes": 9909,
+      "sha256": "40fbd877f43952b8967f0ba5ecedf53ba3e388bb52bdbc6eccbab3881e739126"
+    },
+    "assets/materials/illustrations/cabinetry.svg": {
+      "bytes": 1386,
+      "sha256": "aec52288345d452d41c514d2e2e02963284434f4c4fdcb7c773c67cb2859c96c"
+    },
+    "assets/materials/illustrations/cement.svg": {
+      "bytes": 1305,
+      "sha256": "502b144ea6c6ced6a38e033223f0a24a025952ac84fbacdf4718c695a9ed9126"
+    },
+    "assets/materials/illustrations/door.svg": {
+      "bytes": 1418,
+      "sha256": "eb3895218fd677f4b9a20b607495080c3b928c0460f19f60c89892710e409d14"
+    },
+    "assets/materials/illustrations/floor.svg": {
+      "bytes": 1376,
+      "sha256": "72158d151e5ed9b5778efce4a25a191d912b0b26b5cb3473122194e06d8a8526"
+    },
+    "assets/materials/illustrations/insulation.svg": {
+      "bytes": 1272,
+      "sha256": "0c6db452e693076d2a247a6921312cac86518b390dcc7b43db1998aa87565ea1"
+    },
+    "assets/materials/illustrations/lighting.svg": {
+      "bytes": 1362,
+      "sha256": "73161df9e410db8cc07bb6fa1e6e16a30b7048ab13a5c048d48d7a13a8f16c50"
+    },
+    "assets/materials/illustrations/mep.svg": {
+      "bytes": 1444,
+      "sha256": "47459e6866a058d72f5c83c94029697b802fa4f50b86d90751cf9dc35a3ad2e7"
+    },
+    "assets/materials/illustrations/paint.svg": {
+      "bytes": 1450,
+      "sha256": "7b3d272193d0dd406c70ef6f60e21522944b86f4e68397e0bce75a6cab89ac0d"
+    },
+    "assets/materials/illustrations/provenance.json": {
+      "bytes": 420,
+      "sha256": "7c751299a5801905bdf15fcdbd7e4631853b3e2be35083022c8207862b9c4dba"
+    },
+    "assets/materials/illustrations/roof.svg": {
+      "bytes": 1306,
+      "sha256": "c795105e657db8a8320cfa95263053152681182e90a43739cd5d916a2688508d"
+    },
+    "assets/materials/illustrations/sanitary.svg": {
+      "bytes": 1413,
+      "sha256": "b4892af1151bf07f525bb1b672a3b7d0c2a03aa9776083fb909f5780e77a3cc6"
+    },
+    "assets/materials/illustrations/steel.svg": {
+      "bytes": 1462,
+      "sha256": "3a797d097c319972c98ca3d7dfd14eef844290daa956fea50fbcf77bdaa3e93b"
+    },
+    "assets/materials/illustrations/wall.svg": {
+      "bytes": 1268,
+      "sha256": "a724fa7338aff28d74c0eb586939fe2d7f27b5b5a211679ba774deefc9cfbce8"
+    },
+    "assets/materials/illustrations/waterproof.svg": {
+      "bytes": 1364,
+      "sha256": "8cd4c7877246c68e8a0fc854201152e6139039f8be662fdaaf8f83b3b6fdbcae"
+    }
+  },
+  "buildAssets": {
+    "dist/app.js": {
+      "bytes": 1684874,
+      "sha256": "380183b3dff16cdb1936e73366f0133e5b081f422fd1e5e04a06a72f9af4d1d8"
+    },
+    "dist/styles.css": {
+      "bytes": 587899,
+      "sha256": "3feb8e7e0fc1c95a5f5282752bb866bca896fbf4fb46ae19302e789424b42978"
+    }
+  }
+}

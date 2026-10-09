@@ -51,3 +51,12 @@ test('bundled house photographs and daylight have provenance, matching hashes an
  for(const asset of manifest.assets)for(const file of asset.files){const data=fs.readFileSync(file.file);assert.equal(crypto.createHash('sha256').update(data).digest('hex'),file.sha256);if(file.file.endsWith('.png')){assert.equal(data.readUInt32BE(16),512);assert.equal(data.readUInt32BE(20),512);}assert.match(file.sourceUrl,/^https:\/\/dl.polyhaven.org\//);bytes+=data.length;}
  assert.ok(bytes<4000000);assert.ok(manifest.assets.some(a=>a.files.some(f=>f.file.endsWith('.hdr'))));
 });
+
+test('interior finish details for all 24 styles stay inside measured rooms, stop at openings and use each floor height',()=>{
+ const b=client(),p=b.state.project;Object.assign(p.site,{width:10,depth:12,floors:2,floorHeights:[3.8,3.1]});
+ p.plan.rooms=[{id:'finish-living',floor:0,name:'Khách',type:'living',x:.4,y:.4,w:4.6,h:4.6},{id:'finish-bed',floor:1,name:'Ngủ',type:'bed',x:.4,y:.4,w:4.6,h:4.6},{id:'finish-shaft',floor:0,name:'Giếng',type:'elevator',x:5,y:.4,w:1.8,h:1.8}];
+ p.plan.openings=[{id:'finish-door',roomId:'finish-living',floor:0,kind:'door',side:'north',offset:.2,width:1.1,height:2.3,sill:0},{id:'finish-low-glazing',roomId:'finish-bed',floor:1,kind:'window',side:'east',offset:.25,width:1.5,height:2.5,sill:.05}];p.plan.fixtures=[];const before=JSON.stringify(p.plan),span=b.openingWallSpan(p.plan.openings[0]);
+ let styles=0;for(const style of b.HOUSE_STYLES){b.selectHouseStyle(style.id);styles++;for(const r of p.plan.rooms){const parts=b.interiorFinishDetails(r);if(r.type==='elevator'){assert.equal(parts.length,0);continue;}assert.ok(parts.some(x=>x.kind==='skirting'));for(const q of parts){assert.ok(q.x>=r.x-1e-8&&q.z>=r.y-1e-8&&q.x+q.w<=r.x+r.w+1e-8&&q.z+q.d<=r.y+r.h+1e-8);assert.equal(q.structural,false);assert.ok(q.y+q.h<=b.studioFloorLevel(r.floor).height+1e-8);if(r.floor===0&&q.kind==='skirting'&&q.horizontal&&q.z<r.y+.2)assert.ok(q.x+q.w<=span.a+.001||q.x>=span.b-.001,'door clearance remains open');}}
+ assert.equal(JSON.stringify(p.plan),before);}
+ assert.equal(styles,24);
+});

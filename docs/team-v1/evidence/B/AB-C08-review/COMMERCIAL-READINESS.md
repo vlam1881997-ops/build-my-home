@@ -36,3 +36,13 @@ Checkpoint nguồn được review: A `bbbd70f664d4219856cad30d917747db7d5ac66f`
 ## Giới hạn bằng chứng
 
 Fixture tổng hợp và provider bị chặn/mock; không tạo đơn thật hay tiêu API credits. GLB binary QA ở scratch, không publish lại; hash/cách tái tạo được lưu. 48 ảnh cũ được xem để đánh giá điểm thiếu, không gọi ảnh đó là bản visual mới hay commercial approved. Protected preview của A ghi403/quyền project-team; lần này không thử bypass đường đã bị auto-review từ chối. Khi merge theo yêu cầu hiện tại, đây là **gộp nâng cấp phần mềm**, không thay dấu pending bằng done hoặc công bố sản phẩm/hồ sơ100%.
+
+## Kết quả gộp và kiểm production
+
+- Đã gộp PR37 (chứa PR36) theo yêu cầu hiện tại. Main42d8653, tree314868d3 trùng reviewb79d4758. Cả PR36/37 closed/merged; giữ lịch sử A/B, không squash mất checkpoint.
+- GitHub CI246/run37926145459 success. Vercelproductiondpl_D78oapJMAv63HAfWDZB2bhibMeXC READY, alias www.huiminhbach.id.vn; projectNode22.x. JavaScript/CSS trên tên miền khớp byte bundle đã kiểm.
+- Public production UI smoke desktop1440×1000/phone390×844 đạt:10route, nativefurniture37°, touchsummarybáogiá, vay, bàn giao, supervision và không pageerror/tràn ngang. Nhà cung cấp/paid/APIwrites bị chặn; browsercontext mới không dùng dự án/tài khoản khách thật. Chromium thiếu CA proxy môi trường nên transport dùng Nodefetch HTTPS kiểmTLS rồi fulfill publicresponses, giữ origin tên miền; không tắtTLS/protection, không sử dụng bypass bảo vệ Vercel. Đây là UI/nguồn public, không phải kiểm cloud/payment/professional.
+- Configproduction vẫn cloud/media/payment/places/usage/guestfalse; Gemini/AItrue. Những phần pending ở bảng/thứ tự ưu tiên giữ nguyên.
+- B tiếp tục từ nguồn mainđã ghép qua checkpoint ở codex/b-v1-24; nextB3 đủ24phong cách và sourcedmaterial/visualapproval.
+
+- Đọc log runtime Vercel bị403 do quyền project/team; chưa xác minh được lỗi phía máy chủ. Không gọi trạng thái READY hoặc0pageerror là máy chủ không có lỗi.

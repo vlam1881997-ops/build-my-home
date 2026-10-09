@@ -18,11 +18,17 @@ async function run(device,options){
  await page.evaluate(()=>{
   const B=BuildMyHome,p=B.state.project;B.state.ui.onboardingComplete=true;
   Object.assign(p.site,{width:8,depth:12,floors:1,useParcelGeometry:false,setbackFront:0,setbackRear:0,setbackSide:0});p.style='Japandi';
-  p.plan={rooms:[{id:'b1-living',floor:0,name:'Khách',type:'living',x:.4,y:.4,w:3.5,h:4},{id:'b1-bed',floor:0,name:'Ngủ',type:'bed',x:3.9,y:.4,w:3.5,h:4}],openings:[{id:'b1-door',floor:0,roomId:'b1-living',kind:'door',side:'south',offset:.137,width:.9}],fixtures:[],outdoor:[],lockedRoomIds:[],lockedFloors:[]};
+  p.plan={rooms:[{id:'b1-living',floor:0,name:'Khách',type:'living',x:.4,y:.4,w:3.5,h:4},{id:'b1-bed',floor:0,name:'Ngủ',type:'bed',x:3.9,y:.4,w:3.5,h:4}],openings:[{id:'b1-door',floor:0,roomId:'b1-living',kind:'door',side:'south',offset:.137,width:.9}],fixtures:[],outdoor:[],furniture:[],lockedRoomIds:[],lockedFloors:[]};
   p.materials.finish={exterior:null,rooms:{'b1-bed':{visualMaterials:{floor:'white-marble'},explicitRoles:{floor:true}}}};
   B.save();B.navigateTo(5);
  });
  const measured=await page.evaluate(()=>BuildMyHome.state.project.plan);
+ // Real category controls, local image decoding and visible dated source prices.
+ const categories=await page.evaluate(()=>Object.keys(BuildMyHome.v6MatMeta));let illustrations=0;
+ for(const category of categories){await page.locator('[data-material-view="'+category+'"]').click();const images=page.locator('[data-material-illustration]');assert.ok(await images.count()>0,category);await images.first().scrollIntoViewIfNeeded();await page.waitForFunction(()=>[...document.querySelectorAll('[data-material-illustration]')].some(i=>i.complete&&i.naturalWidth>0));illustrations+=await images.count();}
+ await page.locator('[data-material-view="floor"]').click();await page.locator('.web-product').first().scrollIntoViewIfNeeded();assert.match(await page.locator('.web-product').first().innerText(),/333.000|332.000/);assert.match(await page.locator('.web-product').first().innerText(),/Đối chiếu 09\/10\/2026/);await page.screenshot({path:path.join(output,'material-images-prices-'+device+'.png'),fullPage:false});
+ await page.locator('[data-material-view="paint"]').click();assert.ok(await page.locator('[data-price-freshness="stale"]').count()>0);await page.locator('[data-price-freshness="stale"]').first().scrollIntoViewIfNeeded();assert.match(await page.locator('[data-price-freshness="stale"]').first().innerText(),/2026-06/);await page.locator('[data-material-view="floor"]').click();
+
  const brief=page.locator('.style-material-brief');await brief.scrollIntoViewIfNeeded();assert.match(await brief.innerText(),/Japandi/);
  await brief.locator('summary').click();assert.match(await brief.innerText(),/Kích thước tấm/);assert.equal(await brief.locator('button').count(),0);
  await page.screenshot({path:path.join(output,'showroom-'+device+'.png'),fullPage:false});
@@ -45,6 +51,13 @@ async function run(device,options){
  assert.deepEqual(await page.evaluate(()=>BuildMyHome.state.project.plan),measured);
  assert.equal(await page.evaluate(()=>BuildMyHome.state.project.materials.choices.floor),product);
  await page.screenshot({path:path.join(output,'studio-'+device+'.png'),fullPage:false});
+
+ await page.evaluate(()=>{const B=BuildMyHome;B.state.ui.sceneFocus='floor:0';B.state.ui.designView='floor';B.state.ui.modelWalls='cut';B.state.ui.modelLook='materials';B.render();});await settle();
+ const cut=await page.evaluate(()=>{const B=BuildMyHome,s=B.studio3d,parts=s.scene.userData.modelPresentation.cutCaps.children;return {count:parts.length,neutral:parts.every(p=>p.material.color.equals(p.userData.sourceWall.material.color)),detailCount:s.scene.children.filter(o=>o.userData.kind==='interior-feature').flatMap(o=>o.userData.componentIds||[]).filter(id=>id.startsWith('finish-')).length};});assert.ok(cut.count>0);assert.equal(cut.neutral,true);assert.ok(cut.detailCount>0);
+ await page.locator('[data-model-look]').selectOption('neon');await page.locator('[data-model-look]').selectOption('materials');assert.equal(await page.evaluate(()=>BuildMyHome.studio3d.scene.userData.modelPresentation.cutCaps.children.every(p=>p.material.color.equals(p.userData.sourceWall.material.color))),true);
+ await page.locator('#studio3dStage').screenshot({path:path.join(output,'floor-materials-'+device+'.png')});
+ await page.evaluate(()=>{const B=BuildMyHome;B.state.ui.sceneFocus='room:b1-bed';B.state.ui.designView='room';B.state.ui.roomCamera='inside';B.render();});await settle();
+ assert.ok(await page.evaluate(()=>{let count=0;BuildMyHome.studio3d.scene.traverse(o=>{if(o.userData.kind==='draped-bed-textile')count++;});return count>0;}));await page.locator('#studio3dStage').screenshot({path:path.join(output,'bed-textile-'+device+'.png')});
  await page.locator('.guided-ten-tabs [data-nav="5"]').click();
  assert.match(await page.locator('.style-material-brief').innerText(),/Industrial/);
  await page.reload();await page.waitForFunction(()=>window.__BMH_BOOT_OK);await page.evaluate(()=>BuildMyHome.projects.ready);
@@ -54,7 +67,7 @@ async function run(device,options){
  assert.deepEqual(await page.evaluate(()=>BuildMyHome.state.project.plan),measured);
  assert.equal(await page.locator('.guided-ten-tabs [data-nav]').count(),10);
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));assert.deepEqual(errors,[]);
- evidence.push({device,viewport:options.viewport,materialSwitchMs,styleAfterReload:'industrial',skuSelectionRetained:true,measuredPlanRetained:true,tenTabs:true,jsWebglErrors:errors});
+ evidence.push({device,viewport:options.viewport,materialSwitchMs,styleAfterReload:'industrial',skuSelectionRetained:true,measuredPlanRetained:true,tenTabs:true,categoryIllustrations:illustrations,datedPrices:true,historicPriceLabel:true,neutralWallCut:cut,bedTextile:true,jsWebglErrors:errors});
  console.log(device+': showroom, real material/style controls, 3D, reload and no overflow passed; finish '+materialSwitchMs+'ms');
  await context.close();
 }

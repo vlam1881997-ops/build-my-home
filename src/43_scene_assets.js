@@ -113,7 +113,11 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
      // drivers must not upload a differently sized HTML image into the old map.
      const canvas=document.createElement('canvas'),ctx=canvas.getContext?.('2d');
      if(ctx?.drawImage){canvas.width=canvas.height=512;ctx.drawImage(fallback.image,0,0,512,512);fallback.image=canvas;}
-     const task=BMH.scenePhotoSurface(THREE,scene,photoSets[kind],photoChannels[channel]).then(image=>{if(!image||scene.userData.disposed)return false;if(ctx?.drawImage)ctx.drawImage(image,0,0,512,512);else fallback.image=image;fallback.needsUpdate=true;fallback.userData={...fallback.userData,source:photoSets[kind],license:'CC0-1.0'};return true;});
+     const task=BMH.scenePhotoSurface(THREE,scene,photoSets[kind],photoChannels[channel]).then(image=>{if(!image||scene.userData.disposed)return false;if(ctx?.drawImage){
+      // This plaster photograph is a texture, not the colour of the selected
+      // paint. Keep its mineral variation subtle for a painted interior wall.
+      ctx.globalAlpha=kind==='plaster'&&channel==='color'?.08:1;ctx.drawImage(image,0,0,512,512);ctx.globalAlpha=1;
+     }else fallback.image=image;fallback.needsUpdate=true;fallback.userData={...fallback.userData,source:photoSets[kind],license:'CC0-1.0'};return true;});
      (scene.userData.surfaceLoads||=[]).push(task);
     }
    }return textures.get(key);
@@ -189,7 +193,7 @@ BMH.sceneSurfaceUvs = (geometry, material, origin = {x:0,y:0,z:0}) => {
 // Soft window treatments stay inside the measured room and attach to its actual opening.
 BMH.addWindowDrapery=(THREE,scene,r,base,site,overview=false)=>{
  if(!['living','bed'].includes(r.type))return;
- const levels=BMH.projectLevels(),materials=BMH.sceneAssetMaterials(THREE,scene,BMH.finishPalette?.(r.id)||{});
+ const levels=BMH.studioFloorLevel?.(r.floor)??BMH.projectLevels(),materials=BMH.sceneAssetMaterials(THREE,scene,BMH.finishPalette?.(r.id)||{});
  for(const o of BMH.state.project.plan.openings.filter(o=>o.roomId===r.id&&o.kind==='window')){
   const span=BMH.openingWallSpan(o);if(!span)continue;const horizontal=span.o==='h',inward={north:1,south:-1,west:1,east:-1}[o.side],top=levels.slab+levels.clearHeight-.12,bottom=levels.slab+.03,width=Math.min(.48,(span.b-span.a)*.28),near=overview&&['north','east'].includes(o.side),lo=horizontal?r.x+.13:r.y+.13,hi=horizontal?r.x+r.w-.13:r.y+r.h-.13;
   const material=materials.linen.clone();material.side=THREE.DoubleSide;if(near)material.clippingPlanes=[new THREE.Plane(new THREE.Vector3(0,-1,0),base+.85)];
@@ -429,7 +433,11 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
       const pillow=cushion((d.w-.24)/count,.12,.43,-(d.w-.24)/2+(i+.5)*(d.w-.24)/count,.535,-d.d*.31,m.linen);
       pillow.rotation.x=.07;
     }
-    for(let i=1;i<6;i++)box((d.w-.08)/6,.008,d.d*.48,-d.w/2+.08+i*(d.w-.16)/6,.559,d.d*.17,m.linen,.003);
+    // A single draped textile surface replaces rigid stripe blocks. Its folds
+    // stay within the existing bed envelope and follow the selected linen.
+    const cover=new THREE.PlaneGeometry(d.w-.08,d.d*.59,32,24);cover.rotateX(-Math.PI/2);const cp=cover.attributes.position;
+    for(let i=0;i<cp.count;i++){const x=cp.getX(i),z=cp.getZ(i),u=x/(d.w-.08),v=z/(d.d*.59),edge=Math.max(0,(Math.abs(u)-.37)/.13),fold=Math.sin(u*26+v*4)*.005+Math.sin(v*19-u*5)*.003;cp.setY(i,fold-.018*edge);}
+    cover.computeVertexNormals();mesh(cover,m.linen,0,.555,d.d*.13).userData={kind:'draped-bed-textile',generic:true};
   } else if (/^(table|desk)/.test(model)) {
     if(model==='tableCoffee') {
       const table=m.collection?.table||'oak';

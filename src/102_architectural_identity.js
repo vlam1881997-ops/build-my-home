@@ -149,6 +149,30 @@
   else if(c.id==='soft-curves'){const rise=Math.min(width*.5,.42),h=top-bottom,points=[[0,0],[width,0],[width,h-rise]];for(let i=0;i<=20;i++){const a=i*Math.PI/20;points.push([width/2+width/2*Math.cos(a),h-rise+rise*Math.sin(a)]);}points.push([0,0]);add('curved-feature',start,bottom,width,h,.018,'wall',points);}
   return parts;
  };
+ // Small finish details are derived from solid measured wall intervals. They
+ // stay inside the room and stop at doors, low glazing, fixtures and shafts.
+ // Generic design suggestions; no structure or purchased SKU is inferred.
+ B.interiorFinishDetails=r=>{
+  if(['stairs','elevator','balcony','garage'].includes(r.type))return [];
+  const l=B.studioFloorLevel(r.floor),c=B.interiorCollection(r.id),parts=[],wet=['bath','laundry'].includes(r.type),classical=['neo-elegance','olive-gallery','indochine'].includes(c.id);
+  const walls=B.scenePlanGeometry(B.state.project.plan,r.floor).walls.filter(w=>w.roomIds.includes(r.id));
+  const fixtures=B.planFixtures?.(r.id)||[];
+  const add=(wall,a,b,kind,y,h,depth,role)=>{
+   if(b-a<.025||h<=0)return;const near=wall.horizontal?wall.axis<r.y+r.h/2:wall.axis<r.x+r.w/2,t=wall.thickness||B.measuredWallThickness(wall.roomIds.length>1),axis=wall.axis+(near?1:-1)*(t/2+.001),constant=near?axis:axis-depth;
+   const part={id:'finish-'+r.id+'-'+kind+'-'+parts.length,kind,roomId:r.id,floor:r.floor,collectionId:c.id,x:wall.horizontal?a:constant,y:l.slab+y,z:wall.horizontal?constant:a,w:wall.horizontal?b-a:depth,h,d:wall.horizontal?depth:b-a,horizontal:wall.horizontal,role,generic:true,provisional:true,structural:false};
+   if(part.x>=r.x-.001&&part.z>=r.y-.001&&part.x+part.w<=r.x+r.w+.001&&part.z+part.d<=r.y+r.h+.001)parts.push(part);
+  };
+  for(const w of walls){
+   const a=Math.max(w.a+.002,w.horizontal?r.x+.02:r.y+.02),b=Math.min(w.b-.002,w.horizontal?r.x+r.w-.02:r.y+r.h-.02),near=w.horizontal?w.axis<r.y+r.h/2:w.axis<r.x+r.w/2,side=w.horizontal?(near?'north':'south'):(near?'west':'east');
+   if(w.kind==='door'||w.kind==='window'&&w.sill<.14)continue;
+   let spans=[[a,b]];for(const q of fixtures.filter(q=>q.side===side&&(Number(q.base)||0)<.14)){const qa=w.horizontal?q.x:q.y,qb=qa+(w.horizontal?q.w:q.d);spans=spans.flatMap(([x,z])=>qb<=x||qa>=z?[[x,z]]:[[x,Math.min(z,qa-.01)],[Math.max(x,qb+.01),z]]).filter(([x,z])=>z>x);}
+   for(const [x,z]of spans){add(w,x,z,'skirting',0,classical?.13:.09,.014,wet?'floor':classical?'wall':'accent');if(classical)add(w,x,z,'skirting-cap',.13,.014,.020,'wall');}
+   if(w.kind==='wall'&&classical){const y=l.clearHeight-.09;add(w,a,b,'ceiling-cornice',y,.055,.038,'wall');add(w,a,b,'ceiling-cornice-step',y+.055,.026,.022,'wall');}
+  }
+  return parts;
+ };
+ const interiorFeatures=B.interiorFeatureComponents;
+ B.interiorFeatureComponents=r=>[...interiorFeatures(r),...B.interiorFinishDetails(r)];
  const decorate=B.decorateStudioScene;
  B.decorateStudioScene=options=>{
   decorate(options);const {THREE,scene,visibleFloors,roomFocus,floorFocus,W,D,fh,explode}=options;
@@ -156,7 +180,9 @@
    const parts=B.interiorFeatureComponents(r);if(!parts.length)continue;const base=roomFocus||floorFocus!==null?0:B.studioFloorLevel(f).base+f*explode,materials=B.sceneAssetMaterials(THREE,scene,B.finishPalette(r.id)),groups=new Map();
    for(const p of parts){if(!groups.has(p.role))groups.set(p.role,[]);groups.get(p.role).push(p);}
    for(const [role,group]of groups){let material=materials[role==='accent'?'wood':role],clipped=floorFocus!==null||roomFocus&&B.state.ui.roomCamera!=='inside';if(clipped){material=material.clone();material.clippingPlanes=[new THREE.Plane(new THREE.Vector3(0,-1,0),base+(roomFocus?.85:1.05))];material.clipShadows=true;}
-    const source=group[0].polygon?B.facadePolygonGeometry(THREE,{...group[0],floor:0,y:base+group[0].y},{W,D}):B.sceneJoinedBoxes(THREE,group,{W,D,base});B.sceneSurfaceUvs(source,material,{x:0,y:0,z:0});const mesh=new THREE.Mesh(source,material);mesh.castShadow=mesh.receiveShadow=true;mesh.userData={kind:'interior-feature',roomId:r.id,floor:f,collectionId:group[0].collectionId,componentIds:group.map(p=>p.id),measuredBoxes:group,generic:true};scene.add(mesh);
+    const boxes=group.filter(p=>!p.polygon),sources=[];if(boxes.length)sources.push(B.sceneJoinedBoxes(THREE,boxes,{W,D,base}));for(const p of group.filter(p=>p.polygon))sources.push(B.facadePolygonGeometry(THREE,{...p,floor:0,y:base+p.y},{W,D}));
+    const data={position:[],normal:[],uv:[]};for(const source of sources){const flat=source.index?source.toNonIndexed():source;for(const key of Object.keys(data))data[key].push(...flat.attributes[key].array);if(flat!==source)flat.dispose();source.dispose();}
+    const source=new THREE.BufferGeometry();for(const key of Object.keys(data))source.setAttribute(key,new THREE.Float32BufferAttribute(data[key],key==='uv'?2:3));B.sceneSurfaceUvs(source,material,{x:0,y:0,z:0});const mesh=new THREE.Mesh(source,material);mesh.castShadow=mesh.receiveShadow=true;mesh.userData={kind:'interior-feature',roomId:r.id,floor:f,collectionId:group[0].collectionId,componentIds:group.map(p=>p.id),measuredBoxes:group,generic:true};scene.add(mesh);
    }
   }
  };

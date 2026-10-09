@@ -29,14 +29,14 @@ test('SKU matching rejects substring codes but accepts exact visible or JSON-LD 
  assert.equal(productPageMatchesSku('<p>TILE-600X</p>','TILE-600'),false);assert.equal(productPageMatchesSku('<p>Mã: TILE-600 / 600 mm</p>','TILE-600'),true);assert.equal(productPageMatchesSku('<p>SKU khác</p>','TILE-600'),false);assert.equal(productPageMatchesSku('<script type="application/ld+json">{"@type":"Product","sku":"TILE-600"}</script>','TILE-600'),true);
 });
 test('manufacturer outage preserves all sourced catalog groups without inventing quotes',async()=>{
- for(const c of ['floor','cement','steel','waterproof','paint','mep','door','sanitary','roof','insulation','lighting','cabinetry']){const d=await officialMaterials(c);assert.ok(d.products.length>=4,c);for(const p of d.products){assert.equal(p.price,null);assert.equal(p.priceEvidence.amountVnd,null);assert.equal(p.photoLicense.commercialUse,false);}}
- const d=await officialMaterials('floor',{refresh:true,fetchPage:async()=>{throw Error('offline');}});assert.ok(d.products.length>=4);assert.ok(d.products.every(p=>p.price===null));
+ const snapshots=new Map();for(const c of ['floor','cement','steel','waterproof','paint','mep','door','sanitary','roof','insulation','lighting','cabinetry']){const d=await officialMaterials(c);assert.ok(d.products.length>=4,c);for(const p of d.products){assert.equal(p.price,p.priceEvidence.amountVnd);if(p.price!==null){assert.ok(p.price>0);assert.equal(p.priceEvidence.priceType,'reference');assert.ok(p.priceEvidence.sourceUrl);assert.ok(p.priceEvidence.retrievedAt);assert.equal(p.priceEvidence.quotedAt,null);}assert.equal(p.photoLicense.commercialUse,false);}snapshots.set(c,JSON.stringify(d.products));}
+ const d=await officialMaterials('floor',{refresh:true,fetchPage:async()=>{throw Error('offline');}});assert.ok(d.products.length>=4);assert.equal(JSON.stringify(d.products),snapshots.get('floor'));
 });
 test('source normalization sanitizes bad URLs and does not use priceDate as retrieval date',()=>{
  const p=normalizeMaterialProduct({...product(),productUrl:'http://bad.example',source:'https://127.0.0.1/',priceEvidence:{amountVnd:120000,sourceUrl:'https://user:secret@bad.example/',quotedAt:'2026-05-04'}});assert.equal(p.priceEvidence.sourceUrl,null);assert.equal(p.priceEvidence.quotedAt,'2026-05-04');assert.equal(p.priceEvidence.retrievedAt,'2026-10-01');
 });
 test('choosing web price never creates a project quote and unknown supplier image is not embedded',()=>{
- const {B,state}=client(),x={...product(),price:220000,priceEvidence:{...product().priceEvidence,amountVnd:220000,priceType:'reference'},imageUrl:'https://manufacturer.example/a.jpg'};assert.equal(B.adoptWebMaterial(x),true);const q=state.project.dataEngine.materialOverrides[x.id];assert.equal(q.value,null);assert.equal(q.date,'');assert.equal(q.source,'');assert.equal(q.imageUrl,null);assert.equal(q.product.price,220000);assert.equal(state.project.materials.choices.floor,x.id);const card=B.webProductCard(x);assert.match(card,/220\.000/);assert.match(card,/Chưa công bố/);assert.match(card,/Chưa rõ/);assert.doesNotMatch(card,/<img/);assert.match(card,/Sản phẩm & ảnh tại nguồn/);
+ const {B,state}=client(),x={...product(),price:220000,priceEvidence:{...product().priceEvidence,amountVnd:220000,priceType:'reference'},imageUrl:'https://manufacturer.example/a.jpg'};assert.equal(B.adoptWebMaterial(x),true);const q=state.project.dataEngine.materialOverrides[x.id];assert.equal(q.value,null);assert.equal(q.date,'');assert.equal(q.source,'');assert.equal(q.imageUrl,null);assert.equal(q.product.price,220000);assert.equal(state.project.materials.choices.floor,x.id);const card=B.webProductCard(x);assert.match(card,/220\.000/);assert.match(card,/Chưa công bố/);assert.match(card,/Chưa rõ/);assert.match(card,/data-material-illustration/);assert.doesNotMatch(card,/data-material-product-image/);assert.doesNotMatch(card,/src="https:\/\/manufacturer.example\/a.jpg/);assert.match(card,/sản phẩm & ảnh tại nguồn/i);
 });
 test('a verified existing project quote survives only exact product SKU, specification and unit',()=>{
  const {B,state}=client(),x=product();B.adoptWebMaterial(x);const q=state.project.dataEngine.materialOverrides[x.id];Object.assign(q,{value:150000,source:'Nhà cung cấp thử',date:'2026-10-02',unit:'m2',priceEvidence:{...q.priceEvidence,amountVnd:150000,priceType:'project-quote'}});B.adoptWebMaterial({...x,verifiedAt:'2026-10-07'});assert.equal(state.project.dataEngine.materialOverrides[x.id].value,150000);assert.equal(state.project.dataEngine.materialOverrides[x.id].priceEvidence.priceType,'project-quote');
@@ -92,4 +92,19 @@ test('legacy colour and surface controls clear supplier bindings and protect man
 });
 test('returning a surface to style follows the current collection on read without reviving a supplier binding',()=>{
  const {B,state}=client();B.adoptWebMaterial(product());B.applyCatalogMaterial('floor','ivory-tile',{scope:'all'});B.applyFinishSurface('auto','b');assert.equal(B.finishPalette('b').surface,'auto');assert.equal(B.finishPalette('b').visualMaterials.floor,'oak-floor');state.project.style='Hiện đại';B.houseStyle=()=>({id:'modern',wall:'#eee'});B.interiorCollection=id=>B.INTERIOR_COLLECTIONS.find(c=>c.id==='urban-stone');const p=B.finishPalette('b');assert.equal(p.visualMaterials.floor,'grey-concrete');assert.equal(p.surface,'auto');assert.equal(p.catalogMaterials.floor,undefined);assert.equal(state.project.materials.choices.floor,'tile-a');
+});
+
+// Price observation and date are separate: an old published period never
+// becomes a current quote just because the page was fetched again today.
+test('dated reference prices retain supplier identity, units and historic periods without creating a quote',()=>{
+ const catalog=JSON.parse(fs.readFileSync('assets/materials/official-catalog.json')),priced=catalog.products.filter(x=>x.price!==null);assert.equal(priced.length,13);
+ const {B,state}=client(),at=Date.parse('2026-10-09T12:00:00Z');let stale=0,checked=0;
+ for(const x of priced){const p=materialPriceEvidence(x,at);assert.equal(p.sourceType,'supplier');assert.ok(p.publisher);assert.equal(p.quotedAt,null);assert.equal(p.retrievedAt,'2026-10-09');assert.equal(p.amountVnd,x.price);assert.ok(p.quantityUnit);for(const key of ['includesVat','includesLabour','includesTransport'])assert.equal(p[key],null);const status=B.materialPriceFreshness(p,at);if(status==='stale')stale++;else if(status==='checked')checked++;}
+ assert.equal(stale,7);assert.equal(checked,6);
+ const historic=priced.find(x=>x.priceEvidence.publishedPeriod==='2025'),fresh={...historic.priceEvidence,retrievedAt:'2026-10-09'};assert.equal(B.materialPriceFreshness(fresh,at),'stale');
+ B.adoptWebMaterial({...priced[0],category:'floor'});assert.equal(state.project.dataEngine.materialOverrides[priced[0].id].value,null);
+});
+test('every bundled product has a local generic illustration, and untrusted category cannot escape the asset directory',()=>{
+ const {B}=client(),catalog=JSON.parse(fs.readFileSync('assets/materials/official-catalog.json'));for(const p of catalog.products){const file=B.materialIllustration(p);assert.ok(fs.existsSync(file));assert.match(fs.readFileSync(file,'utf8'),/^<svg/);assert.ok(B.webProductCard(p).includes('data-material-illustration'));}
+ assert.equal(B.materialIllustration({category:'../../private'}),'assets/materials/illustrations/wall.svg');
 });
