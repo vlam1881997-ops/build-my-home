@@ -8,6 +8,13 @@ Trạng thái: **draft cho triển khai**, chưa phải schema đã code. Reuse 
 - Stable room/opening/shaft/element/furniture ID, floor ID và revision. Cao độ dùng `floorLevel()`/`resolvedProjectLevels()`, không quay lại f×floorHeight.
 - 24 style ID giữ nguyên. B cấp profile nhận diện/ma trận vai trò vật liệu và trạng thái compatibility; A dùng cho đề xuất/BOQ. Không sửa vật liệu riêng âm thầm.
 
+## C01 implementation checkpoint A1 — 09/10/2026
+- `defaultState().project.plan.furniture=[]` đã có; mergeState/lưu/mở lại/planSnapshot/undo/redo dùng chung array. Legacy thiếu array được merge thành rỗng, không materialize đồ sinh sẵn thành lựa chọn đã xác nhận.
+- Giữ nguyên ID chứa dấu `:` của B, tombstone `removed`, pose 37°, size và materialBindings. `planFurnitureIssues(plan)` báo ID trùng, số đo/room/floor/materials sai; giữ raw row để phục hồi, không tự gán vị trí/model thay thế.
+- `project.inputEvidence.records` và `projectInputRegister()` tách default/legacy (unknown) khỏi customer-entered/provided và awaiting-review. `recordProjectInput(field,evidence)` chỉ ghi confirmed cho xác nhận khai báo của khách; không tạo reviewed/chứng nhận chuyên môn. Giá trị đổi làm trạng thái stale. `BMH.set` ghi nguồn nhập trước save.
+- Fixture chuẩn hóa tại `evidence/A/A1-fixture.json`; mọi tọa độ/SKU/điều kiện là test-only. Chưa có nguồn khảo sát thật, quy hoạch hay KS.
+- Chưa đóng G1/C01 toàn bộ: cần kiểm adapter B thật, room translation/rotation/regenerate và native drag; triển khai tiếp trên nhánh A, không sửa source B.
+
 ## Nội thất từng món
 A1 thêm schema/history/snapshot/migration; B2 thêm editor và adapter. Cấu trúc mục tiêu `project.plan.furniture[]`, thống nhất trước thêm dữ liệu thật:
 - `id, roomId, floor, modelId`: stable, không lấy index vòng lặp làm ID.

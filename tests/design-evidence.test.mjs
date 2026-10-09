@@ -116,7 +116,7 @@ test('manual dimensions mode enforces entered setbacks and a concave polygon ide
 });
 test('an irregular three-floor site retains aligned stairs, continuous lift holes and stable room IDs',()=>{
  const B=client();B.state.project.site.floors=3;B.saveSiteEvidence({...boundary,localVertices:'0,0\n8,0\n8,8\n5,8\n5,20\n0,20'});assert.equal(B.parcelGeometry().area,124);
- const p=B.state.project;p.plan={rooms:[0,1,2].flatMap(floor=>[{id:'stairs-'+floor,floor,type:'stairs',name:'Thang',x:.4,y:2.4,w:2.4,h:4.2},{id:'lift-'+floor,floor,type:'elevator',name:'Giếng dự trù',x:3.1,y:2.4,w:1.6,h:1.9,elevator:{shaftId:'same-shaft'}}]),openings:[],outdoor:[],fixtures:[],lockedRoomIds:[],lockedFloors:[]};
+ const p=B.state.project;p.plan={furniture:[],rooms:[0,1,2].flatMap(floor=>[{id:'stairs-'+floor,floor,type:'stairs',name:'Thang',x:.4,y:2.4,w:2.4,h:4.2},{id:'lift-'+floor,floor,type:'elevator',name:'Giếng dự trù',x:3.1,y:2.4,w:1.6,h:1.9,elevator:{shaftId:'same-shaft'}}]),openings:[],outdoor:[],fixtures:[],lockedRoomIds:[],lockedFloors:[]};
  assert.equal(B.stairAlignmentIssues().filter(i=>i.sev==='error').length,0);assert.equal(B.elevatorIssues().filter(i=>i.sev==='error').length,0);for(const floor of [1,2])assert.equal(B.stairFloorHoles(floor).length,2);assert.equal(B.elevatorSpec(p.plan.rooms[1]).pitDepth,null);
  assert.equal(B.roomInsideParcel({x:4,y:7,w:2,h:3}),false,'room crossing the L notch is rejected');
  const restored=client(json(B.state));assert.deepEqual(json(restored.state.project.plan),json(p.plan));assert.equal(restored.parcelGeometry().area,124);
@@ -127,7 +127,7 @@ test('unsupported imported survey dimensions cannot be activated or silently cla
 });
 test('physical wall/roof checks and shared exports use the measured boundary without private evidence payloads',()=>{
  const B=client();B.saveSiteEvidence(boundary);const p=B.state.project;
- p.plan={rooms:[0,1].map(floor=>({id:'room-'+floor,floor,type:'living',name:'Fixture room',x:.4,y:2.4,w:4.2,h:4})),openings:[],outdoor:[],fixtures:[],lockedFloors:[],lockedRoomIds:[]};
+ p.plan={furniture:[],rooms:[0,1].map(floor=>({id:'room-'+floor,floor,type:'living',name:'Fixture room',x:.4,y:2.4,w:4.2,h:4})),openings:[],outdoor:[],fixtures:[],lockedFloors:[],lockedRoomIds:[]};
  assert.equal(B.measuredDesignReview().geometryValid,true);p.measuredDesign.roof.overhang=.8;assert.ok(B.measuredGeometryIssues().some(i=>/Mái đua/.test(i.text)));p.measuredDesign.roof.overhang=0;p.plan.rooms[0].x=.2;assert.ok(B.measuredGeometryIssues().some(i=>/mặt ngoài tường/.test(i.text)));
  p.plan.rooms[0].x=.4;p.designEvidence.site[0].value.rawCoordinates='PRIVATE-RAW-DOCUMENT';p.designEvidence.site[0].notes='PRIVATE-NOTES';p.finance.cash=123456789;p.household.ownerBirth=1971;
  const exported=B.customerDesignSnapshot(),text=JSON.stringify(exported);assert.equal(exported.project.siteBasis.vertices.length,4);assert.equal(exported.project.siteBasis.planningStatus,'unverified');assert.ok(!text.includes('PRIVATE-RAW-DOCUMENT'));assert.ok(!text.includes('PRIVATE-NOTES'));assert.ok(!text.includes('123456789'));assert.ok(!text.includes('ownerBirth'));

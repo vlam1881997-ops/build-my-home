@@ -5,6 +5,7 @@ BMH.defaultState = () => ({
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại', briefIdea:'',
     brief:{provider:'',model:'',notice:'',updatedAt:'',result:{},aiSuggestions:{},userRequirements:{}},
+    inputEvidence:{schemaVersion:1,origin:'not-recorded',records:{}},
     sourceRefs:[],
     styleReferenceId:'',
     designEvidence:{schemaVersion:1,research:[],site:[],fengSources:[],materialSources:[],context:{}},
@@ -28,7 +29,7 @@ BMH.defaultState = () => ({
       {id:'o2',floor:0,roomId:'r1',kind:'window',side:'east',offset:.35,width:1.6},
       {id:'o3',floor:0,roomId:'r3',kind:'door',side:'east',offset:.25,width:.8},
       {id:'o4',floor:1,roomId:'r6',kind:'window',side:'east',offset:.4,width:1.6}
-    ], outdoor:[], fixtures:[], lockedRoomIds:[],lockedFloors:[]},
+    ], outdoor:[], fixtures:[], furniture:[], lockedRoomIds:[],lockedFloors:[]},
     planVariants:[],
     designStudio:{kits:[],activeKit:'',inputSignature:'',appliedSignature:''},
     planVersions:[],
@@ -47,6 +48,7 @@ BMH.defaultState = () => ({
 });
 
 BMH.DYNAMIC_STATE_PATHS=new Set(['ui.guidedPanels','project.designEvidence','project.constructionDesign','project.materials.choices','project.materials.finish','project.designStudio','project.homeFinish','project.site.mapCenter','project.aiScan.result','project.dataEngine.materialOverrides','project.dataEngine.costSources','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence','project.costPlan.pricing','project.costPlan.extras','project.dossier.stageProgress']);
+BMH.DYNAMIC_STATE_PATHS.add('project.inputEvidence.records');
 BMH.mergeState = (base, incoming) => {
   const isPlain=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
   if(!isPlain(incoming)) return structuredClone(base);
@@ -81,6 +83,38 @@ BMH.loadState = () => {
   return base;
 };
 BMH.state = BMH.loadState();
+// Defaults and legacy values remain usable; they are not confirmed evidence.
+BMH.INPUT_FIELDS=Object.freeze(['source','style','briefIdea','site.width','site.depth','site.floors','site.frontDirection','site.lat','site.lng','site.lotPoints','site.setbackFront','site.setbackRear','site.setbackSide','household','finance.cash','finance.income','finance.living','finance.reserve','finance.existingDebt','finance.loan','finance.targetBudget']);
+BMH.projectInputValue=(field,p=BMH.state.project)=>field.split('.').reduce((v,k)=>v?.[k],p);
+BMH.recordProjectInput=(field,evidence={}, {save=true}={})=>{
+  field=String(field).replace(/^project\./,'');
+  if(!BMH.INPUT_FIELDS.some(k=>field===k||field.startsWith(k+'.')))return false;
+  const p=BMH.state.project,register=p.inputEvidence||={schemaVersion:1,origin:'not-recorded',records:{}};
+  register.records||={};
+  const value=BMH.evidenceValue(BMH.projectInputValue(field)),sourceType=['customer-entered','surveyed','map-estimate','official-document'].includes(evidence.sourceType)?evidence.sourceType:'customer-entered';
+  register.records[field]={value,sourceType,sourceReference:String(evidence.sourceReference||'').slice(0,200),sourceUrl:BMH.evidenceUrl(evidence.sourceUrl),recordedAt:new Date().toISOString(),effectiveAt:String(evidence.effectiveAt||'').slice(0,40),status:evidence.status==='awaiting-review'?'awaiting-review':'provided',confirmed:evidence.confirmed===true&&sourceType==='customer-entered'};
+  if(save)BMH.save();return register.records[field];
+};
+BMH.projectInputRegister=(p=BMH.state.project)=>BMH.INPUT_FIELDS.map(field=>{
+  const record=p.inputEvidence?.records?.[field],value=BMH.projectInputValue(field,p),same=record&&JSON.stringify(record.value)===JSON.stringify(value),missing=value===null||value===undefined||value===''||Array.isArray(value)&&!value.length;
+  return {field,value:BMH.evidenceValue(value),status:missing?'unknown':record?(same?record.status:'stale'):'unknown',sourceType:record?.sourceType||'unconfirmed-default-or-legacy',confirmed:!!(same&&record.confirmed),sourceReference:record?.sourceReference||null,sourceUrl:record?.sourceUrl||null};
+});
+BMH.planFurnitureIssues=(plan=BMH.state.project.plan)=>{
+  const issues=[],seen=new Set(),rows=plan?.furniture;
+  if(!Array.isArray(rows))return [{code:'furniture-array',text:'Nội thất chưa có danh sách hợp lệ.'}];
+  for(const item of rows){
+    const id=item?.id,r=plan.rooms?.find(r=>r.id===item?.roomId),removed=item?.placementStatus==='removed';
+    const add=(code,text)=>issues.push({id:typeof id==='string'?id:null,code,text});
+    if(typeof id!=='string'||!id||id.length>200||seen.has(id))add('furniture-id','ID nội thất thiếu hoặc trùng; giữ dữ liệu để đối chiếu.');seen.add(id);
+    if(!['present','removed'].includes(item?.placementStatus))add('furniture-status','Trạng thái nội thất không hợp lệ.');
+    if(!removed&&(!r||!Number.isInteger(item?.floor)||item.floor!==r.floor))add('furniture-room','Phòng / tầng của nội thất không khớp.');
+    if(typeof item?.modelId!=='string'||!item.modelId)add('furniture-model','Thiếu model nội thất.');
+    const dimensions=[item?.pose?.x,item?.pose?.y,item?.pose?.z,item?.pose?.rotationDeg,item?.size?.width,item?.size?.depth,item?.size?.height];
+    if(!dimensions.every(Number.isFinite)||item?.pose?.z<0||![item?.size?.width,item?.size?.depth,item?.size?.height].every(n=>n>0))add('furniture-dimensions','Vị trí / góc / kích thước nội thất không hợp lệ.');
+    if(!Array.isArray(item?.materialBindings))add('furniture-materials','Danh sách vật liệu nội thất không hợp lệ.');
+  }
+  return issues;
+};
 // Evidence is stored with the project; it is never a legal or engineering approval.
 BMH.evidenceHash=value=>{const text=JSON.stringify(value);let hash=2166136261;for(let i=0;i<text.length;i++)hash=Math.imul(hash^text.charCodeAt(i),16777619);return (hash>>>0).toString(16);};
 BMH.evidenceUrl=value=>{try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password&&!Array.from(u.searchParams.keys()).some(k=>/token|secret|password|api.?key/i.test(k))?u.href:null;}catch{return null;}};
@@ -238,6 +272,11 @@ BMH.normalizeState = () => {
   if(typeof BMH.state.project.briefIdea!=='string')BMH.state.project.briefIdea='';
   if(!BMH.state.project.brief||typeof BMH.state.project.brief!=='object')BMH.state.project.brief=structuredClone(base.project.brief);
   else {const b=BMH.state.project.brief,d=base.project.brief;for(const [k,v] of Object.entries(d))if(!(k in b))b[k]=structuredClone(v);if(!b.result||typeof b.result!=='object'||Array.isArray(b.result))b.result={};if(!b.aiSuggestions||typeof b.aiSuggestions!=='object'||Array.isArray(b.aiSuggestions))b.aiSuggestions={};if(!b.userRequirements||typeof b.userRequirements!=='object'||Array.isArray(b.userRequirements))b.userRequirements={};b.provider=String(b.provider||'').slice(0,40);b.model=String(b.model||'').slice(0,120);b.notice=String(b.notice||'').slice(0,500);b.updatedAt=String(b.updatedAt||'').slice(0,40);}
+  if(!BMH.state.project.inputEvidence||typeof BMH.state.project.inputEvidence!=='object'||Array.isArray(BMH.state.project.inputEvidence))BMH.state.project.inputEvidence=structuredClone(base.project.inputEvidence);
+  const inputEvidence=BMH.state.project.inputEvidence;inputEvidence.schemaVersion=1;
+  if(!inputEvidence.records||typeof inputEvidence.records!=='object'||Array.isArray(inputEvidence.records))inputEvidence.records={};
+  inputEvidence.records=Object.fromEntries(Object.entries(inputEvidence.records).filter(([field,r])=>r&&typeof r==='object'&&!Array.isArray(r)&&BMH.INPUT_FIELDS.some(k=>field===k||field.startsWith(k+'.'))).map(([field,r])=>[field,{value:BMH.evidenceValue(r.value),sourceType:['customer-entered','surveyed','map-estimate','official-document'].includes(r.sourceType)?r.sourceType:'customer-entered',sourceReference:String(r.sourceReference||'').slice(0,200),sourceUrl:BMH.evidenceUrl(r.sourceUrl),recordedAt:String(r.recordedAt||'').slice(0,40),effectiveAt:String(r.effectiveAt||'').slice(0,40),status:r.status==='awaiting-review'?'awaiting-review':'provided',confirmed:r.confirmed===true&&r.sourceType==='customer-entered'}]));
+  inputEvidence.origin=BMH.localStateLoaded&&inputEvidence.origin==='not-recorded'?'legacy-unconfirmed':inputEvidence.origin;
   if(!Array.isArray(BMH.state.project.sourceRefs))BMH.state.project.sourceRefs=[];
   BMH.state.project.sourceRefs=BMH.state.project.sourceRefs.filter(x=>x&&typeof x==='object').slice(0,6).map(x=>({id:String(x.id||BMH.uid('src')),kind:['image','video','pdf','file'].includes(x.kind)?x.kind:'file',name:String(x.name||'Tài liệu').slice(0,180),type:String(x.type||'').slice(0,120),size:Math.max(0,Number(x.size)||0),status:String(x.status||'Đã lưu tham chiếu').slice(0,120)}));
   if(!BMH.state.project.sourceRefs.some(x=>x.kind==='image'&&x.id===BMH.state.project.styleReferenceId))BMH.state.project.styleReferenceId='';
@@ -268,6 +307,8 @@ BMH.normalizeState = () => {
   if(!Array.isArray(BMH.state.project.plan.rooms))BMH.state.project.plan.rooms=structuredClone(base.project.plan.rooms);
   if(!Array.isArray(BMH.state.project.plan.openings))BMH.state.project.plan.openings=structuredClone(base.project.plan.openings);
   if(!Array.isArray(BMH.state.project.plan.fixtures))BMH.state.project.plan.fixtures=[];
+  // Invalid imports stay recoverable; planFurnitureIssues exposes their errors.
+  if(!('furniture' in BMH.state.project.plan))BMH.state.project.plan.furniture=[];
   if(!Array.isArray(BMH.state.project.plan.lockedRoomIds))BMH.state.project.plan.lockedRoomIds=[];
   BMH.state.project.plan.lockedRoomIds=BMH.state.project.plan.lockedRoomIds.filter(id=>BMH.state.project.plan.rooms.some(r=>r.id===id));
   if(!Array.isArray(BMH.state.project.plan.lockedFloors))BMH.state.project.plan.lockedFloors=[];
@@ -363,5 +404,5 @@ BMH.syncHouseholdSize=()=>{
 };
 BMH.save = () => { BMH.syncSiteEvidence();BMH.syncConstructionReviews();BMH.state.version=BMH.VERSION; BMH.state.meta.savedAt=new Date().toISOString(); try{localStorage.setItem(BMH.STORAGE_KEY,JSON.stringify(BMH.state));BMH.localSaveFailed=false;}catch(e){if(!BMH.localSaveFailed)BMH.toast(BMH.projects?.db?'Lưu nhanh bị giới hạn. Đang lưu vào kho dự án trên thiết bị.':'Trình duyệt hạn chế lưu nhanh. Mở Dự án để tải bản sao.');BMH.localSaveFailed=true;} };
 BMH.get = path => path.split('.').reduce((o,k)=>o?.[k],BMH.state);
-BMH.set = (path,value,{render=true}={}) => { const keys=path.split('.'); let o=BMH.state; for(let i=0;i<keys.length-1;i++){if(!o[keys[i]]||typeof o[keys[i]]!=='object')o[keys[i]]={};o=o[keys[i]];} o[keys.at(-1)]=value; BMH.save(); if(render) BMH.render(); };
+BMH.set = (path,value,{render=true}={}) => { const keys=path.split('.'); let o=BMH.state; for(let i=0;i<keys.length-1;i++){if(!o[keys[i]]||typeof o[keys[i]]!=='object')o[keys[i]]={};o=o[keys[i]];} o[keys.at(-1)]=value; if(path.startsWith('project.'))BMH.recordProjectInput(path,{sourceType:'customer-entered'},{save:false}); BMH.save(); if(render) BMH.render(); };
 BMH.isUnlocked = () => BMH.DEFER_PAYMENT===true || (BMH.state.access.paid===true && (BMH.state.access.source==='server-verified' || (BMH.DEV && String(BMH.state.access.source||'').startsWith('dev'))));

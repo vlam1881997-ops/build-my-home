@@ -30,3 +30,7 @@ Nền: 04a661e2256828eef8ed31dc7ed4b0309e20c0a5 . Chỉ ghi trạng thái có b�
 
 ## Log tích hợp
 - 09/10/2026: phân công mới được tạo; B1 inventory only, A chưa được khởi chạy qua phân công này.
+
+- 09/10/2026 A1: đọc main/A 3c7f510 và B 90dcc4e; C01 default array, migration/history/disk và input-evidence triển khai phía A. B consumer thật đã bàn giao trong PR36. Room transformations/regeneration/native drag và integrated persistence còn đang kiểm, G1 chưa đóng.
+- C02: chấp nhận tên/signatures read-only styleSpecification/styleMaterialMatrix/styleMaterialCompatibility/styleMaterialSchedule của B1 để A2/A4 tiêu thụ; quantity/price thiếu vẫn null, category selection không đồng nghĩa mọi role đã áp dụng.
+- C05: A sẽ đăng ký năm team-b tests hiện có cùng team-a tests, không thêm dependency. C06 production/config/visual/professional review vẫn pending; không tự nâng cờ readiness.
