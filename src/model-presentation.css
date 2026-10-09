@@ -15,6 +15,12 @@
 .model-render-prompt p { margin:0; max-width:650px; color:#607164; font-size:12px; line-height:1.65; }
 .model-render-prompt [data-cinematic-render] { flex:0 0 auto; min-height:48px; padding:12px 18px; border-radius:10px; border:0; background:#24543c; color:#fff; font-weight:700; cursor:pointer; }
 .model-render-prompt [data-cinematic-render]:disabled { opacity:.65; cursor:wait; }
+.model-render-prompt { flex-wrap:wrap; }
+.model-style-reference { display:flex; align-items:center; flex:1 0 100%; flex-wrap:wrap; gap:10px; width:100%; padding-top:10px; border-top:1px solid #d8e3d6; }
+.model-style-reference label { display:grid; gap:5px; font-size:11px; font-weight:700; }
+.model-style-reference select { max-width:min(360px,100%); min-height:40px; padding:8px; border:1px solid #c3d1c2; border-radius:8px; background:#fff; color:#233e32; }
+.model-style-reference img { width:80px; height:55px; object-fit:cover; border-radius:6px; }
+.model-style-reference small { flex:1 1 180px; color:#617165; font-size:10px; line-height:1.5; }
 .model-generated-hero { margin:14px 0 0; }
 .model-generated-hero[hidden] { display:none!important; }
 .guided-studio.model-presentation-workspace .design-workspace { grid-template-columns:minmax(0,1fr) 280px; gap:16px; }

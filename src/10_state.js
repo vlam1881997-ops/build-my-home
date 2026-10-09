@@ -6,6 +6,7 @@ BMH.defaultState = () => ({
     name:'Nhà của mình', source:'suggest', style:'Hiện đại', briefIdea:'',
     brief:{provider:'',model:'',notice:'',updatedAt:'',result:{},aiSuggestions:{},userRequirements:{}},
     sourceRefs:[],
+    styleReferenceId:'',
     designEvidence:{schemaVersion:1,research:[],site:[],fengSources:[],materialSources:[],context:{}},
     constructionDesign:{schemaVersion:2,inputs:{},elements:[],reviews:[],issues:[]},
     site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',pinAddressNeedsReview:false,mapEngine:'free',mapStyle:'hybrid',mapZoom:17,mapCenter:{},showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotSource:'dimensions',boundaryEvidenceId:'',lotPoints:[],useParcelGeometry:false,frontEdge:0,floorHeight:3.4,floorHeights:[],slabThickness:.14,ceilingDrop:.2,deedArea:0,deedReference:'',frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
@@ -239,6 +240,7 @@ BMH.normalizeState = () => {
   else {const b=BMH.state.project.brief,d=base.project.brief;for(const [k,v] of Object.entries(d))if(!(k in b))b[k]=structuredClone(v);if(!b.result||typeof b.result!=='object'||Array.isArray(b.result))b.result={};if(!b.aiSuggestions||typeof b.aiSuggestions!=='object'||Array.isArray(b.aiSuggestions))b.aiSuggestions={};if(!b.userRequirements||typeof b.userRequirements!=='object'||Array.isArray(b.userRequirements))b.userRequirements={};b.provider=String(b.provider||'').slice(0,40);b.model=String(b.model||'').slice(0,120);b.notice=String(b.notice||'').slice(0,500);b.updatedAt=String(b.updatedAt||'').slice(0,40);}
   if(!Array.isArray(BMH.state.project.sourceRefs))BMH.state.project.sourceRefs=[];
   BMH.state.project.sourceRefs=BMH.state.project.sourceRefs.filter(x=>x&&typeof x==='object').slice(0,6).map(x=>({id:String(x.id||BMH.uid('src')),kind:['image','video','pdf','file'].includes(x.kind)?x.kind:'file',name:String(x.name||'Tài liệu').slice(0,180),type:String(x.type||'').slice(0,120),size:Math.max(0,Number(x.size)||0),status:String(x.status||'Đã lưu tham chiếu').slice(0,120)}));
+  if(!BMH.state.project.sourceRefs.some(x=>x.kind==='image'&&x.id===BMH.state.project.styleReferenceId))BMH.state.project.styleReferenceId='';
   if(!BMH.state.project.site||typeof BMH.state.project.site!=='object')BMH.state.project.site=structuredClone(base.project.site);
   if(!BMH.state.project.siteIntelligence||typeof BMH.state.project.siteIntelligence!=='object'||Array.isArray(BMH.state.project.siteIntelligence))BMH.state.project.siteIntelligence=structuredClone(base.project.siteIntelligence);
   else{
