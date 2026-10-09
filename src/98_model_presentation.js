@@ -4,6 +4,9 @@
  * fd0219dc775863754ae00bc561dbdbb2e72a14d2. Full notice: assets/licenses/neonplan3d-MIT.txt. */
 (()=>{
  const B=BMH,esc=B.esc,materialPatches=new WeakMap(),thumbs=new Map();
+ // A's export gate reads this only after the measured Three.js and Architect3D
+ // consumers are loaded. Each floor uses its cumulative base and own height.
+ B.STUDIO_LEVELS_CONTRACT=1;
  const template=html=>{const t=document.createElement('template');t.innerHTML=html;return t;};
  const normalize=B.normalizeState;
  B.normalizeState=()=>{normalize();const u=B.state.ui;u.exteriorCamera=['front','overview'].includes(u.exteriorCamera)?u.exteriorCamera:'front';u.modelLook=u.modelLook==='materials'?'materials':'neon';u.modelWalls=['auto','cut','full'].includes(u.modelWalls)?u.modelWalls:'auto';u.modelRoomId=String(u.modelRoomId||'');u.modelLightLevel=B.clamp(Number.isFinite(Number(u.modelLightLevel))?Number(u.modelLightLevel):75,0,100);};
@@ -22,7 +25,7 @@
   return s.level*q*Math.sqrt(q)*(.2+.8*facing)*characteristic;
  };
  B.modelRoomLights=(r,base)=>{
-  const site=B.state.project.site,fh=B.projectLevels().floorHeight,items=B.roomFurnitureLayout?.(r)||[],lamps=items.filter(x=>/lamp|light|pendant/i.test(x.model||''));
+  const site=B.state.project.site,fh=B.studioFloorLevel?.(r.floor)?.height??B.projectLevels().floorHeight,items=B.roomFurnitureLayout?.(r)||[],lamps=items.filter(x=>/lamp|light|pendant/i.test(x.model||''));
   const points=lamps.length?lamps.slice(0,3).map(x=>({x:x.x+x.w/2-site.width/2,z:x.y+x.d/2-site.depth/2,y:base+B.projectLevels().slab+(Number(x.base)||0)+(Number(x.h)||1.62)*.89})):[{x:r.x+r.w*.53-site.width/2,z:r.y+r.h*.53-site.depth/2,y:base+Math.min(fh-.25,2.6)}];
   return points.map((p,i)=>({...p,level:/corridor|stairs|elevator/.test(r.type)?.38:.82,kind:'pendant',color:i?[.42,.68,1]:r.type==='bath'?[.62,.80,1]:[1,.66,.35]}));
  };
@@ -58,7 +61,7 @@
  const addLightSurface=c=>{
   const {THREE,scene,W,D,fh,explode,focus,roomFocus,floorFocus,visibleFloors}=c,pos=[],col=[];
   for(const f of visibleFloors)for(const r of (roomFocus?[roomFocus]:B.floorRooms(f))){
-   const base=roomFocus||floorFocus!==null?0:f*(fh+explode),slab=B.projectLevels().slab,lamps=B.modelRoomLights(r,base),holes=B.stairFloorHoles?.(f)||[],panels=B.slabPanels?.(r,holes)||[{x:r.x,y:r.y,w:r.w,d:r.h}];
+   const base=roomFocus||floorFocus!==null?0:(B.studioFloorLevel?.(f)?.base??f*fh)+f*explode,slab=B.projectLevels().slab,lamps=B.modelRoomLights(r,base),holes=B.stairFloorHoles?.(f)||[],panels=B.slabPanels?.(r,holes)||[{x:r.x,y:r.y,w:r.w,d:r.h}];
    for(const panel of panels){const nx=Math.max(1,Math.ceil(panel.w/.4)),nz=Math.max(1,Math.ceil(panel.d/.4));
     const vertex=(x,z)=>{const p=[x-W/2,base+slab+.009,z-D/2],light=[0,0,0];for(const lamp of lamps){const k=B.modelLightContribution(lamp,p,[0,1,0]);for(let ch=0;ch<3;ch++)light[ch]+=Math.pow(lamp.color[ch],1.5)*k;}pos.push(...p);col.push(...light.map(v=>1-Math.exp(-v*.7*1.6)));};
     for(let i=0;i<nx;i++)for(let j=0;j<nz;j++){const a=panel.x+panel.w*i/nx,b=panel.y+panel.d*j/nz,x=panel.x+panel.w*(i+1)/nx,z=panel.y+panel.d*(j+1)/nz;for(const p of [[a,b],[a,z],[x,z],[a,b],[x,z],[x,b]])vertex(...p);}
@@ -68,7 +71,7 @@
   const material=new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.75,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false,side:THREE.DoubleSide});
   const mesh=new THREE.Mesh(geometry,material);mesh.userData={kind:'model-room-light',presentationOnly:true};scene.add(mesh);scene.userData.modelPresentation.lightSurface=mesh;
   const lampLayer=new THREE.Group();lampLayer.userData={kind:'model-lamp-glows',presentationOnly:true};
-  const sources=[];for(const f of visibleFloors)for(const r of roomFocus?[roomFocus]:B.floorRooms(f)){if(!B.roomFurnitureLayout(r).some(i=>i.model==='floorLamp'))continue;const base=roomFocus||floorFocus!==null?0:f*(fh+explode);sources.push(...B.modelRoomLights(r,base));}
+  const sources=[];for(const f of visibleFloors)for(const r of roomFocus?[roomFocus]:B.floorRooms(f)){if(!B.roomFurnitureLayout(r).some(i=>i.model==='floorLamp'))continue;const base=roomFocus||floorFocus!==null?0:(B.studioFloorLevel?.(f)?.base??f*fh)+f*explode;sources.push(...B.modelRoomLights(r,base));}
   scene.add(lampLayer);scene.userData.modelPresentation.lampGlows=lampLayer;if(!sources.length)return;
   const canvas=document.createElement('canvas');canvas.width=canvas.height=64;const ctx=canvas.getContext('2d'),gradient=ctx.createRadialGradient(32,32,1,32,32,32);gradient.addColorStop(0,'rgba(255,232,188,.80)');gradient.addColorStop(.16,'rgba(255,193,102,.25)');gradient.addColorStop(1,'rgba(255,176,73,0)');ctx.fillStyle=gradient;ctx.fillRect(0,0,64,64);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
   const glowMaterial=new THREE.MeshBasicMaterial({map:texture,transparent:true,opacity:.6,depthWrite:false,toneMapped:false,blending:THREE.AdditiveBlending});
@@ -141,7 +144,7 @@
    patch.alpha.value=alpha;
   }
   if(st.selectedKey!==key){st.selectedKey=key;for(const o of [...st.selection.children]){st.selection.remove(o);o.geometry.dispose();o.material.dispose();}
-   if(selected){const {THREE}=s,r=selected,levels=B.projectLevels(),base=ui.sceneFocus==='all'?r.floor*(levels.floorHeight+st.context.explode):0;for(const p of B.slabPanels(r,B.stairFloorHoles(r.floor))){
+   if(selected){const {THREE}=s,r=selected,levels=B.projectLevels(),base=ui.sceneFocus==='all'?(B.studioFloorLevel?.(r.floor)?.base??r.floor*levels.floorHeight)+r.floor*st.context.explode:0;for(const p of B.slabPanels(r,B.stairFloorHoles(r.floor))){
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(p.w,p.d),new THREE.MeshBasicMaterial({color:0x31d2e8,transparent:true,opacity:.12,depthWrite:false,toneMapped:false,side:THREE.DoubleSide}));mesh.rotation.x=-Math.PI/2;mesh.position.set(p.x+p.w/2-site.width/2,base+levels.slab+.013,p.y+p.d/2-site.depth/2);st.selection.add(mesh);
     const outline=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([[p.x,p.y],[p.x+p.w,p.y],[p.x+p.w,p.y+p.d],[p.x,p.y+p.d]].map(([x,z])=>new THREE.Vector3(x-site.width/2,base+levels.slab+.018,z-site.depth/2))),new THREE.LineBasicMaterial({color:0x31d2e8,transparent:true,opacity:.65,depthWrite:false,toneMapped:false}));st.selection.add(outline);
    }}
@@ -150,6 +153,31 @@
   st.selection.visible=!(ui.sceneFocus?.startsWith('room:')&&ui.designView==='room'&&ui.roomCamera==='inside');
   for(const item of st.selection.children)if(item.isMesh)item.visible=B.modelLook()==='neon';
  };
+
+ B.modelTraceability=()=>{
+  const p=B.state.project||{},site=p.site||{},rooms=(p.plan?.rooms||[]).filter(r=>!['stairs','elevator','corridor','balcony','utility'].includes(r.type)),roles=['floor','wall','accent','fabric'];
+  const profiles=new Map();let bound=0;
+  const include=(palette,role)=>{const id=palette.visualMaterials?.[role],profile=B.VISUAL_MATERIALS?.find(x=>x.id===id&&x.role===role);if(!profile)return;bound++;profiles.set(profile.id,profile.name);};
+  for(const room of rooms){const palette=B.finishPalette?.(room.id)||{};for(const role of roles)include(palette,role);}
+  const exterior=B.facadeFinishPalette?.()||p.materials?.finish?.exterior||{};
+  for(const role of ['wall','accent'])include(exterior,role);
+  const total=rooms.length*roles.length+2,identity=B.architecturalIdentityReview?.(),style=B.houseStyle?.(),revision=B.drawingRevision?.()||'chưa có revision',measured=rooms.length>0&&Number(site.width)>0&&Number(site.depth)>0;
+  return {
+   styleName:identity?.name||style?.name||p.style||'Chưa chọn phong cách',
+   styleRecognized:identity?.recognized??Boolean(style?.id),
+   revision,
+   geometryLabel:measured?'Khu đất '+Number(site.width).toFixed(2).replace(/\.00$/,'')+' × '+Number(site.depth).toFixed(2).replace(/\.00$/,'')+' m':'Chưa có mặt bằng đo được',
+   materialLabel:rooms.length?(bound+'/'+total+' lựa chọn bề mặt hợp lệ'):'Chưa có phòng để gắn vật liệu',
+   materialNames:[...profiles.values()].slice(0,2),
+   materialProfileIds:[...profiles.keys()],
+   materialComplete:rooms.length>0&&bound===total
+  };
+ };
+ B.modelTraceabilityHtml=()=>{
+  const x=B.modelTraceability(),materials=x.materialNames.length?x.materialNames.join(' · '):'Chọn tại tab Vật liệu';
+  return '<aside class="model-traceability" data-model-traceability aria-label="Nguồn dữ liệu của mô hình 3D"><div><span>PHONG CÁCH</span><b>'+esc(x.styleName)+'</b><small class="'+(x.styleRecognized?'is-ready':'is-review')+'">'+(x.styleRecognized?'✓ Hình khối theo thư viện BMH':'Cần đối chiếu ảnh tham khảo')+'</small></div><div><span>BẢN VẼ NGUỒN</span><b>'+esc(x.geometryLabel)+'</b><small>Revision '+esc(x.revision)+'</small></div><div><span>VẬT LIỆU 3D</span><b>'+esc(x.materialLabel)+'</b><small class="'+(x.materialComplete?'is-ready':'is-review')+'">'+esc(materials)+'</small></div><p>Đồng bộ để duyệt thiết kế; kết cấu, MEP và hồ sơ thi công vẫn cần KTS/KS xác nhận.</p></aside>';
+ };
+ B.refreshModelTraceability=()=>{const old=document.querySelector('[data-model-traceability]');if(!old)return false;old.replaceWith(template(B.modelTraceabilityHtml()).content.firstElementChild);return true;};
 
  B.modelRoomInspectorHtml=()=>{
   const r=B.modelSelectedRoom(),rooms=B.modelVisibleRooms().filter(r=>r.type!=='corridor'),palette=B.finishPalette?.(r?.id)||{},items=r?B.roomFurnitureLayout(r):[],ui=B.state.ui;
@@ -164,10 +192,11 @@
   const measured=root.querySelector('.measured-contract');if(measured){const details=template(B.guidedDetails('model-dimensions','Thông số mái, tường & đối chiếu','')).content.firstElementChild;measured.replaceWith(details);details.querySelector('.guided-details-body').append(measured);root.append(details);}
   const controls=t.content.querySelector('.design-view-controls');controls.querySelector('.model-scope-select')?.remove();
   controls.querySelector('[data-design-floor]')?.remove();
-  controls.insertAdjacentHTML('afterbegin','<label class="guided-select model-look-select">Hiển thị<select data-model-look><option value="neon" '+(B.modelLook()==='neon'?'selected':'')+'>Neon · nhìn rõ bố trí</option><option value="materials" '+(B.modelLook()==='materials'?'selected':'')+'>Vật liệu · màu & bề mặt</option></select></label>');
+  controls.insertAdjacentHTML('afterbegin','<label class="guided-select model-look-select">Chế độ<select data-model-look><option value="neon" '+(B.modelLook()==='neon'?'selected':'')+'>Bố trí kỹ thuật</option><option value="materials" '+(B.modelLook()==='materials'?'selected':'')+'>Xem vật liệu</option></select></label>');
   const top=t.content.querySelector('.design-model-top>div:first-child');top.querySelector('b').textContent=ui.sceneFocus==='all'?(ui.sceneExploded?'Các tầng · góc xem tách lớp':'Ngôi nhà theo thiết kế'):'Tầng '+((B.modelVisibleRooms()[0]?.floor||0)+1)+' · '+(ui.sceneFocus.startsWith('room:')?B.modelVisibleRooms()[0]?.name:'bố trí & nội thất');
+  const workspace=root.querySelector('.design-workspace');workspace?.insertAdjacentHTML('beforebegin',B.modelTraceabilityHtml());
   const wrap=document.createElement('div');wrap.className='model-scene-wrap';stage.replaceWith(wrap);wrap.insertAdjacentHTML('afterbegin',railHtml());wrap.append(stage);
-  stage.insertAdjacentHTML('beforeend','<div class="model-view-badge"><i></i><span data-model-look-name>'+(B.modelLook()==='neon'?'NEON / 3D':'VẬT LIỆU / 3D')+'</span><small>Cùng số đo với bản vẽ</small></div>');
+  stage.insertAdjacentHTML('beforeend','<div class="model-view-badge"><i></i><span data-model-look-name>'+(B.modelLook()==='neon'?'BỐ TRÍ / 3D':'VẬT LIỆU / 3D')+'</span><small>Cùng hình học · '+esc(B.drawingRevision())+'</small></div>');
   const caption=stage.querySelector('.design-model-caption');if(caption)caption.innerHTML='<span>KÉO ĐỂ XOAY · CHỤM ĐỂ ZOOM</span><b>'+(ui.sceneExploded?'Khoảng tách chỉ phục vụ cách xem':'Chạm sàn / tên phòng để xem chi tiết')+'</b>';
   const brief=t.content.querySelector('.design-brief');brief?.insertAdjacentHTML('afterbegin',B.modelRoomInspectorHtml());
   const preview=brief?.querySelector('.guided-collection-preview');if(preview){const d=document.createElement('details');d.className='model-reference-preview';d.innerHTML='<summary>Xem phòng mẫu của bộ nội thất</summary>';preview.replaceWith(d);d.append(preview);}
@@ -201,7 +230,7 @@
   if(s.scene.userData.furnitureLoads?.length)Promise.allSettled(s.scene.userData.furnitureLoads).then(()=>{if(B.studio3d!==s||s.scene.userData.disposed)return;const st=s.scene.userData.modelPresentation;s.scene.traverse(o=>{if(!o.isMesh||o.userData.presentationOnly)return;for(const m of Array.isArray(o.material)?o.material:[o.material])B.prepareModelMaterial(m,null,o,s.scene);});s.scene.remove(st.edges);for(const lines of st.edges.children){lines.geometry.dispose();lines.material.dispose();}buildEdges(st.context);st.edges.visible=B.modelLook()==='neon';s.renderer.shadowMap.needsUpdate=true;s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));});
  };
  const dispose=B.disposeStudio3D;B.disposeStudio3D=()=>{const s=B.studio3d;s?.renderer.domElement.removeEventListener('pointerdown',s.modelDown);s?.renderer.domElement.removeEventListener('pointerup',s.modelUp);return dispose();};
- const refresh=B.refreshStudioFinishes;B.refreshStudioFinishes=(role,id)=>{const ok=refresh(role,id);if(ok){const s=B.studio3d;B.applyModelLook(s);s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));}return ok;};
+ const refresh=B.refreshStudioFinishes;B.refreshStudioFinishes=(role,id)=>{const ok=refresh(role,id);if(ok){const s=B.studio3d;B.applyModelLook(s);B.refreshModelTraceability();s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));}return ok;};
  const start=B.startArchitecturalRender;B.startArchitecturalRender=()=>B.modelLook()==='neon'?B.captureSharpStudioPreview():start();
  document.addEventListener('click',e=>{
   const el=e.target.closest?.('[data-model-scope-btn],[data-model-floor],[data-model-room-inspect]');if(!el)return;
@@ -212,7 +241,7 @@
  document.addEventListener('change',e=>{
   const el=e.target,u=B.state.ui;
   if(el.matches?.('select[data-model-room-inspect]')){B.selectModelRoom(el.value);return;}
-  if(el.matches?.('[data-model-look]')){u.modelLook=el.value==='materials'?'materials':'neon';B.customerFrameCache=null;B.stopArchitecturalRender();B.save();const s=B.studio3d;if(s){B.applyModelLook(s);s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));}const badge=document.querySelector('[data-model-look-name]');if(badge)badge.textContent=B.modelLook()==='neon'?'NEON / 3D':'VẬT LIỆU / 3D';}
+  if(el.matches?.('[data-model-look]')){u.modelLook=el.value==='materials'?'materials':'neon';B.customerFrameCache=null;B.stopArchitecturalRender();B.save();const s=B.studio3d;if(s){B.applyModelLook(s);s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));}const badge=document.querySelector('[data-model-look-name]');if(badge)badge.textContent=B.modelLook()==='neon'?'BỐ TRÍ / 3D':'VẬT LIỆU / 3D';}
  });
  document.addEventListener('input',e=>{if(!e.target.matches?.('[data-model-light-level]'))return;const u=B.state.ui;u.modelLightLevel=B.clamp(Number(e.target.value),0,100);B.customerFrameCache=null;const st=B.studio3d?.scene.userData.modelPresentation;if(st)st.lightSurface.material.opacity=u.modelLightLevel/100;(B.studio3d?.requestRender||B.studio3d?.renderFrame)?.call(B.studio3d);const out=document.querySelector('[data-model-light-value]');if(out)out.value=u.modelLightLevel+'%';});
  document.addEventListener('change',e=>{if(e.target.matches?.('[data-model-light-level]')){B.save();if(B.studio3d)B.cacheModelThumbnail(B.studio3d);}});
