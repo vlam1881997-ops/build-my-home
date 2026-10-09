@@ -4,7 +4,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: B2–B6 independent source/evidence đã lưu; next B3 style-specific refinement trên measured fixtures; C01/C04/config và deployed visual acceptance còn pending
+- active_substep: A+B bbbd70f đã review native C01/C02/C03/C04; CSS báo giá/vay phone đã sửa; next B3 style-specific refinement và dữ liệu/config thương mại còn pending
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-v1-24
 - source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff (520 remote blob bytes đã đối chiếu trong checkout mới; giữ WIP cũ nguyên)
@@ -14,7 +14,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 
 ## Checklist
 - [ ] B1 — 24 hồ sơ phong cách và danh mục vật liệu phù hợp — in_progress (hồ sơ/ma trận/runtime bridge đã có; SKU/spec/sample/ảnh chưa duyệt)
-- [ ] B2 — Chỉnh nội thất từng món và lưu lựa chọn — in_progress (editor/adapter/material bindings/9 tests; schema C01 chưa tích hợp)
+- [ ] B2 — Chỉnh nội thất từng món và lưu lựa chọn — in_progress (ready_for_integration: native A1/C01 editor/reload/37°/GLB đã kiểm; visual/provider/professional gate chưa đóng)
 - [ ] B3 — 3D nhà thật cho đủ 24 phong cách — in_progress
 - [ ] B4 — Giao diện xuyên 10 tab và bàn giao trước thi công — in_progress
 - [ ] B5 — Cloud, tài khoản, ảnh/tệp, quota và thu tiền — in_progress
@@ -102,3 +102,12 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Latest targeted changes: official Node22.23.3 full397/397 +37 B checks passed (434 total). Previewcd0eb8a is READY but curl follows to Vercel login page; HTTP200 was NOT treated as app success. Authenticated Vercel fetch connector failed; no protection settings changed, deployed interactive acceptance pending. Previous desktop/phone isolated fixture evidence retained; latest changes limited to backend guard/timestamp/UI wording.
 
 - Resume next: không tải lại59ảnh/checkpointcd0eb8a. Đọc B2-B6-HANDOFF.md và24contact sheets; tiếp tục B3 mặt đứng/nội thất đặc trưng còn quá giống, phối hợp A3 measured fixtures. Preview protected access denied403 by Vercel connection; CLI fallback unavailable, không đổi protection.
+
+## Review A+B theo yêu cầu gộp của người dùng — 09/10/2026
+
+- PR37 bbbd70f chứa B ce28e327 nguyên lịch sử/blobs; A ahead4/behind0 so B. 351 nguồn đã đối chiếu Git blob. Không sửa source hoặc PROGRESS-A.
+- B xác nhận consumer native C01/C02/C03/C04 trên nguồn A: furniture schema/history/any-angle/reload/GLB, ten routes, BOQ phần có nguồn, finance form, design handover và supervision hook dùng thật; không nhận đây là full commercial gate.
+- Node22.23.3:457/457; bản final CSS/QA chạy native commercial desktop/phone và B editor/ray pick/drag/media/10tabs, không chèn schema. Phone ban đầu lỗi summary báo giá; sửa CSS form/target44/bảng cuộn/viewport và chạy lại đạt. B harness sửa nhãn native và kiểm overflow theo viewport cố định.
+- Final export:32 vectorA3/SVG,3DXFmm,10outputhashes, GLBworldbounds/inverse37°/3unequalfloors đạt. 32 trang PDF của source xuất không đổi đã render/decode và xem8montages. Binary GLB/evidence ảnh mới vẫn scratch; các JSONvalidation được commit.
+- Vercel đúng project đổi nodeVersion24→22; protection/env/cloud/payment không đổi. Source sẽ gộp theo yêu cầu hiện tại, không nhận commercial100% hoặc thi công-ready. Chi tiết còn thiếu và next6workstreams: evidence/B/AB-C08-review/COMMERCIAL-READINESS.md.
+- Source/progress ở checkpoint review mới lấy từ git log/PR37; last verified source A bbbd70f, patch final gắn source hashes riêng. Sau merge ghi lại main/live bằng chứng thực, không thay pending từ số tests.
