@@ -137,7 +137,7 @@ document.addEventListener('click',e=>{
   if('finishGenerate'in d)return void BMH.finishGenerate();
   if('finishApply'in d)return void BMH.finishApply();
   if('finishAccept'in d)return void BMH.finishAccept();
-  if('finishService'in d){if(BMH.finishSatisfied())BMH.navigateTo(10);return;}
+  if('finishService'in d){if(BMH.finishSatisfied())BMH.navigateTo(BMH.workflowRoutes?.handover||10);return;}
   if('finishCancel'in d){BMH.finishCancel();rt.notice='Đã dừng. Ảnh và phương án đã có vẫn được giữ.';BMH.render({preserveScroll:true});}
 });
 document.addEventListener('change',e=>{

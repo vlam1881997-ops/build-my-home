@@ -1,0 +1,39 @@
+{
+  "type": "real downloaded GLB from proposed C01 browser fixture",
+  "sizeBytes": 3517556,
+  "sha256": "11f5ebea6758a955cbd200002d30a759329931fe2213b081993da3b0743a2677",
+  "gitBlobSha": "1728d555a97015bc029cb24fc6f436696a7b52ac",
+  "units": "metres",
+  "furniture": [
+    {
+      "id": "seat-stable",
+      "roomId": "editable",
+      "floor": 0,
+      "modelId": "chair",
+      "origin": "customer-added",
+      "placementStatus": "present",
+      "locked": false,
+      "pose": {
+        "x": 3.845741850352409,
+        "y": 3.257080120545412,
+        "z": 0,
+        "rotationDeg": 37
+      },
+      "size": {
+        "width": 0.4,
+        "depth": 0.4,
+        "height": 0.94
+      },
+      "materialBindings": [
+        {
+          "sku": "TEST-KEEP",
+          "costTreatment": "owned"
+        }
+      ]
+    }
+  ],
+  "stableFurnitureNodeCount": 8,
+  "rawBinaryCommitted": false,
+  "reproduce": "tests/team-b-release.browser.cjs desktop story; binary accessor inverse-angle bounds assertions",
+  "integratedAcceptance": false
+}

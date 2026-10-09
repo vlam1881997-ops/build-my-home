@@ -5,13 +5,14 @@ BMH.defaultState = () => ({
   project: {
     name:'Nhà của mình', source:'suggest', style:'Hiện đại', briefIdea:'',
     brief:{provider:'',model:'',notice:'',updatedAt:'',result:{},aiSuggestions:{},userRequirements:{}},
+    inputEvidence:{schemaVersion:1,origin:'not-recorded',records:{}},
     sourceRefs:[],
     styleReferenceId:'',
     designEvidence:{schemaVersion:1,research:[],site:[],fengSources:[],materialSources:[],context:{}},
     constructionDesign:{schemaVersion:2,inputs:{},elements:[],reviews:[],issues:[]},
-    site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',pinAddressNeedsReview:false,mapEngine:'free',mapStyle:'hybrid',mapZoom:17,mapCenter:{},showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotSource:'dimensions',boundaryEvidenceId:'',lotPoints:[],useParcelGeometry:false,frontEdge:0,floorHeight:3.4,floorHeights:[],slabThickness:.14,ceilingDrop:.2,deedArea:0,deedReference:'',frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
+    site:{north:{azimuthDeg:null,datum:'unknown',sourceReference:'',observedAt:'',status:'unknown'},elevation:{metres:null,datum:'unknown',sourceReference:'',observedAt:'',status:'unknown'},country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',pinAddressNeedsReview:false,mapEngine:'free',mapStyle:'hybrid',mapZoom:17,mapCenter:{},showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotSource:'dimensions',boundaryEvidenceId:'',lotPoints:[],useParcelGeometry:false,frontEdge:0,floorHeight:3.4,floorHeights:[],slabThickness:.14,ceilingDrop:.2,deedArea:0,deedReference:'',frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
     siteIntelligence:{key:'',status:'idle',fetchedAt:'',elevation_m:null,flood:{level:'Chưa đánh giá',score:0,note:'',waterwayDistanceKm:null,riverSignal:null},access:{level:'Chưa đánh giá',score:0,note:'',majorRoadDistanceKm:null,majorRoadName:'',majorRoadType:''},transport:{level:'Chưa đánh giá',surchargePct:0,note:''},suppliers:[],builders:[],webSuppliers:[],webBuilders:[],citations:[],sources:[],aiSummary:'',warnings:[]},
-    finance:{cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,targetBudget:0,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12,rateMeta:{bankId:'VCB',status:'preset',verified:false,product:'',sourceDate:'',fetchedAt:'',provider:'',model:'',introRate:0,postRate:0,promoMonths:0,citations:[],note:''}},
+    finance:{scenario:{schemaVersion:1,confirmed:false,sourceReference:'',effectiveAt:'',months:null,method:'annuity',ratePeriods:[],draws:[],graceMonths:0,fees:null,constructionPayments:[]},cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,targetBudget:0,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12,rateMeta:{bankId:'VCB',status:'preset',verified:false,product:'',sourceDate:'',fetchedAt:'',provider:'',model:'',introRate:0,postRate:0,promoMonths:0,citations:[],note:''}},
     household:{ownerBirth:1988,ownerGender:'Nam',partnerEnabled:true,partnerBirth:1990,partnerGender:'Nữ',requestedSize:0,children:[{id:'c1',name:'Con 1',birth:2012,room:'Riêng'}],relatives:[{id:'p1',name:'Ba',birth:1962,mobility:'Hạn chế nhẹ'},{id:'p2',name:'Mẹ',birth:1964,mobility:'Bình thường'}]},
     plan:{rooms:[
       {id:'r1',floor:0,name:'Phòng khách',type:'living',x:0,y:0,w:5,h:4},
@@ -28,7 +29,7 @@ BMH.defaultState = () => ({
       {id:'o2',floor:0,roomId:'r1',kind:'window',side:'east',offset:.35,width:1.6},
       {id:'o3',floor:0,roomId:'r3',kind:'door',side:'east',offset:.25,width:.8},
       {id:'o4',floor:1,roomId:'r6',kind:'window',side:'east',offset:.4,width:1.6}
-    ], outdoor:[], fixtures:[], lockedRoomIds:[],lockedFloors:[]},
+    ], outdoor:[], fixtures:[], furniture:[], lockedRoomIds:[],lockedFloors:[]},
     planVariants:[],
     designStudio:{kits:[],activeKit:'',inputSignature:'',appliedSignature:''},
     planVersions:[],
@@ -36,17 +37,20 @@ BMH.defaultState = () => ({
     aiScan:{sourceName:'',mimeType:'',scannedAt:'',model:'',provider:'',intent:'reference',appliedAt:'',result:{}},
     homeFinish:{photos:[],activePhotoId:'',preferences:{style:'Hiện đại',budget:'balanced',notes:''},analyses:{},selected:{},satisfaction:{signature:'',confirmedAt:''},geometryKey:''},
     measuredDesign:{roof:{type:'auto',pitchDeg:0,overhang:-1,ridge:'auto',surface:'auto',color:''},wallThickness:{exterior:.22,interior:.12}},
-    costPlan:{contingencyPct:10,pricing:{},extras:{}},
+    costPlan:{contingencyPct:10,pricing:{},extras:{},applications:[],quotes:{},conversions:[],exclusions:[],scopeCoverage:[]},
     performance:{solarEnabled:true,rainwaterEnabled:true,coolRoof:true,smartShading:true,mode:'balanced'},
     dataEngine: BMH.defaultDataEngineState(),
     wearYear:0,
     checklist:{pipe114:false,acWire:false,pressure:false,internet:false,elcb:false,waterTank:false,drainSlope:false,grounding:false,rcbo:false,acDrain:false,kitchenHood:false,conduitReserve:false},
-    dossier:{startDate:'',progress:0,currentStage:'foundation',revision:'A',architect:'',contractor:'',notes:'',actualCosts:{foundation:0,structure:0,walls:0,roof:0,mep:0,finish:0,handover:0},stageProgress:{},budgetBaselines:[],activeBaselineId:'',evidence:[]}
+    dossier:{register:{schemaVersion:1,wbs:[],journal:[],inspections:[],issues:[],changes:[],payments:[],drawdowns:[],decisions:[],outputs:[],warranties:[]},startDate:'',progress:0,currentStage:'foundation',revision:'A',architect:'',contractor:'',notes:'',actualCosts:{foundation:0,structure:0,walls:0,roof:0,mep:0,finish:0,handover:0},stageProgress:{},budgetBaselines:[],activeBaselineId:'',evidence:[]}
   },
   meta:{savedAt:null,createdAt:null,localProjectId:'',cloudProjectId:'',cloudOwnerId:'',cloudRevision:null,cloudUpdatedAt:null}
 });
 
 BMH.DYNAMIC_STATE_PATHS=new Set(['ui.guidedPanels','project.designEvidence','project.constructionDesign','project.materials.choices','project.materials.finish','project.designStudio','project.homeFinish','project.site.mapCenter','project.aiScan.result','project.dataEngine.materialOverrides','project.dataEngine.costSources','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence','project.costPlan.pricing','project.costPlan.extras','project.dossier.stageProgress']);
+BMH.DYNAMIC_STATE_PATHS.add('project.inputEvidence.records');
+BMH.DYNAMIC_STATE_PATHS.add('project.costPlan.quotes');
+BMH.DYNAMIC_STATE_PATHS.add('project.finance.scenario');
 BMH.mergeState = (base, incoming) => {
   const isPlain=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
   if(!isPlain(incoming)) return structuredClone(base);
@@ -81,6 +85,38 @@ BMH.loadState = () => {
   return base;
 };
 BMH.state = BMH.loadState();
+// Defaults and legacy values remain usable; they are not confirmed evidence.
+BMH.INPUT_FIELDS=Object.freeze(['source','style','briefIdea','site.width','site.depth','site.floors','site.frontDirection','site.lat','site.lng','site.lotPoints','site.north','site.elevation','site.setbackFront','site.setbackRear','site.setbackSide','household','finance.cash','finance.income','finance.living','finance.reserve','finance.existingDebt','finance.loan','finance.targetBudget','finance.scenario','costPlan.contingencyPct']);
+BMH.projectInputValue=(field,p=BMH.state.project)=>field.split('.').reduce((v,k)=>v?.[k],p);
+BMH.recordProjectInput=(field,evidence={}, {save=true}={})=>{
+  field=String(field).replace(/^project\./,'');
+  if(!BMH.INPUT_FIELDS.some(k=>field===k||field.startsWith(k+'.')))return false;
+  const p=BMH.state.project,register=p.inputEvidence||={schemaVersion:1,origin:'not-recorded',records:{}};
+  register.records||={};
+  const value=BMH.evidenceValue(BMH.projectInputValue(field)),sourceType=['customer-entered','surveyed','map-estimate','official-document'].includes(evidence.sourceType)?evidence.sourceType:'customer-entered';
+  register.records[field]={value,sourceType,sourceReference:String(evidence.sourceReference||'').slice(0,200),sourceUrl:BMH.evidenceUrl(evidence.sourceUrl),recordedAt:new Date().toISOString(),effectiveAt:String(evidence.effectiveAt||'').slice(0,40),status:evidence.status==='awaiting-review'?'awaiting-review':'provided',confirmed:evidence.confirmed===true&&sourceType==='customer-entered'};
+  if(save)BMH.save();return register.records[field];
+};
+BMH.projectInputRegister=(p=BMH.state.project)=>BMH.INPUT_FIELDS.map(field=>{
+  const record=p.inputEvidence?.records?.[field],value=BMH.projectInputValue(field,p),same=record&&JSON.stringify(record.value)===JSON.stringify(value),missing=value===null||value===undefined||value===''||Array.isArray(value)&&!value.length;
+  return {field,value:BMH.evidenceValue(value),status:missing?'unknown':record?(same?record.status:'stale'):'unknown',sourceType:record?.sourceType||'unconfirmed-default-or-legacy',confirmed:!!(same&&record.confirmed),sourceReference:record?.sourceReference||null,sourceUrl:record?.sourceUrl||null};
+});
+BMH.planFurnitureIssues=(plan=BMH.state.project.plan)=>{
+  const issues=[],seen=new Set(),rows=plan?.furniture;
+  if(!Array.isArray(rows))return [{code:'furniture-array',text:'Nội thất chưa có danh sách hợp lệ.'}];
+  for(const item of rows){
+    const id=item?.id,r=plan.rooms?.find(r=>r.id===item?.roomId),removed=item?.placementStatus==='removed';
+    const add=(code,text)=>issues.push({id:typeof id==='string'?id:null,code,text});
+    if(typeof id!=='string'||!id||id.length>200||seen.has(id))add('furniture-id','ID nội thất thiếu hoặc trùng; giữ dữ liệu để đối chiếu.');seen.add(id);
+    if(!['present','removed'].includes(item?.placementStatus))add('furniture-status','Trạng thái nội thất không hợp lệ.');
+    if(!removed&&(!r||!Number.isInteger(item?.floor)||item.floor!==r.floor))add('furniture-room','Phòng / tầng của nội thất không khớp.');
+    if(typeof item?.modelId!=='string'||!item.modelId)add('furniture-model','Thiếu model nội thất.');
+    const dimensions=[item?.pose?.x,item?.pose?.y,item?.pose?.z,item?.pose?.rotationDeg,item?.size?.width,item?.size?.depth,item?.size?.height];
+    if(!dimensions.every(Number.isFinite)||item?.pose?.z<0||![item?.size?.width,item?.size?.depth,item?.size?.height].every(n=>n>0))add('furniture-dimensions','Vị trí / góc / kích thước nội thất không hợp lệ.');
+    if(!Array.isArray(item?.materialBindings)||item.materialBindings.some(m=>!m||typeof m!=='object'||Array.isArray(m)))add('furniture-materials','Danh sách vật liệu nội thất không hợp lệ.');
+  }
+  return issues;
+};
 // Evidence is stored with the project; it is never a legal or engineering approval.
 BMH.evidenceHash=value=>{const text=JSON.stringify(value);let hash=2166136261;for(let i=0;i<text.length;i++)hash=Math.imul(hash^text.charCodeAt(i),16777619);return (hash>>>0).toString(16);};
 BMH.evidenceUrl=value=>{try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password&&!Array.from(u.searchParams.keys()).some(k=>/token|secret|password|api.?key/i.test(k))?u.href:null;}catch{return null;}};
@@ -238,6 +274,11 @@ BMH.normalizeState = () => {
   if(typeof BMH.state.project.briefIdea!=='string')BMH.state.project.briefIdea='';
   if(!BMH.state.project.brief||typeof BMH.state.project.brief!=='object')BMH.state.project.brief=structuredClone(base.project.brief);
   else {const b=BMH.state.project.brief,d=base.project.brief;for(const [k,v] of Object.entries(d))if(!(k in b))b[k]=structuredClone(v);if(!b.result||typeof b.result!=='object'||Array.isArray(b.result))b.result={};if(!b.aiSuggestions||typeof b.aiSuggestions!=='object'||Array.isArray(b.aiSuggestions))b.aiSuggestions={};if(!b.userRequirements||typeof b.userRequirements!=='object'||Array.isArray(b.userRequirements))b.userRequirements={};b.provider=String(b.provider||'').slice(0,40);b.model=String(b.model||'').slice(0,120);b.notice=String(b.notice||'').slice(0,500);b.updatedAt=String(b.updatedAt||'').slice(0,40);}
+  if(!BMH.state.project.inputEvidence||typeof BMH.state.project.inputEvidence!=='object'||Array.isArray(BMH.state.project.inputEvidence))BMH.state.project.inputEvidence=structuredClone(base.project.inputEvidence);
+  const inputEvidence=BMH.state.project.inputEvidence;inputEvidence.schemaVersion=1;
+  if(!inputEvidence.records||typeof inputEvidence.records!=='object'||Array.isArray(inputEvidence.records))inputEvidence.records={};
+  inputEvidence.records=Object.fromEntries(Object.entries(inputEvidence.records).filter(([field,r])=>r&&typeof r==='object'&&!Array.isArray(r)&&BMH.INPUT_FIELDS.some(k=>field===k||field.startsWith(k+'.'))).map(([field,r])=>[field,{value:BMH.evidenceValue(r.value),sourceType:['customer-entered','surveyed','map-estimate','official-document'].includes(r.sourceType)?r.sourceType:'customer-entered',sourceReference:String(r.sourceReference||'').slice(0,200),sourceUrl:BMH.evidenceUrl(r.sourceUrl),recordedAt:String(r.recordedAt||'').slice(0,40),effectiveAt:String(r.effectiveAt||'').slice(0,40),status:r.status==='awaiting-review'?'awaiting-review':'provided',confirmed:r.confirmed===true&&r.sourceType==='customer-entered'}]));
+  inputEvidence.origin=BMH.localStateLoaded&&inputEvidence.origin==='not-recorded'?'legacy-unconfirmed':inputEvidence.origin;
   if(!Array.isArray(BMH.state.project.sourceRefs))BMH.state.project.sourceRefs=[];
   BMH.state.project.sourceRefs=BMH.state.project.sourceRefs.filter(x=>x&&typeof x==='object').slice(0,6).map(x=>({id:String(x.id||BMH.uid('src')),kind:['image','video','pdf','file'].includes(x.kind)?x.kind:'file',name:String(x.name||'Tài liệu').slice(0,180),type:String(x.type||'').slice(0,120),size:Math.max(0,Number(x.size)||0),status:String(x.status||'Đã lưu tham chiếu').slice(0,120)}));
   if(!BMH.state.project.sourceRefs.some(x=>x.kind==='image'&&x.id===BMH.state.project.styleReferenceId))BMH.state.project.styleReferenceId='';
@@ -268,6 +309,8 @@ BMH.normalizeState = () => {
   if(!Array.isArray(BMH.state.project.plan.rooms))BMH.state.project.plan.rooms=structuredClone(base.project.plan.rooms);
   if(!Array.isArray(BMH.state.project.plan.openings))BMH.state.project.plan.openings=structuredClone(base.project.plan.openings);
   if(!Array.isArray(BMH.state.project.plan.fixtures))BMH.state.project.plan.fixtures=[];
+  // Invalid imports stay recoverable; planFurnitureIssues exposes their errors.
+  if(!('furniture' in BMH.state.project.plan))BMH.state.project.plan.furniture=[];
   if(!Array.isArray(BMH.state.project.plan.lockedRoomIds))BMH.state.project.plan.lockedRoomIds=[];
   BMH.state.project.plan.lockedRoomIds=BMH.state.project.plan.lockedRoomIds.filter(id=>BMH.state.project.plan.rooms.some(r=>r.id===id));
   if(!Array.isArray(BMH.state.project.plan.lockedFloors))BMH.state.project.plan.lockedFloors=[];
@@ -363,5 +406,5 @@ BMH.syncHouseholdSize=()=>{
 };
 BMH.save = () => { BMH.syncSiteEvidence();BMH.syncConstructionReviews();BMH.state.version=BMH.VERSION; BMH.state.meta.savedAt=new Date().toISOString(); try{localStorage.setItem(BMH.STORAGE_KEY,JSON.stringify(BMH.state));BMH.localSaveFailed=false;}catch(e){if(!BMH.localSaveFailed)BMH.toast(BMH.projects?.db?'Lưu nhanh bị giới hạn. Đang lưu vào kho dự án trên thiết bị.':'Trình duyệt hạn chế lưu nhanh. Mở Dự án để tải bản sao.');BMH.localSaveFailed=true;} };
 BMH.get = path => path.split('.').reduce((o,k)=>o?.[k],BMH.state);
-BMH.set = (path,value,{render=true}={}) => { const keys=path.split('.'); let o=BMH.state; for(let i=0;i<keys.length-1;i++){if(!o[keys[i]]||typeof o[keys[i]]!=='object')o[keys[i]]={};o=o[keys[i]];} o[keys.at(-1)]=value; BMH.save(); if(render) BMH.render(); };
+BMH.set = (path,value,{render=true}={}) => { const keys=path.split('.'); let o=BMH.state; for(let i=0;i<keys.length-1;i++){if(!o[keys[i]]||typeof o[keys[i]]!=='object')o[keys[i]]={};o=o[keys[i]];} o[keys.at(-1)]=value; if(path.startsWith('project.'))BMH.recordProjectInput(path,{sourceType:'customer-entered'},{save:false}); BMH.save(); if(render) BMH.render(); };
 BMH.isUnlocked = () => BMH.DEFER_PAYMENT===true || (BMH.state.access.paid===true && (BMH.state.access.source==='server-verified' || (BMH.DEV && String(BMH.state.access.source||'').startsWith('dev'))));

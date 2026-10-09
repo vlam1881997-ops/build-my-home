@@ -106,7 +106,7 @@
   // When a lift shares the narrow service strip, the WC gets a direct hall opening
   // via the lower stair landing; mark that coordination issue rather than invent a corridor.
   if(program.elevator&&!wide)return fail('Bề ngang này chưa bố trí được WC, sảnh và thang máy với lối vào riêng. Tăng bề ngang hoặc thiết kế khối thang riêng.');
-  const plan={rooms,openings,fixtures:[],outdoor:B.programOutdoorZones?.({...program,mode:'custom'})||[],lockedRoomIds:[],lockedFloors:[]};
+  const plan={rooms,openings,fixtures:[],furniture:[],outdoor:B.programOutdoorZones?.({...program,mode:'custom'})||[],lockedRoomIds:[],lockedFloors:[]};
   if(B.createWorshipFixtures)plan.fixtures=B.createWorshipFixtures(plan,program);
   if(program.floorProgram&&plan.fixtures.length!==program.floorProgram.filter(f=>f.worship!=='none').length)return fail('Chưa có vị trí bàn thờ dự trù không chắn cửa tại các tầng yêu cầu. Điều chỉnh công năng hoặc đặt trực tiếp sau khi chọn mặt bằng.');
   if(!(B.customerBaseLayoutValid||B.layoutValid)(rooms))return fail('Phương án vượt ranh hoặc chồng phòng. Giữ mặt bằng hiện tại.');

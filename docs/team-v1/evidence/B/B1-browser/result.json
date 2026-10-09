@@ -1,0 +1,33 @@
+{
+  "runtime": "v22.23.3",
+  "browser": "153.0.8010.0",
+  "isolatedServices": true,
+  "evidence": [
+    {
+      "device": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1040
+      },
+      "materialSwitchMs": 89,
+      "styleAfterReload": "industrial",
+      "skuSelectionRetained": true,
+      "measuredPlanRetained": true,
+      "tenTabs": true,
+      "jsWebglErrors": []
+    },
+    {
+      "device": "phone",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "materialSwitchMs": 102,
+      "styleAfterReload": "industrial",
+      "skuSelectionRetained": true,
+      "measuredPlanRetained": true,
+      "tenTabs": true,
+      "jsWebglErrors": []
+    }
+  ]
+}

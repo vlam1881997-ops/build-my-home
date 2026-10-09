@@ -87,7 +87,7 @@
   try{const source=s.renderer.domElement,scale=Math.min(1,960/Math.max(source.width,source.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(source.width*scale));canvas.height=Math.max(1,Math.round(source.height*scale));canvas.getContext('2d').drawImage(source,0,0,canvas.width,canvas.height);B.customerFrameCache={project:B.state.project,revision:B.drawingRevision(),designKey:B.cinematicSignature(),cameraKey:B.cinematicCameraKey(),dataUrl:canvas.toDataURL('image/png'),width:canvas.width,height:canvas.height};return true;}catch{return false;}
  };
  B.cachedCustomerFrame=()=>{const f=B.customerFrameCache;if(!B.customerFrameMatches(f))return null;const data=atob(f.dataUrl.split(',')[1]),bytes=Uint8Array.from(data,c=>c.charCodeAt(0));return {blob:new Blob([bytes],{type:'image/png'}),width:f.width,height:f.height};};
- const navigate=B.navigateTo;B.navigateTo=step=>{if(B.state.ui.step===6&&Number(step)===10){B.rememberFinishCamera();B.cacheCustomerFrame();}return navigate(step);};
+ const navigate=B.navigateTo;B.navigateTo=step=>{if(B.state.ui.step===6&&Number(step)===(B.workflowRoutes?.handover||10)){B.rememberFinishCamera();B.cacheCustomerFrame();}return navigate(step);};
  const dossier=B.screen10;
  B.screen10=()=>{
   const p=B.state.project,rooms=p.plan.rooms,frame=B.customerFrameMatches(B.customerFrameCache)?B.customerFrameCache:null,sheets=rooms.length?B.architecturalSheets():[],issues=B.plannerIssues(),errors=issues.filter(i=>i.sev==='error');
@@ -100,7 +100,7 @@
  B.render=opts=>{const project=B.state.project;if(renderedProject===project){const panels=B.state.ui.guidedPanels||={};let changed=false;for(const d of document.querySelectorAll('[data-guided-panel]')){if(panels[d.dataset.guidedPanel]!==d.open){panels[d.dataset.guidedPanel]=d.open;changed=true;}}if(changed)B.save();}const result=render(opts);renderedProject=project;return result;};
  const closeMenus=except=>document.querySelectorAll('[data-guided-menu][open]').forEach(d=>{if(d!==except&&!d.contains(except))d.open=false;});
  document.addEventListener('click',e=>{const picker=document.querySelector('.v64-bank-picker[open]');if(picker&&(e.target.closest?.('[data-bank]')||!picker.contains(e.target)))picker.open=false;},true);
- document.addEventListener('click',e=>{const d=e.target.closest?.('[data-guided-menu]');closeMenus(d);});
+ document.addEventListener('click',e=>{const d=e.target.closest?.('[data-guided-menu]');closeMenus(d);if(d&&e.target.closest?.('[data-camera-preset],[data-view-load]')){d.open=false;d.querySelector('summary')?.focus({preventScroll:true});}});
  document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const selector='[data-guided-menu][open],.v64-bank-picker[open]',d=document.activeElement?.closest?.(selector)||document.querySelector(selector);if(d){e.preventDefault();closeMenus(null);d.open=false;d.querySelector('summary')?.focus();}});
  document.addEventListener('change',e=>{
   const input=e.target,ui=B.state.ui,p=ui.planner;

@@ -2,7 +2,6 @@
  * Style families and procedural finishes are previews, not vendor replicas. */
 (()=>{
  const B=BMH,esc=B.esc,clone=structuredClone;
- const styleCollections={modern:'urban-stone',minimal:'urban-stone',contemporary:'urban-stone',brutalist:'urban-stone',barn:'urban-stone',classic:'neo-elegance',neo:'neo-elegance',french:'neo-elegance',indochine:'indochine',vietnamese:'indochine',tudor:'indochine',mediterranean:'coastal',spanish:'coastal',tropical:'coastal',coastal:'coastal',scandi:'nordic-light',japandi:'warm-oak',japanese:'warm-oak',craftsman:'warm-oak',balinese:'warm-oak',artdeco:'olive-gallery',tuscan:'olive-gallery',midcentury:'mid-century',industrial:'loft-leather'};
  const finished=r=>!['stairs','elevator','balcony'].includes(r.type);
  const surfaceRoles=[['floor','Sàn'],['wall','Tường'],['accent','Gỗ / tủ'],['fabric','Vải']];
  const roomTypes=[['living','Phòng khách'],['kitchen','Bếp + ăn'],['bed','Phòng ngủ'],['bath','WC'],['corridor','Hành lang / lối đi'],['worship','Phòng thờ'],['office','Phòng làm việc'],['laundry','Phòng giặt'],['storage','Kho'],['gym','Phòng tập'],['hobby','Phòng sở thích'],['custom','Phòng tự đặt tên'],['utility','Kỹ thuật'],['balcony','Ban công']];
@@ -12,19 +11,31 @@
  const ui=()=>B.state.ui.planner;
  const finish=()=>B.state.project.materials.finish||=( {exterior:null,rooms:{}} );
  const update=()=>{B.finishInvalidate?.();B.customerFrameCache=null;B.save();B.render({preserveScroll:true});};
- B.customerStyleProfile=()=>{const style=B.houseStyle(),id=styleCollections[style?.id]||'warm-oak';return {style,recognized:!!style,name:B.state.project.style,collection:B.INTERIOR_COLLECTIONS.find(c=>c.id===id)||B.INTERIOR_COLLECTIONS[0]};};
+ B.customerStyleProfile=()=>{const style=B.houseStyle(),spec=B.styleSpecification(style?.id),id=spec?.collectionId||'warm-oak';return {style,specification:spec,recognized:!!style,name:B.state.project.style,collection:B.INTERIOR_COLLECTIONS.find(c=>c.id===id)||B.INTERIOR_COLLECTIONS[0]};};
  B.interiorCollection=roomId=>{
   const f=finish(),v=f.interior||{},profile=B.customerStyleProfile(),stored=roomId?v.rooms?.[roomId]||v.default:v.default;
   const authored=roomId&&v.rooms?.[roomId]?v.authored?.[roomId]:v.authored?.default;
   const allowed=stored!=='style'&&(authored==='manual'||authored===B.state.project.style||!authored&&stored===profile.collection.id);
   return allowed&&B.INTERIOR_COLLECTIONS.find(c=>c.id===stored)||profile.collection;
  };
+ B.styleDefaultPalette=roomId=>{
+  const profile=B.customerStyleProfile(),c=B.interiorCollection(roomId),v=finish().interior||{},authored=roomId&&v.rooms?.[roomId]?v.authored?.[roomId]:v.authored?.default;
+  if(!profile.specification||c.id!==profile.collection.id||authored==='manual')return null;
+  const defaults={...c,visualMaterials:{...c.visualMaterials,...profile.specification.defaultMaterials}};
+  for(const [role,id]of Object.entries(defaults.visualMaterials)){const material=B.VISUAL_MATERIALS.find(x=>x.id===id&&x.role===role);if(material){defaults[role]=material.color;if(role==='floor')defaults.surface=material.surface;}}
+  return defaults;
+ };
  B.finishPalette=roomId=>{
   const f=finish(),c=B.interiorCollection(roomId),global=f.exterior||{},room=roomId?f.rooms?.[roomId]||{}:{},r=B.state.project.plan.rooms.find(r=>r.id===roomId);
-  const p={...c,wall:B.houseStyle()?.wall||c.wall,...global,...room,visualMaterials:{...c.visualMaterials,...global.visualMaterials,...room.visualMaterials},collectionId:c.id,shape:c.shape,table:c.table};
-  const surface=room.surface??global.surface;
-  if(surface&&surface!=='auto'&&!room.visualMaterials?.floor&&!global.visualMaterials?.floor)p.visualMaterials.floor={wood:'oak-floor',tile:'ivory-tile',stone:'sand-travertine'}[surface]||p.visualMaterials.floor;
-  if(r?.type==='bath'&&!room.visualMaterials?.floor&&!global.visualMaterials?.floor&&surface===undefined){p.visualMaterials.floor='sand-travertine';p.floor='#cfc0a0';}
+  const defaults=B.styleDefaultPalette(roomId)||c;
+  // Finish writers cache a resolved palette. Only authored roles in that cache
+  // override the next style; preserve pre-marker legacy choices conservatively.
+  const authoredRow=raw=>{const row={...raw,visualMaterials:{...raw.visualMaterials}};for(const [role]of surfaceRoles)if(raw.styleRoles?.[role]===true||raw.explicitRoles&&raw.explicitRoles[role]!==true){delete row[role];delete row.visualMaterials[role];if(role==='floor')delete row.surface;}return row;};
+  const outside=authoredRow(global),inside=authoredRow(room);
+  const p={...defaults,...outside,...inside,visualMaterials:{...defaults.visualMaterials,...outside.visualMaterials,...inside.visualMaterials},collectionId:c.id,shape:c.shape,table:c.table};
+  const surface=inside.surface??outside.surface;
+  if(surface&&surface!=='auto'&&!inside.visualMaterials?.floor&&!outside.visualMaterials?.floor)p.visualMaterials.floor={wood:'oak-floor',tile:'ivory-tile',stone:'sand-travertine'}[surface]||p.visualMaterials.floor;
+  if(r?.type==='bath'&&!inside.visualMaterials?.floor&&!outside.visualMaterials?.floor&&surface===undefined){p.visualMaterials.floor='sand-travertine';p.floor='#cfc0a0';}
   const material=B.VISUAL_MATERIALS.find(v=>v.role==='floor'&&v.id===p.visualMaterials.floor);if(material)p.surface=material.surface;
   return B.validatePaletteBindings?.(roomId,p)||p;
  };
@@ -329,4 +340,150 @@
   if(['Delete','Backspace'].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();const u=ui();if(u.selectedOpening)B.removePlanItem('opening',u.selectedOpening);else if(u.selectedFixture)B.removePlanItem('fixture',u.selectedFixture);else if(u.selected)B.removePlanItem('room',u.selected);}
   if(['Enter',' '].includes(e.key)&&e.target.matches?.('[data-plan-opening],[data-plan-fixture]')){e.preventDefault();selectItem(e.target.hasAttribute('data-plan-opening')?'opening':'fixture',e.target.dataset.planOpening||e.target.dataset.planFixture);}
  },true);
+})();
+
+/* Team B / C01 consumer. A owns the default schema and migration. Never keep
+ * a second furniture store: editor, drawing, model and exports read plan.furniture. */
+(()=>{
+ const B=BMH,clone=v=>structuredClone(v),esc=B.esc,legacy=B.roomFurnitureLayout;
+ const angle=n=>((Number(n)%360)+360)%360;
+ const models={bedDouble:'Giường đôi',bedSingle:'Giường đơn',loungeDesignSofa:'Sofa',loungeChair:'Ghế thư giãn',tableCoffee:'Bàn trà',table:'Bàn ăn',chair:'Ghế',cabinetTelevision:'Tủ TV',televisionModern:'TV',kitchenSink:'Chậu bếp',kitchenStove:'Bếp',kitchenFridge:'Tủ lạnh',bathroomSink:'Lavabo',toilet:'Bồn cầu',shower:'Cabin tắm',bookcaseClosedWide:'Tủ sách',desk:'Bàn làm việc',chairDesk:'Ghế làm việc',cabinetBed:'Tủ đầu giường',pottedPlant:'Cây',sideTable:'Bàn phụ',floorLamp:'Đèn đứng',washingMachine:'Máy giặt'};
+ const plan=()=>B.state.project.plan;
+ const room=id=>plan().rooms.find(r=>r.id===id);
+ const selected=()=>B.state.ui.planner.selectedFurniture||'';
+ B.furnitureContractReady=()=>Array.isArray(B.defaultState().project.plan.furniture)&&(!('furniture' in plan())||Array.isArray(plan().furniture));
+ B.furnitureRecordValid=i=>!!(i&&typeof i.id==='string'&&i.id&&room(i.roomId)&&Number.isInteger(i.floor)&&['present','removed'].includes(i.placementStatus)&&models[i.modelId]&&[i.pose?.x,i.pose?.y,i.pose?.z,i.pose?.rotationDeg,i.size?.width,i.size?.depth,i.size?.height].every(Number.isFinite)&&i.size.width>0&&i.size.depth>0&&i.size.height>0&&i.pose.z>=0);
+ B.furnitureFootprint=i=>{
+  const a=angle(i.pose.rotationDeg)*Math.PI/180,c=Math.cos(a),s=Math.sin(a),w=i.size.width/2,d=i.size.depth/2;
+  return [[-w,-d],[w,-d],[w,d],[-w,d]].map(([x,y])=>({x:i.pose.x+x*c-y*s,y:i.pose.y+x*s+y*c}));
+ };
+ const intersects=(a,b)=>{
+  for(const polygon of [a,b])for(let n=0;n<polygon.length;n++){
+   const p=polygon[n],q=polygon[(n+1)%polygon.length],axis={x:-(q.y-p.y),y:q.x-p.x},proj=v=>v.x*axis.x+v.y*axis.y;
+   const aa=a.map(proj),bb=b.map(proj);if(Math.max(...aa)<=Math.min(...bb)+1e-7||Math.max(...bb)<=Math.min(...aa)+1e-7)return false;
+  }return true;
+ };
+ const box=(x,y,w,d)=>[{x,y},{x:x+w,y},{x:x+w,y:y+d},{x,y:y+d}];
+ B.generatedFurniture=r=>{
+  const counts={};return legacy(r).map(i=>{
+   const dim=B.FURNITURE_DIMENSIONS[i.model],n=counts[i.model]||0;counts[i.model]=n+1;
+   return {id:'furniture:'+r.id+':'+i.model+':'+n,roomId:r.id,floor:r.floor,modelId:i.model,origin:'generated',placementStatus:'present',locked:false,pose:{x:i.x+i.w/2,y:i.y+i.d/2,z:i.base||0,rotationDeg:angle(i.rotation)},size:{width:dim.w,depth:dim.d,height:dim.h},materialBindings:[],costTreatment:'unconfirmed'};
+  });
+ };
+ B.resolvedFurniture=(roomId,{includeRemoved=false}={})=>{
+  const rooms=roomId?[room(roomId)].filter(Boolean):plan().rooms;
+  return rooms.flatMap(r=>{const saved=(plan().furniture||[]).filter(i=>i.roomId===r.id),rows=saved.length?saved:B.generatedFurniture(r);return rows.filter(i=>B.furnitureRecordValid(i)&&(includeRemoved||i.placementStatus==='present')).map(clone);});
+ };
+ B.furniturePlacementIssues=(candidate,rows=B.resolvedFurniture(candidate.roomId))=>{
+  const r=room(candidate.roomId),out=[];if(!B.furnitureRecordValid(candidate)||candidate.floor!==r?.floor)return ['Dữ liệu vật thể hoặc tầng không hợp lệ.'];
+  const polygon=B.furnitureFootprint(candidate),margin=.02;
+  if(polygon.some(p=>p.x<r.x+margin||p.x>r.x+r.w-margin||p.y<r.y+margin||p.y>r.y+r.h-margin))out.push('Vật thể sau khi xoay vượt phòng / xuyên tường.');
+  for(const other of rows){if(other.id===candidate.id||other.placementStatus==='removed')continue;
+   if(candidate.pose.z+candidate.size.height<=other.pose.z+.01||other.pose.z+other.size.height<=candidate.pose.z+.01)continue;
+   if(intersects(polygon,B.furnitureFootprint(other)))out.push('Chạm '+(models[other.modelId]||other.modelId)+'.');
+  }
+  for(const q of B.planFixtures?.(r.id)||[])if(intersects(polygon,box(q.x,q.y,q.w,q.d)))out.push('Chạm bàn thờ / fixture.');
+  for(const o of plan().openings.filter(o=>o.roomId===r.id&&o.kind==='door')){
+   const g=B.openingGeometry(o);if(!g)continue;const w=Number(o.width)||.9,inward=o.swing!=='out',reach=inward?w:.25;
+   const rect=['north','south'].includes(o.side)?box(g.x-w/2-.1,o.side==='north'?r.y-.02:r.y+r.h-reach,w+.2,reach+.02):box(o.side==='west'?r.x-.02:r.x+r.w-reach,g.y-w/2-.1,reach+.02,w+.2);
+   if(intersects(polygon,rect))out.push('Chắn cửa / vùng mở cửa.');
+  }
+  if(r.type==='corridor'||r.type==='stairs'||r.type==='elevator')out.push('Giữ trống hành lang, thang và giếng thang máy.');
+  return [...new Set(out)];
+ };
+ const reject=message=>{B.state.ui.planner.furnitureNotice=message;B.toast(message);return false;};
+ const materialize=roomId=>{plan().furniture||=[];if(!plan().furniture.some(i=>i.roomId===roomId))plan().furniture.push(...B.generatedFurniture(room(roomId)));};
+ const changed=()=>{B.rememberFinishCamera?.();B.save();B.render({preserveScroll:true});};
+ B.editFurniture=(id,changes,{render=true}={})=>{
+  if(!B.furnitureContractReady())return reject('Chưa ghép schema nội thất C01; không lưu thay đổi chưa thể khôi phục.');
+  const item=B.resolvedFurniture(null,{includeRemoved:true}).find(i=>i.id===id);if(!item)return reject('Vật thể không còn trong dự án.');
+  if(B.isRoomLocked(item.roomId)||item.locked&&!(Object.keys(changes).length===1&&changes.locked===false))return reject('Vật thể / phòng / tầng đang khóa.');
+  if(Object.keys(changes).some(k=>!['pose','locked','placementStatus','materialBindings'].includes(k)))return reject('Chỉ sửa vị trí, góc, khóa hoặc xóa; giữ ID/kích thước/vật liệu.');
+  if(changes.materialBindings!==undefined&&(!Array.isArray(changes.materialBindings)||changes.materialBindings.length>20))return reject('Danh sách vật liệu không hợp lệ.');
+  const next={...item,...clone(changes),pose:{...item.pose,...changes.pose}};next.pose.rotationDeg=angle(next.pose.rotationDeg);
+  if(next.placementStatus==='present'){const issues=B.furniturePlacementIssues(next);if(issues.length)return reject(issues.join(' '));}
+  if(!B.furnitureRecordValid(next))return reject('Số đo không hợp lệ.');
+  if(JSON.stringify(next)===JSON.stringify(item))return true;
+  B.pushPlanHistory();materialize(item.roomId);const index=plan().furniture.findIndex(i=>i.id===id);plan().furniture[index]=next;
+  B.state.ui.planner.selectedFurniture=id;B.state.ui.planner.furnitureNotice='Đã lưu · góc '+next.pose.rotationDeg+'°.';
+  if(render)changed();else B.save();return true;
+ };
+ B.furnitureFinishPalette=i=>{
+  const palette=clone(B.finishPalette(i.roomId));palette.visualMaterials||={};
+  for(const binding of i.materialBindings||[]){const profile=B.VISUAL_MATERIALS.find(p=>p.id===binding.visualProfileId&&p.role===binding.role);if(profile&&['accent','fabric'].includes(profile.role)){palette.visualMaterials[profile.role]=profile.id;palette[profile.role]=profile.color;}}
+  return palette;
+ };
+ B.setFurnitureVisualMaterial=(id,role,profileId)=>{
+  if(!['accent','fabric'].includes(role))return false;const item=B.resolvedFurniture().find(i=>i.id===id),profile=B.VISUAL_MATERIALS.find(p=>p.role===role&&p.id===profileId);if(!item||profileId&&!profile)return false;
+  const bindings=clone(item.materialBindings||[]),index=bindings.findIndex(b=>b.role===role),existing=index>=0?bindings[index]:{role};
+  const binding={...existing,role,visualProfileId:profile?.id||null,realWorldScale:profile?clone(profile.scale):null,textureAssetId:null,exactness:'generic'};
+  if(index>=0)bindings[index]=binding;else bindings.push(binding);
+  return B.editFurniture(id,{materialBindings:bindings});
+ };
+ B.addFurniture=(roomId,modelId)=>{
+  if(!B.furnitureContractReady())return reject('Chờ schema nội thất C01 để thêm và lưu vật thể.');
+  const r=room(roomId),d=B.FURNITURE_DIMENSIONS[modelId];if(!r||!models[modelId]||!d||B.isRoomLocked(roomId))return reject('Chọn phòng chưa khóa và mẫu hợp lệ.');
+  const rows=B.resolvedFurniture(roomId);let candidate;
+  for(let y=r.y+d.d/2+.05;y<r.y+r.h-d.d/2-.02&&!candidate;y+=.2)for(let x=r.x+d.w/2+.05;x<r.x+r.w-d.w/2-.02;x+=.2){
+   const i={id:B.uid('furniture'),roomId,floor:r.floor,modelId,origin:'customer-added',placementStatus:'present',locked:false,pose:{x,y,z:0,rotationDeg:0},size:{width:d.w,depth:d.d,height:d.h},materialBindings:[],costTreatment:'unconfirmed'};
+   if(!B.furniturePlacementIssues(i,rows).length){candidate=i;break;}
+  }
+  if(!candidate)return reject('Không còn vị trí trống cho mẫu này. Dời / xóa đồ trước.');
+  B.pushPlanHistory();materialize(roomId);plan().furniture.push(candidate);B.state.ui.planner.selectedFurniture=candidate.id;changed();return candidate;
+ };
+ B.roomFurnitureLayout=r=>B.resolvedFurniture(r.id).map(i=>{
+  const poly=B.furnitureFootprint(i),xs=poly.map(p=>p.x),ys=poly.map(p=>p.y);
+  return {...i,model:i.modelId,x:Math.min(...xs),y:Math.min(...ys),w:Math.abs(Math.sin(i.pose.rotationDeg*Math.PI/180))<1e-10?i.size.width:Math.abs(Math.cos(i.pose.rotationDeg*Math.PI/180))<1e-10?i.size.depth:Math.max(...xs)-Math.min(...xs),d:Math.abs(Math.sin(i.pose.rotationDeg*Math.PI/180))<1e-10?i.size.depth:Math.abs(Math.cos(i.pose.rotationDeg*Math.PI/180))<1e-10?i.size.width:Math.max(...ys)-Math.min(...ys),h:i.size.height,base:i.pose.z,rotation:i.pose.rotationDeg};
+ });
+ const oldSvg=B.furnitureSvg;B.furnitureSvg=r=>{
+  if(['stairs','garage'].includes(r.type))return oldSvg(r);
+  return '<g class="furniture team-b-furniture" stroke="#687c80" fill="#e7e0d4" stroke-width=".025">'+B.resolvedFurniture(r.id).map(i=>'<g data-furniture-id="'+esc(i.id)+'" tabindex="0" role="button" aria-label="'+esc(models[i.modelId])+'" class="'+(selected()===i.id?'selected':'')+'"><polygon points="'+B.furnitureFootprint(i).map(p=>p.x+','+p.y).join(' ')+'"/><title>'+esc(models[i.modelId])+' · '+i.size.width+' × '+i.size.depth+' m · '+i.pose.rotationDeg+'°</title></g>').join('')+'</g>'+B.planFixtures(r.id).map(q=>'<g class="furniture altar-symbol" data-fixture-reference="'+esc(q.id)+'"><rect x="'+q.x+'" y="'+q.y+'" width="'+q.w+'" height="'+q.d+'"/><title>Bàn thờ</title></g>').join('');
+ };
+ const doc=B.architectDocument;B.architectDocument=focus=>{
+  const result=doc(focus);for(const [f,level] of result.levels.entries()){
+   const rows=B.resolvedFurniture().filter(i=>i.floor===f&&(!focus?.startsWith('room:')||i.roomId===focus.slice(5)));
+   const items=rows.map(i=>({id:i.id,item_name:i.modelId,item_type:1,format:'gltf',model_url:'models/'+i.modelId+'.glb',xpos:i.pose.x*100,zpos:i.pose.y*100,ypos:i.pose.z*100,rotation:-i.pose.rotationDeg*Math.PI/180,scale_x:200,scale_y:200,scale_z:200,fixed:i.locked===true}));
+   if(f===0)result.items=[...(result.items||[]).filter(i=>i.item_type!==1),...items];else level.items=[...(level.items||[]).filter(i=>i.item_type!==1),...items];
+  }return result;
+ };
+ const snapshot=B.customerDesignSnapshot;B.customerDesignSnapshot=()=>{const result=snapshot();result.project.furniture=B.resolvedFurniture(null,{includeRemoved:true}).map(i=>({...Object.fromEntries(['id','roomId','floor','modelId','origin','placementStatus','locked','pose','size','costTreatment'].filter(k=>i[k]!==undefined).map(k=>[k,clone(i[k])])),materialBindings:(i.materialBindings||[]).map(b=>Object.fromEntries(['role','productId','sku','specification','quantityUnit','visualProfileId','textureAssetId','realWorldScale','exactness','costTreatment','sourceUrl','licence'].filter(k=>b[k]!==undefined).map(k=>[k,clone(b[k])]))) }));return result;};
+ const structure=B.studioStructureKey,signature=B.cinematicSignature;
+ B.studioStructureKey=()=>structure()+'|furniture:'+JSON.stringify(B.resolvedFurniture());
+ B.cinematicSignature=focus=>signature(focus)+'|furniture:'+JSON.stringify(B.resolvedFurniture());
+ const commit=B.commitDirectPlan;B.commitDirectPlan=(next,selection,options)=>{
+  if(Array.isArray(plan().furniture)){
+   next=clone(next);next.furniture=clone(next.furniture||plan().furniture);
+   for(const i of next.furniture){const old=room(i.roomId),r=next.rooms.find(r=>r.id===i.roomId);if(!r){i.placementStatus='removed';continue;}if(old){i.pose.x+=r.x-old.x;i.pose.y+=r.y-old.y;i.floor=r.floor;
+    if(i.placementStatus==='present'&&B.furnitureFootprint(i).some(p=>p.x<r.x+.02||p.x>r.x+r.w-.02||p.y<r.y+.02||p.y>r.y+r.h-.02))return reject('Đổi phòng khiến đồ nội thất xuyên tường; dời đồ trước.');
+   }}
+  }return commit(next,selection,options);
+ };
+ B.furnitureEditorHtml=()=>{
+  const ui=B.state.ui,r=B.state.ui.step===6?(room((ui.sceneFocus||'').replace(/^room:/,''))||room(ui.modelRoomId)):B.selectedRoom();if(!r)return '';
+  const rows=B.resolvedFurniture(r.id,{includeRemoved:true}),item=rows.find(i=>i.id===selected()&&i.placementStatus==='present'),ready=B.furnitureContractReady(),disabled=(!ready||B.isRoomLocked(r.id)||item?.locked)?'disabled':'';
+  return '<details class="team-b-furniture-editor" '+(selected()?'open':'')+'><summary>Nội thất từng món · '+esc(r.name)+'</summary><div><p>Chọn trên bản vẽ / mô hình; kéo để dời, nhập góc bất kỳ. Vật thể mô phỏng theo số đo.</p>'+(!ready?'<p role="status">Chỉnh từng món nội thất chưa sẵn sàng trong bản này. Bạn vẫn xem được bố trí hiện tại.</p>':'')+'<label>Vật thể<select data-furniture-select><option value="">Chọn một món</option>'+rows.filter(i=>i.placementStatus==='present').map(i=>'<option value="'+esc(i.id)+'" '+(item?.id===i.id?'selected':'')+'>'+esc(models[i.modelId])+(i.locked?' · khóa':'')+'</option>').join('')+'</select></label>'+(item?'<form data-furniture-pose="'+esc(item.id)+'" class="team-b-pose-fields">'+[['x','Tâm X / m',item.pose.x],['y','Tâm Y / m',item.pose.y],['rotationDeg','Góc / °',item.pose.rotationDeg]].map(([k,label,v])=>'<label>'+label+'<input name="'+k+'" type="number" step="any" value="'+v+'" '+disabled+' required></label>').join('')+'<button '+disabled+'>Áp dụng vị trí</button></form><div class="team-b-item-actions"><button data-furniture-lock="'+esc(item.id)+'" '+(!ready||B.isRoomLocked(r.id)?'disabled':'')+'>'+(item.locked?'Mở khóa':'Khóa món này')+'</button><button data-furniture-remove="'+esc(item.id)+'" '+disabled+'>Xóa món này</button><button data-plan-undo>Hoàn tác</button><button data-plan-redo>Làm lại</button></div>':'')+(item?'<details><summary>Vật liệu riêng của món</summary>'+[['accent','Gỗ / bề mặt'],['fabric','Vải / da']].map(([role,label])=>'<label>'+label+'<select data-furniture-material="'+role+'" data-furniture-owner="'+esc(item.id)+'" '+disabled+'><option value="">Theo phòng / phong cách</option>'+B.VISUAL_MATERIALS.filter(p=>p.role===role).map(p=>'<option value="'+p.id+'" '+((item.materialBindings||[]).some(b=>b.role===role&&b.visualProfileId===p.id)?'selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select></label>').join('')+'<small>Bề mặt BMH mô phỏng; giữ SKU đã chọn, cần đối chiếu mẫu thực.</small></details>':'')+'<p role="status" aria-live="polite">'+esc(ui.planner.furnitureNotice||'')+'</p><details '+(rows.some(i=>i.placementStatus==='removed')?'open':'')+'><summary>Thêm món / đồ đã xóa</summary><form data-furniture-add="'+esc(r.id)+'"><label>Mẫu đồ<select name="modelId">'+Object.entries(models).map(([id,label])=>'<option value="'+id+'">'+label+'</option>').join('')+'</select></label><button '+(!ready||B.isRoomLocked(r.id)?'disabled':'')+'>Thêm vào phòng</button></form>'+rows.filter(i=>i.placementStatus==='removed').map(i=>'<button data-furniture-restore="'+esc(i.id)+'" '+(!ready?'disabled':'')+'>Khôi phục '+esc(models[i.modelId])+'</button>').join('')+'</details></div></details>';
+ };
+ const editor=B.screen5,studio=B.screen7;B.screen5=()=>editor()+B.furnitureEditorHtml();B.SCREENS[3]=B.screen5;B.screen7=()=>studio()+B.furnitureEditorHtml();B.SCREENS[5]=B.screen7;
+ const select=id=>{B.state.ui.planner.selectedFurniture=id;const i=B.resolvedFurniture().find(i=>i.id===id);if(i)B.state.ui.planner.selected=i.roomId;B.rememberFinishCamera?.();B.render({preserveScroll:true});};
+ document.addEventListener('submit',e=>{const form=e.target;if(form.matches?.('[data-furniture-pose]')){e.preventDefault();const data=Object.fromEntries(new FormData(form));B.editFurniture(form.dataset.furniturePose,{pose:Object.fromEntries(Object.entries(data).map(([k,v])=>[k,Number(v)]))});}else if(form.matches?.('[data-furniture-add]')){e.preventDefault();B.addFurniture(form.dataset.furnitureAdd,new FormData(form).get('modelId'));}});
+ document.addEventListener('change',e=>{if(e.target.matches?.('[data-furniture-select]'))select(e.target.value);else if(e.target.matches?.('[data-furniture-material]'))B.setFurnitureVisualMaterial(e.target.dataset.furnitureOwner,e.target.dataset.furnitureMaterial,e.target.value);});
+ document.addEventListener('click',e=>{
+  const t=e.target.closest?.('[data-furniture-lock],[data-furniture-remove],[data-furniture-restore]');if(!t)return;
+  if(t.dataset.furnitureLock){const i=B.resolvedFurniture().find(i=>i.id===t.dataset.furnitureLock);if(i)B.editFurniture(i.id,{locked:!i.locked});}
+  else B.editFurniture(t.dataset.furnitureRemove||t.dataset.furnitureRestore,{placementStatus:t.dataset.furnitureRemove?'removed':'present'});
+ });
+ let drag;
+ document.addEventListener('pointerdown',e=>{
+  const target=e.target.closest?.('[data-furniture-id]');if(!target||B.state.ui.step!==4||B.state.ui.planner.tool!=='select'||B.state.ui.planner.directTool!=='select')return;
+  e.stopImmediatePropagation();e.preventDefault();const id=target.dataset.furnitureId,i=B.resolvedFurniture().find(i=>i.id===id),svg=target.closest('svg');if(!i||!svg)return;
+  B.state.ui.planner.selectedFurniture=id;B.state.ui.planner.selected=i.roomId;
+  drag={id,item:i,svg,target,start:B.svgPoint(e,svg),pointer:e.pointerId,last:i.pose};target.setPointerCapture?.(e.pointerId);
+ },true);
+ document.addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.pointer)return;e.preventDefault();const point=B.svgPoint(e,drag.svg),pose={...drag.item.pose,x:drag.item.pose.x+point.x-drag.start.x,y:drag.item.pose.y+point.y-drag.start.y},next={...drag.item,pose};drag.last=pose;
+  drag.target.querySelector('polygon').setAttribute('points',B.furnitureFootprint(next).map(p=>p.x+','+p.y).join(' '));
+ },true);
+ const stop=e=>{if(!drag||e.pointerId!==drag.pointer)return;const d=drag;drag=null;if(e.type!=='pointercancel'&&Math.hypot(d.last.x-d.item.pose.x,d.last.y-d.item.pose.y)>.005){if(!B.editFurniture(d.id,{pose:d.last}))B.render({preserveScroll:true});}else select(d.id);};
+ document.addEventListener('pointerup',stop,true);document.addEventListener('pointercancel',stop,true);
+ document.addEventListener('keydown',e=>{if(e.target.closest?.('[data-furniture-id]')&&['Enter',' '].includes(e.key)){e.preventDefault();select(e.target.closest('[data-furniture-id]').dataset.furnitureId);}});
 })();

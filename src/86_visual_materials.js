@@ -55,11 +55,12 @@ BMH.catalogBindingStatus=(category,binding,product,palette=null)=>{
 };
 BMH.validatePaletteBindings=(roomId,palette={})=>{
  const f=BMH.state.project.materials.finish||{},room=roomId?f.rooms?.[roomId]||{}:{},global=f.exterior||{},bindings={...global.catalogMaterials,...room.catalogMaterials},result={...palette,visualMaterials:{...palette.visualMaterials},catalogMaterials:{},materialBindingStatuses:{}},collection=BMH.interiorCollection?.(roomId);
- const automatic={...global.styleRoles,...room.styleRoles};for(const [role,usesStyle] of Object.entries(automatic))if(usesStyle===true){const profile=BMH.VISUAL_MATERIALS.find(x=>x.id===collection?.visualMaterials?.[role]&&x.role===role);if(profile){result.visualMaterials[role]=profile.id;result[role]=profile.color;if(role==='floor')result.surface='auto';}}
+ const defaults=BMH.styleDefaultPalette?.(roomId)||collection;
+ const automatic={...global.styleRoles,...room.styleRoles};for(const [role,usesStyle] of Object.entries(automatic))if(usesStyle===true){const profile=BMH.VISUAL_MATERIALS.find(x=>x.id===defaults?.visualMaterials?.[role]&&x.role===role);if(profile){result.visualMaterials[role]=profile.id;result[role]=profile.color;if(role==='floor')result.surface='auto';}}
  for(const [category,binding] of Object.entries(bindings)){
   const role=BMH.catalogSurfaceSlots[category];if(!role)continue;if(roomId&&!room.catalogMaterials?.[category]&&room.explicitRoles?.[role])continue;
   const product=BMH.catalogSelectedProduct(category),status=BMH.catalogBindingStatus(category,binding,product,palette);if(room.catalogMaterials?.[category]&&binding.roomId!==roomId){status.valid=false;status.status='stale';status.reason='Liên kết thuộc phòng khác; cần chọn lại bề mặt.';}result.materialBindingStatuses[category]=status;
-  if(status.valid)result.catalogMaterials[category]=binding;else{const profile=BMH.VISUAL_MATERIALS.find(x=>x.id===collection?.visualMaterials?.[role]&&x.role===role);if(profile){result.visualMaterials[role]=profile.id;result[role]=profile.color;if(role==='floor')result.surface=profile.surface;}else{delete result.visualMaterials[role];if(role==='wall')result.wall=BMH.houseStyle?.()?.wall||collection?.wall||'#f2efe8';}}
+  if(status.valid)result.catalogMaterials[category]=binding;else{const profile=BMH.VISUAL_MATERIALS.find(x=>x.id===defaults?.visualMaterials?.[role]&&x.role===role);if(profile){result.visualMaterials[role]=profile.id;result[role]=profile.color;if(role==='floor')result.surface=profile.surface;}else{delete result.visualMaterials[role];if(role==='wall')result.wall=BMH.houseStyle?.()?.wall||collection?.wall||'#f2efe8';}}
  }
  return result;
 };

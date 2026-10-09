@@ -1,0 +1,57 @@
+{
+  "revision": "6D979D3F-741638A5-AI1-RH1",
+  "parser": "ezdxf 1.4.4",
+  "floors": [
+    {
+      "floor": 0,
+      "units": "mm",
+      "areaM2": 176.0,
+      "entities": 137,
+      "auditErrors": 0,
+      "auditFixes": 0,
+      "furnitureIds": [
+        "test-seat-37",
+        "furniture:bed-0:bedDouble:0",
+        "furniture:bed-0:cabinetBed:0",
+        "furniture:bed-0:bookcaseClosedWide:0",
+        "furniture:bed-0:desk:0",
+        "furniture:laundry:washingMachine:0",
+        "furniture:laundry:kitchenSink:0"
+      ],
+      "chairCornerMaxErrorMm": 0.00010663986813597148,
+      "sha256": "a04c6a7c3a6e88e9cac104993ab1c774968b9c82167afda5657c6ea0af954694"
+    },
+    {
+      "floor": 1,
+      "units": "mm",
+      "areaM2": 176.0,
+      "entities": 121,
+      "auditErrors": 0,
+      "auditFixes": 0,
+      "furnitureIds": [
+        "furniture:bed-1:bedDouble:0",
+        "furniture:bed-1:cabinetBed:0",
+        "furniture:bed-1:bookcaseClosedWide:0",
+        "furniture:bed-1:desk:0"
+      ],
+      "chairCornerMaxErrorMm": null,
+      "sha256": "614d69b39551c0fe7e6f7a44943e308f642e139a37b0b7512a004681f0342ff5"
+    },
+    {
+      "floor": 2,
+      "units": "mm",
+      "areaM2": 176.0,
+      "entities": 117,
+      "auditErrors": 0,
+      "auditFixes": 0,
+      "furnitureIds": [
+        "furniture:bed-2:bedDouble:0",
+        "furniture:bed-2:cabinetBed:0",
+        "furniture:bed-2:bookcaseClosedWide:0",
+        "furniture:bed-2:desk:0"
+      ],
+      "chairCornerMaxErrorMm": null,
+      "sha256": "1d3a851e236b393f3e7b969a874d306065784aef05b433c357e4aefb4c640820"
+    }
+  ]
+}
