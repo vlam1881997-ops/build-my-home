@@ -95,7 +95,7 @@
  };
  const cutCaps=c=>{
   const {THREE,scene}=c,group=new THREE.Group();group.userData={kind:'model-cut-caps',presentationOnly:true};
-  scene.updateMatrixWorld(true);scene.traverse(o=>{if(o.userData.kind!=='wall'||o.userData.wallSurface==='window')return;const plane=o.material?.clippingPlanes?.[0];if(!plane||Math.abs(plane.normal.y+1)>.001)return;const bounds=new THREE.Box3().setFromObject(o),y=plane.constant;if(y<=bounds.min.y+.002||y>=bounds.max.y-.002)return;const material=new THREE.MeshStandardMaterial({color:'#408b9d',roughness:.8});B.prepareModelMaterial(material,null,null,scene);const cap=new THREE.Mesh(new THREE.BoxGeometry(bounds.max.x-bounds.min.x,.012,bounds.max.z-bounds.min.z),material);cap.position.set((bounds.max.x+bounds.min.x)/2,y-.005,(bounds.max.z+bounds.min.z)/2);group.add(cap);});scene.add(group);
+  scene.updateMatrixWorld(true);scene.traverse(o=>{if(o.userData.kind!=='wall'||o.userData.wallSurface==='window')return;const plane=o.material?.clippingPlanes?.[0];if(!plane||Math.abs(plane.normal.y+1)>.001)return;const bounds=new THREE.Box3().setFromObject(o),y=plane.constant;if(y<=bounds.min.y+.002||y>=bounds.max.y-.002)return;const material=new THREE.MeshStandardMaterial({color:o.material.color.clone(),roughness:.94});B.prepareModelMaterial(material,null,null,scene);const cap=new THREE.Mesh(new THREE.BoxGeometry(bounds.max.x-bounds.min.x,.012,bounds.max.z-bounds.min.z),material);cap.position.set((bounds.max.x+bounds.min.x)/2,y-.005,(bounds.max.z+bounds.min.z)/2);cap.userData={kind:'wall-cut-cap',presentationOnly:true,sourceWall:o};group.add(cap);});scene.add(group);return group;
  };
  B.configureModelPresentation=c=>{
   const {THREE,scene,ground,displayBase,renderer,roomFocus,floorFocus,focus,explode}=c,ui=B.state.ui,look={value:B.modelLook()==='neon'?1:0};
@@ -119,7 +119,7 @@
   });
   const used=new Set();scene.traverse(o=>{for(const m of Array.isArray(o.material)?o.material:[o.material])if(m)used.add(m);});for(const m of retired)if(!used.has(m)&&![...(scene.userData.finishMaterials?.values()||[])].some(entry=>Object.values(entry).includes(m)))m.dispose();
   const grid=new THREE.GridHelper(160,160,0x32526d,0x1a354d);grid.position.y=.002;grid.material.transparent=true;grid.material.opacity=.3;grid.material.depthWrite=false;grid.userData={kind:'model-site-grid',presentationOnly:true};scene.add(grid);state.grid=grid;
-  addLightSurface(c);cutCaps(c);buildEdges(c);
+  addLightSurface(c);state.cutCaps=cutCaps(c);buildEdges(c);
   const selection=new THREE.Group();selection.userData={kind:'model-room-selection',presentationOnly:true};scene.add(selection);state.selection=selection;
   B.applyModelLook({THREE,scene,renderer,camera:c.camera});
  };
@@ -130,11 +130,13 @@
   s.renderer.toneMappingExposure=neon?1:st.exposure;
   for(const item of st.lights){item.light.color.copy(item.color);item.light.intensity=neon?item.intensity*.65:item.intensity;}
   st.grid.visible=st.edges.visible=st.lightSurface.visible=st.lampGlows.visible=neon;st.lightSurface.material.opacity=B.state.ui.modelLightLevel/100;
+  for(const cap of st.cutCaps?.children||[])cap.material.color.copy(neon?new s.THREE.Color('#408b9d'):cap.userData.sourceWall.material.color);
   const stage=document.querySelector('#studio3dStage');stage?.classList.toggle('model-neon',neon);document.querySelector('.design-studio')?.classList.toggle('model-neon-workspace',neon);
   B.updateModelPresentation(s);
  };
  B.updateModelPresentation=s=>{
   const st=s?.scene?.userData.modelPresentation;if(!st)return;const ui=B.state.ui,site=B.state.project.site,selected=B.modelSelectedRoom(),key=selected?.id||'';
+  if(B.modelLook()==='materials')for(const cap of st.cutCaps?.children||[])cap.material.color.copy(cap.userData.sourceWall.material.color);
   for(const glow of st.lampGlows.children){glow.quaternion.copy(s.camera.quaternion);glow.material.opacity=.6*ui.modelLightLevel/100;}
   for(const o of st.walls){const m=o.material,patch=materialPatches.get(m);if(!patch)continue;let alpha=1;
    if(ui.modelWalls==='auto'||ui.sceneExploded){const ids=o.userData.roomIds||[ancestor(o,'roomId')].filter(Boolean),rooms=ids.map(id=>B.state.project.plan.rooms.find(r=>r.id===id)).filter(Boolean),exterior=rooms.length===1,r=rooms[0];

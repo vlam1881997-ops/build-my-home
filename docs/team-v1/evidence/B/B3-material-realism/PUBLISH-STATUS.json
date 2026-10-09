@@ -1,0 +1,15 @@
+{
+  "sourceCommitLocal": "afef9a7",
+  "baselineB": "b04de86802c99baa5f2119e6154f8e553cb822a1",
+  "baselineMain": "42d8653f68cc7cb4efd94ad0887c2f09401ed5e0",
+  "state": "approval-service-recovered; scoped tree prepared; checkpoint and production verification next",
+  "previousAttempts": {
+    "operation": "github_create_tree",
+    "attempts": 2,
+    "executed": false,
+    "reason": "Automatic approval review thread-store RateLimited429"
+  },
+  "recovery": "Same operation succeeded on next user turn",
+  "bypassAttempted": false,
+  "commercialApproved": false
+}

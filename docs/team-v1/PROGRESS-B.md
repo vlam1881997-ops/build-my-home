@@ -4,7 +4,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: A+B bbbd70f đã review native C01/C02/C03/C04; CSS báo giá/vay phone đã sửa; next B3 style-specific refinement và dữ liệu/config thương mại còn pending
+- active_substep: B3 source verified locally; approval service recovered and scoped GitHub tree prepared; publish checkpoint/CI/main/Vercel verification next
 - target_branch: codex/b-v1-24
 - actual_branch: codex/review-ab-c08 (local isolated review); remote resume codex/b-v1-24
 - source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff (520 remote blob bytes đã đối chiếu trong checkout mới; giữ WIP cũ nguyên)
@@ -119,3 +119,23 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Bằng chứng: evidence/B/AB-C08-review/PRODUCTION-VERIFICATION.json và production-ui-smoke.json. Không đánh dấu G1–G6 thương mại done.
 
 - Observability: runtime logs403, CLI Vercel không có; giữ server-error scan pending. Không thử connection/bypass khác.
+
+## B3 — Ảnh vật liệu, giá có nguồn và chi tiết 3D — 09/10/2026
+
+- Baseline đã live main42d8653 / remoteB b04de868; giữ nguyên A1–A6 measured geometry/state/build/BOQ. Không thay dependency hoặc mở API trả phí.
+- Danh mục95 sản phẩm: thêm13 minh họa SVG gốc BMH, safe category fallback; ảnh có nhãn minh họa, không nhận là ảnh đúng SKU. Showroom dùng mẫu bề mặt CC0 hiện có trong repo.
+- 13 giá tham khảo có amount/unit/nguồn/region/publisher/retrievedAt09/10/2026: 6 giá web vừa đối chiếu, 7 giá bảng2025/tháng06/2026 có nhãn cũ. quotedAt/VAT/công/vận chuyển thiếu vẫn null. 82 sản phẩm chưa có giá giữ unknown. Chọn sản phẩm không tự ghi đè báo giá dự án.
+- 3D measured: wall cut caps lấy đúng màu vật liệu thay cyan; len chân tường/phào theo room/wall intervals, chừa cửa/low fixtures, theo chiều cao từng tầng; texture sơn sạch hơn; rèm dùng floor level thật; chăn có bề mặt vải gấp thay khối sọc. Không đổi footprint/phòng/ô mở/kết cấu của A.
+- Node22.23.3 npm test460/460 đạt. Desktop1440×1040/phone390×844: 12 nhóm minh họa decode, nguồn/đơn vị/ngày/giá cũ, chọn SKU/profile→3D→đổi style→reload, measured plan/SKU giữ, neutral caps/new details/draped textile, 10tabs/no overflow/no JS/WebGL errors. SoftwareGPU finish switch1333/1115ms trong fixture, không suy thành benchmark thiết bị khách hàng.
+- B2–B6 native kiểm lại editor/drag/GLB/report/reload. Phone ghi nhận lần kiểm đầu chưa được đọc sau event; test nay chờ đúng saved report trước assertion (không force click hoặc bỏ qua lỗi). Final native desktop+phone đạt, không schema injection; result/GLB hash trong B3-material-realism.
+- Evidence/provenance/nguồn: evidence/B/B3-material-realism. Không đánh dấu B1/B3/G1–G6 done. Generic texture/illustration chưa phải exact SKU hoặc duyệt hình24style; mới là nâng cấp nguồn/hiển thị/measured detail.
+- Next: xác nhận production đúng commit/bundle; tiếp B3 facade/roof/room assets đặc trưng từng style + sample/SKU/licence/visual acceptance, không viết lại registry/editor/native measured source đã có.
+
+### B3 publish blocked — checkpoint saved locally
+- Tested local source commit afef9a7. 460/460 and final native desktop+phone/material stories passed.
+- Two identical GitHub create_tree attempts were NOT executed: automatic approval review could not initialize Habitat thread-store session (RateLimited429). This was a review infrastructure failure, not a safety determination. No alternate transport/connection was used to bypass approval.
+- RemoteB remains b04de868; main42d8653 / production remain the previous release. New SVGs/catalog/3D source have NOT reached the website. Do not claim this task is deployed.
+- Resume: preserve local bmh-review-ab-c08/checkpoint and package. Re-read main/B heads, publish exactly36 scoped changed files on baseB b04de868 tree0bb22475, CAS expectedB head, open ready PR, wait CI, merge per existing user authorization, verify production commit and public bundle/UI. Do not repeat model/editor implementation or retry denied preview/runtime access.
+
+### Publication resumed
+- Service recovered on the next user turn. Same scoped create_tree operation succeeded; no bypass or alternate credentials. Source tree prepared; branch/PR/CI/production steps must still be verified separately.

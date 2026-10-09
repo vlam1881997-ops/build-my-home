@@ -30,3 +30,34 @@
 .style-material-brief small,.style-material-status{font-size:12px;line-height:1.5;color:#596751;overflow-wrap:anywhere}
 .style-material-status{display:block;margin:6px 0}
 @media(max-width:600px){.style-material-brief{padding:15px}.style-material-brief h3{font-size:19px}}
+/* Material showroom: original product illustrations, visible dated prices and
+   licensed generic texture samples. These never claim a supplier SKU photo. */
+html.bmh-v60 .web-products{grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:18px}
+html.bmh-v60 .web-product{display:flex;flex-direction:column;min-width:0;padding:0;overflow:hidden;border:1px solid #dbe2d6;border-radius:16px;background:#fff}
+html.bmh-v60 .web-product.selected{border-color:#53795b;box-shadow:0 0 0 2px #dce9d8}
+html.bmh-v60 .web-product>div{padding:17px;display:flex;flex-direction:column;gap:9px;flex:1;min-width:0}
+html.bmh-v60 .web-product h3{font-size:16px;line-height:1.4;margin:0;color:#263d31}
+html.bmh-v60 .web-product p{margin:0;font-size:12px;line-height:1.6}
+html.bmh-v60 .web-product small{font-size:11px;line-height:1.5;white-space:normal}
+html.bmh-v60 .material-product-visual{margin:0;position:relative;height:174px;background:#eef0e7;overflow:hidden}
+html.bmh-v60 .material-product-visual img{width:100%;height:100%;display:block;object-fit:cover;border-radius:0}
+html.bmh-v60 .material-product-visual figcaption{position:absolute;left:10px;bottom:9px;padding:4px 7px;border-radius:5px;font-size:10px;color:#425c48;background:#fffffff0}
+html.bmh-v60 .material-price-summary{display:grid;gap:5px;padding:12px;border-radius:10px;background:#f0f5ec;min-width:0}
+html.bmh-v60 .material-price-summary>b{font-size:17px;color:#31503b;line-height:1.5}
+html.bmh-v60 .material-price-summary>span{font-size:11px;font-weight:650;color:#517256}
+html.bmh-v60 .material-price-summary[data-price-freshness="stale"],html.bmh-v60 .material-price-summary[data-price-freshness="expired"]{background:#faf3e6}
+html.bmh-v60 .material-price-summary[data-price-freshness="stale"]>span,html.bmh-v60 .material-price-summary[data-price-freshness="expired"]>span{color:#866329}
+html.bmh-v60 .material-price-summary>a,html.bmh-v60 .material-source-link{font-size:12px;color:#3b6449;text-decoration:underline;overflow-wrap:anywhere}
+html.bmh-v60 .web-product [data-web-product]{margin-top:auto;width:100%;min-height:44px;border-radius:9px;background:#345d42;color:#fff}
+html.bmh-v60 .material-price-facts summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-size:12px;font-weight:650}
+html.bmh-v60 .material-price-facts p{margin:8px 0}
+html.bmh-v60 .finish-swatch{position:relative;overflow:hidden;isolation:isolate}
+html.bmh-v60 .finish-swatch .finish-photo{display:block;width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply;opacity:.72}
+html.bmh-v60 .visual-material-groups button .finish-swatch{width:64px;height:64px;border-radius:8px;flex:none}
+html.bmh-v60 .visual-material-groups button{min-height:88px}
+html.bmh-v60 .showroom-preview{grid-template-columns:minmax(170px,235px) 1fr;gap:22px}
+html.bmh-v60 .showroom-material-image{position:relative;align-self:start;margin:0;background:#eef0e7;border-radius:12px;overflow:hidden}
+html.bmh-v60 .showroom-material-image>img{width:100%;display:block}
+html.bmh-v60 .showroom-material-image>figcaption{font-size:11px;color:#4a6550;padding:0 12px 12px}
+html.bmh-v60 .showroom-material-image>.finish-swatch{position:absolute;width:64px;height:64px;right:10px;bottom:9px;border:3px solid #fff;border-radius:10px;box-shadow:0 4px 12px #334f3426}
+@media(max-width:600px){html.bmh-v60 .showroom-preview{grid-template-columns:1fr}html.bmh-v60 .showroom-material-image{width:100%;max-width:320px}html.bmh-v60 .material-product-visual{height:190px}html.bmh-v60 .web-product>div{padding:15px}}
