@@ -8,7 +8,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-v1-24
 - source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff (520 remote blob bytes đã đối chiếu trong checkout mới; giữ WIP cũ nguyên)
-- last_verified_commit: 05c49aed7dd511005782791e465831add9399f38 (checkpoint B1 đầu tiên: Node22 78 ca + browser desktop/phone; chưa nghiệm thu integration gate)
+- last_verified_commit: 3c2b25992a28276a200b8fc4e74e7dc7a2f4c0a7 (source B1: Node22 397 ca npm test + 11 ca mới; browser desktop/phone và byte hashes đã kiểm; chưa nghiệm thu integration gate)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -58,3 +58,5 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR/test. Khi ready_for_integration, ghi head SHA/PR/fixtures còn thiếu; khi done ghi integrated SHA và gate.
 
 - Checkpoint tiếp: facade cũng xét explicitRoles để cache sàn không khóa vật liệu mặt ngoài; Node22 79/79 ca đạt. Browser evidence ở checkpoint trước; sửa predicate này có ca logic + regression geometry riêng, không tuyên bố duyệt 24 hình.
+
+- PR bàn giao: https://github.com/vlam1881997-ops/build-my-home/pull/36 (draft; B1 vẫn in_progress). Head source 3c2b259; 16 file remote khớp byte với local. Node22 npm test 397/397 đạt, 11 ca B mới chạy riêng. Vercel status success cho source 3c2b259 là deployment PR, không phải production main. CI GitHub lúc ghi đang in_progress.
