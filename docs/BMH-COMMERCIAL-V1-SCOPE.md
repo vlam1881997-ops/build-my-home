@@ -6,10 +6,16 @@ Yêu cầu đã chốt: **hoàn thiện 24 phong cách hiện có, bổ sung v�
 
 Tài liệu này là phạm vi chung cho các phiên làm việc và cả hai Codex. Khi kế hoạch cũ rộng hơn, thực hiện theo phạm vi này. Đây là khóa phạm vi và tiêu chí bàn giao, không phải thông báo phần mềm đã hoàn thành.
 
+## Luồng đầu ra đã chốt
+
+**Hồ sơ đầu vào tổng hợp (phong cách + đất + gia đình/phong thủy + vị trí + vốn/ngân sách) → bản vẽ phù hợp → vật liệu phù hợp → 3D cùng thiết kế → dự toán chi tiết và tối ưu → hỗ trợ vay vốn → bàn giao hồ sơ thiết kế → thi công/giám sát.** Vốn được xét từ đầu; sau khi tính vay có thể quay lại tối ưu phương án. Bàn giao thiết kế phải trước khởi công; hồ sơ hoàn công là đầu ra sau thi công, có tiêu chí riêng.
+
+Đối chiếu nền PR #34 và công việc còn lại: [PR34-COMMERCIAL-GAP-20261009.md](PR34-COMMERCIAL-GAP-20261009.md). Các tab/độ hoàn chỉnh đang trộn bàn giao thiết kế với bàn giao công trình cần được sửa theo luồng này; việc ghi tài liệu không tự sửa giao diện.
+
 ## 1. Phạm vi cố định
 
 - Giữ đúng 24 ID phong cách trong bảng dưới; không thêm phong cách thứ 25, đổi ID hoặc bỏ phong cách đã có trong v1.
-- Giữ luồng hiện tại: đầu vào → khu đất → gia đình/công năng từng tầng → bản vẽ → vật liệu → 3D → dự toán/ngân hàng → tiến độ → hồ sơ/bàn giao, theo điều hướng 10 tab đang có.
+- Giữ luồng hiện tại: đầu vào → khu đất → gia đình/công năng từng tầng → bản vẽ → vật liệu → 3D → dự toán → ngân hàng → bàn giao hồ sơ thiết kế → thi công/giám sát và hồ sơ hoàn công, theo điều hướng 10 tab đang có.
 - Nâng cấp độ chính xác, chất lượng hình ảnh, vật liệu, thao tác và độ tin cậy của luồng đó. Không mở thêm dòng sản phẩm, bộ điều phối tài khoản hay tính năng phụ để trì hoãn đầu ra chính.
 - Khách được sửa bố trí, thêm/xóa phòng, cửa, cửa sổ và chọn vật liệu. Gợi ý phong cách/phong thủy không âm thầm thay lựa chọn khách.
 - Dự án cũ và phối vật liệu riêng phải tiếp tục mở được. Vật liệu khác bảng gợi ý vẫn được chọn, với phản hồi về độ phù hợp thay vì tự thay thế.
