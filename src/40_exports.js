@@ -27,7 +27,7 @@ BMH.planDxf=(floor=BMH.state.ui.planner.floor)=>{
  pair(0,'SECTION');pair(2,'HEADER');pair(9,'$ACADVER');pair(1,'AC1021');pair(9,'$INSUNITS');pair(70,4);pair(9,'$MEASUREMENT');pair(70,1);pair(0,'ENDSEC');
  pair(0,'SECTION');pair(2,'TABLES');pair(0,'TABLE');pair(2,'LAYER');pair(5,'10');pair(100,'AcDbSymbolTable');pair(70,layers.length);
  layers.forEach((name,i)=>{pair(0,'LAYER');pair(5,(32+i).toString(16).toUpperCase());pair(330,'10');pair(100,'AcDbSymbolTableRecord');pair(100,'AcDbLayerTableRecord');pair(2,name);pair(70,0);pair(62,name==='WALLS'?7:name==='WINDOWS'?4:8);pair(6,'CONTINUOUS');});pair(0,'ENDTAB');
- pair(0,'TABLE');pair(2,'APPID');pair(70,1);pair(0,'APPID');pair(100,'AcDbSymbolTableRecord');pair(100,'AcDbRegAppTableRecord');pair(2,'BMH');pair(70,0);pair(0,'ENDTAB');pair(0,'ENDSEC');pair(0,'SECTION');pair(2,'ENTITIES');
+ pair(0,'TABLE');pair(2,'APPID');pair(5,'11');pair(100,'AcDbSymbolTable');pair(70,1);pair(0,'APPID');pair(5,'12');pair(330,'11');pair(100,'AcDbSymbolTableRecord');pair(100,'AcDbRegAppTableRecord');pair(2,'BMH');pair(70,0);pair(0,'ENDTAB');pair(0,'ENDSEC');pair(0,'SECTION');pair(2,'ENTITIES');
  const parcel=p.site.useParcelGeometry?BMH.parcelGeometry?.():null;
  if(parcel)poly(parcel.points,'PLOT',{kind:'parcel-boundary',basis:parcel.basis});else rect(0,0,p.site.width,p.site.depth,'PLOT',{kind:'dimension-envelope',basis:'customer-dimensions'});
  const holes=BMH.stairFloorHoles?.(floor)||[];

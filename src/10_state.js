@@ -37,7 +37,7 @@ BMH.defaultState = () => ({
     aiScan:{sourceName:'',mimeType:'',scannedAt:'',model:'',provider:'',intent:'reference',appliedAt:'',result:{}},
     homeFinish:{photos:[],activePhotoId:'',preferences:{style:'Hiện đại',budget:'balanced',notes:''},analyses:{},selected:{},satisfaction:{signature:'',confirmedAt:''},geometryKey:''},
     measuredDesign:{roof:{type:'auto',pitchDeg:0,overhang:-1,ridge:'auto',surface:'auto',color:''},wallThickness:{exterior:.22,interior:.12}},
-    costPlan:{contingencyPct:10,pricing:{},extras:{},applications:[],quotes:{},conversions:[],exclusions:[]},
+    costPlan:{contingencyPct:10,pricing:{},extras:{},applications:[],quotes:{},conversions:[],exclusions:[],scopeCoverage:[]},
     performance:{solarEnabled:true,rainwaterEnabled:true,coolRoof:true,smartShading:true,mode:'balanced'},
     dataEngine: BMH.defaultDataEngineState(),
     wearYear:0,
@@ -113,7 +113,7 @@ BMH.planFurnitureIssues=(plan=BMH.state.project.plan)=>{
     if(typeof item?.modelId!=='string'||!item.modelId)add('furniture-model','Thiếu model nội thất.');
     const dimensions=[item?.pose?.x,item?.pose?.y,item?.pose?.z,item?.pose?.rotationDeg,item?.size?.width,item?.size?.depth,item?.size?.height];
     if(!dimensions.every(Number.isFinite)||item?.pose?.z<0||![item?.size?.width,item?.size?.depth,item?.size?.height].every(n=>n>0))add('furniture-dimensions','Vị trí / góc / kích thước nội thất không hợp lệ.');
-    if(!Array.isArray(item?.materialBindings))add('furniture-materials','Danh sách vật liệu nội thất không hợp lệ.');
+    if(!Array.isArray(item?.materialBindings)||item.materialBindings.some(m=>!m||typeof m!=='object'||Array.isArray(m)))add('furniture-materials','Danh sách vật liệu nội thất không hợp lệ.');
   }
   return issues;
 };

@@ -13,7 +13,7 @@
    const report=B.teamBEvidenceReport(raw.report);if(report)row.report=report;
    if(Array.isArray(raw.reportHistory))row.reportHistory=raw.reportHistory.slice(-20).flatMap(h=>{const r=B.teamBEvidenceReport(h);return r?[{at:String(h.at||'').slice(0,40),...r}]:[];});
    if(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\/[A-Za-z0-9_-]{1,80}-[a-f0-9]{64}\.(jpg|png|webp|pdf)$/.test(raw.cloudKey||'')&&/^[a-f0-9]{64}$/.test(raw.cloudSha256||'')){
-    for(const key of ['cloudKey','cloudSha256','cloudProjectId','cloudUploadedAt'])row[key]=String(raw[key]||'').slice(0,280);
+    for(const key of ['cloudKey','cloudSha256','cloudProjectId','uploadedAt'])row[key]=String(raw[key]||'').slice(0,280);
    }
   }
  };

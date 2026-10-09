@@ -61,8 +61,34 @@ test('finance terms, zero fees, ledger and sourced application persist through w
 });
 test('handover distinguishes design/field reports/as-built; only documented professional inspection accepts current revision',()=>{
  const B=fixture(),input={title:'TEST check',observedAt:'2026-10-09',sourceReference:'TEST inspection'};const user=B.supervisionAdapter.append('inspections',{...input,requestedState:'accepted'});assert.equal(user.state,'awaiting-review');assert.equal(B.handoverStatus().asBuiltReady,false);
- const professional=B.supervisionAdapter.append('inspections',{...input,reviewer:{name:'TEST KS',role:'engineer'},reviewEvidence:{reference:'TEST signed document'},reviewedAt:'2026-10-09',requestedState:'accepted'});assert.equal(professional.state,'accepted');B.state.project.plan.rooms[0].w+=.1;assert.equal(B.supervisionAdapter.list('inspections').find(r=>r.id===professional.id).state,'stale');assert.equal(B.handoverStatus().certifiedForConstruction,false);
+ const professional=B.supervisionAdapter.append('inspections',{...input,reviewer:{name:'TEST KS',role:'engineer'},reviewEvidence:{reference:'TEST signed document'},reviewedAt:'2026-10-09',requestedState:'accepted'});assert.equal(professional.state,'documented-acceptance');assert.equal(B.supervisionAdapter.list('inspections').find(r=>r.id===professional.id).certified,false);B.state.project.plan.rooms[0].w+=.1;assert.equal(B.supervisionAdapter.list('inspections').find(r=>r.id===professional.id).state,'stale');assert.equal(B.handoverStatus().certifiedForConstruction,false);
 });
 test('North/fengshui are explicitly missing, and public handoff never includes private finance',()=>{
  const B=fixture();B.state.project.finance.cash=987654321;B.state.project.household.ownerBirth=1997;assert.equal(B.siteInputAssessment().north.usable,false);assert.equal(B.fengshuiPlacementAdvice().status,'unknown');const data=JSON.stringify(B.designHandoverManifest());assert.doesNotMatch(data,/987654321|1997|ownerBirth|bankAccount/);assert.equal(B.privateFinancePackageFiles().length,0);assert.equal(B.privateFinancePackageFiles({includeFinance:true}).length,1);
+});
+test('shared delivery conflicts and incomplete professional system scopes cannot become a complete quote',()=>{
+ const B=fixture();B.state.project.plan.furniture=[chair('a'),{...chair('b'),pose:{x:5,y:4,z:0,rotationDeg:37},materialBindings:[{sku:'TEST-ONLY',specification:'Fixture chair',quoteId:'other-q'}]}];
+ B.setSourcedQuote('chair-quote',quote({transportGroup:'trip'}));B.setSourcedQuote('other-q',quote({transportGroup:'trip',transportAmount:6000}));
+ let s=B.commercialBoq();assert.ok(s.rows.filter(r=>r.furnitureId).every(r=>r.amount===null&&r.issues.some(i=>i.includes('mâu thuẫn'))));
+ B.state.project.constructionDesign.elements=[{id:'column',discipline:'structure',name:'TEST column'}];s=B.commercialBoq();assert.ok(s.rows.some(r=>r.code==='COVERAGE-structure'&&r.amount===null));
+ B.state.project.costPlan.scopeCoverage=[{roleId:'structure',confirmed:true,sourceReference:'TEST unverified scope',revision:B.drawingRevision(),elementIds:['column']}];assert.ok(B.commercialBoq().rows.some(r=>r.code==='COVERAGE-structure'));
+});
+test('malformed saved application/ledger/payment rows are retained and block readiness without crashing',()=>{
+ const B=fixture();B.state.project.costPlan.applications=[null];B.state.project.dossier.register.journal=[null];const raw=plain(B.state.project.dossier.register.journal);
+ assert.ok(B.commercialBoq().rows.some(r=>r.code==='INVALID-APPLICATION-0'&&r.amount===null));assert.equal(B.supervisionAdapter.list('journal')[0].state,'invalid-record');assert.ok(B.handoverStatus().missingDesign.includes('invalid-register:journal'));assert.deepEqual(plain(B.state.project.dossier.register.journal),raw);
+ const loan=B.simulateLoanTerms(terms());assert.equal(B.constructionCashflow({openingCash:100,reserve:0,income:10,living:1,existingDebt:0,loan,constructionPayments:[null]}).status,'unknown');assert.equal(B.simulateLoanTerms(terms({ratePeriods:[null]})).status,'unknown');
+});
+test('customer-entered rate/income/build-cost stress preserves the base design and financial terms',()=>{
+ const B=fixture();B.setFinanceScenario({...terms(),confirmed:true,constructionPayments:[{month:1,amount:10000000,sourceReference:'TEST payment'}]});Object.assign(B.state.project.finance,{cash:20000000,reserve:10000000,income:5000000,living:3000000,existingDebt:0});for(const k of ['cash','reserve','income','living','existingDebt'])B.recordProjectInput('finance.'+k,{confirmed:true,sourceReference:'TEST user input'});
+ const revision=B.drawingRevision(),before=plain(B.state.project.finance.scenario),stress=B.simulateFinanceStress({rateIncreasePct:3,incomeChangePct:-20,constructionIncreasePct:10});assert.ok(stress.extraInterest>0);assert.equal(stress.cashflow.rows[0].income,4000000);assert.equal(stress.cashflow.rows[0].construction,11000000);assert.equal(stress.loan.bankApproved,false);assert.equal(B.drawingRevision(),revision);assert.deepEqual(plain(B.state.project.finance.scenario),before);assert.equal(B.simulateFinanceStress({}).status,'unknown');
+});
+test('sourced North rejects impossible/future dates, and exported BOQ review stales independently of geometry',()=>{
+ const B=fixture();B.state.project.site.north={azimuthDeg:37,datum:'true-north',sourceReference:'TEST azimuth',observedAt:'2026-02-30',status:'provided'};assert.equal(B.siteInputAssessment().north.usable,false);B.state.project.site.north.observedAt='2099-01-01';assert.equal(B.siteInputAssessment().north.usable,false);
+ const revision=B.drawingRevision(),output=B.supervisionAdapter.append('outputs',{title:'TEST BOQ',outputType:'boq',priceKey:B.commercialBoq().priceKey,fileHash:'TEST-HASH',fileReference:'test.csv',sourceReference:'TEST export',observedAt:'2026-10-09'});B.setSourcedQuote('changed',quote());assert.equal(B.drawingRevision(),revision);assert.equal(B.supervisionAdapter.list('outputs').find(r=>r.id===output.id).state,'stale');
+});
+test('A3 material pages consume the same complete BOQ rows and furniture tables retain identity/angle',()=>{
+ const B=fixture();B.state.project.plan.furniture=[chair()];B.setSourcedQuote('chair-quote',quote());const sheets=B.architecturalMaterialSheets().join('');for(const row of B.commercialBoq().rows)assert.ok(sheets.includes('data-schedule-id="'+row.code+'"'));assert.match(sheets,/124200 VND/);assert.match(sheets,/tổng công trình unknown/);const furniture=B.furnitureScheduleSheet(0);assert.match(furniture,/data-schedule-id="chair"/);assert.match(furniture,/>37<\/text>/);assert.match(furniture,/ID món/);
+});
+test('public BOQ quote metadata excludes unrelated imported personal fields while retaining the saved original',()=>{
+ const B=fixture();B.state.project.plan.furniture=[chair()];B.setSourcedQuote('chair-quote',quote({bankAccount:'PRIVATE-FIXTURE',income:987654321}));assert.equal(B.state.project.costPlan.quotes['chair-quote'].bankAccount,'PRIVATE-FIXTURE');assert.doesNotMatch(JSON.stringify(B.designHandoverManifest()),/PRIVATE-FIXTURE|987654321|bankAccount/);assert.equal(B.commercialBoq().knownSubtotal,124200);
 });

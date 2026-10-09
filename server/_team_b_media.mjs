@@ -30,8 +30,10 @@ export async function projectMediaHandler(req,res){try{
  const records=[...(project.state?.project?.dossier?.evidence||[]),...(project.state?.project?.sourceRefs||[])];
  if(req.method==='POST'){
   if(!Number.isSafeInteger(body.expectedRevision)||body.expectedRevision!==project.revision)fail('Dự án đã thay đổi trên thiết bị khác. Đồng bộ trước khi tải tệp.',409,'PROJECT_CONFLICT');
-  if(records.length>=100&&!records.some(r=>r.id===evidenceId))fail('Tối đa 100 tham chiếu tệp trong một dự án.',413);
+  const record=records.find(r=>r.id===evidenceId);
+  if(!record)fail('Lưu tham chiếu tệp vào hồ sơ trước khi tải nội dung.',400,'MEDIA_REFERENCE_REQUIRED');
   const bytes=decodeProjectMedia(body.base64,body.type),sha256=createHash('sha256').update(bytes).digest('hex'),key=user.id+'/'+projectId+'/'+evidenceId+'-'+sha256+'.'+extensions[body.type];
+  if(record.cloudSha256&&record.cloudSha256!==sha256)fail('Tệp đã đồng bộ gắn với nội dung cũ. Thêm tệp mới nếu đổi bản gốc.',409,'MEDIA_CONTENT_CHANGED');
   await storage('object/'+bucket+'/'+key,{token,body:bytes,type:body.type});
   return send(res,200,{ok:true,file:{evidenceId,cloudKey:key,cloudProjectId:projectId,cloudSha256:sha256,size:bytes.length,type:body.type,uploadedAt:new Date().toISOString()},requiresProjectSave:true});
  }
