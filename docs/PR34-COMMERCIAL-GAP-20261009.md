@@ -41,6 +41,14 @@ PR #34 chỉ thay đổi hai tài liệu khóa phạm vi; chức năng ứng d�
 | Thi công / giám sát cuối cùng | Giai đoạn, tiến độ tự nhập, chi phí thực tế, mốc ngân sách, checklist MEP và tệp chứng cứ cục bộ | WBS theo công trình, nhật ký/ảnh theo vị trí và hạng mục, người phụ trách, biên bản nghiệm thu, lỗi và xử lý, thay đổi thiết kế/khối lượng, đối chiếu thanh toán/giải ngân, hoàn công/bảo hành. Checklist tự đánh dấu chưa phải nghiệm thu/giám sát chuyên môn |
 | Vận hành thương mại | Có mã cloud/auth/quota/đơn khách/MoMo và phục hồi cục bộ | Cấu hình và xác minh dịch vụ production, tài khoản/quyền dự án, lưu nhiều thiết bị, ảnh/tệp, backup/khôi phục, thu tiền/cấp quyền, quota chi phí AI, hỗ trợ/điều khoản và rollback; không quảng cáo dịch vụ tắt như đã dùng được |
 
+## Bổ sung phạm vi ngày 09/10: khách chỉnh nội thất từng món
+
+Khách được chọn, di chuyển, xoay 0–360° và xóa riêng từng món trong phòng qua 2D/3D. Phải lưu lựa chọn và giữ sau tải lại; đồng bộ bản vẽ, mô hình, bảng kê/dự toán và hồ sơ. Có hoàn tác/làm lại, kiểm tra va chạm/đường đi, giữ vật liệu và cập nhật tư vấn phong thủy theo hướng thực.
+
+Nguồn hiện tại `src/78_design_workflow.js` sinh đồ theo `roomFurnitureLayout()` và xoay qua `furnitureRotation` của phòng. `src/99_customer_design.js` có chỉnh fixture bàn thờ riêng, chưa cung cấp bộ chỉnh độc lập cho mọi đồ nội thất. Không tính xoay toàn phòng là đã đáp ứng yêu cầu này.
+
+Bổ sung vào gói 3, phối hợp gói 2 và 4: lưu ID/model/vị trí/góc/kích thước/SKU của từng món, trạng thái xóa không tự sinh lại; đưa cùng dữ liệu qua 2D/3D/xuất và chi phí. Nghiệm thu theo mục **Nội thất chỉnh sửa riêng từng món** trong tài liệu phạm vi v1.
+
 ## Lệch luồng phải sửa trước
 
 1. `src/89_guided_interface.js` đang đặt tab 9 **Thi công**, tab 10 **Bàn giao**. Giữ 10 tab nhưng đổi luồng mục tiêu thành tab 9 **Bàn giao hồ sơ**, tab 10 **Thi công & giám sát**; remap trạng thái điều hướng/link cũ và kiểm tra các override dùng chỉ số.

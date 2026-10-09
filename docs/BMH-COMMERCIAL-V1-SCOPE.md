@@ -67,6 +67,20 @@ Mỗi phong cách có một hồ sơ nghiệm thu, dùng cùng bản sửa đổ
 
 Phong cách được đánh dấu đạt chỉ khi có liên kết tới fixture, revision/commit, ảnh đầu ra, kết quả kiểm tra và người duyệt. Không đánh dấu đạt chỉ vì có ID trong danh sách hoặc test đơn vị chạy xanh.
 
+## Nội thất chỉnh sửa riêng từng món — yêu cầu v1
+
+Khách phải chọn được từng món trong phòng (giường, sofa, bàn, ghế, tủ, thiết bị và bàn thờ theo loại được hỗ trợ) trên bản vẽ 2D và mô hình 3D để **di chuyển, xoay theo góc mong muốn trong 0–360° và xóa món không cần**. Giao diện chạm/kéo đơn giản; các số đo/góc chi tiết nằm trong phần nâng cao.
+
+- Mỗi món có ID ổn định, thuộc phòng/tầng, kích thước, vị trí và góc riêng. Không dùng xoay cả bộ phòng thay cho xoay từng món.
+- Vị trí/góc đã sửa hoặc quyết định xóa được lưu trong dự án; đổi tab, tải lại, mở lại hoặc dựng lại cảnh không tự tạo lại đồ đã xóa hay trả bố trí về mặc định. Dự án cũ được chuyển đổi mà không mất dữ liệu.
+- Có chọn, kéo, xoay, xóa và hoàn tác/làm lại; tôn trọng khóa phòng/tầng và giữ camera khi chỉnh. Các thao tác thường dùng phải làm được trên điện thoại.
+- Kiểm tra vượt phòng, xuyên tường, chắn cửa/lối đi và va chạm theo kích thước/góc. Cảnh báo phong thủy dùng vị trí/hướng thực sau chỉnh; chỉ tư vấn, không tự di chuyển lại đồ.
+- Một nguồn dữ liệu cho biểu tượng/chi tiết nội thất 2D, mô hình 3D, bảng kê và hồ sơ xuất. Thay góc phải đổi hướng hiển thị thực, không chỉ số trong biểu mẫu. Ảnh phối cảnh AI không phải bề mặt có thể kéo đồ trực tiếp.
+- Giữ model/phong cách/vật liệu/SKU đã chọn khi di chuyển hoặc xoay. Xóa món khỏi phương án làm cập nhật bảng kê và phần dự toán có liên kết; không tự suy khoản tiết kiệm khi chưa có giá hoặc vẫn nằm trong giá gói.
+- Kiểm tra bằng chọn một giường/sofa/tủ riêng, di chuyển và xoay góc không vuông, xóa một món rồi hoàn tác/làm lại, lưu/mở lại và đối chiếu 2D/3D/file xuất/chi phí. Dùng ca nhiều phòng/tầng để xác nhận không sửa nhầm món khác.
+
+Trạng thái khi bổ sung: nguồn hiện có `roomFurnitureLayout()` sinh đồ mẫu và `furnitureRotation` xoay cả bộ; fixture bàn thờ có đường chỉnh riêng. Chưa nghiệm thu đầy đủ bộ chỉnh sửa độc lập từng món. Đây là yêu cầu phải triển khai, không phải tính năng đã hoàn thành.
+
 ## 4. Dữ liệu vật liệu và chi phí
 
 - Mỗi sản phẩm cần nhà cung cấp, mã/quy cách khi có, đơn vị, vị trí dùng, thông tin kỹ thuật và nguồn tham khảo. Texture cần nguồn/quyền sử dụng và tỷ lệ thực; hình catalog không tự động là texture PBR hợp lệ.
