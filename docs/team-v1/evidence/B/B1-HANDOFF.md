@@ -27,7 +27,7 @@ Compatibility: `design-suggestion` dựa trên `product.styleIds` của danh m�
 
 ## Kiểm tra
 
-- Node 22.23.3: build, syntax; 78/78 ca liên quan (10 ca B mới + 68 ca hiện có).
+- Node 22.23.3: build, syntax; 79/79 ca liên quan (11 ca B mới + 68 ca hiện có).
 - Browser Chromium: desktop 1440×1040 và phone 390×844; chọn hàng và bề mặt qua UI → 3D → đổi phong cách → reload, giữ SKU và số đo, 10 tab, không overflow/JS/WebGL error. Xem `B1-browser/result.json` và ảnh.
 - API/AI/thanh toán bị cô lập; không tạo giao dịch, không gọi dịch vụ tính phí.
 - Ảnh phòng test chỉ chứng minh thao tác, không nghiệm thu ngoại thất/nội thất 24 phong cách.

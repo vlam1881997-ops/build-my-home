@@ -47,6 +47,12 @@ test('applying only a supplier floor does not freeze cached wall/wood/fabric def
  b.selectHouseStyle('industrial');const palette=b.finishPalette(room.id),spec=b.styleSpecification('industrial');assert.equal(palette.visualMaterials.floor,'oak-floor');assert.equal(palette.visualMaterials.fabric,spec.defaultMaterials.fabric);assert.equal(palette.fabric,b.VISUAL_MATERIALS.find(x=>x.id==='cognac-leather').color);assert.equal(palette.visualMaterials.wall,'grey-paint');assert.equal(b.showroomFinishInfo(room.id)[0].id,product.id);
 });
 
+test('facade uses its style identity when a saved finish cache only marks the floor as authored',()=>{
+ const b=make(),p=b.state.project;p.materials.finish.exterior={wall:'#f4eee4',accent:'#a47e51',floor:'#c7aa80',visualMaterials:{wall:'ivory-paint',accent:'natural-oak',floor:'oak-floor'},explicitRoles:{floor:true}};
+ b.selectHouseStyle('industrial');const facade=b.facadeFinishPalette();assert.equal(facade.manualAccent,false);assert.equal(facade.manualWall,false);assert.equal(facade.facadeSurface,'brick');
+ p.materials.finish.exterior.explicitRoles.accent=true;assert.equal(b.facadeFinishPalette().manualAccent,true);assert.equal(b.facadeFinishPalette().facadeSurface,'selected');
+});
+
 test('catalog filtering distinguishes curation from a source/sample check and checks role categories',()=>{
  const b=make();b.selectHouseStyle('japandi');const product={id:'x',category:'floor',name:'Vật liệu chưa có mẫu'};
  assert.equal(b.styleMaterialCompatibility(product).status,'needs-sample');assert.equal(b.materialStyleFits(product),true);

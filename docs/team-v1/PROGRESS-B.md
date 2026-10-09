@@ -8,7 +8,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-v1-24
 - source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff (520 remote blob bytes đã đối chiếu trong checkout mới; giữ WIP cũ nguyên)
-- last_verified_commit: 3c7f510d516a0770e79633b64a3896035e162aff (nguồn nền; source implementation ở checkpoint mới được test, chưa nghiệm thu integration gate)
+- last_verified_commit: 05c49aed7dd511005782791e465831add9399f38 (checkpoint B1 đầu tiên: Node22 78 ca + browser desktop/phone; chưa nghiệm thu integration gate)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -26,11 +26,11 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 - Đã thay behavior/UI B1: registry đủ 24 hồ sơ, 10 vai trò/hồ sơ; style defaults dùng chung collection/resolved palette/showroom.
 - Giữ vật liệu, SKU, collection manual và số đo; sửa palette cache sàn không được đóng băng defaults của tường/gỗ/vải khi đổi style. Legacy chưa có marker giữ bảo toàn.
 - Read-only C02 bridge mang SKU/spec/unit/priceEvidence; giá/khối lượng thiếu null, trần/vải chưa có category giữ null; không cộng trùng vai trò cùng category.
-- Source đổi: src/44_house_styles.js, 86_visual_materials.js, 90_product_polish.js, 99_customer_design.js, product-polish.css. Tests/evidence B mới và B1-HANDOFF.md.
+- Source đổi: src/44_house_styles.js, 86_visual_materials.js, 90_product_polish.js, 99_customer_design.js, 102_architectural_identity.js, product-polish.css. Tests/evidence B mới và B1-HANDOFF.md.
 
 ## Kiểm tra / bằng chứng
 - Inventory bằng helper designClient() hiện có; kiểm tra số ID/danh mục. Helper có stub, không phải QA trình duyệt hoặc model thực.
-- Node 22.23.3: build/syntax và 78/78 logic cases liên quan đạt; 10 ca B mới và 68 ca hiện có. Không thay dependency pinned.
+- Node 22.23.3: build/syntax và 79/79 logic cases liên quan đạt; 11 ca B mới và 68 ca hiện có. Không thay dependency pinned.
 - UI thật desktop/phone: showroom → chọn SKU/profile → 3D → đổi style → reload; giữ số đo/SKU/manual floor, tự cập nhật fabric/wall chưa authored, đủ 10 tab, không JS/WebGL errors hoặc overflow. Evidence B1-browser/result.json + PNG.
 - Chưa nghiệm thu 24 ảnh ngoại thất/nội thất; không gọi API tính phí.
 
@@ -56,3 +56,5 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
 - 09/10/2026: B1 implementation đầu tiên có 24 profile/240 material rows, showroom UI, shared finish resolver và C02; Node22 logic/browser có bằng chứng. Lưu source+checkpoint trên nhánh B, mở draft PR; giữ B1 in_progress và G1 pending. B2–B6 chưa hoàn tất.
 
 Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR/test. Khi ready_for_integration, ghi head SHA/PR/fixtures còn thiếu; khi done ghi integrated SHA và gate.
+
+- Checkpoint tiếp: facade cũng xét explicitRoles để cache sàn không khóa vật liệu mặt ngoài; Node22 79/79 ca đạt. Browser evidence ở checkpoint trước; sửa predicate này có ca logic + regression geometry riêng, không tuyên bố duyệt 24 hình.
