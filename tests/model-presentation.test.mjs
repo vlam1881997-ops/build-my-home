@@ -83,6 +83,14 @@ test('an image that finishes encoding after a look change is rejected',async()=>
  b.studio3d={renderer,scene:new THREE.Scene(),camera:new THREE.PerspectiveCamera(),renderFrame(){}};const image=b.sharpStudioFrame(1280);await new Promise(resolve=>setImmediate(resolve));assert.equal(typeof finish,'function');b.state.ui.modelLook='materials';finish(new Blob(['PNG']));assert.equal(await image,null);assert.deepEqual(size.toArray(),[800,500]);assert.equal(b.studio3d.sharpExport,null);
 });
 
+test('Architect3D serializes the measured height of each floor in centimetres',()=>{
+ const project={site:{floors:3},plan:{rooms:[],openings:[]}},heights=[3.8,3.4,3.1];
+ const b={state:{project,ui:{}},projectLevels:()=>({floors:3,floorHeight:3.4,slab:.14}),studioLevels:()=>({floors:3,floorHeight:3.4,slab:.14}),studioFloorLevel:f=>({base:heights.slice(0,f).reduce((a,n)=>a+n,0),height:heights[f],slab:.14}),wallSegments:()=>[{o:'h',a:0,b:5,c:0}],floorRooms:()=>[],disposeStudio3D(){},resetStudio3D(){},mountStudio3D(){},$:()=>null};
+ vm.runInNewContext(fs.readFileSync('src/77_architect3d.js','utf8'),{BMH:b,window:{},document:{},console});
+ const document=b.architectDocument();assert.deepEqual(Array.from(document.levels,x=>x.height),[380,340,310]);
+ assert.ok(Object.values(document.floorplan.corners).every(x=>Math.abs(x.elevation-366)<1e-8));
+});
+
 test('facade styles change profiles without changing measured rooms, openings or room finishes',()=>{
  const project={style:'Hiện đại',site:{width:8,depth:12,floors:2},plan:{rooms:[{id:'a',floor:0,type:'living',x:1,y:2,w:6,h:7},{id:'b',floor:1,type:'bed',x:1,y:2,w:6,h:7}],openings:[{id:'wa',roomId:'a',floor:0,kind:'window',side:'north',width:2.4,offset:.137,height:1.4,sill:.9},{id:'wb',roomId:'b',floor:1,kind:'window',side:'north',width:1.6,offset:.5,height:1.4,sill:.9}]},materials:{finish:{rooms:{a:{wall:'#ffedda',accent:'#443322'}}}}};let style={id:'modern'};
  const b={state:{project,ui:{}},houseStyle:()=>style,finishPalette:id=>project.materials.finish.rooms[id]||{},projectLevels:()=>({floors:2,floorHeight:3.4,slab:.14}),measuredWallThickness:()=>.22,sceneRoofSpec:()=>null,sceneFootprintBounds:rooms=>rooms.length?{x:rooms[0].x,y:rooms[0].y,width:rooms[0].w,depth:rooms[0].h,cx:rooms[0].x+rooms[0].w/2,cy:rooms[0].y+rooms[0].h/2,rectangular:true}:null,floorRooms:f=>project.plan.rooms.filter(r=>r.floor===f),furnitureSvg:()=>'',esc:String,clamp:(n,a,z)=>Math.max(a,Math.min(z,n)),measuredDesignSettings:()=>({roof:{overhang:0}})},ctx={BMH:b,window:{},document:{addEventListener(){}},structuredClone,console};

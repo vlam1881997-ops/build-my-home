@@ -4,6 +4,9 @@
  * fd0219dc775863754ae00bc561dbdbb2e72a14d2. Full notice: assets/licenses/neonplan3d-MIT.txt. */
 (()=>{
  const B=BMH,esc=B.esc,materialPatches=new WeakMap(),thumbs=new Map();
+ // A's export gate reads this only after the measured Three.js and Architect3D
+ // consumers are loaded. Each floor uses its cumulative base and own height.
+ B.STUDIO_LEVELS_CONTRACT=1;
  const template=html=>{const t=document.createElement('template');t.innerHTML=html;return t;};
  const normalize=B.normalizeState;
  B.normalizeState=()=>{normalize();const u=B.state.ui;u.exteriorCamera=['front','overview'].includes(u.exteriorCamera)?u.exteriorCamera:'front';u.modelLook=u.modelLook==='materials'?'materials':'neon';u.modelWalls=['auto','cut','full'].includes(u.modelWalls)?u.modelWalls:'auto';u.modelRoomId=String(u.modelRoomId||'');u.modelLightLevel=B.clamp(Number.isFinite(Number(u.modelLightLevel))?Number(u.modelLightLevel):75,0,100);};
