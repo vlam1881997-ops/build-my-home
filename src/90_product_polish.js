@@ -70,7 +70,19 @@
   const scope='<label>Phạm vi áp dụng<select data-showroom-scope="'+category+'"><option value="unassigned">Phòng chưa chọn riêng</option>'+rooms.map(r=>'<option value="room:'+esc(r.id)+'">Tầng '+(r.floor+1)+' · '+esc(r.name)+'</option>').join('')+'<option value="all">Toàn nhà · thay bề mặt đã chọn</option></select></label>';
   return '<section class="showroom-preview" aria-label="Vật liệu đã chọn và bề mặt 3D"><i class="finish-swatch finish-'+profile.kind+'" style="--finish-color:'+profile.color+'" aria-hidden="true"></i><div><span>'+esc(config.label)+' đã chọn</span><h3>'+esc(product.name)+'</h3><small>'+esc(product.sku||'Chưa có mã hàng')+'</small><label>Bề mặt mô phỏng<select data-showroom-profile="'+category+'">'+B.VISUAL_MATERIALS.filter(p=>p.role===config.role).map(p=>'<option value="'+p.id+'" '+(p.id===profile.id?'selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select></label>'+scope+'<p>Bề mặt mô phỏng chung, chưa phải ảnh hoặc texture đúng mã hàng. Báo giá giữ theo sản phẩm đã chọn.</p>'+(status?.status==='stale'?'<p role="status">'+esc(status.reason)+'</p>':'')+'<button type="button" data-showroom-3d="'+category+'" '+(!room?'disabled':'')+'>Áp dụng & xem 3D →</button>'+(!room?'<small>Tạo phòng ở mục Bản vẽ để xem vật liệu trong 3D.</small>':'')+'</div></section>';
  };
- const catalog=B.materialCatalogHtml;if(catalog)B.materialCatalogHtml=category=>{const preview=B.showroomPreviewHtml(category),alternatives=catalog(category);return preview+(preview&&B.guidedDetails?B.guidedDetails('showroom:'+category,'So sánh sản phẩm khác',alternatives):alternatives);};
+ B.styleMaterialBriefHtml=category=>{
+  const spec=B.styleSpecification();if(!spec)return '<p class="style-material-brief">Phong cách riêng: cần chốt mẫu vật liệu trước khi xác nhận phù hợp.</p>';
+  const roles=B.styleMaterialMatrix().filter(x=>x.category===category),esc=B.esc;if(!roles.length)return '';
+  return '<section class="style-material-brief" aria-label="Vật liệu theo phong cách"><span>VẬT LIỆU THEO PHONG CÁCH</span><h3>'+esc(spec.name)+'</h3><p>'+roles.map(r=>'<b>'+esc(r.name)+'</b>: '+esc(r.intent)).join('<br>')+'</p><details><summary>Quy cách cần chốt & cách tiết kiệm</summary>'+roles.map(r=>'<p><b>'+esc(r.name)+'</b> · '+r.requirements.map(esc).join(' · ')+'</p>').join('')+'<p>'+esc(spec.budgetOptions.economy)+'</p><small>Chưa tính mức tiết kiệm khi thiếu báo giá cùng quy cách. Màu và vật liệu bạn đã chọn được giữ.</small></details><small>Gợi ý BMH; đối chiếu mẫu hãng trước khi chốt mã hàng.</small></section>';
+ };
+ // Explicit catalogue suggestions are filterable; unreviewed products stay visible
+ // with their uncertainty, rather than silently being called compatible.
+ B.materialStyleFits=product=>!['different-style','different-role','unknown-style','missing-product'].includes(B.styleMaterialCompatibility(product).status);
+ const productCard=B.webProductCard;if(productCard)B.webProductCard=product=>{
+  const status=B.styleMaterialCompatibility(product),label=status.status==='design-suggestion'?'Gợi ý theo phong cách':status.status==='different-style'?'Gợi ý cho phong cách khác':'Cần đối chiếu mẫu';
+  return productCard(product).replace('<h3>','<small class="style-material-status" title="'+B.esc(status.reason)+'">'+label+'</small><h3>');
+ };
+ const catalog=B.materialCatalogHtml;if(catalog)B.materialCatalogHtml=category=>{const brief=B.styleMaterialBriefHtml(category),preview=B.showroomPreviewHtml(category),alternatives=catalog(category);return brief+preview+(preview&&B.guidedDetails?B.guidedDetails('showroom:'+category,'So sánh sản phẩm khác',alternatives):alternatives);};
  const studio=B.screen7;B.screen7=()=>{
   let html=studio();const room=B.state.project.plan.rooms.find(r=>'room:'+r.id===B.state.ui.sceneFocus),info=B.showroomFinishInfo(room?.id),esc=B.esc;
   const selected=info.length?'<section class="studio-supplier-choice"><b>Sản phẩm đã chọn</b>'+info.map(x=>'<p>'+esc(x.name)+'<small>'+esc([x.sku,'Mô phỏng: '+x.profileName].filter(Boolean).join(' · '))+'</small></p>').join('')+'<a href="#" data-nav="5">Mở showroom →</a></section>':'';

@@ -2,7 +2,6 @@
  * Style families and procedural finishes are previews, not vendor replicas. */
 (()=>{
  const B=BMH,esc=B.esc,clone=structuredClone;
- const styleCollections={modern:'urban-stone',minimal:'urban-stone',contemporary:'urban-stone',brutalist:'urban-stone',barn:'urban-stone',classic:'neo-elegance',neo:'neo-elegance',french:'neo-elegance',indochine:'indochine',vietnamese:'indochine',tudor:'indochine',mediterranean:'coastal',spanish:'coastal',tropical:'coastal',coastal:'coastal',scandi:'nordic-light',japandi:'warm-oak',japanese:'warm-oak',craftsman:'warm-oak',balinese:'warm-oak',artdeco:'olive-gallery',tuscan:'olive-gallery',midcentury:'mid-century',industrial:'loft-leather'};
  const finished=r=>!['stairs','elevator','balcony'].includes(r.type);
  const surfaceRoles=[['floor','Sàn'],['wall','Tường'],['accent','Gỗ / tủ'],['fabric','Vải']];
  const roomTypes=[['living','Phòng khách'],['kitchen','Bếp + ăn'],['bed','Phòng ngủ'],['bath','WC'],['corridor','Hành lang / lối đi'],['worship','Phòng thờ'],['office','Phòng làm việc'],['laundry','Phòng giặt'],['storage','Kho'],['gym','Phòng tập'],['hobby','Phòng sở thích'],['custom','Phòng tự đặt tên'],['utility','Kỹ thuật'],['balcony','Ban công']];
@@ -12,19 +11,31 @@
  const ui=()=>B.state.ui.planner;
  const finish=()=>B.state.project.materials.finish||=( {exterior:null,rooms:{}} );
  const update=()=>{B.finishInvalidate?.();B.customerFrameCache=null;B.save();B.render({preserveScroll:true});};
- B.customerStyleProfile=()=>{const style=B.houseStyle(),id=styleCollections[style?.id]||'warm-oak';return {style,recognized:!!style,name:B.state.project.style,collection:B.INTERIOR_COLLECTIONS.find(c=>c.id===id)||B.INTERIOR_COLLECTIONS[0]};};
+ B.customerStyleProfile=()=>{const style=B.houseStyle(),spec=B.styleSpecification(style?.id),id=spec?.collectionId||'warm-oak';return {style,specification:spec,recognized:!!style,name:B.state.project.style,collection:B.INTERIOR_COLLECTIONS.find(c=>c.id===id)||B.INTERIOR_COLLECTIONS[0]};};
  B.interiorCollection=roomId=>{
   const f=finish(),v=f.interior||{},profile=B.customerStyleProfile(),stored=roomId?v.rooms?.[roomId]||v.default:v.default;
   const authored=roomId&&v.rooms?.[roomId]?v.authored?.[roomId]:v.authored?.default;
   const allowed=stored!=='style'&&(authored==='manual'||authored===B.state.project.style||!authored&&stored===profile.collection.id);
   return allowed&&B.INTERIOR_COLLECTIONS.find(c=>c.id===stored)||profile.collection;
  };
+ B.styleDefaultPalette=roomId=>{
+  const profile=B.customerStyleProfile(),c=B.interiorCollection(roomId),v=finish().interior||{},authored=roomId&&v.rooms?.[roomId]?v.authored?.[roomId]:v.authored?.default;
+  if(!profile.specification||c.id!==profile.collection.id||authored==='manual')return null;
+  const defaults={...c,visualMaterials:{...c.visualMaterials,...profile.specification.defaultMaterials}};
+  for(const [role,id]of Object.entries(defaults.visualMaterials)){const material=B.VISUAL_MATERIALS.find(x=>x.id===id&&x.role===role);if(material){defaults[role]=material.color;if(role==='floor')defaults.surface=material.surface;}}
+  return defaults;
+ };
  B.finishPalette=roomId=>{
   const f=finish(),c=B.interiorCollection(roomId),global=f.exterior||{},room=roomId?f.rooms?.[roomId]||{}:{},r=B.state.project.plan.rooms.find(r=>r.id===roomId);
-  const p={...c,wall:B.houseStyle()?.wall||c.wall,...global,...room,visualMaterials:{...c.visualMaterials,...global.visualMaterials,...room.visualMaterials},collectionId:c.id,shape:c.shape,table:c.table};
-  const surface=room.surface??global.surface;
-  if(surface&&surface!=='auto'&&!room.visualMaterials?.floor&&!global.visualMaterials?.floor)p.visualMaterials.floor={wood:'oak-floor',tile:'ivory-tile',stone:'sand-travertine'}[surface]||p.visualMaterials.floor;
-  if(r?.type==='bath'&&!room.visualMaterials?.floor&&!global.visualMaterials?.floor&&surface===undefined){p.visualMaterials.floor='sand-travertine';p.floor='#cfc0a0';}
+  const defaults=B.styleDefaultPalette(roomId)||c;
+  // Finish writers cache a resolved palette. Only authored roles in that cache
+  // override the next style; preserve pre-marker legacy choices conservatively.
+  const authoredRow=raw=>{const row={...raw,visualMaterials:{...raw.visualMaterials}};for(const [role]of surfaceRoles)if(raw.styleRoles?.[role]===true||raw.explicitRoles&&raw.explicitRoles[role]!==true){delete row[role];delete row.visualMaterials[role];if(role==='floor')delete row.surface;}return row;};
+  const outside=authoredRow(global),inside=authoredRow(room);
+  const p={...defaults,...outside,...inside,visualMaterials:{...defaults.visualMaterials,...outside.visualMaterials,...inside.visualMaterials},collectionId:c.id,shape:c.shape,table:c.table};
+  const surface=inside.surface??outside.surface;
+  if(surface&&surface!=='auto'&&!inside.visualMaterials?.floor&&!outside.visualMaterials?.floor)p.visualMaterials.floor={wood:'oak-floor',tile:'ivory-tile',stone:'sand-travertine'}[surface]||p.visualMaterials.floor;
+  if(r?.type==='bath'&&!inside.visualMaterials?.floor&&!outside.visualMaterials?.floor&&surface===undefined){p.visualMaterials.floor='sand-travertine';p.floor='#cfc0a0';}
   const material=B.VISUAL_MATERIALS.find(v=>v.role==='floor'&&v.id===p.visualMaterials.floor);if(material)p.surface=material.surface;
   return B.validatePaletteBindings?.(roomId,p)||p;
  };
