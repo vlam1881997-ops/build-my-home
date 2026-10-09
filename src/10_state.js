@@ -10,9 +10,9 @@ BMH.defaultState = () => ({
     styleReferenceId:'',
     designEvidence:{schemaVersion:1,research:[],site:[],fengSources:[],materialSources:[],context:{}},
     constructionDesign:{schemaVersion:2,inputs:{},elements:[],reviews:[],issues:[]},
-    site:{country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',pinAddressNeedsReview:false,mapEngine:'free',mapStyle:'hybrid',mapZoom:17,mapCenter:{},showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotSource:'dimensions',boundaryEvidenceId:'',lotPoints:[],useParcelGeometry:false,frontEdge:0,floorHeight:3.4,floorHeights:[],slabThickness:.14,ceilingDrop:.2,deedArea:0,deedReference:'',frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
+    site:{north:{azimuthDeg:null,datum:'unknown',sourceReference:'',observedAt:'',status:'unknown'},elevation:{metres:null,datum:'unknown',sourceReference:'',observedAt:'',status:'unknown'},country:'Việt Nam',province:'TP. Hồ Chí Minh',district:'Phường Thủ Dầu Một',address:'',lat:11.160,lng:106.650,geoSource:'Dữ liệu vùng',pinAddressNeedsReview:false,mapEngine:'free',mapStyle:'hybrid',mapZoom:17,mapCenter:{},showLotOverlay:true,showClimateMap:true,showContextRings:true,lotMode:'rect',lotSource:'dimensions',boundaryEvidenceId:'',lotPoints:[],useParcelGeometry:false,frontEdge:0,floorHeight:3.4,floorHeights:[],slabThickness:.14,ceilingDrop:.2,deedArea:0,deedReference:'',frontDirection:'Nam',width:5,depth:20,floors:2,road:4,soil:'Đất thịt đồng bằng',shape:'Hình chữ nhật',targetCoverage:.68,setbackFront:2,setbackRear:1,setbackSide:.2,designStrategy:'climate'},
     siteIntelligence:{key:'',status:'idle',fetchedAt:'',elevation_m:null,flood:{level:'Chưa đánh giá',score:0,note:'',waterwayDistanceKm:null,riverSignal:null},access:{level:'Chưa đánh giá',score:0,note:'',majorRoadDistanceKm:null,majorRoadName:'',majorRoadType:''},transport:{level:'Chưa đánh giá',surchargePct:0,note:''},suppliers:[],builders:[],webSuppliers:[],webBuilders:[],citations:[],sources:[],aiSummary:'',warnings:[]},
-    finance:{cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,targetBudget:0,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12,rateMeta:{bankId:'VCB',status:'preset',verified:false,product:'',sourceDate:'',fetchedAt:'',provider:'',model:'',introRate:0,postRate:0,promoMonths:0,citations:[],note:''}},
+    finance:{scenario:{schemaVersion:1,confirmed:false,sourceReference:'',effectiveAt:'',months:null,method:'annuity',ratePeriods:[],draws:[],graceMonths:0,fees:null,constructionPayments:[]},cash:800000000,income:25000000,living:8000000,reserve:100000000,existingDebt:0,loan:500000000,targetBudget:0,years:15,bank:'VCB',introRate:6.9,postRate:10.9,promoMonths:12,rateMeta:{bankId:'VCB',status:'preset',verified:false,product:'',sourceDate:'',fetchedAt:'',provider:'',model:'',introRate:0,postRate:0,promoMonths:0,citations:[],note:''}},
     household:{ownerBirth:1988,ownerGender:'Nam',partnerEnabled:true,partnerBirth:1990,partnerGender:'Nữ',requestedSize:0,children:[{id:'c1',name:'Con 1',birth:2012,room:'Riêng'}],relatives:[{id:'p1',name:'Ba',birth:1962,mobility:'Hạn chế nhẹ'},{id:'p2',name:'Mẹ',birth:1964,mobility:'Bình thường'}]},
     plan:{rooms:[
       {id:'r1',floor:0,name:'Phòng khách',type:'living',x:0,y:0,w:5,h:4},
@@ -37,18 +37,20 @@ BMH.defaultState = () => ({
     aiScan:{sourceName:'',mimeType:'',scannedAt:'',model:'',provider:'',intent:'reference',appliedAt:'',result:{}},
     homeFinish:{photos:[],activePhotoId:'',preferences:{style:'Hiện đại',budget:'balanced',notes:''},analyses:{},selected:{},satisfaction:{signature:'',confirmedAt:''},geometryKey:''},
     measuredDesign:{roof:{type:'auto',pitchDeg:0,overhang:-1,ridge:'auto',surface:'auto',color:''},wallThickness:{exterior:.22,interior:.12}},
-    costPlan:{contingencyPct:10,pricing:{},extras:{}},
+    costPlan:{contingencyPct:10,pricing:{},extras:{},applications:[],quotes:{},conversions:[],exclusions:[]},
     performance:{solarEnabled:true,rainwaterEnabled:true,coolRoof:true,smartShading:true,mode:'balanced'},
     dataEngine: BMH.defaultDataEngineState(),
     wearYear:0,
     checklist:{pipe114:false,acWire:false,pressure:false,internet:false,elcb:false,waterTank:false,drainSlope:false,grounding:false,rcbo:false,acDrain:false,kitchenHood:false,conduitReserve:false},
-    dossier:{startDate:'',progress:0,currentStage:'foundation',revision:'A',architect:'',contractor:'',notes:'',actualCosts:{foundation:0,structure:0,walls:0,roof:0,mep:0,finish:0,handover:0},stageProgress:{},budgetBaselines:[],activeBaselineId:'',evidence:[]}
+    dossier:{register:{schemaVersion:1,wbs:[],journal:[],inspections:[],issues:[],changes:[],payments:[],drawdowns:[],decisions:[],outputs:[],warranties:[]},startDate:'',progress:0,currentStage:'foundation',revision:'A',architect:'',contractor:'',notes:'',actualCosts:{foundation:0,structure:0,walls:0,roof:0,mep:0,finish:0,handover:0},stageProgress:{},budgetBaselines:[],activeBaselineId:'',evidence:[]}
   },
   meta:{savedAt:null,createdAt:null,localProjectId:'',cloudProjectId:'',cloudOwnerId:'',cloudRevision:null,cloudUpdatedAt:null}
 });
 
 BMH.DYNAMIC_STATE_PATHS=new Set(['ui.guidedPanels','project.designEvidence','project.constructionDesign','project.materials.choices','project.materials.finish','project.designStudio','project.homeFinish','project.site.mapCenter','project.aiScan.result','project.dataEngine.materialOverrides','project.dataEngine.costSources','project.brief.result','project.brief.aiSuggestions','project.brief.userRequirements','project.siteIntelligence','project.costPlan.pricing','project.costPlan.extras','project.dossier.stageProgress']);
 BMH.DYNAMIC_STATE_PATHS.add('project.inputEvidence.records');
+BMH.DYNAMIC_STATE_PATHS.add('project.costPlan.quotes');
+BMH.DYNAMIC_STATE_PATHS.add('project.finance.scenario');
 BMH.mergeState = (base, incoming) => {
   const isPlain=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
   if(!isPlain(incoming)) return structuredClone(base);
@@ -84,7 +86,7 @@ BMH.loadState = () => {
 };
 BMH.state = BMH.loadState();
 // Defaults and legacy values remain usable; they are not confirmed evidence.
-BMH.INPUT_FIELDS=Object.freeze(['source','style','briefIdea','site.width','site.depth','site.floors','site.frontDirection','site.lat','site.lng','site.lotPoints','site.setbackFront','site.setbackRear','site.setbackSide','household','finance.cash','finance.income','finance.living','finance.reserve','finance.existingDebt','finance.loan','finance.targetBudget']);
+BMH.INPUT_FIELDS=Object.freeze(['source','style','briefIdea','site.width','site.depth','site.floors','site.frontDirection','site.lat','site.lng','site.lotPoints','site.north','site.elevation','site.setbackFront','site.setbackRear','site.setbackSide','household','finance.cash','finance.income','finance.living','finance.reserve','finance.existingDebt','finance.loan','finance.targetBudget','finance.scenario','costPlan.contingencyPct']);
 BMH.projectInputValue=(field,p=BMH.state.project)=>field.split('.').reduce((v,k)=>v?.[k],p);
 BMH.recordProjectInput=(field,evidence={}, {save=true}={})=>{
   field=String(field).replace(/^project\./,'');

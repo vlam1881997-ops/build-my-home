@@ -45,3 +45,11 @@ A1 thêm schema/history/snapshot/migration; B2 thêm editor và adapter. Cấu t
 - Fixture chung: ranh có nguồn test-only, đất chữ nhật và vát/lõm được hỗ trợ; 3 tầng 3.8/3.4/3.1 m, cửa lệch, U stair/shaft, phòng giặt/custom và thờ khác tầng, món xoay 37°. Thử budget/quotes/loan riêng không gọi provider tính phí.
 - Kiểm tra tọa độ/ID/rotation/đơn vị/revision giữa bản vẽ/GLB/BOQ/hồ sơ; dữ liệu test không thành nguồn công trình thật.
 - Contract thay đổi: A ghi version/điểm khác/consumer ảnh hưởng trong INTEGRATION; B xác nhận bằng checkpoint mình. Mốc interface có thể bàn giao sớm để phía kia làm tiếp, nhưng gate chỉ đạt khi đầu ra thật khớp.
+
+## C07 A-owned integrated adapters (09/10, WIP)
+- Final adapters registered after 104_style_reference; actual B consumer 90dcc4e, no source B edits. C01 requires normalized furniture array, reports malformed rows and refuses unsafe transforms.
+- DXF footprints retain ID/angle/local size. Drawing revision includes furniture/fixtures, excludes quote-only fields and finance; input comparison key separately tracks funding.
+- `commercialBoq`, `setBoqApplication`, `setSourcedQuote`, `applicationQuantity`, `compareSourcedAlternatives`: explicit role/application, sourced conversion and costTreatment; unknown total retained.
+- `simulateLoanTerms`, `setFinanceScenario`, `constructionCashflow`, `financeScenarioSummary`, `scopedFundingNeed`: integer VND monthly convention, explicit fee scope; no daily interest/bank approval.
+- `supervisionAdapter.{list,append,resolve,html}`, `handoverStatus`, `designHandoverManifest`; same-revision review requires professional evidence. `privateFinancePackageFiles({includeFinance:true})` is explicit opt-in; default customer package excludes finance.
+- Consumer G1–G6 acceptance, BOQ coverage and native browser/export checks remain pending.

@@ -29,6 +29,7 @@ Nền: 04a661e2256828eef8ed31dc7ed4b0309e20c0a5 . Chỉ ghi trạng thái có b�
 - C06: credential/config không có quyền thao tác — người gặp ghi blocker; không tự thêm dịch vụ tốn phí.
 
 ## Log tích hợp
+- 09/10/2026 C07 ownership: A xác nhận các module mới `src/team-a-project-contract.js`, `src/team-a-boq.js`, `src/team-a-finance.js`, `src/team-a-handover.js` và `tests/team-a-*.test.mjs` thuộc A. Chỉ mở rộng engine/hook hiện có; đăng ký sau 104_style_reference; không sửa source/CSS/3D B. B head 90dcc4e đã ghép tại 1372285, Draft PR #37. Gate vẫn pending tới khi có bằng chứng tích hợp.
 - 09/10/2026: phân công mới được tạo; B1 inventory only, A chưa được khởi chạy qua phân công này.
 
 - 09/10/2026 A1: đọc main/A 3c7f510 và B 90dcc4e; C01 default array, migration/history/disk và input-evidence triển khai phía A. B consumer thật đã bàn giao trong PR36. Room transformations/regeneration/native drag và integrated persistence còn đang kiểm, G1 chưa đóng.
