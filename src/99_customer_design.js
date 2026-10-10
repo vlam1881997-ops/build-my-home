@@ -40,7 +40,17 @@
   return B.validatePaletteBindings?.(roomId,p)||p;
  };
  const applyCollection=B.applyInteriorCollection;
- B.applyInteriorCollection=(id,roomId=null)=>{const result=applyCollection(id,roomId);if(!result)return result;const v=finish().interior;v.authored||={};for(const r of B.state.project.plan.rooms.filter(r=>roomId?r.id===roomId:finished(r)))v.authored[r.id]=roomId?'manual':B.state.project.style;if(!roomId)v.authored.default=B.state.project.style;B.save();return result;};
+ B.applyInteriorCollection=(id,roomId=null)=>{
+  const result=applyCollection(id,roomId);if(!result)return result;const f=finish(),v=f.interior;v.authored||={};
+  for(const r of B.state.project.plan.rooms.filter(r=>roomId?r.id===roomId:finished(r))){
+   v.authored[r.id]=roomId?'manual':B.state.project.style;
+   // Whole-house collections follow the style, while per-room mixes and any
+   // subsequently edited surface remain explicit customer choices.
+   if(!roomId)for(const [role]of surfaceRoles)f.rooms[r.id].styleRoles[role]=true;
+  }
+  if(!roomId){v.authored.default=B.state.project.style;for(const [role]of surfaceRoles)f.exterior.styleRoles[role]=true;}
+  B.save();return result;
+ };
  B.returnInteriorToStyle=roomId=>{B.pushPlanHistory();const f=finish();f.interior||={rooms:{}};f.interior.rooms||={};if(roomId){f.interior.rooms[roomId]='style';if(f.interior.authored)delete f.interior.authored[roomId];}else f.interior={default:'',rooms:{},authored:{}};update();};
  B.styleOutputReview=()=>{
   const p=B.state.project,profile=B.customerStyleProfile();return {style:p.style,styleId:profile.style?.id||null,recognized:profile.recognized,expectedCollection:{id:profile.collection.id,name:profile.collection.name},textureBasis:'Procedural preview at metre scale; vendor texture and sample required for exact SKU.',rooms:p.plan.rooms.filter(finished).map(r=>{const palette=B.finishPalette(r.id),c=B.interiorCollection(r.id);return {roomId:r.id,name:r.name,floor:r.floor,collection:{id:c.id,name:c.name,shape:c.shape,table:c.table},styleAligned:profile.recognized&&c.id===profile.collection.id,surfaces:surfaceRoles.map(([role])=>{const v=B.VISUAL_MATERIALS.find(v=>v.id===palette.visualMaterials?.[role]&&v.role===role);return {role,id:v?.id||null,name:v?.name||'Chưa chọn',color:palette[role],scale:v?.scale?clone(v.scale):null};}),supplierSurfaces:B.showroomFinishInfo?.(r.id)||[]};})};

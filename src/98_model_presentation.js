@@ -205,7 +205,7 @@
    const hero=root.querySelector('[data-cinematic-hero]');if(hero){hero.classList.add('model-generated-hero');prompt.before(hero);}
   }
   const wrap=document.createElement('div');wrap.className='model-scene-wrap';stage.replaceWith(wrap);wrap.insertAdjacentHTML('afterbegin',railHtml());wrap.append(stage);
-  stage.insertAdjacentHTML('beforeend','<div class="model-view-badge"><i></i><span data-model-look-name>'+(B.modelLook()==='neon'?'BỐ TRÍ / 3D':'VẬT LIỆU / 3D')+'</span><small>Cùng hình học · '+esc(B.drawingRevision())+'</small></div>');
+  stage.insertAdjacentHTML('beforeend','<div class="model-view-badge"><i></i><span data-model-look-name>'+(B.modelLook()==='neon'?'BỐ TRÍ / 3D':'VẬT LIỆU / 3D')+'</span><small data-model-style-name>'+esc(B.state.project.style)+' · '+esc(B.roofDesignSpec?.().name||'')+'</small><small>Cùng hình học · '+esc(B.drawingRevision())+'</small></div>');
   const caption=stage.querySelector('.design-model-caption');if(caption)caption.innerHTML='<span>KÉO ĐỂ XOAY · CHỤM ĐỂ ZOOM</span><b>'+(ui.sceneExploded?'Khoảng tách chỉ phục vụ cách xem':'Chạm sàn / tên phòng để xem chi tiết')+'</b>';
   brief?.insertAdjacentHTML('afterbegin',B.modelRoomInspectorHtml());
   const preview=brief?.querySelector('.guided-collection-preview');if(preview){const d=document.createElement('details');d.className='model-reference-preview';d.innerHTML='<summary>Xem phòng mẫu của bộ nội thất</summary>';preview.replaceWith(d);d.append(preview);}

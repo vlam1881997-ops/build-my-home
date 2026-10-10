@@ -6,6 +6,49 @@ import {materialPriceEvidence} from '../server/_material_catalog.mjs';
 const plain=x=>JSON.parse(JSON.stringify(x));
 const make=()=>{const b=designClient({identity:true});b.autoPlanConcept();b.state.project.materials.finish={exterior:null,rooms:{}};b.materialPriceEvidence=materialPriceEvidence;return b;};
 
+test('whole-house collection defaults follow a new style without freezing colours or losing subsequent manual surfaces',()=>{
+ const b=make(),p=b.state.project,r=p.plan.rooms.find(x=>x.type==='living');b.selectHouseStyle('japandi');b.applyInteriorCollection('warm-oak');
+ const floorId=p.materials.choices.floor;b.applyVisualMaterial('floor','white-marble',r.id);b.applyFinishColor('wall','#abc123',r.id);
+ const saved=JSON.stringify(p.materials),plan=JSON.stringify(p.plan);b.selectHouseStyle('industrial');
+ const palette=b.finishPalette(r.id);assert.equal(b.interiorCollection(r.id).id,'loft-leather');assert.equal(palette.visualMaterials.fabric,'cognac-leather');assert.equal(palette.visualMaterials.accent,'dark-walnut');assert.equal(palette.visualMaterials.floor,'white-marble');assert.equal(palette.wall,'#abc123');
+ const untouched=p.plan.rooms.find(x=>x.id!==r.id&&x.type==='bed');assert.equal(b.finishPalette(untouched.id).visualMaterials.floor,'grey-concrete');assert.equal(b.facadeFinishPalette().facadeSurface,'brick');assert.equal(p.materials.choices.floor,floorId);assert.equal(JSON.stringify(p.materials),saved);assert.equal(JSON.stringify(p.plan),plan);
+ const restored=make();restored.state.project=plain(p);assert.equal(restored.finishPalette(r.id).visualMaterials.fabric,'cognac-leather');assert.equal(restored.finishPalette(r.id).wall,'#abc123');
+});
+
+test('large-area style cladding follows solid exterior bands and never covers the measured opening',()=>{
+ const b=make(),p=b.state.project,plan=JSON.stringify(p.plan);
+ for(const id of ['industrial','brutalist','barn']){b.selectHouseStyle(id);const parts=b.facadeComponents().filter(x=>x.kind==='style-cladding');assert.ok(parts.length>0,id);assert.ok(parts.reduce((area,x)=>area+b.facadeComponentArea(x),0)>30,id);
+  for(const part of parts){assert.equal(part.role,'accent');assert.equal(part.styleId,id);for(const o of p.plan.openings.filter(o=>o.floor===part.floor)){const span=b.openingWallSpan(o);if(!span)continue;const horizontal=span.o==='h';if(horizontal!==part.horizontal)continue;const clear=b.openingReview(o),level=b.studioFloorLevel(part.floor),lo=level.base+level.slab+(clear.sill||0),hi=lo+clear.height,a=horizontal?part.x:part.z,end=a+(horizontal?part.w:part.d),axis=horizontal?part.z:part.x,depth=horizontal?part.d:part.w;if(Math.abs(axis-span.c)>b.measuredWallThickness(false)+depth)continue;assert.ok(Math.min(end,span.b)-Math.max(a,span.a)<1e-8||Math.min(part.y+part.h,hi)-Math.max(part.y,lo)<1e-8,id+' '+o.id);}}
+ }
+ assert.equal(JSON.stringify(p.plan),plan);
+});
+
+test('style selection leaves a stale presentation image and explains an explicitly retained roof',()=>{
+ const b=make();b.state.ui.renderMode='cinematic';b.customerFrameCache={old:true};b.measuredDesignSettings().roof.type='flat';
+ b.selectHouseStyle('scandi');assert.equal(b.state.ui.renderMode,'interactive');assert.equal(b.customerFrameCache,null);assert.match(b.styleModelSummaryHtml(),/đã chọn riêng/);assert.equal(b.roofDesignSpec().type,'flat');
+ b.measuredDesignSettings().roof.type='auto';assert.equal(b.roofDesignSpec().type,'gable');assert.match(b.styleModelSummaryHtml(),/theo phong cách/);
+});
+
+test('outside finish survives both lot-edge walls without expanding the footprint or changing interior paint',()=>{
+ const b=make(),p=b.state.project;p.site.floors=1;p.site.width=5;p.site.depth=20;
+ p.plan={rooms:[{id:'edge-room',type:'living',name:'Khách',floor:0,x:.11,y:1.5,w:4.78,h:16}],openings:[],fixtures:[],outdoor:[],furniture:[],lockedRoomIds:[],lockedFloors:[]};
+ p.materials.finish.rooms['edge-room']={wall:'#abc123',explicitRoles:{wall:true},visualMaterials:{wall:'ivory-paint'}};
+ const plan=JSON.stringify(p.plan);b.selectHouseStyle('industrial');
+ const parts=b.facadeComponents().filter(x=>x.kind==='style-cladding'),left=parts.filter(x=>x.projectionSide==='left'),right=parts.filter(x=>x.projectionSide==='right');assert.ok(left.length>0);assert.ok(right.length>0);
+ assert.ok(left.every(x=>Math.abs(x.x)<1e-8));assert.ok(right.every(x=>Math.abs(x.x+x.w-5)<1e-8));assert.ok(parts.every(x=>x.x>=0&&x.x+x.w<=5+1e-8));
+ assert.equal(b.finishPalette('edge-room').wall,'#abc123');assert.equal(JSON.stringify(p.plan),plan);
+});
+
+test('explicitly requesting suggested finishes releases legacy generic colours, retaining SKU bindings and manually mixed rooms',()=>{
+ const b=make(),p=b.state.project,r=p.plan.rooms.find(x=>x.type==='living'),bed=p.plan.rooms.find(x=>x.type==='bed');
+ const product={id:p.materials.choices.floor,category:'floor',sku:'test-only',specification:'test-only 20x100',unit:'m²'};b.materialResearch={products:[product]};
+ p.materials.finish.exterior={wall:'#aabbcc',accent:'#776655',floor:'#eeccbb',visualMaterials:{wall:'grey-paint',accent:'natural-oak',floor:'oak-floor'},catalogMaterials:{floor:b.createCatalogMaterialBinding(product,'oak-floor')}};
+ b.applyInteriorCollection('neo-elegance',bed.id);const mixed=JSON.stringify(p.materials.finish.rooms[bed.id]),products=JSON.stringify(p.materials.choices),plan=JSON.stringify(p.plan),bound=JSON.stringify(p.materials.finish.exterior.catalogMaterials);
+ b.selectHouseStyle('industrial');assert.match(b.styleModelSummaryHtml(),/Vật liệu cũ đang được giữ/);assert.equal(b.applyStyleMaterialSuggestions(),true);
+ assert.equal(b.facadeFinishPalette().wall,b.houseStyle().wall);assert.equal(b.facadeFinishPalette().facadeSurface,'brick');assert.equal(b.finishPalette(r.id).visualMaterials.fabric,'cognac-leather');assert.equal(b.finishPalette(r.id).visualMaterials.floor,'oak-floor');
+ assert.equal(JSON.stringify(p.materials.finish.exterior.catalogMaterials),bound);assert.equal(JSON.stringify(p.materials.finish.rooms[bed.id]),mixed);assert.equal(JSON.stringify(p.materials.choices),products);assert.equal(JSON.stringify(p.plan),plan);
+});
+
 test('all locked 24 styles supply ten roles, traceable defaults and pending visual acceptance',()=>{
  const b=make(),scope=JSON.parse(fs.readFileSync('docs/team-v1/work-plan.json'));
  assert.deepEqual(Object.keys(b.STYLE_SPECIFICATIONS).sort(),scope.styleIds.slice().sort());
