@@ -1,0 +1,231 @@
+{
+  "runtime": "v22.23.0",
+  "browser": "145.0.7632.6",
+  "cases": [
+    {
+      "device": "desktop",
+      "styles": [
+        {
+          "id": "japandi",
+          "style": "Japandi",
+          "roof": {
+            "type": "flat",
+            "name": "Mái bằng",
+            "pitchDeg": 0,
+            "overhang": 0,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "timber-panel",
+            "timber-panel-joint",
+            "roof-parapet",
+            "roof-coping",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "japandi"
+          ],
+          "collection": "warm-oak",
+          "visibleSwitchMs": 9528
+        },
+        {
+          "id": "industrial",
+          "style": "Industrial",
+          "roof": {
+            "type": "flat",
+            "name": "Mái bằng",
+            "pitchDeg": 0,
+            "overhang": 0,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "brick",
+          "features": [
+            "style-cladding",
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "feature-panel",
+            "roof-parapet",
+            "roof-coping",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "industrial"
+          ],
+          "collection": "loft-leather",
+          "visibleSwitchMs": 8132
+        },
+        {
+          "id": "scandi",
+          "style": "Bắc Âu · Scandinavian",
+          "roof": {
+            "type": "gable",
+            "name": "Mái hai dốc",
+            "pitchDeg": 30,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "timber-panel",
+            "roof-eave-band",
+            "timber-panel-joint",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "scandi"
+          ],
+          "collection": "nordic-light",
+          "visibleSwitchMs": 8496
+        }
+      ],
+      "comparisons": [
+        {
+          "a": "japandi",
+          "b": "industrial",
+          "changedPixelFraction": 0.2905147084852561
+        },
+        {
+          "a": "japandi",
+          "b": "scandi",
+          "changedPixelFraction": 0.261611030478955
+        }
+      ],
+      "measuredPlanUnchanged": true,
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "device": "phone",
+      "styles": [
+        {
+          "id": "japandi",
+          "style": "Japandi",
+          "roof": {
+            "type": "flat",
+            "name": "Mái bằng",
+            "pitchDeg": 0,
+            "overhang": 0,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "timber-panel",
+            "timber-panel-joint",
+            "roof-parapet",
+            "roof-coping",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "japandi"
+          ],
+          "collection": "warm-oak",
+          "visibleSwitchMs": 7881
+        },
+        {
+          "id": "industrial",
+          "style": "Industrial",
+          "roof": {
+            "type": "flat",
+            "name": "Mái bằng",
+            "pitchDeg": 0,
+            "overhang": 0,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "brick",
+          "features": [
+            "style-cladding",
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "feature-panel",
+            "roof-parapet",
+            "roof-coping",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "industrial"
+          ],
+          "collection": "loft-leather",
+          "visibleSwitchMs": 6884
+        },
+        {
+          "id": "scandi",
+          "style": "Bắc Âu · Scandinavian",
+          "roof": {
+            "type": "gable",
+            "name": "Mái hai dốc",
+            "pitchDeg": 30,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "timber-panel",
+            "roof-eave-band",
+            "timber-panel-joint",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "scandi"
+          ],
+          "collection": "nordic-light",
+          "visibleSwitchMs": 7262
+        }
+      ],
+      "comparisons": [
+        {
+          "a": "japandi",
+          "b": "industrial",
+          "changedPixelFraction": 0.46089949137549757
+        },
+        {
+          "a": "japandi",
+          "b": "scandi",
+          "changedPixelFraction": 0.3647584033613445
+        }
+      ],
+      "measuredPlanUnchanged": true,
+      "errors": [],
+      "overflow": false
+    }
+  ],
+  "visualAcceptance": false
+}

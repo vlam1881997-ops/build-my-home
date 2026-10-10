@@ -15,6 +15,10 @@ BMH.houseStyle=()=>BMH.HOUSE_STYLES.find(x=>x.name===BMH.state.project.style)||n
 BMH.selectHouseStyle=id=>{
   const style=BMH.HOUSE_STYLES.find(x=>x.id===id);if(!style)return false;
   BMH.state.project.style=style.name;
+  // A style change must show the editable model, rather than leave a previous
+  // presentation image on top of the newly selected design.
+  BMH.state.ui.renderMode='interactive';
+  BMH.finishInvalidate?.();BMH.customerFrameCache=null;
   BMH.save();return true;
 };
 BMH.styleIllustration=s=>{

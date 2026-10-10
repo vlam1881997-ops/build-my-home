@@ -1,14 +1,14 @@
 /* Shared architectural finish geometry. It decorates measured walls; it never
  * creates a room, opening, balcony or structural member. All dimensions are m. */
 (()=>{
- const B=BMH,hex=v=>/^#[0-9a-f]{6}$/i.test(v||''),revision='architectural-identity-1';
+ const B=BMH,hex=v=>/^#[0-9a-f]{6}$/i.test(v||''),revision='architectural-identity-2';
  // Each style has a distinct composition, rather than a colour-only variant.
  const rules=[
   ['modern','Khung sâu & đường ngang','metal','frame','horizontal',.075,.20,0,'#394443',0],
   ['minimal','Mảng phẳng & khe âm','plaster','reveal','quiet',.035,.08,0,'#ddd8cd',0],
   ['contemporary','Khung lệch & mảng đá','stone','offset','horizontal',.20,.30,0,'#9e9b8d',0],
-  ['classic','Phào nhiều lớp & trụ trang trí','plaster','classical','cornice',.12,.22,.36,'#f1e8d5',2],
-  ['neo','Phào gọn & tỷ lệ đứng','plaster','classical','cornice',.08,.15,.24,'#eee8db',1],
+  ['classic','Phào nhiều lớp & trụ trang trí','plaster','classical','cornice',.17,.30,.36,'#f1e8d5',2],
+  ['neo','Phào gọn & tỷ lệ đứng','plaster','classical','cornice',.105,.22,.24,'#eee8db',1],
   ['indochine','Cửa chớp & vòm trang trí','wood','arched','cornice',.12,.25,.44,'#3c4b3d',2],
   ['mediterranean','Vữa sáng & vòm mềm','plaster','arched','quiet',.14,.26,.50,'#ece2cb',0],
   ['scandi','Gỗ sáng & nhịp đứng','wood','reveal','horizontal',.045,.12,0,'#b5a07b',0],
@@ -16,7 +16,7 @@
   ['japanese','Nhịp gỗ & lam che nắng','wood','screen','horizontal',.09,.38,0,'#65563e',1],
   ['tropical','Lam thoáng & bóng đổ sâu','wood','screen','horizontal',.10,.48,0,'#788065',0],
   ['artdeco','Khung bậc & nhịp đứng','metal','stepped','deco',.11,.18,0,'#9a7948',1],
-  ['french','Khung cửa cao & phào cổ điển','plaster','classical','cornice',.13,.24,.30,'#e9e0cd',2],
+  ['french','Khung cửa cao & phào cổ điển','plaster','classical','cornice',.155,.28,.30,'#e9e0cd',2],
   ['spanish','Vòm sâu & sắc đất nung','plaster','arched','cornice',.18,.28,.46,'#aa6747',1],
   ['tuscan','Đá chân tường & cửa chớp','stone','shutter','cornice',.10,.22,.22,'#988261',0],
   ['craftsman','Khung gỗ rộng & chân đá','wood','wide','horizontal',.12,.30,0,'#726749',1],
@@ -31,6 +31,27 @@
  ];
  B.ARCHITECTURAL_IDENTITIES=Object.fromEntries(rules.map(([id,name,surface,surround,band,trim,shade,arch,color,grid])=>[id,{id,name,surface,surround,band,trim,shade,arch,color,grid}]));
  B.architecturalIdentity=()=>B.ARCHITECTURAL_IDENTITIES[B.houseStyle()?.id]||{id:null,name:'Phong cách riêng',surface:'plaster',surround:'none',band:'quiet',trim:0,shade:0,arch:0,color:'#c8c2b6',grid:0};
+ B.styleModelSummaryHtml=()=>{
+  const roof=B.roofDesignSpec(),manual=B.measuredDesignSettings().roof.type!=='auto',rule=B.architecturalIdentity(),f=B.state.project.materials.finish||{};
+  const custom=[f.exterior,...Object.values(f.rooms||{})].some(row=>row&&['floor','wall','accent','fabric'].some(role=>row.styleRoles?.[role]!==true&&(hex(row[role])||row.visualMaterials?.[role])));
+  return '<p class="style-model-summary">'+B.esc(rule.name)+' · '+B.esc(roof.name)+(manual?' (đã chọn riêng; đổi phong cách giữ mái này).':' (theo phong cách).')+' Phòng, cửa và vật liệu chọn riêng được giữ.</p>'+(custom?'<details class="style-material-reset"><summary>Vật liệu cũ đang được giữ</summary><p>Muốn xem trọn bộ phong cách mới: thay màu và bề mặt mô phỏng bằng gợi ý. Giữ mã hàng đã chọn và phòng phối riêng.</p><button type="button" data-style-material-suggestions>Dùng vật liệu gợi ý</button></details>':'');
+ };
+ // Older projects may have unmarked cached colours. Never silently discard
+ // them; the visible action explicitly asks for suggested generic finishes.
+ B.applyStyleMaterialSuggestions=()=>{
+  if(!B.houseStyle())return false;B.rememberFinishCamera?.();B.pushPlanHistory();
+  const f=B.state.project.materials.finish||={exterior:null,rooms:{}},v=f.interior||{};
+  const reset=row=>{if(!row)return;row.styleRoles||={};row.explicitRoles||={};
+   for(const role of ['floor','wall','accent','fabric']){
+    const bound=Object.entries(row.catalogMaterials||{}).some(([category,binding])=>(binding?.surfaceSlot||B.catalogSurfaceSlots?.[category])===role);
+    row.styleRoles[role]=!bound;row.explicitRoles[role]=bound;
+   }delete row.pillow;delete row.rug;
+  };
+  reset(f.exterior);
+  for(const [id,row]of Object.entries(f.rooms||{}))if(v.authored?.[id]!=='manual')reset(row);
+  B.state.ui.renderMode='interactive';B.customerFrameCache=null;B.finishInvalidate?.();B.save();B.render({preserveScroll:true});return true;
+ };
+ document.addEventListener('click',event=>{if(event.target.closest?.('[data-style-material-suggestions]'))B.applyStyleMaterialSuggestions();});
  const authored=(raw,role)=>raw.styleRoles?.[role]!==true&&(raw.explicitRoles?raw.explicitRoles[role]===true||Object.values(raw.catalogMaterials||{}).some(v=>v.surfaceSlot===role):hex(raw[role])||!!raw.visualMaterials?.[role]||Object.values(raw.catalogMaterials||{}).some(v=>v.surfaceSlot===role));
  B.facadeFinishPalette=()=>{
   const p=B.state.project,raw=p.materials.finish?.exterior||{},resolved=B.finishPalette(),rule=B.architecturalIdentity(),manualAccent=authored(raw,'accent'),manualWall=authored(raw,'wall');
@@ -51,26 +72,48 @@
    const part={id:componentId,floor,roomId,openingId,kind,x,y,z,w,h,d,role,color,projectionSide:side,horizontal:['front','back'].includes(side),styleId:rule.id,generic:true,provisional:true,structural:false,...(polygon?{polygon}: {})};parts.push(part);return part;
   };
   const face=w=>{const r=p.plan.rooms.find(r=>r.id===w.roomIds[0]);if(!r)return null;const near=w.horizontal?w.axis<r.y+r.h/2:w.axis<r.x+r.w/2,side=w.horizontal?(near?'front':'back'):(near?'left':'right');return {r,near,side,axis:w.axis+(near?-1:1)*(w.thickness||B.measuredWallThickness(false))/2};};
-  const box=(f,w,kind,a,y,length,height,depth,role='accent',poly=null)=>{const q=face(w);if(!q)return null;const constant=q.near?q.axis-depth+.0006:q.axis-.0006;return add(f,q.r.id,kind,w.horizontal?a:constant,y,w.horizontal?constant:a,w.horizontal?length:depth,height,w.horizontal?depth:length,role,q.side,poly,w.openingId||null);};
+  const box=(f,w,kind,a,y,length,height,depth,role='accent',poly=null)=>{
+   const q=face(w);if(!q)return null;let constant=q.near?q.axis-depth+.0006:q.axis-.0006;
+   // At a legal lot edge an outward millimetre skin used to be clipped away,
+   // leaving the long side with interior paint. Put only the finish skin just
+   // inside the measured wall face. Never move a reveal, canopy or solid wall.
+   if(['exterior-finish','style-cladding'].includes(kind)){
+    const limit=w.horizontal?D:W;
+    if(q.axis>=-.00001&&q.axis<=limit+.00001)constant=Math.max(0,Math.min(limit-depth,constant));
+   }
+   return add(f,q.r.id,kind,w.horizontal?a:constant,y,w.horizontal?constant:a,w.horizontal?length:depth,height,w.horizontal?depth:length,role,q.side,poly,w.openingId||null);
+  };
   const arch=(width,rise,t)=>{const points=[],segments=20;for(let i=0;i<=segments;i++){const a=Math.PI-i*Math.PI/segments;points.push([width/2+width/2*Math.cos(a),t+rise*Math.sin(a)]);}for(let i=segments;i>=0;i--){const a=Math.PI-i*Math.PI/segments;points.push([width/2+(width/2-t)*Math.cos(a),t+Math.max(.01,rise-t)*Math.sin(a)]);}return points;};
   for(let f=0;f<l.floors;f++){
    const g=B.scenePlanGeometry(p.plan,f),level=B.studioFloorLevel(f),base=level.base,clear=level.height-level.slab,exterior=g.walls.filter(w=>w.roomIds.length===1),front=exterior.filter(w=>face(w)?.side==='front'),seen=new Set();
+   // Apply the style's main exterior material to full solid wall areas, not
+   // only a tiny feature panel. Opening bands are split at their actual sill
+   // and head, so cladding never paints over a door or window.
+   const cladding=['industrial','brutalist','barn'].includes(rule.id),skinRole=cladding&&!finish.manualWall?'accent':'wall';
+   const skinKind=cladding?'style-cladding':'exterior-finish',skinDepth=cladding?.014:.003;
+   const clad=(w,a,y,width,height)=>{
+    if(height<.002)return;box(f,w,skinKind,a,y,width,height,skinDepth,skinRole);
+    if(['coastal','barn'].includes(rule.id)&&face(w)?.side==='front'&&w.b-w.a>.15){
+     if(rule.id==='coastal')for(let v=y+.18;v<y+height-.02;v+=.18)box(f,w,'weatherboard-joint',a,v,width,.009,.009,'wall');
+     else for(let u=a+.20;u<a+width-.02;u+=.20)box(f,w,'metal-standing-seam',u,y,.018,height,.032,'accent');
+    }
+   };
    // A separate outside paint layer keeps room-specific paint inside the house.
    for(const w of exterior){
     const len=w.b-w.a,sill=w.kind==='window'?w.sill:0,top=w.kind==='wall'?0:(w.sill||0)+w.height;
-    if(w.kind==='wall')box(f,w,'exterior-finish',w.a,base+l.slab,len,clear,.003,'wall');
-    else{if(sill>.002)box(f,w,'exterior-finish',w.a,base+l.slab,len,sill,.003,'wall');if(clear-top>.002)box(f,w,'exterior-finish',w.a,base+l.slab+top,len,clear-top,.003,'wall');}
+    if(w.kind==='wall')clad(w,w.a,base+l.slab,len,clear);
+    else{clad(w,w.a,base+l.slab,len,sill);clad(w,w.a,base+l.slab+top,len,clear-top);}
     if(f===0&&w.kind!=='door'){const height=Math.min(w.kind==='window'?sill:clear,['craftsman','tuscan','balinese','brutalist'].includes(rule.id)?.48:.22);if(height>.01)box(f,w,'plinth',w.a,base+l.slab,len,height,.025,'base');}
    }
    const bays=front.filter(w=>w.kind==='wall'&&w.b-w.a>.60).sort((a,b)=>(b.b-b.a)-(a.b-a.a)||a.a-b.a),feature=bays[0];
    if(feature&&rule.id){
-    const span=feature.b-feature.a,width=Math.min(span-.12,['japandi','contemporary','tuscan','brutalist'].includes(rule.id)?1.45:1.08),start=Math.max(feature.a+.06,Math.min(feature.b-.06-width,(feature.a+feature.b-width)/2)),height=clear-.16,y=base+l.slab+.08;
+    const span=feature.b-feature.a,width=Math.min(span-.12,['japandi','contemporary','tuscan','brutalist'].includes(rule.id)?2.10:1.35),start=Math.max(feature.a+.06,Math.min(feature.b-.06-width,(feature.a+feature.b-width)/2)),height=clear-.16,y=base+l.slab+.08;
     if(['japandi','scandi','modern','contemporary','tuscan','brutalist','industrial','balinese'].includes(rule.id))box(f,feature,rule.surface==='wood'?'timber-panel':'feature-panel',start,y,width,height,.026);
     if(['japanese','tropical','vietnamese'].includes(rule.id)){for(let a=start;a<start+width-.04;a+=rule.id==='tropical'?.13:.105)box(f,feature,'wood-slat',a,y,.045,height,.065);}
     if(rule.id==='tudor'&&f>0){box(f,feature,'timber-post',start,y,.07,height,.035);box(f,feature,'timber-post',start+width-.07,y,.07,height,.035);box(f,feature,'timber-diagonal',start,y,width,height,.04,'accent',[[0,0],[.08,0],[width,height-.1],[width,height],[width-.08,height],[0,.1]]);}
     if(rule.band==='deco')for(let i=0;i<3;i++)box(f,feature,'deco-fin',start+i*width/3,y+(.12-i*.04),.055,height-(.12-i*.04),.075);
     if(['classic','neo','french','craftsman'].includes(rule.id)){
-     const locations=rule.id==='classic'?bays:bays.slice(0,2);for(const wall of locations){const t=Math.min(rule.id==='classic'?.22:.16,(wall.b-wall.a-.1)/2),at=wall.a+(wall.b-wall.a-t)/2;box(f,wall,'pilaster',at,base+l.slab,t,clear-.14,.07,'wall');box(f,wall,'pilaster-base',at-.035,base+l.slab,t+.07,.12,.10,'wall');box(f,wall,'pilaster-capital',at-.05,base+level.height-.24,t+.10,.11,.115,'wall');}
+     const locations=rule.id==='classic'?bays:bays.slice(0,2);for(const wall of locations){const t=Math.min(rule.id==='classic'?.32:.22,(wall.b-wall.a-.1)/2),at=wall.a+(wall.b-wall.a-t)/2;box(f,wall,'pilaster',at,base+l.slab,t,clear-.14,.095,'wall');box(f,wall,'pilaster-base',at-.035,base+l.slab,t+.07,.14,.13,'wall');box(f,wall,'pilaster-capital',at-.05,base+level.height-.24,t+.10,.13,.15,'wall');}
     }
    }
    for(const w of front.filter(w=>w.kind!=='wall')){
@@ -90,7 +133,7 @@
     if(rule.surround==='screen'&&headroom>.12){const blades=rule.id==='tropical'?4:2;for(let i=0;i<blades&&.08+i*.075<headroom;i++)box(f,w,'shade-blade',a-.06,top+.08+i*.075,len+.12,.027,rule.shade);}
     if(w.kind==='door'&&f===0&&rule.shade>.1&&headroom>.12)box(f,w,'entry-canopy',a-.16,top+.11,len+.32,.07,Math.min(.58,rule.shade+.14),['japanese','japandi','craftsman','vietnamese','balinese'].includes(rule.id)?'accent':'wall');
    }
-   for(const w of front){const depth=rule.band==='cornice'?.10:rule.band==='deco'?.12:rule.band==='horizontal'?.12:.035,h=rule.band==='cornice'?.11:rule.band==='deco'?.14:.055;box(f,w,rule.band==='cornice'?'cornice':'horizontal-band',w.a,base+level.height-h,w.b-w.a,h,depth,'wall');if(['classic','french','artdeco'].includes(rule.id))box(f,w,'cornice-step',w.a,base+level.height+.025,w.b-w.a,.055,depth+.04,rule.id==='artdeco'?'accent':'wall');}
+   for(const w of front){const depth=rule.band==='cornice'?.16:rule.band==='deco'?.16:rule.band==='horizontal'?.14:.035,h=rule.band==='cornice'?.18:rule.band==='deco'?.16:.055;box(f,w,rule.band==='cornice'?'cornice':'horizontal-band',w.a,base+level.height-h,w.b-w.a,h,depth,rule.id==='modern'||rule.id==='midcentury'?'frame':'wall');if(['classic','french','artdeco'].includes(rule.id))box(f,w,'cornice-step',w.a,base+level.height+.025,w.b-w.a,.075,depth+.06,rule.id==='artdeco'?'accent':'wall');}
    if(['barn','coastal','tudor'].includes(rule.id))for(const wall of front.filter(w=>w.kind==='wall'))for(let a=wall.a+.10;a<wall.b-.04;a+=rule.id==='barn'?.20:.30)box(f,wall,'vertical-joint',a,base+l.slab+.04,.016,clear-.08,.012,rule.id==='tudor'?'accent':'wall');
   }
   const roof=B.sceneRoofSpec(),b=B.sceneFootprintBounds(B.floorRooms(l.floors-1)),top=(l.roofBase??l.floors*l.floorHeight)+l.slab;
@@ -112,13 +155,14 @@
   if(!p.horizontal)g.rotateY(Math.PI/2);g.translate(p.x-W/2,p.y+p.floor*explode,p.z-D/2+(p.horizontal?0:p.d));return g;
  };
  B.addArchitecturalFacade=(options,parts)=>{
-  const {THREE,scene,W,D,explode}=options,groups=new Map();for(const p of parts){const key=p.floor+'|'+p.role+'|'+(p.kind==='exterior-finish'?'skin':p.kind==='timber-panel-joint'?'micro':'detail');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(p);}
+  const {THREE,scene,W,D,explode}=options,groups=new Map();for(const p of parts){const key=p.floor+'|'+p.role+'|'+(['exterior-finish','style-cladding'].includes(p.kind)?'skin':p.kind==='timber-panel-joint'?'micro':'detail');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(p);}
   for(const group of groups.values()){
    const first=group[0],material=B.architecturalFacadeMaterial(THREE,scene,first.role),boxes=group.filter(p=>!p.polygon),polygons=group.filter(p=>p.polygon),all=[];
+   if(['exterior-finish','style-cladding'].includes(first.kind)){material.polygonOffset=true;material.polygonOffsetFactor=-1;material.polygonOffsetUnits=-1;}
    if(boxes.length)all.push(B.sceneJoinedBoxes(THREE,boxes,{W,D,base:first.floor*explode}));for(const p of polygons)all.push(B.facadePolygonGeometry(THREE,p,{W,D,explode}));
    const positions=[],normals=[],uvs=[];for(const source of all){const g=source.index?source.toNonIndexed():source;positions.push(...g.attributes.position.array);normals.push(...g.attributes.normal.array);uvs.push(...g.attributes.uv.array);if(g!==source)g.dispose();source.dispose();}
    const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));B.sceneSurfaceUvs(geometry,material,{x:0,y:0,z:0});
-   const mesh=new THREE.Mesh(geometry,material);mesh.castShadow=!['exterior-finish','timber-panel-joint'].includes(first.kind);mesh.receiveShadow=first.kind!=='timber-panel-joint';mesh.userData={kind:'facade-detail',facadeFinish:true,facadeRole:first.role,facadeSkin:first.kind==='exterior-finish',floor:first.floor,styleId:first.styleId,componentIds:group.map(p=>p.id),measuredBoxes:group,generic:true,provisional:true};scene.add(mesh);
+   const mesh=new THREE.Mesh(geometry,material);mesh.castShadow=!['exterior-finish','style-cladding','timber-panel-joint'].includes(first.kind);mesh.receiveShadow=first.kind!=='timber-panel-joint';mesh.userData={kind:'facade-detail',facadeFinish:true,facadeRole:first.role,facadeSkin:['exterior-finish','style-cladding'].includes(first.kind),floor:first.floor,styleId:first.styleId,componentIds:group.map(p=>p.id),measuredBoxes:group,generic:true,provisional:true};scene.add(mesh);
   }
  };
  const refresh=B.refreshStudioFinishes;

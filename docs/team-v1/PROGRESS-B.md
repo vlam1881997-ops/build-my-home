@@ -4,11 +4,11 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 10/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: B3 photographic material library and measured detailed furniture; source/UI checked locally; publishing current upgrade, 24-style visual acceptance still pending
+- active_substep: B3 style switch + lot-edge finish fix verified locally; publishing codex/b-style-switch-24, 24-style visual acceptance remains pending
 - target_branch: codex/b-v1-24
 - actual_branch: codex/review-ab-c08 (local isolated review); remote resume codex/b-v1-24
 - source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff (520 remote blob bytes đã đối chiếu trong checkout mới; giữ WIP cũ nguyên)
-- last_verified_commit: 03c0b9f4228fc197dbd18d039fc9fb16549c9b89 (PR38 merged; Node22 460/460; native desktop/phone/editor/GLB; public bundles/catalog/illustration match and live desktop/phone10tabs/material prices/3D passed; commercial gates pending)
+- last_verified_commit: c9d6c3a87d8eb2da880e739c2ad0b283d484f516 (PR39 merged; CI249/250 success; Node22 462/462; public file hashes and desktop/phone photo/detailed3D passed)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -154,3 +154,19 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Chromium153 Node22.23.3: native desktop+phone showroom/styles/persistence10tabs pass, đổi finish106/119ms. Fixture 3style Japandi/Industrial/Modern: ảnh thật decode, HDRI, imported chair, same measured plan; đổi da trên mesh nhập giữ scene/camera/pose. Không page/WebGL error. Actual screenshots đã xem; nội thất rõ hơn nhưng mặt đứng vẫn đơn giản, 0/24 visual acceptance remains. Không gọi commercial100%.
 - Tests B thêm trong real-house.test.mjs (đã thuộc ownership B) kiểm SHA/license/size và GLB đo đúng kích thước/góc37°/late disposal. No build/dependency/A-source changes. npm test kết quả ghi validation.json khi hoàn tất.
 - Next: publish scoped source/assets + checkpoint; CI/merge then verify actual public bundles. Tiếp theo cần bộ mặt đứng/mái và nội thất khác cho từng style, ảnh/mẫu đúng SKU có quyền, chưa đủ24 duyệt hình. Cloud/payment/professional gates giữ pending.
+
+## B3 release verified — 10/10/2026
+- Source remote 3fb70276caadd0482faed2bb861a88bbeb9d509c, PR39 merged main c9d6c3a87d8eb2da880e739c2ad0b283d484f516. CI249/250 success, Vercel success. Prior quota review failure interrupted blob upload only; resumed through the same approved connector after user's continuation. All40 source/evidence assets now on GitHub.
+- Public www.huiminhbach.id.vn: app.js/styles.css/modern-armchair.glb/photographic-provenance.json SHA256 exactly match checked local build. Chromium153 desktop1440×1000 and phone390×844 display actual photos, imported chair and HDRI, 10tabs, no overflow or JS/WebGL error. Fresh anonymous fixtures; external/API services isolated. TLS validated through Node transport, no protection bypass. PRODUCTION-VERIFICATION.json and PUBLISH-STATUS.json record proof.
+- Remaining: source photos do not establish supplier-SKU equivalence; 24-style facade/roof/interior visual acceptance, cloud/payment/professional gates remain pending. Next B3 work is architectural composition and detailed assets appropriate to each style, using approved measured geometry. Do not redo furniture editor, photos pipeline or task-A schema.
+
+## B3 style identity / inherited finishes — 10/10/2026
+- User screenshots show narrow 3-storey house and distant cutaway; complaint: most selected styles look the same. This checkpoint addresses visible switching, not the generated target photograph.
+- Source baseline main c9d6c3a; 5 edited B source files match main blobs before the patch. Local worktree codex/review-ab-c08; new review branch codex/b-style-switch-24. Original B role branch and unfinished scope preserved.
+- Fixed discarded exterior finish skins at exact lot edges: millimetre skins sit within the measured wall and use depth bias. Industrial/Brutalist/Barn cladding applies to full solid wall bands, not glass or door voids; front joints/reveals/pilasters/cornices remain bounded and shared with elevations. Explicit exterior paint remains authoritative.
+- Whole-house collection colours now carry styleRoles; later floor/wall/fabric edits and per-room manual collections remain explicit. Existing unmarked project colours are conserved. One disclosed action can restore generic style suggestions, keeping SKU bindings and manual room mixes. No silent migration or invented vendor match.
+- Selecting a style exits an old presentation-image mode, invalidates stale presentation cache and shows actual style/roof in the stage. An explicitly selected roof is retained and explained. No plan regeneration, extra rooms or invented windows.
+- Node22.23.0 npm test:467/467 pass. Native headless Chromium145:24 desktop exterior style selections on one 5x20m /3-floor fixture, 3 phone styles, actual pixel differences, independent interior finishes and reload. Final reset UI additionally verified with 3 desktop/3 phone samples. No JS/WebGL errors or phone overflow.
+- Desktop measured pixel changes in the model region: Japandi↔Industrial28.9%; Japandi↔Scandi23.5%. This verifies changed raster output, not aesthetic approval. Capturing assets/shaders/PNG on software GPU takes roughly6–10s in this harness; not a universal customer latency promise.
+- Evidence: evidence/B/B3-style-switch/{24-styles-result.json,controls-result.json,validation.log,PNG views}. Current plan/cumulative levels/openings/furniture/SKU choices remain unchanged in checked transitions. Billable/external API and non-read network calls isolated.
+- Next: publish exact scoped sources; require CI and Vercel success and verify actual public bundle and style controls. Then continue real facade composition, larger detailed furniture library and per-style visual acceptance. Still0/24 styles professionally/customer visually approved; generated target image is illustrative, not model output. No commercial100% claim.
