@@ -1,0 +1,65 @@
+{
+  "mainCommit": "d374d81dbf9b5ec60ea55b20f2a157429049f18e",
+  "sourceCommit": "ff32f14572631efd53c6514d40529fe82e6bc409",
+  "sourceTree": "bde095bd6a6dfef879b3700872e62325123038ed",
+  "pr": 40,
+  "prUrl": "https://github.com/vlam1881997-ops/build-my-home/pull/40",
+  "merged": true,
+  "githubCi": [
+    {
+      "name": "deploy",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/vlam1881997-ops/build-my-home/actions/runs/38047058814/job/114198783985"
+    },
+    {
+      "name": "check",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/vlam1881997-ops/build-my-home/actions/runs/38047058814/job/114198602335"
+    }
+  ],
+  "githubVercelStatus": [
+    {
+      "state": "success",
+      "description": "Deployment has completed",
+      "url": "https://vercel.com/vlam1881997-9266/build_my_home_full_v1.2_github/H4Z8kUntk2kAjPqwpY3FPb7whN8k"
+    }
+  ],
+  "publicOrigin": "https://www.huiminhbach.id.vn",
+  "commercialComplete": false,
+  "visual24StylesApproved": false,
+  "privateRuntimeLogs": "not inspected; no runtime-log health claim",
+  "publicAssetHashes": [
+    {
+      "path": "app.js",
+      "status": 200,
+      "bytes": 1694277,
+      "sha256": "b4cc463fcc2298740f1e291a7886e9ee6aff3909f31496c44f542e35aabf4afe",
+      "matchesLocal": true
+    },
+    {
+      "path": "styles.css",
+      "status": 200,
+      "bytes": 589466,
+      "sha256": "5259b590e6cb51decad5408e4dcda32218efa0cc2260d379d35b24175bc63392",
+      "matchesLocal": true
+    }
+  ],
+  "publicUi": {
+    "passed": true,
+    "devices": [
+      "desktop",
+      "phone"
+    ],
+    "desktopStyles": 3,
+    "phoneStyles": 3,
+    "interiorStyles": 3,
+    "nativeSuggestedMaterialControl": true,
+    "reload": true,
+    "measuredPlanUnchanged": true,
+    "isolatedProviders": true,
+    "transport": "Public HTTPS bytes fetched with TLS-verifying Node fetch and fulfilled to Chromium; no TLS bypass",
+    "result": "production-ui-smoke.json"
+  }
+}
