@@ -133,15 +133,15 @@
   const {THREE,scene,renderer,ground,displayBase,focus,roomFocus,floorFocus,explode}=c,day=B.state.ui.sceneTheme!=='night',whole=focus==='all'&&!explode;
   scene.userData.realHouse={revision:version,source:'measured-plan',context:'illustrative-sky-and-ground',engineeringApproved:false};
   if(whole){displayBase.visible=false;ground.position.y=-.018;ground.material.color.set('#c4c5bb');const maps=scene.userData.surfaceTextures||=new Map();for(const [slot,channel]of [['map','color'],['normalMap','normal'],['roughnessMap','roughness']]){const t=B.sceneSurfaceTexture(THREE,'concrete',channel);maps.set('house-ground-'+channel,t);ground.material[slot]=t;}ground.material.userData.surfaceScale=[1.2,1.2];ground.material.normalScale.setScalar(.12);B.sceneSurfaceUvs(ground.geometry,ground.material);ground.material.needsUpdate=true;}
-  if(whole&&day){
+  if((whole||roomFocus)&&day){
    const sky=B.houseSkyTexture(THREE);if(sky){const generator=new THREE.PMREMGenerator(renderer);try{const target=generator.fromEquirectangular(sky);scene.userData.environmentTarget?.dispose();scene.userData.environmentTarget=target;scene.environment=target.texture;scene.background=sky;(scene.userData.surfaceTextures||=new Map()).set('house-sky',sky);}finally{generator.dispose();}}
    scene.fog=new THREE.Fog('#dce6e8',60,160);
   }
   if(day){
    for(const light of scene.children.filter(o=>o.isLight)){
-    if(light.isHemisphereLight){light.color.set('#eef4ff');light.groundColor.set('#c4c7bb');light.intensity=whole?.55:1.65;}
-    else if(light.isDirectionalLight){light.color.set(light.castShadow?'#fff5e8':'#dcecff');light.intensity=light.castShadow?2.7:.28;}
-   }renderer.toneMappingExposure=whole?1:.98;
+    if(light.isHemisphereLight){light.color.set('#eef4ff');light.groundColor.set('#c4c7bb');light.intensity=whole?.42:roomFocus?.68:1.1;}
+    else if(light.isDirectionalLight){light.color.set(light.castShadow?'#fff5e8':'#dcecff');light.intensity=light.castShadow?3.1:.16;}
+   }renderer.toneMappingExposure=whole?.93:1.05;
   }
   if(whole&&day){
    // Raster environment lighting cannot see roof occlusion. A bounded indoor
@@ -169,7 +169,7 @@
  };
  const configure=B.configureModelPresentation;B.configureModelPresentation=c=>{
   B.configureHousePresentation(c);configure(c);
-  if(c.focus==='all'&&!c.explode&&B.state.ui.sceneTheme!=='night')(c.scene.userData.surfaceLoads||=[]).push(B.installHouseEnvironment(c));
+  if((c.focus==='all'||c.roomFocus)&&!c.explode&&B.state.ui.sceneTheme!=='night')(c.scene.userData.surfaceLoads||=[]).push(B.installHouseEnvironment(c));
  };
  const panel=B.measuredDesignPanel;
  B.measuredDesignPanel=()=>{
@@ -179,5 +179,5 @@
  const review=B.architecturalIdentityReview;
  B.architecturalIdentityReview=()=>({...review(),constructionDetailRevision:version,parapet:B.roofParapetSpec(),context:'Bầu trời và mặt đất minh họa; công trình lấy từ bản vẽ.',engineeringApproved:false});
  const drawingRevision=B.drawingRevision;B.drawingRevision=()=>drawingRevision()+'-RH1';
- B.ARCH_RENDER_REVISION='customer-measured-house-10';
+ B.ARCH_RENDER_REVISION='customer-measured-house-11';
 })();

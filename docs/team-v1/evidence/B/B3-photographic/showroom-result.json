@@ -1,0 +1,51 @@
+{
+  "runtime": "v22.23.3",
+  "browser": "153.0.8010.0",
+  "isolatedServices": true,
+  "evidence": [
+    {
+      "device": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1040
+      },
+      "materialSwitchMs": 106,
+      "styleAfterReload": "industrial",
+      "skuSelectionRetained": true,
+      "measuredPlanRetained": true,
+      "tenTabs": true,
+      "categoryIllustrations": 86,
+      "datedPrices": true,
+      "historicPriceLabel": true,
+      "neutralWallCut": {
+        "count": 8,
+        "neutral": true,
+        "detailCount": 9
+      },
+      "bedTextile": true,
+      "jsWebglErrors": []
+    },
+    {
+      "device": "phone",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "materialSwitchMs": 119,
+      "styleAfterReload": "industrial",
+      "skuSelectionRetained": true,
+      "measuredPlanRetained": true,
+      "tenTabs": true,
+      "categoryIllustrations": 86,
+      "datedPrices": true,
+      "historicPriceLabel": true,
+      "neutralWallCut": {
+        "count": 8,
+        "neutral": true,
+        "detailCount": 9
+      },
+      "bedTextile": true,
+      "jsWebglErrors": []
+    }
+  ]
+}

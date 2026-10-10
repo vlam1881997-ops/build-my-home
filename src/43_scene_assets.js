@@ -104,7 +104,7 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
   const key = JSON.stringify([finish.wall, finish.floor, finish.accent, finish.fabric, finish.surface,finish.pillow,finish.rug,finish.shape,finish.table,finish.visualMaterials]);
   if (cache.has(key)) return cache.get(key);
   const textures = scene.userData.surfaceTextures ||= new Map();
-  const photoSets={wood:'wood_table_001',woodVertical:'wood_table_001',plank:'wood_floor',fabric:'terlenka',marble:'marble_01',plaster:'white_plaster_02'},photoChannels={color:'diff',normal:'nor_gl',roughness:'rough'};
+  const photoSets={wood:'wood_table_001',woodVertical:'wood_table_001',plank:'wood_floor',fabric:'terlenka',marble:'marble_01',plaster:'white_plaster_02',leather:'brown_leather',concrete:'concrete_floor_02',brick:'brick_wall_001',terrazzo:'terrazzo_tiles'},photoChannels={color:'diff',normal:'nor_gl',roughness:'rough'};
   const texture = (kind,channel='color') => {
    const key=kind+':'+channel;if(!textures.has(key)){
     const fallback=BMH.sceneSurfaceTexture(THREE,kind,channel);textures.set(key,fallback);

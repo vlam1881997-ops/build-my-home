@@ -64,11 +64,28 @@
    return profile?[{category,id:product.id,name:product.name,sku:product.sku||'',profileId:profile.id,profileName:profile.name,exactness:'generic'}]:[];
   });
  };
+ // Original photographs are labelled independently of the supplier catalogue.
+ // These are licensed surface studies, never invented photos of a chosen SKU.
+ B.MATERIAL_PHOTOS=[
+  {id:'wood_floor',name:'Sàn gỗ · ảnh bề mặt gốc',category:'floor'},
+  {id:'marble_01',name:'Đá lát · ảnh bề mặt gốc',category:'floor'},
+  {id:'terrazzo_tiles',name:'Terrazzo · ảnh bề mặt gốc',category:'floor'},
+  {id:'concrete_floor_02',name:'Bê tông · ảnh bề mặt gốc',category:'floor'},
+  {id:'white_plaster_02',name:'Vữa khoáng · ảnh bề mặt gốc',category:'paint'},
+  {id:'wood_table_001',name:'Gỗ hoàn thiện · ảnh bề mặt gốc',category:'cabinetry'},
+  {id:'terlenka',name:'Vải dệt · ảnh bề mặt gốc',category:'cabinetry'},
+  {id:'brown_leather',name:'Da nâu · ảnh bề mặt gốc',category:'cabinetry'},
+  {id:'brick_wall_001',name:'Gạch xây · ảnh bề mặt gốc',category:'brick'}
+ ];
+ B.materialPhotoGallery=category=>{
+  const photos=B.MATERIAL_PHOTOS.filter(p=>p.category===category);if(!photos.length)return '';
+  return '<section class="material-photo-library" aria-label="Ảnh bề mặt vật liệu thật"><header><span>ẢNH BỀ MẶT THẬT</span><h3>Xem vân và chất liệu trước khi chọn.</h3><p>Ảnh chụp/quét bề mặt gốc. Màu trong 3D theo lựa chọn của bạn; đây chưa phải ảnh đúng mã hàng bên dưới.</p></header><div class="material-photo-grid">'+photos.map(p=>'<a href="assets/interior/photos/'+p.id+'.jpg" target="_blank" rel="noopener" aria-label="Phóng to '+B.esc(p.name)+'"><img data-material-surface-photo src="assets/interior/photos/'+p.id+'.jpg" alt="'+B.esc(p.name)+'" loading="lazy" decoding="async"><span>'+B.esc(p.name)+' ↗</span></a>').join('')+'</div><small>Powered by <a href="https://polyhaven.com/license" target="_blank" rel="noopener noreferrer">Poly Haven · CC0</a>. Ảnh sản phẩm cụ thể: mở nguồn hãng trên từng thẻ.</small></section>';
+ };
  B.showroomPreviewHtml=category=>{
   const config=categories[category],product=B.selectedShowroomProduct(category);if(!config||!product)return '';
   const esc=B.esc,rooms=regularRooms(),room=rooms.find(r=>'room:'+r.id===B.state.ui.sceneFocus)||rooms.find(r=>r.type==='living')||rooms[0],palette=B.finishPalette(room?.id),applied=B.showroomFinishInfo(room?.id).find(x=>x.category===category),profile=B.VISUAL_MATERIALS.find(p=>p.id===(applied?.profileId||config.profile)),binding=palette.catalogMaterials?.[category],status=B.catalogBindingStatus?.(category,binding,product,palette);
   const scope='<label>Phạm vi áp dụng<select data-showroom-scope="'+category+'"><option value="unassigned">Phòng chưa chọn riêng</option>'+rooms.map(r=>'<option value="room:'+esc(r.id)+'">Tầng '+(r.floor+1)+' · '+esc(r.name)+'</option>').join('')+'<option value="all">Toàn nhà · thay bề mặt đã chọn</option></select></label>';
-  return '<section class="showroom-preview" aria-label="Vật liệu đã chọn và bề mặt 3D"><figure class="showroom-material-image"><img src="'+esc(B.materialIllustration(product))+'" alt="Minh họa nhóm vật liệu, chưa phải ảnh đúng mã" loading="lazy"><figcaption>Minh họa BMH</figcaption>'+B.finishSampleHtml(profile)+'</figure><div><span>'+esc(config.label)+' đã chọn</span><h3>'+esc(product.name)+'</h3><small>'+esc(product.sku||'Chưa có mã hàng')+'</small><label>Bề mặt mô phỏng<select data-showroom-profile="'+category+'">'+B.VISUAL_MATERIALS.filter(p=>p.role===config.role).map(p=>'<option value="'+p.id+'" '+(p.id===profile.id?'selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select></label>'+scope+'<p>Bề mặt mô phỏng chung, chưa phải ảnh hoặc texture đúng mã hàng. Báo giá giữ theo sản phẩm đã chọn.</p>'+(status?.status==='stale'?'<p role="status">'+esc(status.reason)+'</p>':'')+'<button type="button" data-showroom-3d="'+category+'" '+(!room?'disabled':'')+'>Áp dụng & xem 3D →</button>'+(!room?'<small>Tạo phòng ở mục Bản vẽ để xem vật liệu trong 3D.</small>':'')+'</div></section>';
+  return '<section class="showroom-preview" aria-label="Vật liệu đã chọn và bề mặt 3D"><figure class="showroom-material-image showroom-surface-photo">'+B.finishSampleHtml(profile)+'<figcaption>Bề mặt dùng trong 3D · màu theo lựa chọn, chưa phải ảnh SKU</figcaption></figure><div><span>'+esc(config.label)+' đã chọn</span><h3>'+esc(product.name)+'</h3><small>'+esc(product.sku||'Chưa có mã hàng')+'</small><label>Bề mặt mô phỏng<select data-showroom-profile="'+category+'">'+B.VISUAL_MATERIALS.filter(p=>p.role===config.role).map(p=>'<option value="'+p.id+'" '+(p.id===profile.id?'selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select></label>'+scope+'<p>Bề mặt mô phỏng chung, chưa phải ảnh hoặc texture đúng mã hàng. Báo giá giữ theo sản phẩm đã chọn.</p>'+(status?.status==='stale'?'<p role="status">'+esc(status.reason)+'</p>':'')+'<button type="button" data-showroom-3d="'+category+'" '+(!room?'disabled':'')+'>Áp dụng & xem 3D →</button>'+(!room?'<small>Tạo phòng ở mục Bản vẽ để xem vật liệu trong 3D.</small>':'')+'</div></section>';
  };
  B.styleMaterialBriefHtml=category=>{
   const spec=B.styleSpecification();if(!spec)return '<p class="style-material-brief">Phong cách riêng: cần chốt mẫu vật liệu trước khi xác nhận phù hợp.</p>';
@@ -82,7 +99,7 @@
   const status=B.styleMaterialCompatibility(product),label=status.status==='design-suggestion'?'Gợi ý theo phong cách':status.status==='different-style'?'Gợi ý cho phong cách khác':'Cần đối chiếu mẫu';
   return productCard(product).replace('<h3>','<small class="style-material-status" title="'+B.esc(status.reason)+'">'+label+'</small><h3>');
  };
- const catalog=B.materialCatalogHtml;if(catalog)B.materialCatalogHtml=category=>{const brief=B.styleMaterialBriefHtml(category),preview=B.showroomPreviewHtml(category),alternatives=catalog(category);return brief+preview+(preview&&B.guidedDetails?B.guidedDetails('showroom:'+category,'So sánh sản phẩm khác',alternatives):alternatives);};
+ const catalog=B.materialCatalogHtml;if(catalog)B.materialCatalogHtml=category=>{const brief=B.styleMaterialBriefHtml(category),preview=B.showroomPreviewHtml(category),alternatives=catalog(category);return brief+B.materialPhotoGallery(category)+preview+(preview&&B.guidedDetails?B.guidedDetails('showroom:'+category,'So sánh sản phẩm khác',alternatives):alternatives);};
  const studio=B.screen7;B.screen7=()=>{
   let html=studio();const room=B.state.project.plan.rooms.find(r=>'room:'+r.id===B.state.ui.sceneFocus),info=B.showroomFinishInfo(room?.id),esc=B.esc;
   const selected=info.length?'<section class="studio-supplier-choice"><b>Sản phẩm đã chọn</b>'+info.map(x=>'<p>'+esc(x.name)+'<small>'+esc([x.sku,'Mô phỏng: '+x.profileName].filter(Boolean).join(' · '))+'</small></p>').join('')+'<a href="#" data-nav="5">Mở showroom →</a></section>':'';

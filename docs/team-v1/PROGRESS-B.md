@@ -1,10 +1,10 @@
 # Tiến độ AI B — BMH commercial v1
 
-Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
+Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 10/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: B3 material illustrations/prices/measured finishes released main03c0b9f; desktop/phone production UI passed; next style-specific facade/roof/interior assets and exact SKU/24 visual acceptance
+- active_substep: B3 photographic material library and measured detailed furniture; source/UI checked locally; publishing current upgrade, 24-style visual acceptance still pending
 - target_branch: codex/b-v1-24
 - actual_branch: codex/review-ab-c08 (local isolated review); remote resume codex/b-v1-24
 - source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff (520 remote blob bytes đã đối chiếu trong checkout mới; giữ WIP cũ nguyên)
@@ -146,3 +146,11 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Evidence: B3-material-realism/PRODUCTION-VERIFICATION.json + production-ui-smoke.json. Private Vercel deployment list403 this turn; CLI unavailable; not retried or replaced with identity probes. No private deployment metadata/runtime-log clean claim.
 - Test correction: first production smoke expected cut caps while default auto-wall mode used no clipping planes. Explicit material/cut wall view then passed23neutralcaps on both devices; no source change was necessary.
 - Current upgrade delivered. Whole B3/24styles/price coverage/exactSKU/professional/provider gates stay pending. Continue from integrated source, not B-only legacy checkout; next style-specific facade/roof/interior assets and supplier evidence.
+
+## B3 photographic checkpoint — 10/10/2026
+- Tiếp tục đúng phản hồi của khách: ảnh vật liệu thật và nhà 3D còn đơn giản. 9 ảnh bề mặt gốc CC0 (không phải ảnh SKU), 12 kênh PBR mới cho da/bê tông/gạch/terrazzo, một ghế GLB 8.916 tam giác/243KB với slot gỗ/vải theo lựa chọn. Nguồn, MD5 gốc và SHA256 đầu ra trong photographic-provenance.json; Powered by Poly Haven. Không gọi API lúc khách sử dụng.
+- Showroom có thư viện ảnh thật, phóng to, phân biệt ảnh bề mặt với ảnh hãng. Preview sản phẩm đã chọn dùng swatch bề mặt 3D, không còn hình SVG nhóm trong preview. Ảnh SKU thiếu giấy phép vẫn dẫn sang nguồn hãng, không tự nhận đã có ảnh chính xác cả95sản phẩm.
+- 3D giữ một furniture node/ID/pose/kích thước; mesh chi tiết chỉ thay các collection phù hợp (warm-oak, nordic-light, mid-century, loft-leather, urban-stone, coastal), chọn gỗ/vải dùng chung pipeline và đổi tại chỗ. Cảnh đã hủy không nhận model đến muộn. HDRI cho cả góc phòng; giảm ambient phẳng, tăng tương phản nắng/fill; fallback kỹ thuật và raster vẫn sẵn có.
+- Chromium153 Node22.23.3: native desktop+phone showroom/styles/persistence10tabs pass, đổi finish106/119ms. Fixture 3style Japandi/Industrial/Modern: ảnh thật decode, HDRI, imported chair, same measured plan; đổi da trên mesh nhập giữ scene/camera/pose. Không page/WebGL error. Actual screenshots đã xem; nội thất rõ hơn nhưng mặt đứng vẫn đơn giản, 0/24 visual acceptance remains. Không gọi commercial100%.
+- Tests B thêm trong real-house.test.mjs (đã thuộc ownership B) kiểm SHA/license/size và GLB đo đúng kích thước/góc37°/late disposal. No build/dependency/A-source changes. npm test kết quả ghi validation.json khi hoàn tất.
+- Next: publish scoped source/assets + checkpoint; CI/merge then verify actual public bundles. Tiếp theo cần bộ mặt đứng/mái và nội thất khác cho từng style, ảnh/mẫu đúng SKU có quyền, chưa đủ24 duyệt hình. Cloud/payment/professional gates giữ pending.

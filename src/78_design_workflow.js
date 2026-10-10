@@ -94,7 +94,7 @@ const workflowContext=BMH.aiContext;BMH.aiContext=options=>{const c=workflowCont
 BMH.furnitureModelCache=new Map();
 BMH.loadFurnitureModel=model=>{
  if(!BMH.furnitureLoaderPromise)BMH.furnitureLoaderPromise=Promise.all([import('./vendor/three/loaders/GLTFLoader.js'),import('./vendor/three/loaders/DRACOLoader.js')]).then(([g,d])=>{const decoder=new d.DRACOLoader().setDecoderPath('assets/architect3d/draco/').setDecoderConfig({type:'wasm'}).setWorkerLimit(2);return new g.GLTFLoader().setDRACOLoader(decoder);}).catch(e=>{BMH.furnitureLoaderPromise=null;throw e;});
- if(!BMH.furnitureModelCache.has(model))BMH.furnitureModelCache.set(model,BMH.furnitureLoaderPromise.then(loader=>loader.loadAsync('assets/architect3d/models/'+model+'.glb')).then(g=>g.scene).catch(e=>{BMH.furnitureModelCache.delete(model);throw e;}));
+ if(!BMH.furnitureModelCache.has(model))BMH.furnitureModelCache.set(model,BMH.furnitureLoaderPromise.then(loader=>loader.loadAsync(model==='modern-armchair'?'assets/interior/models/modern-armchair.glb':'assets/architect3d/models/'+model+'.glb')).then(g=>g.scene).catch(e=>{BMH.furnitureModelCache.delete(model);throw e;}));
  return BMH.furnitureModelCache.get(model);
 };
 BMH.replaceSceneFurniture=(group,model,THREE,scene)=>{
@@ -106,13 +106,33 @@ BMH.replaceSceneFurniture=(group,model,THREE,scene)=>{
  }).catch(()=>false);
  scene.userData.furnitureLoads??=[];scene.userData.furnitureLoads.push(task);
 };
+// Licensed detailed geometry is a visual replacement inside the SAME measured
+// furniture node. Preserve IDs, exact pose/size, semantic finishes and fallback.
+BMH.detailedFurnitureAsset=(item,roomId)=>item.model==='loungeChair'&&['warm-oak','nordic-light','mid-century','loft-leather','urban-stone','coastal'].includes(BMH.interiorCollection?.(roomId)?.id)?'modern-armchair':null;
+BMH.upgradeMeasuredFurniture=(group,asset,THREE,scene)=>{
+ const task=BMH.loadFurnitureModel(asset).then(source=>{
+  if(scene.userData.disposed||!group.parent||BMH.studio3d?.scene!==scene)return false;
+  const item=group.userData.placement,finish=BMH.furnitureFinishPalette?.(item)||BMH.finishPalette(group.userData.roomId),mats=BMH.sceneAssetMaterials(THREE,scene,finish),root=source.clone(true),size=item.size||{width:BMH.FURNITURE_DIMENSIONS[item.model].w,height:BMH.FURNITURE_DIMENSIONS[item.model].h,depth:BMH.FURNITURE_DIMENSIONS[item.model].d};
+  root.traverse(mesh=>{if(!mesh.isMesh)return;mesh.geometry=mesh.geometry.clone();const slot=mesh.material.name==='wood'?'wood':'fabric';mesh.material=mats[slot];mesh.userData.finishSlot=slot;mesh.castShadow=mesh.receiveShadow=true;});
+  root.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(root),extent=bounds.getSize(new THREE.Vector3());
+  if(![extent.x,extent.y,extent.z].every(v=>Number.isFinite(v)&&v>1e-6))return false;
+  root.scale.set(size.width/extent.x,size.height/extent.y,size.depth/extent.z);root.updateMatrixWorld(true);
+  // Bake this normalization into vertices so metre UVs and later finish updates
+  // use the same physical scale as the saved dimensions, including GLB exports.
+  root.traverse(mesh=>{if(!mesh.isMesh)return;mesh.geometry.applyMatrix4(mesh.matrixWorld);mesh.position.set(0,0,0);mesh.quaternion.identity();mesh.scale.set(1,1,1);});root.scale.set(1,1,1);root.updateMatrixWorld(true);
+  const normalized=new THREE.Box3().setFromObject(root),center=normalized.getCenter(new THREE.Vector3());
+  root.traverse(mesh=>{if(!mesh.isMesh)return;mesh.geometry.translate(-center.x,-normalized.min.y,-center.z);BMH.sceneSurfaceUvs(mesh.geometry,mesh.material);BMH.prepareModelMaterial?.(mesh.material,null,mesh,scene);});
+  group.traverse(mesh=>mesh.geometry?.dispose());group.clear();group.add(root);group.userData.source='licensed-mesh';group.userData.asset=asset;group.userData.license='CC0-1.0';
+  const studio=BMH.studio3d;studio.renderer.shadowMap.needsUpdate=true;(studio.requestRender||studio.renderFrame).call(studio);return true;
+ }).catch(()=>false);(scene.userData.furnitureLoads||=[]).push(task);return task;
+};
 BMH.addRoomSceneFurniture=(r,base,THREE,scene,mats,site)=>{
  const material=(color,roughness=.75)=>new THREE.MeshStandardMaterial({color,roughness});
  const wood=mats.accent,cloth=material(0xd4c8b8,.96),white=material(0xf4f1e9,.35),dark=mats.dark;
  for(const [index,i] of BMH.roomFurnitureLayout(r).entries()){
   const d=i.size?{w:i.size.width,d:i.size.depth,h:i.size.height}:BMH.FURNITURE_DIMENSIONS[i.model],g=new THREE.Group();g.position.set((i.pose?.x??i.x+i.w/2)-site.width/2,base+i.base,(i.pose?.y??i.y+i.d/2)-site.depth/2);g.rotation.y=-i.rotation*Math.PI/180;
   const detailed=BMH.createRoomAsset?.(i.model,d,THREE,BMH.sceneAssetMaterials?.(THREE,scene,BMH.furnitureFinishPalette?.(i)||BMH.finishPalette?.(r.id)||{})||{});
-  if(detailed){detailed.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(detailed),size=bounds.getSize(new THREE.Vector3());if([size.x,size.y,size.z].every(v=>v>1e-6)){detailed.scale.set(detailed.scale.x*d.w/size.x,detailed.scale.y*d.h/size.y,detailed.scale.z*d.d/size.z);detailed.updateMatrixWorld(true);const final=new THREE.Box3().setFromObject(detailed),center=final.getCenter(new THREE.Vector3());detailed.position.x-=center.x;detailed.position.y-=final.min.y;detailed.position.z-=center.z;}g.add(detailed);g.name=i.id||'furniture-'+r.id+'-'+index;g.userData={id:g.name,furnitureId:g.name,kind:'furniture',roomId:r.id,floor:r.floor,model:i.model,source:'parametric',placement:{...i},generic:true};scene.add(g);BMH.addFurnitureContact(THREE,scene,i,base,site);continue;}
+  if(detailed){detailed.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(detailed),size=bounds.getSize(new THREE.Vector3());if([size.x,size.y,size.z].every(v=>v>1e-6)){detailed.scale.set(detailed.scale.x*d.w/size.x,detailed.scale.y*d.h/size.y,detailed.scale.z*d.d/size.z);detailed.updateMatrixWorld(true);const final=new THREE.Box3().setFromObject(detailed),center=final.getCenter(new THREE.Vector3());detailed.position.x-=center.x;detailed.position.y-=final.min.y;detailed.position.z-=center.z;}g.add(detailed);g.name=i.id||'furniture-'+r.id+'-'+index;g.userData={id:g.name,furnitureId:g.name,kind:'furniture',roomId:r.id,floor:r.floor,model:i.model,source:'parametric',placement:{...i},generic:true};scene.add(g);BMH.addFurnitureContact(THREE,scene,i,base,site);const asset=BMH.detailedFurnitureAsset(i,r.id);if(asset)BMH.upgradeMeasuredFurniture(g,asset,THREE,scene);continue;}
   const box=(w,h,depth,x,y,z,m=wood)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,depth),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;g.add(o);return o;};
   const legs=(top,w=d.w,depth=d.d)=>{for(const x of [-w/2+.08,w/2-.08])for(const z of [-depth/2+.08,depth/2-.08])box(.045,top,.045,x,top/2,z,dark);};
   if(/bedDouble|bedSingle/.test(i.model)){box(d.w,.22,d.d,0,.2,0);box(d.w,.13,d.d-.08,0,.38,0,white);box(d.w,.07,d.d*.65,0,.49,d.d*.15,cloth);box(d.w,d.h,.10,0,d.h/2,-d.d/2+.05);for(const x of [-d.w*.24,d.w*.24])box(d.w*.38,.1,.4,x,.49,-d.d*.32,white);}
