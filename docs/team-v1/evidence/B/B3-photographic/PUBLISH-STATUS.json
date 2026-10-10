@@ -1,0 +1,18 @@
+{
+  "sourceLocalCommit": "67c4a79",
+  "sourceRemoteCommit": "3fb70276caadd0482faed2bb861a88bbeb9d509c",
+  "pullRequest": "https://github.com/vlam1881997-ops/build-my-home/pull/39",
+  "mainCommit": "c9d6c3a87d8eb2da880e739c2ad0b283d484f516",
+  "githubCi": {
+    "run": 249,
+    "conclusion": "success"
+  },
+  "production": "Vercel success; public bundle hashes and desktop/phone photo/3D story passed",
+  "commercialAccepted": false,
+  "deploymentUrl": "https://vercel.com/vlam1881997-9266/build_my_home_full_v1.2_github/9HGdVH7VapobjmLY6dV3VcrCjp6p",
+  "mainCi": {
+    "run": 250,
+    "conclusion": "success"
+  },
+  "logsInspection": "Not repeated: Vercel metadata/runtime-log access previously denied. Verification uses GitHub Vercel status and public HTTPS/UI."
+}

@@ -4,11 +4,11 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 10/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: B3 photographic material library and measured detailed furniture; source/UI checked locally; publishing current upgrade, 24-style visual acceptance still pending
+- active_substep: B3 photographic release verified on main c9d6c3a; next refine style-specific facades/roof/interiors and exact supplier photos; 24-style acceptance pending
 - target_branch: codex/b-v1-24
 - actual_branch: codex/review-ab-c08 (local isolated review); remote resume codex/b-v1-24
 - source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff (520 remote blob bytes đã đối chiếu trong checkout mới; giữ WIP cũ nguyên)
-- last_verified_commit: 03c0b9f4228fc197dbd18d039fc9fb16549c9b89 (PR38 merged; Node22 460/460; native desktop/phone/editor/GLB; public bundles/catalog/illustration match and live desktop/phone10tabs/material prices/3D passed; commercial gates pending)
+- last_verified_commit: c9d6c3a87d8eb2da880e739c2ad0b283d484f516 (PR39 merged; CI249/250 success; Node22 462/462; public file hashes and desktop/phone photo/detailed3D passed)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -154,3 +154,8 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Chromium153 Node22.23.3: native desktop+phone showroom/styles/persistence10tabs pass, đổi finish106/119ms. Fixture 3style Japandi/Industrial/Modern: ảnh thật decode, HDRI, imported chair, same measured plan; đổi da trên mesh nhập giữ scene/camera/pose. Không page/WebGL error. Actual screenshots đã xem; nội thất rõ hơn nhưng mặt đứng vẫn đơn giản, 0/24 visual acceptance remains. Không gọi commercial100%.
 - Tests B thêm trong real-house.test.mjs (đã thuộc ownership B) kiểm SHA/license/size và GLB đo đúng kích thước/góc37°/late disposal. No build/dependency/A-source changes. npm test kết quả ghi validation.json khi hoàn tất.
 - Next: publish scoped source/assets + checkpoint; CI/merge then verify actual public bundles. Tiếp theo cần bộ mặt đứng/mái và nội thất khác cho từng style, ảnh/mẫu đúng SKU có quyền, chưa đủ24 duyệt hình. Cloud/payment/professional gates giữ pending.
+
+## B3 release verified — 10/10/2026
+- Source remote 3fb70276caadd0482faed2bb861a88bbeb9d509c, PR39 merged main c9d6c3a87d8eb2da880e739c2ad0b283d484f516. CI249/250 success, Vercel success. Prior quota review failure interrupted blob upload only; resumed through the same approved connector after user's continuation. All40 source/evidence assets now on GitHub.
+- Public www.huiminhbach.id.vn: app.js/styles.css/modern-armchair.glb/photographic-provenance.json SHA256 exactly match checked local build. Chromium153 desktop1440×1000 and phone390×844 display actual photos, imported chair and HDRI, 10tabs, no overflow or JS/WebGL error. Fresh anonymous fixtures; external/API services isolated. TLS validated through Node transport, no protection bypass. PRODUCTION-VERIFICATION.json and PUBLISH-STATUS.json record proof.
+- Remaining: source photos do not establish supplier-SKU equivalence; 24-style facade/roof/interior visual acceptance, cloud/payment/professional gates remain pending. Next B3 work is architectural composition and detailed assets appropriate to each style, using approved measured geometry. Do not redo furniture editor, photos pipeline or task-A schema.

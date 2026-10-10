@@ -1,0 +1,48 @@
+{
+  "production": "https://www.huiminhbach.id.vn",
+  "mainCommit": "c9d6c3a87d8eb2da880e739c2ad0b283d484f516",
+  "checkedAt": "2026-10-10T05:51:31.750Z",
+  "transport": "Public HTTPS fetched through Node with TLS validation; same bytes rendered in Chromium. Providers isolated, anonymous fixtures.",
+  "assets": [
+    {
+      "path": "app.js",
+      "bytes": 1689893,
+      "sha256": "0359527638ef1d4407892025b8df82b5e575dfddd449e3e83f287c5d57fd1b01"
+    },
+    {
+      "path": "styles.css",
+      "bytes": 589466,
+      "sha256": "5259b590e6cb51decad5408e4dcda32218efa0cc2260d379d35b24175bc63392"
+    },
+    {
+      "path": "assets/interior/models/modern-armchair.glb",
+      "bytes": 242868,
+      "sha256": "61aa73d35d6beb4d26b0fa4ca45afaf1ad316f456c60aeaa562bce7079a39cdc"
+    },
+    {
+      "path": "assets/interior/photographic-provenance.json",
+      "bytes": 9361,
+      "sha256": "aae33409fb5bf520b34055ec5b5e4bcbd84016dce0097c34422f0e65f3ebf240"
+    }
+  ],
+  "evidence": [
+    {
+      "device": "desktop",
+      "chair": true,
+      "hdri": true,
+      "revision": "customer-measured-house-11",
+      "tenTabs": 10,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "device": "phone",
+      "chair": true,
+      "hdri": true,
+      "revision": "customer-measured-house-11",
+      "tenTabs": 10,
+      "overflow": false,
+      "errors": []
+    }
+  ]
+}
