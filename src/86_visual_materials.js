@@ -99,7 +99,7 @@ BMH.visualMaterialContext=roomId=>{
  return {collection:collection?{id:collection.id,name:collection.name,note:collection.note,shape:collection.shape,table:collection.table}:null,palette:Object.fromEntries(['wall','floor','accent','fabric','pillow','rug'].map(role=>[role,palette[role]]).filter(([,value])=>/^#[0-9a-f]{6}$/i.test(value||''))),surface:palette.surface||'auto',surfaces:Object.entries(palette.visualMaterials||{}).flatMap(([role,id])=>{const p=BMH.VISUAL_MATERIALS.find(p=>p.id===id&&p.role===role);return p?[{role,id,name:p.name,color:palette[role]||p.color,kind:p.kind,scale:p.scale,roughness:p.roughness,detail:p.detail}]:[];})};
 };
 BMH.finishSampleHtml=profile=>{
- const photos={wood:'wood_table_001',plank:'wood_floor',marble:'marble_01',plaster:'white_plaster_02',fabric:'terlenka'},asset=photos[profile.kind];
+ const photos={wood:'wood_table_001',plank:'wood_floor',marble:'marble_01',plaster:'white_plaster_02',fabric:'terlenka',leather:'brown_leather',concrete:'concrete_floor_02',brick:'brick_wall_001',terrazzo:'terrazzo_tiles'},asset=photos[profile.kind];
  return '<i class="finish-swatch finish-'+profile.kind+'" style="--finish-color:'+profile.color+'" aria-hidden="true">'+(asset?'<img class="finish-photo" src="assets/interior/textures/'+asset+'-diff.png" alt="" loading="lazy" decoding="async">':'')+'</i>';
 };
 BMH.visualMaterialsHtml=()=>{

@@ -61,3 +61,18 @@ html.bmh-v60 .showroom-material-image>img{width:100%;display:block}
 html.bmh-v60 .showroom-material-image>figcaption{font-size:11px;color:#4a6550;padding:0 12px 12px}
 html.bmh-v60 .showroom-material-image>.finish-swatch{position:absolute;width:64px;height:64px;right:10px;bottom:9px;border:3px solid #fff;border-radius:10px;box-shadow:0 4px 12px #334f3426}
 @media(max-width:600px){html.bmh-v60 .showroom-preview{grid-template-columns:1fr}html.bmh-v60 .showroom-material-image{width:100%;max-width:320px}html.bmh-v60 .material-product-visual{height:190px}html.bmh-v60 .web-product>div{padding:15px}}
+
+/* Photographed surface samples retain the original colour and source identity. */
+html.bmh-v60 .material-photo-library{margin:18px 0 24px;padding:22px;background:#f7f5ef;border:1px solid #e3e1d8;border-radius:16px}
+html.bmh-v60 .material-photo-library header>span{font-size:11px;font-weight:700;letter-spacing:.12em;color:#586d5e}
+html.bmh-v60 .material-photo-library h3{margin:6px 0 8px;font-size:22px}
+html.bmh-v60 .material-photo-library p{max-width:720px;color:#616960;font-size:13px;line-height:1.6}
+html.bmh-v60 .material-photo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:18px 0}
+html.bmh-v60 .material-photo-grid a{display:block;overflow:hidden;border-radius:10px;color:#314a3e;background:white;text-decoration:none}
+html.bmh-v60 .material-photo-grid img{display:block;width:100%;aspect-ratio:1.25;object-fit:cover;transition:transform .2s}
+html.bmh-v60 .material-photo-grid a:hover img{transform:scale(1.035)}
+html.bmh-v60 .material-photo-grid span{display:block;padding:12px;font-size:12px;line-height:1.5}
+html.bmh-v60 .material-photo-library>small{font-size:11px;color:#687169}
+html.bmh-v60 .showroom-surface-photo>.finish-swatch{position:static;display:block;width:100%;height:230px;border:0;border-radius:0;box-shadow:none}
+html.bmh-v60 .showroom-surface-photo>figcaption{padding:12px}
+@media(max-width:600px){html.bmh-v60 .material-photo-library{padding:15px}html.bmh-v60 .material-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}html.bmh-v60 .material-photo-library h3{font-size:19px}}

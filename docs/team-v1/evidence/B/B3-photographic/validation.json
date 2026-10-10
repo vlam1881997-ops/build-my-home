@@ -1,0 +1,11 @@
+{
+  "runtime": "Node22.23.3",
+  "tests": 462,
+  "passed": 462,
+  "failed": 0,
+  "browser": "Chromium153",
+  "desktopPhone": "passed; showroom/styles/persistence/10tabs",
+  "photographicStory": "passed; three styles, detailed mesh/finish switch, unchanged plan",
+  "visualAcceptance": false,
+  "productionVerified": false
+}
