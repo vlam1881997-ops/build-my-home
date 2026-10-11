@@ -4,11 +4,11 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 11/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: B3 facade PBR/depth and upholstery verified; release codex/b-facade-depth in progress
+- active_substep: PR41 released and verified on public desktop/phone; next B3 facade composition and broader per-style interior assets
 - target_branch: codex/b-v1-24
-- actual_branch: codex/review-ab-c08 (local); next remote checkpoint codex/b-facade-depth; prior verified checkpoint codex/b-style-switch-24
-- source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff (520 remote blob bytes đã đối chiếu trong checkout mới; giữ WIP cũ nguyên)
-- last_verified_commit: d374d81dbf9b5ec60ea55b20f2a157429049f18e (PR40 merged; CI and Vercel success; Node22 467/467; native public style switches and exact bundle hashes verified)
+- actual_branch: codex/review-ab-c08 (local); remote resume codex/b-facade-depth; PR41 source is merged in main
+- source_baseline: d374d81dbf9b5ec60ea55b20f2a157429049f18e (PR40 integrated baseline for PR41; earlier work preserved)
+- last_verified_commit: 958cd2588cf79335ad7d6a301ab1e2ed9285c96e (PR41 merged; CI/Vercel success; Node22 470 tests; exact public bundle hashes and native desktop/phone PBR/style/interior/persistence checks passed)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -191,3 +191,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Native desktop3styles/phone3styles, interiors3styles, reset action, persistence and unchanged plan pass. All3 Industrial map channels identify brick_wall_001, not fallback. Actual screenshot inspected: brick joints/colour variation now visible.
 - Bump measured facade drawing suffix AI3 and render revision12 so prior cached imagery cannot represent the new finish geometry. Final CI and public build must cover these cache markers.
 - Local remaining quality: silhouettes are still limited by measured plan; broader facade composition and style-specific furniture remain incomplete. No24-style visual signoff.
+
+
+## B3 facade-depth production verified — 11/10/2026
+- PR41 source7fd62d9 merged main958cd25; CI PR/main check success and Vercel Deployment has completed. Public app.js1696807B SHA256 b61113b32bace3e913059de253adadd53e006e2a4a151afabac56793531ee798 and styles.css589466B exactly match tested build.
+- Final public-byte Chromium145 / Node22.23.0 run passed: 3desktop/3phone exterior styles, 3interiors, actual brick colour/normal/roughness photographic source, native material reset, save/reload, measured plan unchanged; no JS/WebGL errors or overflow. Provider/API/non-read calls isolated; TLS verification enabled. No private runtime-log health claim.
+- Previous usage-limit approval failure blocked result retrieval; this continuation restored the exact published source and reran only the missing final public validation. Local earlier patch preserved. PRODUCTION-VERIFICATION.json and production-ui-smoke.json are durable evidence on codex/b-facade-depth. No second source deployment was needed.
+- Next: improve measured facade composition and the furniture library per style, then visual acceptance of each of the24 styles. The functional/texture defect is fixed; current whole-house silhouettes remain simple. No24style visual signoff, engineering approval or commercial100% claim. Preserve Task A ownership, authored materials, IDs and dimensions.

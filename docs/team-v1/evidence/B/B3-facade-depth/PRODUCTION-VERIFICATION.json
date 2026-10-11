@@ -30,8 +30,23 @@
     ]
   },
   "publicUi": {
-    "status": "in_progress",
-    "reason": "Prior final result retrieval was blocked by usage-limit automatic review; final run restarted after verified checkout/runtime recovery"
+    "status": "passed",
+    "devices": [
+      "desktop",
+      "phone"
+    ],
+    "desktopStyles": 3,
+    "phoneStyles": 3,
+    "interiorStyles": 3,
+    "actualBrickPbrChannels": 3,
+    "nativeMaterialReset": true,
+    "saveReload": true,
+    "measuredPlanUnchanged": true,
+    "jsWebglErrors": 0,
+    "overflow": false,
+    "isolatedProviders": true,
+    "transport": "Public HTTPS with TLS-verifying Node fetch; exact fetched bytes fulfilled to Chromium. No TLS bypass.",
+    "evidence": "production-ui-smoke.json"
   },
   "commercialComplete": false,
   "visual24StylesApproved": false,
@@ -51,5 +66,6 @@
       "sha256": "5259b590e6cb51decad5408e4dcda32218efa0cc2260d379d35b24175bc63392",
       "matchesLocal": true
     }
-  ]
+  ],
+  "recoveryNote": "Prior result retrieval blocked by automatic approval usage-limit failure. Recovered published source from GitHub; preserved earlier local patch. Restored truncated browser binary from intact existing archive, then completed this public run."
 }
