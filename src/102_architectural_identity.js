@@ -1,7 +1,7 @@
 /* Shared architectural finish geometry. It decorates measured walls; it never
  * creates a room, opening, balcony or structural member. All dimensions are m. */
 (()=>{
- const B=BMH,hex=v=>/^#[0-9a-f]{6}$/i.test(v||''),revision='architectural-identity-2';
+ const B=BMH,hex=v=>/^#[0-9a-f]{6}$/i.test(v||''),revision='architectural-identity-3';
  // Each style has a distinct composition, rather than a colour-only variant.
  const rules=[
   ['modern','Khung sâu & đường ngang','metal','frame','horizontal',.075,.20,0,'#394443',0],
@@ -108,7 +108,10 @@
    const bays=front.filter(w=>w.kind==='wall'&&w.b-w.a>.60).sort((a,b)=>(b.b-b.a)-(a.b-a.a)||a.a-b.a),feature=bays[0];
    if(feature&&rule.id){
     const span=feature.b-feature.a,width=Math.min(span-.12,['japandi','contemporary','tuscan','brutalist'].includes(rule.id)?2.10:1.35),start=Math.max(feature.a+.06,Math.min(feature.b-.06-width,(feature.a+feature.b-width)/2)),height=clear-.16,y=base+l.slab+.08;
-    if(['japandi','scandi','modern','contemporary','tuscan','brutalist','industrial','balinese'].includes(rule.id))box(f,feature,rule.surface==='wood'?'timber-panel':'feature-panel',start,y,width,height,.026);
+    if(['japandi','scandi','modern','contemporary','tuscan','brutalist','industrial','balinese'].includes(rule.id)){
+     box(f,feature,rule.surface==='wood'?'timber-panel':'feature-panel',start,y,width,height,.026);
+     if(rule.surface==='wood')for(let u=0;u<width-.035;u+=.095)box(f,feature,'timber-batten',start+u,y,Math.min(.065,width-u),height,.047);
+    }
     if(['japanese','tropical','vietnamese'].includes(rule.id)){for(let a=start;a<start+width-.04;a+=rule.id==='tropical'?.13:.105)box(f,feature,'wood-slat',a,y,.045,height,.065);}
     if(rule.id==='tudor'&&f>0){box(f,feature,'timber-post',start,y,.07,height,.035);box(f,feature,'timber-post',start+width-.07,y,.07,height,.035);box(f,feature,'timber-diagonal',start,y,width,height,.04,'accent',[[0,0],[.08,0],[width,height-.1],[width,height],[width-.08,height],[0,.1]]);}
     if(rule.band==='deco')for(let i=0;i<3;i++)box(f,feature,'deco-fin',start+i*width/3,y+(.12-i*.04),.055,height-(.12-i*.04),.075);
@@ -125,6 +128,16 @@
      if(rule.surround==='classical'){for(let i=1;i<3;i++)box(f,w,'window-pediment',a-t*(1+i*.2),top+t*i,len+t*(2+i*.4),t*.45,Math.max(.03,t+i*.02),'wall');}
      if(rule.surround==='offset')box(f,w,'offset-fin',a+len+t,base+l.slab+.08,t*1.4,clear-.16,rule.shade,'accent');
      if(rule.surround==='stepped')for(let i=0;i<3;i++)box(f,w,'deco-step',a-t+i*t*.45,top+t*(i+1),len+t*2-i*t*.9,t*.65,.05+i*.025,'accent');
+    }
+    if(w.kind==='window'&&['modern','contemporary','japandi','brutalist','artdeco'].includes(rule.id)&&headroom>.24){
+     const edge=rule.id==='brutalist'?.22:rule.id==='japandi'?.12:.17,projection=Math.min(.24,rule.shade),role=['modern','artdeco'].includes(rule.id)?'frame':rule.id==='contemporary'?'accent':'wall';
+     const bottomEdge=Math.max(base+l.slab,bottom-.20),height=top-bottomEdge+.22;
+     for(const x of [a-edge-.025,a+len+.025]){
+      const solid=front.find(q=>q.kind==='wall'&&Math.abs(q.axis-w.axis)<.001&&x>=q.a&&x+edge<=q.b);
+      if(solid)box(f,solid,'bay-frame-jamb',x,bottomEdge,edge,height,projection,role);
+     }
+     box(f,w,'bay-frame-head',a,top+.10,len,.12,projection,role);
+     if(bottom-base-l.slab>.24)box(f,w,'bay-frame-sill',a,bottom-.20,len,.12,projection,role);
     }
     if(rule.arch>0&&headroom>.20){const rise=Math.min(rule.arch,headroom-.05),stroke=Math.min(.08,rise*.3);box(f,w,'arch-crown',a-.08,top+.025,len+.16,rise+stroke,.065,rule.id==='indochine'?'accent':'wall',arch(len+.16,rise,stroke));}
     if(['shutter','arched'].includes(rule.surround)&&w.kind==='window'&&['indochine','tuscan','coastal','spanish'].includes(rule.id)){
@@ -146,7 +159,7 @@
   if(role==='wall')m=shared.wall.clone();else if(role==='base')m=shared.stone.clone();else if(role==='frame')m=shared.metal.clone();else if(finish.manualAccent||finish.facadeSurface==='wood')m=(finish.manualAccent?shared.wood:shared.slattedWood).clone();else if(finish.facadeSurface==='stone')m=shared.stone.clone();else if(finish.facadeSurface==='metal')m=shared.metal.clone();else m=shared.wall.clone();
   m.color.set(role==='wall'?finish.wall:role==='base'?'#908c7c':role==='frame'?'#'+B.scenePalette().frame.toString(16).padStart(6,'0'):finish.accent);
   if(role==='frame'||role==='accent'&&finish.facadeSurface==='metal'){m.roughness=.42;m.metalness=.5;}if(role==='base'){m.roughness=.9;m.userData.surfaceScale=[.8,.8];}
-  if(role==='accent'&&['brick','concrete'].includes(finish.facadeSurface)){for(const [slot,channel]of [['map','color'],['normalMap','normal'],['roughnessMap','roughness']]){const texture=B.sceneSurfaceTexture(THREE,finish.facadeSurface,channel);if(texture){texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.colorSpace=channel==='color'?THREE.SRGBColorSpace:THREE.NoColorSpace;m[slot]=texture;}}m.userData.surfaceScale=finish.facadeSurface==='brick'?[.44,.15]:[2,2];m.normalScale.setScalar(.10);m.roughness=.91;}
+  if(role==='accent'&&['brick','concrete'].includes(finish.facadeSurface)){for(const [slot,channel]of [['map','color'],['normalMap','normal'],['roughnessMap','roughness']]){const texture=B.sceneMaterialTexture(THREE,scene,finish.facadeSurface,channel);if(texture){texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.colorSpace=channel==='color'?THREE.SRGBColorSpace:THREE.NoColorSpace;m[slot]=texture;}}m.userData.surfaceScale=finish.facadeSurface==='brick'?[1.1,1.04]:[2,2];m.normalScale.setScalar(finish.facadeSurface==='brick'?.52:.22);m.roughness=.91;}
   m.polygonOffset=true;m.polygonOffsetFactor=-1;m.polygonOffsetUnits=-1;
   m.userData={...m.userData,finishSlot:'facade-'+role,facadeRole:role,generic:true};cache.set(key,m);return m;
  };
@@ -238,6 +251,6 @@
  };
  const review=B.styleOutputReview;B.styleOutputReview=()=>({...review(),architecture:B.architecturalIdentityReview()});
  const html=B.styleOutputHtml;B.styleOutputHtml=()=>{const a=B.architecturalIdentityReview();return html().replace('<div class="customer-style-body">','<div class="customer-style-body"><p class="architectural-identity-summary"><b>'+B.esc(a.name)+'</b><br>'+B.esc(a.roof.name)+(a.roof.manual?' · theo thông số bạn chọn':' · theo phong cách')+'<br>Hoàn thiện mặt ngoài: '+B.esc(a.materialBasis)+'. Màu riêng trong phòng được giữ.'+(a.setbackReviewNeeded?'<br>Chi tiết nhô mặt tiền cần đối chiếu khoảng lùi được phép tại khu đất.':'')+'</p>');};
- const drawingRevision=B.drawingRevision;B.drawingRevision=()=>drawingRevision()+'-AI1';
+ const drawingRevision=B.drawingRevision;B.drawingRevision=()=>drawingRevision()+'-AI3';
  B.ARCH_RENDER_REVISION='customer-architectural-identity-9';
 })();

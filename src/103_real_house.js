@@ -179,5 +179,5 @@
  const review=B.architecturalIdentityReview;
  B.architecturalIdentityReview=()=>({...review(),constructionDetailRevision:version,parapet:B.roofParapetSpec(),context:'Bầu trời và mặt đất minh họa; công trình lấy từ bản vẽ.',engineeringApproved:false});
  const drawingRevision=B.drawingRevision;B.drawingRevision=()=>drawingRevision()+'-RH1';
- B.ARCH_RENDER_REVISION='customer-measured-house-11';
+ B.ARCH_RENDER_REVISION='customer-measured-house-12';
 })();

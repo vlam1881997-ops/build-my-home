@@ -94,18 +94,17 @@ BMH.scenePhotoSurface = (THREE, scene, asset, channel) => {
   let settled=false,timer;
   const finish=image=>{if(settled)return;settled=true;clearTimeout(timer);cancels.delete(cancel);resolve(scene.userData.disposed?null:image);};
   const cancel=()=>finish(null);cancels.add(cancel);
-  timer=setTimeout(cancel,BMH.SCENE_TEXTURE_TIMEOUT||8000);
+  // Begin the deadline after synchronous scene/shader construction yields.
+  // Requests start immediately; already downloaded image events get a chance
+  // to run before the timeout on a slow GPU. Raster remains immediately usable.
+  setTimeout(()=>{if(!settled)timer=setTimeout(cancel,BMH.SCENE_TEXTURE_TIMEOUT||30000);},0);
   try{new THREE.TextureLoader().load('assets/interior/textures/'+asset+'-'+channel+'.png',loaded=>{const image=loaded.image;loaded.dispose();if(!settled&&!scene.userData.disposed)photos.set(key,image);finish(image);},undefined,cancel);}catch(_){cancel();}
  });loads.set(key,task);return task;
 };
 
-BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
-  const cache = scene.userData.finishMaterials ||= new Map();
-  const key = JSON.stringify([finish.wall, finish.floor, finish.accent, finish.fabric, finish.surface,finish.pillow,finish.rug,finish.shape,finish.table,finish.visualMaterials]);
-  if (cache.has(key)) return cache.get(key);
+BMH.sceneMaterialTexture = (THREE, scene, kind, channel='color') => {
   const textures = scene.userData.surfaceTextures ||= new Map();
   const photoSets={wood:'wood_table_001',woodVertical:'wood_table_001',plank:'wood_floor',fabric:'terlenka',marble:'marble_01',plaster:'white_plaster_02',leather:'brown_leather',concrete:'concrete_floor_02',brick:'brick_wall_001',terrazzo:'terrazzo_tiles'},photoChannels={color:'diff',normal:'nor_gl',roughness:'rough'};
-  const texture = (kind,channel='color') => {
    const key=kind+':'+channel;if(!textures.has(key)){
     const fallback=BMH.sceneSurfaceTexture(THREE,kind,channel);textures.set(key,fallback);
     if(fallback&&photoSets[kind]&&THREE.TextureLoader&&typeof document.createElementNS==='function'){
@@ -121,7 +120,13 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
      (scene.userData.surfaceLoads||=[]).push(task);
     }
    }return textures.get(key);
-  };
+};
+
+BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
+  const cache = scene.userData.finishMaterials ||= new Map();
+  const key = JSON.stringify([finish.wall, finish.floor, finish.accent, finish.fabric, finish.surface,finish.pillow,finish.rug,finish.shape,finish.table,finish.visualMaterials]);
+  if (cache.has(key)) return cache.get(key);
+  const texture=(kind,channel='color')=>BMH.sceneMaterialTexture(THREE,scene,kind,channel);
   const make = (color, roughness, kind, scale) => {
     const m = new THREE.MeshStandardMaterial({color, roughness});
     if (kind) {
@@ -366,16 +371,28 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
   };
   // A soft, slightly compressed superellipsoid gives upholstery a continuous
   // silhouette. It remains inside the same measured furniture envelope.
-  const cushion = (w,h,depth,x,y,z,material=m.fabric,orientation='seat') => {
-    const geometry=new THREE.SphereGeometry(1,32,16),p=geometry.attributes.position,power=v=>Math.sign(v)*Math.pow(Math.abs(v),.48);
+  const cushion = (w,h,depth,x,y,z,material=m.fabric,orientation='seat',tufted=false) => {
+    const geometry=new THREE.SphereGeometry(1,tufted?64:32,tufted?32:16),p=geometry.attributes.position,power=v=>Math.sign(v)*Math.pow(Math.abs(v),.48);
     for(let i=0;i<p.count;i++){
       let px=power(p.getX(i))*w/2,py=power(p.getY(i))*h/2,pz=power(p.getZ(i))*depth/2;
       const centre=Math.max(0,1-(px/(w/2))**2)*Math.max(0,1-(pz/(depth/2))**2);
       if(orientation==='seat'&&py>0)py-=Math.min(.009,h*.06)*centre*(py/(h/2));
+      if(tufted&&pz<0){
+       // Recess the real textile surface around buttons; folds are geometry,
+       // not dark dots floating in front of a flat backrest.
+       const u=px/(w/2),v=py/(h/2),front=Math.max(0,-pz/(depth/2));let dent=0;
+       for(const a of [-.62,0,.62])for(const b of [-.4,.4])dent+=Math.exp(-((u-a)**2/.014+(v-b)**2/.024));
+       const diagonal=Math.pow(Math.abs(Math.cos((u/.62+v/.8)*Math.PI)),18)+Math.pow(Math.abs(Math.cos((u/.62-v/.8)*Math.PI)),18);
+       pz+=Math.min(depth*.24,.032)*(dent*.8+diagonal*.08)*front;
+      }
       p.setXYZ(i,px,py,pz);
     }
     geometry.computeVertexNormals();geometry.computeBoundingBox();
-    const o=mesh(geometry,material,x,y,z);o.userData={kind:'upholstery',generic:true};
+    const o=mesh(geometry,material,x,y,z);o.userData={kind:'upholstery',generic:true,tufted};
+    if(tufted)for(const a of [-.62,0,.62])for(const b of [-.4,.4]){
+     const front=-depth/2*Math.pow(Math.max(0,1-Math.pow(Math.abs(a),2/.48)-Math.pow(Math.abs(b),2/.48)),.48/2)+Math.min(depth*.24,.032)*.8;
+     const button=sphere(.014,.014,.007,x+a*w/2,y+b*h/2,z+front-.002,material);o.add(button);button.position.set(a*w/2,b*h/2,front-.002);button.userData={kind:'upholstery-button',generic:true};
+    }
     // Welt follows the actual cushion perimeter, with no painted-on stripe.
     if(THREE.CatmullRomCurve3&&THREE.TubeGeometry){
       const points=[],backRadius=Math.sqrt(1-Math.pow(.76,2/.48));for(let i=0;i<48;i++){const a=i/48*Math.PI*2;points.push(orientation==='seat'?new THREE.Vector3(power(Math.cos(a))*w*.502,0,power(Math.sin(a))*depth*.502):new THREE.Vector3(power(Math.cos(a)*backRadius)*w*.502,power(Math.sin(a)*backRadius)*h*.502,-depth*.381));}
@@ -400,6 +417,10 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     box(d.w-.035,.40,.14,0,d.h-.22,d.d/2-.095,timber?m.wood:m.fabric,curved?.12:linear?.018:.065);
     for(const x of [-d.w/2+arms/2,d.w/2-arms/2]){
      if(timber){box(arms,.065,d.d-.035,x,.55,0,m.wood,.015);for(const z of [-d.d*.34,d.d*.34])box(.04,.37,.04,x,.345,z,m.wood,.008);for(let z=-d.d*.3;z<d.d*.3;z+=.045)box(.015,.29,.014,x,.38,z,m.slattedWood,.003);}
+     else if(shape==='tufted'){
+      box(arms*.75,.25,d.d-.06,x,.32,0,m.fabric,.065);
+      const roll=cylinder(arms*.68,arms*.68,d.d-.045,x,.54,0,m.fabric);roll.rotation.x=Math.PI/2;roll.userData={kind:'rolled-arm',generic:true};
+     }
      else if(curved)cushion(arms,.42,d.d-.06,x,.43,0,m.fabric,'back');
      else box(arms,.41,d.d-.035,x,.43,0,m.fabric,linear?.028:.06);
     }
@@ -407,10 +428,10 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     for(let i=0;i<count;i++) {
       const x=-seatW/2+(i+.5)*seatW/count;
       cushion(seatW/count-.025,.16,d.d-.24,x,.45,-.055,m.fabric);
-      const back=cushion(seatW/count-.025,curved?.35:.31,curved?.20:.15,x,curved?.63:.67,d.d/2-.185,m.fabric,'back');
+      const back=cushion(seatW/count-.025,curved?.35:.31,curved?.20:.15,x,curved?.63:.67,d.d/2-.185,m.fabric,'back',shape==='tufted');
       back.rotation.x=-.12;
-      if(shape==='channel')for(let j=0;j<4;j++)box(.006,.235,.004,x-seatW/count*.35+j*seatW/count*.23,.67,d.d/2-.265,m.fabric,.001);
-      if(shape==='tufted')for(const y of [.59,.72])for(const bx of [-.22,.22])sphere(.018,.018,.009,x+bx*seatW/count,y,d.d/2-.278,m.fabric);
+      if(shape==='channel')for(let j=0;j<4;j++)cushion((seatW/count-.04)/4,.29,.055,x-seatW/count*.375+j*seatW/count*.25,.67,d.d/2-.265,m.fabric,'back');
+
     }
     for (const [x,angle,material] of [[-seatW*.32,.16,m.linen],[seatW*.33,-.18,m.pillow]]) {
       const pillow=cushion(chair?.28:.33,.3,.12,x,.62,d.d/2-.31,material,'back');
