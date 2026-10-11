@@ -4,7 +4,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 11/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: PR41 released and verified on public desktop/phone; next B3 facade composition and broader per-style interior assets
+- active_substep: B3 24-style roof/material/facade upgrade; 473 Node22 tests passed, final native proposal workflow in progress
 - target_branch: codex/b-v1-24
 - actual_branch: codex/review-ab-c08 (local); remote resume codex/b-facade-depth; PR41 source is merged in main
 - source_baseline: d374d81dbf9b5ec60ea55b20f2a157429049f18e (PR40 integrated baseline for PR41; earlier work preserved)
@@ -198,3 +198,15 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Final public-byte Chromium145 / Node22.23.0 run passed: 3desktop/3phone exterior styles, 3interiors, actual brick colour/normal/roughness photographic source, native material reset, save/reload, measured plan unchanged; no JS/WebGL errors or overflow. Provider/API/non-read calls isolated; TLS verification enabled. No private runtime-log health claim.
 - Previous usage-limit approval failure blocked result retrieval; this continuation restored the exact published source and reran only the missing final public validation. Local earlier patch preserved. PRODUCTION-VERIFICATION.json and production-ui-smoke.json are durable evidence on codex/b-facade-depth. No second source deployment was needed.
 - Next: improve measured facade composition and the furniture library per style, then visual acceptance of each of the24 styles. The functional/texture defect is fixed; current whole-house silhouettes remain simple. No24style visual signoff, engineering approval or commercial100% claim. Preserve Task A ownership, authored materials, IDs and dimensions.
+
+## B3 — 24-style measured facade / roof upgrade (11/10/2026)
+- User explicitly requested continuing all 24 existing styles, from materials to detailed 3D, after comparing the inspiration villa with the narrow measured house.
+- Source baseline remains main 958cd2588cf79335ad7d6a301ab1e2ed9285c96e; remote role branch codex/b-facade-depth proof head bbbf1df4d049b2e1796bfb6a74e4757a49d38ffc. Preserve prior evidence/source.
+- Pitched roof fallback now clips shared roof planes to occupied upper-floor cells and slab holes; concave/notched footprints no longer silently omit the roof. Same sceneRoofSpec feeds 3D, elevations and measured roof area. Effective overhang is zero on compound footprints and reported separately; roof drainage/structure remains provisional. No new geometry store.
+- All 24 styles have explicit frame/base palettes and suggested opening proportions; richer measured classical pilasters/crown/coursing. Existing customer materials/room/furniture/locks remain authoritative.
+- Explicit facade proposal previews window dimensions before applying through commitDirectPlan; style selection alone never changes openings. Upper-floor suggested sills remain >=0.90 m; this is not a certified guard design.
+- Material matrix now includes generic roof/facade/joinery/ceiling previews, and visible model swatches include roof/exterior/frame. No invented SKU, price or supplier approval. Inspiration photo retained; project dimensions moved away from its caption so it is not presented as a measured design.
+- Source: src/44_house_styles.js, 45_studio3d.js, 101_visual_studio.js, 102_architectural_identity.js, 103_real_house.js; tests/real-house.test.mjs, team-b-style-identity.browser.cjs. All B-owned, no A schema/build/dependencies changed.
+- Tests: Node22 full 473/473 passed; actual raster screenshots for all 24 exterior styles, 3 interiors and 3 phone exteriors passed before proposal UI addition. Evidence B/B3-style-24. Final native apply/undo/redo/reload run ongoing in B/B3-style-proposals.
+- Visual acceptance remains pending: narrow townhouse cannot duplicate a wide villa photo; balcony/terrace/major massing must be authored in measured plan. No claim of commercial completion or 24 professional approvals.
+- Next: finish native proposal run, inspect contact sheet, publish scoped PR and verify CI/live source. Then continue detailed interior assets and architectural composition against measured customer references.

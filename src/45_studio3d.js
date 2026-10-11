@@ -238,7 +238,7 @@ BMH.mountStudio3D = async () => {
   if(focus==='all'&&roof){
    mats.roof.side=THREE.DoubleSide;
    for(const [polygon,gable]of [...roof.faces.map(p=>[p,false]),...(roof.gables||[]).map(p=>[p,true])]){const coords=[];for(let i=1;i<polygon.length-1;i++)for(const q of [polygon[0],polygon[i],polygon[i+1]])coords.push(q[0]-W/2,q[1],q[2]-D/2);const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(coords,3));geo.computeVertexNormals();if(!gable)BMH.roofSurfaceUvs?.(THREE,geo,polygon);const mesh=new THREE.Mesh(geo,gable?mats.wall:mats.roof);mesh.userData={kind:gable?'roof-gable':'roof',roofType:roof.type||'hip',modelArea:BMH.polygonArea3D?.(polygon),designRevision:BMH.drawingRevision()};mesh.castShadow=mesh.receiveShadow=true;scene.add(mesh);}
-   if(roof.type!=='flat')addBox(roof.width,.12,roof.depth,roof.bounds.cx-W/2,roof.eave-.08,roof.bounds.cy-D/2,mats.dark);
+   if(roof.type!=='flat'&&!roof.compound)addBox(roof.width,.12,roof.depth,roof.bounds.cx-W/2,roof.eave-.08,roof.bounds.cy-D/2,mats.dark);
   }
 
   const centerRoom=roomFocus?new THREE.Vector3(roomFocus.x+roomFocus.w/2-W/2,roomFocus.type==='stairs'?BMH.studioFloorLevel(roomFocus.floor).height*.55:1.12,roomFocus.y+roomFocus.h/2-D/2):null;

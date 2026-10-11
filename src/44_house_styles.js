@@ -99,10 +99,12 @@ document.addEventListener('toggle',e=>{if(e.target.matches?.('.house-styles'))BM
  B.styleMaterialMatrix=(id=B.houseStyle?.()?.id)=>{
   const spec=B.styleSpecification(id);if(!spec)return [];
   return B.STYLE_MATERIAL_ROLES.map(role=>{
-   const profileId=role.surfaceSlot?spec.defaultMaterials[role.surfaceSlot]:role.id==='wetArea'?'sand-travertine':role.id==='stairs'?spec.defaultMaterials.floor:null;
+   const profileId=role.surfaceSlot?spec.defaultMaterials[role.surfaceSlot]:role.id==='wetArea'?'sand-travertine':role.id==='stairs'?spec.defaultMaterials.floor:role.id==='ceiling'?'ivory-paint':null;
    const preview=B.VISUAL_MATERIALS?.find(x=>x.id===profileId);
-   const category=role.id==='roof'&&['flat','offset'].includes(spec.roofForm)?'waterproof':role.category;
-   return {...structuredClone(role),category,styleId:id,briefRevision:revision,profileId:preview?.id||null,visualPreview:preview?{id:preview.id,name:preview.name,kind:preview.kind,realWorldScale:[...preview.scale],exactness:'generic',textureAssetId:null}:null,
+   const identity=B.ARCHITECTURAL_IDENTITIES?.[id],flat=['flat','offset','deco'].includes(spec.roofForm),roofKind=flat?'concrete':id==='balinese'?'thatch':['barn','scandi','tudor','coastal'].includes(id)?'metal':'tile';
+   const exterior=role.id==='facade'?{id:'facade-'+id,name:identity?.name||spec.facadeIntent,kind:identity?.surface||'plaster',color:spec.wallColor,accentColor:identity?.color||spec.accentColor,realWorldScale:identity?.surface==='brick'?[1.1,1.04]:[1,1],sceneBinding:'facadeFinishPalette'}:role.id==='openings'?{id:'joinery-'+id,name:'Khung cửa theo phong cách',kind:'metal',color:identity?.frame||spec.accentColor,realWorldScale:[1,1],sceneBinding:'scenePalette.frame'}:role.id==='roof'?{id:'roof-'+id,name:({concrete:'Mái bằng mô phỏng',tile:'Ngói mô phỏng',metal:'Tấm kim loại mô phỏng',thatch:'Lớp phủ tự nhiên mô phỏng'})[roofKind],kind:roofKind,color:roofKind==='concrete'?'#a1a09a':roofKind==='thatch'?'#897147':roofKind==='metal'?'#3c494c':['vietnamese','mediterranean','spanish','tuscan','indochine'].includes(id)?'#9f5636':'#5b625e',realWorldScale:roofKind==='tile'?[2,2]:roofKind==='metal'?[.42,2]:[1,1],sceneBinding:'roofSurfaceSpec'}:null;
+   const category=role.id==='roof'&&['flat','offset','deco'].includes(spec.roofForm)?'waterproof':role.category;
+   return {...structuredClone(role),category,styleId:id,briefRevision:revision,profileId:preview?.id||null,visualPreview:preview?{id:preview.id,name:preview.name,kind:preview.kind,color:preview.color,realWorldScale:[...preview.scale],exactness:'generic',textureAssetId:null}:exterior?{...exterior,exactness:'generic',textureAssetId:null}:null,
     intent:role.id==='roof'?spec.roofIntent:role.id==='facade'?spec.facadeIntent:preview?.detail||spec.paletteIntent,
     quantity:null,quantityBasis:null,selectedProductId:null,sku:null,specification:null,productUnit:null,priceEvidence:null,
     supplierSampleConfirmed:false,engineeringApproved:false};

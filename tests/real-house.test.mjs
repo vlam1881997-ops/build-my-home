@@ -6,6 +6,33 @@ import crypto from 'node:crypto';
 import {designClient} from './fixtures/design-client.mjs';
 const client=()=>{const b=designClient({realHouse:true});assert.equal(b.autoPlanConcept(),true);return b;};
 
+test('pitched roofs survive a notched measured footprint without covering its courtyard',()=>{
+ const b=client(),p=b.state.project;Object.assign(p.site,{width:9,depth:12,floors:1});
+ p.plan.rooms=[{id:'a',floor:0,type:'living',x:1,y:1,w:5,h:4},{id:'b',floor:0,type:'bed',x:1,y:5,w:3,h:4}];p.plan.openings=[];p.plan.fixtures=[];
+ const before=JSON.stringify(p.plan),d=b.measuredDesignSettings();d.roof.overhang=.25;
+ for(const type of ['hip','gable','mono'])for(const ridge of ['depth','width']){
+  Object.assign(d.roof,{type,ridge,pitchDeg:30});const roof=b.sceneRoofSpec();assert.ok(roof?.compound,type);assert.ok(roof.rise>0);assert.ok(roof.area>32);assert.equal(roof.overhang,0);assert.equal(roof.requestedOverhang,.25);
+  let projected=0;for(const face of roof.faces){projected+=b.polygonArea3D(face.map(q=>[q[0],0,q[2]]));for(const point of face){assert.ok(point.every(Number.isFinite));assert.ok(point[0]<=4+1e-8||point[2]<=5+1e-8,'notch stays open');}}
+  assert.ok(Math.abs(projected-32)<1e-7,'exact occupied footprint, no duplicate roof panels');assert.ok(roof.gables.length>0);assert.equal(JSON.stringify(p.plan),before);
+  const exploded=b.sceneRoofSpec(1.2);assert.equal(exploded.area,roof.area);
+ }
+});
+
+test('24 exterior palettes keep authored joinery while classical detail is projected into drawings',()=>{
+ const b=client(),p=b.state.project;for(const style of b.HOUSE_STYLES){b.selectHouseStyle(style.id);assert.match(b.architecturalIdentity().frame,/^#[0-9a-f]{6}$/);assert.match(b.architecturalIdentity().base,/^#[0-9a-f]{6}$/);p.materials.finish.exterior={frame:'#123456'};assert.equal(b.scenePalette().frame,0x123456);}
+ p.materials.finish.exterior={};b.selectHouseStyle('neo');const parts=b.facadeComponents();for(const kind of ['roof-crown','pilaster-flute','stone-course'])assert.ok(parts.some(q=>q.kind===kind),kind);
+ const sheet=b.architecturalElevationSheet('front');for(const q of parts.filter(q=>q.kind==='roof-crown'))assert.ok(sheet.includes('data-facade-component="'+q.id+'"'));
+});
+
+test('24 facade proposals share validated opening edits, preserve room and furniture geometry and honor locks',()=>{
+ const b=client(),p=b.state.project,original=JSON.stringify(p.plan),signatures=new Set();
+ for(const style of b.HOUSE_STYLES){b.selectHouseStyle(style.id);const v=b.styleFacadeProposal();assert.equal(v.reason,'',style.id);assert.ok(v.changes.length>0,style.id);assert.equal(JSON.stringify(p.plan),original);assert.equal(JSON.stringify(v.plan.rooms),JSON.stringify(p.plan.rooms));assert.equal(JSON.stringify(v.plan.furniture),JSON.stringify(p.plan.furniture));assert.equal(JSON.stringify(v.plan.fixtures),JSON.stringify(p.plan.fixtures));assert.deepEqual(v.plan.openings.map(o=>o.id),p.plan.openings.map(o=>o.id));signatures.add(JSON.stringify(v.changes.map(q=>q.after)));
+  for(const q of v.changes){if(q.floor>0)assert.ok(q.after.sill>=.9);const before=p.plan.openings.find(o=>o.id===q.id),after=v.plan.openings.find(o=>o.id===q.id),a=b.openingWallSpan(before),c=b.withPlan(v.plan,()=>b.openingWallSpan(after));assert.ok(Math.abs(a.a+a.b-c.a-c.b)<1e-8);}
+ }
+ assert.ok(signatures.size>=16,'distinct measured proportions, not just names');
+ p.plan.lockedFloors=[0,1,2];assert.equal(b.styleFacadeProposal().changes.length,0);assert.equal(b.applyStyleFacadeProposal(),false);
+});
+
 test('3D facade and jambs consume cumulative floor bases from A without altering measured plan',()=>{
  const b=client(),p=b.state.project,original=JSON.stringify(p.plan),heights=[3.8,3.4,3.1],bases=[0,3.8,7.2];
  b.resolvedProjectLevels=()=>({...b.projectLevels(),roofBase:10.3,levels:heights.map((height,floor)=>({floor,base:bases[floor],height,slab:.14,ceilingDrop:.2,clearHeight:height-.34}))});
