@@ -1,7 +1,7 @@
 /* Shared architectural finish geometry. It decorates measured walls; it never
  * creates a room, opening, balcony or structural member. All dimensions are m. */
 (()=>{
- const B=BMH,hex=v=>/^#[0-9a-f]{6}$/i.test(v||''),revision='architectural-identity-3';
+ const B=BMH,hex=v=>/^#[0-9a-f]{6}$/i.test(v||''),revision='architectural-identity-4';
  // Each style has a distinct composition, rather than a colour-only variant.
  const rules=[
   ['modern','Khung sâu & đường ngang','metal','frame','horizontal',.075,.20,0,'#394443',0],
@@ -30,11 +30,40 @@
   ['balinese','Lam gỗ & chân đá tự nhiên','wood','screen','horizontal',.12,.44,0,'#7d684a',0]
  ];
  B.ARCHITECTURAL_IDENTITIES=Object.fromEntries(rules.map(([id,name,surface,surround,band,trim,shade,arch,color,grid])=>[id,{id,name,surface,surround,band,trim,shade,arch,color,grid}]));
+ // Exterior joinery and stone belong to the chosen architecture, not the
+ // default interior collection. Customer-authored finishes retain priority.
+ const finishes={modern:['#293632','#76786f'],minimal:['#74776f','#c0b8aa'],contemporary:['#343a39','#777970'],classic:['#423d32','#b7a98f'],neo:['#303733','#aaa28f'],indochine:['#304335','#897656'],mediterranean:['#70614b','#c6af8c'],scandi:['#5c6058','#9d9c90'],japandi:['#524d41','#a49b86'],japanese:['#473c2d','#77786b'],tropical:['#3c4d3e','#7d8872'],artdeco:['#69512f','#4b514b'],french:['#393d39','#b7ac96'],spanish:['#473c30','#a18a69'],tuscan:['#5a4833','#998362'],craftsman:['#4c4738','#82806b'],tudor:['#372e26','#978b76'],barn:['#292f2c','#777970'],midcentury:['#514636','#a99572'],industrial:['#252d2e','#696b64'],brutalist:['#444a47','#92958e'],coastal:['#e5e4d8','#b9bcb0'],vietnamese:['#4e392b','#8d826a'],balinese:['#493d2c','#787767']};
+ for(const [id,[frame,base]]of Object.entries(finishes))Object.assign(B.ARCHITECTURAL_IDENTITIES[id],{frame,base});
+ const openings={modern:[.70,2.10,.55],minimal:[.62,2.05,.55],contemporary:[.74,2.15,.50],classic:[.48,2.25,.65],neo:[.54,2.20,.65],indochine:[.52,2.20,.60],mediterranean:[.50,2.05,.65],scandi:[.60,2.05,.55],japandi:[.66,1.90,.60],japanese:[.68,1.85,.65],tropical:[.76,2.15,.50],artdeco:[.50,2.30,.60],french:[.48,2.35,.65],spanish:[.46,2.05,.70],tuscan:[.46,1.95,.70],craftsman:[.62,1.85,.65],tudor:[.48,1.90,.70],barn:[.64,2.10,.55],midcentury:[.74,1.70,.70],industrial:[.72,2.20,.55],brutalist:[.58,1.85,.70],coastal:[.64,2.05,.60],vietnamese:[.60,1.85,.70],balinese:[.70,2.10,.55]};
+ // An explicit proposal, never a side effect of selecting a style. The shared
+ // plan editor owns validation/history, and both 2D and 3D consume its result.
+ B.styleFacadeProposal=()=>{
+  const p=B.state.project,recipe=openings[B.houseStyle()?.id],plan=B.planSnapshot(),changes=[];
+  if(!recipe)return {plan,changes,reason:'Chọn một phong cách trong danh mục.'};
+  for(const o of plan.openings){
+   const r=plan.rooms.find(r=>r.id===o.roomId);if(o.kind!=='window'||o.side!=='north'||!r||!['living','bed','office','worship'].includes(r.type)||B.isRoomLocked(r.id)||B.isFloorLocked(r.floor))continue;
+   const span=B.openingWallSpan(o),wall=B.scenePlanGeometry(p.plan,r.floor).walls.find(w=>w.openingId===o.id&&w.roomIds.length===1);if(!span||!wall)continue;
+   const centre=(span.a+span.b)/2,gap=Math.max(.20,(B.ARCHITECTURAL_IDENTITIES[B.houseStyle().id]?.trim||.1)*2+.06);
+   let lo=r.x+gap,hi=r.x+r.w-gap;
+   for(const other of p.plan.openings){if(other.id===o.id||other.floor!==o.floor)continue;const q=B.openingWallSpan(other);if(!q||q.o!==span.o||Math.abs(q.c-span.c)>.001)continue;if(q.b<=centre)lo=Math.max(lo,q.b+gap);if(q.a>=centre)hi=Math.min(hi,q.a-gap);}
+   const width=Math.floor(Math.min(r.w*recipe[0],2*(centre-lo),2*(hi-centre))*100)/100;if(width<.5)continue;
+   // Upper-floor windows keep a >= 0.90 m sill; no unmodelled balcony/guard.
+   const sill=o.floor>0?Math.max(.9,recipe[2]):recipe[2],height=Math.floor(Math.min(recipe[1],B.studioFloorLevel(o.floor).clearHeight-sill-.16)*100)/100;
+   if(height<.6||r.w-width<.08)continue;
+   const next={width,height,sill,offset:(centre-width/2-r.x)/(r.w-width)};if(next.offset<0||next.offset>1)continue;
+   if(['width','height','sill','offset'].every(k=>Math.abs(Number(o[k]??0)-next[k])<.001))continue;
+   changes.push({id:o.id,room:r.name||r.id,floor:o.floor,before:{width:o.width,height:o.height,sill:o.sill,offset:o.offset},after:next});Object.assign(o,next);
+  }
+  return {plan,changes,reason:changes.length?B.directPlanError(plan):'Không có cửa mặt tiền phù hợp để điều chỉnh; kiểm tra phòng/tầng đang khóa.'};
+ };
+ B.applyStyleFacadeProposal=()=>{const proposal=B.styleFacadeProposal();if(proposal.reason||!proposal.changes.length){B.toast(proposal.reason);return false;}return B.commitDirectPlan(proposal.plan,null,{translateFixtures:false});};
+ B.styleFacadeProposalHtml=()=>{const v=B.styleFacadeProposal(),esc=B.esc,fmt=n=>Number(n||0).toFixed(2);return '<details class="style-facade-proposal"><summary>Phương án cửa mặt tiền theo phong cách</summary><p>Giữ vị trí tâm cửa, tường và công năng. Áp dụng sẽ đổi kích thước cửa trên cả bản vẽ và 3D; có thể hoàn tác trong Bản vẽ.</p>'+v.changes.map(q=>'<p><b>Tầng '+(q.floor+1)+' · '+esc(q.room)+'</b><br>'+fmt(q.before.width)+' × '+fmt(q.before.height)+' m → '+fmt(q.after.width)+' × '+fmt(q.after.height)+' m · bậu '+fmt(q.after.sill)+' m</p>').join('')+(v.reason?'<p role="status">'+esc(v.reason)+'</p>':'<button type="button" data-style-facade-apply>Áp dụng phương án mặt tiền</button>')+'<small>Kích thước gợi ý cần đối chiếu hướng nắng, thông gió, kính và kết cấu quanh cửa.</small></details>';};
+ document.addEventListener('click',event=>{if(event.target.closest?.('[data-style-facade-apply]'))B.applyStyleFacadeProposal();});
  B.architecturalIdentity=()=>B.ARCHITECTURAL_IDENTITIES[B.houseStyle()?.id]||{id:null,name:'Phong cách riêng',surface:'plaster',surround:'none',band:'quiet',trim:0,shade:0,arch:0,color:'#c8c2b6',grid:0};
  B.styleModelSummaryHtml=()=>{
   const roof=B.roofDesignSpec(),manual=B.measuredDesignSettings().roof.type!=='auto',rule=B.architecturalIdentity(),f=B.state.project.materials.finish||{};
   const custom=[f.exterior,...Object.values(f.rooms||{})].some(row=>row&&['floor','wall','accent','fabric'].some(role=>row.styleRoles?.[role]!==true&&(hex(row[role])||row.visualMaterials?.[role])));
-  return '<p class="style-model-summary">'+B.esc(rule.name)+' · '+B.esc(roof.name)+(manual?' (đã chọn riêng; đổi phong cách giữ mái này).':' (theo phong cách).')+' Phòng, cửa và vật liệu chọn riêng được giữ.</p>'+(custom?'<details class="style-material-reset"><summary>Vật liệu cũ đang được giữ</summary><p>Muốn xem trọn bộ phong cách mới: thay màu và bề mặt mô phỏng bằng gợi ý. Giữ mã hàng đã chọn và phòng phối riêng.</p><button type="button" data-style-material-suggestions>Dùng vật liệu gợi ý</button></details>':'');
+  return '<p class="style-model-summary">'+B.esc(rule.name)+' · '+B.esc(roof.name)+(manual?' (đã chọn riêng; đổi phong cách giữ mái này).':' (theo phong cách).')+' Phòng, cửa và vật liệu chọn riêng được giữ.</p>'+(B.sceneRoofSpec()?.compound?'<p class="style-model-summary">Mái bám phần đất và tầng trên có góc lõm; không đua mái tại các cạnh này. Cấu tạo và thoát nước mái cần được thiết kế riêng.</p>':'')+B.styleFacadeProposalHtml()+(custom?'<details class="style-material-reset"><summary>Vật liệu cũ đang được giữ</summary><p>Muốn xem trọn bộ phong cách mới: thay màu và bề mặt mô phỏng bằng gợi ý. Giữ mã hàng đã chọn và phòng phối riêng.</p><button type="button" data-style-material-suggestions>Dùng vật liệu gợi ý</button></details>':'');
  };
  // Older projects may have unmarked cached colours. Never silently discard
  // them; the visible action explicitly asks for suggested generic finishes.
@@ -57,7 +86,7 @@
   const p=B.state.project,raw=p.materials.finish?.exterior||{},resolved=B.finishPalette(),rule=B.architecturalIdentity(),manualAccent=authored(raw,'accent'),manualWall=authored(raw,'wall');
   return {...resolved,wall:manualWall?resolved.wall:B.houseStyle()?.wall||resolved.wall,accent:manualAccent?resolved.accent:rule.color,visualMaterials:{...resolved.visualMaterials,...(!manualAccent?{accent:''}:{}),...(!manualWall?{wall:'ivory-paint'}:{})},facadeSurface:manualAccent?'selected':rule.surface,manualAccent,manualWall};
  };
- const palette=B.scenePalette;B.scenePalette=()=>{const value=palette(),raw=B.state.project.materials.finish?.exterior||{},rule=B.architecturalIdentity();return {...value,frame:hex(raw.frame)?parseInt(raw.frame.slice(1),16):['classic','neo','french','coastal'].includes(rule.id)?0xddd8c9:value.frame};};
+ const palette=B.scenePalette;B.scenePalette=()=>{const value=palette(),raw=B.state.project.materials.finish?.exterior||{},rule=B.architecturalIdentity();return {...value,frame:hex(raw.frame)?parseInt(raw.frame.slice(1),16):rule.frame?parseInt(rule.frame.slice(1),16):value.frame};};
  B.facadeComponentArea=part=>part.polygon?Math.abs(part.polygon.reduce((n,a,i)=>{const b=part.polygon[(i+1)%part.polygon.length];return n+a[0]*b[1]-b[0]*a[1];},0))/2:part.h*(part.horizontal===false?part.d:part.w);
  B.facadeComponents=()=>{
   const p=B.state.project,l=B.studioLevels(),rule=B.architecturalIdentity(),finish=B.facadeFinishPalette(),parts=[],ids=new Set(),W=Number(p.site.width),D=Number(p.site.depth);
@@ -68,7 +97,7 @@
    const x2=Math.min(W,x+w),z2=Math.min(D,z+d);x=Math.max(0,x);z=Math.max(0,z);w=x2-x;d=z2-z;if(w<=.001||d<=.001)return null;
    if(p.site.useParcelGeometry&&B.roomInsideParcel&&!B.roomInsideParcel({x,y:z,w,h:d},{...p.site,setbackFront:0,setbackRear:0,setbackSide:0}))return null;
    const componentId=[revision,rule.id||'custom',floor,roomId||'house',openingId||'',kind,...[x,y,z,w,h,d].map(n=>Math.round(n*10000))].join('-');if(ids.has(componentId))return null;ids.add(componentId);
-   const color=role==='frame'?'#'+B.scenePalette().frame.toString(16).padStart(6,'0'):role==='base'?'#908c7c':finish[role]||finish.accent;
+   const color=role==='frame'?'#'+B.scenePalette().frame.toString(16).padStart(6,'0'):role==='base'?rule.base||'#908c7c':finish[role]||finish.accent;
    const part={id:componentId,floor,roomId,openingId,kind,x,y,z,w,h,d,role,color,projectionSide:side,horizontal:['front','back'].includes(side),styleId:rule.id,generic:true,provisional:true,structural:false,...(polygon?{polygon}: {})};parts.push(part);return part;
   };
   const face=w=>{const r=p.plan.rooms.find(r=>r.id===w.roomIds[0]);if(!r)return null;const near=w.horizontal?w.axis<r.y+r.h/2:w.axis<r.x+r.w/2,side=w.horizontal?(near?'front':'back'):(near?'left':'right');return {r,near,side,axis:w.axis+(near?-1:1)*(w.thickness||B.measuredWallThickness(false))/2};};
@@ -93,6 +122,12 @@
    const skinKind=cladding?'style-cladding':'exterior-finish',skinDepth=cladding?.014:.003;
    const clad=(w,a,y,width,height)=>{
     if(height<.002)return;box(f,w,skinKind,a,y,width,height,skinDepth,skinRole);
+    if(['classic','neo','french','tuscan','mediterranean','spanish'].includes(rule.id)&&face(w)?.side==='front'&&f===0){
+     // Rusticated coursing is a shallow finish on solid bands, never an
+     // invented opening. Its scale stays in metres when the lot changes.
+     const course=rule.id==='neo'?.42:rule.id==='tuscan'?.32:.38;
+     for(let h=y+course;h<y+height-.025;h+=course)box(f,w,'stone-course',a,h,width,.018,.018,'base');
+    }
     if(['coastal','barn'].includes(rule.id)&&face(w)?.side==='front'&&w.b-w.a>.15){
      if(rule.id==='coastal')for(let v=y+.18;v<y+height-.02;v+=.18)box(f,w,'weatherboard-joint',a,v,width,.009,.009,'wall');
      else for(let u=a+.20;u<a+width-.02;u+=.20)box(f,w,'metal-standing-seam',u,y,.018,height,.032,'accent');
@@ -116,7 +151,9 @@
     if(rule.id==='tudor'&&f>0){box(f,feature,'timber-post',start,y,.07,height,.035);box(f,feature,'timber-post',start+width-.07,y,.07,height,.035);box(f,feature,'timber-diagonal',start,y,width,height,.04,'accent',[[0,0],[.08,0],[width,height-.1],[width,height],[width-.08,height],[0,.1]]);}
     if(rule.band==='deco')for(let i=0;i<3;i++)box(f,feature,'deco-fin',start+i*width/3,y+(.12-i*.04),.055,height-(.12-i*.04),.075);
     if(['classic','neo','french','craftsman'].includes(rule.id)){
-     const locations=rule.id==='classic'?bays:bays.slice(0,2);for(const wall of locations){const t=Math.min(rule.id==='classic'?.32:.22,(wall.b-wall.a-.1)/2),at=wall.a+(wall.b-wall.a-t)/2;box(f,wall,'pilaster',at,base+l.slab,t,clear-.14,.095,'wall');box(f,wall,'pilaster-base',at-.035,base+l.slab,t+.07,.14,.13,'wall');box(f,wall,'pilaster-capital',at-.05,base+level.height-.24,t+.10,.13,.15,'wall');}
+     const locations=rule.id==='classic'?bays:bays.slice(0,2);for(const wall of locations){const t=Math.min(rule.id==='classic'?.38:.30,(wall.b-wall.a-.1)/2),at=wall.a+(wall.b-wall.a-t)/2;box(f,wall,'pilaster',at,base+l.slab,t,clear-.20,.115,'wall');box(f,wall,'pilaster-base',at-.035,base+l.slab,t+.07,.18,.16,'wall');box(f,wall,'pilaster-capital',at-.05,base+level.height-.30,t+.10,.14,.18,'wall');
+      if(rule.id!=='craftsman')for(let i=1;i<4;i++)box(f,wall,'pilaster-flute',at+t*i/4-.009,base+l.slab+.24,.018,clear-.62,.128,'wall');
+     }
     }
    }
    for(const w of front.filter(w=>w.kind!=='wall')){
@@ -147,6 +184,10 @@
     if(w.kind==='door'&&f===0&&rule.shade>.1&&headroom>.12)box(f,w,'entry-canopy',a-.16,top+.11,len+.32,.07,Math.min(.58,rule.shade+.14),['japanese','japandi','craftsman','vietnamese','balinese'].includes(rule.id)?'accent':'wall');
    }
    for(const w of front){const depth=rule.band==='cornice'?.16:rule.band==='deco'?.16:rule.band==='horizontal'?.14:.035,h=rule.band==='cornice'?.18:rule.band==='deco'?.16:.055;box(f,w,rule.band==='cornice'?'cornice':'horizontal-band',w.a,base+level.height-h,w.b-w.a,h,depth,rule.id==='modern'||rule.id==='midcentury'?'frame':'wall');if(['classic','french','artdeco'].includes(rule.id))box(f,w,'cornice-step',w.a,base+level.height+.025,w.b-w.a,.075,depth+.06,rule.id==='artdeco'?'accent':'wall');}
+   if(f===l.floors-1&&rule.band==='cornice')for(const w of front){
+    for(const [offset,height,depth]of [[-.08,.055,.22],[.005,.065,.27],[.085,.05,.31]])box(f,w,'roof-crown',w.a,base+level.height+offset,w.b-w.a,height,depth,'wall');
+    if(['classic','french'].includes(rule.id))for(let a=w.a+.06;a+.055<w.b;a+=.19)box(f,w,'cornice-dentil',a,base+level.height-.105,.055,.075,.20,'wall');
+   }
    if(['barn','coastal','tudor'].includes(rule.id))for(const wall of front.filter(w=>w.kind==='wall'))for(let a=wall.a+.10;a<wall.b-.04;a+=rule.id==='barn'?.20:.30)box(f,wall,'vertical-joint',a,base+l.slab+.04,.016,clear-.08,.012,rule.id==='tudor'?'accent':'wall');
   }
   const roof=B.sceneRoofSpec(),b=B.sceneFootprintBounds(B.floorRooms(l.floors-1)),top=(l.roofBase??l.floors*l.floorHeight)+l.slab;
@@ -157,7 +198,7 @@
   const finish=B.facadeFinishPalette(),rule=B.architecturalIdentity(),key=JSON.stringify([role,finish.wall,finish.accent,finish.visualMaterials,finish.facadeSurface,rule.id]),cache=scene.userData.architecturalMaterials||=new Map();if(cache.has(key))return cache.get(key);
   const shared=B.sceneAssetMaterials(THREE,scene,finish);let m;
   if(role==='wall')m=shared.wall.clone();else if(role==='base')m=shared.stone.clone();else if(role==='frame')m=shared.metal.clone();else if(finish.manualAccent||finish.facadeSurface==='wood')m=(finish.manualAccent?shared.wood:shared.slattedWood).clone();else if(finish.facadeSurface==='stone')m=shared.stone.clone();else if(finish.facadeSurface==='metal')m=shared.metal.clone();else m=shared.wall.clone();
-  m.color.set(role==='wall'?finish.wall:role==='base'?'#908c7c':role==='frame'?'#'+B.scenePalette().frame.toString(16).padStart(6,'0'):finish.accent);
+  m.color.set(role==='wall'?finish.wall:role==='base'?rule.base||'#908c7c':role==='frame'?'#'+B.scenePalette().frame.toString(16).padStart(6,'0'):finish.accent);
   if(role==='frame'||role==='accent'&&finish.facadeSurface==='metal'){m.roughness=.42;m.metalness=.5;}if(role==='base'){m.roughness=.9;m.userData.surfaceScale=[.8,.8];}
   if(role==='accent'&&['brick','concrete'].includes(finish.facadeSurface)){for(const [slot,channel]of [['map','color'],['normalMap','normal'],['roughnessMap','roughness']]){const texture=B.sceneMaterialTexture(THREE,scene,finish.facadeSurface,channel);if(texture){texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.colorSpace=channel==='color'?THREE.SRGBColorSpace:THREE.NoColorSpace;m[slot]=texture;}}m.userData.surfaceScale=finish.facadeSurface==='brick'?[1.1,1.04]:[2,2];m.normalScale.setScalar(finish.facadeSurface==='brick'?.52:.22);m.roughness=.91;}
   m.polygonOffset=true;m.polygonOffsetFactor=-1;m.polygonOffsetUnits=-1;
@@ -250,7 +291,7 @@
   return {revision,styleId:rule.id,name:rule.name,recognized:!!rule.id,roof:{type:roof.type,name:roof.name,manual:settings.roof.type!=='auto'},materialBasis:palette.manualAccent?'Lựa chọn của khách':'Gợi ý theo phong cách',features:[...new Set(parts.filter(p=>p.kind!=='exterior-finish').map(p=>p.kind))],componentCount:parts.length,finishAreas:areas,finishAreaBasis:'Diện tích hình học từng chi tiết mô phỏng, có thể chồng lớp; chưa phải khối lượng báo giá.',setbackReviewNeeded,exactReferenceMatch:null,engineeringApproved:false};
  };
  const review=B.styleOutputReview;B.styleOutputReview=()=>({...review(),architecture:B.architecturalIdentityReview()});
- const html=B.styleOutputHtml;B.styleOutputHtml=()=>{const a=B.architecturalIdentityReview();return html().replace('<div class="customer-style-body">','<div class="customer-style-body"><p class="architectural-identity-summary"><b>'+B.esc(a.name)+'</b><br>'+B.esc(a.roof.name)+(a.roof.manual?' · theo thông số bạn chọn':' · theo phong cách')+'<br>Hoàn thiện mặt ngoài: '+B.esc(a.materialBasis)+'. Màu riêng trong phòng được giữ.'+(a.setbackReviewNeeded?'<br>Chi tiết nhô mặt tiền cần đối chiếu khoảng lùi được phép tại khu đất.':'')+'</p>');};
- const drawingRevision=B.drawingRevision;B.drawingRevision=()=>drawingRevision()+'-AI3';
+ const html=B.styleOutputHtml;B.styleOutputHtml=()=>{const a=B.architecturalIdentityReview(),roof=B.roofSurfaceSpec(),facade=B.facadeFinishPalette(),samples=[['Mái',roof.color,roof.name],['Mặt ngoài',facade.wall,B.houseStyle()?.name||'Màu riêng'],['Khung cửa','#'+B.scenePalette().frame.toString(16).padStart(6,'0'),'Màu khung đang dùng']],swatches=samples.map(([label,color,name])=>'<div><i style="background:'+B.esc(color)+'"></i><span><small>'+B.esc(label)+'</small><b>'+B.esc(name)+'</b></span></div>').join('');return html().replace('<b>Vật liệu đang chọn</b>','<b>Vật liệu đang chọn</b>'+swatches).replace('<div class="customer-style-body">','<div class="customer-style-body"><p class="architectural-identity-summary"><b>'+B.esc(a.name)+'</b><br>'+B.esc(a.roof.name)+(a.roof.manual?' · theo thông số bạn chọn':' · theo phong cách')+'<br>Hoàn thiện mặt ngoài: '+B.esc(a.materialBasis)+'. Màu riêng trong phòng được giữ.'+(a.setbackReviewNeeded?'<br>Chi tiết nhô mặt tiền cần đối chiếu khoảng lùi được phép tại khu đất.':'')+'</p>');};
+ const drawingRevision=B.drawingRevision;B.drawingRevision=()=>drawingRevision()+'-AI4';
  B.ARCH_RENDER_REVISION='customer-architectural-identity-9';
 })();

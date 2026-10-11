@@ -1,0 +1,24 @@
+{
+  "sourceCommit": "edb338efcb62c2a18300d13f7fc48eab0c38f7fb",
+  "node": "22.23.0",
+  "tests": {
+    "total": 473,
+    "pass": 473,
+    "fail": 0
+  },
+  "files": {
+    "src/44_house_styles.js": "3b6b597d137fa6abdd842138b062af332acc090e5e5f7b66f3d62d6ceb6f8775",
+    "src/45_studio3d.js": "e9c30d22ae2fcd811dfdc6423186c432b44c98e2da069069a7838eca57d209f8",
+    "src/101_visual_studio.js": "5443703c8e44152037b393fdd4401ed8d49f231c5eb94d545e67bc03374626c7",
+    "src/102_architectural_identity.js": "0bb805339469a0aee52c30812fb8a2768d881e693ba23890807bd93f661dfe4c",
+    "src/103_real_house.js": "632e6056198c6759926eb120d72f494e9ea3c253368670ce2a255b2c2330cb61",
+    "dist/app.js": "814a8d0a1d50989027dac79be356b407af9cee328b47d3c71528b8dfb8f600d7",
+    "dist/styles.css": "5259b590e6cb51decad5408e4dcda32218efa0cc2260d379d35b24175bc63392"
+  },
+  "limitations": [
+    "24 visual approvals pending",
+    "Generic materials, not verified supplier SKU",
+    "Compound roof drainage and structure require design review",
+    "Existing plan massing/terraces/balconies preserved"
+  ]
+}

@@ -55,7 +55,31 @@
   return {height:B.roofDesignSpec().type==='flat'?(explicit?height:.38):0,source:explicit?'customer':'design-suggestion',notice:'Tường chắn mái là chi tiết phương án; cần KTS/KS xác nhận cấu tạo, chống thấm và thoát nước.'};
  };
  const roofSpec=B.sceneRoofSpec;
- B.sceneRoofSpec=(explode=0)=>{const roof=roofSpec(explode),parapet=B.roofParapetSpec();return roof?{...roof,parapet,envelopeTop:roof.eave+roof.rise+parapet.height+(parapet.height>0?.025:0)}:null;};
+ // Clip pitched planes to the occupied top-floor cells. A notch, terrace or
+ // shaft is not permission to fill the bounding rectangle with a roof/slab.
+ B.compoundRoofSpec=(explode=0)=>{
+  const p=B.state.project,l=B.studioLevels(),rooms=B.floorRooms(l.floors-1),bounds=B.sceneFootprintBounds(rooms),spec=B.roofDesignSpec();
+  if(!bounds||bounds.rectangular||spec.type==='flat')return null;
+  const {x,y,width,depth,cx,cy}=bounds,eave=l.roofBase+(l.floors-1)*explode+l.slab+.18,tan=Math.tan(spec.pitchDeg*Math.PI/180),along=spec.ridge==='depth'||spec.ridge==='auto'&&depth>=width;
+  const c=[[x,eave,y],[x+width,eave,y],[x+width,eave,y+depth],[x,eave,y+depth]];
+  let rise=(spec.type==='mono'?(along?width:depth):(spec.type==='hip'?Math.min(width,depth):along?width:depth)/2)*tan,planes,ridge;
+  if(spec.type==='mono'){for(const i of along?[1,2]:[2,3])c[i][1]+=rise;planes=[c];ridge=(along?[c[1],c[2]]:[c[3],c[2]]).map(q=>[...q]);}
+  else{const inset=spec.type==='hip'?Math.min(width,depth)/2:0;ridge=along?[[cx,eave+rise,y+inset],[cx,eave+rise,y+depth-inset]]:[[x+inset,eave+rise,cy],[x+width-inset,eave+rise,cy]];
+   planes=spec.type==='hip'?(along?[[c[0],c[1],ridge[0]],[c[0],ridge[0],ridge[1],c[3]],[c[1],c[2],ridge[1],ridge[0]],[c[3],ridge[1],c[2]]]:[[c[0],c[3],ridge[0]],[c[0],ridge[0],ridge[1],c[1]],[c[3],c[2],ridge[1],ridge[0]],[c[1],ridge[1],c[2]]]):along?[[c[0],ridge[0],ridge[1],c[3]],[c[1],c[2],ridge[1],ridge[0]]]:[[c[0],c[1],ridge[1],ridge[0]],[c[3],ridge[0],ridge[1],c[2]]];
+  }
+  const panels=rooms.flatMap(r=>B.slabPanels(r,B.stairFloorHoles(l.floors))),xs=[...new Set(panels.flatMap(q=>[q.x,q.x+q.w]))].sort((a,b)=>a-b),zs=[...new Set(panels.flatMap(q=>[q.y,q.y+q.d]))].sort((a,b)=>a-b),faces=[];
+  const clip=(poly,axis,limit,sign)=>{const out=[];for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length],da=(a[axis]-limit)*sign,db=(b[axis]-limit)*sign;if(da>=-1e-9)out.push(a);if(da>1e-9&&db< -1e-9||da< -1e-9&&db>1e-9){const t=da/(da-db);out.push(a.map((v,j)=>v+(b[j]-v)*t));}}return out;};
+  for(let i=1;i<xs.length;i++)for(let j=1;j<zs.length;j++){const mx=(xs[i-1]+xs[i])/2,mz=(zs[j-1]+zs[j])/2;if(!panels.some(q=>mx>q.x-1e-9&&mx<q.x+q.w+1e-9&&mz>q.y-1e-9&&mz<q.y+q.d+1e-9))continue;
+   for(const plane of planes){let poly=plane;for(const [a,v,s]of [[0,xs[i-1],1],[0,xs[i],-1],[2,zs[j-1],1],[2,zs[j],-1]])poly=clip(poly,a,v,s);if(poly.length>=3&&B.polygonArea3D(poly)>1e-8)faces.push(poly);}
+  }
+  // Unpaired plane edges are the actual perimeter, including courtyard edges.
+  const edges=new Map(),key=q=>q.map(v=>Math.round(v*1e7)).join(',');
+  for(const poly of faces)for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length];if(Math.hypot(a[0]-b[0],a[2]-b[2])<1e-8)continue;const k=[key(a),key(b)].sort().join('|'),r=edges.get(k);if(r)r.count++;else edges.set(k,{a,b,count:1});}
+  const gables=[...edges.values()].filter(q=>q.count===1).map(({a,b})=>[[a[0],eave-.18,a[2]],[b[0],eave-.18,b[2]],b,a]).filter(q=>B.polygonArea3D(q)>1e-8);
+  if(!faces.length)return null;rise=Math.max(...faces.flat().map(q=>q[1]))-eave;
+  return {...spec,bounds,width,depth,eave,rise,corners:c,ridge,faces,gables,area:faces.reduce((n,f)=>n+B.polygonArea3D(f),0),gableArea:gables.reduce((n,f)=>n+B.polygonArea3D(f),0),compound:true,overhang:0,requestedOverhang:spec.overhang,notice:'Mái phương án cắt theo mặt bằng tầng trên; không đua mái tại cạnh lõm. Cần thiết kế thoát nước và kết cấu mái.'};
+ };
+ B.sceneRoofSpec=(explode=0)=>{const roof=roofSpec(explode)||B.compoundRoofSpec(explode),parapet=B.roofParapetSpec();return roof?{...roof,parapet,envelopeTop:roof.eave+roof.rise+parapet.height+(parapet.height>0?.025:0)}:null;};
  // The very same parts are rendered by Three and projected onto elevations.
  // Parcel clipping never fills a notch or an upper-floor terrace/shaft void.
  B.houseConstructionDetails=()=>{
@@ -177,7 +201,7 @@
   return panel().replace('</div><p>Đổi mái/tường',input+'</div><p>Đổi mái/tường').replace('Bề dày tường, sàn và mái cần hồ sơ kỹ thuật xác nhận.','Bề dày tường, sàn và mái cần hồ sơ kỹ thuật xác nhận. '+(roof.height>0?'Tường chắn mái '+Math.round(roof.height*1000)+' mm '+(roof.source==='customer'?'theo số đo bạn nhập.':'là gợi ý phương án; nhập số đo thực hoặc 0 để bỏ.') :''));
  };
  const review=B.architecturalIdentityReview;
- B.architecturalIdentityReview=()=>({...review(),constructionDetailRevision:version,parapet:B.roofParapetSpec(),context:'Bầu trời và mặt đất minh họa; công trình lấy từ bản vẽ.',engineeringApproved:false});
- const drawingRevision=B.drawingRevision;B.drawingRevision=()=>drawingRevision()+'-RH1';
- B.ARCH_RENDER_REVISION='customer-measured-house-12';
+ B.architecturalIdentityReview=()=>{const result=review(),roof=B.sceneRoofSpec();return {...result,roof:{...result.roof,modeled:!!roof,compound:!!roof?.compound,effectiveOverhang:roof?.overhang??null,notice:roof?.notice||null},constructionDetailRevision:version,parapet:B.roofParapetSpec(),context:'Bầu trời và mặt đất minh họa; công trình lấy từ bản vẽ.',engineeringApproved:false};};
+ const drawingRevision=B.drawingRevision;B.drawingRevision=()=>drawingRevision()+'-RH2';
+ B.ARCH_RENDER_REVISION='customer-measured-house-13';
 })();

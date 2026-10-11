@@ -36,19 +36,30 @@ async function run(device,viewport){
  await settle();const evidence=[],pixels=new Map();
  const selected=device==='desktop'?(process.env.BMH_STYLE_IDS?.split(',')||await page.evaluate(()=>BuildMyHome.HOUSE_STYLES.map(x=>x.id))):['japandi','industrial','scandi'];
  for(const id of selected){
+  if(process.env.BMH_APPLY_FACADE==='1')await page.evaluate(plan=>{BuildMyHome.state.project.plan=JSON.parse(plan);},plan);
   const start=Date.now();await page.locator('[data-customer-style]').selectOption(id);await settle();
   assert.equal(await page.evaluate(()=>JSON.stringify(BuildMyHome.state.project.plan)),plan,id+' measured plan');
+  let applied=null;
+  if(process.env.BMH_APPLY_FACADE==='1'){
+   applied=await page.evaluate(()=>{const v=BuildMyHome.styleFacadeProposal();return {reason:v.reason,plan:v.plan,changes:v.changes};});assert.equal(applied.reason,'',id+' proposal');assert.ok(applied.changes.length>0);
+   await page.locator('.style-facade-proposal>summary').click();await page.locator('[data-style-facade-apply]').click();await settle();
+   assert.deepEqual(await page.evaluate(()=>BuildMyHome.state.project.plan),applied.plan);assert.deepEqual(applied.plan.rooms,JSON.parse(plan).rooms);assert.deepEqual(applied.plan.furniture,JSON.parse(plan).furniture);
+   if(id==='neo'){await page.evaluate(()=>BuildMyHome.undoPlan());await settle();assert.deepEqual(await page.evaluate(()=>BuildMyHome.state.project.plan),JSON.parse(plan));await page.evaluate(()=>BuildMyHome.redoPlan());await settle();assert.deepEqual(await page.evaluate(()=>BuildMyHome.state.project.plan),applied.plan);await page.evaluate(()=>BuildMyHome.save());await page.reload();await settle();assert.deepEqual(await page.evaluate(()=>BuildMyHome.state.project.plan),applied.plan);}
+  }
   const row=await page.evaluate(()=>{
    const B=BuildMyHome,s=B.studio3d,rule=B.architecturalIdentity();
    return {id:rule.id,style:B.state.project.style,roof:B.roofDesignSpec(),surface:B.facadeFinishPalette().facadeSurface,features:B.architecturalIdentityReview().features,
+    roofMeshCount:s.scene.children.filter(x=>x.userData.kind==='roof').length,roofGeometry:B.sceneRoofSpec()?{area:B.sceneRoofSpec().area,compound:!!B.sceneRoofSpec().compound}:null,
     renderedStyleIds:[...new Set(s.scene.children.filter(x=>x.userData.facadeFinish).map(x=>x.userData.styleId))],collection:B.customerStyleProfile().collection.id,facadeTextures:[...s.scene.userData.surfaceTextures].filter(([key])=>key.startsWith('brick:')).map(([key,t])=>({key,source:t?.userData.source||null}))};
   });
   assert.equal(row.id,id);assert.deepEqual(row.renderedStyleIds,[id]);
+  assert.ok(row.roofMeshCount>0&&row.roofGeometry.area>0,id+' actual roof');row.proposalChanges=applied?.changes||[];
   if(id==='industrial'){assert.equal(row.facadeTextures.length,3);assert.ok(row.facadeTextures.every(x=>x.source==='brick_wall_001'),'actual photographic PBR must arrive, not just fallback');}
   const png=await page.locator('#studio3dCanvas').screenshot();pixels.set(id,PNG.sync.read(png));
   fs.writeFileSync(path.join(out,id+'-'+device+'-exterior.png'),png);
   row.visibleSwitchMs=Date.now()-start;evidence.push(row);console.log(device,id,row.visibleSwitchMs+' ms');
  }
+ if(process.env.BMH_APPLY_FACADE==='1'){await page.evaluate(plan=>{BuildMyHome.state.project.plan=JSON.parse(plan);BuildMyHome.render();},plan);await settle();}
  function difference(a,b){
   assert.equal(a.width,b.width);assert.equal(a.height,b.height);let changed=0,count=0;
   // The canvas excludes the new style badge. Ignore the edges of its backdrop.

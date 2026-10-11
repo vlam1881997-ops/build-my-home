@@ -1,0 +1,71 @@
+{
+  "mainCommit": "958cd2588cf79335ad7d6a301ab1e2ed9285c96e",
+  "sourceCommit": "7fd62d9fc629df80933a3c17d8b20960cdb709cc",
+  "pr": 41,
+  "prUrl": "https://github.com/vlam1881997-ops/build-my-home/pull/41",
+  "merged": true,
+  "publicOrigin": "https://www.huiminhbach.id.vn",
+  "githubCi": [
+    {
+      "name": "deploy",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/vlam1881997-ops/build-my-home/actions/runs/38100316421/job/114354909806"
+    },
+    {
+      "name": "check",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/vlam1881997-ops/build-my-home/actions/runs/38100316421/job/114354740496"
+    }
+  ],
+  "vercel": {
+    "state": "success",
+    "statuses": [
+      {
+        "state": "success",
+        "description": "Deployment has completed",
+        "url": "https://vercel.com/vlam1881997-9266/build_my_home_full_v1.2_github/Cj7KzUSyATDdrXEf5cMFp2G8iTkd"
+      }
+    ]
+  },
+  "publicUi": {
+    "status": "passed",
+    "devices": [
+      "desktop",
+      "phone"
+    ],
+    "desktopStyles": 3,
+    "phoneStyles": 3,
+    "interiorStyles": 3,
+    "actualBrickPbrChannels": 3,
+    "nativeMaterialReset": true,
+    "saveReload": true,
+    "measuredPlanUnchanged": true,
+    "jsWebglErrors": 0,
+    "overflow": false,
+    "isolatedProviders": true,
+    "transport": "Public HTTPS with TLS-verifying Node fetch; exact fetched bytes fulfilled to Chromium. No TLS bypass.",
+    "evidence": "production-ui-smoke.json"
+  },
+  "commercialComplete": false,
+  "visual24StylesApproved": false,
+  "privateRuntimeLogs": "not inspected",
+  "publicAssetHashes": [
+    {
+      "path": "app.js",
+      "status": 200,
+      "bytes": 1696807,
+      "sha256": "b61113b32bace3e913059de253adadd53e006e2a4a151afabac56793531ee798",
+      "matchesLocal": true
+    },
+    {
+      "path": "styles.css",
+      "status": 200,
+      "bytes": 589466,
+      "sha256": "5259b590e6cb51decad5408e4dcda32218efa0cc2260d379d35b24175bc63392",
+      "matchesLocal": true
+    }
+  ],
+  "recoveryNote": "Prior result retrieval blocked by automatic approval usage-limit failure. Recovered published source from GitHub; preserved earlier local patch. Restored truncated browser binary from intact existing archive, then completed this public run."
+}
