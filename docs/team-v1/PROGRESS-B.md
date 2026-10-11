@@ -1,14 +1,14 @@
 # Tiến độ AI B — BMH commercial v1
 
-Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 10/10/2026.
+Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 11/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: B3 style switch + lot-edge finish fix verified locally; publishing codex/b-style-switch-24, 24-style visual acceptance remains pending
+- active_substep: B3 facade PBR/depth and upholstery verified; release codex/b-facade-depth in progress
 - target_branch: codex/b-v1-24
-- actual_branch: codex/review-ab-c08 (local isolated review); remote resume codex/b-v1-24
+- actual_branch: codex/review-ab-c08 (local); next remote checkpoint codex/b-facade-depth; prior verified checkpoint codex/b-style-switch-24
 - source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff (520 remote blob bytes đã đối chiếu trong checkout mới; giữ WIP cũ nguyên)
-- last_verified_commit: c9d6c3a87d8eb2da880e739c2ad0b283d484f516 (PR39 merged; CI249/250 success; Node22 462/462; public file hashes and desktop/phone photo/detailed3D passed)
+- last_verified_commit: d374d81dbf9b5ec60ea55b20f2a157429049f18e (PR40 merged; CI and Vercel success; Node22 467/467; native public style switches and exact bundle hashes verified)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -170,3 +170,24 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Desktop measured pixel changes in the model region: Japandi↔Industrial28.9%; Japandi↔Scandi23.5%. This verifies changed raster output, not aesthetic approval. Capturing assets/shaders/PNG on software GPU takes roughly6–10s in this harness; not a universal customer latency promise.
 - Evidence: evidence/B/B3-style-switch/{24-styles-result.json,controls-result.json,validation.log,PNG views}. Current plan/cumulative levels/openings/furniture/SKU choices remain unchanged in checked transitions. Billable/external API and non-read network calls isolated.
 - Next: publish exact scoped sources; require CI and Vercel success and verify actual public bundle and style controls. Then continue real facade composition, larger detailed furniture library and per-style visual acceptance. Still0/24 styles professionally/customer visually approved; generated target image is illustrative, not model output. No commercial100% claim.
+
+## B3 style-switch release verified — 10/10/2026
+- Source ff32f14572631efd53c6514d40529fe82e6bc409; PR40 merged main d374d81dbf9b5ec60ea55b20f2a157429049f18e. PR/main GitHub check success; Vercel production reports Deployment has completed (H4Z8kUntk2kAjPqwpY3FPb7whN8k).
+- Public www.huiminhbach.id.vn app.js 1694277 bytes / styles.css 589466 bytes match exact local build SHA256. Actual public-response WebGL controls pass 3 desktop + 3 phone styles, 3 interior styles, suggested-material button, save/reload and unchanged measured plan; no JS/WebGL errors or phone overflow. Anonymous fixture, APIs/external/non-read services isolated, TLS verified in Node transport. No private runtime-log health claim.
+- Evidence: B3-style-switch/PRODUCTION-VERIFICATION.json, production-ui-smoke.json and public-style-smoke.cjs. Publication proof checkpoint stays on codex/b-style-switch-24 after merged source. Native model comparison is real output, not AI illustration.
+- Next unfinished B3: measured facade composition and a broader detailed interior asset library per style, followed by customer/architect visual acceptance. Functional switching is fixed; style visual acceptance remains 0/24 and commercial readiness is not complete. Preserve Task A ownership and existing supplier/manual material choices.
+
+
+## B3 facade depth / upholstery — 11/10/2026, WIP
+- Resumed existing uncommitted work after interruption; main remains PR40 d374d81. No A-owned files, build registration, dependencies, plan schema or supplier catalog changes.
+- Shared sceneMaterialTexture allows exterior brick/concrete to receive the existing licensed photographed colour/normal/roughness maps. Previous exterior code bypassed this loader. Brick preview module is generic 1.1 x 1.04 m, not an exact supplier SKU.
+- Found a second issue in a real browser: HTTP200 brick images could still be discarded by an 8s deadline spanning initial scene/shader construction. Requests start immediately; begin the bounded30s deadline after synchronous construction yields. Immediate raster fallback and disposed-scene guard retained. Final browser asserts actual map source for all3 brick channels.
+- Existing measured front openings gain bounded bay frames; timber panels gain true-depth battens. Sofa collections gain recessed tufted textiles/rolled arms and raised channel cushions inside the same measured envelope and editable parent.
+- Prior intermediate Node22 full470/470 and native5desktop/3phone checks passed, but screenshots still showed fallback brick. That run is NOT final photographic acceptance. Final tests/screens are running into evidence/B/B3-facade-depth to preserve evidence across sessions.
+- Next: inspect final photographic-source assertions and screenshots, finish release tests, scoped GitHub PR/main merge and public bundle/native UI verification. No commercial100% or24style visual approval claim.
+
+### Final local verification
+- Fixed the deadline while retaining synchronous request registration/deduplication and ignoring late/disposed-scene callbacks. Existing31 texture/asset lifecycle checks pass unchanged; final full Node22 test470/470 passes.
+- Native desktop3styles/phone3styles, interiors3styles, reset action, persistence and unchanged plan pass. All3 Industrial map channels identify brick_wall_001, not fallback. Actual screenshot inspected: brick joints/colour variation now visible.
+- Bump measured facade drawing suffix AI3 and render revision12 so prior cached imagery cannot represent the new finish geometry. Final CI and public build must cover these cache markers.
+- Local remaining quality: silhouettes are still limited by measured plan; broader facade composition and style-specific furniture remain incomplete. No24-style visual signoff.

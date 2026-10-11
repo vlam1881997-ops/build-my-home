@@ -41,9 +41,10 @@ async function run(device,viewport){
   const row=await page.evaluate(()=>{
    const B=BuildMyHome,s=B.studio3d,rule=B.architecturalIdentity();
    return {id:rule.id,style:B.state.project.style,roof:B.roofDesignSpec(),surface:B.facadeFinishPalette().facadeSurface,features:B.architecturalIdentityReview().features,
-    renderedStyleIds:[...new Set(s.scene.children.filter(x=>x.userData.facadeFinish).map(x=>x.userData.styleId))],collection:B.customerStyleProfile().collection.id};
+    renderedStyleIds:[...new Set(s.scene.children.filter(x=>x.userData.facadeFinish).map(x=>x.userData.styleId))],collection:B.customerStyleProfile().collection.id,facadeTextures:[...s.scene.userData.surfaceTextures].filter(([key])=>key.startsWith('brick:')).map(([key,t])=>({key,source:t?.userData.source||null}))};
   });
   assert.equal(row.id,id);assert.deepEqual(row.renderedStyleIds,[id]);
+  if(id==='industrial'){assert.equal(row.facadeTextures.length,3);assert.ok(row.facadeTextures.every(x=>x.source==='brick_wall_001'),'actual photographic PBR must arrive, not just fallback');}
   const png=await page.locator('#studio3dCanvas').screenshot();pixels.set(id,PNG.sync.read(png));
   fs.writeFileSync(path.join(out,id+'-'+device+'-exterior.png'),png);
   row.visibleSwitchMs=Date.now()-start;evidence.push(row);console.log(device,id,row.visibleSwitchMs+' ms');

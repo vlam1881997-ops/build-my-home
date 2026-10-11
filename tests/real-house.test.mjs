@@ -73,3 +73,43 @@ test('detailed chair keeps measured local bounds, pose and semantic customer fin
  const slots=new Set();group.traverse(o=>{if(o.isMesh)slots.add(o.material.userData.finishSlot)});assert.deepEqual([...slots].sort(),['fabric','wood']);assert.equal(JSON.stringify(b.state.project.plan),plan);
  scene.userData.disposed=true;const before=group.children[0];assert.equal(await b.upgradeMeasuredFurniture(group,'modern-armchair',THREE,scene),false);assert.equal(group.children[0],before);
 });
+
+test('facade photographic PBR uses scene-owned shared maps and metre UVs, retaining authored paint',()=>{
+ const b=client(),scene=new THREE.Scene(),calls=[],maps=new Map();b.state.project.materials.finish.exterior=null;b.selectHouseStyle('industrial');
+ b.sceneMaterialTexture=(T,s,kind,channel)=>{assert.equal(s,scene);calls.push([kind,channel]);const key=kind+channel;if(!maps.has(key)){const t=new T.Texture();t.userData={source:'test-photo',kind,channel};maps.set(key,t);}return maps.get(key);};
+ const m=b.architecturalFacadeMaterial(THREE,scene,'accent');assert.deepEqual(calls.filter(x=>x[0]==='brick'),[['brick','color'],['brick','normal'],['brick','roughness']]);assert.equal(m.map,maps.get('brickcolor'));assert.equal(m.normalMap,maps.get('bricknormal'));assert.deepEqual(Array.from(m.userData.surfaceScale),[1.1,1.04]);
+ const g=new THREE.BoxGeometry(1.1,1.04,.01);b.sceneSurfaceUvs(g,m);const uv=g.attributes.uv;assert.ok([...uv.array].every(Number.isFinite));
+ const before=b.state.project.materials.choices;b.applyFinishColor('accent','#aaccee');const custom=b.architecturalFacadeMaterial(THREE,scene,'accent');assert.equal(custom.color.getHexString(),'aaccee');assert.equal(custom.map?.userData.kind==='brick',false);assert.equal(b.state.project.materials.choices,before);
+});
+
+test('all interior collection meshes fit measured envelopes and tufted backrests contain recessed textiles',()=>{
+ const b=client(),plan=JSON.stringify(b.state.project.plan),signatures=new Set();
+ for(const collection of b.INTERIOR_COLLECTIONS){
+  const scene=new THREE.Scene(),materials=b.sceneAssetMaterials(THREE,scene,{...collection}),size={w:2.24,h:.87,d:.94};
+  const model=b.createRoomAsset('loungeDesignSofa',size,THREE,materials);model.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(model),actual=bounds.getSize(new THREE.Vector3());
+  for(const [a,e]of [[actual.x,size.w],[actual.y,size.h],[actual.z,size.d],[bounds.min.y,0]])assert.ok(Math.abs(a-e)<1e-5,collection.id);
+  let triangles=0,tufts=0,rolls=0;model.traverse(o=>{if(o.isMesh){triangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3;if(o.userData.tufted)tufts++;if(o.userData.kind==='rolled-arm')rolls++;}});
+  assert.ok(triangles<90000,collection.id+' bounded triangles '+triangles);signatures.add(triangles);
+  if(collection.shape==='tufted'){assert.equal(tufts,2);assert.equal(rolls,2);}
+  assert.equal(JSON.stringify(b.state.project.plan),plan);
+ }
+ assert.ok(signatures.size>=6,'collection shapes are geometrically distinct');
+});
+
+test('facade bay frames and battens stay on measured solid bands and preserve every opening',()=>{
+ const b=client(),p=b.state.project,before=JSON.stringify(p.plan);let frames=0,battens=0;
+ for(const id of ['modern','contemporary','japandi','brutalist','artdeco','scandi']){
+  b.selectHouseStyle(id);for(const q of b.facadeComponents().filter(x=>/^bay-frame-|^timber-batten$/.test(x.kind))){
+   if(q.kind==='timber-batten')battens++;else frames++;
+   assert.ok(q.x>=0&&q.z>=0&&q.x+q.w<=p.site.width+1e-8&&q.z+q.d<=p.site.depth+1e-8);
+   for(const o of p.plan.openings.filter(x=>x.floor===q.floor)){
+    const s=b.openingWallSpan(o);if(!s||s.o!=='h'||Math.abs(s.c-q.z)>.4)continue;
+    const bottom=b.studioFloorLevel(o.floor).base+b.studioLevels().slab+(o.sill||0),top=bottom+o.height;
+    const overlapX=Math.min(q.x+q.w,s.b)-Math.max(q.x,s.a),overlapY=Math.min(q.y+q.h,top)-Math.max(q.y,bottom);
+    assert.ok(overlapX<.001||overlapY<.001,'finish must not occlude '+o.id);
+   }
+   assert.equal(q.structural,false);
+  }assert.equal(JSON.stringify(p.plan),before);
+ }
+ assert.ok(frames>0);assert.ok(battens>0);
+});
