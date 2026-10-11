@@ -4,7 +4,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 11/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: B3 24-style roof/material/facade upgrade; 473 Node22 tests passed, final native proposal workflow in progress
+- active_substep: B3 24-style roof/material/facade upgrade; 473 Node22 tests passed, native 24-style proposals + 3 phone cases passed; PR42 ready for release
 - target_branch: codex/b-v1-24
 - actual_branch: codex/review-ab-c08 (local); remote resume codex/b-facade-depth; PR41 source is merged in main
 - source_baseline: d374d81dbf9b5ec60ea55b20f2a157429049f18e (PR40 integrated baseline for PR41; earlier work preserved)
@@ -210,3 +210,5 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Tests: Node22 full 473/473 passed; actual raster screenshots for all 24 exterior styles, 3 interiors and 3 phone exteriors passed before proposal UI addition. Evidence B/B3-style-24. Final native apply/undo/redo/reload run ongoing in B/B3-style-proposals.
 - Visual acceptance remains pending: narrow townhouse cannot duplicate a wide villa photo; balcony/terrace/major massing must be authored in measured plan. No claim of commercial completion or 24 professional approvals.
 - Next: finish native proposal run, inspect contact sheet, publish scoped PR and verify CI/live source. Then continue detailed interior assets and architectural composition against measured customer references.
+
+- Final native proposal evidence: 24/24 desktop styles + 3/3 phone styles, actual roof meshes and photographed brick PBR, no JS/WebGL errors/overflow. Neo apply/undo/redo/save/reload passed; rooms/furniture retained. Result and contact sheet in B/B3-style-proposals. Visual acceptance remains pending; this releases the functional upgrade, not a 100% commercial claim.
