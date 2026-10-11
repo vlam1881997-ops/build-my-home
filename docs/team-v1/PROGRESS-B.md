@@ -1,14 +1,14 @@
 # Tiến độ AI B — BMH commercial v1
 
-Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 11/10/2026.
+Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 12/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: B3 24-style roof/material/facade upgrade; 473 Node22 tests passed, native 24-style proposals + 3 phone cases passed; PR42 ready for release
+- active_substep: PR42 release checkpoint complete; next B3 architectural massing/reference acceptance and per-style interior detail
 - target_branch: codex/b-v1-24
-- actual_branch: codex/review-ab-c08 (local); remote resume codex/b-facade-depth; PR41 source is merged in main
-- source_baseline: d374d81dbf9b5ec60ea55b20f2a157429049f18e (PR40 integrated baseline for PR41; earlier work preserved)
-- last_verified_commit: 958cd2588cf79335ad7d6a301ab1e2ed9285c96e (PR41 merged; CI/Vercel success; Node22 470 tests; exact public bundle hashes and native desktop/phone PBR/style/interior/persistence checks passed)
+- actual_branch: codex/review-ab-c08 (local); remote resume codex/b-facade-depth; PR42 source is merged in main
+- source_baseline: 6a323673be7c5a6d6874b5bc345d9c354f6c5f55 (PR42 integrated release; earlier work/evidence preserved)
+- last_verified_commit: 6a323673be7c5a6d6874b5bc345d9c354f6c5f55 (473 Node22 tests; local 24 desktop + 3 phone proposals passed; CI/Vercel success; public hashes matched again 12/10; public UI partial, see release.json)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -212,3 +212,11 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Next: finish native proposal run, inspect contact sheet, publish scoped PR and verify CI/live source. Then continue detailed interior assets and architectural composition against measured customer references.
 
 - Final native proposal evidence: 24/24 desktop styles + 3/3 phone styles, actual roof meshes and photographed brick PBR, no JS/WebGL errors/overflow. Neo apply/undo/redo/save/reload passed; rooms/furniture retained. Result and contact sheet in B/B3-style-proposals. Visual acceptance remains pending; this releases the functional upgrade, not a 100% commercial claim.
+
+- PR42 merged main 6a323673be7c5a6d6874b5bc345d9c354f6c5f55. Main CI check success, Vercel deployment success. Public app.js and styles.css HTTP200 and exact local SHA256 match; browser verification running with isolated test projects and blocked external/API writes.
+
+## PR42 release checkpoint — 12/10/2026
+- Main remains 6a323673; both public bundles HTTP200 and exact local SHA256 match on resume. Deployment is complete.
+- Public browser run completed exterior checks/captures for Japandi, Industrial, Scandi and Neo (Neo includes apply/undo/redo/save/reload). Usage-limit auto-review stopped result retrieval; no final public result.json and no public phone evidence. Record partial, never full pass. Local complete desktop/phone evidence remains in main.
+- No need to repeat all 473 tests or all 24 renders for this unchanged source. Runtime application source untouched in this resume.
+- Next implementation: B3 massing/facade composition against customer references, appropriate measured roof/terrace/balcony plans and broader interior asset diversity. The current 24-style contact sheet is a functional comparison, not 24 aesthetic approvals; B3/commercial acceptance remain in_progress.
