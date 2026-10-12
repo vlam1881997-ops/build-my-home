@@ -4,7 +4,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 12/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: PR42 release checkpoint complete; next B3 architectural massing/reference acceptance and per-style interior detail
+- active_substep: W01.1 complete — measured prototype evidence and bedroom camera fix; next W01.2 massing proposals and reference acceptance
 - target_branch: codex/b-v1-24
 - actual_branch: codex/review-ab-c08 (local); remote resume codex/b-facade-depth; PR42 source is merged in main
 - source_baseline: 6a323673be7c5a6d6874b5bc345d9c354f6c5f55 (PR42 integrated release; earlier work/evidence preserved)
@@ -220,3 +220,17 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Public browser run completed exterior checks/captures for Japandi, Industrial, Scandi and Neo (Neo includes apply/undo/redo/save/reload). Usage-limit auto-review stopped result retrieval; no final public result.json and no public phone evidence. Record partial, never full pass. Local complete desktop/phone evidence remains in main.
 - No need to repeat all 473 tests or all 24 renders for this unchanged source. Runtime application source untouched in this resume.
 - Next implementation: B3 massing/facade composition against customer references, appropriate measured roof/terrace/balcony plans and broader interior asset diversity. The current 24-style contact sheet is a functional comparison, not 24 aesthetic approvals; B3/commercial acceptance remain in_progress.
+
+## W01.1 — 12/10/2026
+- Mục tiêu: neo/japandi/industrial trên nhà phố 5.4 × 20 m/3 tầng và đất rộng 14 × 20 m/2 tầng. Dựng ngoại thất/phòng khách/phòng ngủ từ plan thật, lưu revision/số đo/palette cùng ảnh.
+- File dự kiến: tests/team-b-prototypes.browser.cjs; evidence/B/W01-prototypes/*; source B liên quan khi tìm được lỗi có căn cứ.
+- Tiêu chí: không tự đổi plan khi chuyển style/view; mái có geometry thật; vật liệu đúng style; ảnh đủ để đánh giá hình khối. Fixture thử nghiệm, không phải phương án thi công đã được duyệt.
+
+### W01.1 checkpoint — source and evidence
+- Source: src/43_scene_assets.js checks five sightlines to measured bed before choosing an eye-height camera; retains fallback and all furniture geometry. src/103_real_house.js render revision 14 invalidates old cached views.
+- New B tests: team-b-prototypes.browser.cjs (repeatable fixture/style/view/device filters); team-b-prototype-camera.test.mjs (frustum, ray obstruction, four furniture rotations, unchanged objects).
+- Verification: 32/32 Node22 camera/scene tests; baseline 6 desktop cases × exterior/living/bed; changed camera 6 desktop bedrooms; Neo townhouse phone bedroom, no JS/WebGL error or overflow. Evidence: docs/team-v1/evidence/B/W01-prototypes/validation.json and four contact sheets. No unrelated full-suite rerun.
+- Visual finding: wardrobe obstruction corrected. Exterior massing remains box-like; W01 and commercial acceptance remain in_progress. Neo roof does exist (townhouse rise 1.559 m), street view obscures most of its slope.
+- Counterpart request: A-massing-request.md records oversized bedroom (3.98 × 12.38 m in test fixture), proposals for floor setbacks/loggia and coherent room allocation through the shared plan and explicit acceptance/history. No source A changed.
+- Next W01.2: coordinate measured massing alternatives for the three prototypes; keep room/opening/furniture IDs and locks, then recapture changed exterior views. Refine room assets separately where independent; do not repeat the baseline or claim six-box sheet is visual approval.
+- Publishing: scoped branch codex/b-facade-depth, parent 00ed96a43a54c27a7a666fdef706625fd07a7d83; new checkpoint SHA from branch log. No production deployment for this WIP.
