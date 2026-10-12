@@ -1,14 +1,14 @@
 # Tiến độ AI B — BMH commercial v1
 
-Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 11/10/2026.
+Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 12/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: B3 24-style roof/material/facade upgrade; 473 Node22 tests passed, native 24-style proposals + 3 phone cases passed; PR42 ready for release
+- active_substep: W08.1 rotation and measured furniture size controls; W01.2 exterior massing still pending
 - target_branch: codex/b-v1-24
-- actual_branch: codex/review-ab-c08 (local); remote resume codex/b-facade-depth; PR41 source is merged in main
-- source_baseline: d374d81dbf9b5ec60ea55b20f2a157429049f18e (PR40 integrated baseline for PR41; earlier work preserved)
-- last_verified_commit: 958cd2588cf79335ad7d6a301ab1e2ed9285c96e (PR41 merged; CI/Vercel success; Node22 470 tests; exact public bundle hashes and native desktop/phone PBR/style/interior/persistence checks passed)
+- actual_branch: codex/review-ab-c08 (local); remote resume codex/b-facade-depth; PR42 source is merged in main
+- source_baseline: 6a323673be7c5a6d6874b5bc345d9c354f6c5f55 (PR42 integrated release; earlier work/evidence preserved)
+- last_verified_commit: 6a323673be7c5a6d6874b5bc345d9c354f6c5f55 (473 Node22 tests; local 24 desktop + 3 phone proposals passed; CI/Vercel success; public hashes matched again 12/10; public UI partial, see release.json)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -212,3 +212,33 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Next: finish native proposal run, inspect contact sheet, publish scoped PR and verify CI/live source. Then continue detailed interior assets and architectural composition against measured customer references.
 
 - Final native proposal evidence: 24/24 desktop styles + 3/3 phone styles, actual roof meshes and photographed brick PBR, no JS/WebGL errors/overflow. Neo apply/undo/redo/save/reload passed; rooms/furniture retained. Result and contact sheet in B/B3-style-proposals. Visual acceptance remains pending; this releases the functional upgrade, not a 100% commercial claim.
+
+- PR42 merged main 6a323673be7c5a6d6874b5bc345d9c354f6c5f55. Main CI check success, Vercel deployment success. Public app.js and styles.css HTTP200 and exact local SHA256 match; browser verification running with isolated test projects and blocked external/API writes.
+
+## PR42 release checkpoint — 12/10/2026
+- Main remains 6a323673; both public bundles HTTP200 and exact local SHA256 match on resume. Deployment is complete.
+- Public browser run completed exterior checks/captures for Japandi, Industrial, Scandi and Neo (Neo includes apply/undo/redo/save/reload). Usage-limit auto-review stopped result retrieval; no final public result.json and no public phone evidence. Record partial, never full pass. Local complete desktop/phone evidence remains in main.
+- No need to repeat all 473 tests or all 24 renders for this unchanged source. Runtime application source untouched in this resume.
+- Next implementation: B3 massing/facade composition against customer references, appropriate measured roof/terrace/balcony plans and broader interior asset diversity. The current 24-style contact sheet is a functional comparison, not 24 aesthetic approvals; B3/commercial acceptance remain in_progress.
+
+## W01.1 — 12/10/2026
+- Mục tiêu: neo/japandi/industrial trên nhà phố 5.4 × 20 m/3 tầng và đất rộng 14 × 20 m/2 tầng. Dựng ngoại thất/phòng khách/phòng ngủ từ plan thật, lưu revision/số đo/palette cùng ảnh.
+- File dự kiến: tests/team-b-prototypes.browser.cjs; evidence/B/W01-prototypes/*; source B liên quan khi tìm được lỗi có căn cứ.
+- Tiêu chí: không tự đổi plan khi chuyển style/view; mái có geometry thật; vật liệu đúng style; ảnh đủ để đánh giá hình khối. Fixture thử nghiệm, không phải phương án thi công đã được duyệt.
+
+### W01.1 checkpoint — source and evidence
+- Source: src/43_scene_assets.js checks five sightlines to measured bed before choosing an eye-height camera; retains fallback and all furniture geometry. src/103_real_house.js render revision 14 invalidates old cached views.
+- New B tests: team-b-prototypes.browser.cjs (repeatable fixture/style/view/device filters); team-b-prototype-camera.test.mjs (frustum, ray obstruction, four furniture rotations, unchanged objects).
+- Verification: 32/32 Node22 camera/scene tests; baseline 6 desktop cases × exterior/living/bed; changed camera 6 desktop bedrooms; Neo townhouse phone bedroom, no JS/WebGL error or overflow. Evidence: docs/team-v1/evidence/B/W01-prototypes/validation.json and four contact sheets. No unrelated full-suite rerun.
+- Visual finding: wardrobe obstruction corrected. Exterior massing remains box-like; W01 and commercial acceptance remain in_progress. Neo roof does exist (townhouse rise 1.559 m), street view obscures most of its slope.
+- Counterpart request: A-massing-request.md records oversized bedroom (3.98 × 12.38 m in test fixture), proposals for floor setbacks/loggia and coherent room allocation through the shared plan and explicit acceptance/history. No source A changed.
+- Next W01.2: coordinate measured massing alternatives for the three prototypes; keep room/opening/furniture IDs and locks, then recapture changed exterior views. Refine room assets separately where independent; do not repeat the baseline or claim six-box sheet is visual approval.
+- Publishing: scoped branch codex/b-facade-depth, parent 00ed96a43a54c27a7a666fdef706625fd07a7d83; new checkpoint SHA from branch log. No production deployment for this WIP.
+
+## W08.1 — ưu tiên theo yêu cầu khách 12/10/2026
+- Thêm xoay trái/phải theo bước 15/45/90 độ, giữ nhập góc bất kỳ; đánh dấu hướng dùng theo mặt trước của mesh trên bản vẽ. Xoay qua editFurniture dùng chung ID/pose/history/lock/collision/save.
+- Cho nhập rộng/sâu/cao từ sản phẩm đã chọn; kiểm footprint và cao thông thủy trước lưu. Giữ modelId, SKU và vật liệu riêng. Model 3D vẫn là generic, không tự nhận đúng mẫu hãng.
+- Source: src/99_customer_design.js, src/customer-design.css. Tests: tests/team-b-furniture.test.mjs; tests/team-b-rotation.browser.cjs.
+- Unit: 17/17 Node22 gồm schema A hiện có, history/lock/collision/kích thước và giữ cùng món/góc/kích thước qua 24 style. Browser desktop/phone: thao tác native trên bàn, ghế, tủ TV, TV, bồn cầu; trái/phải45°, nhập37°, sửa kích thước ghế, khóa, reload và đo node 3D đạt.
+- Còn thiếu: ảnh/mã mẫu/model hãng có quyền sử dụng và liên kết chính xác SKU cho bộ nội thất; kiểm mẫu thực của 24 bộ chưa đạt. Chưa thêm tài sản hãng không có bằng chứng. W01 khối nhà vẫn pending; yêu cầu A trong W01-prototypes/A-massing-request.md.
+- Bước tiếp theo: kiểm và nâng mẫu nội thất có dữ liệu model/nguồn rõ, liên kết lựa chọn mẫu với asset ổn định qua đổi phong cách; giữ checkpoint W01.2. Không đóng thương mại hoặc triển khai WIP chỉ vì kiểm tra xanh.

@@ -237,7 +237,34 @@ BMH.measuredWalkPathIsClear=(room,from,to,items=BMH.roomFurnitureLayout(room),{w
  }
  return true;
 };
+// Frame the actual bed, not an empty room centre. Check several sightlines:
+// a clear centre ray alone can leave a wardrobe across half of the picture.
+BMH.bedroomPresentationCamera=(room,items)=>{
+ if(!BMH.studioFloorLevel&&!BMH.projectLevels)return null;
+ const bed=items.find(i=>/^bed(Double|Single)$/.test(i.model));if(!bed)return null;
+ const levels=BMH.studioFloorLevel?.(room.floor)??BMH.projectLevels(),eye=Math.min(1.65,(levels.height??levels.floorHeight)-(levels.ceilingDrop||0)-.18),targetHeight=levels.slab+(bed.base||0)+Math.min(.72,bed.h*.7);
+ const target={x:bed.x+bed.w/2,y:bed.y+bed.d/2},samples=[[.12,.12],[.88,.12],[.12,.88],[.88,.88],[.5,.5]].map(([u,v])=>({x:bed.x+bed.w*u,y:bed.y+bed.d*v}));
+ const blocked=(camera,aim,item)=>{
+  if(item===bed)return false;let enter=0,leave=1;
+  for(const [axis,lo,hi]of [['x',item.x-.025,item.x+item.w+.025],['y',item.y-.025,item.y+item.d+.025],['height',levels.slab+(item.base||0)-.025,levels.slab+(item.base||0)+item.h+.025]]){
+   const from=axis==='height'?eye:camera[axis],to=axis==='height'?targetHeight:aim[axis],delta=to-from;
+   if(Math.abs(delta)<1e-8){if(from<lo||from>hi)return false;continue;}
+   const a=(lo-from)/delta,b=(hi-from)/delta;enter=Math.max(enter,Math.min(a,b));leave=Math.min(leave,Math.max(a,b));if(enter>leave)return false;
+  }return enter<.98&&leave>.02;
+ };
+ let best=null;
+ for(const u of [.08,.18,.32,.5,.68,.82,.92])for(const v of [.08,.18,.32,.5,.68,.82,.92]){
+  const camera={x:room.x+room.w*u,y:room.y+room.h*v,height:eye};
+  if(!BMH.interiorCameraIsClear(room,camera,items)||items.some(i=>(i.base||0)<eye&&i.h>.15&&camera.x>i.x-.1&&camera.x<i.x+i.w+.1&&camera.y>i.y-.1&&camera.y<i.y+i.d+.1))continue;
+  const dx=camera.x-target.x,dy=camera.y-target.y,horizontal=Math.hypot(dx,dy);if(horizontal<1.2)continue;
+  const visible=samples.filter(p=>{const px=p.x-camera.x,py=p.y-camera.y;return (-dx*px-dy*py)/(horizontal*Math.hypot(px,py))>Math.cos(.42)&&!items.some(i=>blocked(camera,p,i));}).length;
+  if(visible<samples.length)continue;
+  const score=-Math.abs(horizontal-3.2);if(!best||score>best.score)best={score,camera,target,targetHeight,yaw:Math.atan2(dx,dy),pitch:Math.atan2(eye-targetHeight,horizontal),distance:Math.hypot(horizontal,eye-targetHeight)};
+ }
+ return best;
+};
 BMH.roomInteriorCamera = (room, items = BMH.roomFurnitureLayout(room)) => {
+  if(room.type==='bed'){const view=BMH.bedroomPresentationCamera(room,items);if(view)return view;}
   const rotation = Number(room.furnitureRotation) || 0, angle = -rotation*Math.PI/180;
   const run = rotation%180===90 ? room.w : room.h;
   if (run < .8) return null;
