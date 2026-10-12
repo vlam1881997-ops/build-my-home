@@ -203,5 +203,5 @@
  const review=B.architecturalIdentityReview;
  B.architecturalIdentityReview=()=>{const result=review(),roof=B.sceneRoofSpec();return {...result,roof:{...result.roof,modeled:!!roof,compound:!!roof?.compound,effectiveOverhang:roof?.overhang??null,notice:roof?.notice||null},constructionDetailRevision:version,parapet:B.roofParapetSpec(),context:'Bầu trời và mặt đất minh họa; công trình lấy từ bản vẽ.',engineeringApproved:false};};
  const drawingRevision=B.drawingRevision;B.drawingRevision=()=>drawingRevision()+'-RH2';
- B.ARCH_RENDER_REVISION='customer-measured-house-14';
+ B.ARCH_RENDER_REVISION='customer-measured-house-15';
 })();

@@ -180,6 +180,16 @@
       "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/modern_arm_chair_01/modern_arm_chair_01.bin",
       "sourceMd5": "5a8f2ea1c79ea484140e484b2a621670",
       "sha256": "61aa73d35d6beb4d26b0fa4ca45afaf1ad316f456c60aeaa562bce7079a39cdc"
+    },
+    {
+      "asset": "modern_arm_chair_01",
+      "kind": "measured-furniture-geometry",
+      "file": "assets/interior/models/modern-armchair-facing.glb",
+      "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/modern_arm_chair_01/modern_arm_chair_01.bin",
+      "sourceMd5": "5a8f2ea1c79ea484140e484b2a621670",
+      "sha256": "4264b9851c0f165763bc969294d41a07642890785d917f6bd7e6c02ce8fcde5c",
+      "derivedFrom": "assets/interior/models/modern-armchair.glb",
+      "processing": "Derived from modern-armchair.glb: rotated 180 degrees around Y; centred X/Z; base Y=0. BMH front is -Z. Metres; original topology unchanged."
     }
   ]
 }
