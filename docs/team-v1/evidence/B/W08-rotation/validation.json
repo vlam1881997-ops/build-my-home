@@ -1,0 +1,25 @@
+{
+  "checkpoint": "W08.1",
+  "status": "rotation-and-size-controls-verified",
+  "sourceParent": "7b83ed805688b176db8f18eda143d62fb9eb09c1",
+  "unit": {
+    "runtime": "v22.23.0",
+    "passed": 17,
+    "failed": 0,
+    "files": [
+      "tests/team-b-furniture.test.mjs",
+      "tests/team-a-input-furniture.test.mjs"
+    ]
+  },
+  "browser": "result.json",
+  "notes": [
+    "Native left/right, arbitrary angle, sizing, locks, reload and real mesh pose/size checked on desktop and phone",
+    "24 styles preserve stored model ID, pose, dimensions and materials in unit checks; not 24 visual approvals",
+    "Furniture remains generic; no manufacturer-exact geometry or new supplier SKU assets added",
+    "W01 exterior massing and commercial acceptance still pending"
+  ],
+  "sha256": {
+    "src/99_customer_design.js": "73b6316e315f3f1a9763b10e7fdfaf1e3538fa3845b5e346ac778ae4960b3e3b",
+    "src/customer-design.css": "309f90cb0cef768c80b17f57d688708cfb52eda1d2c633a2d09e874619514ed4"
+  }
+}

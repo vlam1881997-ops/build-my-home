@@ -4,7 +4,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 12/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W01.1 complete — measured prototype evidence and bedroom camera fix; next W01.2 massing proposals and reference acceptance
+- active_substep: W08.1 rotation and measured furniture size controls; W01.2 exterior massing still pending
 - target_branch: codex/b-v1-24
 - actual_branch: codex/review-ab-c08 (local); remote resume codex/b-facade-depth; PR42 source is merged in main
 - source_baseline: 6a323673be7c5a6d6874b5bc345d9c354f6c5f55 (PR42 integrated release; earlier work/evidence preserved)
@@ -234,3 +234,11 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Counterpart request: A-massing-request.md records oversized bedroom (3.98 × 12.38 m in test fixture), proposals for floor setbacks/loggia and coherent room allocation through the shared plan and explicit acceptance/history. No source A changed.
 - Next W01.2: coordinate measured massing alternatives for the three prototypes; keep room/opening/furniture IDs and locks, then recapture changed exterior views. Refine room assets separately where independent; do not repeat the baseline or claim six-box sheet is visual approval.
 - Publishing: scoped branch codex/b-facade-depth, parent 00ed96a43a54c27a7a666fdef706625fd07a7d83; new checkpoint SHA from branch log. No production deployment for this WIP.
+
+## W08.1 — ưu tiên theo yêu cầu khách 12/10/2026
+- Thêm xoay trái/phải theo bước 15/45/90 độ, giữ nhập góc bất kỳ; đánh dấu hướng dùng theo mặt trước của mesh trên bản vẽ. Xoay qua editFurniture dùng chung ID/pose/history/lock/collision/save.
+- Cho nhập rộng/sâu/cao từ sản phẩm đã chọn; kiểm footprint và cao thông thủy trước lưu. Giữ modelId, SKU và vật liệu riêng. Model 3D vẫn là generic, không tự nhận đúng mẫu hãng.
+- Source: src/99_customer_design.js, src/customer-design.css. Tests: tests/team-b-furniture.test.mjs; tests/team-b-rotation.browser.cjs.
+- Unit: 17/17 Node22 gồm schema A hiện có, history/lock/collision/kích thước và giữ cùng món/góc/kích thước qua 24 style. Browser desktop/phone: thao tác native trên bàn, ghế, tủ TV, TV, bồn cầu; trái/phải45°, nhập37°, sửa kích thước ghế, khóa, reload và đo node 3D đạt.
+- Còn thiếu: ảnh/mã mẫu/model hãng có quyền sử dụng và liên kết chính xác SKU cho bộ nội thất; kiểm mẫu thực của 24 bộ chưa đạt. Chưa thêm tài sản hãng không có bằng chứng. W01 khối nhà vẫn pending; yêu cầu A trong W01-prototypes/A-massing-request.md.
+- Bước tiếp theo: kiểm và nâng mẫu nội thất có dữ liệu model/nguồn rõ, liên kết lựa chọn mẫu với asset ổn định qua đổi phong cách; giữ checkpoint W01.2. Không đóng thương mại hoặc triển khai WIP chỉ vì kiểm tra xanh.
