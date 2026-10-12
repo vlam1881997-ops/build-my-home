@@ -366,6 +366,7 @@ BMH.createSceneFoliage=(THREE,dimensions,material,count=48)=>{
 };
 
 BMH.createRoomAsset = (model, d, THREE, m) => {
+  const selectedModel=model;if(model==='loungeChairModern')model='loungeChair';
   const supported = /^(bedDouble|bedSingle|loungeDesignSofa|loungeChair|tableCoffee|table|desk|chair|chairDesk|cabinetTelevision|televisionModern|kitchenSink|kitchenStove|kitchenFridge|bookcaseClosedWide|cabinetBed|pottedPlant|washingMachine|bathroomSink|toilet|shower|sideTable|floorLamp)$/;
   if (!supported.test(model) || !d || ![d.w,d.h,d.d].every(v => Number.isFinite(v) && v > 0)) return null;
   const root = new THREE.Group();
@@ -611,7 +612,7 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
   const bounds = new THREE.Box3().setFromObject(root), size = bounds.getSize(new THREE.Vector3());
   root.scale.set(d.w/size.x,d.h/size.y,d.d/size.z);
   root.position.set(-(bounds.min.x+bounds.max.x)/2*root.scale.x,-bounds.min.y*root.scale.y,-(bounds.min.z+bounds.max.z)/2*root.scale.z);
-  root.userData = {source:'parametric',model,generic:true,dimensions:{...d},collection:{...m.collection}};
+  root.userData = {source:'parametric',model:selectedModel,generic:true,dimensions:{...d},collection:{...m.collection}};
   return root;
 };
 

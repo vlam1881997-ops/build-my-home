@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-12",
+  "status": "ready_for_integration",
+  "node": "22.23.0",
+  "unitTests": {
+    "passed": 93,
+    "failed": 0,
+    "files": [
+      "team-b-furniture",
+      "real-house",
+      "scene-assets",
+      "team-a-input-furniture",
+      "customer-design"
+    ]
+  },
+  "browser": "result.json",
+  "devices": [
+    "desktop",
+    "phone"
+  ],
+  "styles": [
+    "neo",
+    "japandi",
+    "industrial"
+  ],
+  "asset": {
+    "path": "assets/interior/models/modern-armchair-facing.glb",
+    "sha256": "4264b9851c0f165763bc969294d41a07642890785d917f6bd7e6c02ce8fcde5c",
+    "license": "CC0-1.0",
+    "triangles": 8916,
+    "sourceAsset": "modern-armchair.glb",
+    "processing": "Rotation Y180 baked into positions/normals, centered X/Z, baseY0; topology unchanged",
+    "manufacturerVerified": false
+  },
+  "commercial24SetsAccepted": false
+}
