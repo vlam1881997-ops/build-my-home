@@ -468,10 +468,15 @@
   if(['stairs','garage'].includes(r.type))return oldSvg(r);
   return '<g class="furniture team-b-furniture" stroke="#687c80" fill="#e7e0d4" stroke-width=".025">'+B.resolvedFurniture(r.id).map(i=>'<g data-furniture-id="'+esc(i.id)+'" tabindex="0" role="button" aria-label="'+esc(models[i.modelId])+'" class="'+(selected()===i.id?'selected':'')+'"><polygon points="'+B.furnitureFootprint(i).map(p=>p.x+','+p.y).join(' ')+'"/>'+B.furnitureDirectionSvg(i)+'<title>'+esc(models[i.modelId])+' · '+i.size.width+' × '+i.size.depth+' m · '+i.pose.rotationDeg+'°</title></g>').join('')+'</g>'+B.planFixtures(r.id).map(q=>'<g class="furniture altar-symbol" data-fixture-reference="'+esc(q.id)+'"><rect x="'+q.x+'" y="'+q.y+'" width="'+q.w+'" height="'+q.d+'"/><title>Bàn thờ</title></g>').join('');
  };
+ // Scale vendored assets from catalog dimensions to the customer's saved size.
+ B.furnitureExportScale=i=>{
+  const d=B.FURNITURE_DIMENSIONS[i.modelId],factor=i.modelId==='loungeChairModern'?100:200;
+  return d?{scale_x:factor*i.size.width/d.w,scale_y:factor*i.size.height/d.h,scale_z:factor*i.size.depth/d.d}:{scale_x:factor,scale_y:factor,scale_z:factor};
+ };
  const doc=B.architectDocument;B.architectDocument=focus=>{
   const result=doc(focus);for(const [f,level] of result.levels.entries()){
    const rows=B.resolvedFurniture().filter(i=>i.floor===f&&(!focus?.startsWith('room:')||i.roomId===focus.slice(5)));
-   const items=rows.map(i=>({id:i.id,item_name:i.modelId,item_type:1,format:'gltf',model_url:i.modelId==='loungeChairModern'?'../interior/models/modern-armchair-facing.glb':'models/'+i.modelId+'.glb',xpos:i.pose.x*100,zpos:i.pose.y*100,ypos:i.pose.z*100,rotation:-i.pose.rotationDeg*Math.PI/180,scale_x:i.modelId==='loungeChairModern'?100*i.size.width/B.FURNITURE_DIMENSIONS.loungeChairModern.w:200,scale_y:i.modelId==='loungeChairModern'?100*i.size.height/B.FURNITURE_DIMENSIONS.loungeChairModern.h:200,scale_z:i.modelId==='loungeChairModern'?100*i.size.depth/B.FURNITURE_DIMENSIONS.loungeChairModern.d:200,fixed:i.locked===true}));
+   const items=rows.map(i=>({id:i.id,item_name:i.modelId,item_type:1,format:'gltf',model_url:i.modelId==='loungeChairModern'?'../interior/models/modern-armchair-facing.glb':'models/'+i.modelId+'.glb',xpos:i.pose.x*100,zpos:i.pose.y*100,ypos:i.pose.z*100,rotation:-i.pose.rotationDeg*Math.PI/180,...B.furnitureExportScale(i),fixed:i.locked===true}));
    if(f===0)result.items=[...(result.items||[]).filter(i=>i.item_type!==1),...items];else level.items=[...(level.items||[]).filter(i=>i.item_type!==1),...items];
   }return result;
  };
