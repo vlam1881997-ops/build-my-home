@@ -1,14 +1,14 @@
 # Tiến độ AI A — BMH commercial v1
 
-Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
+Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 13/10/2026.
 - role: A
 - status: in_progress
-- active_task: A1–A6
-- active_substep: C08 source tích hợp B ce28e327, BOQ/finance/handover và QA native exports đã kiểm; bàn giao để review, giữ các gate thiếu dữ liệu/config/visual ở pending
-- target_branch: codex/a-v1-24
-- actual_branch: codex/a-v1-24
-- source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff
-- last_verified_commit: 137228537bef5d4ab9c82318947d019b55dd5363 (mốc source ghép trước C07/C08; kết quả C08 gắn source hashes trong evidence/A/C08, không dùng SHA này thay cho patch đang kiểm)
+- active_task: A-R1 / A-R2 (gói tiếp tục 13/10; A1/A2 trong manifest hiện hành)
+- active_substep: R1 fixtures và R2 preview/apply thu chiều sâu phòng ngủ đã có; Draft WIP, UI B / native browser / Node22 / exports chưa nghiệm thu
+- target_branch: codex/a-massing-20261013
+- actual_branch: codex/a-massing-20261013
+- source_baseline: ddf9dfe348263a28148cfbf8ca5132f1d492f8dc (main, PR #47 merged)
+- last_verified_commit: ddf9dfe348263a28148cfbf8ca5132f1d492f8dc (baseline GitHub đã xác minh; patch kiểm bằng source hashes tại evidence/A/R1-R2, chưa là release gate)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -75,3 +75,16 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 
 - Checkpoint C07 WIP: A1–A6 adapters/test đã có; source chưa nghiệm thu gate. Baseline tested commit 1372285 trước patch; checkpoint mới xem git log.
 - Checkpoint C08 WIP: sửa coverage/privacy/material-PDF/APPID/stress; 457 Node22 checks và native desktop/mobile/export/GLB proof đã có. Hồ sơ TEST-ONLY và HANDOFF-CODEX-A-20261014.md ghi nội dung thực ngày09/10, không nhận nghiệm thu tương lai. Source+progress+evidence nằm trên nhánh A/PR37; gate chưa đóng.
+
+## R1/R2 — tiếp tục từ PR #47, 13/10/2026
+
+- PR #37 đã merge (`42d8653`), không còn Draft đang làm. Main hiện đã qua PR #47 (`ddf9dfe`). Các ghi chú C08/PR37 ở trên là lịch sử, không phải trạng thái PR hiện tại.
+- B `codex/b-facade-depth` đã có checkpoint `778e3fe`: rotation/model bounds/washer/catalogue PR43–47. Giữ nguyên các file B; không làm lại phần đó. W01 A-massing-request còn cần A cấp hình học.
+- Tạo continuation `codex/a-massing-20261013` / `bmh-codex-a-massing` từ PR47, giữ hai worktree A cũ và generated WIP. Checkout dùng sparse cho asset/evidence chưa tải; không xem đây là gói app đầy đủ asset.
+- R1: fixtures TEST-ONLY 5.4×20/3F, 14×20/2F, ranh lõm 176m²; nguồn giả lập được ghi rõ, Bắc/quy hoạch unknown, review awaiting-review. Bộ test nạp envelope/parcel gốc thay vì dùng rectangle stub.
+- R2: tái hiện phòng ngủ nhà phố 3.98×12.38 m. Nguyên nhân bộ packer chia hết chiều sâu dư vào các phòng. Thêm `previewRoomDepthChange` / `applyRoomDepthChange` ở module A đang được đăng ký: khách chọn phòng, chiều sâu và cạnh giữ; xem số đo/diện tích trước–sau, kiểm cửa/lối đi/locks/nội thất, rồi commit qua editor hiện có. Không tự sửa generator hoặc tự áp dụng.
+- Phần nhường ra `unassigned` / `awaiting-review`, giá null/unknown. Chưa tự khai báo loggia, ban công, sàn sân thượng hay kết cấu. Không có geometry store mới.
+- 54/54 kiểm tra component đạt Node24.19.0: ba ranh thực, preview bất biến, apply đúng preview, stale/tamper/locks bị từ chối, giữ phòng/thang/ID/SKU/góc37°/tombstone, undo/redo và lưu/mở lại. Build hiện có đạt. Browser runner đã viết nhưng Chromium cũ bị truncated (ELF thiếu section headers), launch SIGSEGV; chưa chạy được desktop/mobile. Node22 chưa sẵn có trong môi trường này.
+- Thử thêm real-house suite: 66/68 đạt, 2 lỗi ENOENT do asset photographic-provenance và modern-armchair-facing chưa tải trong sparse checkout. Không gọi đây là regression production hay full suite xanh.
+- Codex Security `security-diff-scan`: đọc được skill nhưng reference config-preflight không đọc được và capability scan không có; chưa có báo cáo scan chính thức. Dependency không thay đổi.
+- Next action: B nối hai hook vào UI xem/chọn phương án; A mở rộng phân công năng khoảng trống/stepback theo lựa chọn khách và xác minh A3/DXF/roof/BOQ cùng revision. Khôi phục runtime Node22/browser rồi chạy runner sáu ca; chưa merge/release/production.

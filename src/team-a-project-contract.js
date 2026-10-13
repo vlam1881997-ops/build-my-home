@@ -53,6 +53,41 @@
   }
   const reason=placementError(next);return reason?{ok:false,reason}:{ok:true,plan:next};
  };
+ // A measured retraction is an explicit customer choice, never a style side effect.
+ // The released rectangle is NOT a terrace/slab: its use and engineering are unknown.
+ B.previewRoomDepthChange=request=>{
+  const source=B.state.project.plan,room=source.rooms.find(r=>r.id===request?.roomId);
+  const fail=reason=>({ok:false,reason});
+  if(!room||room.type!=='bed')return fail('Chọn phòng ngủ cần xem phương án thu chiều sâu.');
+  if(!Number.isFinite(request.depth)||request.depth<2.95||request.depth>=room.h)return fail('Chiều sâu cần từ 2,95 m và nhỏ hơn hiện tại; đây là giới hạn bộ bố trí, không phải chuẩn pháp lý.');
+  if(!['front','rear'].includes(request.anchor))return fail('Chọn giữ cạnh trước hoặc cạnh sau của phòng.');
+  if(!B.furnitureContractReady())return fail('Nội thất chưa được chuẩn hóa; giữ bản gốc để kiểm tra.');
+  const candidate=B.planSnapshot(),next=candidate.rooms.find(r=>r.id===room.id);
+  next.h=request.depth;if(request.anchor==='rear')next.y=room.y+room.h-request.depth;
+  candidate.fixtures=B.translatedFixtures(candidate.rooms,source);
+  if(candidate.fixtures.length!==(source.fixtures||[]).length)return fail('Có fixture mất liên kết phòng; kiểm tra bản gốc trước khi thu chiều sâu.');
+  const carried=B.carryFurnitureToPlan(candidate);if(!carried.ok)return fail(carried.reason);
+  const plan=carried.plan,reason=B.directPlanError(plan);if(reason)return fail(reason);
+  const issues=B.withPlan(plan,()=>[...B.measuredGeometryIssues().filter(i=>i.sev==='error'),...B.elevatorIssues().filter(i=>i.sev==='error')]);
+  if(issues.length)return fail(issues[0].text);
+  const disconnected=B.withPlan(plan,()=>B.circulationAnalysis(room.floor).unreachable);
+  if(disconnected.length)return fail(disconnected[0].name+': chưa có đường tiếp cận liên tục qua cửa.');
+  const released={floor:room.floor,x:room.x,y:request.anchor==='rear'?room.y:room.y+request.depth,w:room.w,h:room.h-request.depth,use:'unassigned',reviewStatus:'awaiting-review'};
+  return {ok:true,units:'m',sourceRevision:B.drawingRevision(),sourcePlanKey:JSON.stringify(source),request:{roomId:room.id,depth:request.depth,anchor:request.anchor},plan,
+   room:{id:room.id,before:{width:room.w,depth:room.h,area:room.w*room.h},after:{width:next.w,depth:next.h,area:next.w*next.h}},released:{...released,area:released.w*released.h},
+   cost:{status:'unknown',amount:null,reason:'Cần bóc lại khối lượng và báo giá cùng revision; không suy tiền tiết kiệm từ diện tích.'},
+   notice:'Giữ số phòng và khối thang; cửa và đồ đi theo phòng như bản xem trước. Phần nhường ra chưa là loggia/sân thượng; cần khách chọn công năng và KTS/KS kiểm duyệt.'};
+ };
+ B.applyRoomDepthChange=preview=>{
+  if(!preview?.ok||preview.sourceRevision!==B.drawingRevision()||preview.sourcePlanKey!==JSON.stringify(B.state.project.plan))return reject('Phương án đã cũ; xem lại số đo trước khi áp dụng.');
+  const current=B.previewRoomDepthChange(preview.request);
+  if(!current.ok)return reject(current.reason);
+  if(JSON.stringify(current.plan)!==JSON.stringify(preview.plan))return reject('Bản xem trước đã thay đổi; tạo lại phương án.');
+  // commitDirectPlan performs fixture/furniture translations once, using source poses.
+  const candidate=B.planSnapshot(),r=current.plan.rooms.find(r=>r.id===preview.request.roomId);
+  candidate.rooms=candidate.rooms.map(q=>q.id===r.id?copy(r):q);
+  return B.commitDirectPlan(candidate,{floor:r.floor,selected:r.id,selectedOpening:'',selectedFixture:''});
+ };
  const proposal=B.architectureProposal;
  B.architectureProposal=strategy=>{const result=proposal(strategy);if(!result.ok)return result;const carried=B.carryFurnitureToPlan(result.plan);return carried.ok?{...result,plan:carried.plan}:{...result,ok:false,reason:carried.reason};};
  const apply=B.applyDesignKit;

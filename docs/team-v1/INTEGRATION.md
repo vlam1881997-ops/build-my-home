@@ -45,3 +45,9 @@ Nền thực thi: main3c7f510 → A1dc78657 + B90dcc4e tại1372285 → C0719a84
 - 09/10/2026 A1: đọc main/A 3c7f510 và B 90dcc4e; C01 default array, migration/history/disk và input-evidence triển khai phía A. B consumer thật đã bàn giao trong PR36. Room transformations/regeneration/native drag và integrated persistence còn đang kiểm, G1 chưa đóng.
 - C02: chấp nhận tên/signatures read-only styleSpecification/styleMaterialMatrix/styleMaterialCompatibility/styleMaterialSchedule của B1 để A2/A4 tiêu thụ; quantity/price thiếu vẫn null, category selection không đồng nghĩa mọi role đã áp dụng.
 - C05: A sẽ đăng ký năm team-b tests hiện có cùng team-a tests, không thêm dependency. C06 production/config/visual/professional review vẫn pending; không tự nâng cờ readiness.
+
+## 2026-10-13 — A continuation after PR47
+
+PR37 is merged; current verified main baseline is ddf9dfe348263a28148cfbf8ca5132f1d492f8dc (PR47). A continues in codex/a-massing-20261013, worktree bmh-codex-a-massing, preserving old worktrees. Default branch names in the original manifest are historical; file ownership is unchanged. B active progress read at 778e3fe on codex/b-facade-depth.
+
+Scoped R1/R2 patch: A-owned team-a-project-contract.js, tests/fixtures/design-client.mjs, new tests/team-a-massing* and evidence/A/R1-R2, plus A progress/contracts/integration. No B file, build/dependency/server/Vercel or style catalogue changes. The preview/apply hook is ready for B UI wiring; acceptance pending native desktop/mobile, Node22, changed-fixture exports, professional geometry use and Codex Security. No production action. See R1-R2 README for complete validation limits.

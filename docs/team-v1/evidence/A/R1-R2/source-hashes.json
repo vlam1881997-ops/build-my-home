@@ -1,0 +1,10 @@
+{
+  "baseline": "ddf9dfe348263a28148cfbf8ca5132f1d492f8dc",
+  "files": {
+    "src/team-a-project-contract.js": "aa9ef3583d839d24bae8501201537a272f7cb8ba6404fa59403c60a43dfc9e4a",
+    "tests/fixtures/design-client.mjs": "f23f78bac9b60b20b08dea9a189c4b10620ced575eeea8c3a5e7f98312f2eac9",
+    "tests/team-a-massing.test.mjs": "00abfb3d7accca7011d4cbb4f8700e79c8d15b44a58a892adc61787d767c00c6",
+    "tests/team-a-massing.browser.cjs": "671cde4a9e15f3d1d5c1f328f17777514dac6c0ed677d33d429008a900a8cc9f",
+    "tests/team-a-massing-fixtures.json": "a39aa19a5b234e2a8fec3697edd8dce7c1dc1b03f06928395726c2a8a54b1ed5"
+  }
+}
