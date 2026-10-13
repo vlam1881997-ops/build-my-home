@@ -66,3 +66,12 @@ details:has(>[data-team-a-boq])>summary{min-height:44px;align-content:center;fon
 .team-b-rotation-controls{display:grid;grid-template-columns:1fr minmax(70px,.65fr) 1fr;gap:8px;align-items:end}.team-b-rotation-controls button{font-weight:700;color:#245b53}.team-b-rotation-controls label{min-width:0}.team-b-rotation-controls select{width:100%}
 
 .team-b-pose-fields label{min-width:0}.team-b-pose-fields input{width:100%;min-width:0;box-sizing:border-box}
+
+/* Catalogue previews are pre-rendered from real library geometry; no extra WebGL context. */
+.team-b-catalogue-preview{margin:10px 0 14px;border:1px solid var(--border,#d7dfd9);border-radius:14px;overflow:hidden;background:#edf0ed}
+.team-b-catalogue-preview img{display:block;width:100%;height:auto;max-height:220px;object-fit:contain}
+.team-b-catalogue-preview figcaption{display:grid;gap:6px;padding:12px;background:var(--surface,#fff);color:var(--text,#253a32);overflow-wrap:anywhere}
+.team-b-catalogue-preview strong{font-size:1rem}
+.team-b-catalogue-preview span{font-size:.85rem;font-variant-numeric:tabular-nums}
+.team-b-catalogue-preview small{font-size:.78rem;line-height:1.5;color:var(--muted,#58685f)}
+.team-b-furniture-editor [data-furniture-add]{min-width:0}
