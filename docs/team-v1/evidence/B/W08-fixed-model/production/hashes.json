@@ -1,0 +1,23 @@
+[
+  {
+    "path": "app.js",
+    "status": 200,
+    "bytes": 1715438,
+    "sha256": "f511c34f598511bf9da2b07fccdd4b5696db423cddedc6811ec55624662429ad",
+    "matches": true
+  },
+  {
+    "path": "styles.css",
+    "status": 200,
+    "bytes": 589842,
+    "sha256": "ca8c48054d29a84eeb556686dc43a137bb311324cbf825fcae4475f5ef440505",
+    "matches": true
+  },
+  {
+    "path": "assets/interior/models/modern-armchair-facing.glb",
+    "status": 200,
+    "bytes": 242904,
+    "sha256": "4264b9851c0f165763bc969294d41a07642890785d917f6bd7e6c02ce8fcde5c",
+    "matches": true
+  }
+]
