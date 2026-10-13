@@ -428,7 +428,7 @@
  // bed foot and toilet bowl face +Z. Symmetric tables have no asserted front.
  B.furnitureFacing=i=>{
   const negative=['loungeDesignSofa','loungeChair','loungeChairModern','chair','chairDesk','cabinetTelevision','televisionModern','bookcaseClosedWide','cabinetBed'];
-  const sign=negative.includes(i.modelId)?-1:['bedDouble','bedSingle','toilet'].includes(i.modelId)?1:0;
+  const sign=negative.includes(i.modelId)?-1:['bedDouble','bedSingle','toilet','washingMachine'].includes(i.modelId)?1:0;
   const a=i.pose.rotationDeg*Math.PI/180;return {x:-Math.sin(a)*sign,y:Math.cos(a)*sign,defined:sign!==0};
  };
  B.furnitureDirectionSvg=i=>{
