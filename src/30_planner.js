@@ -89,7 +89,7 @@ BMH.wallSegments = (floor=BMH.state.ui.planner.floor) => {
       if(count)out.push({o:es[0].o,c:es[0].c,a,b,count});
     }
   }
-  return out;
+  return out.filter(s=>s.count!==1||!rooms.some(r=>BMH.outdoorOpenEdge?.(r,s.o==='h',s.c,s.a,s.b)));
 };
 
 BMH.openingWallSpan = (opening,rooms=BMH.state.project.plan.rooms) => {

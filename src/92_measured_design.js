@@ -2,6 +2,16 @@
  * Geometry is a design model, never a substitute for structural/MEP design. */
 (()=>{
  const B=BMH,esc=B.esc,finite=Number.isFinite;
+ B.outdoorRoom=r=>r?.outdoorSpace&&['loggia','terrace'].includes(r.outdoorSpace.kind);
+ B.outdoorOpenEdge=(r,horizontal,axis,a,b)=>B.outdoorRoom(r)&&(Array.isArray(r.outdoorSpace.openSides)?r.outdoorSpace.openSides:[]).some(side=>{
+  const h=['north','south'].includes(side),c=h?(side==='north'?r.y:r.y+r.h):(side==='west'?r.x:r.x+r.w),start=h?r.x:r.y,end=start+(h?r.w:r.h);
+  return h===horizontal&&Math.abs(c-axis)<.001&&a>=start-.001&&b<=end+.001;
+ });
+ B.outdoorSpaceRegister=()=>B.state.project.plan.rooms.filter(r=>r.type==='balcony'||B.outdoorRoom(r)).map(r=>{
+  const s=r.outdoorSpace||{},revision=B.drawingRevision(),technicalInputKey='outdoor:'+r.id,input=B.state.project.constructionDesign?.inputs?.[technicalInputKey];
+  const declared=B.technicalRecordState(input,'input'),detailsStatus=declared==='reviewed'?(input.reviewedRevision===revision&&B.technicalSourceProvided(input)?'reviewed':'stale'):declared;
+  return {roomId:r.id,floor:r.floor,kind:s.kind||'unknown',sourceReference:s.sourceReference||null,revision,units:'m',width:r.w,depth:r.h,area:r.w*r.h,openSides:Array.isArray(s.openSides)?[...s.openSides]:[],covered:s.kind==='loggia'?true:s.kind==='terrace'?false:null,reviewStatus:'awaiting-review',guard:{status:'unknown'},drainage:{status:'unknown'},structuralStatus:'awaiting-review',technicalInputKey,detailsStatus,detailsReference:B.technicalSourceProvided(input)?input.sourceReference||input.reference||input.reportReference||null:null};
+ });
  B.measuredDesignSettings=()=>{
   const p=B.state.project,d=p.measuredDesign||={};
   d.roof={type:'auto',pitchDeg:0,overhang:-1,ridge:'auto',surface:'auto',color:'',...(d.roof||{})};
@@ -50,7 +60,7 @@
  };
  // One vertex set feeds WebGL, plan, elevation, section and roof takeoff.
  B.sceneRoofSpec=(explode=0)=>{
-  const p=B.state.project,l=B.resolvedProjectLevels(),rooms=B.floorRooms(l.floors-1).filter(r=>[r.x,r.y,r.w,r.h].every(finite)&&r.w>0&&r.h>0),bounds=B.sceneFootprintBounds(rooms),spec=B.roofDesignSpec();
+  const p=B.state.project,l=B.resolvedProjectLevels(),rooms=B.floorRooms(l.floors-1).filter(r=>r.outdoorSpace?.kind!=='terrace'&&[r.x,r.y,r.w,r.h].every(finite)&&r.w>0&&r.h>0),bounds=B.sceneFootprintBounds(rooms),spec=B.roofDesignSpec();
   if(!bounds||!bounds.rectangular&&spec.type!=='flat')return null;
   const width=bounds.width+spec.overhang*2,depth=bounds.depth+spec.overhang*2,cx=bounds.cx,cz=bounds.cy;
   const eave=l.roofBase+(l.floors-1)*explode+l.slab+(spec.type==='flat'?0:.18),alongDepth=spec.ridge==='depth'||spec.ridge==='auto'&&depth>=width;
@@ -81,6 +91,12 @@
    if(!r.id||ids.has(r.id))add('Mã phòng bị thiếu/trùng: '+(r.id||'—'));ids.add(r.id);
    if(![r.x,r.y,r.w,r.h].every(finite)||r.w<=.2||r.h<=.2||!Number.isInteger(r.floor)||r.floor<0||r.floor>=l.floors){add((r.name||r.id)+': kích thước/tầng không hợp lệ.');continue;}
    if(r.x<0||r.y<0||r.x+r.w>p.site.width+.001||r.y+r.h>p.site.depth+.001||B.roomInsideParcel&&!B.roomInsideParcel(r))add(r.name+': phòng vượt ranh/khoảng lùi đã nhập.');
+   if(r.outdoorSpace){
+    const s=r.outdoorSpace,roof=B.roofDesignSpec();
+    if(!B.outdoorRoom(r)||r.type!=='balcony'||!Array.isArray(s.openSides)||!s.openSides.length||s.openSides.some(v=>!['north','east','south','west'].includes(v))||new Set(s.openSides).size!==s.openSides.length||typeof s.sourceReference!=='string'||!s.sourceReference.trim()||s.sourceReference.trim().length>240)add(r.name+': dữ liệu không gian ngoài trời hoặc nguồn chưa hợp lệ.');
+    if(r.floor!==l.floors-1||roof.type!=='flat'||roof.overhang!==0)add(r.name+': phạm vi ngoài trời hiện hỗ trợ tầng trên cùng, mái bằng không đua; không tự đổi mái hoặc các tầng khác.');
+    for(const side of Array.isArray(s.openSides)?s.openSides:[])if(B.sharedWallNeighbors?.(p.plan.rooms,r,side).length)add(r.name+': cạnh mở ngoài trời đang tiếp giáp một phòng.');
+   }
   }
   for(let f=0;f<l.floors;f++){
    const rooms=B.floorRooms(f);if(!rooms.length)add('Tầng '+(f+1)+' chưa có mặt bằng.');
@@ -90,6 +106,7 @@
    const r=p.plan.rooms.find(r=>r.id===o.roomId),span=r?B.openingWallSpan(o):null,h=o.height??(o.kind==='door'?2.1:1.4),s=o.kind==='door'?0:o.sill??.9;
    if(!o.id||openingIds.has(o.id))add('Mã cửa bị thiếu/trùng: '+(o.id||'—'));openingIds.add(o.id);
    if(!r||o.floor!==r.floor||!span||!['door','window'].includes(o.kind)||!finite(o.width)||o.width<.45||o.width>(['north','south'].includes(o.side)?r.w:r.h)+.001||!finite(h)||h<=0||!finite(s)||s<0||h+s>B.floorLevel(o.floor).clearHeight+.001||o.offset!==undefined&&(!finite(o.offset)||o.offset<0||o.offset>1)){add('Ô mở '+(o.id||'—')+': kiểm tra phòng, rộng/cao/bậu và vị trí.');continue;}
+   if(B.outdoorOpenEdge(r,span.o==='h',span.c,span.a,span.b))add('Ô mở '+o.id+': không đặt cửa trên cạnh ngoài trời không có tường.');
    if(spans.some(q=>q.floor===o.floor&&q.o===span.o&&Math.abs(q.c-span.c)<.001&&Math.min(q.b,span.b)-Math.max(q.a,span.a)>.001))add('Ô mở '+o.id+' trùng một ô khác trên cùng tường.');
    spans.push({...span,floor:o.floor});
   }
@@ -122,7 +139,7 @@
    const floorWallRects=wallRects.filter((_,i)=>g.walls[i].kind!=='door');
    const area=panels=>panels.reduce((n,q)=>n+q.w*q.d,0),rooms=g.rooms.map(r=>{
     const slabPanels=B.slabPanels(r,holes),floorPanels=B.slabPanels(r,[...holes,...floorWallRects]),ceilingPanels=B.slabPanels(r,[...nextHoles,...wallRects]);
-    return {roomId:r.id,name:r.name,type:r.type,floor,grossArea:r.w*r.h,slabArea:area(slabPanels),floorFinish:['stairs','elevator'].includes(r.type)?0:area(floorPanels),ceilingFinish:['stairs','elevator'].includes(r.type)?0:area(ceilingPanels)};
+    return {roomId:r.id,name:r.name,type:r.type,floor,grossArea:r.w*r.h,slabArea:area(slabPanels),floorFinish:['stairs','elevator'].includes(r.type)?0:area(floorPanels),ceilingFinish:['stairs','elevator'].includes(r.type)||r.outdoorSpace?.kind==='terrace'?0:area(ceilingPanels),...(B.outdoorRoom(r)?{outdoorKind:r.outdoorSpace.kind,outdoorArea:r.w*r.h}:{})};
    });
    for(const w of g.walls){
     const len=w.b-w.a,H=B.floorLevel(floor).height-l.slab,aperture=w.kind==='wall'?0:len*Math.max(0,Math.min(w.height,H-(w.sill||0))),net=len*H-aperture;
@@ -146,6 +163,8 @@
   if(B.state.project.plan.rooms.some(r=>r.x<B.measuredWallThickness(false)/2||r.y<B.measuredWallThickness(false)/2||r.x+r.w>B.state.project.site.width-B.measuredWallThickness(false)/2||r.y+r.h>B.state.project.site.depth-B.measuredWallThickness(false)/2))warnings.push('Mốc phòng sát ranh đất: kiểm tra mặt ngoài tường, khoảng lùi và phần mái đua.');
   warnings.push(...(B.elevatorIssues?.()||[]).filter(i=>i.sev!=='error').map(i=>i.text));
   warnings.push(...(B.stairAlignmentIssues?.()||[]).filter(i=>i.sev!=='error').map(i=>i.text));
+  for(const r of B.state.project.plan.rooms.filter(r=>r.type==='balcony'&&!r.outdoorSpace))warnings.push(r.name+': ban công cũ chưa khai báo cạnh mở/mái (unknown); giữ hình học gốc, cần đối chiếu hồ sơ.');
+  for(const r of B.state.project.plan.rooms.filter(B.outdoorRoom))warnings.push(r.name+': lan can, thoát nước, chống thấm và chịu lực awaiting-review; không dùng thi công.');
   const technical=B.constructionReview?.();
   if(!B.resolvedProjectLevels().uniform&&B.STUDIO_LEVELS_CONTRACT!==1)warnings.push('Cao tầng riêng đã có trong 2D; consumer 3D cần tích hợp hợp đồng cao độ trước khi xuất ảnh / GLB / gói có 3D.');
   if(technical?.unparsed)warnings.push('Có '+technical.unparsed+' mục kỹ thuật cũ chưa có cấu trúc; giữ dữ liệu để đối chiếu hồ sơ gốc.');

@@ -28,6 +28,18 @@ for case in ['townhouse','wide','concave']:
         area=abs(sum(x*pts[(i+1)%len(pts)][1]-pts[(i+1)%len(pts)][0]*y for i,(x,y) in enumerate(pts)))/2/1e6
         assert math.isclose(area,ev['parcelArea'],abs_tol=1e-6)
         for e in entities:assert meta(e)['revision']==revision and meta(e)['units']=='mm'
+        for room in [r for r in plan['rooms'] if r['floor']==floor and r.get('outdoorSpace')]:
+            edges=[e for e in entities if e.dxf.layer=='OUTDOOR_EDGES' and meta(e).get('roomId')==room['id']]
+            assert len(edges)==len(room['outdoorSpace']['openSides'])
+            for e in edges:
+                m=meta(e);side=m['side'];assert m['guardStatus']=='unknown' and m['reviewStatus']=='awaiting-review'
+                h=side in ['north','south'];c=(room['y'] if side=='north' else room['y']+room['h']) if h else (room['x'] if side=='west' else room['x']+room['w'])
+                expected=((room['x'],c,room['x']+room['w'],c) if h else (c,room['y'],c,room['y']+room['h']))
+                actual=(e.dxf.start.x,-e.dxf.start.y,e.dxf.end.x,-e.dxf.end.y)
+                assert all(abs(a-b*1000)<.002 for a,b in zip(actual,expected))
+            quantities=json.loads((d/'quantities.json').read_text())
+            qr=next(q for f in quantities['floors'] for q in f['rooms'] if q['roomId']==room['id'])
+            if room['outdoorSpace']['kind']=='terrace':assert qr['ceilingFinish']==0
         for room in [r for r in plan['rooms'] if r['floor']==floor and r['type'] not in ['stairs','elevator']]:
             panels=[e for e in entities if meta(e).get('kind')=='slab-panel' and meta(e).get('roomId')==room['id']]
             assert panels,room['id'];ps=[q for e in panels for q in points(e)]

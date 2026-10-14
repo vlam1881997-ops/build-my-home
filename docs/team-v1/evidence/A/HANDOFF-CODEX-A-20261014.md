@@ -1,3 +1,19 @@
+# Current A-only handoff — 14/10/2026
+
+**Read this section first.** Current branch: `codex/a-massing-20261013`, [Draft PR48](https://github.com/vlam1881997-ops/build-my-home/pull/48). Older C08/PR37 notes below are historical. The A source/data/export package is ready for later integration within the documented supported scope; it is not construction approval or an integrated production release.
+
+This continuation completes measured room-depth alternatives, allocated enclosed uses, top-floor loggia/terrace geometry, legacy balcony declaration, consistent roof/slab/open-edge drawings/quantities, outdoor technical review and loan prepayment support. Existing A1–A6 contracts remain in place. Twenty-four styles remain unchanged.
+
+Final evidence: `outdoor-final-20261014/` contains source hashes,160/160 Node22 test results,12/12 native desktop/phone cases, independent validation of208 vector A3 PDF pages with corresponding SVG and16 millimetre DXFs. Previous native enclosed-room/finance evidence remains in `R3-R5-native-20261014/`. Drawings are TEST-ONLY, not a real surveyed/engineered house.
+
+Outdoor support is deliberately bounded: top floor, flat roof, zero overhang; no cantilever or lower-floor engineering inferred. Sources, open edges and customer apply are explicit. Legacy data is preserved. Lan can/drainage/waterproof/structural documents use existing professional source/reviewer/revision checks and become stale after design changes. Missing quantities/prices remain null; a documented review is not certification.
+
+Remaining acceptance requirements: user-deferred A+B integration/option UI/final2D–3D and live preview; real site/engineering/SKU quotes/bank inputs; professional/customer approval. Official Codex Security scan is pending its unavailable required preflight; independent pattern/manual checks found no secret matches, npm audit retains one moderate existing esbuild dev finding. LibreCAD manual measurements are not claimed. No main merge or production deployment.
+
+See `docs/team-v1/contracts.md` for the exact outdoor API and `outdoor-final-20261014/README.md` for reproduction and scope. Source and tests are preserved on PR48.
+
+---
+
 # Handoff Codex A — TASK A, checkpoint C08
 
 Nội dung thực cập nhật **09/10/2026**. Tên tệp giữ mốc bàn giao14/10 theo yêu cầu, không xác nhận đã làm việc hoặc nghiệm thu ở ngày tương lai.

@@ -12,7 +12,7 @@ BMH.exportLoan = () => {
 BMH.exportEstimate = () => { const e=BMH.estimate(), b=BMH.dataCostBasis(), rows=[['Hạng mục','Giá trị (VND)'],['Đơn giá phần thô / m²',b.shellPerM2],['Đơn giá hoàn thiện / m²',b.finishPerM2],['Đơn giá chuẩn bị / m²',b.prepPerM2],['Phần thô',e.shell],['Hoàn thiện & vật liệu',e.finish],['Vận chuyển',e.transport],['Thích ứng khí hậu',e.climatePrep||0],['Năng lượng & nước bền vững',e.performanceUpgrade||0],['Chuẩn bị',e.prep],['Dự phòng 10%',e.contingency],['TỔNG',e.total],['Nguồn đơn giá',b.sourceLabel],['Ngày nguồn',b.sourceDate],['Tham chiếu',b.reference]]; BMH.download('BMH-du-toan.xls',BMH.excelXml('Du toan',rows),'application/vnd.ms-excel'); };
 // CAD geometry uses millimetres at 1:1; annotations are on separate layers.
 BMH.planDxf=(floor=BMH.state.ui.planner.floor)=>{
- const p=BMH.state.project,rooms=BMH.floorRooms(floor),parts=[],revision=BMH.drawingRevision(),layers=['PLOT','WALLS','DOORS','WINDOWS','FURNITURE','STAIRS','ELEVATOR','SLABS','VOIDS','DIMENSIONS','LABELS'];
+ const p=BMH.state.project,rooms=BMH.floorRooms(floor),parts=[],revision=BMH.drawingRevision(),layers=['PLOT','WALLS','DOORS','WINDOWS','FURNITURE','STAIRS','ELEVATOR','SLABS','VOIDS','DIMENSIONS','LABELS','OUTDOOR_EDGES'];
  const pair=(code,value)=>parts.push(String(code),String(value));
  const entity=(type,layer,subclass)=>{pair(0,type);pair(100,'AcDbEntity');pair(8,layer);pair(100,subclass);};
  // Registered XDATA contains only design identities, never raw customer state.
@@ -33,6 +33,10 @@ BMH.planDxf=(floor=BMH.state.ui.planner.floor)=>{
  const holes=BMH.stairFloorHoles?.(floor)||[];
  holes.forEach((q,i)=>rect(q.x,q.y,q.w,q.h,'VOIDS',{kind:'floor-void',voidIndex:i}));
  for(const r of rooms)for(const q of BMH.slabPanels?.(r,holes)||[{x:r.x,y:r.y,w:r.w,d:r.h}])rect(q.x,q.y,q.w,q.d,'SLABS',{kind:'slab-panel',roomId:r.id});
+ for(const r of rooms.filter(r=>BMH.outdoorRoom?.(r)))for(const side of r.outdoorSpace.openSides){
+  const h=['north','south'].includes(side),c=h?(side==='north'?r.y:r.y+r.h):(side==='west'?r.x:r.x+r.w);
+  line(h?r.x:c,h?c:r.y,h?r.x+r.w:c,h?c:r.y+r.h,'OUTDOOR_EDGES',{kind:'open-edge',roomId:r.id,spaceKind:r.outdoorSpace.kind,side,guardStatus:'unknown',reviewStatus:'awaiting-review'});
+ }
  for(const w of BMH.scenePlanGeometry(p.plan,floor).walls){
   const t=w.thickness||.12,x=w.horizontal?w.a:w.axis-t/2,y=w.horizontal?w.axis-t/2:w.a,width=w.horizontal?w.b-w.a:t,depth=w.horizontal?t:w.b-w.a,info={kind:w.kind,roomIds:(w.roomIds||[]).join(','),openingId:w.openingId};
   if(w.kind==='wall')rect(x,y,width,depth,'WALLS',info);

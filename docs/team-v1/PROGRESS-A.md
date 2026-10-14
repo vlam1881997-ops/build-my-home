@@ -114,3 +114,13 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Source `96_vector_pdf.js`: kiểm trước toàn bộ tờ A3 cùng revision và đúng đơn vị m/mm; từ chối revision thiếu/unknown/khác nhau trước khi nạp font/PDF. Chụp chuỗi SVG trước async để caller không thay trang giữa lúc xuất.
 - 3/3 kiểm tra chống trộn revision/khổ/đơn vị đạt Node22. Xuất lại native 3PDF/102trang đạt sau sửa; parser độc lập kiểm PDF/SVG/8DXF/BOQ/quantities cùng revision. Bằng chứng combined-export-validation.json và pdf-revision-tests.log.
 - Chỉ sửa file A, không rà hoặc sửa công việc B. Giữ PR48 Draft; phần không gian ngoài trời A2 chưa được đánh dấu hoàn tất.
+
+## A-only handoff — 14/10, outdoor contract verified
+
+- Active branch `codex/a-massing-20261013`, PR48; last_verified_commit `43a66a9587bedf2dfb1fea756897fac840cc3edc`. Current checkpoint identity comes from git log; exact tested patch hashes are in `evidence/A/outdoor-final-20261014/source-hashes.json`.
+- A2/A3/A4/A6 outdoor source contract is ready_for_integration in the documented scope: top-floor loggia/terrace, flat roof without overhang, explicit customer selection. Open-edge walls/roof/ceiling/slab, A3 detail, DXF millimetres, BOQ missing scope and technical review share one plan/revision. Legacy balcony geometry stays unchanged until explicitly declared.
+- Verification: 160/160 Node22 A tests; 12/12 native desktop/phone cases; six native vector PDF dossiers /208 A3 pages, corresponding SVGs,16 DXFs with independent units/revision/geometry checks. Evidence and reproduction: `evidence/A/outdoor-final-20261014/README.md`. Earlier statements that outdoor support is absent are superseded by this bounded implementation.
+- Source only in A-owned modules/tests; package.json, build script, server, Vercel and B source untouched. No dependency added. Generated dist/node_modules remain outside the commit.
+- Security: pattern scan/manual scoped diff review performed; official Codex Security remains pending missing required preflight capability. Existing npm moderate dev esbuild advisory remains; no high/critical reported.
+- User explicitly deferred B review and A+B integration. Do not inspect B or claim integrated done/G1–G6 closure. A option-picker consumer, final2D–3D/live preview acceptance belong to later integration. Independent A implementation and test handoff in this continuation are complete within the stated scope.
+- next_action: use this A contract/fixtures when the user resumes integration; collect measured site/professional/quote/bank inputs for a real project. No fabricated sources or review. No main merge/deploy.
