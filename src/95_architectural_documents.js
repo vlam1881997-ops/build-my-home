@@ -108,10 +108,13 @@
   const flip=side==='back'||side==='left',point=(x,z)=>({x:ox+(flip?span-x:x)*k,y:oy+(total-z)*k}),box=(x,z,w,h,fill='white',extra='')=>{const a=point(x,z+h),b=point(x+w,z);return rect(Math.min(a.x,b.x),a.y,Math.abs(a.x-b.x),h*k,fill,.22,ink,extra);};let body='';
   for(let f=0;f<l.floors;f++){
    const rooms=B.floorRooms(f),g=B.scenePlanGeometry(p.plan,f),level=B.floorLevel(f),base=level.base;
+   const slabRanges=rooms.flatMap(r=>B.slabPanels(r,B.stairFloorHoles(f)).map(q=>{const a=v.horizontal?q.x:q.y;return [a,a+(v.horizontal?q.w:q.d)];})).sort((a,b)=>a[0]-b[0]),mergedSlabs=[];
+   for(const range of slabRanges){const last=mergedSlabs.at(-1);if(last&&range[0]<=last[1]+.001)last[1]=Math.max(last[1],range[1]);else mergedSlabs.push([...range]);}
+   for(const [a,b]of mergedSlabs)body+=box(a,base,b-a,l.slab,'#e1e4e6','data-elevation-slab="'+f+'"');
    const eligible=g.walls.filter(w=>w.horizontal===v.horizontal&&w.roomIds.length===1&&rooms.some(r=>r.id===w.roomIds[0]&&Math.abs((v.horizontal?(v.near?r.y:r.y+r.h):(v.near?r.x:r.x+r.w))-w.axis)<.001)),xs=[...new Set(eligible.flatMap(w=>[w.a,w.b]))].sort((a,b)=>a-b);
    for(let i=1;i<xs.length;i++){const a=xs[i-1],b=xs[i],mid=(a+b)/2,w=eligible.filter(w=>mid>=w.a&&mid<=w.b).sort((a,b)=>v.near?a.axis-b.axis:b.axis-a.axis)[0];if(!w)continue;
     const color=B.facadeFinishPalette?.().wall||B.finishPalette(w.roomIds[0]).wall||B.houseStyle()?.wall||'#e9e5dc';
-    body+=box(a,base,b-a,l.slab,'#e1e4e6')+box(a,base+l.slab,b-a,level.height-l.slab,color,'fill-opacity=".22"');
+    body+=box(a,base+l.slab,b-a,level.height-l.slab,color,'fill-opacity=".22"');
     if(w.kind!=='wall'){const z=base+l.slab+(w.sill||0),h=w.height;body+=box(a,z,b-a,h,w.kind==='window'?'#e6edf1':'#e6ded1','data-opening-id="'+attr(w.openingId)+'"');const P=point(mid,z),Q=point(mid,z+h);body+=line(P.x,P.y,Q.x,Q.y,.2);if(w.kind==='window'){const c=point(a,z+h*.65),d=point(b,z+h*.65);body+=line(c.x,c.y,d.x,d.y,.17);}body+=text((P.x+Q.x)/2,Q.y-1.2,B.openingCode(p.plan.openings.find(o=>o.id===w.openingId)),2.15,'middle');}
    }
   }
@@ -133,10 +136,11 @@
    const rooms=B.floorRooms(floor),g=B.scenePlanGeometry(p.plan,floor),level=B.floorLevel(floor),base=level.base;
    for(const r of rooms.filter(intersects)){
     for(const q of B.slabPanels(r,B.stairFloorHoles(floor)).filter(intersects))body+=box(axis==='x'?q.y:q.x,base,axis==='x'?q.d:q.w,l.slab,'#646f77','data-section-slab="'+floor+'"');
-    if(floor===l.floors-1)for(const q of B.slabPanels(r,B.stairFloorHoles(floor+1)).filter(intersects))body+=box(axis==='x'?q.y:q.x,base+level.height,axis==='x'?q.d:q.w,l.slab,'#646f77');
+    if(floor===l.floors-1&&r.outdoorSpace?.kind!=='terrace')for(const q of B.slabPanels(r,B.stairFloorHoles(floor+1)).filter(intersects))body+=box(axis==='x'?q.y:q.x,base+level.height,axis==='x'?q.d:q.w,l.slab,'#646f77');
     const u=axis==='x'?r.y:r.x,length=axis==='x'?r.h:r.w,center=point(u+length/2,base+level.height*.51);const fullLabelLines=words(r.name,Math.max(8,Math.floor((length*k-4)/(2.35*.57)))),maxLabelLines=Math.max(1,Math.floor(level.clearHeight*k/3.2)-2),roomCode=B.architecturalRoomSchedule(floor).find(q=>q.id===r.id)?.code||r.id,labelLines=fullLabelLines.length>maxLabelLines?[...fullLabelLines.slice(0,Math.max(0,maxLabelLines-1)),'… '+roomCode]:fullLabelLines;body+='<g data-section-room-id="'+attr(r.id)+'"><title>'+esc(r.name)+'</title>'+labelLines.map((s,i)=>text(center.x,center.y+(i-(labelLines.length-1)/2)*3.2,s,2.35,'middle')).join('')+'</g>';
     if(r.type==='stairs')for(const q of B.stairGeometry(r).filter(intersects))body+=box(axis==='x'?q.y:q.x,base+l.slab+q.base,axis==='x'?q.d:q.w,q.h,'#c8c1b4','data-section-stair="'+attr(r.id)+'"');
     else if(r.type==='elevator'){const A=point(u+.12,base),C=point(u+.12,base+level.height),D=point(u+length-.12,base),E=point(u+length-.12,base+level.height);body+=line(A.x,A.y,C.x,C.y,.3)+line(D.x,D.y,E.x,E.y,.3);if(floor===0){const s=B.elevatorSpec(r),depth=axis==='x'?s.cabinDepth:s.cabinWidth;body+=box(u+(length-depth)/2,base+l.slab,depth,2.1,'#e4ecee','data-section-elevator="'+attr(r.id)+'"');}}
+    else if(r.outdoorSpace?.kind==='terrace'){const H=point(u+length/2,base+level.height*.40);body+='<g data-section-open-air="'+attr(r.id)+'">'+text(H.x,H.y,'Ngoài trời · không trần',2.15,'middle')+'</g>';}
     else{const H=point(u+length/2,base+level.height*.40),a=point(u+.08,base+level.height-l.ceilingDrop),b=point(u+length-.08,base+level.height-l.ceilingDrop);body+=line(a.x,a.y,b.x,b.y,.12,light,'1 .6')+text(H.x,H.y,'Htt '+level.clearHeight.toFixed(3)+' m',2.15,'middle');}
    }
    for(const w of g.walls){if(w.horizontal!==(axis==='x')||cut<w.a||cut>w.b)continue;const x=w.axis-w.thickness/2,height=level.height-l.slab;
@@ -219,6 +223,15 @@
   return B.drawingTablePages(rows,{widths,size:2.35,minHeight:10,height:193,maxRows:20}).map((_,page)=>tableSheet({floor:undefined,page,rows,widths,headers:['Vật liệu','SKU','Quy cách','Khối lượng','Đơn vị','Nguồn','Trạng thái'],code:'KT-VL',title:'BẢNG VẬT LIỆU / NGUỒN',caption:'Khối lượng kiến trúc từ mô hình; kết cấu / MEP chưa có hồ sơ thì giữ unknown. Quy cách và giá cần nguồn.',minHeight:10,maxRows:20}));
  };
  const legacySheets=B.architecturalSheets;
+ B.outdoorSpaceSheet=(r,index=0)=>{
+  const p=planLayout(r.floor),s=r.outdoorSpace,level=B.floorLevel(r.floor);let body=parcelOutline(p);
+  body+=p.box(r.x,r.y,r.w,r.h,'#edf3ee',.25,ink,'data-outdoor-room="'+attr(r.id)+'" data-outdoor-kind="'+attr(s.kind)+'"');
+  for(const side of s.openSides){const h=['north','south'].includes(side),c=h?(side==='north'?r.y:r.y+r.h):(side==='west'?r.x:r.x+r.w),a=p.point(h?r.x:c,h?c:r.y),b=p.point(h?r.x+r.w:c,h?c:r.y+r.h);body+=line(a.x,a.y,b.x,b.y,.6,blue,'2 1');}
+  body+=dim(p.point(r.x,r.y),p.point(r.x+r.w,r.y),-8,Math.round(r.w*1000))+dim(p.point(r.x,r.y),p.point(r.x,r.y+r.h),8,Math.round(r.h*1000));
+  const center=p.point(r.x+r.w/2,r.y+r.h/2);body+=text(center.x,center.y,r.name,3,'middle')+text(center.x,center.y+4,(r.w*r.h).toFixed(2)+' m²',2.5,'middle');
+  const sidebar=groupTitle(330,29,'KHÔNG GIAN NGOÀI TRỜI')+text(330,43,'Tầng '+(r.floor+1)+' · '+s.kind)+text(330,54,'Cốt sàn +'+(level.base+B.resolvedProjectLevels().slab).toFixed(3)+' m')+blockText(330,69,s.kind==='terrace'?'Không mái phía trên; diện tích trần bằng 0.':'Có mái; cạnh nét đứt không có tường kín.',34,2.4)+blockText(330,105,'Lan can: unknown. Thoát nước: unknown. Chống thấm, sàn chịu lực: awaiting-review.',34,2.4)+blockText(330,152,'Nguồn lựa chọn: '+s.sourceReference,34,2.3)+blockText(330,199,'Không tự suy chiều cao lan can, thép, dầm hoặc tải trọng. Cần hồ sơ KTS/KS.',34,2.3);
+  return sheet({code:'KT-NT-'+(index+1),title:r.name.toUpperCase()+' / CẠNH MỞ',scale:p.scale,body,sidebar,caption:'Nét đứt là cạnh mở cần thiết kế bảo vệ, không phải lan can đã được duyệt. Chưa dùng thi công.'});
+ };
  B.architecturalSheets=()=>{
   const previous=legacySheets(),sheets=[{name:'Bìa hồ sơ',svg:B.architecturalCoverSheet()},{name:'Ranh đất / khoảng lùi',svg:B.architecturalSiteSheet()}];
   for(let f=0;f<Number(B.state.project.site.floors);f++){
@@ -231,6 +244,7 @@
   sheets.push({name:'Mặt cắt A–A',svg:B.sectionSvg()},{name:'Mặt cắt B–B',svg:B.architecturalSectionSheet('y')});
   sheets.push(...previous.filter(s=>/data-sheet-code="KT-(CT-|TM-|MAI)/.test(s.svg)));
   sheets.push(...B.architecturalMaterialSheets().map((svg,i)=>({name:'Vật liệu / '+(i+1),svg})),...B.technicalRegisterSheets().map((svg,i)=>({name:'Sổ đầu vào / '+(i+1),svg})));
+  sheets.push(...B.state.project.plan.rooms.filter(B.outdoorRoom).map((r,i)=>({name:'Ngoài trời / '+r.name,svg:B.outdoorSpaceSheet(r,i)})));
   return sheets;
  };
  const current=B.currentDrawingSvg;

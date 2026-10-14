@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "testOnly": true,
+  "units": "m",
+  "source": "Synthetic fixtures for TASK A, based on B W01 prototype dimensions; not a client survey",
+  "planningStatus": "unknown",
+  "northStatus": "unknown",
+  "engineeringStatus": "awaiting-review",
+  "cases": [
+    {"id":"townhouse","site":{"width":5.4,"depth":20,"floors":3,"floorHeights":[3.8,3.4,3.1],"setbackFront":1.5,"setbackRear":0.5,"setbackSide":0},"expectedArea":108},
+    {"id":"wide","site":{"width":14,"depth":20,"floors":2,"floorHeights":[3.8,3.4],"setbackFront":3,"setbackRear":2,"setbackSide":1.5},"expectedArea":280},
+    {"id":"concave","site":{"width":10,"depth":20,"floors":3,"floorHeights":[3.8,3.4,3.1],"setbackFront":0,"setbackRear":0,"setbackSide":0},"vertices":[{"x":0,"y":0},{"x":10,"y":0},{"x":10,"y":12},{"x":7,"y":12},{"x":7,"y":20},{"x":0,"y":20}],"expectedArea":176}
+  ]
+}

@@ -1,14 +1,14 @@
 # Tiến độ AI A — BMH commercial v1
 
-Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 09/10/2026.
+Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 14/10/2026.
 - role: A
 - status: in_progress
-- active_task: A1–A6
-- active_substep: C08 source tích hợp B ce28e327, BOQ/finance/handover và QA native exports đã kiểm; bàn giao để review, giữ các gate thiếu dữ liệu/config/visual ở pending
-- target_branch: codex/a-v1-24
-- actual_branch: codex/a-v1-24
-- source_baseline: 3c7f510d516a0770e79633b64a3896035e162aff
-- last_verified_commit: 137228537bef5d4ab9c82318947d019b55dd5363 (mốc source ghép trước C07/C08; kết quả C08 gắn source hashes trong evidence/A/C08, không dùng SHA này thay cho patch đang kiểm)
+- active_task: A-R1 / A-R2 (gói tiếp tục 13/10; A1/A2 trong manifest hiện hành)
+- active_substep: R2 chia công năng có cửa thực, R3 SVG/DXF/BOQ parity và R5 trả trước đã kiểm trên Node22; native/PDF đã kiểm; chỉ tiếp tục nhiệm vụ A, hoãn rà B và ghép A+B theo yêu cầu 14/10
+- target_branch: codex/a-massing-20261013
+- actual_branch: codex/a-massing-20261013
+- source_baseline: ddf9dfe348263a28148cfbf8ca5132f1d492f8dc (main, PR #47 merged)
+- last_verified_commit: 8dbff47f6f35f61f7443b86a015917687e44b4ee (148 A checks Node22, native6 massing +2 finance và102 trang PDF; evidence/A/R3-R5-native-20261014)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -75,3 +75,52 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 
 - Checkpoint C07 WIP: A1–A6 adapters/test đã có; source chưa nghiệm thu gate. Baseline tested commit 1372285 trước patch; checkpoint mới xem git log.
 - Checkpoint C08 WIP: sửa coverage/privacy/material-PDF/APPID/stress; 457 Node22 checks và native desktop/mobile/export/GLB proof đã có. Hồ sơ TEST-ONLY và HANDOFF-CODEX-A-20261014.md ghi nội dung thực ngày09/10, không nhận nghiệm thu tương lai. Source+progress+evidence nằm trên nhánh A/PR37; gate chưa đóng.
+
+## R1/R2 — tiếp tục từ PR #47, 13/10/2026
+
+- PR #37 đã merge (`42d8653`), không còn Draft đang làm. Main hiện đã qua PR #47 (`ddf9dfe`). Các ghi chú C08/PR37 ở trên là lịch sử, không phải trạng thái PR hiện tại.
+- B `codex/b-facade-depth` đã có checkpoint `778e3fe`: rotation/model bounds/washer/catalogue PR43–47. Giữ nguyên các file B; không làm lại phần đó. W01 A-massing-request còn cần A cấp hình học.
+- Tạo continuation `codex/a-massing-20261013` / `bmh-codex-a-massing` từ PR47, giữ hai worktree A cũ và generated WIP. Checkout dùng sparse cho asset/evidence chưa tải; không xem đây là gói app đầy đủ asset.
+- R1: fixtures TEST-ONLY 5.4×20/3F, 14×20/2F, ranh lõm 176m²; nguồn giả lập được ghi rõ, Bắc/quy hoạch unknown, review awaiting-review. Bộ test nạp envelope/parcel gốc thay vì dùng rectangle stub.
+- R2: tái hiện phòng ngủ nhà phố 3.98×12.38 m. Nguyên nhân bộ packer chia hết chiều sâu dư vào các phòng. Thêm `previewRoomDepthChange` / `applyRoomDepthChange` ở module A đang được đăng ký: khách chọn phòng, chiều sâu và cạnh giữ; xem số đo/diện tích trước–sau, kiểm cửa/lối đi/locks/nội thất, rồi commit qua editor hiện có. Không tự sửa generator hoặc tự áp dụng.
+- Phần nhường ra `unassigned` / `awaiting-review`, giá null/unknown. Chưa tự khai báo loggia, ban công, sàn sân thượng hay kết cấu. Không có geometry store mới.
+- 54/54 kiểm tra component đạt Node24.19.0: ba ranh thực, preview bất biến, apply đúng preview, stale/tamper/locks bị từ chối, giữ phòng/thang/ID/SKU/góc37°/tombstone, undo/redo và lưu/mở lại. Build hiện có đạt. Browser runner đã viết nhưng Chromium cũ bị truncated (ELF thiếu section headers), launch SIGSEGV; chưa chạy được desktop/mobile. Node22 chưa sẵn có trong môi trường này.
+- Thử thêm real-house suite: 66/68 đạt, 2 lỗi ENOENT do asset photographic-provenance và modern-armchair-facing chưa tải trong sparse checkout. Không gọi đây là regression production hay full suite xanh.
+- Codex Security `security-diff-scan`: đọc được skill nhưng reference config-preflight không đọc được và capability scan không có; chưa có báo cáo scan chính thức. Dependency không thay đổi.
+- Next action: B nối hai hook vào UI xem/chọn phương án; A mở rộng phân công năng khoảng trống/stepback theo lựa chọn khách và xác minh A3/DXF/roof/BOQ cùng revision. Khôi phục runtime Node22/browser rồi chạy runner sáu ca; chưa merge/release/production.
+
+## Checkpoint 14/10 — R2 allocation, R3 exports, R5 prepayment
+
+- Base giữ PR48 `833fef7`, main PR47 và B `778e3fe` chưa đổi khi đọc 14/10. Giữ cùng nhánh A, không sửa B.
+- Preview có 4 lựa chọn: chưa phân công năng / làm việc / giặt / kho. Cửa riêng tiếp giáp corridor, chuyển cửa sổ ngoài có danh sách thay đổi; không tự dời phòng theo style. So phương án có assessment/giá provisional, giá nguồn thiếu giữ null.
+- 62/62 kiểm tra Node22.23.0 đạt; build/syntax đạt. Trả trước cuối tháng có nguồn và phí riêng, recast giảm khoản trả/giữ kỳ hạn; thiếu phí không thành0. Đã nối form A5 hiện có, không chạm UI B.
+- Xuất102SVG A3 +8DXF trên3fixture; ezdxf0errors/0fixes, số đo ranh/phòngmm và revisionBOQ khớp. RenderSVG và xem contact sheets/chi tiết; chưa có nativePDF mới.
+- Môi trường Node22 khôi phục được. Chromium cũ bịtruncated; auto-review từ chối tải browserthay thế với lý doquy tắc dùngbrowsercó sẵn. Không tìmđường vòng. Cầnchủsảnphẩm cho phép thay QA browserhỏng trước khi chạy native/PDF.
+- next_action: sau khi được phép khôi phục browser, chạy native6ca vàexportPDF; B nối `compareRoomDepthOptions` / `applyRoomDepthChange`. A tiếp tục hợp đồng không gian ngoài trời/mái/railing theo mộtnguồngeometry, không mô tả việc chia phòng kín là loggia hoàn tất.
+- blocked_inputs: quyền thay browserhỏng, capabilityCodexSecurity, consumerUI/3D B, hồ sơ/quotes/chuyênmôn thực. Không mark COMPLETE, không merge/deploy.
+
+## Checkpoint 14/10 — A-only native/PDF, phạm vi mới của chủ sản phẩm
+
+- Chủ sản phẩm đã cho phép thay Chromium QA hỏng. SHA512 package được xác minh; Chromium133 chạy được. Blocker browser cũ đã được giải quyết, không còn cần xin phép lại.
+- 148/148 kiểm tra A trên Node22.23.0; native desktop/phone6ca massing và2ca A5 form đều đạt. A5 trả trước tháng3 có phí, giảm khoản tháng4 đúng phép tính độc lập; lưu/reload, malformed fee atomic, revision ổn định.
+- 102 trang PDF native pdf-lib (34/33/35) được render toàn bộ; A3/searchable revision/vector đã kiểm. Revision khớp bộ SVG/DXF/BOQ đã xuất, không dữ liệu thật/không signoff.
+- Test tái lập mới: team-a-finance.browser.cjs và team-a-massing-pdf.browser.cjs. Không sửa source production, package/build hoặc file B. Không dùng lượt commercial browser bị ngắt làm bằng chứng hoàn tất.
+- Chỉ làm A từ checkpoint này. Hoãn rà nhiệm vụ B và ghép A+B theo chỉ đạo 14/10; chưa merge/deploy. Các yêu cầu consumer B ở checkpoint trước được giữ làm lịch sử.
+- next_action_A: hoàn thiện hình học/nguồn/review không gian ngoài trời A2, không đổi nhãn phần dư thành loggia; tiếp tục BOQ/phạm vi thiếu và bàn giao A. Giá, Bắc, quy hoạch, kết cấu/MEP không có nguồn giữ unknown/awaiting-review.
+- Remaining gates riêng: semantics ngoài trời chưa xong; Security preflight/capability chưa có; hồ sơ thực chưa cung cấp. Không tuyên bố toàn TASK A đã hoàn thành.
+
+### A3 revision guard — 14/10
+
+- Source `96_vector_pdf.js`: kiểm trước toàn bộ tờ A3 cùng revision và đúng đơn vị m/mm; từ chối revision thiếu/unknown/khác nhau trước khi nạp font/PDF. Chụp chuỗi SVG trước async để caller không thay trang giữa lúc xuất.
+- 3/3 kiểm tra chống trộn revision/khổ/đơn vị đạt Node22. Xuất lại native 3PDF/102trang đạt sau sửa; parser độc lập kiểm PDF/SVG/8DXF/BOQ/quantities cùng revision. Bằng chứng combined-export-validation.json và pdf-revision-tests.log.
+- Chỉ sửa file A, không rà hoặc sửa công việc B. Giữ PR48 Draft; phần không gian ngoài trời A2 chưa được đánh dấu hoàn tất.
+
+## A-only handoff — 14/10, outdoor contract verified
+
+- Active branch `codex/a-massing-20261013`, PR48; last_verified_commit `43a66a9587bedf2dfb1fea756897fac840cc3edc`. Current checkpoint identity comes from git log; exact tested patch hashes are in `evidence/A/outdoor-final-20261014/source-hashes.json`.
+- A2/A3/A4/A6 outdoor source contract is ready_for_integration in the documented scope: top-floor loggia/terrace, flat roof without overhang, explicit customer selection. Open-edge walls/roof/ceiling/slab, A3 detail, DXF millimetres, BOQ missing scope and technical review share one plan/revision. Legacy balcony geometry stays unchanged until explicitly declared.
+- Verification: 160/160 Node22 A tests; 12/12 native desktop/phone cases; six native vector PDF dossiers /208 A3 pages, corresponding SVGs,16 DXFs with independent units/revision/geometry checks. Evidence and reproduction: `evidence/A/outdoor-final-20261014/README.md`. Earlier statements that outdoor support is absent are superseded by this bounded implementation.
+- Source only in A-owned modules/tests; package.json, build script, server, Vercel and B source untouched. No dependency added. Generated dist/node_modules remain outside the commit.
+- Security: pattern scan/manual scoped diff review performed; official Codex Security remains pending missing required preflight capability. Existing npm moderate dev esbuild advisory remains; no high/critical reported.
+- User explicitly deferred B review and A+B integration. Do not inspect B or claim integrated done/G1–G6 closure. A option-picker consumer, final2D–3D/live preview acceptance belong to later integration. Independent A implementation and test handoff in this continuation are complete within the stated scope.
+- next_action: use this A contract/fixtures when the user resumes integration; collect measured site/professional/quote/bank inputs for a real project. No fabricated sources or review. No main merge/deploy.
