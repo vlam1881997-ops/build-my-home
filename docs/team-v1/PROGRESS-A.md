@@ -4,11 +4,11 @@ Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 14/10/2026.
 - role: A
 - status: in_progress
 - active_task: A-R1 / A-R2 (gói tiếp tục 13/10; A1/A2 trong manifest hiện hành)
-- active_substep: R2 chia công năng có cửa thực, R3 SVG/DXF/BOQ parity và R5 trả trước đã kiểm trên Node22; native/PDF bị chặn do browser hỏng và download bị auto-review từ chối
+- active_substep: R2 chia công năng có cửa thực, R3 SVG/DXF/BOQ parity và R5 trả trước đã kiểm trên Node22; native/PDF đã kiểm; chỉ tiếp tục nhiệm vụ A, hoãn rà B và ghép A+B theo yêu cầu 14/10
 - target_branch: codex/a-massing-20261013
 - actual_branch: codex/a-massing-20261013
 - source_baseline: ddf9dfe348263a28148cfbf8ca5132f1d492f8dc (main, PR #47 merged)
-- last_verified_commit: 833fef77024bed16522035985e04e31314db1e38 (checkpoint PR48 trước patch 14/10; source hashes và 62 Node22 checks tại evidence/A/R2-R5-20261014)
+- last_verified_commit: 8dbff47f6f35f61f7443b86a015917687e44b4ee (148 A checks Node22, native6 massing +2 finance và102 trang PDF; evidence/A/R3-R5-native-20261014)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -98,3 +98,13 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Môi trường Node22 khôi phục được. Chromium cũ bịtruncated; auto-review từ chối tải browserthay thế với lý doquy tắc dùngbrowsercó sẵn. Không tìmđường vòng. Cầnchủsảnphẩm cho phép thay QA browserhỏng trước khi chạy native/PDF.
 - next_action: sau khi được phép khôi phục browser, chạy native6ca vàexportPDF; B nối `compareRoomDepthOptions` / `applyRoomDepthChange`. A tiếp tục hợp đồng không gian ngoài trời/mái/railing theo mộtnguồngeometry, không mô tả việc chia phòng kín là loggia hoàn tất.
 - blocked_inputs: quyền thay browserhỏng, capabilityCodexSecurity, consumerUI/3D B, hồ sơ/quotes/chuyênmôn thực. Không mark COMPLETE, không merge/deploy.
+
+## Checkpoint 14/10 — A-only native/PDF, phạm vi mới của chủ sản phẩm
+
+- Chủ sản phẩm đã cho phép thay Chromium QA hỏng. SHA512 package được xác minh; Chromium133 chạy được. Blocker browser cũ đã được giải quyết, không còn cần xin phép lại.
+- 148/148 kiểm tra A trên Node22.23.0; native desktop/phone6ca massing và2ca A5 form đều đạt. A5 trả trước tháng3 có phí, giảm khoản tháng4 đúng phép tính độc lập; lưu/reload, malformed fee atomic, revision ổn định.
+- 102 trang PDF native pdf-lib (34/33/35) được render toàn bộ; A3/searchable revision/vector đã kiểm. Revision khớp bộ SVG/DXF/BOQ đã xuất, không dữ liệu thật/không signoff.
+- Test tái lập mới: team-a-finance.browser.cjs và team-a-massing-pdf.browser.cjs. Không sửa source production, package/build hoặc file B. Không dùng lượt commercial browser bị ngắt làm bằng chứng hoàn tất.
+- Chỉ làm A từ checkpoint này. Hoãn rà nhiệm vụ B và ghép A+B theo chỉ đạo 14/10; chưa merge/deploy. Các yêu cầu consumer B ở checkpoint trước được giữ làm lịch sử.
+- next_action_A: hoàn thiện hình học/nguồn/review không gian ngoài trời A2, không đổi nhãn phần dư thành loggia; tiếp tục BOQ/phạm vi thiếu và bàn giao A. Giá, Bắc, quy hoạch, kết cấu/MEP không có nguồn giữ unknown/awaiting-review.
+- Remaining gates riêng: semantics ngoài trời chưa xong; Security preflight/capability chưa có; hồ sơ thực chưa cung cấp. Không tuyên bố toàn TASK A đã hoàn thành.

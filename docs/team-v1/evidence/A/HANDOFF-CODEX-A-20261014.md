@@ -44,3 +44,7 @@ A sở hữu các `src/team-a-*`, `tests/team-a-*`, evidence/A, state/measuremen
 5. C06/B5: SQLcloud/media/provider/payment/merchant và declaredNode22 vs VercelNode24 cần chủ quyền cấu hình/điều phối chốt; không gọi dịch vụ chưa bật là hoạt động. B6 và KTS/KS/customer signoff phải có bằng chứng thực cùng revision; G1–G6 còn pending phần này.
 
 Không merge main hoặc deploy production trong checkpoint. Tiếp tục đọc TASK-A/PROGRESS-A/INTEGRATION/contracts và branch head trước sửa; khi có quyền preview hoặc nguồn professional thì kiểm phần tương ứng, không chạy lại toàn bộ test nếu source không đổi và không phát sinh nghi ngờ mới.
+
+## Bổ sung thực tế 14/10 — PR48, chỉ phần A
+
+Baseline kiểm `8dbff47`; bằng chứng `R3-R5-native-20261014/`. 148 A checks Node22 +6 native massing +2 A5 form đạt; 102 trang PDF vector A3 cùng revision SVG/DXF/BOQ, render toàn bộ. Chưa nghiệm thu loggia/sân thượng hoặc Security chính thức. Chỉ bàn giao phần A; rà B và ghép A+B được chủ sản phẩm hoãn ngày14/10. Không merge/deploy, không đánh dấu toàn bộ hoàn thành.
