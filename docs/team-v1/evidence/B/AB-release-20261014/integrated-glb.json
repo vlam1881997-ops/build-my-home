@@ -1,0 +1,58 @@
+[
+  {
+    "device": "desktop",
+    "glb": {
+      "bytes": 4957136,
+      "triangles": 13645,
+      "measured": {
+        "width": 1.1991113346566378,
+        "height": 0.36924968659877777,
+        "depth": 1.1996567556885558
+      },
+      "profiles": [
+        "dark-walnut",
+        "sand-travertine"
+      ],
+      "revision": "3E77B02E-741638A5-AI4-RH2",
+      "embeddedImages": 16,
+      "units": "metres"
+    },
+    "focus": {
+      "maxFrameEdge": 0.7572543153913264,
+      "sameRenderer": true,
+      "unchangedFurniture": true
+    },
+    "delayedAssetWait": true,
+    "failedAssetNoDownload": true,
+    "buttonRestored": true,
+    "errors": []
+  },
+  {
+    "device": "phone",
+    "glb": {
+      "bytes": 4957136,
+      "triangles": 13645,
+      "measured": {
+        "width": 1.1991113346566378,
+        "height": 0.36924968659877777,
+        "depth": 1.1996567556885558
+      },
+      "profiles": [
+        "dark-walnut",
+        "sand-travertine"
+      ],
+      "revision": "3E77B02E-741638A5-AI4-RH2",
+      "embeddedImages": 16,
+      "units": "metres"
+    },
+    "focus": {
+      "maxFrameEdge": 0.8810211126013393,
+      "sameRenderer": true,
+      "unchangedFurniture": true
+    },
+    "delayedAssetWait": true,
+    "failedAssetNoDownload": true,
+    "buttonRestored": true,
+    "errors": []
+  }
+]

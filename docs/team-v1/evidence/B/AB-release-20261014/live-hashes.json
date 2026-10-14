@@ -1,0 +1,16 @@
+[
+  {
+    "path": "app.js",
+    "status": 200,
+    "matches": true,
+    "remoteSha256": "0174a0243cad109790ea260bb8c81c4a7b7a01286c90286047fff89c526f2d61",
+    "localSha256": "0174a0243cad109790ea260bb8c81c4a7b7a01286c90286047fff89c526f2d61"
+  },
+  {
+    "path": "styles.css",
+    "status": 200,
+    "matches": true,
+    "remoteSha256": "3328a2b4731c15cbbafaff71c379970f09fb813359be8af64d66973bd1d03bc5",
+    "localSha256": "3328a2b4731c15cbbafaff71c379970f09fb813359be8af64d66973bd1d03bc5"
+  }
+]

@@ -1,0 +1,372 @@
+(node:31) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# (node:38) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: presentation preserves measured buffers and colour selections; export restores opaque real walls
+ok 1 - presentation preserves measured buffers and colour selections; export restores opaque real walls
+  ---
+  duration_ms: 35.094665
+  type: 'test'
+  ...
+# Subtest: cutaway outlines and caps stop at the viewing cut while source wall height is retained
+ok 2 - cutaway outlines and caps stop at the viewing cut while source wall height is retained
+  ---
+  duration_ms: 13.310192
+  type: 'test'
+  ...
+# Subtest: batching repetitive rug details preserves triangle count, world bounds and material
+ok 3 - batching repetitive rug details preserves triangle count, world bounds and material
+  ---
+  duration_ms: 10.931091
+  type: 'test'
+  ...
+# Subtest: room inspection cannot reuse a selected room from another floor or a removed room
+ok 4 - room inspection cannot reuse a selected room from another floor or a removed room
+  ---
+  duration_ms: 1.894767
+  type: 'test'
+  ...
+# Subtest: 3D traceability names the chosen style, measured revision and material bindings without claiming engineering approval
+ok 5 - 3D traceability names the chosen style, measured revision and material bindings without claiming engineering approval
+  ---
+  duration_ms: 2.787918
+  type: 'test'
+  ...
+# Subtest: traceability excludes missing profiles, wrong surface roles and deleted rooms
+ok 6 - traceability excludes missing profiles, wrong surface roles and deleted rooms
+  ---
+  duration_ms: 4.67942
+  type: 'test'
+  ...
+# Subtest: showroom uses canonical price evidence, distinguishes missing from explicit zero and excludes expired prices
+ok 7 - showroom uses canonical price evidence, distinguishes missing from explicit zero and excludes expired prices
+  ---
+  duration_ms: 3.208826
+  type: 'test'
+  ...
+# Subtest: visual navigation retains every route and does not claim a successful save
+ok 8 - visual navigation retains every route and does not claim a successful save
+  ---
+  duration_ms: 3.518023
+  type: 'test'
+  ...
+# Subtest: look, wall view, room and light preferences survive the real loader schema
+ok 9 - look, wall view, room and light preferences survive the real loader schema
+  ---
+  duration_ms: 20.357696
+  type: 'test'
+  ...
+# Subtest: an image that finishes encoding after a look change is rejected
+ok 10 - an image that finishes encoding after a look change is rejected
+  ---
+  duration_ms: 16.407669
+  type: 'test'
+  ...
+# Subtest: Architect3D serializes the measured height of each floor in centimetres
+ok 11 - Architect3D serializes the measured height of each floor in centimetres
+  ---
+  duration_ms: 1.973546
+  type: 'test'
+  ...
+# Subtest: facade styles change profiles without changing measured rooms, openings or room finishes
+ok 12 - facade styles change profiles without changing measured rooms, openings or room finishes
+  ---
+  duration_ms: 13.313256
+  type: 'test'
+  ...
+# Subtest: furniture close-up removes the front-wall veil only in the viewer and restores automatically
+ok 13 - furniture close-up removes the front-wall veil only in the viewer and restores automatically
+  ---
+  duration_ms: 11.946037
+  type: 'test'
+  ...
+# (node:39) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: townhouse: real parcel/envelope, explicit depth preview, apply, history and reload
+ok 14 - townhouse: real parcel/envelope, explicit depth preview, apply, history and reload
+  ---
+  duration_ms: 214.74346
+  type: 'test'
+  ...
+# Subtest: wide: real parcel/envelope, explicit depth preview, apply, history and reload
+ok 15 - wide: real parcel/envelope, explicit depth preview, apply, history and reload
+  ---
+  duration_ms: 98.12233
+  type: 'test'
+  ...
+# Subtest: concave: real parcel/envelope, explicit depth preview, apply, history and reload
+ok 16 - concave: real parcel/envelope, explicit depth preview, apply, history and reload
+  ---
+  duration_ms: 214.170841
+  type: 'test'
+  ...
+# Subtest: invalid dimensions, room/floor/shared-wall locks, stale and tampered previews are atomic
+ok 17 - invalid dimensions, room/floor/shared-wall locks, stale and tampered previews are atomic
+  ---
+  duration_ms: 36.640615
+  type: 'test'
+  ...
+# Subtest: authored furniture identity, 37-degree angle, SKU and tombstone survive one translation
+ok 18 - authored furniture identity, 37-degree angle, SKU and tombstone survive one translation
+  ---
+  duration_ms: 36.298888
+  type: 'test'
+  ...
+# Subtest: townhouse: explicit allocation has its own corridor door and preserves total area
+ok 19 - townhouse: explicit allocation has its own corridor door and preserves total area
+  ---
+  duration_ms: 393.617703
+  type: 'test'
+  ...
+# Subtest: wide: explicit allocation has its own corridor door and preserves total area
+ok 20 - wide: explicit allocation has its own corridor door and preserves total area
+  ---
+  duration_ms: 402.862171
+  type: 'test'
+  ...
+# Subtest: concave: explicit allocation has its own corridor door and preserves total area
+ok 21 - concave: explicit allocation has its own corridor door and preserves total area
+  ---
+  duration_ms: 798.104477
+  type: 'test'
+  ...
+# Subtest: unsupported, undersized or duplicate allocation is rejected without changing state
+ok 22 - unsupported, undersized or duplicate allocation is rejected without changing state
+  ---
+  duration_ms: 119.906754
+  type: 'test'
+  ...
+# (node:41) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: townhouse loggia: measured open edges, roof, quantities, drawings, history and persistence
+ok 23 - townhouse loggia: measured open edges, roof, quantities, drawings, history and persistence
+  ---
+  duration_ms: 2000.49483
+  type: 'test'
+  ...
+# Subtest: townhouse terrace: measured open edges, roof, quantities, drawings, history and persistence
+ok 24 - townhouse terrace: measured open edges, roof, quantities, drawings, history and persistence
+  ---
+  duration_ms: 1605.324468
+  type: 'test'
+  ...
+# Subtest: wide loggia: measured open edges, roof, quantities, drawings, history and persistence
+ok 25 - wide loggia: measured open edges, roof, quantities, drawings, history and persistence
+  ---
+  duration_ms: 2147.912746
+  type: 'test'
+  ...
+# Subtest: wide terrace: measured open edges, roof, quantities, drawings, history and persistence
+ok 26 - wide terrace: measured open edges, roof, quantities, drawings, history and persistence
+  ---
+  duration_ms: 2162.045784
+  type: 'test'
+  ...
+# Subtest: concave loggia: measured open edges, roof, quantities, drawings, history and persistence
+ok 27 - concave loggia: measured open edges, roof, quantities, drawings, history and persistence
+  ---
+  duration_ms: 3365.243416
+  type: 'test'
+  ...
+# Subtest: concave terrace: measured open edges, roof, quantities, drawings, history and persistence
+ok 28 - concave terrace: measured open edges, roof, quantities, drawings, history and persistence
+  ---
+  duration_ms: 3968.950077
+  type: 'test'
+  ...
+# Subtest: outdoor requires explicit source, supported roof and free exterior edge; invalid/locked proposals are atomic
+ok 29 - outdoor requires explicit source, supported roof and free exterior edge; invalid/locked proposals are atomic
+  ---
+  duration_ms: 29.869578
+  type: 'test'
+  ...
+# Subtest: legacy balcony retains its original geometry until an explicit outdoor declaration, including locks and history
+ok 30 - legacy balcony retains its original geometry until an explicit outdoor declaration, including locks and history
+  ---
+  duration_ms: 94.110044
+  type: 'test'
+  ...
+# Subtest: outdoor specialist document is source/reviewer/revision checked and becomes stale after a design change
+ok 31 - outdoor specialist document is source/reviewer/revision checked and becomes stale after a design change
+  ---
+  duration_ms: 1282.100039
+  type: 'test'
+  ...
+# (node:46) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: end-month prepayment: independent equal-principal reconciliation and fee charged once
+ok 32 - end-month prepayment: independent equal-principal reconciliation and fee charged once
+  ---
+  duration_ms: 45.257852
+  type: 'test'
+  ...
+# Subtest: annuity resets after prepayment and again at supplied rate phase
+ok 33 - annuity resets after prepayment and again at supplied rate phase
+  ---
+  duration_ms: 10.299755
+  type: 'test'
+  ...
+# Subtest: draws and grace retain their convention; missing fee is unknown; malformed/overpaid terms reject
+ok 34 - draws and grace retain their convention; missing fee is unknown; malformed/overpaid terms reject
+  ---
+  duration_ms: 10.329901
+  type: 'test'
+  ...
+# Subtest: scenario persists without changing design revision; cash flow includes repayment and fee once
+ok 35 - scenario persists without changing design revision; cash flow includes repayment and fee once
+  ---
+  duration_ms: 22.506277
+  type: 'test'
+  ...
+# (node:57) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: export waits for models and for textures enqueued by those models
+ok 36 - export waits for models and for textures enqueued by those models
+  ---
+  duration_ms: 4.383403
+  type: 'test'
+  ...
+# Subtest: failed model prevents export while failed texture explicitly marks fallback
+ok 37 - failed model prevents export while failed texture explicitly marks fallback
+  ---
+  duration_ms: 3.416249
+  type: 'test'
+  ...
+# Subtest: hanging network releases export and a replaced project cancels promptly
+ok 38 - hanging network releases export and a replaced project cancels promptly
+  ---
+  duration_ms: 19.000792
+  type: 'test'
+  ...
+# Subtest: GLB directional and spot lights retain their world-space aim
+ok 39 - GLB directional and spot lights retain their world-space aim
+  ---
+  duration_ms: 6.994223
+  type: 'test'
+  ...
+# (node:58) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: C01 absent refuses durable writes rather than creating a disconnected store
+ok 40 - C01 absent refuses durable writes rather than creating a disconnected store
+  ---
+  duration_ms: 89.582477
+  type: 'test'
+  ...
+# Subtest: 37-degree pose uses rotated footprint, preserves identity/materials, undo/redo and C01 reload
+ok 41 - 37-degree pose uses rotated footprint, preserves identity/materials, undo/redo and C01 reload
+  ---
+  duration_ms: 47.093468
+  type: 'test'
+  ...
+# Subtest: deleted generated item is tombstoned, not regenerated by style or JSON reload
+ok 42 - deleted generated item is tombstoned, not regenerated by style or JSON reload
+  ---
+  duration_ms: 27.29027
+  type: 'test'
+  ...
+# Subtest: true angled footprint rejects wall crossing and collision without consuming history
+ok 43 - true angled footprint rejects wall crossing and collision without consuming history
+  ---
+  duration_ms: 26.309772
+  type: 'test'
+  ...
+# Subtest: door swept zone, fixture and corridor are kept clear
+ok 44 - door swept zone, fixture and corridor are kept clear
+  ---
+  duration_ms: 9.209245
+  type: 'test'
+  ...
+# Subtest: item, room and floor locks reject mutation; item unlock works
+ok 45 - item, room and floor locks reject mutation; item unlock works
+  ---
+  duration_ms: 13.264071
+  type: 'test'
+  ...
+# Subtest: room translation is atomic and cannot resize through authored furniture
+ok 46 - room translation is atomic and cannot resize through authored furniture
+  ---
+  duration_ms: 10.756276
+  type: 'test'
+  ...
+# Subtest: customer export carries same pose, tombstones and item material references without finance/account fields
+ok 47 - customer export carries same pose, tombstones and item material references without finance/account fields
+  ---
+  duration_ms: 18.719106
+  type: 'test'
+  ...
+# Subtest: per-item generic material is resolved by renderer and export without dropping SKU; other items and style remain independent
+ok 48 - per-item generic material is resolved by renderer and export without dropping SKU; other items and style remain independent
+  ---
+  duration_ms: 18.403318
+  type: 'test'
+  ...
+# Subtest: left/right quick rotation shares history, locks, footprint and normalized stored angles
+ok 49 - left/right quick rotation shares history, locks, footprint and normalized stored angles
+  ---
+  duration_ms: 15.609361
+  type: 'test'
+  ...
+# Subtest: plan direction marks follow the actual model front at arbitrary stored angles
+ok 50 - plan direction marks follow the actual model front at arbitrary stored angles
+  ---
+  duration_ms: 10.845081
+  type: 'test'
+  ...
+# Subtest: actual product dimensions update the same record, layout and history, rejecting wall crossings
+ok 51 - actual product dimensions update the same record, layout and history, rejecting wall crossings
+  ---
+  duration_ms: 20.555936
+  type: 'test'
+  ...
+# Subtest: 24 styles retain the customer model, measured dimensions, arbitrary facing and chosen material
+ok 52 - 24 styles retain the customer model, measured dimensions, arbitrary facing and chosen material
+  ---
+  duration_ms: 35.638509
+  type: 'test'
+  ...
+# Subtest: explicit detailed chair keeps the selected geometry across all 24 styles and preserves the customer snapshot
+ok 53 - explicit detailed chair keeps the selected geometry across all 24 styles and preserves the customer snapshot
+  ---
+  duration_ms: 32.894987
+  type: 'test'
+  ...
+# Subtest: Architect3D export keeps independently edited dimensions and identity
+ok 54 - Architect3D export keeps independently edited dimensions and identity
+  ---
+  duration_ms: 8.563168
+  type: 'test'
+  ...
+# Subtest: catalogue shows measured defaults and provenance without changing customer furniture
+ok 55 - catalogue shows measured defaults and provenance without changing customer furniture
+  ---
+  duration_ms: 27.98632
+  type: 'test'
+  ...
+# Subtest: explicit detailed table keeps the selected geometry across all 24 styles and preserves the customer snapshot
+ok 56 - explicit detailed table keeps the selected geometry across all 24 styles and preserves the customer snapshot
+  ---
+  duration_ms: 37.069855
+  type: 'test'
+  ...
+# Subtest: table stone override is isolated, durable across 24 styles and resettable without losing SKU
+ok 57 - table stone override is isolated, durable across 24 styles and resettable without losing SKU
+  ---
+  duration_ms: 41.500139
+  type: 'test'
+  ...
+# Subtest: model-specific controls omit inapplicable finishes
+ok 58 - model-specific controls omit inapplicable finishes
+  ---
+  duration_ms: 4.979434
+  type: 'test'
+  ...
+1..58
+# tests 58
+# suites 0
+# pass 58
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 16824.391114
