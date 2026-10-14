@@ -124,7 +124,7 @@ BMH.sceneMaterialTexture = (THREE, scene, kind, channel='color') => {
 
 BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
   const cache = scene.userData.finishMaterials ||= new Map();
-  const key = JSON.stringify([finish.wall, finish.floor, finish.accent, finish.fabric, finish.surface,finish.pillow,finish.rug,finish.shape,finish.table,finish.visualMaterials]);
+  const key = JSON.stringify([finish.wall, finish.floor, finish.accent, finish.fabric, finish.surface,finish.pillow,finish.rug,finish.shape,finish.table,finish.visualMaterials,finish.stoneVisualMaterial]);
   if (cache.has(key)) return cache.get(key);
   const texture=(kind,channel='color')=>BMH.sceneMaterialTexture(THREE,scene,kind,channel);
   const make = (color, roughness, kind, scale) => {
@@ -173,6 +173,8 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
    if(profile.kind==='velvet'){const physical=new THREE.MeshPhysicalMaterial({color:material.color.clone(),map:material.map,normalMap:material.normalMap,roughnessMap:material.roughnessMap,roughness:material.roughness,sheen:.6,sheenRoughness:.85,sheenColor:finish.fabric||profile.color});physical.normalScale.copy(material.normalScale);physical.userData={...material.userData};material.dispose();replace(target,physical);}else replace(target,material);
    if(role==='accent')replace('slattedWood',make(finish.accent||profile.color,profile.roughness,profile.kind==='wood'?'woodVertical':profile.kind,profile.scale));
   }
+  const stoneProfile=BMH.VISUAL_MATERIALS?.find(p=>p.id===finish.stoneVisualMaterial&&p.role==='floor'&&p.surface==='stone');
+  if(stoneProfile){const material=make(stoneProfile.color,stoneProfile.roughness,stoneProfile.kind,stoneProfile.scale);material.normalScale?.setScalar(stoneProfile.normalStrength);material.userData.visualMaterial=stoneProfile.id;replace('stone',material);}
   for (const material of Object.values(materials)) if(material.isMaterial)material.envMapIntensity = BMH.state?.ui?.sceneTheme === 'night' ? .3 : .65;
   for(const [slot,material] of Object.entries(materials))if(material?.isMaterial)material.userData.finishSlot=slot;
   materials.floor.userData.finishSlot='floor';
@@ -367,6 +369,7 @@ BMH.createSceneFoliage=(THREE,dimensions,material,count=48)=>{
 
 BMH.createRoomAsset = (model, d, THREE, m) => {
   const selectedModel=model;if(model==='loungeChairModern')model='loungeChair';
+  if(model==='tableCoffeeModern')model='tableCoffee';
   const supported = /^(bedDouble|bedSingle|loungeDesignSofa|loungeChair|tableCoffee|table|desk|chair|chairDesk|cabinetTelevision|televisionModern|kitchenSink|kitchenStove|kitchenFridge|bookcaseClosedWide|cabinetBed|pottedPlant|washingMachine|bathroomSink|toilet|shower|sideTable|floorLamp)$/;
   if (!supported.test(model) || !d || ![d.w,d.h,d.d].every(v => Number.isFinite(v) && v > 0)) return null;
   const root = new THREE.Group();

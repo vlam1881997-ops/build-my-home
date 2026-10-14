@@ -141,7 +141,8 @@
   for(const o of st.walls){const m=o.material,patch=materialPatches.get(m);if(!patch)continue;let alpha=1;
    if(ui.modelWalls==='auto'||ui.sceneExploded){const ids=o.userData.roomIds||[ancestor(o,'roomId')].filter(Boolean),rooms=ids.map(id=>B.state.project.plan.rooms.find(r=>r.id===id)).filter(Boolean),exterior=rooms.length===1,r=rooms[0];
     let front=true;if(r&&o.userData.wallAxis){const axis=o.userData.wallAxis,center=axis==='x'?r.x+r.w/2-site.width/2:r.y+r.h/2-site.depth/2,wall=o.userData.wallCoordinate-(axis==='x'?site.width:site.depth)/2,cam=s.camera.position[axis];front=(wall-center)*(cam-wall)>0;}
-    alpha=exterior?(front?.16:.86):.44;
+    const closeup=s.scene.userData.furnitureCloseup&&ui.designView==='room'&&ui.roomCamera!=='inside';
+    alpha=exterior?(front?(closeup?0:.16):(closeup?1:.86)):.44;
    }
    patch.alpha.value=alpha;
   }

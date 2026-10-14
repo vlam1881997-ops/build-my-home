@@ -255,6 +255,18 @@
       "sku": null
     },
     {
+      "id": "tableCoffeeModern",
+      "dimensionsMetres": {
+        "w": 1.1991113424301147,
+        "h": 0.3692496716976166,
+        "d": 1.1996567845344543
+      },
+      "source": "assets/interior/models/modern-coffee-table.glb",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
       "id": "sideTable",
       "dimensionsMetres": {
         "w": 0.4,

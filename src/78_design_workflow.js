@@ -35,6 +35,7 @@ document.addEventListener('pointerdown',e=>{
 // Furniture dimensions are measured from the vendored CC0 GLBs, in metres.
 BMH.FURNITURE_DIMENSIONS={"bedDouble": {"w": 1.912, "h": 0.75, "d": 2.25}, "bedSingle": {"w": 1.142, "h": 0.75, "d": 2.25}, "loungeDesignSofa": {"w": 2.24, "h": 0.8, "d": 0.82}, "loungeChair": {"w": 0.98, "h": 0.92, "d": 0.82}, "tableCoffee": {"w": 1.322, "h": 0.46, "d": 0.8}, "table": {"w": 1.683, "h": 0.6535, "d": 0.8947}, "chair": {"w": 0.4, "h": 0.94, "d": 0.4}, "cabinetTelevision": {"w": 1.6, "h": 0.62, "d": 0.5}, "televisionModern": {"w": 1.3696, "h": 0.9095, "d": 0.2568}, "kitchenSink": {"w": 0.86, "h": 0.98, "d": 0.9}, "kitchenStove": {"w": 0.86, "h": 0.9, "d": 0.9}, "kitchenFridge": {"w": 0.86, "h": 1.84, "d": 0.5839}, "bathroomSink": {"w": 0.68, "h": 1.12, "d": 0.58}, "toilet": {"w": 0.6251, "h": 0.9019, "d": 0.9544}, "shower": {"w": 1.1236, "h": 2.1881, "d": 1.1636}, "bookcaseClosedWide": {"w": 1.6, "h": 1.58, "d": 0.5}, "desk": {"w": 1.469, "h": 0.7688, "d": 0.7846}, "chairDesk": {"w": 0.6699, "h": 1.2152, "d": 0.6286}, "pottedPlant": {"w": 0.4241, "h": 1.308, "d": 0.4829}, "cabinetBed": {"w": 0.532, "h": 0.4664, "d": 0.43}};
 BMH.FURNITURE_DIMENSIONS.loungeChairModern={w:.8203444183,h:1.0228520567,d:.9865616858};
+BMH.FURNITURE_DIMENSIONS.tableCoffeeModern={w:1.1991113424301147,h:.3692496716976166,d:1.1996567845344543};
 BMH.FURNITURE_DIMENSIONS.sideTable={w:.40,h:.65,d:.40};
 BMH.FURNITURE_DIMENSIONS.floorLamp={w:.40,h:1.62,d:.40};
 BMH.FURNITURE_DIMENSIONS.washingMachine={w:.60,h:.85,d:.65};
@@ -95,7 +96,7 @@ const workflowContext=BMH.aiContext;BMH.aiContext=options=>{const c=workflowCont
 BMH.furnitureModelCache=new Map();
 BMH.loadFurnitureModel=model=>{
  if(!BMH.furnitureLoaderPromise)BMH.furnitureLoaderPromise=Promise.all([import('./vendor/three/loaders/GLTFLoader.js'),import('./vendor/three/loaders/DRACOLoader.js')]).then(([g,d])=>{const decoder=new d.DRACOLoader().setDecoderPath('assets/architect3d/draco/').setDecoderConfig({type:'wasm'}).setWorkerLimit(2);return new g.GLTFLoader().setDRACOLoader(decoder);}).catch(e=>{BMH.furnitureLoaderPromise=null;throw e;});
- if(!BMH.furnitureModelCache.has(model))BMH.furnitureModelCache.set(model,BMH.furnitureLoaderPromise.then(loader=>loader.loadAsync(model==='modern-armchair'?'assets/interior/models/modern-armchair-facing.glb':'assets/architect3d/models/'+model+'.glb')).then(g=>g.scene).catch(e=>{BMH.furnitureModelCache.delete(model);throw e;}));
+ if(!BMH.furnitureModelCache.has(model))BMH.furnitureModelCache.set(model,BMH.furnitureLoaderPromise.then(loader=>loader.loadAsync(model==='modern-coffee-table'?'assets/interior/models/modern-coffee-table.glb':model==='modern-armchair'?'assets/interior/models/modern-armchair-facing.glb':'assets/architect3d/models/'+model+'.glb')).then(g=>g.scene).catch(e=>{BMH.furnitureModelCache.delete(model);throw e;}));
  return BMH.furnitureModelCache.get(model);
 };
 BMH.replaceSceneFurniture=(group,model,THREE,scene)=>{
@@ -109,12 +110,12 @@ BMH.replaceSceneFurniture=(group,model,THREE,scene)=>{
 };
 // Licensed detailed geometry is a visual replacement inside the SAME measured
 // furniture node. Preserve IDs, exact pose/size, semantic finishes and fallback.
-BMH.detailedFurnitureAsset=(item,roomId)=>item.model==='loungeChairModern'?'modern-armchair':item.model==='loungeChair'&&['warm-oak','nordic-light','mid-century','loft-leather','urban-stone','coastal'].includes(BMH.interiorCollection?.(roomId)?.id)?'modern-armchair':null;
+BMH.detailedFurnitureAsset=(item,roomId)=>item.model==='tableCoffeeModern'?'modern-coffee-table':item.model==='loungeChairModern'?'modern-armchair':item.model==='loungeChair'&&['warm-oak','nordic-light','mid-century','loft-leather','urban-stone','coastal'].includes(BMH.interiorCollection?.(roomId)?.id)?'modern-armchair':null;
 BMH.upgradeMeasuredFurniture=(group,asset,THREE,scene)=>{
  const task=BMH.loadFurnitureModel(asset).then(source=>{
   if(scene.userData.disposed||!group.parent||BMH.studio3d?.scene!==scene)return false;
   const item=group.userData.placement,finish=BMH.furnitureFinishPalette?.(item)||BMH.finishPalette(group.userData.roomId),mats=BMH.sceneAssetMaterials(THREE,scene,finish),root=source.clone(true),size=item.size||{width:BMH.FURNITURE_DIMENSIONS[item.model].w,height:BMH.FURNITURE_DIMENSIONS[item.model].h,depth:BMH.FURNITURE_DIMENSIONS[item.model].d};
-  root.traverse(mesh=>{if(!mesh.isMesh)return;mesh.geometry=mesh.geometry.clone();const slot=mesh.material.name==='wood'?'wood':'fabric';mesh.material=mats[slot];mesh.userData.finishSlot=slot;mesh.castShadow=mesh.receiveShadow=true;});
+  root.traverse(mesh=>{if(!mesh.isMesh)return;mesh.geometry=mesh.geometry.clone();const slot=mesh.material.name==='wood'?'wood':mesh.material.name==='stone'?'stone':'fabric';mesh.material=mats[slot];mesh.userData.finishSlot=slot;mesh.castShadow=mesh.receiveShadow=true;});
   root.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(root),extent=bounds.getSize(new THREE.Vector3());
   if(![extent.x,extent.y,extent.z].every(v=>Number.isFinite(v)&&v>1e-6))return false;
   root.scale.set(size.width/extent.x,size.height/extent.y,size.depth/extent.z);root.updateMatrixWorld(true);

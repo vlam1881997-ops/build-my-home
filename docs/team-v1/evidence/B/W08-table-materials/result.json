@@ -1,0 +1,196 @@
+{
+  "runtime": "v22.23.0",
+  "cases": [
+    {
+      "device": "desktop",
+      "items": [
+        {
+          "id": "furniture-mv7ns05e-jek7g",
+          "roomId": "room",
+          "floor": 0,
+          "modelId": "tableCoffeeModern",
+          "origin": "customer-added",
+          "placementStatus": "present",
+          "locked": false,
+          "pose": {
+            "x": 3,
+            "y": 3,
+            "z": 0,
+            "rotationDeg": 37
+          },
+          "size": {
+            "width": 1.1991113424301147,
+            "depth": 1.1996567845344543,
+            "height": 0.3692496716976166
+          },
+          "materialBindings": [
+            {
+              "role": "floor",
+              "visualProfileId": "sand-travertine",
+              "realWorldScale": [
+                0.8,
+                0.8
+              ],
+              "textureAssetId": null,
+              "exactness": "generic"
+            },
+            {
+              "role": "accent",
+              "visualProfileId": "dark-walnut",
+              "realWorldScale": [
+                1.5,
+                1.5
+              ],
+              "textureAssetId": null,
+              "exactness": "generic"
+            }
+          ],
+          "costTreatment": "unconfirmed"
+        }
+      ],
+      "styles": [
+        {
+          "style": "japandi",
+          "id": "furniture-mv7ns05e-jek7g",
+          "model": "tableCoffeeModern",
+          "asset": "modern-coffee-table",
+          "source": "licensed-mesh",
+          "angle": -0.6457718232379019,
+          "size": {
+            "width": 1.1991113424301147,
+            "depth": 1.1996567845344543,
+            "height": 0.3692496716976166
+          },
+          "measured": {
+            "width": 1.1991113424301147,
+            "height": 0.3692496716976166,
+            "depth": 1.1996567249298096
+          },
+          "slots": [
+            "stone",
+            "wood"
+          ],
+          "exported": {
+            "id": "furniture-mv7ns05e-jek7g",
+            "item_name": "tableCoffeeModern",
+            "item_type": 1,
+            "format": "gltf",
+            "model_url": "../interior/models/modern-coffee-table.glb",
+            "xpos": 300,
+            "zpos": 300,
+            "ypos": 0,
+            "rotation": -0.6457718232379019,
+            "scale_x": 100,
+            "scale_y": 100,
+            "scale_z": 100,
+            "fixed": false
+          },
+          "pose": {
+            "x": 3,
+            "y": 3,
+            "z": 0,
+            "rotationDeg": 37
+          }
+        }
+      ],
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "device": "phone",
+      "items": [
+        {
+          "id": "furniture-mv7ns7a2-s0rdf",
+          "roomId": "room",
+          "floor": 0,
+          "modelId": "tableCoffeeModern",
+          "origin": "customer-added",
+          "placementStatus": "present",
+          "locked": false,
+          "pose": {
+            "x": 3,
+            "y": 3,
+            "z": 0,
+            "rotationDeg": 37
+          },
+          "size": {
+            "width": 1.1991113424301147,
+            "depth": 1.1996567845344543,
+            "height": 0.3692496716976166
+          },
+          "materialBindings": [
+            {
+              "role": "floor",
+              "visualProfileId": "sand-travertine",
+              "realWorldScale": [
+                0.8,
+                0.8
+              ],
+              "textureAssetId": null,
+              "exactness": "generic"
+            },
+            {
+              "role": "accent",
+              "visualProfileId": "dark-walnut",
+              "realWorldScale": [
+                1.5,
+                1.5
+              ],
+              "textureAssetId": null,
+              "exactness": "generic"
+            }
+          ],
+          "costTreatment": "unconfirmed"
+        }
+      ],
+      "styles": [
+        {
+          "style": "japandi",
+          "id": "furniture-mv7ns7a2-s0rdf",
+          "model": "tableCoffeeModern",
+          "asset": "modern-coffee-table",
+          "source": "licensed-mesh",
+          "angle": -0.6457718232379019,
+          "size": {
+            "width": 1.1991113424301147,
+            "depth": 1.1996567845344543,
+            "height": 0.3692496716976166
+          },
+          "measured": {
+            "width": 1.1991113424301147,
+            "height": 0.3692496716976166,
+            "depth": 1.1996567249298096
+          },
+          "slots": [
+            "stone",
+            "wood"
+          ],
+          "exported": {
+            "id": "furniture-mv7ns7a2-s0rdf",
+            "item_name": "tableCoffeeModern",
+            "item_type": 1,
+            "format": "gltf",
+            "model_url": "../interior/models/modern-coffee-table.glb",
+            "xpos": 300,
+            "zpos": 300,
+            "ypos": 0,
+            "rotation": -0.6457718232379019,
+            "scale_x": 100,
+            "scale_y": 100,
+            "scale_z": 100,
+            "fixed": false
+          },
+          "pose": {
+            "x": 3,
+            "y": 3,
+            "z": 0,
+            "rotationDeg": 37
+          }
+        }
+      ],
+      "errors": [],
+      "overflow": false
+    }
+  ],
+  "exactSupplierAssets": false
+}

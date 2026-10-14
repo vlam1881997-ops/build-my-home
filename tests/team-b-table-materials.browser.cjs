@@ -1,0 +1,39 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {spawn}=require('node:child_process'),{chromium}=require('playwright');
+const root=path.resolve(__dirname,'..'),port='3127',origin='http://127.0.0.1:'+port,out=path.join(root,'docs/team-v1/evidence/B/W08-table-materials');
+let server,browser;const results={runtime:process.version,cases:[],exactSupplierAssets:false};
+(async()=>{
+ fs.mkdirSync(out,{recursive:true});server=spawn(process.execPath,['scripts/dev.cjs'],{cwd:root,env:{...process.env,PORT:port},stdio:['ignore','pipe','pipe']});
+ await new Promise((ok,no)=>{server.stdout.on('data',s=>{if(s.toString().includes('local:'))ok();});server.on('error',no);});
+ browser=await chromium.launch({executablePath:process.env.BMH_CHROMIUM_EXECUTABLE,args:['--no-sandbox','--disable-dev-shm-usage','--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader']});
+ for(const device of process.env.BMH_DEVICE?[process.env.BMH_DEVICE]:['desktop','phone']){
+  const ctx=await browser.newContext({viewport:device==='phone'?{width:390,height:844}:{width:1280,height:900},serviceWorkers:'block'}),page=await ctx.newPage(),errors=[];page.setDefaultTimeout(60000);
+  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(/THREE.WebGLProgram|Shader Error|WebGL: INVALID/.test(m.text()))errors.push(m.text());});
+  await ctx.route('**/*',r=>{const q=r.request(),u=new URL(q.url());return u.origin===origin&&!u.pathname.startsWith('/api/')&&q.method()==='GET'?r.continue():r.fulfill({status:503,body:'Isolated test'});});
+  await page.goto(origin);await page.waitForFunction(()=>window.__BMH_BOOT_OK);await page.evaluate(()=>BuildMyHome.projects.ready);
+  await page.evaluate(()=>{const B=BuildMyHome,p=B.state.project;B.state.ui.onboardingComplete=true;Object.assign(p.site,{width:6,depth:6,floors:1,floorHeights:[3.5],useParcelGeometry:false});p.plan={rooms:[{id:'room',name:'Phòng kiểm mẫu',type:'custom',floor:0,x:1,y:1,w:4,h:4}],openings:[],fixtures:[],outdoor:[],furniture:[],lockedRoomIds:[],lockedFloors:[]};B.state.ui.planner.selected='room';B.navigateTo(4);});
+  const editor=page.locator('.team-b-furniture-editor');await editor.locator('summary').first().click();await editor.getByText('Thêm món / đồ đã xóa',{exact:true}).click();await editor.locator('[data-furniture-add] select').selectOption('tableCoffeeModern');await editor.locator('[data-furniture-add] button').click();
+  const id=await page.evaluate(()=>BuildMyHome.state.project.plan.furniture.find(i=>i.modelId==='tableCoffeeModern').id);
+  await editor.locator('[data-furniture-select]').selectOption(id);for(const key of ['x','y'])await editor.locator('input[name="'+key+'"]').fill('3');await editor.locator('[data-furniture-pose] button').click();await editor.locator('[data-furniture-turn-step]').selectOption('45');await editor.locator('[data-furniture-turn="-1"]').click();
+  assert.equal(await page.evaluate(id=>BuildMyHome.resolvedFurniture().find(i=>i.id===id).pose.rotationDeg,id),315);await editor.locator('[data-furniture-turn="1"]').click();
+  await editor.locator('input[name="rotationDeg"]').fill('37');await editor.locator('[data-furniture-pose] button').click();
+  await editor.getByText('Kích thước mẫu · Bàn trà Modern · gỗ và đá',{exact:true}).click();assert.equal(await editor.locator('[data-furniture-size]').evaluate(f=>f.checkValidity()),true,'measured precision is accepted by native inputs');await editor.locator('[data-furniture-size] button').click();
+  await editor.getByText('Vật liệu riêng của món',{exact:true}).click();
+  assert.equal(await editor.locator('[data-furniture-material="fabric"]').count(),0);
+  await editor.locator('[data-furniture-material="floor"]').selectOption('sand-travertine');
+  await editor.getByText('Vật liệu riêng của món',{exact:true}).click();
+  await editor.locator('[data-furniture-material="accent"]').selectOption('dark-walnut');
+  await editor.screenshot({path:path.join(out,device+'-controls.png')});
+  const saved=await page.evaluate(()=>{BuildMyHome.save();return BuildMyHome.state.project.plan.furniture;});await page.reload();await page.waitForFunction(()=>window.__BMH_BOOT_OK);await page.evaluate(()=>BuildMyHome.projects.ready);assert.deepEqual(await page.evaluate(()=>BuildMyHome.state.project.plan.furniture),saved);
+  const cases=[];
+  for(const style of ['japandi']){
+   await page.evaluate(style=>{const B=BuildMyHome;B.selectHouseStyle(style);B.state.ui.sceneFocus='room:room';B.state.ui.designView='room';B.state.ui.roomCamera='overview';B.navigateTo(6);},style);
+   await page.locator('#studio3dStage').scrollIntoViewIfNeeded();await page.waitForFunction(id=>{const B=BuildMyHome,g=B.studio3d?.teamBFurnitureGroups?.find(g=>g.userData.furnitureId===id);return g?.userData.source==='licensed-mesh'&&B.studio3d.structureKey===B.studioStructureKey();},id);
+   const mesh=await page.evaluate(id=>{const B=BuildMyHome,g=B.studio3d.teamBFurnitureGroups.find(g=>g.userData.furnitureId===id);const T=B.studio3d.THREE,bounds=new T.Box3(),slots=[];g.traverse(m=>{if(!m.geometry)return;m.geometry.computeBoundingBox();bounds.union(m.geometry.boundingBox);slots.push(m.material.userData.finishSlot);if(m.material.userData.finishSlot==='stone'&&m.material.userData.visualMaterial!=='sand-travertine')throw new Error('stone override missing');if(m.material.userData.finishSlot==='wood'&&m.material.userData.visualMaterial!=='dark-walnut')throw new Error('wood override missing');});const measured=bounds.getSize(new T.Vector3());const doc=B.architectDocument(),item=doc.items.find(i=>i.id===id);return {id:g.userData.furnitureId,model:g.userData.model,asset:g.userData.asset,source:g.userData.source,angle:g.rotation.y,size:g.userData.measuredSize,measured:{width:measured.x,height:measured.y,depth:measured.z},slots,exported:item,pose:B.resolvedFurniture().find(i=>i.id===id).pose};},id);
+   assert.equal(mesh.model,'tableCoffeeModern');assert.equal(mesh.asset,'modern-coffee-table');assert.equal(mesh.source,'licensed-mesh');assert.ok(Math.abs(mesh.angle+37*Math.PI/180)<1e-8);assert.deepEqual(mesh.size,saved.find(i=>i.id===id).size);for(const axis of ['width','height','depth'])assert.ok(Math.abs(mesh.measured[axis]-mesh.size[axis])<.0001,axis+' decoded geometry');assert.ok(mesh.slots.includes('wood')&&mesh.slots.includes('stone'));assert.equal(mesh.exported.model_url,'../interior/models/modern-coffee-table.glb');for(const axis of ['x','y','z'])assert.ok(Math.abs(mesh.exported['scale_'+axis]-100)<1e-7);assert.ok(Math.abs(mesh.exported.rotation-mesh.angle)<1e-8);
+   const assetUrl=new URL('assets/architect3d/'+mesh.exported.model_url,origin).href;assert.equal((await ctx.request.get(assetUrl)).status(),200);
+   await page.locator('#studio3dCanvas').screenshot({path:path.join(out,device+'-'+style+'.png')});cases.push({style,...mesh});
+  }
+  assert.deepEqual(errors,[]);const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1);assert.equal(overflow,false);results.cases.push({device,items:saved,styles:cases,errors,overflow});fs.writeFileSync(path.join(out,'result.json'),JSON.stringify(results,null,2)+'\n');console.log(device+' explicit model/rotation/reload/3D/export passed');await ctx.close();
+ }
+})().catch(e=>{console.error(e);process.exitCode=1;}).finally(async()=>{await browser?.close();server?.kill();});

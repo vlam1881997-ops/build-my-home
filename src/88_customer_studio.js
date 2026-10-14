@@ -14,19 +14,48 @@ BMH.loadDesignView=id=>{
 };
 BMH.setStudioCameraPreset=preset=>{
  const s=BMH.studio3d;if(!s?.state)return BMH.toast('Mở 3D để chọn góc.');if(BMH.state.ui.roomCamera==='inside'&&preset!=='eye')return BMH.toast('Chọn Xem toàn phòng trước khi dùng góc từ trên/chéo.');
- const poses={diagonal:{yaw:Math.PI*.22,pitch:.48},top:{yaw:0,pitch:1.43},eye:{yaw:Math.PI*.22,pitch:.06}};if(!poses[preset])return;BMH.stopArchitecturalRender();s.resetCameraValidation?.();Object.assign(s.state,poses[preset]);s.state.updateCamera();
+ const poses={diagonal:{yaw:Math.PI*.22,pitch:.48},top:{yaw:0,pitch:1.43},eye:{yaw:Math.PI*.22,pitch:.06}};if(!poses[preset])return;s.scene.userData.furnitureCloseup=null;BMH.stopArchitecturalRender();s.resetCameraValidation?.();Object.assign(s.state,poses[preset]);s.state.updateCamera();
+};
+// The exported snapshot must use the same settled assets as the measured viewer.
+// A generation guard cancels obsolete work; a deadline keeps failed networks usable.
+BMH.awaitStudioAssets=async(s,isCurrent,{timeoutMs=30000,pollMs=100}={})=>{
+ let timer,watch;
+ const stopped=new Promise(resolve=>{timer=setTimeout(()=>resolve({status:'timeout'}),timeoutMs);watch=setInterval(()=>{if(!isCurrent()||s.scene.userData.disposed)resolve({status:'cancelled'});},pollMs);});
+ const settle=async()=>{
+  let furnitureCount=0,surfaceCount=0,fallbackSurfaces=0;
+  while(true){
+   if(!isCurrent()||s.scene.userData.disposed)return {status:'cancelled'};
+   const furniture=(s.scene.userData.furnitureLoads||[]).slice(furnitureCount);furnitureCount+=furniture.length;
+   const models=await Promise.allSettled(furniture);
+   if(!isCurrent()||s.scene.userData.disposed)return {status:'cancelled'};
+   if(models.some(r=>r.status==='rejected'||r.value===false))return {status:'model-failed'};
+   const surfaces=(s.scene.userData.surfaceLoads||[]).slice(surfaceCount);surfaceCount+=surfaces.length;
+   const textures=await Promise.allSettled(surfaces);fallbackSurfaces+=textures.filter(r=>r.status==='rejected'||r.value===false).length;
+   if(furnitureCount===(s.scene.userData.furnitureLoads||[]).length&&surfaceCount===(s.scene.userData.surfaceLoads||[]).length)return {status:isCurrent()&&!s.scene.userData.disposed?'ready':'cancelled',fallbackSurfaces};
+  }
+ };
+ try{return await Promise.race([settle(),stopped]);}finally{clearTimeout(timer);clearInterval(watch);}
+};
+BMH.prepareGlbLights=snapshot=>{
+ const lights=[];snapshot.traverse(o=>{if((o.isDirectionalLight||o.isSpotLight)&&o.target)lights.push(o);});
+ snapshot.updateMatrixWorld(true);
+ for(const light of lights){const target=light.target.getWorldPosition(light.target.position.clone());light.lookAt(target);light.add(light.target);light.target.position.set(0,0,-1);}
+ snapshot.updateMatrixWorld(true);
 };
 BMH.exportStudioGlb=async()=>{
  const s=BMH.studio3d;if(!s?.renderer){BMH.toast('Mở 3D để tải mô hình đang xem.');return false;}if(BMH.modelExportBusy)return false;
- BMH.modelExportBusy=true;const signature=BMH.cinematicSignature(),revision=BMH.drawingRevision(),buttons=[...document.querySelectorAll('[data-studio-glb]')];buttons.forEach(b=>b.disabled=true);let snapshot,ownedMaterials;
+ BMH.modelExportBusy=true;const signature=BMH.cinematicSignature(),revision=BMH.drawingRevision(),project=BMH.state.project,isCurrent=()=>BMH.studio3d===s&&BMH.state.project===project&&signature===BMH.cinematicSignature(),buttons=[...document.querySelectorAll('[data-studio-glb]')];buttons.forEach(b=>b.disabled=true);let snapshot,ownedMaterials;
  try{
-  const [THREE,module]=await Promise.all([BMH.ensureThree(),import('./vendor/three/exporters/GLTFExporter.js')]);if(BMH.studio3d!==s||signature!==BMH.cinematicSignature())return false;
-  snapshot=BMH.architecturalRenderScene(THREE,s.scene,{purpose:'model'});snapshot.background=snapshot.environment=null;ownedMaterials=snapshot.userData.ownedMaterials;
+  BMH.toast('Đang chuẩn bị mô hình và vật liệu để tải…');
+  const assets=await BMH.awaitStudioAssets(s,isCurrent);
+  if(assets.status!=='ready'){if(assets.status!=='cancelled')BMH.toast(assets.status==='timeout'?'Mô hình chưa tải xong. Kiểm tra mạng rồi thử tải 3D lại.':'Một mẫu nội thất chưa tải được. Mở lại góc 3D rồi thử lại.');return false;}
+  const [THREE,module]=await Promise.all([BMH.ensureThree(),import('./vendor/three/exporters/GLTFExporter.js')]);if(!isCurrent())return false;
+  snapshot=BMH.architecturalRenderScene(THREE,s.scene,{purpose:'model'});snapshot.background=snapshot.environment=null;ownedMaterials=snapshot.userData.ownedMaterials;BMH.prepareGlbLights(snapshot);
   snapshot.traverse(o=>{const data=o.userData||{};o.userData=Object.fromEntries(['kind','roomId','openingId','shaftId','fixtureId','furnitureId','componentId','floor','generic','provisional','styleId','collectionId','facadeRole'].filter(k=>['string','number','boolean'].includes(typeof data[k])).map(k=>[k,data[k]]));for(const key of ['roomIds','componentIds'])if(Array.isArray(data[key]))o.userData[key]=data[key].filter(id=>typeof id==='string');});
-  snapshot.userData={bmh:{units:'metres',status:'preliminary-architecture',revision,view:BMH.state.ui.sceneFocus||'all',style:BMH.state.project.style,finishes:BMH.customerDesignSnapshot().project.finishes,architecture:BMH.architecturalIdentityReview?.()||null,furniture:BMH.customerDesignSnapshot().project.furniture||[]}};
+  snapshot.userData={bmh:{units:'metres',status:'preliminary-architecture',surfaceStatus:assets.fallbackSurfaces?'fallback-present':'settled',revision,view:BMH.state.ui.sceneFocus||'all',style:BMH.state.project.style,finishes:BMH.customerDesignSnapshot().project.finishes,architecture:BMH.architecturalIdentityReview?.()||null,furniture:BMH.customerDesignSnapshot().project.furniture||[]}};
   const glb=await new module.GLTFExporter().parseAsync(snapshot,{binary:true,onlyVisible:true,maxTextureSize:512});
-  if(BMH.studio3d!==s||signature!==BMH.cinematicSignature())return false;
-  BMH.download('BMH-mo-hinh-3D-'+(BMH.state.ui.sceneFocus||'all').replace(/[^a-z0-9_-]/gi,'-')+'-'+revision+'.glb',glb,'model/gltf-binary');BMH.toast('Đã tải GLB của mô hình đang xem · đơn vị mét.');return true;
+  if(!isCurrent())return false;
+  BMH.download('BMH-mo-hinh-3D-'+(BMH.state.ui.sceneFocus||'all').replace(/[^a-z0-9_-]/gi,'-')+'-'+revision+'.glb',glb,'model/gltf-binary');BMH.toast(assets.fallbackSurfaces?'Đã tải GLB · một số bề mặt dùng mẫu mô phỏng do ảnh vật liệu chưa tải được.':'Đã tải GLB của mô hình đang xem · đơn vị mét.');return true;
  }catch(error){console.warn('BMH model export',error);BMH.toast('Chưa xuất được mô hình. Thử lại từ góc 3D đã tải.');return false;}
  finally{snapshot?.traverse(o=>o.geometry?.dispose());for(const m of ownedMaterials||[])m.dispose();BMH.modelExportBusy=false;buttons.forEach(b=>b.disabled=false);}
 };
