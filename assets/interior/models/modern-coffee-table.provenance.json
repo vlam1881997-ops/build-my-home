@@ -1,0 +1,20 @@
+{
+  "modelId": "tableCoffeeModern",
+  "asset": "modern-coffee-table",
+  "sourceUrl": "https://polyhaven.com/a/modern_coffee_table_02",
+  "license": "CC0-1.0",
+  "licenseUrl": "https://polyhaven.com/license",
+  "author": "Amin",
+  "retrievedAt": "2026-10-14",
+  "sourceGltfSha256": "59acb8abec936a74d52d83f9208aa0314accc4363586b5b94f89ab2d8b85ad76",
+  "sourceBinSha256": "548427547069b51ef667ef34278d767fe529f383c1b62dbfb1cff97697bd974c",
+  "sha256": "ea2c17d53eb3dc8120edf65e664f399ab6483ccbdc961cfe0019c1b3391c6123",
+  "dimensionsMetres": {
+    "w": 1.1991113424301147,
+    "h": 0.3692496716976166,
+    "d": 1.1996567845344543
+  },
+  "triangles": 13645,
+  "processing": "Preserved topology, centred X/Z, grounded Y. Metres. Original baked materials replaced with semantic wood/stone for customer finish choices. No manufacturer or SKU.",
+  "generator": "tests/team-b-normalize-coffee.py"
+}

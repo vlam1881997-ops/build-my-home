@@ -357,7 +357,7 @@
 (()=>{
  const B=BMH,clone=v=>structuredClone(v),esc=B.esc,legacy=B.roomFurnitureLayout;
  const angle=n=>((Number(n)%360)+360)%360;
- const models={bedDouble:'Giường đôi',bedSingle:'Giường đơn',loungeDesignSofa:'Sofa',loungeChair:'Ghế thư giãn',loungeChairModern:'Ghế thư giãn Modern',tableCoffee:'Bàn trà',table:'Bàn ăn',chair:'Ghế',cabinetTelevision:'Tủ TV',televisionModern:'TV',kitchenSink:'Chậu bếp',kitchenStove:'Bếp',kitchenFridge:'Tủ lạnh',bathroomSink:'Lavabo',toilet:'Bồn cầu',shower:'Cabin tắm',bookcaseClosedWide:'Tủ sách',desk:'Bàn làm việc',chairDesk:'Ghế làm việc',cabinetBed:'Tủ đầu giường',pottedPlant:'Cây',sideTable:'Bàn phụ',floorLamp:'Đèn đứng',washingMachine:'Máy giặt'};
+ const models={bedDouble:'Giường đôi',bedSingle:'Giường đơn',loungeDesignSofa:'Sofa',loungeChair:'Ghế thư giãn',loungeChairModern:'Ghế thư giãn Modern',tableCoffee:'Bàn trà',tableCoffeeModern:'Bàn trà Modern · gỗ và đá',table:'Bàn ăn',chair:'Ghế',cabinetTelevision:'Tủ TV',televisionModern:'TV',kitchenSink:'Chậu bếp',kitchenStove:'Bếp',kitchenFridge:'Tủ lạnh',bathroomSink:'Lavabo',toilet:'Bồn cầu',shower:'Cabin tắm',bookcaseClosedWide:'Tủ sách',desk:'Bàn làm việc',chairDesk:'Ghế làm việc',cabinetBed:'Tủ đầu giường',pottedPlant:'Cây',sideTable:'Bàn phụ',floorLamp:'Đèn đứng',washingMachine:'Máy giặt'};
  const plan=()=>B.state.project.plan;
  const room=id=>plan().rooms.find(r=>r.id===id);
  const selected=()=>B.state.ui.planner.selectedFurniture||'';
@@ -470,13 +470,13 @@
  };
  // Scale vendored assets from catalog dimensions to the customer's saved size.
  B.furnitureExportScale=i=>{
-  const d=B.FURNITURE_DIMENSIONS[i.modelId],factor=i.modelId==='loungeChairModern'?100:200;
+  const d=B.FURNITURE_DIMENSIONS[i.modelId],factor=['loungeChairModern','tableCoffeeModern'].includes(i.modelId)?100:200;
   return d?{scale_x:factor*i.size.width/d.w,scale_y:factor*i.size.height/d.h,scale_z:factor*i.size.depth/d.d}:{scale_x:factor,scale_y:factor,scale_z:factor};
  };
  const doc=B.architectDocument;B.architectDocument=focus=>{
   const result=doc(focus);for(const [f,level] of result.levels.entries()){
    const rows=B.resolvedFurniture().filter(i=>i.floor===f&&(!focus?.startsWith('room:')||i.roomId===focus.slice(5)));
-   const items=rows.map(i=>({id:i.id,item_name:i.modelId,item_type:1,format:'gltf',model_url:i.modelId==='loungeChairModern'?'../interior/models/modern-armchair-facing.glb':'models/'+i.modelId+'.glb',xpos:i.pose.x*100,zpos:i.pose.y*100,ypos:i.pose.z*100,rotation:-i.pose.rotationDeg*Math.PI/180,...B.furnitureExportScale(i),fixed:i.locked===true}));
+   const items=rows.map(i=>({id:i.id,item_name:i.modelId,item_type:1,format:'gltf',model_url:i.modelId==='tableCoffeeModern'?'../interior/models/modern-coffee-table.glb':i.modelId==='loungeChairModern'?'../interior/models/modern-armchair-facing.glb':'models/'+i.modelId+'.glb',xpos:i.pose.x*100,zpos:i.pose.y*100,ypos:i.pose.z*100,rotation:-i.pose.rotationDeg*Math.PI/180,...B.furnitureExportScale(i),fixed:i.locked===true}));
    if(f===0)result.items=[...(result.items||[]).filter(i=>i.item_type!==1),...items];else level.items=[...(level.items||[]).filter(i=>i.item_type!==1),...items];
   }return result;
  };
@@ -495,7 +495,7 @@
  B.furnitureCatalogueHtml=id=>{
   const d=B.FURNITURE_DIMENSIONS[id];if(!models[id]||!d)return '';
   const mm=n=>Math.round(n*1000).toLocaleString('vi-VN');
-  return '<figure class="team-b-catalogue-preview" data-catalogue-model="'+esc(id)+'"><img src="assets/interior/catalogue/'+encodeURIComponent(id)+'.webp" width="480" height="360" loading="lazy" decoding="async" alt="Mô hình '+esc(models[id])+' với bề mặt trung tính"><figcaption><strong>'+esc(models[id])+'</strong><span>Rộng '+mm(d.w)+' × sâu '+mm(d.d)+' × cao '+mm(d.h)+' mm</span><small>'+(id==='loungeChairModern'?'Mẫu thư viện Poly Haven · CC0.':'Mẫu mô phỏng BMH; kiểu dáng theo bộ nội thất.')+' Ảnh xem trước dùng bề mặt trung tính, không phải ảnh sản phẩm hãng. Xem vật liệu đã chọn trong phòng 3D.</small></figcaption></figure>';
+  return '<figure class="team-b-catalogue-preview" data-catalogue-model="'+esc(id)+'"><img src="assets/interior/catalogue/'+encodeURIComponent(id)+'.webp" width="480" height="360" loading="lazy" decoding="async" alt="Mô hình '+esc(models[id])+' với bề mặt trung tính"><figcaption><strong>'+esc(models[id])+'</strong><span>Rộng '+mm(d.w)+' × sâu '+mm(d.d)+' × cao '+mm(d.h)+' mm</span><small>'+(['loungeChairModern','tableCoffeeModern'].includes(id)?'Mẫu thư viện Poly Haven · CC0.':'Mẫu mô phỏng BMH; kiểu dáng theo bộ nội thất.')+' Ảnh xem trước dùng bề mặt trung tính, không phải ảnh sản phẩm hãng. Xem vật liệu đã chọn trong phòng 3D.</small></figcaption></figure>';
  };
  B.furnitureEditorHtml=()=>{
   const ui=B.state.ui,r=B.state.ui.step===6?(room((ui.sceneFocus||'').replace(/^room:/,''))||room(ui.modelRoomId)):B.selectedRoom();if(!r)return '';

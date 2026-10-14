@@ -367,6 +367,7 @@ BMH.createSceneFoliage=(THREE,dimensions,material,count=48)=>{
 
 BMH.createRoomAsset = (model, d, THREE, m) => {
   const selectedModel=model;if(model==='loungeChairModern')model='loungeChair';
+  if(model==='tableCoffeeModern')model='tableCoffee';
   const supported = /^(bedDouble|bedSingle|loungeDesignSofa|loungeChair|tableCoffee|table|desk|chair|chairDesk|cabinetTelevision|televisionModern|kitchenSink|kitchenStove|kitchenFridge|bookcaseClosedWide|cabinetBed|pottedPlant|washingMachine|bathroomSink|toilet|shower|sideTable|floorLamp)$/;
   if (!supported.test(model) || !d || ![d.w,d.h,d.d].every(v => Number.isFinite(v) && v > 0)) return null;
   const root = new THREE.Group();
