@@ -1,0 +1,103 @@
+/* Customer presentation and a design-only handoff, independent of personal finances. */
+BMH.savedDesignViews=()=>{
+ const views=BMH.designState().savedViews;return (Array.isArray(views)?views:[]).filter(v=>v&&typeof v.id==='string'&&typeof v.focus==='string'&&[v.yaw,v.pitch,v.dist,...(Array.isArray(v.target)?v.target:[])].every(Number.isFinite)&&v.target?.length===3&&v.dist>0).slice(-4);
+};
+BMH.saveDesignView=()=>{
+ const s=BMH.studio3d;if(!s?.state)return BMH.toast('Mở 3D để lưu góc nhìn.');const ui=BMH.state.ui,room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===ui.sceneFocus),view={id:BMH.uid('view'),name:room?room.name:ui.sceneFocus?.startsWith('floor:')?'Tầng '+(Number(ui.sceneFocus.slice(6))+1):'Ngoại thất',focus:ui.sceneFocus||'all',designView:ui.designView,roomCamera:ui.roomCamera,exteriorCamera:ui.exteriorCamera,theme:ui.sceneTheme,yaw:s.state.yaw,pitch:s.state.pitch,dist:s.state.dist,target:s.state.target.toArray()};
+ BMH.designState().savedViews=[...BMH.savedDesignViews(),view].slice(-4);BMH.rememberFinishCamera();BMH.save();BMH.render({preserveScroll:true});BMH.toast('Đã lưu góc nhìn trong dự án này · tối đa 4 góc.');
+};
+BMH.loadDesignView=id=>{
+ const v=BMH.savedDesignViews().find(v=>v.id===id);if(!v)return false;const p=BMH.state.project;
+ if(v.focus.startsWith('room:')&&!p.plan.rooms.some(r=>r.id===v.focus.slice(5))||v.focus.startsWith('floor:')&&Number(v.focus.slice(6))>=Number(p.site.floors)){BMH.toast('Phòng/tầng của góc này đã bị xóa. Lưu một góc mới.');return false;}
+ const ui=BMH.state.ui;ui.sceneFocus=v.focus;ui.designView=v.designView||'exterior';ui.roomCamera=v.roomCamera||'overview';ui.exteriorCamera=v.exteriorCamera;ui.sceneTheme=v.theme||'day';ui.sceneExploded=false;
+ BMH.studio3d?.resetCameraValidation?.();BMH.pendingFinishCamera={project:p,focus:v.focus,preset:ui.roomCamera,exterior:ui.exteriorCamera,yaw:v.yaw,pitch:v.pitch,dist:v.dist,target:[...v.target]};BMH.save();BMH.render({preserveScroll:true});return true;
+};
+BMH.setStudioCameraPreset=preset=>{
+ const s=BMH.studio3d;if(!s?.state)return BMH.toast('Mở 3D để chọn góc.');if(BMH.state.ui.roomCamera==='inside'&&preset!=='eye')return BMH.toast('Chọn Xem toàn phòng trước khi dùng góc từ trên/chéo.');
+ const poses={diagonal:{yaw:Math.PI*.22,pitch:.48},top:{yaw:0,pitch:1.43},eye:{yaw:Math.PI*.22,pitch:.06}};if(!poses[preset])return;s.scene.userData.furnitureCloseup=null;BMH.stopArchitecturalRender();s.resetCameraValidation?.();Object.assign(s.state,poses[preset]);s.state.updateCamera();
+};
+// The exported snapshot must use the same settled assets as the measured viewer.
+// A generation guard cancels obsolete work; a deadline keeps failed networks usable.
+BMH.awaitStudioAssets=async(s,isCurrent,{timeoutMs=30000,pollMs=100}={})=>{
+ let timer,watch;
+ const stopped=new Promise(resolve=>{timer=setTimeout(()=>resolve({status:'timeout'}),timeoutMs);watch=setInterval(()=>{if(!isCurrent()||s.scene.userData.disposed)resolve({status:'cancelled'});},pollMs);});
+ const settle=async()=>{
+  let furnitureCount=0,surfaceCount=0,fallbackSurfaces=0;
+  while(true){
+   if(!isCurrent()||s.scene.userData.disposed)return {status:'cancelled'};
+   const furniture=(s.scene.userData.furnitureLoads||[]).slice(furnitureCount);furnitureCount+=furniture.length;
+   const models=await Promise.allSettled(furniture);
+   if(!isCurrent()||s.scene.userData.disposed)return {status:'cancelled'};
+   if(models.some(r=>r.status==='rejected'||r.value===false))return {status:'model-failed'};
+   const surfaces=(s.scene.userData.surfaceLoads||[]).slice(surfaceCount);surfaceCount+=surfaces.length;
+   const textures=await Promise.allSettled(surfaces);fallbackSurfaces+=textures.filter(r=>r.status==='rejected'||r.value===false).length;
+   if(furnitureCount===(s.scene.userData.furnitureLoads||[]).length&&surfaceCount===(s.scene.userData.surfaceLoads||[]).length)return {status:isCurrent()&&!s.scene.userData.disposed?'ready':'cancelled',fallbackSurfaces};
+  }
+ };
+ try{return await Promise.race([settle(),stopped]);}finally{clearTimeout(timer);clearInterval(watch);}
+};
+BMH.prepareGlbLights=snapshot=>{
+ const lights=[];snapshot.traverse(o=>{if((o.isDirectionalLight||o.isSpotLight)&&o.target)lights.push(o);});
+ snapshot.updateMatrixWorld(true);
+ for(const light of lights){const target=light.target.getWorldPosition(light.target.position.clone());light.lookAt(target);light.add(light.target);light.target.position.set(0,0,-1);}
+ snapshot.updateMatrixWorld(true);
+};
+BMH.exportStudioGlb=async()=>{
+ const s=BMH.studio3d;if(!s?.renderer){BMH.toast('Mở 3D để tải mô hình đang xem.');return false;}if(BMH.modelExportBusy)return false;
+ BMH.modelExportBusy=true;const signature=BMH.cinematicSignature(),revision=BMH.drawingRevision(),project=BMH.state.project,isCurrent=()=>BMH.studio3d===s&&BMH.state.project===project&&signature===BMH.cinematicSignature(),buttons=[...document.querySelectorAll('[data-studio-glb]')];buttons.forEach(b=>b.disabled=true);let snapshot,ownedMaterials;
+ try{
+  BMH.toast('Đang chuẩn bị mô hình và vật liệu để tải…');
+  const assets=await BMH.awaitStudioAssets(s,isCurrent);
+  if(assets.status!=='ready'){if(assets.status!=='cancelled')BMH.toast(assets.status==='timeout'?'Mô hình chưa tải xong. Kiểm tra mạng rồi thử tải 3D lại.':'Một mẫu nội thất chưa tải được. Mở lại góc 3D rồi thử lại.');return false;}
+  const [THREE,module]=await Promise.all([BMH.ensureThree(),import('./vendor/three/exporters/GLTFExporter.js')]);if(!isCurrent())return false;
+  snapshot=BMH.architecturalRenderScene(THREE,s.scene,{purpose:'model'});snapshot.background=snapshot.environment=null;ownedMaterials=snapshot.userData.ownedMaterials;BMH.prepareGlbLights(snapshot);
+  snapshot.traverse(o=>{const data=o.userData||{};o.userData=Object.fromEntries(['kind','roomId','openingId','shaftId','fixtureId','furnitureId','componentId','floor','generic','provisional','styleId','collectionId','facadeRole'].filter(k=>['string','number','boolean'].includes(typeof data[k])).map(k=>[k,data[k]]));for(const key of ['roomIds','componentIds'])if(Array.isArray(data[key]))o.userData[key]=data[key].filter(id=>typeof id==='string');});
+  snapshot.userData={bmh:{units:'metres',status:'preliminary-architecture',surfaceStatus:assets.fallbackSurfaces?'fallback-present':'settled',revision,view:BMH.state.ui.sceneFocus||'all',style:BMH.state.project.style,finishes:BMH.customerDesignSnapshot().project.finishes,architecture:BMH.architecturalIdentityReview?.()||null,furniture:BMH.customerDesignSnapshot().project.furniture||[]}};
+  const glb=await new module.GLTFExporter().parseAsync(snapshot,{binary:true,onlyVisible:true,maxTextureSize:512});
+  if(!isCurrent())return false;
+  BMH.download('BMH-mo-hinh-3D-'+(BMH.state.ui.sceneFocus||'all').replace(/[^a-z0-9_-]/gi,'-')+'-'+revision+'.glb',glb,'model/gltf-binary');BMH.toast(assets.fallbackSurfaces?'Đã tải GLB · một số bề mặt dùng mẫu mô phỏng do ảnh vật liệu chưa tải được.':'Đã tải GLB của mô hình đang xem · đơn vị mét.');return true;
+ }catch(error){console.warn('BMH model export',error);BMH.toast('Chưa xuất được mô hình. Thử lại từ góc 3D đã tải.');return false;}
+ finally{snapshot?.traverse(o=>o.geometry?.dispose());for(const m of ownedMaterials||[])m.dispose();BMH.modelExportBusy=false;buttons.forEach(b=>b.disabled=false);}
+};
+BMH.customerStudioToolbar=()=>{
+ const views=BMH.savedDesignViews(),lifts=BMH.elevatorShafts(),issues=BMH.plannerIssues(),errors=issues.filter(i=>i.sev==='error'),ui=BMH.state.ui;
+ return '<section class="customer-studio-toolbar"><div><span class="studio-eyebrow">BMH / STUDIO</span><h2>Góc nhìn đẹp. Hồ sơ rõ ràng.</h2><p>'+BMH.state.project.plan.rooms.length+' không gian · '+BMH.state.project.site.floors+' tầng'+(lifts.length?' · '+lifts.length+' giếng thang máy':'')+'</p></div><div class="customer-studio-actions"><button data-view-save>Lưu góc nhìn</button><button data-studio-glb title="Tải mô hình đang xem; chọn Ngoại thất để lấy toàn nhà">Tải 3D · GLB</button><button data-presentation-toggle aria-pressed="'+Boolean(ui.presentationMode)+'">'+(ui.presentationMode?'Thoát trình bày':'Chế độ trình bày')+'</button><button class="client-package-primary" data-client-package>Hồ sơ gửi khách ↓</button></div></section><div class="customer-view-strip"><span>GÓC NHANH</span>'+[['diagonal','Góc chéo'],['top','Từ trên'],['eye','Ngang tầm mắt']].map(([id,name])=>'<button data-camera-preset="'+id+'">'+name+'</button>').join('')+views.map(v=>'<div class="saved-view-chip"><button data-view-load="'+BMH.esc(v.id)+'">'+BMH.esc(v.name)+'</button><button data-view-delete="'+BMH.esc(v.id)+'" aria-label="Xóa góc '+BMH.esc(v.name)+'">×</button></div>').join('')+'</div><details class="customer-design-check"><summary><span>'+ (errors.length?'Cần sửa '+errors.length+' điểm hình học':issues.length?'Có '+issues.length+' điểm cần đối chiếu':'Kiểm tra hình học sơ bộ')+'</span><small>Kiểm tra trước khi gửi khách</small></summary><div><p>Bản vẽ và 3D dùng chung mặt bằng. Hồ sơ này là phương án kiến trúc sơ bộ để trao đổi và duyệt thiết kế.</p>'+(issues.length?'<ul>'+issues.slice(0,12).map(i=>'<li class="check-'+(i.sev==='error'?'error':'warn')+'">'+BMH.esc(i.text)+'</li>').join('')+'</ul>':'<p>Chưa phát hiện xung đột hình học trong các kiểm tra hiện có.</p>')+'<button data-nav="4">Chỉnh mặt bằng / thêm thang máy →</button></div></details>';
+};
+const customerStudioScreen=BMH.screen7;BMH.screen7=()=>{
+ const lift=BMH.state.ui.designView==='room'?BMH.state.project.plan.rooms.find(r=>r.type==='elevator'&&'room:'+r.id===BMH.state.ui.sceneFocus):null;
+ let html=customerStudioScreen();html=html.replace('class="design-studio"','class="design-studio'+(BMH.state.ui.presentationMode?' customer-presentation':'')+(lift?' elevator-view':'')+'"');if(lift)html=html.replace(/<aside class="design-brief">[\s\S]*?<\/aside>/,BMH.elevatorBriefHtml(lift));return html.replace('<div class="design-workspace">',BMH.customerStudioToolbar()+'<div class="design-workspace">');
+};BMH.SCREENS[5]=BMH.screen7;
+// Explicit allowlists prevent finance, household, payment and account data entering a client pack.
+BMH.customerDesignSnapshot=()=>{
+ const p=BMH.state.project,pick=(o,keys)=>Object.fromEntries(keys.filter(k=>o?.[k]!==undefined).map(k=>[k,structuredClone(o[k])])),finish=id=>{const f=BMH.visualMaterialContext(id);return {collection:pick(f.collection,['id','name']),palette:pick(f.palette,['wall','floor','accent','fabric','rug','curtain','metal']),surfaces:(f.surfaces||[]).map(s=>pick(s,['id','role','name','detail','roughness','scale'])),supplierSurfaces:(BMH.showroomFinishInfo?.(id)||[]).map(x=>pick(x,['category','id','name','sku','profileId','profileName']))};};
+ return {format:'BMH-customer-design',version:1,units:'metres',dimensionUnits:'millimetres',status:'preliminary-architecture',revision:BMH.drawingRevision(),exportedAt:new Date().toISOString(),project:{name:p.name,style:p.style,site:pick(p.site,['width','depth','floors','floorHeight','slabThickness','ceilingDrop','frontDirection','province','district','address']),rooms:p.plan.rooms.map(r=>({...pick(r,['id','floor','name','type','x','y','w','h','furnitureRotation','stairShape','stairDirection','stairGuard']),...(r.type==='elevator'?{elevator:BMH.elevatorSpec(r)}:{})})),openings:p.plan.openings.map(o=>pick(o,['id','floor','roomId','kind','side','offset','width','height','sill','hinge','swing','motion','passage'])),outdoor:(p.plan.outdoor||[]).map(o=>pick(o,['id','name','type','x','y','w','h'])),finishes:{exterior:finish(null),rooms:p.plan.rooms.map(r=>({roomId:r.id,...finish(r.id)}))},supplierChoices:pick(p.materials.choices,['floor','cement','steel','waterproof','paint','mep','door','sanitary','roof','insulation','lighting','cabinetry'])},checks:BMH.plannerIssues().map(i=>({severity:i.sev,text:i.text})),notice:'Phương án sơ bộ. Kết cấu, MEP, PCCC, lắp đặt thang máy và hồ sơ thi công cần đơn vị chuyên môn xác nhận.'};
+};
+BMH.customerPresentationHtml=(snapshot,sheets,image='')=>{
+ const esc=BMH.esc,p=snapshot.project,rows=p.rooms.map(r=>'<tr><td>T'+(r.floor+1)+'</td><td>'+esc(r.name)+'</td><td>'+r.w.toFixed(2)+' × '+r.h.toFixed(2)+' m</td><td>'+(r.w*r.h).toFixed(2)+' m²</td></tr>').join(''),materials=p.finishes.rooms.map(f=>{const room=p.rooms.find(r=>r.id===f.roomId);return '<tr><td>'+esc(room?.name)+'</td><td>'+esc(f.collection?.name||p.style)+'</td><td>'+f.surfaces.map(s=>esc(s.name)).join(' · ')+(f.supplierSurfaces||[]).map(x=>'<br><small>'+esc(x.name)+(x.sku?' · '+esc(x.sku):'')+' · Mô phỏng: '+esc(x.profileName)+'</small>').join('')+'</td></tr>';}).join('');
+ return '<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BMH · '+esc(p.name)+'</title><style>@page{size:A3 landscape;margin:0}*{box-sizing:border-box}body{margin:0;background:#edf1ed;color:#203b35;font:15px Arial,sans-serif}.toolbar{position:sticky;top:0;padding:16px;text-align:center;background:#fff;z-index:2}.toolbar button{border:0;background:#245a4c;color:white;border-radius:8px;padding:12px 20px;cursor:pointer}.page{width:420mm;min-height:297mm;margin:16px auto;background:#fff;page-break-after:always}.cover{padding:22mm;display:grid;grid-template-columns:1.3fr 1fr;gap:16mm;align-items:center}.cover small{letter-spacing:3px;color:#597768}.cover h1{font-size:44px;margin:18px 0}.cover>div>svg{width:100%;height:auto}.cover img{width:100%;max-height:225mm;object-fit:contain;border-radius:10px}.summary{padding:16mm}.summary h2{font-size:28px}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{text-align:left;padding:10px;border-bottom:1px solid #d7e3dc}.notice{background:#f0f5ef;padding:18px;border-radius:8px;line-height:1.6}.sheet{height:297mm;min-height:297mm}.sheet>svg{display:block;width:420mm;height:297mm}li{margin:8px 0}@media(max-width:1000px){.page{width:100%;min-height:auto}.cover{display:block;padding:24px}.cover img{max-height:80vh}.summary{padding:24px}.sheet{height:auto}.sheet>svg{width:100%;height:auto}table{font-size:12px}th,td{padding:7px}}@media print{body{background:white}.toolbar{display:none}.page{width:420mm;margin:0}.cover{display:grid;padding:22mm;min-height:297mm}.summary{padding:16mm}.sheet{height:297mm}.sheet>svg{width:420mm;height:297mm}.page:last-child{page-break-after:auto}table{font-size:15px}th,td{padding:10px}.page{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body><div class="toolbar"><button onclick="window.print()">In / Lưu hồ sơ PDF</button><p>Khổ A3 ngang · 100% · tắt đầu/chân trang. Các tờ có tỷ lệ giữ đúng tỷ lệ khi in 100%.</p></div><section class="page cover"><div><small>BUILD MY HOME / DESIGN STUDIO</small><h1>'+esc(p.name)+'</h1><p>'+esc(p.style)+' · '+p.site.width+' × '+p.site.depth+' m · '+p.site.floors+' tầng</p><p>'+esc([p.site.district,p.site.province].filter(Boolean).join(', '))+'</p><p>Dữ liệu '+esc(snapshot.revision)+' · '+new Date(snapshot.exportedAt).toLocaleDateString('vi-VN')+'</p><div class="notice">'+esc(snapshot.notice)+'</div></div>'+(image?'<img src="'+esc(image)+'" alt="Góc nhìn từ mô hình 3D của phương án">':'<div>'+sheets[0]?.svg+'</div>')+'</section><section class="page summary"><h2>Không gian & số đo</h2><table><thead><tr><th>Tầng</th><th>Không gian</th><th>Kích thước</th><th>Diện tích bố trí</th></tr></thead><tbody>'+rows+'</tbody></table><h2>Phong cách & vật liệu mô phỏng</h2><table><thead><tr><th>Phòng</th><th>Bộ nội thất</th><th>Bề mặt đang chọn</th></tr></thead><tbody>'+materials+'</tbody></table><p class="notice">Vật liệu mô phỏng giúp duyệt thẩm mỹ. Mã sản phẩm, quy cách và báo giá cần xác nhận với nhà cung cấp.</p></section><section class="page summary"><h2>Điểm cần đối chiếu trước khi chốt</h2>'+(snapshot.checks.length?'<ul>'+snapshot.checks.map(i=>'<li>'+esc(i.text)+'</li>').join(''):'<p>Chưa phát hiện xung đột hình học trong các kiểm tra hiện có.</p>')+'<p class="notice">'+esc(snapshot.notice)+'</p><p>Tệp thiet-ke.json là dữ liệu thiết kế để đối chiếu. Sao lưu dự án để mở lại BMH dùng chức năng Sao lưu trong Dự án của tôi.</p></section>'+sheets.map(s=>'<section class="page sheet">'+s.svg+'</section>').join('')+'</body></html>';
+};
+BMH.customerPackageFiles=(snapshot,sheets,html)=>{
+ const files=[['HO-SO-GUI-KHACH.html',html],['thiet-ke.json',JSON.stringify(snapshot,null,2)],['HUONG-DAN.txt','Mở HO-SO-GUI-KHACH.html để xem và in/lưu PDF A3.\nBản vẽ SVG và CAD DXF dùng đơn vị ghi trên từng tờ.\nHồ sơ là phương án sơ bộ, cần KS/KTS và hãng thang máy xác nhận trước thi công.\nẢnh PNG, nếu có, được lấy từ mô hình 3D của phương án.\nTệp này chỉ chứa thiết kế, không phải bản sao lưu toàn bộ tài khoản/dự án.\n']];
+ sheets.forEach((s,i)=>files.push(['ban-ve/'+String(i+1).padStart(2,'0')+'-'+s.name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-')+'.svg',s.svg]));
+ for(let floor=0;floor<Number(snapshot.project.site.floors);floor++)files.push(['cad/mat-bang-tang-'+(floor+1)+'-mm.dxf',BMH.planDxf(floor)]);
+ return files;
+};
+BMH.exportCustomerPackage=async()=>{
+ if(BMH.customerPackageBusy)return false;BMH.customerPackageBusy=true;const buttons=[...document.querySelectorAll('[data-client-package]')];buttons.forEach(b=>b.disabled=true);const project=BMH.state.project,revision=BMH.drawingRevision(),designKey=BMH.cinematicSignature(),cameraKey=BMH.cinematicCameraKey(),costKey=BMH.measuredPricingKey?.();
+ try{
+  const snapshot=BMH.customerDesignSnapshot(),sheets=BMH.architecturalSheets(),frame=BMH.studio3d?.renderer?await BMH.sharpStudioFrame(1280):BMH.cachedCustomerFrame?.()||null;
+  if(BMH.state.project!==project||BMH.drawingRevision()!==revision||BMH.cinematicSignature()!==designKey||BMH.cinematicCameraKey()!==cameraKey||costKey!==BMH.measuredPricingKey?.()){BMH.toast('Thiết kế/báo giá vừa đổi. Tạo lại hồ sơ để giữ đồng bộ.');return false;}
+  let image='';if(frame)image=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('Ảnh chưa đọc được'));reader.readAsDataURL(frame.blob);});
+  if(BMH.state.project!==project||BMH.drawingRevision()!==revision||BMH.cinematicSignature()!==designKey||BMH.cinematicCameraKey()!==cameraKey||costKey!==BMH.measuredPricingKey?.())return false;
+  const files=BMH.customerPackageFiles(snapshot,sheets,BMH.customerPresentationHtml(snapshot,sheets,image));if(frame)files.push(['phoi-canh-3D.png',new Uint8Array(await frame.blob.arrayBuffer())]);
+  if(BMH.architecturalPdfBytes)files.push(['bo-ban-ve-A3.pdf',await BMH.architecturalPdfBytes(sheets)]);
+  if(BMH.state.project!==project||BMH.drawingRevision()!==revision||BMH.cinematicSignature()!==designKey||BMH.cinematicCameraKey()!==cameraKey||costKey!==BMH.measuredPricingKey?.()){BMH.toast('Thiết kế/báo giá vừa đổi. Tạo lại hồ sơ để giữ đồng bộ.');return false;}
+  BMH.download('BMH-ho-so-gui-khach-'+revision+'.zip',BMH.zipStored(files),'application/zip');BMH.toast('Đã xuất hồ sơ: bản vẽ, CAD, vật liệu'+(frame?' và ảnh 3D của phương án.':'.'));return true;
+ }catch(error){console.warn('BMH client pack',error);BMH.toast('Chưa xuất được hồ sơ. Kiểm tra mặt bằng rồi thử lại.');return false;}finally{BMH.customerPackageBusy=false;buttons.forEach(b=>b.disabled=false);}
+};
+document.addEventListener('click',e=>{
+ const b=e.target.closest?.('[data-client-package],[data-view-save],[data-view-load],[data-view-delete],[data-camera-preset],[data-presentation-toggle],[data-studio-glb]');if(!b)return;
+ const d=b.dataset;if('studioGlb'in d)return void BMH.exportStudioGlb();if('clientPackage'in d)return void BMH.exportCustomerPackage();if('viewSave'in d)return BMH.saveDesignView();if(d.viewLoad)return BMH.loadDesignView(d.viewLoad);if(d.cameraPreset)return BMH.setStudioCameraPreset(d.cameraPreset);
+ if(d.viewDelete){BMH.designState().savedViews=BMH.savedDesignViews().filter(v=>v.id!==d.viewDelete);BMH.rememberFinishCamera();BMH.save();BMH.render({preserveScroll:true});return;}
+ if('presentationToggle'in d){BMH.rememberFinishCamera();BMH.state.ui.presentationMode=!BMH.state.ui.presentationMode;BMH.save();BMH.render({preserveScroll:true});}
+});

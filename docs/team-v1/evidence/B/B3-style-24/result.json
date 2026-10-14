@@ -1,0 +1,975 @@
+{
+  "runtime": "v22.23.0",
+  "browser": "145.0.7632.6",
+  "cases": [
+    {
+      "device": "desktop",
+      "styles": [
+        {
+          "id": "modern",
+          "style": "Hiện đại",
+          "roof": {
+            "type": "flat",
+            "name": "Mái bằng",
+            "pitchDeg": 0,
+            "overhang": 0,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "metal",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "bay-frame-jamb",
+            "bay-frame-head",
+            "bay-frame-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "feature-panel",
+            "roof-parapet",
+            "roof-coping",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "modern"
+          ],
+          "collection": "urban-stone",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6602
+        },
+        {
+          "id": "minimal",
+          "style": "Tối giản",
+          "roof": {
+            "type": "flat",
+            "name": "Mái bằng",
+            "pitchDeg": 0,
+            "overhang": 0,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "plaster",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "horizontal-band",
+            "roof-parapet",
+            "roof-coping",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "minimal"
+          ],
+          "collection": "urban-stone",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6406
+        },
+        {
+          "id": "contemporary",
+          "style": "Đương đại",
+          "roof": {
+            "type": "flat",
+            "name": "Mái bằng",
+            "pitchDeg": 0,
+            "overhang": 0,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "stone",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "offset-fin",
+            "bay-frame-jamb",
+            "bay-frame-head",
+            "bay-frame-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "feature-panel",
+            "roof-parapet",
+            "roof-coping",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "contemporary"
+          ],
+          "collection": "soft-curves",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6100
+        },
+        {
+          "id": "classic",
+          "style": "Cổ điển",
+          "roof": {
+            "type": "hip",
+            "name": "Mái bốn dốc",
+            "pitchDeg": 30,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "plaster",
+          "features": [
+            "stone-course",
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "window-pediment",
+            "arch-crown",
+            "entry-canopy",
+            "cornice",
+            "cornice-step",
+            "pilaster",
+            "pilaster-base",
+            "pilaster-capital",
+            "pilaster-flute",
+            "roof-crown",
+            "cornice-dentil",
+            "roof-eave-band",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "classic"
+          ],
+          "collection": "neo-elegance",
+          "facadeTextures": [],
+          "visibleSwitchMs": 9577
+        },
+        {
+          "id": "neo",
+          "style": "Tân cổ điển",
+          "roof": {
+            "type": "hip",
+            "name": "Mái bốn dốc",
+            "pitchDeg": 30,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "plaster",
+          "features": [
+            "stone-course",
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "window-pediment",
+            "arch-crown",
+            "entry-canopy",
+            "cornice",
+            "pilaster",
+            "pilaster-base",
+            "pilaster-capital",
+            "pilaster-flute",
+            "roof-crown",
+            "roof-eave-band",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "neo"
+          ],
+          "collection": "neo-elegance",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6949
+        },
+        {
+          "id": "indochine",
+          "style": "Đông Dương · Indochine",
+          "roof": {
+            "type": "hip",
+            "name": "Mái bốn dốc",
+            "pitchDeg": 30,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "arch-crown",
+            "shutter-frame",
+            "shutter",
+            "entry-canopy",
+            "cornice",
+            "roof-crown",
+            "roof-eave-band",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "indochine"
+          ],
+          "collection": "indochine",
+          "facadeTextures": [],
+          "visibleSwitchMs": 7102
+        },
+        {
+          "id": "mediterranean",
+          "style": "Địa Trung Hải",
+          "roof": {
+            "type": "hip",
+            "name": "Mái bốn dốc",
+            "pitchDeg": 30,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "plaster",
+          "features": [
+            "stone-course",
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "arch-crown",
+            "entry-canopy",
+            "horizontal-band",
+            "roof-eave-band",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "mediterranean"
+          ],
+          "collection": "coastal",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6440
+        },
+        {
+          "id": "scandi",
+          "style": "Bắc Âu · Scandinavian",
+          "roof": {
+            "type": "gable",
+            "name": "Mái hai dốc",
+            "pitchDeg": 30,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "timber-panel",
+            "timber-batten",
+            "roof-eave-band",
+            "timber-panel-joint",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "scandi"
+          ],
+          "collection": "nordic-light",
+          "facadeTextures": [],
+          "visibleSwitchMs": 8191
+        },
+        {
+          "id": "japandi",
+          "style": "Japandi",
+          "roof": {
+            "type": "flat",
+            "name": "Mái bằng",
+            "pitchDeg": 0,
+            "overhang": 0,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "bay-frame-jamb",
+            "bay-frame-head",
+            "bay-frame-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "timber-panel",
+            "timber-batten",
+            "timber-panel-joint",
+            "roof-parapet",
+            "roof-coping",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "japandi"
+          ],
+          "collection": "warm-oak",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6750
+        },
+        {
+          "id": "japanese",
+          "style": "Nhật Bản",
+          "roof": {
+            "type": "hip",
+            "name": "Mái bốn dốc",
+            "pitchDeg": 28,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "shade-blade",
+            "entry-canopy",
+            "horizontal-band",
+            "wood-slat",
+            "roof-eave-band",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "japanese"
+          ],
+          "collection": "warm-oak",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6326
+        },
+        {
+          "id": "tropical",
+          "style": "Nhiệt đới",
+          "roof": {
+            "type": "hip",
+            "name": "Mái bốn dốc",
+            "pitchDeg": 28,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "shade-blade",
+            "entry-canopy",
+            "horizontal-band",
+            "wood-slat",
+            "roof-eave-band",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "tropical"
+          ],
+          "collection": "coastal",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6423
+        },
+        {
+          "id": "artdeco",
+          "style": "Art Deco",
+          "roof": {
+            "type": "flat",
+            "name": "Mái bằng",
+            "pitchDeg": 0,
+            "overhang": 0,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "metal",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "deco-step",
+            "bay-frame-jamb",
+            "bay-frame-head",
+            "bay-frame-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "cornice-step",
+            "deco-fin",
+            "roof-parapet",
+            "roof-coping",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "artdeco"
+          ],
+          "collection": "olive-gallery",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6638
+        },
+        {
+          "id": "french",
+          "style": "Pháp tỉnh lẻ",
+          "roof": {
+            "type": "hip",
+            "name": "Mái bốn dốc",
+            "pitchDeg": 30,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "plaster",
+          "features": [
+            "stone-course",
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "window-pediment",
+            "arch-crown",
+            "entry-canopy",
+            "cornice",
+            "cornice-step",
+            "pilaster",
+            "pilaster-base",
+            "pilaster-capital",
+            "pilaster-flute",
+            "roof-crown",
+            "cornice-dentil",
+            "roof-eave-band",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "french"
+          ],
+          "collection": "neo-elegance",
+          "facadeTextures": [],
+          "visibleSwitchMs": 7172
+        },
+        {
+          "id": "spanish",
+          "style": "Thuộc địa Tây Ban Nha",
+          "roof": {
+            "type": "hip",
+            "name": "Mái bốn dốc",
+            "pitchDeg": 30,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "plaster",
+          "features": [
+            "stone-course",
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "arch-crown",
+            "shutter-frame",
+            "shutter",
+            "entry-canopy",
+            "cornice",
+            "roof-crown",
+            "roof-eave-band",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "spanish"
+          ],
+          "collection": "coastal",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6754
+        },
+        {
+          "id": "tuscan",
+          "style": "Tuscan · Ý",
+          "roof": {
+            "type": "hip",
+            "name": "Mái bốn dốc",
+            "pitchDeg": 30,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "stone",
+          "features": [
+            "stone-course",
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "arch-crown",
+            "shutter-frame",
+            "shutter",
+            "entry-canopy",
+            "cornice",
+            "feature-panel",
+            "roof-crown",
+            "roof-eave-band",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "tuscan"
+          ],
+          "collection": "olive-gallery",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6639
+        },
+        {
+          "id": "craftsman",
+          "style": "Craftsman",
+          "roof": {
+            "type": "gable",
+            "name": "Mái hai dốc",
+            "pitchDeg": 30,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "pilaster",
+            "pilaster-base",
+            "pilaster-capital",
+            "roof-eave-band",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "craftsman"
+          ],
+          "collection": "warm-oak",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6358
+        },
+        {
+          "id": "tudor",
+          "style": "Tudor",
+          "roof": {
+            "type": "gable",
+            "name": "Mái hai dốc",
+            "pitchDeg": 45,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "vertical-joint",
+            "timber-post",
+            "timber-diagonal",
+            "roof-eave-band",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "tudor"
+          ],
+          "collection": "indochine",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6509
+        },
+        {
+          "id": "barn",
+          "style": "Modern Barn",
+          "roof": {
+            "type": "gable",
+            "name": "Mái hai dốc",
+            "pitchDeg": 30,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "metal",
+          "features": [
+            "style-cladding",
+            "metal-standing-seam",
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "horizontal-band",
+            "vertical-joint",
+            "roof-eave-band",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "barn"
+          ],
+          "collection": "urban-stone",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6526
+        },
+        {
+          "id": "midcentury",
+          "style": "Mid-century Modern",
+          "roof": {
+            "type": "flat",
+            "name": "Mái bằng",
+            "pitchDeg": 0,
+            "overhang": 0,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "roof-parapet",
+            "roof-coping",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "midcentury"
+          ],
+          "collection": "mid-century",
+          "facadeTextures": [],
+          "visibleSwitchMs": 8702
+        },
+        {
+          "id": "industrial",
+          "style": "Industrial",
+          "roof": {
+            "type": "flat",
+            "name": "Mái bằng",
+            "pitchDeg": 0,
+            "overhang": 0,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "brick",
+          "features": [
+            "style-cladding",
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "feature-panel",
+            "roof-parapet",
+            "roof-coping",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "industrial"
+          ],
+          "collection": "loft-leather",
+          "facadeTextures": [
+            {
+              "key": "brick:color",
+              "source": "brick_wall_001"
+            },
+            {
+              "key": "brick:normal",
+              "source": "brick_wall_001"
+            },
+            {
+              "key": "brick:roughness",
+              "source": "brick_wall_001"
+            }
+          ],
+          "visibleSwitchMs": 8268
+        },
+        {
+          "id": "brutalist",
+          "style": "Brutalist",
+          "roof": {
+            "type": "flat",
+            "name": "Mái bằng",
+            "pitchDeg": 0,
+            "overhang": 0,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "concrete",
+          "features": [
+            "style-cladding",
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "bay-frame-jamb",
+            "bay-frame-head",
+            "bay-frame-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "feature-panel",
+            "roof-parapet",
+            "roof-coping",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "brutalist"
+          ],
+          "collection": "urban-stone",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6624
+        },
+        {
+          "id": "coastal",
+          "style": "Coastal",
+          "roof": {
+            "type": "gable",
+            "name": "Mái hai dốc",
+            "pitchDeg": 22,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "plaster",
+          "features": [
+            "weatherboard-joint",
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "shutter-frame",
+            "shutter",
+            "entry-canopy",
+            "horizontal-band",
+            "vertical-joint",
+            "roof-eave-band",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "coastal"
+          ],
+          "collection": "coastal",
+          "facadeTextures": [],
+          "visibleSwitchMs": 7197
+        },
+        {
+          "id": "vietnamese",
+          "style": "Việt Nam đương đại",
+          "roof": {
+            "type": "hip",
+            "name": "Mái bốn dốc",
+            "pitchDeg": 28,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "shade-blade",
+            "entry-canopy",
+            "cornice",
+            "wood-slat",
+            "roof-crown",
+            "roof-eave-band",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "vietnamese"
+          ],
+          "collection": "indochine",
+          "facadeTextures": [],
+          "visibleSwitchMs": 7421
+        },
+        {
+          "id": "balinese",
+          "style": "Bali",
+          "roof": {
+            "type": "hip",
+            "name": "Mái bốn dốc",
+            "pitchDeg": 28,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "shade-blade",
+            "entry-canopy",
+            "horizontal-band",
+            "timber-panel",
+            "timber-batten",
+            "roof-eave-band",
+            "timber-panel-joint",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "balinese"
+          ],
+          "collection": "warm-oak",
+          "facadeTextures": [],
+          "visibleSwitchMs": 6981
+        }
+      ],
+      "comparisons": [
+        {
+          "a": "japandi",
+          "b": "industrial",
+          "changedPixelFraction": 0.30347976919536973
+        },
+        {
+          "a": "japandi",
+          "b": "scandi",
+          "changedPixelFraction": 0.2654208998548621
+        }
+      ],
+      "measuredPlanUnchanged": true,
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "device": "phone",
+      "styles": [
+        {
+          "id": "japandi",
+          "style": "Japandi",
+          "roof": {
+            "type": "flat",
+            "name": "Mái bằng",
+            "pitchDeg": 0,
+            "overhang": 0,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "bay-frame-jamb",
+            "bay-frame-head",
+            "bay-frame-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "timber-panel",
+            "timber-batten",
+            "timber-panel-joint",
+            "roof-parapet",
+            "roof-coping",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "japandi"
+          ],
+          "collection": "warm-oak",
+          "facadeTextures": [],
+          "visibleSwitchMs": 7746
+        },
+        {
+          "id": "industrial",
+          "style": "Industrial",
+          "roof": {
+            "type": "flat",
+            "name": "Mái bằng",
+            "pitchDeg": 0,
+            "overhang": 0,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "brick",
+          "features": [
+            "style-cladding",
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "feature-panel",
+            "roof-parapet",
+            "roof-coping",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "industrial"
+          ],
+          "collection": "loft-leather",
+          "facadeTextures": [
+            {
+              "key": "brick:color",
+              "source": "brick_wall_001"
+            },
+            {
+              "key": "brick:normal",
+              "source": "brick_wall_001"
+            },
+            {
+              "key": "brick:roughness",
+              "source": "brick_wall_001"
+            }
+          ],
+          "visibleSwitchMs": 7008
+        },
+        {
+          "id": "scandi",
+          "style": "Bắc Âu · Scandinavian",
+          "roof": {
+            "type": "gable",
+            "name": "Mái hai dốc",
+            "pitchDeg": 30,
+            "overhang": 0.10999999999999943,
+            "ridge": "auto",
+            "source": "Gợi ý từ phong cách; có thể chỉnh"
+          },
+          "surface": "wood",
+          "features": [
+            "plinth",
+            "window-reveal",
+            "opening-head",
+            "window-sill",
+            "entry-canopy",
+            "horizontal-band",
+            "timber-panel",
+            "timber-batten",
+            "roof-eave-band",
+            "timber-panel-joint",
+            "opening-jamb"
+          ],
+          "renderedStyleIds": [
+            "scandi"
+          ],
+          "collection": "nordic-light",
+          "facadeTextures": [],
+          "visibleSwitchMs": 9196
+        }
+      ],
+      "comparisons": [
+        {
+          "a": "japandi",
+          "b": "industrial",
+          "changedPixelFraction": 0.4795168067226891
+        },
+        {
+          "a": "japandi",
+          "b": "scandi",
+          "changedPixelFraction": 0.38608469703670945
+        }
+      ],
+      "measuredPlanUnchanged": true,
+      "errors": [],
+      "overflow": false
+    }
+  ],
+  "visualAcceptance": false
+}

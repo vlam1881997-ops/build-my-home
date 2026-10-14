@@ -1,0 +1,131 @@
+{
+  "license": "CC0-1.0",
+  "licenseUrl": "https://polyhaven.com/license",
+  "prepared": "2026-10-08",
+  "processing": "Static local files. 512px colour neutralized for customer tint; GL normals normalized. Roof/mineral surfaces are generic visual approximations, not supplier SKUs. Sky is illustrative and not the customer location. No runtime external asset API.",
+  "assets": [
+    {
+      "id": "marble_01",
+      "source": "https://polyhaven.com/a/marble_01",
+      "files": [
+        {
+          "file": "assets/interior/textures/marble_01-diff.png",
+          "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/marble_01/marble_01_diff_1k.jpg",
+          "sourceMd5": "04325ced5018eb8a2e598a4ef69cb176",
+          "sha256": "c16f2a6f018763db58b21413ccc3dd8fc822890038cbe8ac56a7f50f8e56e68b",
+          "bytes": 148548
+        },
+        {
+          "file": "assets/interior/textures/marble_01-nor_gl.png",
+          "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/marble_01/marble_01_nor_gl_1k.jpg",
+          "sourceMd5": "fa073d722cde733c1bd6cc6e8897c8e3",
+          "sha256": "197e0cab62b93ddf5f31b857b8a2aa8077448353430150934e108b7e80d155bc",
+          "bytes": 144469
+        },
+        {
+          "file": "assets/interior/textures/marble_01-rough.png",
+          "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/marble_01/marble_01_rough_1k.jpg",
+          "sourceMd5": "59cef1be1b7376c9d0dcc7a64adf7882",
+          "sha256": "087b24d0ccfb1223ad36f162cb794ac033835898d1db669e4e7d043463c7d455",
+          "bytes": 86954
+        }
+      ],
+      "metreTile": [
+        1.5,
+        1.5
+      ],
+      "generic": true,
+      "authors": [
+        "Rob Tuytel"
+      ]
+    },
+    {
+      "id": "roof_07",
+      "source": "https://polyhaven.com/a/roof_07",
+      "files": [
+        {
+          "file": "assets/interior/textures/roof_07-diff.png",
+          "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/roof_07/roof_07_diff_1k.jpg",
+          "sourceMd5": "5cca627f07a68f51d66e2d68fa8dea98",
+          "sha256": "053fa49b8b516d5f19ac1074215f2f060193a7632e8e255afd18c40b0ac496ce",
+          "bytes": 225182
+        },
+        {
+          "file": "assets/interior/textures/roof_07-nor_gl.png",
+          "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/roof_07/roof_07_nor_gl_1k.jpg",
+          "sourceMd5": "9e300977c51811d98d6c86dda14e8d5a",
+          "sha256": "56df42682d66534c167c433bbc522a1b2790dd3abffef19a8664904f1f4e7679",
+          "bytes": 262221
+        },
+        {
+          "file": "assets/interior/textures/roof_07-rough.png",
+          "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/roof_07/roof_07_rough_1k.jpg",
+          "sourceMd5": "2bd7ad21f2ddd70010a317b4c9645787",
+          "sha256": "8781b732c5251a2973e3798cd23706ddbdc1fbb1911bc56b753593bf14d9deed",
+          "bytes": 348365
+        }
+      ],
+      "metreTile": [
+        2,
+        2
+      ],
+      "generic": true,
+      "authors": [
+        "Rob Tuytel"
+      ]
+    },
+    {
+      "id": "kloppenheim_06_puresky",
+      "source": "https://polyhaven.com/a/kloppenheim_06_puresky",
+      "authors": [
+        "Greg Zaal",
+        "Jarod Guest"
+      ],
+      "genericContext": true,
+      "files": [
+        {
+          "file": "assets/interior/environments/daylight-1k.hdr",
+          "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/kloppenheim_06_puresky_1k.hdr",
+          "sourceMd5": "995d68b1656f26452572645c0ffe898b",
+          "sha256": "206c67e3a1b992282821cf06662bdd69bbb4915c1c4444a66338a40d6a7d4e34",
+          "bytes": 1173154
+        }
+      ]
+    },
+    {
+      "id": "white_plaster_02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/white_plaster_02",
+      "metreTile": [
+        1,
+        1
+      ],
+      "generic": true,
+      "files": [
+        {
+          "file": "assets/interior/textures/white_plaster_02-diff.png",
+          "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/white_plaster_02/white_plaster_02_diff_1k.jpg",
+          "sourceMd5": "7b10c2686bcfd76d1f309a20fd06b57e",
+          "sha256": "4aec903dbd81252cd0062360ecd3a2e95fd9bc2da1db8729216337791b559053",
+          "bytes": 174174
+        },
+        {
+          "file": "assets/interior/textures/white_plaster_02-nor_gl.png",
+          "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/white_plaster_02/white_plaster_02_nor_gl_1k.jpg",
+          "sourceMd5": "55fc03203ebf1dc703a380fde93ff502",
+          "sha256": "ee669ef44abd96fb2c08f58de25370144c4720a7ab6d00e3a0713da6109e5ab7",
+          "bytes": 390209
+        },
+        {
+          "file": "assets/interior/textures/white_plaster_02-rough.png",
+          "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/white_plaster_02/white_plaster_02_rough_1k.jpg",
+          "sourceMd5": "8b28f263360b8c4ddbdc4f7c650c4eeb",
+          "sha256": "a4eac0b1d6ad3ddad37a987d3385ded4990ea0ee337ee3700ab717c364a2ac22",
+          "bytes": 171854
+        }
+      ]
+    }
+  ]
+}

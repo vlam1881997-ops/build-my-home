@@ -1,0 +1,306 @@
+{
+  "generator": "tests/team-b-furniture-thumbnails.browser.cjs",
+  "note": "Neutral catalogue renders; room style and chosen finishes may change procedural shapes. Not supplier product photographs.",
+  "models": [
+    {
+      "id": "bedDouble",
+      "dimensionsMetres": {
+        "w": 1.912,
+        "h": 0.75,
+        "d": 2.25
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "bedSingle",
+      "dimensionsMetres": {
+        "w": 1.142,
+        "h": 0.75,
+        "d": 2.25
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "loungeDesignSofa",
+      "dimensionsMetres": {
+        "w": 2.24,
+        "h": 0.8,
+        "d": 0.82
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "loungeChair",
+      "dimensionsMetres": {
+        "w": 0.98,
+        "h": 0.92,
+        "d": 0.82
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "tableCoffee",
+      "dimensionsMetres": {
+        "w": 1.322,
+        "h": 0.46,
+        "d": 0.8
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "table",
+      "dimensionsMetres": {
+        "w": 1.683,
+        "h": 0.6535,
+        "d": 0.8947
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "chair",
+      "dimensionsMetres": {
+        "w": 0.4,
+        "h": 0.94,
+        "d": 0.4
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "cabinetTelevision",
+      "dimensionsMetres": {
+        "w": 1.6,
+        "h": 0.62,
+        "d": 0.5
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "televisionModern",
+      "dimensionsMetres": {
+        "w": 1.3696,
+        "h": 0.9095,
+        "d": 0.2568
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "kitchenSink",
+      "dimensionsMetres": {
+        "w": 0.86,
+        "h": 0.98,
+        "d": 0.9
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "kitchenStove",
+      "dimensionsMetres": {
+        "w": 0.86,
+        "h": 0.9,
+        "d": 0.9
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "kitchenFridge",
+      "dimensionsMetres": {
+        "w": 0.86,
+        "h": 1.84,
+        "d": 0.5839
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "bathroomSink",
+      "dimensionsMetres": {
+        "w": 0.68,
+        "h": 1.12,
+        "d": 0.58
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "toilet",
+      "dimensionsMetres": {
+        "w": 0.6251,
+        "h": 0.9019,
+        "d": 0.9544
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "shower",
+      "dimensionsMetres": {
+        "w": 1.1236,
+        "h": 2.1881,
+        "d": 1.1636
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "bookcaseClosedWide",
+      "dimensionsMetres": {
+        "w": 1.6,
+        "h": 1.58,
+        "d": 0.5
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "desk",
+      "dimensionsMetres": {
+        "w": 1.469,
+        "h": 0.7688,
+        "d": 0.7846
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "chairDesk",
+      "dimensionsMetres": {
+        "w": 0.6699,
+        "h": 1.2152,
+        "d": 0.6286
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "pottedPlant",
+      "dimensionsMetres": {
+        "w": 0.4241,
+        "h": 1.308,
+        "d": 0.4829
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "cabinetBed",
+      "dimensionsMetres": {
+        "w": 0.532,
+        "h": 0.4664,
+        "d": 0.43
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "loungeChairModern",
+      "dimensionsMetres": {
+        "w": 0.8203444183,
+        "h": 1.0228520567,
+        "d": 0.9865616858
+      },
+      "source": "assets/interior/models/modern-armchair-facing.glb",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "tableCoffeeModern",
+      "dimensionsMetres": {
+        "w": 1.1991113424301147,
+        "h": 0.3692496716976166,
+        "d": 1.1996567845344543
+      },
+      "source": "assets/interior/models/modern-coffee-table.glb",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "sideTable",
+      "dimensionsMetres": {
+        "w": 0.4,
+        "h": 0.65,
+        "d": 0.4
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "floorLamp",
+      "dimensionsMetres": {
+        "w": 0.4,
+        "h": 1.62,
+        "d": 0.4
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    },
+    {
+      "id": "washingMachine",
+      "dimensionsMetres": {
+        "w": 0.6,
+        "h": 0.85,
+        "d": 0.65
+      },
+      "source": "src/43_scene_assets.js:createRoomAsset",
+      "neutralFinish": true,
+      "manufacturer": null,
+      "sku": null
+    }
+  ]
+}

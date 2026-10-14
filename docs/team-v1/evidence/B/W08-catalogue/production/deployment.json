@@ -1,0 +1,41 @@
+{
+  "id": "dpl_963C7VUbPqd8DEp1GNE8VW97sfWu",
+  "name": "build_my_home_full_v1.2_github",
+  "url": "buildmyhomefullv12github-o9hibyuxc-vlam1881997-9266.vercel.app",
+  "type": "LAMBDAS",
+  "state": "READY",
+  "createdAt": 1791892125640,
+  "creator": {
+    "uid": "JrF29pow3oIlTW0EbOyAnKwF",
+    "username": "vlam1881997-9266"
+  },
+  "project": {
+    "id": "prj_PcB996IRamEZqWrKpA5qk9T290kh",
+    "name": "build_my_home_full_v1.2_github",
+    "framework": null
+  },
+  "meta": {
+    "githubCommitRef": "main",
+    "githubCommitSha": "ddf9dfe348263a28148cfbf8ca5132f1d492f8dc",
+    "githubCommitMessage": "Merge pull request #47 from vlam1881997-ops/codex/b-facade-depth\n\nfeat: measured furniture catalogue previews",
+    "githubRepo": "build-my-home",
+    "githubOrg": "vlam1881997-ops"
+  },
+  "alias": [
+    "nhanhocuatoi.com",
+    "www.huiminhbach.id.vn",
+    "buildmyhomefullv12github.vercel.app",
+    "huiminhbach.id.vn",
+    "buildmyhomefullv12github-vlam1881997-9266.vercel.app",
+    "buildmyhomefullv12github-git-main-vlam1881997-9266.vercel.app"
+  ],
+  "target": "production",
+  "regions": [
+    "iad1"
+  ],
+  "buildingAt": 1791892127031,
+  "ready": 1791892138031,
+  "readyState": "READY",
+  "source": "git",
+  "aliasError": null
+}

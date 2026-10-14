@@ -1,0 +1,93 @@
+[
+  {
+    "fixture": "townhouse",
+    "revision": "7B152BC9-741638A5-AI4-RH2",
+    "sheets": 34,
+    "floors": [
+      {
+        "floor": 0,
+        "INSUNITS": 4,
+        "auditErrors": 0,
+        "auditFixes": 0,
+        "parcelAreaM2": 108.0,
+        "roomBoundsMm": true
+      },
+      {
+        "floor": 1,
+        "INSUNITS": 4,
+        "auditErrors": 0,
+        "auditFixes": 0,
+        "parcelAreaM2": 108.0,
+        "roomBoundsMm": true
+      },
+      {
+        "floor": 2,
+        "INSUNITS": 4,
+        "auditErrors": 0,
+        "auditFixes": 0,
+        "parcelAreaM2": 108.0,
+        "roomBoundsMm": true
+      }
+    ],
+    "pdf": "not-tested",
+    "professionalReview": "awaiting-review"
+  },
+  {
+    "fixture": "wide",
+    "revision": "518ED9D8-741638A5-AI4-RH2",
+    "sheets": 33,
+    "floors": [
+      {
+        "floor": 0,
+        "INSUNITS": 4,
+        "auditErrors": 0,
+        "auditFixes": 0,
+        "parcelAreaM2": 280.0,
+        "roomBoundsMm": true
+      },
+      {
+        "floor": 1,
+        "INSUNITS": 4,
+        "auditErrors": 0,
+        "auditFixes": 0,
+        "parcelAreaM2": 280.0,
+        "roomBoundsMm": true
+      }
+    ],
+    "pdf": "not-tested",
+    "professionalReview": "awaiting-review"
+  },
+  {
+    "fixture": "concave",
+    "revision": "8594992E-741638A5-AI4-RH2",
+    "sheets": 35,
+    "floors": [
+      {
+        "floor": 0,
+        "INSUNITS": 4,
+        "auditErrors": 0,
+        "auditFixes": 0,
+        "parcelAreaM2": 176.0,
+        "roomBoundsMm": true
+      },
+      {
+        "floor": 1,
+        "INSUNITS": 4,
+        "auditErrors": 0,
+        "auditFixes": 0,
+        "parcelAreaM2": 176.0,
+        "roomBoundsMm": true
+      },
+      {
+        "floor": 2,
+        "INSUNITS": 4,
+        "auditErrors": 0,
+        "auditFixes": 0,
+        "parcelAreaM2": 176.0,
+        "roomBoundsMm": true
+      }
+    ],
+    "pdf": "not-tested",
+    "professionalReview": "awaiting-review"
+  }
+]

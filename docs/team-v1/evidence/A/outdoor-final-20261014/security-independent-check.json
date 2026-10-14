@@ -1,0 +1,32 @@
+{
+  "scope": [
+    "src/30_planner.js",
+    "src/40_exports.js",
+    "src/92_measured_design.js",
+    "src/95_architectural_documents.js",
+    "src/team-a-boq.js",
+    "src/team-a-handover.js",
+    "src/team-a-project-contract.js",
+    "tests/team-a-massing-export-qa.py",
+    "tests/team-a-massing-export.mjs",
+    "tests/team-a-massing-pdf.browser.cjs",
+    "tests/team-a-outdoor.test.mjs",
+    "tests/team-a-outdoor.browser.cjs"
+  ],
+  "patterns": [
+    "private-key",
+    "github-token",
+    "aws-access",
+    "openai-token"
+  ],
+  "matches": [],
+  "manualReview": [
+    "sourceReference escaped in SVG",
+    "candidate revalidated before mutation",
+    "stale/lock rejection",
+    "external details remain unpriced unless supplied",
+    "no new network or dependency code"
+  ],
+  "officialCodexSecurity": "pending: required config-preflight reference/capability unavailable",
+  "dependencyAudit": "1 moderate dev esbuild; no high/critical; no dependency change"
+}

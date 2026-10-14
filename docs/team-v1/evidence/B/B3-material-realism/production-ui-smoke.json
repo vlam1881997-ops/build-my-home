@@ -1,0 +1,69 @@
+{
+  "origin": "https://www.huiminhbach.id.vn",
+  "expectedCommit": "03c0b9f4228fc197dbd18d039fc9fb16549c9b89",
+  "runtime": "v22.23.3",
+  "isolatedProviders": true,
+  "transport": "public HTTPS via TLS-verifying Node fetch; Chromium transport lacks managed proxy CA, no TLS bypass",
+  "devices": [
+    {
+      "device": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "tenRoutes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "nativeSchema": true,
+      "realAngleEdit": 37,
+      "quoteTouch": true,
+      "bankForm": true,
+      "handover": true,
+      "supervision": true,
+      "materialIllustrations": true,
+      "datedReferencePrices": true,
+      "neutralCutCaps": true,
+      "measuredInteriorFinishes": true,
+      "errors": []
+    },
+    {
+      "device": "phone",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "tenRoutes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "nativeSchema": true,
+      "realAngleEdit": 37,
+      "quoteTouch": true,
+      "bankForm": true,
+      "handover": true,
+      "supervision": true,
+      "materialIllustrations": true,
+      "datedReferencePrices": true,
+      "neutralCutCaps": true,
+      "measuredInteriorFinishes": true,
+      "errors": []
+    }
+  ]
+}

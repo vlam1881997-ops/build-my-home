@@ -1,0 +1,30 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..'),pub=path.join(root,'dist');
+const read=f=>fs.readFileSync(path.join(pub,f),'utf8');
+test('public runtime is self-contained and keeps one debug JS bundle',()=>{const h=read('index.html');const local=[...h.matchAll(/<script src=\"([^\"]+)\"/g)].map(m=>m[1]).filter(x=>!/^https?:/.test(x));assert.deepEqual(local,[]);assert.match(h,/id=\"bmh-inline-app\"/);assert.equal(fs.existsSync(path.join(pub,'app.js')),true);});
+test('public runtime has one local CSS bundle',()=>{const h=read('index.html');const local=[...h.matchAll(/<link rel="stylesheet" href="([^"]+)"/g)].map(m=>m[1]).filter(x=>!/^https?:/.test(x));assert.deepEqual(local,['styles.css']);});
+test('legacy patch files are absent',()=>{for(const f of ['v2.js','v21.js','design-polish.js','product-suite.js','mobile-resilience.js','upgrade.js','core.js','v2.css','v21.css','design-polish.css','product-suite.css'])assert.equal(fs.existsSync(path.join(pub,f)),false,f);});
+test('single entitlement guards both steps 9 and 10',()=>{const js=read('app.js');assert.match(js,/step>=9&&!BMH\.isUnlocked\(\)/);assert.match(js,/step===8&&!BMH\.isUnlocked\(\)/);});
+test('3D scene exists only in screen 7 implementation',()=>{const js=read('app.js');assert.match(js,/BMH\.screen7/);assert.doesNotMatch(js,/screen1[\s\S]{0,3000}callout/);});
+test('Binh Duong coordinates are pinned correctly',()=>{assert.match(read('app.js'),/'Bình Dương': \{lat:11\.160, lng:106\.650/);});
+test('planner has door and window objects',()=>{const js=read('app.js');assert.match(js,/kind:'door'/);assert.match(js,/kind:'window'/);assert.match(js,/data-add-opening="door"/);});
+test('planner uses one pointer controller',()=>{const js=read('app.js');assert.equal((js.match(/addEventListener\('pointerdown'/g)||[]).length,1);assert.equal((js.match(/addEventListener\('pointermove'/g)||[]).length,1);assert.equal((js.match(/addEventListener\('pointerup'/g)||[]).length,1);});
+test('production does not expose dev pay unless local DEV flag',()=>{const js=read('app.js');assert.match(js,/BMH\.DEV\?'<button class="dev-pay"/);});
+test('step 5 has no watermark labels',()=>{const js=read('app.js');assert.doesNotMatch(js,/THƯỚC TỶ LỆ Ý TƯỞNG|tọa độ theo tim tường|Ranh đất, sơ đồ ý tưởng/);});
+test('V3.2 planner renders architectural wall layer and dimension chains',()=>{const js=read('app.js');assert.match(js,/BMH\.wallSegments/);assert.match(js,/arch-wall/);assert.match(js,/dimension-chain/);});
+test('V3.2 openings are editable and tagged',()=>{const js=read('app.js');assert.match(js,/openingCode/);assert.match(js,/data-opening-field/);assert.match(js,/data-opening-delete/);});
+test('V3.2 3D uses cutaway model linked to planner and materials',()=>{const js=read('app.js');assert.match(js,/3D CUTAWAY/);assert.match(js,/Mặt bằng Bước 5 \+ vật liệu Bước 6/);assert.match(js,/openingMarkup/);});
+test('V3.3 planner has direct smart-wall edge editing',()=>{const js=read('app.js');assert.match(js,/edgeMoveCandidate/);assert.match(js,/data-edge-id/);assert.match(js,/sharedWallNeighbors/);});
+test('V3.3 door and window tools place openings on clicked walls',()=>{const js=read('app.js');assert.match(js,/placeOpeningAt/);assert.match(js,/data-wall-place/);assert.match(js,/tool==='select'/);});
+test('V3.3 planner supports undo redo and zoom controls',()=>{const js=read('app.js');assert.match(js,/undoPlan/);assert.match(js,/redoPlan/);assert.match(js,/data-plan-undo/);assert.match(js,/data-planner-zoom/);});
+test('V3.3 design review scores are derived from project state',()=>{const js=read('app.js');assert.match(js,/BMH\.designReview/);assert.match(js,/review\.overall/);assert.match(js,/review\.function/);});
+test('V3.3 cutaway can explode floors',()=>{const js=read('app.js');assert.match(js,/sceneExploded/);assert.match(js,/data-scene-explode/);assert.match(js,/zStep=ui\.sceneExploded\?3\.8:3/);});
+test('V3.4 planner provides coordinated floor overlay and structural suggestions',()=>{const js=read('app.js');assert.match(js,/belowFloorSvg/);assert.match(js,/suggestedColumns/);assert.match(js,/data-planner="below"/);assert.match(js,/data-planner="structure"/);});
+test('V3.4 planner analyses daylight and natural ventilation',()=>{const js=read('app.js');assert.match(js,/roomEnvironment/);assert.match(js,/daylight/);assert.match(js,/ventilation/);assert.match(js,/scene-analysis-strip/);});
+test('V3.4 planner can coordinate stairs and wet zones across floors',()=>{const js=read('app.js');assert.match(js,/coordinationIssues/);assert.match(js,/alignCurrentFloor/);assert.match(js,/data-align-floor/);});
+test('V3.4 cutaway displays structural column and north orientation layers',()=>{const js=read('app.js');assert.match(js,/iso-column/);assert.match(js,/iso-orientation/);});
+
+test('V3.4.2 Step 4 compass helper is defined before screen render',()=>{const js=read('app.js');assert.match(js,/BMH\.compass\s*=\s*\(\)\s*=>/);assert.match(js,/BMH\.screen4[\s\S]*BMH\.compass\(\)/);});
+test('V3.4.2 Step 4 household needs and interactive site controls exist',()=>{const js=read('app.js');assert.match(js,/BMH\.householdNeeds/);assert.match(js,/data-site-shape/);assert.match(js,/data-road-value/);});
+test('V3.4.2 render errors are contained instead of blanking the app',()=>{const js=read('app.js');assert.match(js,/BMH\.runtimeError/);assert.match(js,/render error at step/);});
+
+test('V3.4.2 Stable Boot removes service worker as critical dependency',()=>{const h=read('index.html'),js=read('app.js');assert.match(h,/getRegistrations/);assert.doesNotMatch(js,/serviceWorker\.register/);assert.match(js,/__BMH_BOOT_OK=true/);});

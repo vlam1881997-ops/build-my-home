@@ -1,0 +1,22 @@
+{
+  "main": "ec6f9a2780386dd5edc929e47c96dd84a4cbced4",
+  "source": "e522220dcb8392deaf97f7e4543b42ea6ffb5f30",
+  "deployment": "dpl_C5E5LqQpHdp4X4WndgtLAgZBCeKQ",
+  "checkedAt": "2026-10-13T11:37:19.965Z",
+  "rows": [
+    {
+      "url": "https://www.huiminhbach.id.vn/app.js",
+      "status": 200,
+      "bytes": 1715534,
+      "sha256": "b1a0d98047d8150b0fb2a1db469a4f026bfcfa145629baecbc449bdd16ed1f0e",
+      "matches": true
+    },
+    {
+      "url": "https://www.huiminhbach.id.vn/assets/architect3d/models/washingMachine.glb",
+      "status": 200,
+      "bytes": 109540,
+      "sha256": "7b195fb55a12951a62d636a65215c15d945bcba1f7a1c764a0473fc223a3e856",
+      "matches": true
+    }
+  ]
+}

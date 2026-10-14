@@ -1,0 +1,56 @@
+{
+  "pr": 42,
+  "head": "ee128022f3afe98dc78f6edf6d9f778e091780c2",
+  "sourceCommit": "edb338efcb62c2a18300d13f7fc48eab0c38f7fb",
+  "tests": {
+    "total": 473,
+    "pass": 473,
+    "fail": 0
+  },
+  "localBrowser": {
+    "desktopStyles": 24,
+    "phoneStyles": 3,
+    "errors": [],
+    "overflow": false
+  },
+  "production": {
+    "status": "deployed-bundle-verified",
+    "mergeCommit": "6a323673be7c5a6d6874b5bc345d9c354f6c5f55",
+    "domain": "https://www.huiminhbach.id.vn",
+    "vercelStatus": "success",
+    "ciStatus": "success",
+    "publicHashes": [
+      {
+        "name": "app.js",
+        "status": 200,
+        "sha256": "814a8d0a1d50989027dac79be356b407af9cee328b47d3c71528b8dfb8f600d7",
+        "bytes": 1708674,
+        "matches": true
+      },
+      {
+        "name": "styles.css",
+        "status": 200,
+        "sha256": "5259b590e6cb51decad5408e4dcda32218efa0cc2260d379d35b24175bc63392",
+        "bytes": 589466,
+        "matches": true
+      }
+    ],
+    "browserStatus": "partial-interrupted",
+    "desktopStylesCompleted": [
+      "japandi",
+      "industrial",
+      "scandi",
+      "neo"
+    ],
+    "phoneStatus": "not-completed-on-public-domain",
+    "interruption": "Automatic approval review could not execute result retrieval because the session usage limit was reached. No bypass was attempted. Four desktop exterior screenshots and timing lines survived; the full result.json did not.",
+    "recheckedDate": "2026-10-12",
+    "timingMsIncludingApplyCaptureAndForNeoHistoryReload": {
+      "japandi": 40308,
+      "industrial": 33665,
+      "scandi": 28111,
+      "neo": 73055
+    }
+  },
+  "commercialAcceptance": false
+}

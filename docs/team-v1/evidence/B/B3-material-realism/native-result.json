@@ -1,0 +1,37 @@
+{
+  "runtime": "v22.23.3",
+  "isolatedServices": true,
+  "proposedC01SchemaFixture": false,
+  "nativeContractIntegration": true,
+  "integratedAcceptance": false,
+  "devices": [
+    {
+      "device": "desktop",
+      "real2dEditor": true,
+      "real3dSelection": true,
+      "angle": 37,
+      "glb": true,
+      "tenTabs": true,
+      "evidenceAnnotation": true,
+      "localReload": true,
+      "localMediaIsolation": true,
+      "jsErrors": [],
+      "schema": "native A1 furniture contract"
+    },
+    {
+      "device": "phone",
+      "real2dEditor": true,
+      "real3dSelection": true,
+      "angle": 37,
+      "glb": false,
+      "tenTabs": true,
+      "evidenceAnnotation": true,
+      "localReload": true,
+      "localMediaIsolation": true,
+      "jsErrors": [],
+      "schema": "native A1 furniture contract"
+    }
+  ],
+  "styles": [],
+  "browser": "153.0.8010.0"
+}

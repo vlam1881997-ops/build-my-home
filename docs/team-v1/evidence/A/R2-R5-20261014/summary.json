@@ -1,0 +1,793 @@
+{
+  "runtime": "v22.23.0",
+  "pdfGate": "pending-native-browser",
+  "cases": [
+    {
+      "fixture": "townhouse",
+      "testOnly": true,
+      "revision": "7B152BC9-741638A5-AI4-RH2",
+      "units": "m",
+      "site": {
+        "width": 5.4,
+        "depth": 20,
+        "floors": 3,
+        "floorHeights": [
+          3.8,
+          3.4,
+          3.1
+        ],
+        "setbackFront": 1.5,
+        "setbackRear": 0.5,
+        "setbackSide": 0
+      },
+      "parcelArea": 108,
+      "room": {
+        "id": "design-f2-bed-1",
+        "before": {
+          "width": 3.9800000000000004,
+          "depth": 12.379999999999999,
+          "area": 49.272400000000005
+        },
+        "after": {
+          "width": 3.9800000000000004,
+          "depth": 3.8,
+          "area": 15.124
+        }
+      },
+      "released": {
+        "floor": 2,
+        "x": 0.11000000000000032,
+        "y": 1.61,
+        "w": 3.9800000000000004,
+        "h": 8.579999999999998,
+        "use": "office",
+        "reviewStatus": "awaiting-review",
+        "roomId": "design-f2-bed-1-released",
+        "area": 34.148399999999995
+      },
+      "changes": [
+        {
+          "kind": "window-room",
+          "id": "design-o23",
+          "from": "design-f2-bed-1",
+          "to": "design-f2-bed-1-released",
+          "reason": "Giữ cửa sổ trên tường ngoài của phòng mới, không để trên vách ngăn phòng ngủ."
+        },
+        {
+          "kind": "room-added",
+          "id": "design-f2-bed-1-released",
+          "type": "office"
+        },
+        {
+          "kind": "opening-added",
+          "id": "design-f2-bed-1-released-access"
+        }
+      ],
+      "sheets": [
+        "Bìa hồ sơ",
+        "Ranh đất / khoảng lùi",
+        "Kiến trúc tầng 1",
+        "Nội thất tầng 1",
+        "Bảng diện tích T1 / 1",
+        "Thống kê nội thất T1 / 1",
+        "Bảng cửa tầng 1 / 1",
+        "Kiến trúc tầng 2",
+        "Nội thất tầng 2",
+        "Bảng diện tích T2 / 1",
+        "Thống kê nội thất T2 / 1",
+        "Bảng cửa tầng 2 / 1",
+        "Kiến trúc tầng 3",
+        "Nội thất tầng 3",
+        "Bảng diện tích T3 / 1",
+        "Thống kê nội thất T3 / 1",
+        "Bảng cửa tầng 3 / 1",
+        "Mặt đứng trước",
+        "Mặt đứng sau",
+        "Mặt đứng phải",
+        "Mặt đứng trái",
+        "Mặt cắt A–A",
+        "Mặt cắt B–B",
+        "Chi tiết cầu thang tầng 1",
+        "Chi tiết cầu thang tầng 2",
+        "Mặt bằng mái",
+        "Vật liệu / 1",
+        "Vật liệu / 2",
+        "Vật liệu / 3",
+        "Vật liệu / 4",
+        "Vật liệu / 5",
+        "Vật liệu / 6",
+        "Vật liệu / 7",
+        "Sổ đầu vào / 1"
+      ],
+      "outputs": [
+        {
+          "file": "sheet-01.svg",
+          "sha256": "14613b495750aa2a2b3a58a30b8055ca0ede3413979f118ba3a47975d241d92c"
+        },
+        {
+          "file": "sheet-02.svg",
+          "sha256": "9db31dd2bc14734914fb3a396ef7f31ad271e867930791e23f3b4b69bc0938d0"
+        },
+        {
+          "file": "sheet-03.svg",
+          "sha256": "fab84d135335f72db99667d96968f2f1a6b0c6650409391866a020b2d38f71f0"
+        },
+        {
+          "file": "sheet-04.svg",
+          "sha256": "bfe9a6331538555f50d445295df18973c6f67d911887161faa909d8536c8941f"
+        },
+        {
+          "file": "sheet-05.svg",
+          "sha256": "7b232a92260aec64afc10caffcded55da97066ac48848ec3e6e70dd61b9b7152"
+        },
+        {
+          "file": "sheet-06.svg",
+          "sha256": "379ce60a5514026a6ef21dc516f3554a710683ae966ad6fbc4ca64efb5702848"
+        },
+        {
+          "file": "sheet-07.svg",
+          "sha256": "7dabfe25568dc9f49d9f896a4713f91ede2710c6ad11b761c9530c641b306dac"
+        },
+        {
+          "file": "sheet-08.svg",
+          "sha256": "c74e61e4770a5b242ffd05b61389fea9f4d2219342c091e0db2b266b8a3dbb1d"
+        },
+        {
+          "file": "sheet-09.svg",
+          "sha256": "d74a69e15840f0b646160488c7043271b409e2947f16d9f53be366833aa55897"
+        },
+        {
+          "file": "sheet-10.svg",
+          "sha256": "7d151f7509c53b7337e58ba801474d64b6f1acbf7267af301afc41cb7d8ecf92"
+        },
+        {
+          "file": "sheet-11.svg",
+          "sha256": "3eb82729d7230347ea520b9c980ffde6bc7b4899f72248c255e67150a5f2e04f"
+        },
+        {
+          "file": "sheet-12.svg",
+          "sha256": "cbd98bd5ce36c5825bf44a57bf118c3f0b36f402f53fe2414811b460d68d9c81"
+        },
+        {
+          "file": "sheet-13.svg",
+          "sha256": "4162d34a9576cfd2ead35bbcdfdb4448eb15a434e15def5829d4fdcab22a3ebc"
+        },
+        {
+          "file": "sheet-14.svg",
+          "sha256": "e79efcc9dc1253134ce7c86ea934c4e5d4a60611d6c48d5e7009b1212e8bcd8e"
+        },
+        {
+          "file": "sheet-15.svg",
+          "sha256": "f175d7b12a7c99ef39990f98070d196ea1ef438c758225d9a9ab1f0c34c2d35a"
+        },
+        {
+          "file": "sheet-16.svg",
+          "sha256": "0c3df707bd2179637265d3db5ead7c363d639d90c890c39579f92f57b3405e7c"
+        },
+        {
+          "file": "sheet-17.svg",
+          "sha256": "a9a5f69c210af04f795d4feabc860002f60d7a9f6c1c8dd74639506d3226897e"
+        },
+        {
+          "file": "sheet-18.svg",
+          "sha256": "d954a04a407694308a4b1d4f2039f931c43fce807e8d0594330bec9949ccdaa9"
+        },
+        {
+          "file": "sheet-19.svg",
+          "sha256": "f7d7fdaa361db3b9c23495697d7d7f0229ac43f33af8971bca750ce4478afa46"
+        },
+        {
+          "file": "sheet-20.svg",
+          "sha256": "bec7084efb108849e6fbf04efc436556ed20fac4d81a7f449faef54ed1681e3f"
+        },
+        {
+          "file": "sheet-21.svg",
+          "sha256": "5e7c004badd3e71c904ebc11089987a5ed9936d3e5bc58518074e561e99caa3e"
+        },
+        {
+          "file": "sheet-22.svg",
+          "sha256": "6ed9e31cfa1ee55742b5e6116e2bb8b43d0e283ba15e2880c0067cf0feddc3d1"
+        },
+        {
+          "file": "sheet-23.svg",
+          "sha256": "7e19bef3e97ac68e6b08942a67cc6de4f3f92bf5919afda138072592d4c51a09"
+        },
+        {
+          "file": "sheet-24.svg",
+          "sha256": "df82af10a49931e1952603029d3f197a246562353b5c8845c0bafcc8d5fb0179"
+        },
+        {
+          "file": "sheet-25.svg",
+          "sha256": "bd02a61633c5137970ea47ab136b28644c20e56575e368f0d013feacd500f2e5"
+        },
+        {
+          "file": "sheet-26.svg",
+          "sha256": "25aa428375c7ec8dbcad67e458dfe0cad82e130a2096f48106dac50962ffc2d0"
+        },
+        {
+          "file": "sheet-27.svg",
+          "sha256": "21c567d08c44cbd64c80a3afa8d2036f49b9ff256dcb772b6469fec6c07f0a3b"
+        },
+        {
+          "file": "sheet-28.svg",
+          "sha256": "c8eba511769a2dd73f72274892d747e43a9a3d1cabb83ef048d26ed3a90f546e"
+        },
+        {
+          "file": "sheet-29.svg",
+          "sha256": "f4ac587d8057585955b7899c60789b5098562986bb5cebe132f8789ba99c5c85"
+        },
+        {
+          "file": "sheet-30.svg",
+          "sha256": "f79478a3b6746d8bf51d2e6fe8b0116fa79191649d95711694cc523abb8e52b9"
+        },
+        {
+          "file": "sheet-31.svg",
+          "sha256": "1626e1390952c88c574033f36b6e642e940b7747f691dcef81c12b8c2ec93036"
+        },
+        {
+          "file": "sheet-32.svg",
+          "sha256": "c25b02a14c92bd91aaf6ec0538ae0f7897e966aaf707c44f905cc226439b1daa"
+        },
+        {
+          "file": "sheet-33.svg",
+          "sha256": "ed09c1b0700a75442647780ccc1c21e238f778230331bf06d93b35e14b29665d"
+        },
+        {
+          "file": "sheet-34.svg",
+          "sha256": "5ca196d3dc304196a983a142d67a5d61516e4fcc66161963e05ea80e2417e08c"
+        },
+        {
+          "file": "floor-0.dxf",
+          "sha256": "84e9aadb73db37a0e5bfb47dd5dd2b9756da03c630759b43ebfb7c635c3ee361"
+        },
+        {
+          "file": "floor-1.dxf",
+          "sha256": "59ffd86bac9ab24c4df67fa24178eb059608312916c74a86b779b089fee292e4"
+        },
+        {
+          "file": "floor-2.dxf",
+          "sha256": "43726f1887483e9c74027bf664fcbdd914b9a4ed8371f811d71f69427ef158b0"
+        },
+        {
+          "file": "boq.json",
+          "sha256": "6e0bfd435a47b589cf1c853caa9cd9cbf92226e5519df21823243ed1bc0c84ec"
+        },
+        {
+          "file": "quantities.json",
+          "sha256": "7378a507d3d43fe9c8b6f3913fb887e00f7a17f932b42afb4638ae187c0b000a"
+        },
+        {
+          "file": "plan.json",
+          "sha256": "f399b7809c6b894976aec2946798dd1af1348344a2de4046bff88cb7993c0466"
+        },
+        {
+          "file": "evidence.json",
+          "sha256": "65dfabcb92a5a8bb8a6983b4494a2471082f87816da35a98e940099b4bcf216f"
+        }
+      ]
+    },
+    {
+      "fixture": "wide",
+      "testOnly": true,
+      "revision": "518ED9D8-741638A5-AI4-RH2",
+      "units": "m",
+      "site": {
+        "width": 14,
+        "depth": 20,
+        "floors": 2,
+        "floorHeights": [
+          3.8,
+          3.4
+        ],
+        "setbackFront": 3,
+        "setbackRear": 2,
+        "setbackSide": 1.5
+      },
+      "parcelArea": 280,
+      "room": {
+        "id": "design-f1-bed-1",
+        "before": {
+          "width": 4.79,
+          "depth": 5.289999999999999,
+          "area": 25.339099999999995
+        },
+        "after": {
+          "width": 4.79,
+          "depth": 3,
+          "area": 14.370000000000001
+        }
+      },
+      "released": {
+        "floor": 1,
+        "x": 1.6100000000000003,
+        "y": 3.11,
+        "w": 4.79,
+        "h": 2.289999999999999,
+        "use": "laundry",
+        "reviewStatus": "awaiting-review",
+        "roomId": "design-f1-bed-1-released",
+        "area": 10.969099999999996
+      },
+      "changes": [
+        {
+          "kind": "window-room",
+          "id": "design-o17",
+          "from": "design-f1-bed-1",
+          "to": "design-f1-bed-1-released",
+          "reason": "Giữ cửa sổ trên tường ngoài của phòng mới, không để trên vách ngăn phòng ngủ."
+        },
+        {
+          "kind": "room-added",
+          "id": "design-f1-bed-1-released",
+          "type": "laundry"
+        },
+        {
+          "kind": "opening-added",
+          "id": "design-f1-bed-1-released-access"
+        }
+      ],
+      "sheets": [
+        "Bìa hồ sơ",
+        "Ranh đất / khoảng lùi",
+        "Kiến trúc tầng 1",
+        "Nội thất tầng 1",
+        "Bảng diện tích T1 / 1",
+        "Thống kê nội thất T1 / 1",
+        "Thống kê nội thất T1 / 2",
+        "Bảng cửa tầng 1 / 1",
+        "Kiến trúc tầng 2",
+        "Nội thất tầng 2",
+        "Bảng diện tích T2 / 1",
+        "Thống kê nội thất T2 / 1",
+        "Thống kê nội thất T2 / 2",
+        "Bảng cửa tầng 2 / 1",
+        "Mặt đứng trước",
+        "Mặt đứng sau",
+        "Mặt đứng phải",
+        "Mặt đứng trái",
+        "Mặt cắt A–A",
+        "Mặt cắt B–B",
+        "Chi tiết cầu thang tầng 1",
+        "Mặt bằng mái",
+        "Vật liệu / 1",
+        "Vật liệu / 2",
+        "Vật liệu / 3",
+        "Vật liệu / 4",
+        "Vật liệu / 5",
+        "Vật liệu / 6",
+        "Vật liệu / 7",
+        "Vật liệu / 8",
+        "Vật liệu / 9",
+        "Vật liệu / 10",
+        "Sổ đầu vào / 1"
+      ],
+      "outputs": [
+        {
+          "file": "sheet-01.svg",
+          "sha256": "dfff1de652020d35e7961ae7f6224bc4639a9f35a87cc3dec7986d28f14355f4"
+        },
+        {
+          "file": "sheet-02.svg",
+          "sha256": "c16fa0881f4595fa4575d2038b926d34365866a3da032d987c87d4dbe947f820"
+        },
+        {
+          "file": "sheet-03.svg",
+          "sha256": "d82fd8616829d0c8a3b58ff21e9da3ff278f55eb046b6b071dfbabdf021d23ec"
+        },
+        {
+          "file": "sheet-04.svg",
+          "sha256": "921b440f491cafa1e9745aa78a8e62d3fe7d3d113d78e7ce824a6f26609cf7dc"
+        },
+        {
+          "file": "sheet-05.svg",
+          "sha256": "4813fe4dcb2cccbf2ca568ad714e6c9c22746993f42cc382a629395362959a49"
+        },
+        {
+          "file": "sheet-06.svg",
+          "sha256": "a10098eb274515e9ad387170fcc6ae99d648d0ed5a6be8e90c3fe3d3feb83d44"
+        },
+        {
+          "file": "sheet-07.svg",
+          "sha256": "abd99d201f165dccbe9045bb66d6847218d020738f97be7d20302fed6368167e"
+        },
+        {
+          "file": "sheet-08.svg",
+          "sha256": "c0a86e5cdd23175ac1217f1a7b2be965eb27a935155fd937277d9dd4b321c5bf"
+        },
+        {
+          "file": "sheet-09.svg",
+          "sha256": "dd98b3d7f39b18a742f03dc394f199b663a1f69d370385cf23f979eeb2b06ad9"
+        },
+        {
+          "file": "sheet-10.svg",
+          "sha256": "372422174db36e492dd4a3bc5aba37ecf52fb127acc411eb7713dee47fd6b59d"
+        },
+        {
+          "file": "sheet-11.svg",
+          "sha256": "187634c2e49a596d3f8ef8e0155b550a5494beeac7ee58f6d79fb720ae6d46df"
+        },
+        {
+          "file": "sheet-12.svg",
+          "sha256": "5fd8f9fdcc7a0ce229d11428e88cdff59f9b37afc7a618c9bedb4d57ffe742d4"
+        },
+        {
+          "file": "sheet-13.svg",
+          "sha256": "c8e5d4811857e929bdfdd8042e9819ed97b3b229b522f402a5bd4bf18659d21d"
+        },
+        {
+          "file": "sheet-14.svg",
+          "sha256": "57cd0c5f1b65653ada7a2d3c3b07b3fac8b907394d2ca7dcab74381ebc059ddd"
+        },
+        {
+          "file": "sheet-15.svg",
+          "sha256": "8c0784618d375ad0a69ea93cfec8ef8d8dc15b01d9d9d9b7b3ca0a66dabcc289"
+        },
+        {
+          "file": "sheet-16.svg",
+          "sha256": "c3cf29b49e61ada0d9933254f3873c391dc9696f837cf86452e5641c8dfa0585"
+        },
+        {
+          "file": "sheet-17.svg",
+          "sha256": "7648e0e5325c626dedb468a173a1a654df0efd50c2152812e21027d10ac0efc5"
+        },
+        {
+          "file": "sheet-18.svg",
+          "sha256": "22c7c1660cb21f0b34c3558fcdffe05506dceca00e590a925e72f8621053a040"
+        },
+        {
+          "file": "sheet-19.svg",
+          "sha256": "07cb291c8fa8144c99834dd38f43a8cba610ae60a588dd0f5fde938a898b79f4"
+        },
+        {
+          "file": "sheet-20.svg",
+          "sha256": "5d0827457314574e507e7f2b014ac4c89640efc379e867a2f3e8330c74a2854b"
+        },
+        {
+          "file": "sheet-21.svg",
+          "sha256": "da00dd0864ee23817cbe601a6dcca163532f92c9bc71dd7d798e5eaf7eb62419"
+        },
+        {
+          "file": "sheet-22.svg",
+          "sha256": "185ebc6c20a2d6f4a0cbf83b27cdd93ab3b04c5be767ce78903e1451ffe5e7b7"
+        },
+        {
+          "file": "sheet-23.svg",
+          "sha256": "962d3a0536b5ff3dda2e9a59054fee325efa640156ec396e801a93a14084690b"
+        },
+        {
+          "file": "sheet-24.svg",
+          "sha256": "be33f415ddfc9e4d4b16240220f4c832d90c1862ffd2907564157eeead5d4b99"
+        },
+        {
+          "file": "sheet-25.svg",
+          "sha256": "b05bd01822ee42f9b86fc2a1e10a815a7bfa3f1555a223ae0dc2ecbfbe843c76"
+        },
+        {
+          "file": "sheet-26.svg",
+          "sha256": "5605f7aad331e2cbcedb02f435434d35d5b89f62e43f85614223375aece9a848"
+        },
+        {
+          "file": "sheet-27.svg",
+          "sha256": "52ae985781171e696df01a419562c57c1e31a6d1732f4e310c936c7a98d388e3"
+        },
+        {
+          "file": "sheet-28.svg",
+          "sha256": "f1145069922235cb306528d190ada505a5c5a4dedff3c7c9c8dc5a8d11f64163"
+        },
+        {
+          "file": "sheet-29.svg",
+          "sha256": "12860661debc879bfa69bbf031f747b0daecccdb4b5c93a30193fb894612cbd6"
+        },
+        {
+          "file": "sheet-30.svg",
+          "sha256": "2d23641c7cb846df5a687584d012c1635731dd5c3128c0559ef95e879cefd647"
+        },
+        {
+          "file": "sheet-31.svg",
+          "sha256": "91e25a55d77ac346309d2012c16e5a18ab0536ac6ba9f60d145768158727cdf7"
+        },
+        {
+          "file": "sheet-32.svg",
+          "sha256": "d41b7c1216ff19d5298b5fddac4bdbd35eaa128d1402ec03664d0537e645be81"
+        },
+        {
+          "file": "sheet-33.svg",
+          "sha256": "6e76c023a1be8f060ec80315da19a14089921243f47ceea4ba3ea6bdf00fef52"
+        },
+        {
+          "file": "floor-0.dxf",
+          "sha256": "b5b88cc621f18fbc395565ec5f73974374e1204cf0c9d60bc7e200f25ce54021"
+        },
+        {
+          "file": "floor-1.dxf",
+          "sha256": "123f462e15e88696abe7ce28f22e50e1224836e20b79a095eddb52d9f24d0806"
+        },
+        {
+          "file": "boq.json",
+          "sha256": "3e6a1774d3a40dec8338ea286b6f9da1a4a727f7ed3ea5d9b214dfc65ac77998"
+        },
+        {
+          "file": "quantities.json",
+          "sha256": "00826fce7c72f7567d56b606c56c9ddcf71a5c5c69d4b9f4ce9da30ce4cb2c23"
+        },
+        {
+          "file": "plan.json",
+          "sha256": "9acaecdf74d7b841068b34dc596b97853bc9b40467f70d3198d736d522f6167f"
+        },
+        {
+          "file": "evidence.json",
+          "sha256": "a6170a2c737a53a50b2141276db0dc828e8820a03659af06d5ad870c9f01f51d"
+        }
+      ]
+    },
+    {
+      "fixture": "concave",
+      "testOnly": true,
+      "revision": "8594992E-741638A5-AI4-RH2",
+      "units": "m",
+      "site": {
+        "width": 10,
+        "depth": 20,
+        "floors": 3,
+        "floorHeights": [
+          3.8,
+          3.4,
+          3.1
+        ],
+        "setbackFront": 0,
+        "setbackRear": 0,
+        "setbackSide": 0
+      },
+      "parcelArea": 176,
+      "room": {
+        "id": "design-f2-bed-1",
+        "before": {
+          "width": 5.359999999999999,
+          "depth": 14.16,
+          "area": 75.8976
+        },
+        "after": {
+          "width": 5.359999999999999,
+          "depth": 3.8,
+          "area": 20.368
+        }
+      },
+      "released": {
+        "floor": 2,
+        "x": 0.21999999999999975,
+        "y": 0.22,
+        "w": 5.359999999999999,
+        "h": 10.36,
+        "use": "office",
+        "reviewStatus": "awaiting-review",
+        "roomId": "design-f2-bed-1-released",
+        "area": 55.52959999999999
+      },
+      "changes": [
+        {
+          "kind": "window-room",
+          "id": "design-o23",
+          "from": "design-f2-bed-1",
+          "to": "design-f2-bed-1-released",
+          "reason": "Giữ cửa sổ trên tường ngoài của phòng mới, không để trên vách ngăn phòng ngủ."
+        },
+        {
+          "kind": "room-added",
+          "id": "design-f2-bed-1-released",
+          "type": "office"
+        },
+        {
+          "kind": "opening-added",
+          "id": "design-f2-bed-1-released-access"
+        }
+      ],
+      "sheets": [
+        "Bìa hồ sơ",
+        "Ranh đất / khoảng lùi",
+        "Kiến trúc tầng 1",
+        "Nội thất tầng 1",
+        "Bảng diện tích T1 / 1",
+        "Thống kê nội thất T1 / 1",
+        "Bảng cửa tầng 1 / 1",
+        "Kiến trúc tầng 2",
+        "Nội thất tầng 2",
+        "Bảng diện tích T2 / 1",
+        "Thống kê nội thất T2 / 1",
+        "Bảng cửa tầng 2 / 1",
+        "Kiến trúc tầng 3",
+        "Nội thất tầng 3",
+        "Bảng diện tích T3 / 1",
+        "Thống kê nội thất T3 / 1",
+        "Bảng cửa tầng 3 / 1",
+        "Mặt đứng trước",
+        "Mặt đứng sau",
+        "Mặt đứng phải",
+        "Mặt đứng trái",
+        "Mặt cắt A–A",
+        "Mặt cắt B–B",
+        "Chi tiết cầu thang tầng 1",
+        "Chi tiết cầu thang tầng 2",
+        "Mặt bằng mái",
+        "Vật liệu / 1",
+        "Vật liệu / 2",
+        "Vật liệu / 3",
+        "Vật liệu / 4",
+        "Vật liệu / 5",
+        "Vật liệu / 6",
+        "Vật liệu / 7",
+        "Vật liệu / 8",
+        "Sổ đầu vào / 1"
+      ],
+      "outputs": [
+        {
+          "file": "sheet-01.svg",
+          "sha256": "2a3b0d5b354a5bed39651039b96652585dcd202e9dd7f8e54e711110befab4c1"
+        },
+        {
+          "file": "sheet-02.svg",
+          "sha256": "d8db4d88a4a37a2e88f66339b8e6e98681c658fcd0d12621559e19d384c624d0"
+        },
+        {
+          "file": "sheet-03.svg",
+          "sha256": "f49df99982af111aaa521d792ac00b58588fdf5f70338237595eb893fc623af1"
+        },
+        {
+          "file": "sheet-04.svg",
+          "sha256": "8fb9c35685a93d892a5394d9e95c3252fc241c463ec05c29065f4c25dffec0d9"
+        },
+        {
+          "file": "sheet-05.svg",
+          "sha256": "711f369b8dd6ff129755978c4f985402538d9f66608bba73e7eaaffb3221c7b4"
+        },
+        {
+          "file": "sheet-06.svg",
+          "sha256": "55898df229ccefc1d969a1a32d0202a28ea8ccb39007b7cd0ef74a1a9392735e"
+        },
+        {
+          "file": "sheet-07.svg",
+          "sha256": "0100fe089f21ee847045fc421c60b50218a3658c7dab8530c148c86890cca0fd"
+        },
+        {
+          "file": "sheet-08.svg",
+          "sha256": "692329b8735cbf2e1b6d38434003c1abcf7236f2423fb4aae4db2563e4e7044c"
+        },
+        {
+          "file": "sheet-09.svg",
+          "sha256": "480373edd3448fbee243d78101af7d7fd12bbf846298494ddc7363cbc5ece3d9"
+        },
+        {
+          "file": "sheet-10.svg",
+          "sha256": "daac71aa1e961ea764e9c10706f75a53bd7a5b15e63c3b6ae12fc8e50f548063"
+        },
+        {
+          "file": "sheet-11.svg",
+          "sha256": "33de3e08fcb948d8c1b7196dd411fa2948dbcd70376704bd023029d9e9fc0b03"
+        },
+        {
+          "file": "sheet-12.svg",
+          "sha256": "c193815cb6927c802579fa3740488b6220da7ccd74574b5306adb2ee6858c593"
+        },
+        {
+          "file": "sheet-13.svg",
+          "sha256": "f244623379632c23a99c73c2fbd15bdc00147f11d6fdcbecb7d168398695275e"
+        },
+        {
+          "file": "sheet-14.svg",
+          "sha256": "fe6f4bf1faf8a8baa4e6d725024835508a222cd0baad5a80a4c9da87ae54a390"
+        },
+        {
+          "file": "sheet-15.svg",
+          "sha256": "acd5ccf24b05a3a47a815c35c806bfc48ef9203d5b2dd2461b2392328e83eac4"
+        },
+        {
+          "file": "sheet-16.svg",
+          "sha256": "b2fdeb562dc377a56891933cbda7e8ecd5420fdc83823436c467e50428ca2f89"
+        },
+        {
+          "file": "sheet-17.svg",
+          "sha256": "a8adf10991cd850d9df1cf32288969be4870c46f88f0f92a9b50c588f79544d4"
+        },
+        {
+          "file": "sheet-18.svg",
+          "sha256": "7322f0cfb4f28a5075539a09b9386826d69c9e2916d7ad247f307bc882810d57"
+        },
+        {
+          "file": "sheet-19.svg",
+          "sha256": "be8d7d08cf9c5637fb618a9c6c4548ca6b196585f7aa3ea8db9ef20c7e5bcf0f"
+        },
+        {
+          "file": "sheet-20.svg",
+          "sha256": "ef8d1981b3834b06b793fbfd4088a0fb040124c37f8be845887ed43b17f8d4e2"
+        },
+        {
+          "file": "sheet-21.svg",
+          "sha256": "f69b4fe64b6de9d3d56f24ab06e8eddb8a6afaf6e5f566a436ab2dc608f66836"
+        },
+        {
+          "file": "sheet-22.svg",
+          "sha256": "909ea24f0f9a0161d4f6f2ebe3e052fc88b29aacdd7b448258488cafaf25e441"
+        },
+        {
+          "file": "sheet-23.svg",
+          "sha256": "8de4706bff2505fe1ef8b112bd6eee23c77fa6ddbce2ce77c7fd6d765393f6bb"
+        },
+        {
+          "file": "sheet-24.svg",
+          "sha256": "4f2aa2cc9b4ad7091cb71db4510c1b3bc408aa659d4cda174269f203fa633849"
+        },
+        {
+          "file": "sheet-25.svg",
+          "sha256": "b46f825e560a0c8206643be081759094757c2f2ac5180c4d2d3bf99ce8820291"
+        },
+        {
+          "file": "sheet-26.svg",
+          "sha256": "2341e5c176967123fd7336c163707da83aebfef993c429760ab8ea327fb8d3ee"
+        },
+        {
+          "file": "sheet-27.svg",
+          "sha256": "27e503079d4c8383395a863d6d45b83cb4f987b99386132000a2a3507015ebe8"
+        },
+        {
+          "file": "sheet-28.svg",
+          "sha256": "6d4ce1b79b0cbab4b27915577c5f3d2b86e6a29d09df70abb34a8ba5f73bb6cc"
+        },
+        {
+          "file": "sheet-29.svg",
+          "sha256": "d0e2b527b989c59344f41fa1b05e60af02923ddde38ce58769541cf2e3bad1a7"
+        },
+        {
+          "file": "sheet-30.svg",
+          "sha256": "9adb99abdd00d1a0c797e925431299dea5800ebf6c77df6837085908eaa17e07"
+        },
+        {
+          "file": "sheet-31.svg",
+          "sha256": "5d9ffd0d9fc8b22d2d387badcb8f7c680b67825be84a3c1a4046a206e1b65882"
+        },
+        {
+          "file": "sheet-32.svg",
+          "sha256": "bfb36326fb2c9d13daf24d56e6cfaebc9aaaf7eab719f442a9cae48b6438b58c"
+        },
+        {
+          "file": "sheet-33.svg",
+          "sha256": "85ba3449d06b4e5e3ec13e14e93c61cf9a1e5d45998d52b8f9e78c93f16d0487"
+        },
+        {
+          "file": "sheet-34.svg",
+          "sha256": "e3be9b8c71d3e93dc87fbc79f90d0a2b1c136971d271ee1d67c658aa00a2b570"
+        },
+        {
+          "file": "sheet-35.svg",
+          "sha256": "7cfa82ed5dbe6b0d620e16e3b7aa3d271638a0f78eae9bcd28b3c49e9fa664d5"
+        },
+        {
+          "file": "floor-0.dxf",
+          "sha256": "20f96d100506ef1f4b7f0d05313c52beda7231dff8d52a8d28fb43f1bfc5448c"
+        },
+        {
+          "file": "floor-1.dxf",
+          "sha256": "540d3b15f3da16cb06237e5224146062382785d0ab1e01c4c069e7fc5e99c984"
+        },
+        {
+          "file": "floor-2.dxf",
+          "sha256": "90b4fd8dfc076768d43e27b6117822156120a81791710738fd9a8ea8f2ec0e14"
+        },
+        {
+          "file": "boq.json",
+          "sha256": "1dbd0550393dd5f4721dd9dffe6f4f2e4e7a19fdb2719c70c221654be7fcc301"
+        },
+        {
+          "file": "quantities.json",
+          "sha256": "4938f64d2f01a251acdc7babd1e28e84712c7854e4d3904e2ad35e078892ff79"
+        },
+        {
+          "file": "plan.json",
+          "sha256": "747c8706004024216df9170ceac09690add2c81ac401ab4d0086463018e7e3b0"
+        },
+        {
+          "file": "evidence.json",
+          "sha256": "9cb1018a6eccd83b49c92f035b0153b57491238a29c42552a600886ccd6bb9f4"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,998 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# (node:12) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: brief rooms, aligned lifts and connected doors are preserved in three feasible spatial options
+ok 1 - brief rooms, aligned lifts and connected doors are preserved in three feasible spatial options
+  ---
+  duration_ms: 28.268629
+  type: 'test'
+  ...
+# Subtest: applying a spatial kit retains the customer style, colours, supplier SKU and exact restore point
+ok 2 - applying a spatial kit retains the customer style, colours, supplier SKU and exact restore point
+  ---
+  duration_ms: 17.059001
+  type: 'test'
+  ...
+# Subtest: infeasible requests and floor locks never replace the current plan or silently add bathrooms
+ok 3 - infeasible requests and floor locks never replace the current plan or silently add bathrooms
+  ---
+  duration_ms: 10.418036
+  type: 'test'
+  ...
+# Subtest: submillimetre arithmetic seams retain rectangular style roofs while real notches stay empty
+ok 4 - submillimetre arithmetic seams retain rectangular style roofs while real notches stay empty
+  ---
+  duration_ms: 4.971784
+  type: 'test'
+  ...
+# Subtest: furniture sets never leave orphan desk chairs or dining chairs when their table cannot fit
+ok 5 - furniture sets never leave orphan desk chairs or dining chairs when their table cannot fit
+  ---
+  duration_ms: 5.380678
+  type: 'test'
+  ...
+# Subtest: A3 sheets include measured furniture, sliding lift doors, all four elevations and both real stair cuts
+ok 6 - A3 sheets include measured furniture, sliding lift doors, all four elevations and both real stair cuts
+  ---
+  duration_ms: 1097.844691
+  type: 'test'
+  ...
+# Subtest: two-floor 5×20 and irregular three-floor A3 sheets use exact parcel and actual slab voids
+ok 7 - two-floor 5×20 and irregular three-floor A3 sheets use exact parcel and actual slab voids
+  ---
+  duration_ms: 471.023001
+  type: 'test'
+  ...
+# Subtest: every floor has full Vietnamese room/furniture/opening schedules with variable-height pagination
+ok 8 - every floor has full Vietnamese room/furniture/opening schedules with variable-height pagination
+  ---
+  duration_ms: 288.833853
+  type: 'test'
+  ...
+# Subtest: unequal floor datums and rises appear on A3 plans, four elevations, both sections and the lift sheet
+ok 9 - unequal floor datums and rises appear on A3 plans, four elevations, both sections and the lift sheet
+  ---
+  duration_ms: 258.041645
+  type: 'test'
+  ...
+# Subtest: A3 dossier includes cover, exact site, materials and sanitized technical register on the same revision
+ok 10 - A3 dossier includes cover, exact site, materials and sanitized technical register on the same revision
+  ---
+  duration_ms: 194.167472
+  type: 'test'
+  ...
+# (node:13) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: chosen L parcel constrains rooms and design area, not the bounding rectangle
+ok 11 - chosen L parcel constrains rooms and design area, not the bounding rectangle
+  ---
+  duration_ms: 7.308142
+  type: 'test'
+  ...
+# Subtest: boundary intersection rejects rectangle spanning an inward notch with all corners inside
+ok 12 - boundary intersection rejects rectangle spanning an inward notch with all corners inside
+  ---
+  duration_ms: 1.364939
+  type: 'test'
+  ...
+# Subtest: floor, ceiling and parametric opening dimensions survive cm conversion and document validation
+ok 13 - floor, ceiling and parametric opening dimensions survive cm conversion and document validation
+  ---
+  duration_ms: 53.596785
+  type: 'test'
+  ...
+# Subtest: style chooser appears in Tab 1 and ceilings reject oversized openings
+ok 14 - style chooser appears in Tab 1 and ceilings reject oversized openings
+  ---
+  duration_ms: 1.317628
+  type: 'test'
+  ...
+# Subtest: suggested window responds to family ranking and avoids a shared room wall
+ok 15 - suggested window responds to family ranking and avoids a shared room wall
+  ---
+  duration_ms: 6.949864
+  type: 'test'
+  ...
+# Subtest: saved project retains parcel selection, dimensions and Architect3D engine across reload
+ok 16 - saved project retains parcel selection, dimensions and Architect3D engine across reload
+  ---
+  duration_ms: 8.981985
+  type: 'test'
+  ...
+# Subtest: automatic plan connects private rooms through corridors and aligned stairs
+ok 17 - automatic plan connects private rooms through corridors and aligned stairs
+  ---
+  duration_ms: 22.361716
+  type: 'test'
+  ...
+# Subtest: automatic parcel plan stays within an exact unrounded envelope and rejects insufficient space
+ok 18 - automatic parcel plan stays within an exact unrounded envelope and rejects insufficient space
+  ---
+  duration_ms: 14.74101
+  type: 'test'
+  ...
+# Subtest: room rotation preserves door position on rotated wall and is undoable
+ok 19 - room rotation preserves door position on rotated wall and is undoable
+  ---
+  duration_ms: 6.831176
+  type: 'test'
+  ...
+# Subtest: inspector rejects tall or colliding doors and shares valid opening with model
+ok 20 - inspector rejects tall or colliding doors and shares valid opening with model
+  ---
+  duration_ms: 6.699589
+  type: 'test'
+  ...
+# Subtest: all furnished room types use in-bounds placements in both drawing and Architect3D
+ok 21 - all furnished room types use in-bounds placements in both drawing and Architect3D
+  ---
+  duration_ms: 12.419885
+  type: 'test'
+  ...
+# Subtest: light spatial view draws each floor and room without loading GPU renderer
+ok 22 - light spatial view draws each floor and room without loading GPU renderer
+  ---
+  duration_ms: 6.442773
+  type: 'test'
+  ...
+# Subtest: current Tab 6 renders every room and exposes batch and Gemini review actions
+ok 23 - current Tab 6 renders every room and exposes batch and Gemini review actions
+  ---
+  duration_ms: 6.551436
+  type: 'test'
+  ...
+# Subtest: U stair landing fits the existing 3.4 by 3.2m well with actual rise and shared model parts
+ok 24 - U stair landing fits the existing 3.4 by 3.2m well with actual rise and shared model parts
+  ---
+  duration_ms: 8.232789
+  type: 'test'
+  ...
+# Subtest: existing opening edits ignore their own footprint, validate collisions and retain undo and locks
+ok 25 - existing opening edits ignore their own footprint, validate collisions and retain undo and locks
+  ---
+  duration_ms: 8.423476
+  type: 'test'
+  ...
+# Subtest: isolated upstairs room document contains its walls, openings and furniture only
+ok 26 - isolated upstairs room document contains its walls, openings and furniture only
+  ---
+  duration_ms: 6.604636
+  type: 'test'
+  ...
+# Subtest: upper slab leaves the lower stairwell open and the final storey has no upward flight
+ok 27 - upper slab leaves the lower stairwell open and the final storey has no upward flight
+  ---
+  duration_ms: 19.507396
+  type: 'test'
+  ...
+# Subtest: room gallery uses the image belonging to each room signature
+ok 28 - room gallery uses the image belonging to each room signature
+  ---
+  duration_ms: 4.663492
+  type: 'test'
+  ...
+# Subtest: garage drawing uses a bounded vehicle and never an unscaled text label
+ok 29 - garage drawing uses a bounded vehicle and never an unscaled text label
+  ---
+  duration_ms: 5.293857
+  type: 'test'
+  ...
+# Subtest: wide doors retain their actual leaf width instead of the former 0.9m cap
+ok 30 - wide doors retain their actual leaf width instead of the former 0.9m cap
+  ---
+  duration_ms: 9.502206
+  type: 'test'
+  ...
+# (node:19) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: construction schema migration preserves legacy measurements, nulls, zeroes and stable IDs without inventing engineering data
+ok 31 - construction schema migration preserves legacy measurements, nulls, zeroes and stable IDs without inventing engineering data
+  ---
+  duration_ms: 37.049902
+  type: 'test'
+  ...
+# Subtest: a reviewed checkbox or incomplete professional evidence stays awaiting review and retains the declaration
+ok 32 - a reviewed checkbox or incomplete professional evidence stays awaiting review and retains the declaration
+  ---
+  duration_ms: 13.159476
+  type: 'test'
+  ...
+# Subtest: unstructured legacy technical records remain stored and pending instead of being discarded or approved
+ok 33 - unstructured legacy technical records remain stored and pending instead of being discarded or approved
+  ---
+  duration_ms: 27.185643
+  type: 'test'
+  ...
+# Subtest: professional review metadata and stale propagation never create a self-invalidating design revision
+ok 34 - professional review metadata and stale propagation never create a self-invalidating design revision
+  ---
+  duration_ms: 20.581639
+  type: 'test'
+  ...
+# Subtest: price and personal finance preserve review validity while SKU and technical dimensions stale the review
+ok 35 - price and personal finance preserve review validity while SKU and technical dimensions stale the review
+  ---
+  duration_ms: 18.259122
+  type: 'test'
+  ...
+# Subtest: reviewing a supplied technical element changes review state without changing its geometry or source identity
+ok 36 - reviewing a supplied technical element changes review state without changing its geometry or source identity
+  ---
+  duration_ms: 12.988009
+  type: 'test'
+  ...
+# Subtest: material metadata and per-room choices persist; revision responds to product identity, not price
+ok 37 - material metadata and per-room choices persist; revision responds to product identity, not price
+  ---
+  duration_ms: 27.515669
+  type: 'test'
+  ...
+# Subtest: fresh projects show materials and automatic wall view; saved explicit views survive normalization
+ok 38 - fresh projects show materials and automatic wall view; saved explicit views survive normalization
+  ---
+  duration_ms: 21.429802
+  type: 'test'
+  ...
+# Subtest: measured boundary stays in metres and does not alter pin, rooms, materials or private inputs
+ok 39 - measured boundary stays in metres and does not alter pin, rooms, materials or private inputs
+  ---
+  duration_ms: 23.983692
+  type: 'test'
+  ...
+# Subtest: crossed, duplicate or unsupported coordinates leave both evidence and history untouched
+ok 40 - crossed, duplicate or unsupported coordinates leave both evidence and history untouched
+  ---
+  duration_ms: 8.03298
+  type: 'test'
+  ...
+# Subtest: VN-2000 raw data and technical/feng/material records survive legacy merge and reload without a fabricated transform
+ok 41 - VN-2000 raw data and technical/feng/material records survive legacy merge and reload without a fabricated transform
+  ---
+  duration_ms: 11.718593
+  type: 'test'
+  ...
+# Subtest: pin and boundary changes invalidate scoped sources and supplier cache while preserving old documents and finance snapshots
+ok 42 - pin and boundary changes invalidate scoped sources and supplier cache while preserving old documents and finance snapshots
+  ---
+  duration_ms: 32.546341
+  type: 'test'
+  ...
+# Subtest: revision covers setbacks, frontage, technical inputs and boundary documents without using finance or stale reviews as approvals
+ok 43 - revision covers setbacks, frontage, technical inputs and boundary documents without using finance or stale reviews as approvals
+  ---
+  duration_ms: 15.715013
+  type: 'test'
+  ...
+# Subtest: manual dimensions mode enforces entered setbacks and a concave polygon identifies offending edges
+ok 44 - manual dimensions mode enforces entered setbacks and a concave polygon identifies offending edges
+  ---
+  duration_ms: 4.857262
+  type: 'test'
+  ...
+# Subtest: an irregular three-floor site retains aligned stairs, continuous lift holes and stable room IDs
+ok 45 - an irregular three-floor site retains aligned stairs, continuous lift holes and stable room IDs
+  ---
+  duration_ms: 17.907685
+  type: 'test'
+  ...
+# Subtest: unsupported imported survey dimensions cannot be activated or silently clamped
+ok 46 - unsupported imported survey dimensions cannot be activated or silently clamped
+  ---
+  duration_ms: 9.011799
+  type: 'test'
+  ...
+# Subtest: physical wall/roof checks and shared exports use the measured boundary without private evidence payloads
+ok 47 - physical wall/roof checks and shared exports use the measured boundary without private evidence payloads
+  ---
+  duration_ms: 18.272693
+  type: 'test'
+  ...
+# Subtest: Places needs its own capability permission; Gemini key alone never enables a metered Places request
+ok 48 - Places needs its own capability permission; Gemini key alone never enables a metered Places request
+  ---
+  duration_ms: 0.296686
+  type: 'test'
+  ...
+# Subtest: site scan uses exact coordinates and source scope for cache, and keeps planning unknown
+ok 49 - site scan uses exact coordinates and source scope for cache, and keeps planning unknown
+  ---
+  duration_ms: 2.304249
+  type: 'test'
+  ...
+# (node:20) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: door hinges and inward/outward swing share exact endpoints for all four sides
+ok 50 - door hinges and inward/outward swing share exact endpoints for all four sides
+  ---
+  duration_ms: 39.207492
+  type: 'test'
+  ...
+# Subtest: an isolated room retains the doorway defined by the adjoining room
+ok 51 - an isolated room retains the doorway defined by the adjoining room
+  ---
+  duration_ms: 1.899962
+  type: 'test'
+  ...
+# Subtest: A3 projections are finite, use the actual cut and share one geometry revision
+ok 52 - A3 projections are finite, use the actual cut and share one geometry revision
+  ---
+  duration_ms: 21.02236
+  type: 'test'
+  ...
+# Subtest: roof projections use the same measured vertices as the web scene
+ok 53 - roof projections use the same measured vertices as the web scene
+  ---
+  duration_ms: 3.280805
+  type: 'test'
+  ...
+# Subtest: the default section cuts an actual stair flight and opening motion invalidates rendered views
+ok 54 - the default section cuts an actual stair flight and opening motion invalidates rendered views
+  ---
+  duration_ms: 3.153254
+  type: 'test'
+  ...
+# Subtest: stair detail sheets show the shared actual flights, storey rise and individual tread count
+ok 55 - stair detail sheets show the shared actual flights, storey rise and individual tread count
+  ---
+  duration_ms: 2.275255
+  type: 'test'
+  ...
+# Subtest: large opening schedules paginate every row without truncation
+ok 56 - large opening schedules paginate every row without truncation
+  ---
+  duration_ms: 17.870109
+  type: 'test'
+  ...
+# Subtest: drawing scale fits A3 with integer scale selection and a measurable known span
+ok 57 - drawing scale fits A3 with integer scale selection and a measurable known span
+  ---
+  duration_ms: 5.481048
+  type: 'test'
+  ...
+# Subtest: stair drawing selection follows the floor, survives a deleted flight and excludes the top-floor well
+ok 58 - stair drawing selection follows the floor, survives a deleted flight and excludes the top-floor well
+  ---
+  duration_ms: 2.904752
+  type: 'test'
+  ...
+# Subtest: the active stair sheet and its download reflect the selected flight and measured edits
+ok 59 - the active stair sheet and its download reflect the selected flight and measured edits
+  ---
+  duration_ms: 5.149831
+  type: 'test'
+  ...
+# Subtest: DXF model millimetres, non-centred opening metadata and void panels are native entities
+ok 60 - DXF model millimetres, non-centred opening metadata and void panels are native entities
+  ---
+  duration_ms: 11.755499
+  type: 'test'
+  ...
+# Subtest: an imported name longer than one sheet continues without clipping or dropping text
+ok 61 - an imported name longer than one sheet continues without clipping or dropping text
+  ---
+  duration_ms: 2.246092
+  type: 'test'
+  ...
+# (node:26) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: three unequal floor heights drive stair rise, lift geometry, roof datum, takeoff and lossless reload
+ok 62 - three unequal floor heights drive stair rise, lift geometry, roof datum, takeoff and lossless reload
+  ---
+  duration_ms: 52.241925
+  type: 'test'
+  ...
+# Subtest: unequal levels remain exportable as 2D but a package with unadapted 3D is explicitly gated
+ok 63 - unequal levels remain exportable as 2D but a package with unadapted 3D is explicitly gated
+  ---
+  duration_ms: 14.903054
+  type: 'test'
+  ...
+# Subtest: roof appearance follows the selected style and keeps a customer override separate from supplier SKU
+ok 64 - roof appearance follows the selected style and keeps a customer override separate from supplier SKU
+  ---
+  duration_ms: 3.424711
+  type: 'test'
+  ...
+# Subtest: style roof vertices and takeoff agree with analytical areas, drawings and elevations
+ok 65 - style roof vertices and takeoff agree with analytical areas, drawings and elevations
+  ---
+  duration_ms: 18.351191
+  type: 'test'
+  ...
+# Subtest: one shared opening is measured once; slabs subtract the same stair and shaft panels as WebGL
+ok 66 - one shared opening is measured once; slabs subtract the same stair and shaft panels as WebGL
+  ---
+  duration_ms: 12.050992
+  type: 'test'
+  ...
+# Subtest: measured wall thickness appears in drawing fills, CAD and finish deductions
+ok 67 - measured wall thickness appears in drawing fills, CAD and finish deductions
+  ---
+  duration_ms: 18.619152
+  type: 'test'
+  ...
+# Subtest: invalid and duplicate geometry blocks measured handoff, not project backups
+ok 68 - invalid and duplicate geometry blocks measured handoff, not project backups
+  ---
+  duration_ms: 14.218777
+  type: 'test'
+  ...
+# Subtest: quotes require scope, source/date and compatible units; supply includes separately entered labour/tax/waste
+ok 69 - quotes require scope, source/date and compatible units; supply includes separately entered labour/tax/waste
+  ---
+  duration_ms: 32.568053
+  type: 'test'
+  ...
+# Subtest: BOQ is reconciled without invented structural material quantities; unquoted lift scope stays unknown
+ok 70 - BOQ is reconciled without invented structural material quantities; unquoted lift scope stays unknown
+  ---
+  duration_ms: 229.722089
+  type: 'test'
+  ...
+# Subtest: quote comparison uses the same waste, tax, labour and quantity without altering geometry
+ok 71 - quote comparison uses the same waste, tax, labour and quantity without altering geometry
+  ---
+  duration_ms: 14.742482
+  type: 'test'
+  ...
+# Subtest: two sourced SKUs reconcile VAT, labour and transport while unknown BOQ rows remain null
+ok 72 - two sourced SKUs reconcile VAT, labour and transport while unknown BOQ rows remain null
+  ---
+  duration_ms: 27.198323
+  type: 'test'
+  ...
+# Subtest: expired, incomplete and malformed quote metadata never becomes zero; an explicit sourced zero is retained
+ok 73 - expired, incomplete and malformed quote metadata never becomes zero; an explicit sourced zero is retained
+  ---
+  duration_ms: 29.673559
+  type: 'test'
+  ...
+# Subtest: technical dimensions do not imply structural quantities; explicitly sourced professional quantities remain identified
+ok 74 - technical dimensions do not imply structural quantities; explicitly sourced professional quantities remain identified
+  ---
+  duration_ms: 25.708386
+  type: 'test'
+  ...
+# Subtest: CSV export neutralizes formula-like customer strings while preserving numeric dimensions and known zeros
+ok 75 - CSV export neutralizes formula-like customer strings while preserving numeric dimensions and known zeros
+  ---
+  duration_ms: 4.211602
+  type: 'test'
+  ...
+# Subtest: budget snapshots survive edits/reload and progress is individually entered, never inferred from spending
+ok 76 - budget snapshots survive edits/reload and progress is individually entered, never inferred from spending
+  ---
+  duration_ms: 160.570488
+  type: 'test'
+  ...
+# Subtest: roof and style edits share plan undo while quote edits do not invalidate design revision
+ok 77 - roof and style edits share plan undo while quote edits do not invalidate design revision
+  ---
+  duration_ms: 16.569335
+  type: 'test'
+  ...
+# Subtest: customer cost export carries geometry and unknown scopes without household/bank/account data
+ok 78 - customer cost export carries geometry and unknown scopes without household/bank/account data
+  ---
+  duration_ms: 55.816206
+  type: 'test'
+  ...
+# (node:27) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: planner cuts real wall geometry at a door and rejects an opening from the other room on the same span
+ok 79 - planner cuts real wall geometry at a door and rejects an opening from the other room on the same span
+  ---
+  duration_ms: 6.416653
+  type: 'test'
+  ...
+# Subtest: AI scan requires an actual parcel pin, not a regional or Gemini reference point
+ok 80 - AI scan requires an actual parcel pin, not a regional or Gemini reference point
+  ---
+  duration_ms: 1.049616
+  type: 'test'
+  ...
+# Subtest: public AI capability endpoint reports configured provider without leaking a key
+ok 81 - public AI capability endpoint reports configured provider without leaking a key
+  ---
+  duration_ms: 0.849185
+  type: 'test'
+  ...
+# Subtest: Gemini permission failures stop before retrying other models
+ok 82 - Gemini permission failures stop before retrying other models
+  ---
+  duration_ms: 1.706642
+  type: 'test'
+  ...
+# Subtest: capability flags do not advertise undeployed account or payment routes
+ok 83 - capability flags do not advertise undeployed account or payment routes
+  ---
+  duration_ms: 0.281833
+  type: 'test'
+  ...
+# Subtest: family identities change by birth year and gender and remain unknown without gender
+ok 84 - family identities change by birth year and gender and remain unknown without gender
+  ---
+  duration_ms: 1.65847
+  type: 'test'
+  ...
+# Subtest: supplier quote import rejects missing source/date instead of inventing today
+ok 85 - supplier quote import rejects missing source/date instead of inventing today
+  ---
+  duration_ms: 2.673684
+  type: 'test'
+  ...
+# Subtest: a dated supplier quote must contain a usable price and keeps provenance per cost item
+ok 86 - a dated supplier quote must contain a usable price and keeps provenance per cost item
+  ---
+  duration_ms: 1.802897
+  type: 'test'
+  ...
+# Subtest: a product photo is attached only with a specific SKU and HTTPS product page
+ok 87 - a product photo is attached only with a specific SKU and HTTPS product page
+  ---
+  duration_ms: 1.313642
+  type: 'test'
+  ...
+# Subtest: a dated m² quote flows through material choice, estimate, BOQ, funding and handover
+ok 88 - a dated m² quote flows through material choice, estimate, BOQ, funding and handover
+  ---
+  duration_ms: 27.040315
+  type: 'test'
+  ...
+# Subtest: a local project backup restores its plan and prices without importing payment rights or linking a cloud project
+ok 89 - a local project backup restores its plan and prices without importing payment rights or linking a cloud project
+  ---
+  duration_ms: 2.362087
+  type: 'test'
+  ...
+# Subtest: GeoJSON parser accepts WGS84 polygon but rejects projected coordinates
+ok 90 - GeoJSON parser accepts WGS84 polygon but rejects projected coordinates
+  ---
+  duration_ms: 1.427323
+  type: 'test'
+  ...
+# Subtest: crossing parcel edges are rejected before a drawn or imported area is trusted
+ok 91 - crossing parcel edges are rejected before a drawn or imported area is trusted
+  ---
+  duration_ms: 1.153952
+  type: 'test'
+  ...
+# Subtest: moving a shared wall cannot shift a locked neighboring room
+ok 92 - moving a shared wall cannot shift a locked neighboring room
+  ---
+  duration_ms: 1.048424
+  type: 'test'
+  ...
+# Subtest: a user drawn boundary cannot silently change the unverified design area
+ok 93 - a user drawn boundary cannot silently change the unverified design area
+  ---
+  duration_ms: 1.182836
+  type: 'test'
+  ...
+# Subtest: keyless map fallback keeps the parcel pin available when imagery fails
+ok 94 - keyless map fallback keeps the parcel pin available when imagery fails
+  ---
+  duration_ms: 1.247242
+  type: 'test'
+  ...
+# Subtest: planner shows the active tool, position controls and placement feedback
+ok 95 - planner shows the active tool, position controls and placement feedback
+  ---
+  duration_ms: 2.726444
+  type: 'test'
+  ...
+# (node:38) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a manually placed pin and its address review state survive reload and normalization
+ok 96 - a manually placed pin and its address review state survive reload and normalization
+  ---
+  duration_ms: 14.504956
+  type: 'test'
+  ...
+# Subtest: an old saved pin without the new flag migrates to address review
+ok 97 - an old saved pin without the new flag migrates to address review
+  ---
+  duration_ms: 7.098147
+  type: 'test'
+  ...
+# Subtest: locked floors survive a saved project reload
+ok 98 - locked floors survive a saved project reload
+  ---
+  duration_ms: 5.229521
+  type: 'test'
+  ...
+# Subtest: active opening and stair drawings survive project reload with their selected sheet
+ok 99 - active opening and stair drawings survive project reload with their selected sheet
+  ---
+  duration_ms: 10.161475
+  type: 'test'
+  ...
+# Subtest: AI sees the pin and only the Site Intelligence scan matching that pin
+ok 100 - AI sees the pin and only the Site Intelligence scan matching that pin
+  ---
+  duration_ms: 0.693781
+  type: 'test'
+  ...
+# Subtest: estimate uses all floors while plan is empty or incomplete, then exact planned area
+ok 101 - estimate uses all floors while plan is empty or incomplete, then exact planned area
+  ---
+  duration_ms: 4.450812
+  type: 'test'
+  ...
+# Subtest: bank rates require a dated bank-specific source and both rates
+ok 102 - bank rates require a dated bank-specific source and both rates
+  ---
+  duration_ms: 0.698689
+  type: 'test'
+  ...
+# Subtest: planning prices never inherit the build date as a supplier source date
+ok 103 - planning prices never inherit the build date as a supplier source date
+  ---
+  duration_ms: 1.69214
+  type: 'test'
+  ...
+# Subtest: image render accepts only a bounded image and keeps plan details in the prompt
+ok 104 - image render accepts only a bounded image and keeps plan details in the prompt
+  ---
+  duration_ms: 5.826938
+  type: 'test'
+  ...
+# Subtest: image endpoint honors explicit disable and returns the Gemini image with a server-only key
+ok 105 - image endpoint honors explicit disable and returns the Gemini image with a server-only key
+  ---
+  duration_ms: 5.624063
+  type: 'test'
+  ...
+# Subtest: cinematic capture completes even when the loading view disposes WebGL
+ok 106 - cinematic capture completes even when the loading view disposes WebGL
+  ---
+  duration_ms: 3.585603
+  type: 'test'
+  ...
+# Subtest: 3D plan shares adjoining walls and cuts the specified doorway
+ok 107 - 3D plan shares adjoining walls and cuts the specified doorway
+  ---
+  duration_ms: 1.958531
+  type: 'test'
+  ...
+# Subtest: a new construction dossier starts at zero and records actual spending by stage
+ok 108 - a new construction dossier starts at zero and records actual spending by stage
+  ---
+  duration_ms: 10.00546
+  type: 'test'
+  ...
+# Subtest: construction evidence metadata survives project save and reload
+ok 109 - construction evidence metadata survives project save and reload
+  ---
+  duration_ms: 3.742488
+  type: 'test'
+  ...
+# Subtest: dossier ZIP contains the original construction evidence bytes
+ok 110 - dossier ZIP contains the original construction evidence bytes
+  ---
+  duration_ms: 11.41038
+  type: 'test'
+  ...
+# Subtest: house style survives reload, preserves plan and SKU, and invalidates the old render
+ok 111 - house style survives reload, preserves plan and SKU, and invalidates the old render
+  ---
+  duration_ms: 5.980989
+  type: 'test'
+  ...
+# Subtest: new material categories retain their selected products after state reload
+ok 112 - new material categories retain their selected products after state reload
+  ---
+  duration_ms: 3.66317
+  type: 'test'
+  ...
+# (node:68) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: room rotation uses one atomic transform, preserving 37-degree pose, local size and history
+ok 113 - room rotation uses one atomic transform, preserving 37-degree pose, local size and history
+  ---
+  duration_ms: 59.446386
+  type: 'test'
+  ...
+# Subtest: locked furniture and door collisions reject a room edit without consuming history
+ok 114 - locked furniture and door collisions reject a room edit without consuming history
+  ---
+  duration_ms: 6.693198
+  type: 'test'
+  ...
+# Subtest: regeneration remaps authored records and tombstones, or refuses a lost/colliding room
+ok 115 - regeneration remaps authored records and tombstones, or refuses a lost/colliding room
+  ---
+  duration_ms: 15.113891
+  type: 'test'
+  ...
+# Subtest: DXF and schedule carry stable identity, true rotated corners and local dimensions in mm
+ok 116 - DXF and schedule carry stable identity, true rotated corners and local dimensions in mm
+  ---
+  duration_ms: 12.654127
+  type: 'test'
+  ...
+# Subtest: drawing revision invalidates pose/fixture/SKU, while price and finance edits remain separate
+ok 117 - drawing revision invalidates pose/fixture/SKU, while price and finance edits remain separate
+  ---
+  duration_ms: 11.057
+  type: 'test'
+  ...
+# Subtest: BOQ reconciles sourced furniture, VAT/labour/transport, keeping full project scope unknown
+ok 118 - BOQ reconciles sourced furniture, VAT/labour/transport, keeping full project scope unknown
+  ---
+  duration_ms: 53.719338
+  type: 'test'
+  ...
+# Subtest: explicit owned/bundled costs and shared transport cannot silently duplicate purchases
+ok 119 - explicit owned/bundled costs and shared transport cannot silently duplicate purchases
+  ---
+  duration_ms: 62.550907
+  type: 'test'
+  ...
+# Subtest: sourced unit conversion, expired/missing prices and duplicate application scope remain visible
+ok 120 - sourced unit conversion, expired/missing prices and duplicate application scope remain visible
+  ---
+  duration_ms: 80.129788
+  type: 'test'
+  ...
+# Subtest: A5 monthly schedules agree with existing domain formulas across methods/rate resets/zero rate
+ok 121 - A5 monthly schedules agree with existing domain formulas across methods/rate resets/zero rate
+  ---
+  duration_ms: 14.01489
+  type: 'test'
+  ...
+# Subtest: draws/grace/fees reconcile month balances and actual cash, preserving reserve
+ok 122 - draws/grace/fees reconcile month balances and actual cash, preserving reserve
+  ---
+  duration_ms: 17.750284
+  type: 'test'
+  ...
+# Subtest: finance terms, zero fees, ledger and sourced application persist through whitelist merge
+ok 123 - finance terms, zero fees, ledger and sourced application persist through whitelist merge
+  ---
+  duration_ms: 14.061611
+  type: 'test'
+  ...
+# Subtest: handover distinguishes design/field reports/as-built; only documented professional inspection accepts current revision
+ok 124 - handover distinguishes design/field reports/as-built; only documented professional inspection accepts current revision
+  ---
+  duration_ms: 68.376583
+  type: 'test'
+  ...
+# Subtest: North/fengshui are explicitly missing, and public handoff never includes private finance
+ok 125 - North/fengshui are explicitly missing, and public handoff never includes private finance
+  ---
+  duration_ms: 49.612963
+  type: 'test'
+  ...
+# Subtest: shared delivery conflicts and incomplete professional system scopes cannot become a complete quote
+ok 126 - shared delivery conflicts and incomplete professional system scopes cannot become a complete quote
+  ---
+  duration_ms: 68.253598
+  type: 'test'
+  ...
+# Subtest: malformed saved application/ledger/payment rows are retained and block readiness without crashing
+ok 127 - malformed saved application/ledger/payment rows are retained and block readiness without crashing
+  ---
+  duration_ms: 31.67252
+  type: 'test'
+  ...
+# Subtest: customer-entered rate/income/build-cost stress preserves the base design and financial terms
+ok 128 - customer-entered rate/income/build-cost stress preserves the base design and financial terms
+  ---
+  duration_ms: 14.457995
+  type: 'test'
+  ...
+# Subtest: sourced North rejects impossible/future dates, and exported BOQ review stales independently of geometry
+ok 129 - sourced North rejects impossible/future dates, and exported BOQ review stales independently of geometry
+  ---
+  duration_ms: 52.269371
+  type: 'test'
+  ...
+# Subtest: A3 material pages consume the same complete BOQ rows and furniture tables retain identity/angle
+ok 130 - A3 material pages consume the same complete BOQ rows and furniture tables retain identity/angle
+  ---
+  duration_ms: 47.614042
+  type: 'test'
+  ...
+# Subtest: public BOQ quote metadata excludes unrelated imported personal fields while retaining the saved original
+ok 131 - public BOQ quote metadata excludes unrelated imported personal fields while retaining the saved original
+  ---
+  duration_ms: 45.881481
+  type: 'test'
+  ...
+# (node:76) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: C01 merge, normalization, history and storage preserve authored rows and tombstones
+ok 132 - C01 merge, normalization, history and storage preserve authored rows and tombstones
+  ---
+  duration_ms: 46.912078
+  type: 'test'
+  ...
+# Subtest: C01 legacy plans gain an empty authored array without fabricating purchases
+ok 133 - C01 legacy plans gain an empty authored array without fabricating purchases
+  ---
+  duration_ms: 9.221614
+  type: 'test'
+  ...
+# Subtest: invalid furniture stays recoverable and reports duplicate ID, geometry and room errors
+ok 134 - invalid furniture stays recoverable and reports duplicate ID, geometry and room errors
+  ---
+  duration_ms: 7.928353
+  type: 'test'
+  ...
+# Subtest: entered zero differs from unknown and changed values stale confirmation without certifying sources
+ok 135 - entered zero differs from unknown and changed values stale confirmation without certifying sources
+  ---
+  duration_ms: 9.684639
+  type: 'test'
+  ...
+# (node:82) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: townhouse: real parcel/envelope, explicit depth preview, apply, history and reload
+ok 136 - townhouse: real parcel/envelope, explicit depth preview, apply, history and reload
+  ---
+  duration_ms: 100.522002
+  type: 'test'
+  ...
+# Subtest: wide: real parcel/envelope, explicit depth preview, apply, history and reload
+ok 137 - wide: real parcel/envelope, explicit depth preview, apply, history and reload
+  ---
+  duration_ms: 55.414363
+  type: 'test'
+  ...
+# Subtest: concave: real parcel/envelope, explicit depth preview, apply, history and reload
+ok 138 - concave: real parcel/envelope, explicit depth preview, apply, history and reload
+  ---
+  duration_ms: 100.483916
+  type: 'test'
+  ...
+# Subtest: invalid dimensions, room/floor/shared-wall locks, stale and tampered previews are atomic
+ok 139 - invalid dimensions, room/floor/shared-wall locks, stale and tampered previews are atomic
+  ---
+  duration_ms: 25.519251
+  type: 'test'
+  ...
+# Subtest: authored furniture identity, 37-degree angle, SKU and tombstone survive one translation
+ok 140 - authored furniture identity, 37-degree angle, SKU and tombstone survive one translation
+  ---
+  duration_ms: 33.907174
+  type: 'test'
+  ...
+# Subtest: townhouse: explicit allocation has its own corridor door and preserves total area
+ok 141 - townhouse: explicit allocation has its own corridor door and preserves total area
+  ---
+  duration_ms: 315.724503
+  type: 'test'
+  ...
+# Subtest: wide: explicit allocation has its own corridor door and preserves total area
+ok 142 - wide: explicit allocation has its own corridor door and preserves total area
+  ---
+  duration_ms: 222.40239
+  type: 'test'
+  ...
+# Subtest: concave: explicit allocation has its own corridor door and preserves total area
+ok 143 - concave: explicit allocation has its own corridor door and preserves total area
+  ---
+  duration_ms: 577.118956
+  type: 'test'
+  ...
+# Subtest: unsupported, undersized or duplicate allocation is rejected without changing state
+ok 144 - unsupported, undersized or duplicate allocation is rejected without changing state
+  ---
+  duration_ms: 106.841025
+  type: 'test'
+  ...
+# (node:92) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: townhouse loggia: measured open edges, roof, quantities, drawings, history and persistence
+ok 145 - townhouse loggia: measured open edges, roof, quantities, drawings, history and persistence
+  ---
+  duration_ms: 1422.989606
+  type: 'test'
+  ...
+# Subtest: townhouse terrace: measured open edges, roof, quantities, drawings, history and persistence
+ok 146 - townhouse terrace: measured open edges, roof, quantities, drawings, history and persistence
+  ---
+  duration_ms: 1247.226812
+  type: 'test'
+  ...
+# Subtest: wide loggia: measured open edges, roof, quantities, drawings, history and persistence
+ok 147 - wide loggia: measured open edges, roof, quantities, drawings, history and persistence
+  ---
+  duration_ms: 1581.039354
+  type: 'test'
+  ...
+# Subtest: wide terrace: measured open edges, roof, quantities, drawings, history and persistence
+ok 148 - wide terrace: measured open edges, roof, quantities, drawings, history and persistence
+  ---
+  duration_ms: 1762.183815
+  type: 'test'
+  ...
+# Subtest: concave loggia: measured open edges, roof, quantities, drawings, history and persistence
+ok 149 - concave loggia: measured open edges, roof, quantities, drawings, history and persistence
+  ---
+  duration_ms: 2846.247354
+  type: 'test'
+  ...
+# Subtest: concave terrace: measured open edges, roof, quantities, drawings, history and persistence
+ok 150 - concave terrace: measured open edges, roof, quantities, drawings, history and persistence
+  ---
+  duration_ms: 2956.560707
+  type: 'test'
+  ...
+# Subtest: outdoor requires explicit source, supported roof and free exterior edge; invalid/locked proposals are atomic
+ok 151 - outdoor requires explicit source, supported roof and free exterior edge; invalid/locked proposals are atomic
+  ---
+  duration_ms: 29.714099
+  type: 'test'
+  ...
+# Subtest: legacy balcony retains its original geometry until an explicit outdoor declaration, including locks and history
+ok 152 - legacy balcony retains its original geometry until an explicit outdoor declaration, including locks and history
+  ---
+  duration_ms: 69.886139
+  type: 'test'
+  ...
+# Subtest: outdoor specialist document is source/reviewer/revision checked and becomes stale after a design change
+ok 153 - outdoor specialist document is source/reviewer/revision checked and becomes stale after a design change
+  ---
+  duration_ms: 1001.427556
+  type: 'test'
+  ...
+# (node:100) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: native A3 sheets pass one-revision and metre/millimetre preflight
+ok 154 - native A3 sheets pass one-revision and metre/millimetre preflight
+  ---
+  duration_ms: 1113.522728
+  type: 'test'
+  ...
+# Subtest: PDF rejects mixed, missing or unknown revisions before any resource/network work
+ok 155 - PDF rejects mixed, missing or unknown revisions before any resource/network work
+  ---
+  duration_ms: 865.114926
+  type: 'test'
+  ...
+# Subtest: PDF rejects wrong page size and units even when revision matches
+ok 156 - PDF rejects wrong page size and units even when revision matches
+  ---
+  duration_ms: 748.757896
+  type: 'test'
+  ...
+# (node:107) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: end-month prepayment: independent equal-principal reconciliation and fee charged once
+ok 157 - end-month prepayment: independent equal-principal reconciliation and fee charged once
+  ---
+  duration_ms: 28.996162
+  type: 'test'
+  ...
+# Subtest: annuity resets after prepayment and again at supplied rate phase
+ok 158 - annuity resets after prepayment and again at supplied rate phase
+  ---
+  duration_ms: 6.132627
+  type: 'test'
+  ...
+# Subtest: draws and grace retain their convention; missing fee is unknown; malformed/overpaid terms reject
+ok 159 - draws and grace retain their convention; missing fee is unknown; malformed/overpaid terms reject
+  ---
+  duration_ms: 5.943563
+  type: 'test'
+  ...
+# Subtest: scenario persists without changing design revision; cash flow includes repayment and fee once
+ok 160 - scenario persists without changing design revision; cash flow includes repayment and fee once
+  ---
+  duration_ms: 10.190779
+  type: 'test'
+  ...
+1..160
+# tests 160
+# suites 0
+# pass 160
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 13326.784566

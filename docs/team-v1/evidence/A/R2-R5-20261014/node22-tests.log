@@ -1,0 +1,392 @@
+(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# (node:13) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: each floor keeps its requested rooms, zero WC floor and freely chosen worship location
+ok 1 - each floor keeps its requested rooms, zero WC floor and freely chosen worship location
+  ---
+  duration_ms: 40.398939
+  type: 'test'
+  ...
+# Subtest: living altar shares exact SVG, CAD and schedule dimensions and supports delete undo redo
+ok 2 - living altar shares exact SVG, CAD and schedule dimensions and supports delete undo redo
+  ---
+  duration_ms: 40.78721
+  type: 'test'
+  ...
+# Subtest: new style controls shapes while explicit materials and product bindings remain selected
+ok 3 - new style controls shapes while explicit materials and product bindings remain selected
+  ---
+  duration_ms: 47.491804
+  type: 'test'
+  ...
+# Subtest: applying another spatial option remaps per-room finishes and supplier bindings semantically
+ok 4 - applying another spatial option remaps per-room finishes and supplier bindings semantically
+  ---
+  duration_ms: 68.580464
+  type: 'test'
+  ...
+# Subtest: a direct passage is a wall hole with no door leaf or door purchase area
+ok 5 - a direct passage is a wall hole with no door leaf or door purchase area
+  ---
+  duration_ms: 11.403227
+  type: 'test'
+  ...
+# Subtest: locked shared walls reject opening edits and deletion; invalid rooms do not alter history
+ok 6 - locked shared walls reject opening edits and deletion; invalid rooms do not alter history
+  ---
+  duration_ms: 4.976862
+  type: 'test'
+  ...
+# Subtest: floor intent, direct edit controls and measured fixtures survive schema merge
+ok 7 - floor intent, direct edit controls and measured fixtures survive schema merge
+  ---
+  duration_ms: 11.80971
+  type: 'test'
+  ...
+# Subtest: moving a room translates its altar; shrinking across it rejects the whole edit
+ok 8 - moving a room translates its altar; shrinking across it rejects the whole edit
+  ---
+  duration_ms: 7.546054
+  type: 'test'
+  ...
+# Subtest: altar facing uses surveyed front direction and marks unknown cultural criteria
+ok 9 - altar facing uses surveyed front direction and marks unknown cultural criteria
+  ---
+  duration_ms: 12.213228
+  type: 'test'
+  ...
+# Subtest: out-of-range imported floor count stays visible and blocks automatic proposal
+ok 10 - out-of-range imported floor count stays visible and blocks automatic proposal
+  ---
+  duration_ms: 7.345571
+  type: 'test'
+  ...
+# Subtest: whole-house material choices cover office, worship, corridors and future rooms
+ok 11 - whole-house material choices cover office, worship, corridors and future rooms
+  ---
+  duration_ms: 21.45641
+  type: 'test'
+  ...
+# Subtest: room rotation carries altar dimensions and side, with invalid fixtures reported
+ok 12 - room rotation carries altar dimensions and side, with invalid fixtures reported
+  ---
+  duration_ms: 7.355456
+  type: 'test'
+  ...
+# Subtest: customer-added laundry and named rooms appear on the requested floor with minimum area and measured fittings
+ok 13 - customer-added laundry and named rooms appear on the requested floor with minimum area and measured fittings
+  ---
+  duration_ms: 13.168287
+  type: 'test'
+  ...
+# Subtest: invalid or oversized room requests preserve the current plan; removing a request supports undo
+ok 14 - invalid or oversized room requests preserve the current plan; removing a request supports undo
+  ---
+  duration_ms: 28.937691
+  type: 'test'
+  ...
+# Subtest: off-centre door retains exact schema and measured SVG/3D aperture through delete undo redo and reload
+ok 15 - off-centre door retains exact schema and measured SVG/3D aperture through delete undo redo and reload
+  ---
+  duration_ms: 21.638864
+  type: 'test'
+  ...
+# Subtest: numeric opening/room failures, collisions and impossible placements preserve undo and redo
+ok 16 - numeric opening/room failures, collisions and impossible placements preserve undo and redo
+  ---
+  duration_ms: 11.050846
+  type: 'test'
+  ...
+# Subtest: inverse SVG matrix keeps measured points through zoom, pan and landscape rotation
+ok 17 - inverse SVG matrix keeps measured points through zoom, pan and landscape rotation
+  ---
+  duration_ms: 6.769763
+  type: 'test'
+  ...
+# Subtest: room/floor locks and both sides of old/new shared walls reject every direct mutation
+ok 18 - room/floor locks and both sides of old/new shared walls reject every direct mutation
+  ---
+  duration_ms: 12.730097
+  type: 'test'
+  ...
+# Subtest: detached room drag previews preserve the plan/history; rejected final drop has no undo entry
+ok 19 - detached room drag previews preserve the plan/history; rejected final drop has no undo entry
+  ---
+  duration_ms: 11.329055
+  type: 'test'
+  ...
+# Subtest: passage and fixtures keep measured data, supplier finishes and floor intent after room edits and disk reload
+ok 20 - passage and fixtures keep measured data, supplier finishes and floor intent after room edits and disk reload
+  ---
+  duration_ms: 16.625287
+  type: 'test'
+  ...
+# Subtest: too-small walls and fixture collisions reject placement without disturbing redo
+ok 21 - too-small walls and fixture collisions reject placement without disturbing redo
+  ---
+  duration_ms: 14.636821
+  type: 'test'
+  ...
+# Subtest: exact laundry request keeps nullable metres, count and stable request ID across transfer undo and disk reload
+ok 22 - exact laundry request keeps nullable metres, count and stable request ID across transfer undo and disk reload
+  ---
+  duration_ms: 12.409874
+  type: 'test'
+  ...
+# Subtest: exact requested room dimensions reach measured geometry without shrinking or inventing optional rooms
+ok 23 - exact requested room dimensions reach measured geometry without shrinking or inventing optional rooms
+  ---
+  duration_ms: 15.241392
+  type: 'test'
+  ...
+# Subtest: incomplete, conflicting or oversized exact request retains intent and the current measured plan/history
+ok 24 - incomplete, conflicting or oversized exact request retains intent and the current measured plan/history
+  ---
+  duration_ms: 29.492421
+  type: 'test'
+  ...
+# Subtest: floor request transfers reject locked targets without moving intent or adding undo entries
+ok 25 - floor request transfers reject locked targets without moving intent or adding undo entries
+  ---
+  duration_ms: 6.317141
+  type: 'test'
+  ...
+# Subtest: numeric floor height changes reject tall openings and locked floors atomically and undo with stable IDs
+ok 26 - numeric floor height changes reject tall openings and locked floors atomically and undo with stable IDs
+  ---
+  duration_ms: 29.012627
+  type: 'test'
+  ...
+# Subtest: direct room floor transfer is atomic and retains opening/fixture IDs, offsets, manual finishes and numeric dimensions
+ok 27 - direct room floor transfer is atomic and retains opening/fixture IDs, offsets, manual finishes and numeric dimensions
+  ---
+  duration_ms: 14.907158
+  type: 'test'
+  ...
+# Subtest: direct floor transfer rejects collisions, source/target locks and independent vertical circulation changes
+ok 28 - direct floor transfer rejects collisions, source/target locks and independent vertical circulation changes
+  ---
+  duration_ms: 6.058331
+  type: 'test'
+  ...
+# Subtest: manual room collection survives a house style change and layout option remapping
+ok 29 - manual room collection survives a house style change and layout option remapping
+  ---
+  duration_ms: 82.514276
+  type: 'test'
+  ...
+# Subtest: requested room dimensions disclosure stays open across width edits and saving the project
+ok 30 - requested room dimensions disclosure stays open across width edits and saving the project
+  ---
+  duration_ms: 7.215084
+  type: 'test'
+  ...
+# (node:14) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: room rotation uses one atomic transform, preserving 37-degree pose, local size and history
+ok 31 - room rotation uses one atomic transform, preserving 37-degree pose, local size and history
+  ---
+  duration_ms: 49.712602
+  type: 'test'
+  ...
+# Subtest: locked furniture and door collisions reject a room edit without consuming history
+ok 32 - locked furniture and door collisions reject a room edit without consuming history
+  ---
+  duration_ms: 6.817506
+  type: 'test'
+  ...
+# Subtest: regeneration remaps authored records and tombstones, or refuses a lost/colliding room
+ok 33 - regeneration remaps authored records and tombstones, or refuses a lost/colliding room
+  ---
+  duration_ms: 6.145523
+  type: 'test'
+  ...
+# Subtest: DXF and schedule carry stable identity, true rotated corners and local dimensions in mm
+ok 34 - DXF and schedule carry stable identity, true rotated corners and local dimensions in mm
+  ---
+  duration_ms: 10.726548
+  type: 'test'
+  ...
+# Subtest: drawing revision invalidates pose/fixture/SKU, while price and finance edits remain separate
+ok 35 - drawing revision invalidates pose/fixture/SKU, while price and finance edits remain separate
+  ---
+  duration_ms: 11.861768
+  type: 'test'
+  ...
+# Subtest: BOQ reconciles sourced furniture, VAT/labour/transport, keeping full project scope unknown
+ok 36 - BOQ reconciles sourced furniture, VAT/labour/transport, keeping full project scope unknown
+  ---
+  duration_ms: 46.816051
+  type: 'test'
+  ...
+# Subtest: explicit owned/bundled costs and shared transport cannot silently duplicate purchases
+ok 37 - explicit owned/bundled costs and shared transport cannot silently duplicate purchases
+  ---
+  duration_ms: 77.076711
+  type: 'test'
+  ...
+# Subtest: sourced unit conversion, expired/missing prices and duplicate application scope remain visible
+ok 38 - sourced unit conversion, expired/missing prices and duplicate application scope remain visible
+  ---
+  duration_ms: 77.594701
+  type: 'test'
+  ...
+# Subtest: A5 monthly schedules agree with existing domain formulas across methods/rate resets/zero rate
+ok 39 - A5 monthly schedules agree with existing domain formulas across methods/rate resets/zero rate
+  ---
+  duration_ms: 12.445919
+  type: 'test'
+  ...
+# Subtest: draws/grace/fees reconcile month balances and actual cash, preserving reserve
+ok 40 - draws/grace/fees reconcile month balances and actual cash, preserving reserve
+  ---
+  duration_ms: 7.873277
+  type: 'test'
+  ...
+# Subtest: finance terms, zero fees, ledger and sourced application persist through whitelist merge
+ok 41 - finance terms, zero fees, ledger and sourced application persist through whitelist merge
+  ---
+  duration_ms: 13.524614
+  type: 'test'
+  ...
+# Subtest: handover distinguishes design/field reports/as-built; only documented professional inspection accepts current revision
+ok 42 - handover distinguishes design/field reports/as-built; only documented professional inspection accepts current revision
+  ---
+  duration_ms: 60.352177
+  type: 'test'
+  ...
+# Subtest: North/fengshui are explicitly missing, and public handoff never includes private finance
+ok 43 - North/fengshui are explicitly missing, and public handoff never includes private finance
+  ---
+  duration_ms: 40.429636
+  type: 'test'
+  ...
+# Subtest: shared delivery conflicts and incomplete professional system scopes cannot become a complete quote
+ok 44 - shared delivery conflicts and incomplete professional system scopes cannot become a complete quote
+  ---
+  duration_ms: 57.904203
+  type: 'test'
+  ...
+# Subtest: malformed saved application/ledger/payment rows are retained and block readiness without crashing
+ok 45 - malformed saved application/ledger/payment rows are retained and block readiness without crashing
+  ---
+  duration_ms: 31.083509
+  type: 'test'
+  ...
+# Subtest: customer-entered rate/income/build-cost stress preserves the base design and financial terms
+ok 46 - customer-entered rate/income/build-cost stress preserves the base design and financial terms
+  ---
+  duration_ms: 14.660126
+  type: 'test'
+  ...
+# Subtest: sourced North rejects impossible/future dates, and exported BOQ review stales independently of geometry
+ok 47 - sourced North rejects impossible/future dates, and exported BOQ review stales independently of geometry
+  ---
+  duration_ms: 49.084161
+  type: 'test'
+  ...
+# Subtest: A3 material pages consume the same complete BOQ rows and furniture tables retain identity/angle
+ok 48 - A3 material pages consume the same complete BOQ rows and furniture tables retain identity/angle
+  ---
+  duration_ms: 53.401096
+  type: 'test'
+  ...
+# Subtest: public BOQ quote metadata excludes unrelated imported personal fields while retaining the saved original
+ok 49 - public BOQ quote metadata excludes unrelated imported personal fields while retaining the saved original
+  ---
+  duration_ms: 52.89292
+  type: 'test'
+  ...
+# (node:15) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: townhouse: real parcel/envelope, explicit depth preview, apply, history and reload
+ok 50 - townhouse: real parcel/envelope, explicit depth preview, apply, history and reload
+  ---
+  duration_ms: 84.545147
+  type: 'test'
+  ...
+# Subtest: wide: real parcel/envelope, explicit depth preview, apply, history and reload
+ok 51 - wide: real parcel/envelope, explicit depth preview, apply, history and reload
+  ---
+  duration_ms: 75.811127
+  type: 'test'
+  ...
+# Subtest: concave: real parcel/envelope, explicit depth preview, apply, history and reload
+ok 52 - concave: real parcel/envelope, explicit depth preview, apply, history and reload
+  ---
+  duration_ms: 154.351119
+  type: 'test'
+  ...
+# Subtest: invalid dimensions, room/floor/shared-wall locks, stale and tampered previews are atomic
+ok 53 - invalid dimensions, room/floor/shared-wall locks, stale and tampered previews are atomic
+  ---
+  duration_ms: 31.412004
+  type: 'test'
+  ...
+# Subtest: authored furniture identity, 37-degree angle, SKU and tombstone survive one translation
+ok 54 - authored furniture identity, 37-degree angle, SKU and tombstone survive one translation
+  ---
+  duration_ms: 34.767312
+  type: 'test'
+  ...
+# Subtest: townhouse: explicit allocation has its own corridor door and preserves total area
+ok 55 - townhouse: explicit allocation has its own corridor door and preserves total area
+  ---
+  duration_ms: 232.162426
+  type: 'test'
+  ...
+# Subtest: wide: explicit allocation has its own corridor door and preserves total area
+ok 56 - wide: explicit allocation has its own corridor door and preserves total area
+  ---
+  duration_ms: 228.136417
+  type: 'test'
+  ...
+# Subtest: concave: explicit allocation has its own corridor door and preserves total area
+ok 57 - concave: explicit allocation has its own corridor door and preserves total area
+  ---
+  duration_ms: 496.670223
+  type: 'test'
+  ...
+# Subtest: unsupported, undersized or duplicate allocation is rejected without changing state
+ok 58 - unsupported, undersized or duplicate allocation is rejected without changing state
+  ---
+  duration_ms: 71.059922
+  type: 'test'
+  ...
+# (node:21) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: end-month prepayment: independent equal-principal reconciliation and fee charged once
+ok 59 - end-month prepayment: independent equal-principal reconciliation and fee charged once
+  ---
+  duration_ms: 29.175358
+  type: 'test'
+  ...
+# Subtest: annuity resets after prepayment and again at supplied rate phase
+ok 60 - annuity resets after prepayment and again at supplied rate phase
+  ---
+  duration_ms: 6.369671
+  type: 'test'
+  ...
+# Subtest: draws and grace retain their convention; missing fee is unknown; malformed/overpaid terms reject
+ok 61 - draws and grace retain their convention; missing fee is unknown; malformed/overpaid terms reject
+  ---
+  duration_ms: 5.924779
+  type: 'test'
+  ...
+# Subtest: scenario persists without changing design revision; cash flow includes repayment and fee once
+ok 62 - scenario persists without changing design revision; cash flow includes repayment and fee once
+  ---
+  duration_ms: 10.044019
+  type: 'test'
+  ...
+1..62
+# tests 62
+# suites 0
+# pass 62
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1492.215657

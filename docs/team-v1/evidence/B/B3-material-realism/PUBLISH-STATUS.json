@@ -1,0 +1,21 @@
+{
+  "sourceCommitLocal": "afef9a7",
+  "baselineB": "b04de86802c99baa5f2119e6154f8e553cb822a1",
+  "baselineMain": "42d8653f68cc7cb4efd94ad0887c2f09401ed5e0",
+  "state": "published-and-production-verified",
+  "previousAttempts": {
+    "operation": "github_create_tree",
+    "attempts": 2,
+    "executed": false,
+    "reason": "Automatic approval review thread-store RateLimited429"
+  },
+  "recovery": "Same operation succeeded on next user turn",
+  "bypassAttempted": false,
+  "commercialApproved": false,
+  "sourceCheckpoint": "f5c3201c91479be60231854eb0578423b1ce934d",
+  "mainCommit": "03c0b9f4228fc197dbd18d039fc9fb16549c9b89",
+  "pr": 38,
+  "githubPublished": true,
+  "productionUpdated": true,
+  "publicUiDesktopPhonePassed": true
+}

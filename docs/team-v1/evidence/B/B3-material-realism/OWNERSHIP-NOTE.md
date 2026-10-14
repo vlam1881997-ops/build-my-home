@@ -1,0 +1,1 @@
+B requests a scoped change to the previously unlisted tests/completion.test.mjs: its old assertion that every catalog price is null must validate sourced reference prices as well as missing values. This is the existing catalog acceptance test, not A-owned calculation/state/build code. Changes remain limited to that assertion. No A-owned source or progress file is changed.

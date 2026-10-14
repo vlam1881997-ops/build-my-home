@@ -1,0 +1,344 @@
+{
+  "runtime": "v22.23.0",
+  "cases": [
+    {
+      "device": "desktop",
+      "items": [
+        {
+          "id": "sample-0",
+          "modelId": "table",
+          "roomId": "room",
+          "floor": 0,
+          "origin": "customer-added",
+          "placementStatus": "present",
+          "locked": false,
+          "pose": {
+            "x": 3,
+            "y": 3,
+            "z": 0,
+            "rotationDeg": 37
+          },
+          "size": {
+            "width": 1.683,
+            "depth": 0.8947,
+            "height": 0.6535
+          },
+          "materialBindings": [],
+          "costTreatment": "unconfirmed"
+        },
+        {
+          "id": "sample-1",
+          "modelId": "chair",
+          "roomId": "room",
+          "floor": 0,
+          "origin": "customer-added",
+          "placementStatus": "present",
+          "locked": false,
+          "pose": {
+            "x": 6,
+            "y": 3,
+            "z": 0,
+            "rotationDeg": 37
+          },
+          "size": {
+            "width": 0.56,
+            "depth": 0.61,
+            "height": 0.88
+          },
+          "materialBindings": [],
+          "costTreatment": "unconfirmed"
+        },
+        {
+          "id": "sample-2",
+          "modelId": "cabinetTelevision",
+          "roomId": "room",
+          "floor": 0,
+          "origin": "customer-added",
+          "placementStatus": "present",
+          "locked": false,
+          "pose": {
+            "x": 9,
+            "y": 3,
+            "z": 0,
+            "rotationDeg": 37
+          },
+          "size": {
+            "width": 1.6,
+            "depth": 0.5,
+            "height": 0.62
+          },
+          "materialBindings": [],
+          "costTreatment": "unconfirmed"
+        },
+        {
+          "id": "sample-3",
+          "modelId": "televisionModern",
+          "roomId": "room",
+          "floor": 0,
+          "origin": "customer-added",
+          "placementStatus": "present",
+          "locked": false,
+          "pose": {
+            "x": 3,
+            "y": 7,
+            "z": 0,
+            "rotationDeg": 37
+          },
+          "size": {
+            "width": 1.3696,
+            "depth": 0.2568,
+            "height": 0.9095
+          },
+          "materialBindings": [],
+          "costTreatment": "unconfirmed"
+        },
+        {
+          "id": "sample-4",
+          "modelId": "toilet",
+          "roomId": "room",
+          "floor": 0,
+          "origin": "customer-added",
+          "placementStatus": "present",
+          "locked": false,
+          "pose": {
+            "x": 6,
+            "y": 7,
+            "z": 0,
+            "rotationDeg": 37
+          },
+          "size": {
+            "width": 0.6251,
+            "depth": 0.9544,
+            "height": 0.9019
+          },
+          "materialBindings": [],
+          "costTreatment": "unconfirmed"
+        }
+      ],
+      "meshes": [
+        {
+          "id": "sample-0",
+          "angle": -0.6457718232379019,
+          "size": {
+            "width": 1.683,
+            "depth": 0.8947,
+            "height": 0.6535
+          },
+          "model": "table"
+        },
+        {
+          "id": "sample-1",
+          "angle": -0.6457718232379019,
+          "size": {
+            "width": 0.56,
+            "depth": 0.61,
+            "height": 0.88
+          },
+          "model": "chair"
+        },
+        {
+          "id": "sample-2",
+          "angle": -0.6457718232379019,
+          "size": {
+            "width": 1.6,
+            "depth": 0.5,
+            "height": 0.62
+          },
+          "model": "cabinetTelevision"
+        },
+        {
+          "id": "sample-3",
+          "angle": -0.6457718232379019,
+          "size": {
+            "width": 1.3696,
+            "depth": 0.2568,
+            "height": 0.9095
+          },
+          "model": "televisionModern"
+        },
+        {
+          "id": "sample-4",
+          "angle": -0.6457718232379019,
+          "size": {
+            "width": 0.6251,
+            "depth": 0.9544,
+            "height": 0.9019
+          },
+          "model": "toilet"
+        }
+      ],
+      "errors": [],
+      "overflow": false
+    },
+    {
+      "device": "phone",
+      "items": [
+        {
+          "id": "sample-0",
+          "modelId": "table",
+          "roomId": "room",
+          "floor": 0,
+          "origin": "customer-added",
+          "placementStatus": "present",
+          "locked": false,
+          "pose": {
+            "x": 3,
+            "y": 3,
+            "z": 0,
+            "rotationDeg": 37
+          },
+          "size": {
+            "width": 1.683,
+            "depth": 0.8947,
+            "height": 0.6535
+          },
+          "materialBindings": [],
+          "costTreatment": "unconfirmed"
+        },
+        {
+          "id": "sample-1",
+          "modelId": "chair",
+          "roomId": "room",
+          "floor": 0,
+          "origin": "customer-added",
+          "placementStatus": "present",
+          "locked": false,
+          "pose": {
+            "x": 6,
+            "y": 3,
+            "z": 0,
+            "rotationDeg": 37
+          },
+          "size": {
+            "width": 0.56,
+            "depth": 0.61,
+            "height": 0.88
+          },
+          "materialBindings": [],
+          "costTreatment": "unconfirmed"
+        },
+        {
+          "id": "sample-2",
+          "modelId": "cabinetTelevision",
+          "roomId": "room",
+          "floor": 0,
+          "origin": "customer-added",
+          "placementStatus": "present",
+          "locked": false,
+          "pose": {
+            "x": 9,
+            "y": 3,
+            "z": 0,
+            "rotationDeg": 37
+          },
+          "size": {
+            "width": 1.6,
+            "depth": 0.5,
+            "height": 0.62
+          },
+          "materialBindings": [],
+          "costTreatment": "unconfirmed"
+        },
+        {
+          "id": "sample-3",
+          "modelId": "televisionModern",
+          "roomId": "room",
+          "floor": 0,
+          "origin": "customer-added",
+          "placementStatus": "present",
+          "locked": false,
+          "pose": {
+            "x": 3,
+            "y": 7,
+            "z": 0,
+            "rotationDeg": 37
+          },
+          "size": {
+            "width": 1.3696,
+            "depth": 0.2568,
+            "height": 0.9095
+          },
+          "materialBindings": [],
+          "costTreatment": "unconfirmed"
+        },
+        {
+          "id": "sample-4",
+          "modelId": "toilet",
+          "roomId": "room",
+          "floor": 0,
+          "origin": "customer-added",
+          "placementStatus": "present",
+          "locked": false,
+          "pose": {
+            "x": 6,
+            "y": 7,
+            "z": 0,
+            "rotationDeg": 37
+          },
+          "size": {
+            "width": 0.6251,
+            "depth": 0.9544,
+            "height": 0.9019
+          },
+          "materialBindings": [],
+          "costTreatment": "unconfirmed"
+        }
+      ],
+      "meshes": [
+        {
+          "id": "sample-0",
+          "angle": -0.6457718232379019,
+          "size": {
+            "width": 1.683,
+            "depth": 0.8947,
+            "height": 0.6535
+          },
+          "model": "table"
+        },
+        {
+          "id": "sample-1",
+          "angle": -0.6457718232379019,
+          "size": {
+            "width": 0.56,
+            "depth": 0.61,
+            "height": 0.88
+          },
+          "model": "chair"
+        },
+        {
+          "id": "sample-2",
+          "angle": -0.6457718232379019,
+          "size": {
+            "width": 1.6,
+            "depth": 0.5,
+            "height": 0.62
+          },
+          "model": "cabinetTelevision"
+        },
+        {
+          "id": "sample-3",
+          "angle": -0.6457718232379019,
+          "size": {
+            "width": 1.3696,
+            "depth": 0.2568,
+            "height": 0.9095
+          },
+          "model": "televisionModern"
+        },
+        {
+          "id": "sample-4",
+          "angle": -0.6457718232379019,
+          "size": {
+            "width": 0.6251,
+            "depth": 0.9544,
+            "height": 0.9019
+          },
+          "model": "toilet"
+        }
+      ],
+      "errors": [],
+      "overflow": false
+    }
+  ],
+  "exactSupplierAssets": false
+}

@@ -1,0 +1,27 @@
+{
+  "A": {
+    "pr": 48,
+    "head": "378847971c45f4cb5b570247fc171bb5b1b94c5a",
+    "merge": "d552014573e619028a18a06419e502532c6009ff"
+  },
+  "B": {
+    "pr": 49,
+    "head": "bfc68d54c95727e3a320c00468f00eade393c3c0"
+  },
+  "main": "c1ec74ea9aafaeb101a30dba0880fe7c3934262b",
+  "branch": "main",
+  "url": "https://www.huiminhbach.id.vn",
+  "sourceBlobsCompared": 60,
+  "sourceMismatches": 0,
+  "testsPassed": 58,
+  "outdoorNativeCases": 12,
+  "glbDevices": [
+    "desktop",
+    "phone"
+  ],
+  "deploymentStatus": "GitHub Vercel status success; public app/css hash match",
+  "vercelMetadata": "MCP list denied 403; CLI unavailable; no protection bypass attempted",
+  "commercialApproval": false,
+  "mainCI": "success",
+  "vercelDeploymentDashboard": "https://vercel.com/vlam1881997-9266/build_my_home_full_v1.2_github/HHbjpg8jJzTHP9RDsioJYnDCx4Ri"
+}

@@ -1,0 +1,39 @@
+{
+  "version": "1.7.0",
+  "date": "2026-09-21T05:31:30.342628+00:00",
+  "automated_tests": {
+    "passed": 65,
+    "failed": 0
+  },
+  "vm_screen_checks": {
+    "passed": 11,
+    "failed": 0
+  },
+  "shared_core_bundle_matches_source": true,
+  "product_suite_assets": {
+    "js": "dist/product-suite.js",
+    "css": "dist/product-suite.css",
+    "project_store": "bmh-project-store-v17"
+  },
+  "http_static_smoke": {
+    "status": "passed",
+    "paths": [
+      "/",
+      "/app.js",
+      "/styles.css",
+      "/mobile-resilience.js",
+      "/product-suite.js",
+      "/product-suite.css",
+      "/manifest.webmanifest"
+    ]
+  },
+  "vercel_build": "npm run build:vercel -> public/",
+  "api_no_key_status": 503,
+  "ai_cloud": "optional Vercel function; requires OPENAI_API_KEY and OPENAI_MODEL; live provider not tested",
+  "ai_local_review": "rule/evidence based; no fake cloud response",
+  "mobile_resilience": "included; real-device QA still required",
+  "browser_e2e": "not completed in container; Chromium headless could not initialize display/GPU stack",
+  "pricing": "default bank/material/climate data are illustrative/reference scenarios; real quotes must be user-entered or provider-integrated",
+  "geometry": "concept centerline rectangles, shared walls, openings and resize handles; not BIM/construction design",
+  "payment": "not implemented in v1.7; no fake payment/webhook generated"
+}

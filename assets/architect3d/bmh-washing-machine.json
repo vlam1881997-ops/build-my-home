@@ -1,0 +1,19 @@
+{
+  "modelId": "washingMachine",
+  "file": "models/washingMachine.glb",
+  "source": "src/43_scene_assets.js:createRoomAsset",
+  "generator": "tests/team-b-washer-asset.mjs",
+  "rights": "Original BMH geometry; no third-party model or manufacturer branding",
+  "generic": true,
+  "manufacturer": null,
+  "sku": null,
+  "front": "+Z",
+  "dimensionsMetres": {
+    "w": 0.6,
+    "h": 0.85,
+    "d": 0.65
+  },
+  "sourceScale": 0.5,
+  "architectDefaultScale": 200,
+  "sha256": "7b195fb55a12951a62d636a65215c15d945bcba1f7a1c764a0473fc223a3e856"
+}

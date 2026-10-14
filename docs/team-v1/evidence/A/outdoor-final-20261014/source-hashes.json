@@ -1,0 +1,14 @@
+{
+  "src/30_planner.js": "e3f569d0a1b398c01990c83eb2c34ffbaf55b16741695f735b74ca9dcdec4153",
+  "src/40_exports.js": "b9aa2b38abf2f511e2c3988b05dc9c489615cd4c59491e37efdb699d203b9700",
+  "src/92_measured_design.js": "be6d6ab80898e72cb9e2fc47b33f1c3fd686b74cc9f0f5eb77acd3cd51eee92a",
+  "src/95_architectural_documents.js": "baf0053eedf48caabd2024b7b9efadd1d1d8b4b79e21de502cc52875a5b525b5",
+  "src/team-a-boq.js": "f874e1f719ea9ac6d1598f4d1dc0f9ef075bac421b2a5837e8308066fe1b56e2",
+  "src/team-a-handover.js": "7643781548012dc759a80c3add345ab362415c91c10e1c95f6723b633bf2ad6a",
+  "src/team-a-project-contract.js": "5a6b1d88bafebead3b17f516eadf828e83a98761be871e6c599d5652d4463b57",
+  "tests/team-a-massing-export-qa.py": "95c9fd90d9ed3e58052e82da75008e6a49a28d03df2982c938e1a9da8a06f02b",
+  "tests/team-a-massing-export.mjs": "77e8209a63b160956ede2b60fc02dfaf4bff8b3c43e006a09959c11cd6342bfa",
+  "tests/team-a-massing-pdf.browser.cjs": "e97faf6b53269f64e23ccf3f70bf7a7b601a619627a916ef40c230ee41c37eda",
+  "tests/team-a-outdoor.test.mjs": "5892e54e22b7b9f73c033d586c5402a65b6c8f63eb17b6b3ed55271060655180",
+  "tests/team-a-outdoor.browser.cjs": "2b30c37c32ff0e05129c8448b0b59b2a1527f299df9ecde6bea31d062f10299b"
+}

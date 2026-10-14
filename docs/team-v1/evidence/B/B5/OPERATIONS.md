@@ -1,0 +1,15 @@
+# B5 operating boundaries
+
+Private image/PDF media is routed through existing /api/projects?operation=media (no extra Vercel function). Source: server/_team_b_media.mjs; client: 91_customer_cloud.js. Limit 2 MB/file fits existing function payload; immutable content-hash keys allow retry without overwriting bytes. GET signs only keys referenced in that user's saved project, for 120 s. Upload -> project metadata revision-save required; conflict/network failure preserves local bytes and explains partially saved status. Ownership checked by API and Storage RLS; no service-role key used for file operations.
+
+Apply sql/BMH_PROJECT_MEDIA.sql AFTER existing customer cloud migration, verify real private bucket with separate accounts, then set BMH_MEDIA_READY=true. Current environment has no Supabase admin/database connection; migration is supplied, NOT applied. No provider/plugin/dependency installed, no claim of free unlimited storage. Existing provider quotas/costs apply; bucket file-size limit is not a total-spend cap. Operational cleanup/retention and resumable >2 MB uploads remain follow-up; do not erase metadata to claim bytes were deleted.
+
+Existing revision-CAS/conflict copies, token refresh, AI allowance ledger, MoMo sandbox/receipt recovery remain reused. Payment must be confirmed by server/webhook; QA uses mocks, no merchant order or real spend. Current public capability flags, cross-device/Storage/RLS and merchant sandbox must be checked on the integrated deployment before B5 acceptance.
+
+Primary docs checked 2026-10-09: https://supabase.com/docs/guides/storage/security/access-control ; https://supabase.com/docs/reference/self-hosting-storage/v1/upload-a-new-object .
+
+Local cache now uses project:<localProjectId>:<evidenceId> and a transactional first-project claim for legacy unscoped records. Explicit project copies copy scoped cache; imported metadata alone cannot read another project's new cached file. Legacy unscoped files have no reliable original project identity, so first referenced project claims them; ambiguous older copies may require reattaching originals. Device storage is not a separate authentication boundary. Cloud keys still enforce user/project ownership; quota/retention/cleanup remain pending real provider configuration.
+
+Actual Vercel metadata check 2026-10-09: connected project prj_PcB996IRamEZqWrKpA5qk9T290kh has only GEMINI_API_KEY (sensitive, production+preview; values never decrypted). No Supabase/MoMo readiness environment entries. Node setting 24.x vs repo22.x is handed to A deployment owner for alignment. Public production config recorded separately; this is not a B-branch production deployment.
+
+POST media now requires a saved evidence/sourceRef ID, and rejects changed content for an already-bound immutable attachment before contacting Storage. This prevents arbitrary unregistered file uploads and accidental attachment substitution. It is not a total storage/spend quota; retention/ledger/provider caps still require the operations work above. UploadedAt is retained by the B normalizer extension.

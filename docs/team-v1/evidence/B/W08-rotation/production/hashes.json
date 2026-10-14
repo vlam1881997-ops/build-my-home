@@ -1,0 +1,16 @@
+[
+  {
+    "name": "app.js",
+    "status": 200,
+    "sha256": "986a30711e7da9cd7f804a233a257c66547fec53a7a99d141ac444844fb5486e",
+    "bytes": 1714751,
+    "matches": true
+  },
+  {
+    "name": "styles.css",
+    "status": 200,
+    "sha256": "ca8c48054d29a84eeb556686dc43a137bb311324cbf825fcae4475f5ef440505",
+    "bytes": 589842,
+    "matches": true
+  }
+]

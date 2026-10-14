@@ -1,0 +1,346 @@
+{
+  "testOnly": true,
+  "revision": "6D979D3F-741638A5-AI1-RH1",
+  "pdf": {
+    "file": "bo-ban-ve-A3.pdf",
+    "pages": 32,
+    "sha256": "5617427d9ab96bc8b642e90c9babd2d8839087f8c3b7a212b3e8c5cc7df08e74",
+    "checks": [
+      {
+        "page": 1,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 2,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 3,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 4,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 5,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 6,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 7,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 8,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 9,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 10,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 11,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 12,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 13,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 14,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 15,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 16,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 17,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 18,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 19,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 20,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 21,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 22,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 23,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 24,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 25,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 26,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 27,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 28,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 29,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 30,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 31,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      },
+      {
+        "page": 32,
+        "A3": true,
+        "searchable": true,
+        "vector": true,
+        "renderDecoded": true
+      }
+    ]
+  },
+  "SVGCount": 32,
+  "outputHashes": [
+    {
+      "type": "plans",
+      "file": "bo-ban-ve-A3.pdf",
+      "sha256": "5617427d9ab96bc8b642e90c9babd2d8839087f8c3b7a212b3e8c5cc7df08e74"
+    },
+    {
+      "type": "roof",
+      "file": "bo-ban-ve-A3.pdf",
+      "sha256": "5617427d9ab96bc8b642e90c9babd2d8839087f8c3b7a212b3e8c5cc7df08e74"
+    },
+    {
+      "type": "elevations",
+      "file": "bo-ban-ve-A3.pdf",
+      "sha256": "5617427d9ab96bc8b642e90c9babd2d8839087f8c3b7a212b3e8c5cc7df08e74"
+    },
+    {
+      "type": "sections",
+      "file": "bo-ban-ve-A3.pdf",
+      "sha256": "5617427d9ab96bc8b642e90c9babd2d8839087f8c3b7a212b3e8c5cc7df08e74"
+    },
+    {
+      "type": "openings",
+      "file": "bang-cua.csv",
+      "sha256": "281a7e1d664416e9309d3ead574eeb660c33eeb3ccc4a428d32b172b547aaa40"
+    },
+    {
+      "type": "areas",
+      "file": "bang-dien-tich.csv",
+      "sha256": "24386869d02a8f235e9bad5c1fbfafbe640d1c83c1b392093b0e3fa6f0b2c5b9"
+    },
+    {
+      "type": "materials",
+      "file": "bang-vat-lieu.csv",
+      "sha256": "332343e68c0fc3619f0d0e85c9a6b49f5e448e5ebad890efbe6095983635299d"
+    },
+    {
+      "type": "furniture",
+      "file": "bang-noi-that.csv",
+      "sha256": "5e6716362a695d58772ffcaa9ec54e5e8d51550afb3e54af0c1494e0b7c93cbd"
+    },
+    {
+      "type": "boq",
+      "file": "boq-co-nguon.csv",
+      "sha256": "98cf48114d535f34da465e7c6c41219b10a0b9ed99c5fea533c75fd64d50c782"
+    },
+    {
+      "type": "technical-register",
+      "file": "technical-register.json",
+      "sha256": "ff2d8eb54d5f43da840731fadba8acddcfd2377471480e248e6cfb5bd0e58b01"
+    }
+  ],
+  "publicCanaryCheck": "passed; specific synthetic private fields only",
+  "dxf": {
+    "parser": "ezdxf 1.4.4",
+    "floors": [
+      {
+        "floor": 0,
+        "units": "mm",
+        "areaM2": 176.0,
+        "entities": 137,
+        "auditErrors": 0,
+        "auditFixes": 0,
+        "furnitureIds": [
+          "test-seat-37",
+          "furniture:bed-0:bedDouble:0",
+          "furniture:bed-0:cabinetBed:0",
+          "furniture:bed-0:bookcaseClosedWide:0",
+          "furniture:bed-0:desk:0",
+          "furniture:laundry:washingMachine:0",
+          "furniture:laundry:kitchenSink:0"
+        ],
+        "chairCornerMaxErrorMm": 0.00010663986813597148,
+        "sha256": "a04c6a7c3a6e88e9cac104993ab1c774968b9c82167afda5657c6ea0af954694"
+      },
+      {
+        "floor": 1,
+        "units": "mm",
+        "areaM2": 176.0,
+        "entities": 121,
+        "auditErrors": 0,
+        "auditFixes": 0,
+        "furnitureIds": [
+          "furniture:bed-1:bedDouble:0",
+          "furniture:bed-1:cabinetBed:0",
+          "furniture:bed-1:bookcaseClosedWide:0",
+          "furniture:bed-1:desk:0"
+        ],
+        "chairCornerMaxErrorMm": null,
+        "sha256": "614d69b39551c0fe7e6f7a44943e308f642e139a37b0b7512a004681f0342ff5"
+      },
+      {
+        "floor": 2,
+        "units": "mm",
+        "areaM2": 176.0,
+        "entities": 117,
+        "auditErrors": 0,
+        "auditFixes": 0,
+        "furnitureIds": [
+          "furniture:bed-2:bedDouble:0",
+          "furniture:bed-2:cabinetBed:0",
+          "furniture:bed-2:bookcaseClosedWide:0",
+          "furniture:bed-2:desk:0"
+        ],
+        "chairCornerMaxErrorMm": null,
+        "sha256": "1d3a851e236b393f3e7b969a874d306065784aef05b433c357e4aefb4c640820"
+      }
+    ]
+  },
+  "visualReview": "recorded separately by reviewer; automated checks do not prove layout"
+}

@@ -1,0 +1,29 @@
+[
+  {
+    "fixture": "townhouse",
+    "pages": 34,
+    "revision": "7B152BC9-741638A5-AI4-RH2",
+    "a3": true,
+    "searchableRevisionEveryPage": true,
+    "rasterImages": 0,
+    "sha256": "181f6c690f83c32254edf38219db0f3b3b627e90f53427726777f10cb95567c4"
+  },
+  {
+    "fixture": "wide",
+    "pages": 33,
+    "revision": "518ED9D8-741638A5-AI4-RH2",
+    "a3": true,
+    "searchableRevisionEveryPage": true,
+    "rasterImages": 0,
+    "sha256": "872d8f324aac9a74a55ced67d73eebac7ac735e8be7ed2e4d23f271686263c73"
+  },
+  {
+    "fixture": "concave",
+    "pages": 35,
+    "revision": "8594992E-741638A5-AI4-RH2",
+    "a3": true,
+    "searchableRevisionEveryPage": true,
+    "rasterImages": 0,
+    "sha256": "899aa4aa2738fef17bdf8d328759e8c1f254e9e3ba3e6873aee03c54d28b9aa0"
+  }
+]
