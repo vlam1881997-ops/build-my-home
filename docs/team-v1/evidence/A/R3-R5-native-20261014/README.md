@@ -24,3 +24,7 @@ Set `BMH_CHROMIUM_EXECUTABLE` to a working Chromium and `NODE_PATH` to the insta
 Owner instruction 14/10: work only on A; postpone checking B and merging A+B. No B task inspection, B edits, merge or deployment in this checkpoint. Older B gate references are historical/future integration requirements, not a current work queue.
 
 A2 outdoor semantics (usable balcony/loggia/terrace, roof/railing/drainage and review evidence) are still incomplete. Current room allocation supports enclosed office/laundry/storage or an explicitly unassigned area only. Source quotes/professional documents remain unknown/awaiting-review. Official Codex Security capability/preflight unavailable; do not read passing functional tests as a security scan.
+
+## A3 revision guard follow-up
+
+`96_vector_pdf.js` now rejects mixed/missing/unknown revision, wrong A3 viewBox and wrong m/mm metadata before loading PDF resources. It snapshots SVG strings before the asynchronous font load. Three targeted rejection tests pass; the native three-PDF/102-page export was repeated after this code change. `combined-export-validation.json` records independent PDF/SVG/DXF/BOQ checks on the resulting files. PDF hashes differ by generated metadata time; geometry revision is unchanged. Earlier `pdf-validation.json` preserves the prior run, not the new bytes.

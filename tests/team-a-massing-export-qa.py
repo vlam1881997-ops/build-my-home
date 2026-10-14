@@ -1,6 +1,7 @@
 """Independent millimetre DXF/SVG checks for changed A-R2 synthetic cases."""
 import json
 import math
+import hashlib
 import sys
 from pathlib import Path
 import xml.etree.ElementTree as ET
@@ -32,5 +33,17 @@ for case in ['townhouse','wide','concave']:
             assert panels,room['id'];ps=[q for e in panels for q in points(e)]
             for actual,expected in [(min(x for x,y in ps),room['x']*1000),(max(x for x,y in ps),(room['x']+room['w'])*1000),(min(y for x,y in ps),-(room['y']+room['h'])*1000),(max(y for x,y in ps),-room['y']*1000)]:assert abs(actual-expected)<.002,(room['id'],actual,expected)
         floors.append({'floor':floor,'INSUNITS':4,'auditErrors':0,'auditFixes':0,'parcelAreaM2':area,'roomBoundsMm':True})
-    results.append({'fixture':case,'revision':revision,'sheets':len(svgs),'floors':floors,'pdf':'not-tested','professionalReview':'awaiting-review'})
+    pdf_result={'status':'not-generated'}
+    pdf_file=d/'BMH-A3.pdf'
+    if pdf_file.exists():
+        from pypdf import PdfReader
+        pdf=PdfReader(pdf_file);assert len(pdf.pages)==len(svgs)
+        for page in pdf.pages:
+            assert abs(float(page.mediabox.width)-420*72/25.4)<.01
+            assert abs(float(page.mediabox.height)-297*72/25.4)<.01
+            text=page.extract_text()
+            assert revision in text and 'CHƯA DÙNG THI CÔNG' in text
+            assert not page.images
+        pdf_result={'status':'checked','pages':len(pdf.pages),'a3':True,'searchableRevisionEveryPage':True,'rasterImages':0,'sha256':hashlib.sha256(pdf_file.read_bytes()).hexdigest()}
+    results.append({'fixture':case,'revision':revision,'sheets':len(svgs),'floors':floors,'pdf':pdf_result,'professionalReview':'awaiting-review'})
 (root/'export-validation.json').write_text(json.dumps(results,indent=2)+'\n');print(json.dumps(results,indent=2))

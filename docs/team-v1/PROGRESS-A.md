@@ -108,3 +108,9 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Chỉ làm A từ checkpoint này. Hoãn rà nhiệm vụ B và ghép A+B theo chỉ đạo 14/10; chưa merge/deploy. Các yêu cầu consumer B ở checkpoint trước được giữ làm lịch sử.
 - next_action_A: hoàn thiện hình học/nguồn/review không gian ngoài trời A2, không đổi nhãn phần dư thành loggia; tiếp tục BOQ/phạm vi thiếu và bàn giao A. Giá, Bắc, quy hoạch, kết cấu/MEP không có nguồn giữ unknown/awaiting-review.
 - Remaining gates riêng: semantics ngoài trời chưa xong; Security preflight/capability chưa có; hồ sơ thực chưa cung cấp. Không tuyên bố toàn TASK A đã hoàn thành.
+
+### A3 revision guard — 14/10
+
+- Source `96_vector_pdf.js`: kiểm trước toàn bộ tờ A3 cùng revision và đúng đơn vị m/mm; từ chối revision thiếu/unknown/khác nhau trước khi nạp font/PDF. Chụp chuỗi SVG trước async để caller không thay trang giữa lúc xuất.
+- 3/3 kiểm tra chống trộn revision/khổ/đơn vị đạt Node22. Xuất lại native 3PDF/102trang đạt sau sửa; parser độc lập kiểm PDF/SVG/8DXF/BOQ/quantities cùng revision. Bằng chứng combined-export-validation.json và pdf-revision-tests.log.
+- Chỉ sửa file A, không rà hoặc sửa công việc B. Giữ PR48 Draft; phần không gian ngoài trời A2 chưa được đánh dấu hoàn tất.
