@@ -61,9 +61,24 @@
   if(!room||room.type!=='bed')return fail('Chọn phòng ngủ cần xem phương án thu chiều sâu.');
   if(!Number.isFinite(request.depth)||request.depth<2.95||request.depth>=room.h)return fail('Chiều sâu cần từ 2,95 m và nhỏ hơn hiện tại; đây là giới hạn bộ bố trí, không phải chuẩn pháp lý.');
   if(!['front','rear'].includes(request.anchor))return fail('Chọn giữ cạnh trước hoặc cạnh sau của phòng.');
+  const use=request.releasedUse??'unassigned',uses={office:['Phòng làm việc',2.6],laundry:['Phòng giặt',1.8],storage:['Kho',1.5]};
+  if(use!=='unassigned'&&!Object.hasOwn(uses,use))return fail('Chọn công năng được hỗ trợ; loggia/sân thượng cần hợp đồng hình học riêng.');
   if(!B.furnitureContractReady())return fail('Nội thất chưa được chuẩn hóa; giữ bản gốc để kiểm tra.');
   const candidate=B.planSnapshot(),next=candidate.rooms.find(r=>r.id===room.id);
   next.h=request.depth;if(request.anchor==='rear')next.y=room.y+room.h-request.depth;
+  const released={floor:room.floor,x:room.x,y:request.anchor==='rear'?room.y:room.y+request.depth,w:room.w,h:room.h-request.depth,use,reviewStatus:'awaiting-review'},changes=[];
+  if(use!=='unassigned'){
+   if(released.h<uses[use][1]||released.w<1.5)return fail('Phần dư chưa đủ kích thước cho công năng này trong bộ bố trí.');
+   const id=room.id+'-released',openingId=id+'-access';
+   if(candidate.rooms.some(r=>r.id===id)||candidate.openings.some(o=>o.id===openingId))return fail('ID phần chia đã tồn tại; chỉnh phòng hiện có thay vì tạo trùng.');
+   const added={id,floor:room.floor,type:use,name:uses[use][0],x:released.x,y:released.y,w:released.w,h:released.h};candidate.rooms.push(added);
+   const access=['east','west'].flatMap(side=>B.sharedWallNeighbors(candidate.rooms,added,side).filter(r=>r.type==='corridor').map(r=>({side,a:Math.max(r.y,added.y),b:Math.min(r.y+r.h,added.y+added.h)}))).find(s=>s.b-s.a>=1.06);
+   if(!access)return fail('Phần dư chưa có cạnh tiếp giáp hành lang đủ để đặt cửa riêng; không tự tạo lối qua phòng ngủ.');
+   candidate.openings.push({id:openingId,roomId:id,floor:room.floor,kind:'door',side:access.side,width:.9,offset:((access.a+access.b)/2-added.y-.45)/(added.h-.9),height:2.1,sill:0,hinge:'left',swing:'in'});
+   const sharedSide=request.anchor==='rear'?'north':'south';
+   for(const o of candidate.openings.filter(o=>o.roomId===room.id&&o.kind==='window'&&o.side===sharedSide)){o.roomId=id;changes.push({kind:'window-room',id:o.id,from:room.id,to:id,reason:'Giữ cửa sổ trên tường ngoài của phòng mới, không để trên vách ngăn phòng ngủ.'});}
+   changes.push({kind:'room-added',id,type:use},{kind:'opening-added',id:openingId});released.roomId=id;
+  }
   candidate.fixtures=B.translatedFixtures(candidate.rooms,source);
   if(candidate.fixtures.length!==(source.fixtures||[]).length)return fail('Có fixture mất liên kết phòng; kiểm tra bản gốc trước khi thu chiều sâu.');
   const carried=B.carryFurnitureToPlan(candidate);if(!carried.ok)return fail(carried.reason);
@@ -72,11 +87,10 @@
   if(issues.length)return fail(issues[0].text);
   const disconnected=B.withPlan(plan,()=>B.circulationAnalysis(room.floor).unreachable);
   if(disconnected.length)return fail(disconnected[0].name+': chưa có đường tiếp cận liên tục qua cửa.');
-  const released={floor:room.floor,x:room.x,y:request.anchor==='rear'?room.y:room.y+request.depth,w:room.w,h:room.h-request.depth,use:'unassigned',reviewStatus:'awaiting-review'};
-  return {ok:true,units:'m',sourceRevision:B.drawingRevision(),sourcePlanKey:JSON.stringify(source),request:{roomId:room.id,depth:request.depth,anchor:request.anchor},plan,
+  return {ok:true,units:'m',sourceRevision:B.drawingRevision(),sourcePlanKey:JSON.stringify(source),request:{roomId:room.id,depth:request.depth,anchor:request.anchor,releasedUse:use},plan,changes,
    room:{id:room.id,before:{width:room.w,depth:room.h,area:room.w*room.h},after:{width:next.w,depth:next.h,area:next.w*next.h}},released:{...released,area:released.w*released.h},
    cost:{status:'unknown',amount:null,reason:'Cần bóc lại khối lượng và báo giá cùng revision; không suy tiền tiết kiệm từ diện tích.'},
-   notice:'Giữ số phòng và khối thang; cửa và đồ đi theo phòng như bản xem trước. Phần nhường ra chưa là loggia/sân thượng; cần khách chọn công năng và KTS/KS kiểm duyệt.'};
+   notice:'Giữ phòng ngủ và khối thang; công năng mới, cửa và đồ thể hiện trong bản xem trước. Phần dư chưa là loggia/sân thượng; cần khách chấp nhận và KTS/KS kiểm duyệt.'};
  };
  B.applyRoomDepthChange=preview=>{
   if(!preview?.ok||preview.sourceRevision!==B.drawingRevision()||preview.sourcePlanKey!==JSON.stringify(B.state.project.plan))return reject('Phương án đã cũ; xem lại số đo trước khi áp dụng.');
@@ -85,9 +99,10 @@
   if(JSON.stringify(current.plan)!==JSON.stringify(preview.plan))return reject('Bản xem trước đã thay đổi; tạo lại phương án.');
   // commitDirectPlan performs fixture/furniture translations once, using source poses.
   const candidate=B.planSnapshot(),r=current.plan.rooms.find(r=>r.id===preview.request.roomId);
-  candidate.rooms=candidate.rooms.map(q=>q.id===r.id?copy(r):q);
+  candidate.rooms=copy(current.plan.rooms);candidate.openings=copy(current.plan.openings);
   return B.commitDirectPlan(candidate,{floor:r.floor,selected:r.id,selectedOpening:'',selectedFixture:''});
  };
+ B.compareRoomDepthOptions=request=>['unassigned','office','laundry','storage'].map(releasedUse=>{const result=B.previewRoomDepthChange({...request,releasedUse});return {releasedUse,...result,...(result.ok?{assessment:B.evaluateDesignOption(result.plan,{strategy:'customer-room-allocation'})}:{})};});
  const proposal=B.architectureProposal;
  B.architectureProposal=strategy=>{const result=proposal(strategy);if(!result.ok)return result;const carried=B.carryFurnitureToPlan(result.plan);return carried.ok?{...result,plan:carried.plan}:{...result,ok:false,reason:carried.reason};};
  const apply=B.applyDesignKit;

@@ -1,19 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {designClient} from './fixtures/design-client.mjs';
-const fixtures=JSON.parse(fs.readFileSync('tests/team-a-massing-fixtures.json','utf8'));
+import {fixtures,fixture,target} from './team-a-massing-fixture.mjs';
 const plain=x=>JSON.parse(JSON.stringify(x));
-function fixture(f=fixtures.cases[0]){
- const B=designClient({nativeParcel:true,realHouse:true}),p=B.state.project;
- Object.assign(p.site,f.site,{useParcelGeometry:!!f.vertices,targetCoverage:.8,north:{status:'unknown'},elevation:{status:'unknown'}});
- if(f.vertices){Object.assign(p.site,{lotMode:'custom',lotSource:'survey-local',frontEdge:0,boundaryEvidenceId:'test-concave'});p.designEvidence.site=[{id:'test-concave',kind:'boundary',unit:'m',sourceType:'customer',verifiedState:'provided',sourceTitle:'TEST-ONLY local coordinates',value:{sourceCrs:'LOCAL_METRES',surveyReference:'TEST-ONLY A/AB',localVertices:f.vertices}}];}
- p.style='Japandi';p.briefIdea='';p.household.relatives=[];p.designStudio={program:{mode:'custom',bedrooms:3,bathrooms:3}};
- p.plan={rooms:[],openings:[],fixtures:[],furniture:[],outdoor:[],lockedRoomIds:[],lockedFloors:[]};
- const proposal=B.architectureProposal('balanced');assert.equal(proposal.ok,true,proposal.reason);p.plan=proposal.plan;
- B.planHistory={undo:[],redo:[]};return B;
-}
-function target(B){return B.state.project.plan.rooms.filter(r=>r.type==='bed').sort((a,b)=>b.h-a.h)[0];}
 const request=B=>({roomId:target(B).id,depth:3.8,anchor:'rear'});
 for(const f of fixtures.cases)test(f.id+': real parcel/envelope, explicit depth preview, apply, history and reload',()=>{
  const B=fixture(f),p=B.state.project,before=plain(p.plan),rev=B.drawingRevision(),r=target(B),area=B.measuredQuantities().grossArea;
@@ -44,4 +33,23 @@ test('authored furniture identity, 37-degree angle, SKU and tombstone survive on
  p.plan.furniture=[chair,{...plain(chair),id:'removed',placementStatus:'removed'}];const preview=B.previewRoomDepthChange(request(B));assert.equal(preview.ok,true,preview.reason);assert.equal(B.applyRoomDepthChange(preview),true);assert.deepEqual(plain(p.plan),plain(preview.plan));
  for(const item of p.plan.furniture){assert.equal(item.pose.rotationDeg,37);assert.equal(item.pose.x,chair.pose.x);assert.ok(Math.abs(item.pose.y-(chair.pose.y+r.h-3.8))<1e-9);assert.equal(item.materialBindings[0].sku,'TEST-ONLY');}assert.equal(p.plan.furniture[1].placementStatus,'removed');
  B.undoPlan();p.plan.furniture[0].locked=true;assert.equal(B.previewRoomDepthChange(request(B)).ok,false);p.plan.furniture[0].locked=false;p.plan.furniture[0].pose.y=r.y+8;assert.equal(B.previewRoomDepthChange(request(B)).ok,false);
+});
+for(const f of fixtures.cases)test(f.id+': explicit allocation has its own corridor door and preserves total area',()=>{
+ for(const releasedUse of ['office','laundry','storage'])for(const anchor of ['front','rear']){
+  const B=fixture(f),before=plain(B.state.project.plan),r=target(B),area=B.measuredQuantities().grossArea;
+  const preview=B.previewRoomDepthChange({...request(B),depth:f.id==='wide'?3:3.8,anchor,releasedUse});if(f.id==='wide'&&releasedUse==='office'){assert.equal(preview.ok,false);assert.deepEqual(plain(B.state.project.plan),before);continue;}assert.equal(preview.ok,true,preview.reason);
+  assert.deepEqual(plain(B.state.project.plan),before);const added=preview.plan.rooms.find(q=>q.id===preview.released.roomId);assert.equal(added.type,releasedUse);
+  const door=preview.plan.openings.find(o=>o.id===added.id+'-access');assert.equal(door.kind,'door');assert.equal(door.width,.9);
+  assert.equal(B.applyRoomDepthChange(preview),true);assert.deepEqual(plain(B.state.project.plan),plain(preview.plan));assert.ok(Math.abs(B.measuredQuantities().grossArea-area)<1e-7);
+  assert.equal(B.circulationAnalysis(r.floor).unreachable.length,0);assert.deepEqual(plain(B.state.project.plan.rooms.filter(q=>q.type==='bed').map(q=>q.id)),before.rooms.filter(q=>q.type==='bed').map(q=>q.id));
+  for(const id of preview.changes.filter(c=>c.kind==='window-room').map(c=>c.id)){const o=B.state.project.plan.openings.find(o=>o.id===id);assert.equal(o.roomId,added.id);assert.equal(o.kind,'window');assert.equal(o.side,anchor==='rear'?'north':'south');}
+  const after=plain(B.state.project.plan);B.undoPlan();assert.deepEqual(plain(B.state.project.plan),before);B.redoPlan();assert.deepEqual(plain(B.state.project.plan),after);B.save();B.state=B.loadState();assert.deepEqual(plain(B.state.project.plan),after);
+ }
+});
+test('unsupported, undersized or duplicate allocation is rejected without changing state',()=>{
+ const B=fixture(),r=target(B),before=plain(B.state.project.plan);
+ for(const releasedUse of ['balcony','terrace','__proto__'])assert.equal(B.previewRoomDepthChange({...request(B),releasedUse}).ok,false);
+ assert.equal(B.previewRoomDepthChange({...request(B),depth:r.h-.7,releasedUse:'office'}).ok,false);
+ const options=B.compareRoomDepthOptions(request(B));assert.equal(options.length,4);assert.ok(options.every(o=>o.ok&&o.cost.amount===null));assert.deepEqual(plain(B.state.project.plan),before);
+ assert.equal(B.applyRoomDepthChange(options[1]),true);const snapshot=plain(B.state.project.plan);assert.equal(B.previewRoomDepthChange({roomId:r.id,depth:3,releasedUse:'storage',anchor:'rear'}).ok,false);assert.deepEqual(plain(B.state.project.plan),snapshot);
 });

@@ -1,14 +1,14 @@
 # Tiến độ AI A — BMH commercial v1
 
-Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 13/10/2026.
+Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 14/10/2026.
 - role: A
 - status: in_progress
 - active_task: A-R1 / A-R2 (gói tiếp tục 13/10; A1/A2 trong manifest hiện hành)
-- active_substep: R1 fixtures và R2 preview/apply thu chiều sâu phòng ngủ đã có; Draft WIP, UI B / native browser / Node22 / exports chưa nghiệm thu
+- active_substep: R2 chia công năng có cửa thực, R3 SVG/DXF/BOQ parity và R5 trả trước đã kiểm trên Node22; native/PDF bị chặn do browser hỏng và download bị auto-review từ chối
 - target_branch: codex/a-massing-20261013
 - actual_branch: codex/a-massing-20261013
 - source_baseline: ddf9dfe348263a28148cfbf8ca5132f1d492f8dc (main, PR #47 merged)
-- last_verified_commit: ddf9dfe348263a28148cfbf8ca5132f1d492f8dc (baseline GitHub đã xác minh; patch kiểm bằng source hashes tại evidence/A/R1-R2, chưa là release gate)
+- last_verified_commit: 833fef77024bed16522035985e04e31314db1e38 (checkpoint PR48 trước patch 14/10; source hashes và 62 Node22 checks tại evidence/A/R2-R5-20261014)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -88,3 +88,13 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Thử thêm real-house suite: 66/68 đạt, 2 lỗi ENOENT do asset photographic-provenance và modern-armchair-facing chưa tải trong sparse checkout. Không gọi đây là regression production hay full suite xanh.
 - Codex Security `security-diff-scan`: đọc được skill nhưng reference config-preflight không đọc được và capability scan không có; chưa có báo cáo scan chính thức. Dependency không thay đổi.
 - Next action: B nối hai hook vào UI xem/chọn phương án; A mở rộng phân công năng khoảng trống/stepback theo lựa chọn khách và xác minh A3/DXF/roof/BOQ cùng revision. Khôi phục runtime Node22/browser rồi chạy runner sáu ca; chưa merge/release/production.
+
+## Checkpoint 14/10 — R2 allocation, R3 exports, R5 prepayment
+
+- Base giữ PR48 `833fef7`, main PR47 và B `778e3fe` chưa đổi khi đọc 14/10. Giữ cùng nhánh A, không sửa B.
+- Preview có 4 lựa chọn: chưa phân công năng / làm việc / giặt / kho. Cửa riêng tiếp giáp corridor, chuyển cửa sổ ngoài có danh sách thay đổi; không tự dời phòng theo style. So phương án có assessment/giá provisional, giá nguồn thiếu giữ null.
+- 62/62 kiểm tra Node22.23.0 đạt; build/syntax đạt. Trả trước cuối tháng có nguồn và phí riêng, recast giảm khoản trả/giữ kỳ hạn; thiếu phí không thành0. Đã nối form A5 hiện có, không chạm UI B.
+- Xuất102SVG A3 +8DXF trên3fixture; ezdxf0errors/0fixes, số đo ranh/phòngmm và revisionBOQ khớp. RenderSVG và xem contact sheets/chi tiết; chưa có nativePDF mới.
+- Môi trường Node22 khôi phục được. Chromium cũ bịtruncated; auto-review từ chối tải browserthay thế với lý doquy tắc dùngbrowsercó sẵn. Không tìmđường vòng. Cầnchủsảnphẩm cho phép thay QA browserhỏng trước khi chạy native/PDF.
+- next_action: sau khi được phép khôi phục browser, chạy native6ca vàexportPDF; B nối `compareRoomDepthOptions` / `applyRoomDepthChange`. A tiếp tục hợp đồng không gian ngoài trời/mái/railing theo mộtnguồngeometry, không mô tả việc chia phòng kín là loggia hoàn tất.
+- blocked_inputs: quyền thay browserhỏng, capabilityCodexSecurity, consumerUI/3D B, hồ sơ/quotes/chuyênmôn thực. Không mark COMPLETE, không merge/deploy.
