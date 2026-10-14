@@ -1,7 +1,0 @@
-{
-  "scope": "main3c7f510...working source; integrated B included; explicit patterns only, not exhaustive security review",
-  "files": 45,
-  "findings": [],
-  "officialCodexSecurityScan": "blocked: config-preflight reference and callable capability unavailable",
-  "dependencyAudit": "one pre-existing moderate dev esbuild GHSA-67mh-4wv8-2f99; no dependency upgrade"
-}

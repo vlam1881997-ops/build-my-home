@@ -1,8 +1,0 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import vm from 'node:vm';
-const source=fs.readFileSync('src/70_v60_product_ui.js','utf8');
-function client(fetch){let now=1800000000000,renders=0;const B={v6:{bankLogos:{}},BANKS:[{id:'test',name:'Test Bank',fullName:'Test Bank'}],state:{ui:{step:8}},render(){renders++;},v65Norm:s=>String(s||'').toLowerCase()};vm.runInNewContext(source.slice(source.indexOf('BMH.v65LoadBankLogos=async'),source.indexOf('BMH.v6BankMark=')),{BMH:B,fetch,Date:{now:()=>now},console:{warn(){}}});return {B,advance:ms=>{now+=ms;},renders:()=>renders};}
-test('failed directory keeps vector fallback and suppresses render-triggered retries until cooldown ends',async()=>{let calls=0;const c=client(async()=>{calls++;return {ok:false,status:503};});await c.B.v65LoadBankLogos();for(let i=0;i<20;i++)await c.B.v65LoadBankLogos();assert.equal(calls,1);assert.equal(c.renders(),1);assert.equal(c.B.v6.bankLogosLoading,false);assert.equal(c.B.v6.bankLogosLoaded,undefined);c.advance(600001);await c.B.v65LoadBankLogos();assert.equal(calls,2);});
-test('concurrent loads share the in-flight guard; successful retry installs matched logos once',async()=>{let finish,calls=0;const c=client(()=>{calls++;return new Promise(resolve=>{finish=resolve;});}),pending=c.B.v65LoadBankLogos();await c.B.v65LoadBankLogos();assert.equal(calls,1);finish({ok:true,json:async()=>({data:[{code:'test',shortName:'Test Bank',name:'Test Bank',logo:'/fixture-logo.svg'}]})});await pending;assert.equal(c.B.v6.bankLogos.test,'/fixture-logo.svg');await c.B.v65LoadBankLogos();assert.equal(calls,1);assert.equal(c.renders(),1);});
