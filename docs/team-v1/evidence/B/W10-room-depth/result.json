@@ -1,0 +1,86 @@
+[
+  {
+    "device": "desktop",
+    "beforeRoom": {
+      "id": "design-f2-bed-1",
+      "floor": 2,
+      "name": "Phòng Con 1",
+      "type": "bed",
+      "x": 0.11000000000000032,
+      "y": 1.61,
+      "w": 3.9800000000000004,
+      "h": 12.379999999999999
+    },
+    "afterRoom": {
+      "id": "design-f2-bed-1",
+      "floor": 2,
+      "name": "Phòng Con 1",
+      "type": "bed",
+      "x": 0.11000000000000032,
+      "y": 10.189999999999998,
+      "w": 3.9800000000000004,
+      "h": 3.8
+    },
+    "addedRoom": {
+      "id": "design-f2-bed-1-released",
+      "floor": 2,
+      "type": "laundry",
+      "name": "Phòng giặt",
+      "x": 0.11000000000000032,
+      "y": 1.61,
+      "w": 3.9800000000000004,
+      "h": 8.579999999999998
+    },
+    "measured": {
+      "width": 3.9800000190734863,
+      "depth": 3.799999952316284,
+      "revision": "55B46E03-741638A5-AI4-RH2"
+    },
+    "invalidEditRejected": true,
+    "previewNoMutation": true,
+    "undoExact": true,
+    "errors": []
+  },
+  {
+    "device": "phone",
+    "beforeRoom": {
+      "id": "design-f2-bed-1",
+      "floor": 2,
+      "name": "Phòng Con 1",
+      "type": "bed",
+      "x": 0.11000000000000032,
+      "y": 1.61,
+      "w": 3.9800000000000004,
+      "h": 12.379999999999999
+    },
+    "afterRoom": {
+      "id": "design-f2-bed-1",
+      "floor": 2,
+      "name": "Phòng Con 1",
+      "type": "bed",
+      "x": 0.11000000000000032,
+      "y": 10.189999999999998,
+      "w": 3.9800000000000004,
+      "h": 3.8
+    },
+    "addedRoom": {
+      "id": "design-f2-bed-1-released",
+      "floor": 2,
+      "type": "laundry",
+      "name": "Phòng giặt",
+      "x": 0.11000000000000032,
+      "y": 1.61,
+      "w": 3.9800000000000004,
+      "h": 8.579999999999998
+    },
+    "measured": {
+      "width": 3.9800000190734863,
+      "depth": 3.799999952316284,
+      "revision": "55B46E03-741638A5-AI4-RH2"
+    },
+    "invalidEditRejected": true,
+    "previewNoMutation": true,
+    "undoExact": true,
+    "errors": []
+  }
+]
