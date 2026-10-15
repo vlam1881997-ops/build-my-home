@@ -1,0 +1,118 @@
+[
+  {
+    "device": "desktop",
+    "first": {
+      "plan": "{\"rooms\":[{\"id\":\"room\",\"floor\":0,\"type\":\"living\",\"name\":\"Phòng thử nghiệm\",\"x\":1,\"y\":2,\"w\":6,\"h\":6}],\"openings\":[{\"id\":\"door\",\"floor\":0,\"roomId\":\"room\",\"side\":\"north\",\"kind\":\"door\",\"offset\":0.1,\"width\":1,\"height\":2.1,\"sill\":0},{\"id\":\"window\",\"floor\":0,\"roomId\":\"room\",\"side\":\"east\",\"kind\":\"window\",\"offset\":0.3,\"width\":1.2,\"height\":1.4,\"sill\":0.8}],\"fixtures\":[],\"furniture\":[],\"outdoor\":[],\"lockedRoomIds\":[],\"lockedFloors\":[]}",
+      "style": "Hiện đại",
+      "interior": "{\"id\":\"urban-stone\",\"name\":\"Đá & đường nét\",\"note\":\"Sofa thấp, bàn đá chân thép, tông xám dịu.\",\"shape\":\"linear\",\"table\":\"stone\",\"wall\":\"#f2eee5\",\"floor\":\"#a9aaa4\",\"accent\":\"#65432e\",\"fabric\":\"#d9cfbb\",\"pillow\":\"#626f72\",\"rug\":\"#d2d2cb\",\"surface\":\"stone\",\"visualMaterials\":{\"floor\":\"grey-concrete\",\"accent\":\"dark-walnut\",\"fabric\":\"natural-linen\",\"wall\":\"ivory-paint\"},\"collectionId\":\"urban-stone\",\"catalogMaterials\":{},\"materialBindingStatuses\":{}}",
+      "scope": "exterior-only",
+      "status": "sample",
+      "count": 2,
+      "white": true,
+      "scale": [
+        1.2,
+        0.6
+      ],
+      "angle": 37,
+      "left": [
+        116,
+        82,
+        54,
+        255
+      ],
+      "right": [
+        168,
+        185,
+        140,
+        255
+      ],
+      "overflow": false
+    },
+    "reopened": {
+      "plan": "{\"rooms\":[{\"id\":\"room\",\"floor\":0,\"type\":\"living\",\"name\":\"Phòng thử nghiệm\",\"x\":1,\"y\":2,\"w\":6,\"h\":6}],\"openings\":[{\"id\":\"door\",\"floor\":0,\"roomId\":\"room\",\"side\":\"north\",\"kind\":\"door\",\"offset\":0.1,\"width\":1,\"height\":2.1,\"sill\":0},{\"id\":\"window\",\"floor\":0,\"roomId\":\"room\",\"side\":\"east\",\"kind\":\"window\",\"offset\":0.3,\"width\":1.2,\"height\":1.4,\"sill\":0.8}],\"outdoor\":[],\"fixtures\":[],\"furniture\":[],\"lockedRoomIds\":[],\"lockedFloors\":[]}",
+      "style": "Hiện đại",
+      "interior": "{\"id\":\"urban-stone\",\"name\":\"Đá & đường nét\",\"note\":\"Sofa thấp, bàn đá chân thép, tông xám dịu.\",\"shape\":\"linear\",\"table\":\"stone\",\"wall\":\"#f2eee5\",\"floor\":\"#a9aaa4\",\"accent\":\"#65432e\",\"fabric\":\"#d9cfbb\",\"pillow\":\"#626f72\",\"rug\":\"#d2d2cb\",\"surface\":\"stone\",\"visualMaterials\":{\"floor\":\"grey-concrete\",\"accent\":\"dark-walnut\",\"fabric\":\"natural-linen\",\"wall\":\"ivory-paint\"},\"collectionId\":\"urban-stone\",\"catalogMaterials\":{},\"materialBindingStatuses\":{}}",
+      "scope": "exterior-only",
+      "status": "sample",
+      "count": 2,
+      "white": true,
+      "scale": [
+        1.2,
+        0.6
+      ],
+      "angle": 37,
+      "left": [
+        116,
+        82,
+        54,
+        255
+      ],
+      "right": [
+        168,
+        185,
+        140,
+        255
+      ],
+      "overflow": false
+    },
+    "errors": []
+  },
+  {
+    "device": "phone",
+    "first": {
+      "plan": "{\"rooms\":[{\"id\":\"room\",\"floor\":0,\"type\":\"living\",\"name\":\"Phòng thử nghiệm\",\"x\":1,\"y\":2,\"w\":6,\"h\":6}],\"openings\":[{\"id\":\"door\",\"floor\":0,\"roomId\":\"room\",\"side\":\"north\",\"kind\":\"door\",\"offset\":0.1,\"width\":1,\"height\":2.1,\"sill\":0},{\"id\":\"window\",\"floor\":0,\"roomId\":\"room\",\"side\":\"east\",\"kind\":\"window\",\"offset\":0.3,\"width\":1.2,\"height\":1.4,\"sill\":0.8}],\"fixtures\":[],\"furniture\":[],\"outdoor\":[],\"lockedRoomIds\":[],\"lockedFloors\":[]}",
+      "style": "Hiện đại",
+      "interior": "{\"id\":\"urban-stone\",\"name\":\"Đá & đường nét\",\"note\":\"Sofa thấp, bàn đá chân thép, tông xám dịu.\",\"shape\":\"linear\",\"table\":\"stone\",\"wall\":\"#f2eee5\",\"floor\":\"#a9aaa4\",\"accent\":\"#65432e\",\"fabric\":\"#d9cfbb\",\"pillow\":\"#626f72\",\"rug\":\"#d2d2cb\",\"surface\":\"stone\",\"visualMaterials\":{\"floor\":\"grey-concrete\",\"accent\":\"dark-walnut\",\"fabric\":\"natural-linen\",\"wall\":\"ivory-paint\"},\"collectionId\":\"urban-stone\",\"catalogMaterials\":{},\"materialBindingStatuses\":{}}",
+      "scope": "exterior-only",
+      "status": "sample",
+      "count": 2,
+      "white": true,
+      "scale": [
+        1.2,
+        0.6
+      ],
+      "angle": 37,
+      "left": [
+        116,
+        82,
+        54,
+        255
+      ],
+      "right": [
+        168,
+        185,
+        140,
+        255
+      ],
+      "overflow": false
+    },
+    "reopened": {
+      "plan": "{\"rooms\":[{\"id\":\"room\",\"floor\":0,\"type\":\"living\",\"name\":\"Phòng thử nghiệm\",\"x\":1,\"y\":2,\"w\":6,\"h\":6}],\"openings\":[{\"id\":\"door\",\"floor\":0,\"roomId\":\"room\",\"side\":\"north\",\"kind\":\"door\",\"offset\":0.1,\"width\":1,\"height\":2.1,\"sill\":0},{\"id\":\"window\",\"floor\":0,\"roomId\":\"room\",\"side\":\"east\",\"kind\":\"window\",\"offset\":0.3,\"width\":1.2,\"height\":1.4,\"sill\":0.8}],\"outdoor\":[],\"fixtures\":[],\"furniture\":[],\"lockedRoomIds\":[],\"lockedFloors\":[]}",
+      "style": "Hiện đại",
+      "interior": "{\"id\":\"urban-stone\",\"name\":\"Đá & đường nét\",\"note\":\"Sofa thấp, bàn đá chân thép, tông xám dịu.\",\"shape\":\"linear\",\"table\":\"stone\",\"wall\":\"#f2eee5\",\"floor\":\"#a9aaa4\",\"accent\":\"#65432e\",\"fabric\":\"#d9cfbb\",\"pillow\":\"#626f72\",\"rug\":\"#d2d2cb\",\"surface\":\"stone\",\"visualMaterials\":{\"floor\":\"grey-concrete\",\"accent\":\"dark-walnut\",\"fabric\":\"natural-linen\",\"wall\":\"ivory-paint\"},\"collectionId\":\"urban-stone\",\"catalogMaterials\":{},\"materialBindingStatuses\":{}}",
+      "scope": "exterior-only",
+      "status": "sample",
+      "count": 2,
+      "white": true,
+      "scale": [
+        1.2,
+        0.6
+      ],
+      "angle": 37,
+      "left": [
+        116,
+        82,
+        54,
+        255
+      ],
+      "right": [
+        168,
+        185,
+        140,
+        255
+      ],
+      "overflow": false
+    },
+    "errors": []
+  }
+]

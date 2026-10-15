@@ -84,7 +84,7 @@
  const authored=(raw,role)=>raw.styleRoles?.[role]!==true&&(raw.explicitRoles?raw.explicitRoles[role]===true||Object.values(raw.catalogMaterials||{}).some(v=>v.surfaceSlot===role):hex(raw[role])||!!raw.visualMaterials?.[role]||Object.values(raw.catalogMaterials||{}).some(v=>v.surfaceSlot===role));
  B.facadeFinishPalette=()=>{
   const p=B.state.project,raw=p.materials.finish?.exterior||{},resolved=B.finishPalette(),rule=B.architecturalIdentity(),manualAccent=authored(raw,'accent'),manualWall=authored(raw,'wall');
-  return {...resolved,wall:manualWall?resolved.wall:B.houseStyle()?.wall||resolved.wall,accent:manualAccent?resolved.accent:rule.color,visualMaterials:{...resolved.visualMaterials,...(!manualAccent?{accent:''}:{}),...(!manualWall?{wall:'ivory-paint'}:{})},facadeSurface:manualAccent?'selected':rule.surface,manualAccent,manualWall};
+  const result={...resolved,wall:manualWall?resolved.wall:B.houseStyle()?.wall||resolved.wall,accent:manualAccent?resolved.accent:rule.color,visualMaterials:{...resolved.visualMaterials,...(!manualAccent?{accent:''}:{}),...(!manualWall?{wall:'ivory-paint'}:{})},facadeSurface:manualAccent?'selected':rule.surface,manualAccent,manualWall};return B.resolveFacadeMaterialBindings?.(result)||result;
  };
  const palette=B.scenePalette;B.scenePalette=()=>{const value=palette(),raw=B.state.project.materials.finish?.exterior||{},rule=B.architecturalIdentity();return {...value,frame:hex(raw.frame)?parseInt(raw.frame.slice(1),16):rule.frame?parseInt(rule.frame.slice(1),16):value.frame};};
  B.facadeComponentArea=part=>part.polygon?Math.abs(part.polygon.reduce((n,a,i)=>{const b=part.polygon[(i+1)%part.polygon.length];return n+a[0]*b[1]-b[0]*a[1];},0))/2:part.h*(part.horizontal===false?part.d:part.w);
@@ -195,10 +195,10 @@
   return parts;
  };
  B.architecturalFacadeMaterial=(THREE,scene,role)=>{
-  const finish=B.facadeFinishPalette(),rule=B.architecturalIdentity(),key=JSON.stringify([role,finish.wall,finish.accent,finish.visualMaterials,finish.facadeSurface,rule.id]),cache=scene.userData.architecturalMaterials||=new Map();if(cache.has(key))return cache.get(key);
+  const finish=B.facadeFinishPalette(),rule=B.architecturalIdentity(),key=JSON.stringify([role,finish.wall,finish.accent,finish.visualMaterials,finish.facadeSurface,finish.catalogMaterials,rule.id]),cache=scene.userData.architecturalMaterials||=new Map();if(cache.has(key))return cache.get(key);
   const shared=B.sceneAssetMaterials(THREE,scene,finish);let m;
   if(role==='wall')m=shared.wall.clone();else if(role==='base')m=shared.stone.clone();else if(role==='frame')m=shared.metal.clone();else if(finish.manualAccent||finish.facadeSurface==='wood')m=(finish.manualAccent?shared.wood:shared.slattedWood).clone();else if(finish.facadeSurface==='stone')m=shared.stone.clone();else if(finish.facadeSurface==='metal')m=shared.metal.clone();else m=shared.wall.clone();
-  m.color.set(role==='wall'?finish.wall:role==='base'?rule.base||'#908c7c':role==='frame'?'#'+B.scenePalette().frame.toString(16).padStart(6,'0'):finish.accent);
+  if(!m.userData.materialSampleId)m.color.set(role==='wall'?finish.wall:role==='base'?rule.base||'#908c7c':role==='frame'?'#'+B.scenePalette().frame.toString(16).padStart(6,'0'):finish.accent);
   if(role==='frame'||role==='accent'&&finish.facadeSurface==='metal'){m.roughness=.42;m.metalness=.5;}if(role==='base'){m.roughness=.9;m.userData.surfaceScale=[.8,.8];}
   if(role==='accent'&&['brick','concrete'].includes(finish.facadeSurface)){for(const [slot,channel]of [['map','color'],['normalMap','normal'],['roughnessMap','roughness']]){const texture=B.sceneMaterialTexture(THREE,scene,finish.facadeSurface,channel);if(texture){texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.colorSpace=channel==='color'?THREE.SRGBColorSpace:THREE.NoColorSpace;m[slot]=texture;}}m.userData.surfaceScale=finish.facadeSurface==='brick'?[1.1,1.04]:[2,2];m.normalScale.setScalar(finish.facadeSurface==='brick'?.52:.22);m.roughness=.91;}
   m.polygonOffset=true;m.polygonOffsetFactor=-1;m.polygonOffsetUnits=-1;

@@ -1,0 +1,200 @@
+[
+  {
+    "device": "desktop",
+    "first": {
+      "plan": "{\"rooms\":[{\"id\":\"sample-living\",\"floor\":0,\"type\":\"living\",\"name\":\"Phòng khách thử nghiệm\",\"x\":1,\"y\":2,\"w\":4,\"h\":5},{\"id\":\"sample-bed\",\"floor\":0,\"type\":\"bed\",\"name\":\"Phòng ngủ không đổi\",\"x\":5,\"y\":2,\"w\":4,\"h\":5}],\"openings\":[],\"fixtures\":[],\"furniture\":[],\"outdoor\":[],\"lockedRoomIds\":[],\"lockedFloors\":[]}",
+      "style": "Hiện đại",
+      "bed": "{\"id\":\"urban-stone\",\"name\":\"Đá & đường nét\",\"note\":\"Sofa thấp, bàn đá chân thép, tông xám dịu.\",\"shape\":\"linear\",\"table\":\"stone\",\"wall\":\"#f2eee5\",\"floor\":\"#a9aaa4\",\"accent\":\"#65432e\",\"fabric\":\"#d9cfbb\",\"pillow\":\"#626f72\",\"rug\":\"#d2d2cb\",\"surface\":\"stone\",\"visualMaterials\":{\"floor\":\"grey-concrete\",\"accent\":\"dark-walnut\",\"fabric\":\"natural-linen\",\"wall\":\"ivory-paint\"},\"collectionId\":\"urban-stone\",\"catalogMaterials\":{},\"materialBindingStatuses\":{}}",
+      "sku": "SYNTHETIC-700-1100",
+      "scale": [
+        0.7,
+        1.1
+      ],
+      "rotationDeg": 37,
+      "color": "ffffff",
+      "left": [
+        207,
+        53,
+        41,
+        255
+      ],
+      "right": [
+        32,
+        85,
+        187,
+        255
+      ],
+      "maxUvError": 2.0987658277960008e-7,
+      "bindingStatus": "sample",
+      "sample": {
+        "mediaId": "material-sample-d725272f-ab2f-481d-8093-988034be7f26",
+        "productId": "fixture-sample-floor",
+        "sku": "SYNTHETIC-700-1100",
+        "specification": "700 x 1100 mm, test only",
+        "realWorldScale": [
+          0.7,
+          1.1
+        ],
+        "rotationDeg": 37,
+        "sourceReference": "Synthetic two-colour test, not a product photograph",
+        "basis": "customer-provided-colour-sample"
+      },
+      "overflow": false
+    },
+    "reopened": {
+      "plan": "{\"rooms\":[{\"id\":\"sample-living\",\"floor\":0,\"type\":\"living\",\"name\":\"Phòng khách thử nghiệm\",\"x\":1,\"y\":2,\"w\":4,\"h\":5},{\"id\":\"sample-bed\",\"floor\":0,\"type\":\"bed\",\"name\":\"Phòng ngủ không đổi\",\"x\":5,\"y\":2,\"w\":4,\"h\":5}],\"openings\":[],\"outdoor\":[],\"fixtures\":[],\"furniture\":[],\"lockedRoomIds\":[],\"lockedFloors\":[]}",
+      "style": "Hiện đại",
+      "bed": "{\"id\":\"urban-stone\",\"name\":\"Đá & đường nét\",\"note\":\"Sofa thấp, bàn đá chân thép, tông xám dịu.\",\"shape\":\"linear\",\"table\":\"stone\",\"wall\":\"#f2eee5\",\"floor\":\"#a9aaa4\",\"accent\":\"#65432e\",\"fabric\":\"#d9cfbb\",\"pillow\":\"#626f72\",\"rug\":\"#d2d2cb\",\"surface\":\"stone\",\"visualMaterials\":{\"floor\":\"grey-concrete\",\"accent\":\"dark-walnut\",\"fabric\":\"natural-linen\",\"wall\":\"ivory-paint\"},\"collectionId\":\"urban-stone\",\"catalogMaterials\":{},\"materialBindingStatuses\":{}}",
+      "sku": "SYNTHETIC-700-1100",
+      "scale": [
+        0.7,
+        1.1
+      ],
+      "rotationDeg": 37,
+      "color": "ffffff",
+      "left": [
+        207,
+        53,
+        41,
+        255
+      ],
+      "right": [
+        32,
+        85,
+        187,
+        255
+      ],
+      "maxUvError": 2.0987658277960008e-7,
+      "bindingStatus": "sample",
+      "sample": {
+        "mediaId": "material-sample-d725272f-ab2f-481d-8093-988034be7f26",
+        "productId": "fixture-sample-floor",
+        "sku": "SYNTHETIC-700-1100",
+        "specification": "700 x 1100 mm, test only",
+        "realWorldScale": [
+          0.7,
+          1.1
+        ],
+        "rotationDeg": 37,
+        "sourceReference": "Synthetic two-colour test, not a product photograph",
+        "basis": "customer-provided-colour-sample"
+      },
+      "overflow": false
+    },
+    "glbProof": {
+      "bytes": 8562768,
+      "embeddedSample": true,
+      "sku": "SYNTHETIC-700-1100",
+      "left": [
+        207,
+        53,
+        41,
+        255
+      ],
+      "right": [
+        32,
+        85,
+        187,
+        255
+      ]
+    },
+    "copied": {
+      "newScope": true,
+      "hasSample": true,
+      "sku": "SYNTHETIC-700-1100"
+    },
+    "changedSkuRejected": true,
+    "errors": []
+  },
+  {
+    "device": "phone",
+    "first": {
+      "plan": "{\"rooms\":[{\"id\":\"sample-living\",\"floor\":0,\"type\":\"living\",\"name\":\"Phòng khách thử nghiệm\",\"x\":1,\"y\":2,\"w\":4,\"h\":5},{\"id\":\"sample-bed\",\"floor\":0,\"type\":\"bed\",\"name\":\"Phòng ngủ không đổi\",\"x\":5,\"y\":2,\"w\":4,\"h\":5}],\"openings\":[],\"fixtures\":[],\"furniture\":[],\"outdoor\":[],\"lockedRoomIds\":[],\"lockedFloors\":[]}",
+      "style": "Hiện đại",
+      "bed": "{\"id\":\"urban-stone\",\"name\":\"Đá & đường nét\",\"note\":\"Sofa thấp, bàn đá chân thép, tông xám dịu.\",\"shape\":\"linear\",\"table\":\"stone\",\"wall\":\"#f2eee5\",\"floor\":\"#a9aaa4\",\"accent\":\"#65432e\",\"fabric\":\"#d9cfbb\",\"pillow\":\"#626f72\",\"rug\":\"#d2d2cb\",\"surface\":\"stone\",\"visualMaterials\":{\"floor\":\"grey-concrete\",\"accent\":\"dark-walnut\",\"fabric\":\"natural-linen\",\"wall\":\"ivory-paint\"},\"collectionId\":\"urban-stone\",\"catalogMaterials\":{},\"materialBindingStatuses\":{}}",
+      "sku": "SYNTHETIC-700-1100",
+      "scale": [
+        0.7,
+        1.1
+      ],
+      "rotationDeg": 37,
+      "color": "ffffff",
+      "left": [
+        207,
+        53,
+        41,
+        255
+      ],
+      "right": [
+        32,
+        85,
+        187,
+        255
+      ],
+      "maxUvError": 2.0987658277960008e-7,
+      "bindingStatus": "sample",
+      "sample": {
+        "mediaId": "material-sample-e1af6b87-f9cc-4fa7-8d67-6f3735d4c4af",
+        "productId": "fixture-sample-floor",
+        "sku": "SYNTHETIC-700-1100",
+        "specification": "700 x 1100 mm, test only",
+        "realWorldScale": [
+          0.7,
+          1.1
+        ],
+        "rotationDeg": 37,
+        "sourceReference": "Synthetic two-colour test, not a product photograph",
+        "basis": "customer-provided-colour-sample"
+      },
+      "overflow": false
+    },
+    "reopened": {
+      "plan": "{\"rooms\":[{\"id\":\"sample-living\",\"floor\":0,\"type\":\"living\",\"name\":\"Phòng khách thử nghiệm\",\"x\":1,\"y\":2,\"w\":4,\"h\":5},{\"id\":\"sample-bed\",\"floor\":0,\"type\":\"bed\",\"name\":\"Phòng ngủ không đổi\",\"x\":5,\"y\":2,\"w\":4,\"h\":5}],\"openings\":[],\"outdoor\":[],\"fixtures\":[],\"furniture\":[],\"lockedRoomIds\":[],\"lockedFloors\":[]}",
+      "style": "Hiện đại",
+      "bed": "{\"id\":\"urban-stone\",\"name\":\"Đá & đường nét\",\"note\":\"Sofa thấp, bàn đá chân thép, tông xám dịu.\",\"shape\":\"linear\",\"table\":\"stone\",\"wall\":\"#f2eee5\",\"floor\":\"#a9aaa4\",\"accent\":\"#65432e\",\"fabric\":\"#d9cfbb\",\"pillow\":\"#626f72\",\"rug\":\"#d2d2cb\",\"surface\":\"stone\",\"visualMaterials\":{\"floor\":\"grey-concrete\",\"accent\":\"dark-walnut\",\"fabric\":\"natural-linen\",\"wall\":\"ivory-paint\"},\"collectionId\":\"urban-stone\",\"catalogMaterials\":{},\"materialBindingStatuses\":{}}",
+      "sku": "SYNTHETIC-700-1100",
+      "scale": [
+        0.7,
+        1.1
+      ],
+      "rotationDeg": 37,
+      "color": "ffffff",
+      "left": [
+        207,
+        53,
+        41,
+        255
+      ],
+      "right": [
+        32,
+        85,
+        187,
+        255
+      ],
+      "maxUvError": 2.0987658277960008e-7,
+      "bindingStatus": "sample",
+      "sample": {
+        "mediaId": "material-sample-e1af6b87-f9cc-4fa7-8d67-6f3735d4c4af",
+        "productId": "fixture-sample-floor",
+        "sku": "SYNTHETIC-700-1100",
+        "specification": "700 x 1100 mm, test only",
+        "realWorldScale": [
+          0.7,
+          1.1
+        ],
+        "rotationDeg": 37,
+        "sourceReference": "Synthetic two-colour test, not a product photograph",
+        "basis": "customer-provided-colour-sample"
+      },
+      "overflow": false
+    },
+    "glbProof": null,
+    "copied": {
+      "newScope": true,
+      "hasSample": true,
+      "sku": "SYNTHETIC-700-1100"
+    },
+    "changedSkuRejected": true,
+    "errors": []
+  }
+]

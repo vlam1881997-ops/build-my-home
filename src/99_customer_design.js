@@ -26,7 +26,7 @@
   return defaults;
  };
  B.finishPalette=roomId=>{
-  const f=finish(),c=B.interiorCollection(roomId),global=f.exterior||{},room=roomId?f.rooms?.[roomId]||{}:{},r=B.state.project.plan.rooms.find(r=>r.id===roomId);
+  const f=finish(),c=B.interiorCollection(roomId),global=B.roomGlobalFinish?.(f.exterior||{},roomId)||f.exterior||{},room=roomId?f.rooms?.[roomId]||{}:{},r=B.state.project.plan.rooms.find(r=>r.id===roomId);
   const defaults=B.styleDefaultPalette(roomId)||c;
   // Finish writers cache a resolved palette. Only authored roles in that cache
   // override the next style; preserve pre-marker legacy choices conservatively.
