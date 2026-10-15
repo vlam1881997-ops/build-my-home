@@ -480,9 +480,47 @@
   const poly=B.furnitureFootprint(i),xs=poly.map(p=>p.x),ys=poly.map(p=>p.y);
   return {...i,model:i.modelId,x:Math.min(...xs),y:Math.min(...ys),w:Math.abs(Math.sin(i.pose.rotationDeg*Math.PI/180))<1e-10?i.size.width:Math.abs(Math.cos(i.pose.rotationDeg*Math.PI/180))<1e-10?i.size.depth:Math.max(...xs)-Math.min(...xs),d:Math.abs(Math.sin(i.pose.rotationDeg*Math.PI/180))<1e-10?i.size.depth:Math.abs(Math.cos(i.pose.rotationDeg*Math.PI/180))<1e-10?i.size.width:Math.max(...ys)-Math.min(...ys),h:i.size.height,base:i.pose.z,rotation:i.pose.rotationDeg};
  });
+ // Measured plan symbols use the same local axes and pose as the 3D asset.
+ // Internal lines are schematic furniture notation, not manufacturer details.
+ B.furniturePlanSymbol=i=>{
+  const w=i.size?.width,d=i.size?.depth,p=i.pose;
+  if(!p||![w,d,p.x,p.y,p.rotationDeg].every(Number.isFinite)||w<=0||d<=0)return '';
+  const rect=(x,y,a,b,r=0)=>'<rect x="'+x*w+'" y="'+y*d+'" width="'+a*w+'" height="'+b*d+'" rx="'+r*Math.min(w,d)+'"/>',
+   line=(x,y,a,b)=>'<path fill="none" d="M'+x*w+' '+y*d+' L'+a*w+' '+b*d+'"/>',
+   ellipse=(x,y,a,b)=>'<ellipse cx="'+x*w+'" cy="'+y*d+'" rx="'+a*w+'" ry="'+b*d+'"/>',id=i.modelId;
+  let detail='',kind='cabinet';
+  if(/^bed/.test(id)){
+   kind='bed';detail=rect(-.48,-.49,.96,.07)+rect(-.45,-.40,.9,.86,.035)+line(-.45,-.12,.45,-.12);
+   const n=id==='bedDouble'?2:1;for(let j=0;j<n;j++)detail+=rect(-.4+j*.8/n,-.36,.72/n,.18,.04);
+  }else if(/^(lounge|chair)/.test(id)){
+   kind='seat';detail=rect(-.47,.32,.94,.15,.04)+rect(-.47,-.45,.12,.77,.035)+rect(.35,-.45,.12,.77,.035);
+   const n=id==='loungeDesignSofa'?3:1;for(let j=0;j<n;j++)detail+=rect(-.33+j*.66/n,-.40,.60/n,.67,.04);
+  }else if(id==='toilet'){
+   kind='toilet';detail=rect(-.40,-.47,.8,.25,.04)+ellipse(0,.1,.38,.35)+ellipse(0,.10,.25,.24);
+  }else if(/Sink$/.test(id)){
+   kind='sink';detail=rect(-.46,-.46,.92,.92,.03)+ellipse(0,.03,.34,.29)+ellipse(0,.03,.035,.035)+line(0,-.4,0,-.18);
+  }else if(id==='kitchenStove'){
+   kind='hob';detail=rect(-.46,-.46,.92,.92,.03);for(const x of [-.23,.23])for(const y of [-.23,.23])detail+=ellipse(x,y,.14,.14);
+  }else if(id==='shower'){
+   kind='shower';detail=rect(-.47,-.47,.94,.94)+line(-.47,-.47,.47,.47)+line(.47,-.47,-.47,.47)+ellipse(0,0,.06,.06);
+  }else if(id==='televisionModern'){
+   kind='tv';detail=rect(-.48,-.1,.96,.2)+rect(-.18,.1,.36,.25)+line(-.4,-.2,.4,-.2);
+  }else if(id==='washingMachine'){
+   kind='washer';detail=rect(-.46,-.46,.92,.92,.03)+line(-.46,.32,.46,.32)+line(-.22,.44,.22,.44);
+  }else if(id==='pottedPlant'){
+   kind='plant';detail=ellipse(0,0,.22,.22);for(let n=0;n<6;n++){const a=n*Math.PI/3;detail+=ellipse(Math.cos(a)*.23,Math.sin(a)*.23,.18,.18);}
+  }else if(id==='floorLamp'){
+   kind='lamp';detail=ellipse(0,0,.44,.44)+ellipse(0,0,.08,.08);
+  }else if(/^(table|sideTable|desk)/.test(id)){
+   kind='table';detail=rect(-.46,-.46,.92,.92,.04);if(id==='desk')detail+=rect(-.28,-.3,.56,.30,.01);
+  }else{
+   detail=rect(-.46,-.46,.92,.92)+line(0,-.46,0,.46)+line(-.30,-.35,-.15,-.35)+line(.15,-.35,.30,-.35);
+  }
+  return '<g class="furniture-plan-symbol" data-symbol-kind="'+kind+'" data-symbol-model="'+esc(id)+'" transform="translate('+p.x+' '+p.y+') rotate('+p.rotationDeg+')" pointer-events="none" fill="#faf8f3" stroke="#536b70" stroke-width=".018">'+detail+'</g>';
+ };
  const oldSvg=B.furnitureSvg;B.furnitureSvg=r=>{
   if(['stairs','garage'].includes(r.type))return oldSvg(r);
-  return '<g class="furniture team-b-furniture" stroke="#687c80" fill="#e7e0d4" stroke-width=".025">'+B.resolvedFurniture(r.id).map(i=>'<g data-furniture-id="'+esc(i.id)+'" tabindex="0" role="button" aria-label="'+esc(models[i.modelId])+'" class="'+(selected()===i.id?'selected':'')+'"><polygon points="'+B.furnitureFootprint(i).map(p=>p.x+','+p.y).join(' ')+'"/>'+B.furnitureDirectionSvg(i)+'<title>'+esc(models[i.modelId])+' · '+i.size.width+' × '+i.size.depth+' m · '+i.pose.rotationDeg+'°</title></g>').join('')+'</g>'+B.planFixtures(r.id).map(q=>'<g class="furniture altar-symbol" data-fixture-reference="'+esc(q.id)+'"><rect x="'+q.x+'" y="'+q.y+'" width="'+q.w+'" height="'+q.d+'"/><title>Bàn thờ</title></g>').join('');
+  return '<g class="furniture team-b-furniture" stroke="#687c80" fill="#e7e0d4" stroke-width=".025">'+B.resolvedFurniture(r.id).map(i=>'<g data-furniture-id="'+esc(i.id)+'" tabindex="0" role="button" aria-label="'+esc(models[i.modelId])+'" class="'+(selected()===i.id?'selected':'')+'"><polygon points="'+B.furnitureFootprint(i).map(p=>p.x+','+p.y).join(' ')+'"/>'+B.furniturePlanSymbol(i)+B.furnitureDirectionSvg(i)+'<title>'+esc(models[i.modelId])+' · '+i.size.width+' × '+i.size.depth+' m · '+i.pose.rotationDeg+'° · Ký hiệu quy ước theo kích thước</title></g>').join('')+'</g>'+B.planFixtures(r.id).map(q=>'<g class="furniture altar-symbol" data-fixture-reference="'+esc(q.id)+'"><rect x="'+q.x+'" y="'+q.y+'" width="'+q.w+'" height="'+q.d+'"/><title>Bàn thờ</title></g>').join('');
  };
  // Scale vendored assets from catalog dimensions to the customer's saved size.
  B.furnitureExportScale=i=>{
