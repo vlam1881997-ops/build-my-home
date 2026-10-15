@@ -41,6 +41,49 @@ BMH.VISUAL_MATERIALS=[
  {id:'cognac-leather',role:'fabric',name:'Da cognac',color:'#a66738',kind:'leather',scale:[.15,.15],roughness:.57,normalStrength:.16,detail:'Da màu cognac, hạt da nhỏ, ánh satin nhẹ.'}
 ];
 BMH.catalogSurfaceSlots={floor:'floor',paint:'wall',cabinetry:'accent'};
+// Sample pixels stay in the project-scoped media store, never in the project JSON.
+// A provided colour sample is not a measured normal/roughness map or certification.
+const sampleRuntime=new WeakMap(),sampleOperations=new WeakMap();
+BMH.catalogSampleMetadataValid=b=>{
+ const s=b?.sample;return !!s&&typeof s.mediaId==='string'&&/^material-sample-[a-zA-Z0-9-]+$/.test(s.mediaId)&&s.productId===b.productId&&s.sku===b.sku&&s.specification===b.specification&&typeof s.sourceReference==='string'&&s.sourceReference.trim().length>0&&s.sourceReference.length<=240&&Array.isArray(s.realWorldScale)&&s.realWorldScale.length===2&&s.realWorldScale.every(n=>Number.isFinite(n)&&n>=.01&&n<=20)&&Number.isFinite(s.rotationDeg)&&s.rotationDeg>=0&&s.rotationDeg<360;
+};
+BMH.materialSampleForBinding=b=>BMH.catalogSampleMetadataValid(b)?sampleRuntime.get(BMH.state.project)?.get(b.sample.mediaId)||null:null;
+BMH.restoreMaterialSamples=async()=>{
+ const project=BMH.state.project;if(!BMH.styleReferenceStore)return;
+ let cache=sampleRuntime.get(project);if(!cache)sampleRuntime.set(project,cache=new Map());
+ const f=project.materials.finish||{},bindings=[f.exterior,...Object.values(f.rooms||{})].filter(Boolean).flatMap(r=>Object.values(r.catalogMaterials||{}));
+ await Promise.allSettled(bindings.filter(BMH.catalogSampleMetadataValid).map(async b=>{
+  const s=b.sample;if(cache.has(s.mediaId))return;const data=await BMH.styleReferenceStore.get(s.mediaId,{legacy:false});
+  if(!/^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(data||''))return;
+  const image=new Image();image.src=data;await image.decode();if(BMH.state.project!==project)return;
+  cache.set(s.mediaId,{image,mediaId:s.mediaId});
+ }));
+};
+BMH.applyCatalogSample=async(category,{roomId,profileId,file,widthM,depthM,rotationDeg=0,sourceReference}={})=>{
+ const project=BMH.state.project,product=BMH.catalogSelectedProduct(category),role=BMH.catalogSurfaceSlots[category],profile=BMH.VISUAL_MATERIALS.find(v=>v.id===profileId&&v.role===role);
+ const fail=reason=>({ok:false,reason});
+ if(!product||!profile||!project.plan.rooms.some(r=>r.id===roomId&&!['stairs','elevator','balcony'].includes(r.type)))return fail('Chọn sản phẩm, bề mặt và phòng cần áp dụng.');
+ if(!file||!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>20*1024*1024)return fail('Chọn ảnh JPG, PNG hoặc WebP tối đa 20 MB.');
+ if(![widthM,depthM].every(n=>Number.isFinite(n)&&n>=.01&&n<=20)||!Number.isFinite(rotationDeg)||rotationDeg<0||rotationDeg>=360||typeof sourceReference!=='string'||!sourceReference.trim()||sourceReference.trim().length>240)return fail('Nhập kích thước mẫu từ 10 đến 20.000 mm, góc từ 0 đến dưới 360° và nguồn ảnh.');
+ if(!BMH.styleReferenceStore)return fail('Kho ảnh chưa sẵn sàng.');
+ const identity=x=>JSON.stringify([x?.id,x?.sku,x?.specification||x?.spec,x?.unit]),productIdentity=identity(product),operation={};
+ let operations=sampleOperations.get(project);if(!operations)sampleOperations.set(project,operations=new Map());const operationKey=category+':'+roomId;operations.set(operationKey,operation);
+ try{
+  const bitmap=await createImageBitmap(file),ratio=Math.min(1,1024/Math.max(bitmap.width,bitmap.height)),canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(bitmap.width*ratio));canvas.height=Math.max(1,Math.round(bitmap.height*ratio));canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();
+  const data=canvas.toDataURL('image/jpeg',.9),image=new Image();image.src=data;await image.decode();
+  const stillCurrent=()=>BMH.state.project===project&&identity(BMH.catalogSelectedProduct(category))===productIdentity&&operations.get(operationKey)===operation&&project.plan.rooms.some(r=>r.id===roomId);
+  if(!stillCurrent())return fail('Dự án hoặc sản phẩm đã đổi; chọn lại trước khi gắn ảnh mẫu.');
+  const mediaId='material-sample-'+crypto.randomUUID();await BMH.styleReferenceStore.put(mediaId,data);
+  if(!stillCurrent())return fail('Dự án hoặc sản phẩm đã đổi; ảnh chưa được áp dụng.');
+  if(!BMH.applyCatalogMaterial(category,profileId,{roomId,scope:'room'}))return fail('Không áp dụng được vật liệu cho phòng.');
+  const binding=project.materials.finish.rooms[roomId].catalogMaterials[category];
+  binding.sample={mediaId,productId:binding.productId,sku:binding.sku,specification:binding.specification,realWorldScale:[widthM,depthM],rotationDeg,sourceReference:sourceReference.trim(),basis:'customer-provided-colour-sample'};
+  let cache=sampleRuntime.get(project);if(!cache)sampleRuntime.set(project,cache=new Map());cache.set(mediaId,{image,mediaId});
+  BMH.finishInvalidate?.();BMH.save();return {ok:true,mediaId};
+ }catch(_){return fail('Chưa hoàn tất việc gắn ảnh mẫu. Kiểm tra file, kho ảnh và thử lại.');}
+};
+const sampleMount=BMH.mountStudio3D;BMH.mountStudio3D=async()=>{await BMH.restoreMaterialSamples();await sampleMount();};
 BMH.catalogSelectedProduct=category=>{const id=BMH.state.project.materials.choices?.[category],q=BMH.state.project.dataEngine?.materialOverrides?.[id]?.product,x=q||BMH.materialResearch?.products?.find(x=>x.id===id);return x&&x.id===id&&x.category===category?x:null;};
 BMH.createCatalogMaterialBinding=(product,profileId,{roomId=null}={})=>{
  const slot=BMH.catalogSurfaceSlots[product?.category],profile=BMH.VISUAL_MATERIALS.find(x=>x.id===profileId&&x.role===slot);if(!product?.id||!profile)return null;
@@ -51,7 +94,9 @@ BMH.catalogBindingStatus=(category,binding,product,palette=null)=>{
  const profile=BMH.VISUAL_MATERIALS.find(x=>x.id===binding.visualProfileId&&x.role===slot),unit=BMH.materialUnit?.(product.priceEvidence?.quantityUnit??product.unit)??product.unit??null;
  if(binding.productId!==product.id||binding.id!==product.id||!Object.hasOwn(binding,'sku')||binding.sku!==(product.sku||null)||!Object.hasOwn(binding,'specification')||binding.specification!==(product.specification||product.spec||null)||!Object.hasOwn(binding,'quantityUnit')||binding.quantityUnit!==unit)return fail('Mã hàng, quy cách hoặc đơn vị đã đổi; chọn lại bề mặt.');
  if(!profile||binding.surfaceSlot!==slot||binding.profileId!==profile.id||!Array.isArray(binding.realWorldScale)||binding.realWorldScale.length!==profile.scale.length||!binding.realWorldScale.every((v,i)=>v===profile.scale[i])||binding.textureAssetId!==null)return fail('Bề mặt hoặc tỷ lệ mô phỏng đã đổi; cần chọn lại.');
- if(palette&&palette.visualMaterials?.[slot]!==profile.id)return fail('Bề mặt phòng đã được chỉnh riêng.');return {valid:true,status:'generic',reason:'Bề mặt BMH mô phỏng; đối chiếu mẫu và mã hàng tại hãng.',exactness:'generic'};
+ if(palette&&palette.visualMaterials?.[slot]!==profile.id)return fail('Bề mặt phòng đã được chỉnh riêng.');
+ if(binding.sample){if(!BMH.catalogSampleMetadataValid(binding))return fail('Ảnh mẫu không khớp mã hàng/quy cách hoặc kích thước; cần gắn lại.');return {valid:true,status:BMH.materialSampleForBinding(binding)?'sample':'sample-unavailable',reason:BMH.materialSampleForBinding(binding)?'Ảnh màu mẫu do khách cung cấp, lặp đúng kích thước đã nhập; độ nhám/ánh sáng vẫn mô phỏng.':'Ảnh mẫu chưa có trên thiết bị này; chưa thể hiện đúng mẫu trong 3D.',exactness:'customer-sample'};}
+ return {valid:true,status:'generic',reason:'Bề mặt BMH mô phỏng; đối chiếu mẫu và mã hàng tại hãng.',exactness:'generic'};
 };
 BMH.validatePaletteBindings=(roomId,palette={})=>{
  const f=BMH.state.project.materials.finish||{},room=roomId?f.rooms?.[roomId]||{}:{},global=f.exterior||{},bindings={...global.catalogMaterials,...room.catalogMaterials},result={...palette,visualMaterials:{...palette.visualMaterials},catalogMaterials:{},materialBindingStatuses:{}},collection=BMH.interiorCollection?.(roomId);
@@ -96,7 +141,7 @@ BMH.applyFinishSurface=(surface,roomId=null)=>{
 document.addEventListener('change',event=>{const t=event.target,color=t.dataset?.designColor,surface=t.hasAttribute?.('data-design-surface');if(!color&&!surface)return;const room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===BMH.state.ui.sceneFocus),role=color||'floor',changed=color?BMH.applyFinishColor(color,t.value,room?.id):BMH.applyFinishSurface(t.value,room?.id);if(!changed)return;event.stopImmediatePropagation();if(!BMH.refreshStudioFinishes?.(role,room?.id))BMH.render({preserveScroll:true});},true);
 BMH.visualMaterialContext=roomId=>{
  const palette=BMH.finishPalette(roomId),collection=roomId?BMH.interiorCollection(roomId):null;
- return {collection:collection?{id:collection.id,name:collection.name,note:collection.note,shape:collection.shape,table:collection.table}:null,palette:Object.fromEntries(['wall','floor','accent','fabric','pillow','rug'].map(role=>[role,palette[role]]).filter(([,value])=>/^#[0-9a-f]{6}$/i.test(value||''))),surface:palette.surface||'auto',surfaces:Object.entries(palette.visualMaterials||{}).flatMap(([role,id])=>{const p=BMH.VISUAL_MATERIALS.find(p=>p.id===id&&p.role===role);return p?[{role,id,name:p.name,color:palette[role]||p.color,kind:p.kind,scale:p.scale,roughness:p.roughness,detail:p.detail}]:[];})};
+ return {collection:collection?{id:collection.id,name:collection.name,note:collection.note,shape:collection.shape,table:collection.table}:null,palette:Object.fromEntries(['wall','floor','accent','fabric','pillow','rug'].map(role=>[role,palette[role]]).filter(([,value])=>/^#[0-9a-f]{6}$/i.test(value||''))),surface:palette.surface||'auto',materialSamples:Object.entries(palette.catalogMaterials||{}).filter(([,b])=>BMH.catalogSampleMetadataValid(b)).map(([category,b])=>({category,productId:b.productId,sku:b.sku,scale:[...b.sample.realWorldScale],rotationDeg:b.sample.rotationDeg,sourceReference:b.sample.sourceReference,status:palette.materialBindingStatuses?.[category]?.status,basis:'customer-provided-colour-sample',physicalResponse:'simulated'})),surfaces:Object.entries(palette.visualMaterials||{}).flatMap(([role,id])=>{const p=BMH.VISUAL_MATERIALS.find(p=>p.id===id&&p.role===role);return p?[{role,id,name:p.name,color:palette[role]||p.color,kind:p.kind,scale:p.scale,roughness:p.roughness,detail:p.detail}]:[];})};
 };
 BMH.finishSampleHtml=profile=>{
  const photos={wood:'wood_table_001',plank:'wood_floor',marble:'marble_01',plaster:'white_plaster_02',fabric:'terlenka',leather:'brown_leather',concrete:'concrete_floor_02',brick:'brick_wall_001',terrazzo:'terrazzo_tiles'},asset=photos[profile.kind];
