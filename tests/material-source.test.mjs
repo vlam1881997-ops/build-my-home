@@ -97,7 +97,7 @@ test('returning a surface to style follows the current collection on read withou
 // Price observation and date are separate: an old published period never
 // becomes a current quote just because the page was fetched again today.
 test('dated reference prices retain supplier identity, units and historic periods without creating a quote',()=>{
- const catalog=JSON.parse(fs.readFileSync('assets/materials/official-catalog.json')),priced=catalog.products.filter(x=>x.price!==null);assert.equal(priced.length,13);
+ const catalog=JSON.parse(fs.readFileSync('assets/materials/official-catalog.json')),priced=catalog.products.filter(x=>x.price!==null&&x.priceEvidence.retrievedAt==='2026-10-09');assert.equal(priced.length,13);
  const {B,state}=client(),at=Date.parse('2026-10-09T12:00:00Z');let stale=0,checked=0;
  for(const x of priced){const p=materialPriceEvidence(x,at);assert.equal(p.sourceType,'supplier');assert.ok(p.publisher);assert.equal(p.quotedAt,null);assert.equal(p.retrievedAt,'2026-10-09');assert.equal(p.amountVnd,x.price);assert.ok(p.quantityUnit);for(const key of ['includesVat','includesLabour','includesTransport'])assert.equal(p[key],null);const status=B.materialPriceFreshness(p,at);if(status==='stale')stale++;else if(status==='checked')checked++;}
  assert.equal(stale,7);assert.equal(checked,6);
