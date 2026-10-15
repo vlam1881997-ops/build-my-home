@@ -1,0 +1,937 @@
+{
+  "task": "W01.1",
+  "testOnly": true,
+  "runtime": "v22.23.0",
+  "device": "desktop",
+  "visualAcceptance": false,
+  "cases": [
+    {
+      "style": "modern",
+      "plan": {
+        "rooms": [
+          {
+            "id": "design-f0-corridor-1",
+            "floor": 0,
+            "name": "Sảnh / hành lang T1",
+            "type": "corridor",
+            "x": 4.090000000000001,
+            "y": 1.61,
+            "w": 1.2,
+            "h": 17.78
+          },
+          {
+            "id": "design-f0-living-1",
+            "floor": 0,
+            "name": "Phòng khách",
+            "type": "living",
+            "x": 0.11000000000000032,
+            "y": 1.61,
+            "w": 3.9800000000000004,
+            "h": 4.037142857142857
+          },
+          {
+            "id": "design-f0-kitchen-1",
+            "floor": 0,
+            "name": "Bếp + ăn",
+            "type": "kitchen",
+            "x": 0.11000000000000032,
+            "y": 5.647142857142858,
+            "w": 3.9800000000000004,
+            "h": 4.355714285714286
+          },
+          {
+            "id": "design-f0-bed-1",
+            "floor": 0,
+            "name": "Phòng ông bà",
+            "type": "bed",
+            "x": 0.11000000000000032,
+            "y": 10.002857142857144,
+            "w": 3.9800000000000004,
+            "h": 3.9871428571428575
+          },
+          {
+            "id": "design-f0-bath-1",
+            "floor": 0,
+            "name": "WC T1",
+            "type": "bath",
+            "x": 0.11,
+            "y": 13.99,
+            "w": 3.9800000000000004,
+            "h": 2.2
+          },
+          {
+            "id": "design-f0-stairs-1",
+            "floor": 0,
+            "name": "Cầu thang",
+            "type": "stairs",
+            "x": 0.11,
+            "y": 16.19,
+            "w": 3.9800000000000004,
+            "h": 3.2,
+            "stairShape": "u",
+            "stairDirection": 0
+          },
+          {
+            "id": "design-f1-corridor-1",
+            "floor": 1,
+            "name": "Sảnh / hành lang T2",
+            "type": "corridor",
+            "x": 4.090000000000001,
+            "y": 1.61,
+            "w": 1.2,
+            "h": 17.78
+          },
+          {
+            "id": "design-f1-bed-1",
+            "floor": 1,
+            "name": "Phòng ngủ chính",
+            "type": "bed",
+            "x": 0.11000000000000032,
+            "y": 1.61,
+            "w": 3.9800000000000004,
+            "h": 12.379999999999999
+          },
+          {
+            "id": "design-f1-bath-1",
+            "floor": 1,
+            "name": "WC T2",
+            "type": "bath",
+            "x": 0.11,
+            "y": 13.99,
+            "w": 3.9800000000000004,
+            "h": 2.2
+          },
+          {
+            "id": "design-f1-stairs-1",
+            "floor": 1,
+            "name": "Cầu thang",
+            "type": "stairs",
+            "x": 0.11,
+            "y": 16.19,
+            "w": 3.9800000000000004,
+            "h": 3.2,
+            "stairShape": "u",
+            "stairDirection": 0
+          },
+          {
+            "id": "design-f2-corridor-1",
+            "floor": 2,
+            "name": "Sảnh / hành lang T3",
+            "type": "corridor",
+            "x": 4.090000000000001,
+            "y": 1.61,
+            "w": 1.2,
+            "h": 17.78
+          },
+          {
+            "id": "design-f2-bed-1",
+            "floor": 2,
+            "name": "Phòng Con 1",
+            "type": "bed",
+            "x": 0.11000000000000032,
+            "y": 1.61,
+            "w": 3.9800000000000004,
+            "h": 12.379999999999999
+          },
+          {
+            "id": "design-f2-bath-1",
+            "floor": 2,
+            "name": "WC T3",
+            "type": "bath",
+            "x": 0.11,
+            "y": 13.99,
+            "w": 3.9800000000000004,
+            "h": 2.2
+          },
+          {
+            "id": "design-f2-stairs-1",
+            "floor": 2,
+            "name": "Cầu thang",
+            "type": "stairs",
+            "x": 0.11,
+            "y": 16.19,
+            "w": 3.9800000000000004,
+            "h": 3.2,
+            "stairShape": "u",
+            "stairDirection": 0
+          }
+        ],
+        "openings": [
+          {
+            "id": "design-o1",
+            "roomId": "design-f0-corridor-1",
+            "floor": 0,
+            "kind": "door",
+            "side": "north",
+            "width": 0.95,
+            "offset": 0.5,
+            "height": 2.4,
+            "sill": 0,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o2",
+            "roomId": "design-f0-living-1",
+            "floor": 0,
+            "kind": "door",
+            "side": "east",
+            "width": 0.9,
+            "offset": 0.76,
+            "height": 2.2,
+            "sill": 0,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o3",
+            "roomId": "design-f0-living-1",
+            "floor": 0,
+            "kind": "window",
+            "side": "north",
+            "width": 2.78,
+            "offset": 0.5,
+            "height": 2.1,
+            "sill": 0.55,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o4",
+            "roomId": "design-f0-living-1",
+            "floor": 0,
+            "kind": "window",
+            "side": "west",
+            "width": 1.4,
+            "offset": 0.38,
+            "height": 1.4,
+            "sill": 0.9,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o5",
+            "roomId": "design-f0-kitchen-1",
+            "floor": 0,
+            "kind": "door",
+            "side": "east",
+            "width": 0.9,
+            "offset": 0.76,
+            "height": 2.2,
+            "sill": 0,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o6",
+            "roomId": "design-f0-kitchen-1",
+            "floor": 0,
+            "kind": "window",
+            "side": "west",
+            "width": 1.4,
+            "offset": 0.38,
+            "height": 1.4,
+            "sill": 0.9,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o7",
+            "roomId": "design-f0-bed-1",
+            "floor": 0,
+            "kind": "door",
+            "side": "east",
+            "width": 0.9,
+            "offset": 0.76,
+            "height": 2.2,
+            "sill": 0,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o8",
+            "roomId": "design-f0-bed-1",
+            "floor": 0,
+            "kind": "window",
+            "side": "west",
+            "width": 1.4,
+            "offset": 0.38,
+            "height": 1.4,
+            "sill": 0.9,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o11",
+            "roomId": "design-f0-bath-1",
+            "floor": 0,
+            "kind": "door",
+            "side": "east",
+            "width": 0.8,
+            "offset": 0.6,
+            "height": 2.2,
+            "sill": 0,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o12",
+            "roomId": "design-f0-bath-1",
+            "floor": 0,
+            "kind": "window",
+            "side": "west",
+            "width": 0.65,
+            "offset": 0.5,
+            "height": 0.55,
+            "sill": 1.7,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o13",
+            "roomId": "design-f0-stairs-1",
+            "floor": 0,
+            "kind": "door",
+            "side": "east",
+            "width": 0.9,
+            "offset": 0.93,
+            "height": 2.2,
+            "sill": 0,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o14",
+            "roomId": "design-f1-bed-1",
+            "floor": 1,
+            "kind": "door",
+            "side": "east",
+            "width": 0.9,
+            "offset": 0.76,
+            "height": 2.2,
+            "sill": 0,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o15",
+            "roomId": "design-f1-bed-1",
+            "floor": 1,
+            "kind": "window",
+            "side": "north",
+            "width": 2.78,
+            "offset": 0.5,
+            "height": 1.99,
+            "sill": 0.9,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o16",
+            "roomId": "design-f1-bed-1",
+            "floor": 1,
+            "kind": "window",
+            "side": "west",
+            "width": 1.4,
+            "offset": 0.38,
+            "height": 1.4,
+            "sill": 0.9,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o19",
+            "roomId": "design-f1-bath-1",
+            "floor": 1,
+            "kind": "door",
+            "side": "east",
+            "width": 0.8,
+            "offset": 0.6,
+            "height": 2.2,
+            "sill": 0,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o20",
+            "roomId": "design-f1-bath-1",
+            "floor": 1,
+            "kind": "window",
+            "side": "west",
+            "width": 0.65,
+            "offset": 0.5,
+            "height": 0.55,
+            "sill": 1.7,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o21",
+            "roomId": "design-f1-stairs-1",
+            "floor": 1,
+            "kind": "door",
+            "side": "east",
+            "width": 0.9,
+            "offset": 0.93,
+            "height": 2.2,
+            "sill": 0,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o22",
+            "roomId": "design-f2-bed-1",
+            "floor": 2,
+            "kind": "door",
+            "side": "east",
+            "width": 0.9,
+            "offset": 0.76,
+            "height": 2.2,
+            "sill": 0,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o23",
+            "roomId": "design-f2-bed-1",
+            "floor": 2,
+            "kind": "window",
+            "side": "north",
+            "width": 2.78,
+            "offset": 0.5,
+            "height": 1.7,
+            "sill": 0.9,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o24",
+            "roomId": "design-f2-bed-1",
+            "floor": 2,
+            "kind": "window",
+            "side": "west",
+            "width": 1.4,
+            "offset": 0.38,
+            "height": 1.4,
+            "sill": 0.9,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o27",
+            "roomId": "design-f2-bath-1",
+            "floor": 2,
+            "kind": "door",
+            "side": "east",
+            "width": 0.8,
+            "offset": 0.6,
+            "height": 2.2,
+            "sill": 0,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o28",
+            "roomId": "design-f2-bath-1",
+            "floor": 2,
+            "kind": "window",
+            "side": "west",
+            "width": 0.65,
+            "offset": 0.5,
+            "height": 0.55,
+            "sill": 1.7,
+            "hinge": "left",
+            "swing": "in"
+          },
+          {
+            "id": "design-o29",
+            "roomId": "design-f2-stairs-1",
+            "floor": 2,
+            "kind": "door",
+            "side": "east",
+            "width": 0.9,
+            "offset": 0.93,
+            "height": 2.2,
+            "sill": 0,
+            "hinge": "left",
+            "swing": "in"
+          }
+        ],
+        "fixtures": [],
+        "furniture": [],
+        "outdoor": [],
+        "lockedRoomIds": [],
+        "lockedFloors": []
+      },
+      "site": {
+        "north": {
+          "azimuthDeg": null,
+          "datum": "unknown",
+          "sourceReference": "",
+          "observedAt": "",
+          "status": "unknown"
+        },
+        "elevation": {
+          "metres": null,
+          "datum": "unknown",
+          "sourceReference": "",
+          "observedAt": "",
+          "status": "unknown"
+        },
+        "country": "Việt Nam",
+        "province": "TP. Hồ Chí Minh",
+        "district": "Phường Thủ Dầu Một",
+        "address": "",
+        "lat": 11.16,
+        "lng": 106.65,
+        "geoSource": "Dữ liệu vùng",
+        "pinAddressNeedsReview": false,
+        "mapEngine": "free",
+        "mapStyle": "hybrid",
+        "mapZoom": 17,
+        "mapCenter": {},
+        "showLotOverlay": true,
+        "showClimateMap": true,
+        "showContextRings": true,
+        "lotMode": "rect",
+        "lotSource": "dimensions",
+        "boundaryEvidenceId": "",
+        "lotPoints": [],
+        "useParcelGeometry": false,
+        "frontEdge": 0,
+        "floorHeight": 3.4,
+        "floorHeights": [
+          3.8,
+          3.4,
+          3.1
+        ],
+        "slabThickness": 0.14,
+        "ceilingDrop": 0.2,
+        "deedArea": 0,
+        "deedReference": "",
+        "frontDirection": "Nam",
+        "width": 5.4,
+        "depth": 20,
+        "floors": 3,
+        "road": 4,
+        "soil": "Đất thịt đồng bằng",
+        "shape": "Hình chữ nhật",
+        "targetCoverage": 0.8,
+        "setbackFront": 1.5,
+        "setbackRear": 0.5,
+        "setbackSide": 0,
+        "designStrategy": "balanced"
+      },
+      "revision": "35FD5A8F-741638A5-AI4-RH2",
+      "roof": {
+        "type": "flat",
+        "name": "Mái bằng",
+        "pitchDeg": 0,
+        "overhang": 0,
+        "ridge": [],
+        "source": "Gợi ý từ phong cách; có thể chỉnh",
+        "bounds": {
+          "x": 0.11,
+          "y": 1.61,
+          "width": 5.18,
+          "depth": 17.78,
+          "cx": 2.7,
+          "cy": 10.5,
+          "rectangular": true
+        },
+        "width": 5.18,
+        "depth": 17.78,
+        "eave": 10.44,
+        "rise": 0,
+        "corners": [
+          [
+            0.11000000000000032,
+            10.44,
+            1.6099999999999994
+          ],
+          [
+            5.29,
+            10.44,
+            1.6099999999999994
+          ],
+          [
+            5.29,
+            10.44,
+            19.39
+          ],
+          [
+            0.11000000000000032,
+            10.44,
+            19.39
+          ]
+        ],
+        "faces": [
+          [
+            [
+              4.090000000000001,
+              10.44,
+              1.61
+            ],
+            [
+              5.290000000000001,
+              10.44,
+              1.61
+            ],
+            [
+              5.290000000000001,
+              10.44,
+              19.39
+            ],
+            [
+              4.090000000000001,
+              10.44,
+              19.39
+            ]
+          ],
+          [
+            [
+              0.11000000000000032,
+              10.44,
+              1.61
+            ],
+            [
+              4.090000000000001,
+              10.44,
+              1.61
+            ],
+            [
+              4.090000000000001,
+              10.44,
+              13.989999999999998
+            ],
+            [
+              0.11000000000000032,
+              10.44,
+              13.989999999999998
+            ]
+          ],
+          [
+            [
+              0.11,
+              10.44,
+              13.99
+            ],
+            [
+              4.090000000000001,
+              10.44,
+              13.99
+            ],
+            [
+              4.090000000000001,
+              10.44,
+              16.19
+            ],
+            [
+              0.11,
+              10.44,
+              16.19
+            ]
+          ],
+          [
+            [
+              0.11,
+              10.44,
+              16.19
+            ],
+            [
+              0.21000000000000002,
+              10.44,
+              16.19
+            ],
+            [
+              0.21000000000000002,
+              10.44,
+              19.39
+            ],
+            [
+              0.11,
+              10.44,
+              19.39
+            ]
+          ],
+          [
+            [
+              3.99,
+              10.44,
+              16.19
+            ],
+            [
+              4.090000000000001,
+              10.44,
+              16.19
+            ],
+            [
+              4.090000000000001,
+              10.44,
+              19.39
+            ],
+            [
+              3.99,
+              10.44,
+              19.39
+            ]
+          ],
+          [
+            [
+              0.21000000000000002,
+              10.44,
+              16.19
+            ],
+            [
+              3.99,
+              10.44,
+              16.19
+            ],
+            [
+              3.99,
+              10.44,
+              16.290000000000003
+            ],
+            [
+              0.21000000000000002,
+              10.44,
+              16.290000000000003
+            ]
+          ],
+          [
+            [
+              0.21000000000000002,
+              10.44,
+              19.290000000000003
+            ],
+            [
+              3.99,
+              10.44,
+              19.290000000000003
+            ],
+            [
+              3.99,
+              10.44,
+              19.39
+            ],
+            [
+              0.21000000000000002,
+              10.44,
+              19.39
+            ]
+          ]
+        ],
+        "gables": [],
+        "area": 80.7604,
+        "gableArea": 0,
+        "parapet": {
+          "height": 0.38,
+          "source": "design-suggestion",
+          "notice": "Tường chắn mái là chi tiết phương án; cần KTS/KS xác nhận cấu tạo, chống thấm và thoát nước."
+        },
+        "envelopeTop": 10.845
+      },
+      "identity": {
+        "revision": "architectural-identity-4",
+        "styleId": "modern",
+        "name": "Khung sâu & đường ngang",
+        "recognized": true,
+        "roof": {
+          "type": "flat",
+          "name": "Mái bằng",
+          "manual": false,
+          "modeled": true,
+          "compound": false,
+          "effectiveOverhang": 0,
+          "notice": null
+        },
+        "materialBasis": "Gợi ý theo phong cách",
+        "features": [
+          "plinth",
+          "feature-panel",
+          "window-reveal",
+          "opening-head",
+          "window-sill",
+          "bay-frame-jamb",
+          "bay-frame-head",
+          "bay-frame-sill",
+          "entry-canopy",
+          "horizontal-band",
+          "roof-parapet",
+          "roof-coping",
+          "opening-jamb"
+        ],
+        "componentCount": 165,
+        "finishAreas": {
+          "wall": 442.04676,
+          "base": 2.0702000000000003,
+          "accent": 8.052000000000003,
+          "frame": 8.917375
+        },
+        "finishAreaBasis": "Diện tích hình học từng chi tiết mô phỏng, có thể chồng lớp; chưa phải khối lượng báo giá.",
+        "setbackReviewNeeded": true,
+        "exactReferenceMatch": null,
+        "engineeringApproved": false,
+        "constructionDetailRevision": "measured-house-1",
+        "parapet": {
+          "height": 0.38,
+          "source": "design-suggestion",
+          "notice": "Tường chắn mái là chi tiết phương án; cần KTS/KS xác nhận cấu tạo, chống thấm và thoát nước."
+        },
+        "context": "Bầu trời và mặt đất minh họa; công trình lấy từ bản vẽ."
+      },
+      "views": [
+        {
+          "view": "exterior",
+          "filename": "townhouse-modern-exterior.png",
+          "roomId": null,
+          "palette": {
+            "id": "urban-stone",
+            "name": "Đá & đường nét",
+            "note": "Sofa thấp, bàn đá chân thép, tông xám dịu.",
+            "shape": "linear",
+            "table": "stone",
+            "wall": "#e9e5dc",
+            "floor": "#a9aaa4",
+            "accent": "#394443",
+            "fabric": "#d9cfbb",
+            "pillow": "#626f72",
+            "rug": "#d2d2cb",
+            "surface": "stone",
+            "visualMaterials": {
+              "floor": "grey-concrete",
+              "accent": "",
+              "fabric": "natural-linen",
+              "wall": "ivory-paint"
+            },
+            "collectionId": "urban-stone",
+            "catalogMaterials": {},
+            "materialBindingStatuses": {},
+            "facadeSurface": "metal",
+            "manualAccent": false,
+            "manualWall": false
+          },
+          "collection": null
+        },
+        {
+          "view": "living",
+          "filename": "townhouse-modern-living.png",
+          "roomId": "design-f0-living-1",
+          "palette": {
+            "id": "urban-stone",
+            "name": "Đá & đường nét",
+            "note": "Sofa thấp, bàn đá chân thép, tông xám dịu.",
+            "shape": "linear",
+            "table": "stone",
+            "wall": "#f2eee5",
+            "floor": "#a9aaa4",
+            "accent": "#65432e",
+            "fabric": "#d9cfbb",
+            "pillow": "#626f72",
+            "rug": "#d2d2cb",
+            "surface": "stone",
+            "visualMaterials": {
+              "floor": "grey-concrete",
+              "accent": "dark-walnut",
+              "fabric": "natural-linen",
+              "wall": "ivory-paint"
+            },
+            "collectionId": "urban-stone",
+            "catalogMaterials": {},
+            "materialBindingStatuses": {}
+          },
+          "collection": "urban-stone"
+        },
+        {
+          "view": "bed",
+          "filename": "townhouse-modern-bed.png",
+          "roomId": "design-f0-bed-1",
+          "palette": {
+            "id": "urban-stone",
+            "name": "Đá & đường nét",
+            "note": "Sofa thấp, bàn đá chân thép, tông xám dịu.",
+            "shape": "linear",
+            "table": "stone",
+            "wall": "#f2eee5",
+            "floor": "#a9aaa4",
+            "accent": "#65432e",
+            "fabric": "#d9cfbb",
+            "pillow": "#626f72",
+            "rug": "#d2d2cb",
+            "surface": "stone",
+            "visualMaterials": {
+              "floor": "grey-concrete",
+              "accent": "dark-walnut",
+              "fabric": "natural-linen",
+              "wall": "ivory-paint"
+            },
+            "collectionId": "urban-stone",
+            "catalogMaterials": {},
+            "materialBindingStatuses": {}
+          },
+          "collection": "urban-stone"
+        }
+      ],
+      "fixture": "townhouse",
+      "proposalChanges": [
+        {
+          "id": "design-o3",
+          "room": "Phòng khách",
+          "floor": 0,
+          "before": {
+            "width": 2.4,
+            "height": 1.65,
+            "sill": 0.65,
+            "offset": 0.5
+          },
+          "after": {
+            "width": 2.78,
+            "height": 2.1,
+            "sill": 0.55,
+            "offset": 0.5
+          }
+        },
+        {
+          "id": "design-o15",
+          "room": "Phòng ngủ chính",
+          "floor": 1,
+          "before": {
+            "width": 1.5,
+            "height": 1.4,
+            "sill": 0.9,
+            "offset": 0.5
+          },
+          "after": {
+            "width": 2.78,
+            "height": 1.99,
+            "sill": 0.9,
+            "offset": 0.5
+          }
+        },
+        {
+          "id": "design-o23",
+          "room": "Phòng Con 1",
+          "floor": 2,
+          "before": {
+            "width": 1.5,
+            "height": 1.4,
+            "sill": 0.9,
+            "offset": 0.5
+          },
+          "after": {
+            "width": 2.78,
+            "height": 1.7,
+            "sill": 0.9,
+            "offset": 0.5
+          }
+        }
+      ],
+      "renderRevision": "customer-measured-house-18",
+      "overflow": false,
+      "elapsedMs": 28826,
+      "errors": []
+    }
+  ],
+  "browser": "145.0.7632.6",
+  "complete": true
+}
