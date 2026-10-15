@@ -4,7 +4,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 15/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W13 product-linked room/exterior samples released; next measured initial-reference facade contract and licensed catalogue asset coverage
+- active_substep: W14 reference/elevation/model review and measured-revision satisfaction; native desktop/phone validation in progress
 - target_branch: codex/b-v1-24
 - actual_branch: remote codex/b-facade-depth; local restored checkout bmh-review-ab-c08 contains older git metadata; push only scoped files against fresh remote tree
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
@@ -425,3 +425,12 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Public www.huiminhbach.id.vn/app.js HTTP200 SHA256fa111495ebf0debc9494e49753a1377370c7112c6e261fa2b25e987b2a96103c and styles.css HTTP200 SHA2566c953af35795e71e73daff1a5390f1ba9232614f02a09e7e90706d5ea7487c84 exactly match tested local build.
 - Public native desktop-room path passed sample form upload, actual pixels, measured UVs, unchanged2D/style/other room, reopen/copy/media scope, parsed embedded GLB pixels and changed-SKU rejection. Public phone-facade path passed exterior sample map/tint/scale/angle, unchanged interior/2D/style, reload and no overflow. No page errors; synthetic browser-local projects, all API/external/nonGET writes blocked. Public evidence production-room/result.json, production-facade/result.json and public-check.json. No real provider/payment/customer writes.
 - W13 sample pipeline complete and live within its declared scope; no claim catalogue SKU assets are complete or Modern reference geometry is accepted. Concrete next handoff is MODERN-REFERENCE-NEXT.md: styleReferenceId currently guides Gemini images, not measured house geometry. Need selected design/reference tied to the same confirmed2D facade components before asserting exact original-design matching. Continue independent verified asset coverage while that contract is prepared; do not edit A source or synthesize engineering dimensions.
+
+
+## W14 / reference-to-measured-model review — 15/10/2026
+- Resumed checkpoint0b66dfd. B-owned source only:81_design_studio,104_style_reference,customer-design.css. No A schema, geometry store, build or dependency change.
+- Fixed customer satisfaction retaining approval after roof/parapet, per-floor height, chosen reference or active-kit changes. Acceptance now includes the shared drawing revision and measured inputs; camera/view selection does not invalidate it. This is customer satisfaction, never professional approval.
+- Added one disclosure beside the actual3D: original uploaded reference (or the selected catalogue style illustration) beside one of four elevations from the shared measured model. Missing uploaded bytes are disclosed, never silently replaced by another picture. Exposes floor heights/current revision; changing elevation updates only the panel and retains the3D renderer/camera.
+- Customer snapshot carries source-reference metadata, measured rooms/openings, same facade component IDs and per-room/exterior product summaries. No local image bytes exported in the JSON review; geometryMatch remains not-verified and engineeringApproved false.
+- Node22 build and26 focused reference/design/dossier tests passed. Native desktop reached comparison/mesh-ID/3800+3400mm/elevation-switch/acceptance invalidation checks; reload/phone run still in progress at this checkpoint. Earlier runner mistakenly looked for acceptance on3D instead of its actual Handover screen; runner corrected, not application code.
+- Whole Modern commercial/reference visual gate remains in_progress. This fixes traceability and a real stale-approval defect; it does not change generic facade composition into the original two-storey reference house. Shared approved reference-specific facade geometry and legitimate product assets remain required as detailed in MODERN-REFERENCE-NEXT.md.

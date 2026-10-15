@@ -93,3 +93,16 @@ details:has(>[data-team-a-boq])>summary{min-height:44px;align-content:center;fon
 .material-sample-editor form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}.material-sample-editor label{display:grid;gap:6px;font-size:13px;min-width:0}
 .material-sample-editor input,.material-sample-editor select,.material-sample-editor button{box-sizing:border-box;width:100%;max-width:100%;min-height:44px;padding:9px;border:1px solid #cadbd3;border-radius:9px;background:white;color:inherit;font:inherit}.material-sample-editor button{background:#205b4b;color:white;cursor:pointer}.material-sample-editor button:disabled{opacity:.6}.material-sample-editor figure{margin:12px 0}.material-sample-editor figure img{display:block;max-width:240px;width:100%;max-height:180px;object-fit:contain}.material-sample-editor figcaption{font-size:12px}
 @media(max-width:600px){.material-sample-editor{padding:14px}.material-sample-editor form{grid-template-columns:1fr}}
+.reference-design-review{margin:16px 0;padding:16px;border:1px solid #d8e3d6;border-radius:14px;background:#fff;color:#233e32;min-width:0}
+.reference-design-review summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}
+.reference-design-review p{font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.reference-design-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;min-width:0}
+.reference-design-grid figure{margin:0;min-width:0;background:#f6f7f3;border-radius:10px;padding:10px}
+.reference-design-grid img{display:block;width:100%;height:300px;object-fit:contain;background:#fff}
+.reference-design-grid figcaption{font-size:12px;line-height:1.5;padding-top:8px;overflow-wrap:anywhere}
+.reference-design-grid label{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;margin-bottom:8px}
+.reference-design-grid select,.reference-design-review button{min-height:44px;max-width:100%}
+.reference-design-empty{min-height:180px;display:grid;place-items:center;padding:20px;font-size:13px;line-height:1.6}
+@media(max-width:640px){.reference-design-grid{grid-template-columns:1fr}.reference-design-grid img{height:220px}.reference-design-review{padding:12px}}
+.reference-design-grid .style-concept{height:300px;aspect-ratio:auto;border-radius:0}
+@media(max-width:640px){.reference-design-grid .style-concept{height:220px}}

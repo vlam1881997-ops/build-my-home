@@ -32,7 +32,9 @@ BMH.designInputKey=()=>{const s=BMH.state.project.site;return JSON.stringify({si
 BMH.designAppliedKey=()=>JSON.stringify({plan:BMH.state.project.plan,finish:BMH.state.project.materials.finish,style:BMH.state.project.style});
 BMH.designApprovalKey=()=>{
  const p=BMH.state.project;
- return JSON.stringify({design:BMH.designAppliedKey(),input:BMH.designInputKey(),products:p.materials.choices,productCodes:Object.values(p.materials.choices||{}).map(id=>[id,p.dataEngine?.materialOverrides?.[id]?.sku||''])});
+ // Satisfaction belongs to this measured revision, including the selected
+ // reference, not just room rectangles and a style label. Camera is excluded.
+ return JSON.stringify({design:BMH.designAppliedKey(),input:BMH.designInputKey(),drawingRevision:BMH.drawingRevision?.()||null,measuredDesign:p.measuredDesign||null,floorHeights:p.site.floorHeights||null,referenceId:p.styleReferenceId||null,activeKit:p.designStudio?.activeKit||null,products:p.materials.choices,productCodes:Object.values(p.materials.choices||{}).map(id=>[id,p.dataEngine?.materialOverrides?.[id]?.sku||''])});
 };
 BMH.designCanApprove=()=>{
  const p=BMH.state.project,rooms=p.plan.rooms,floors=Number(p.site.floors);
