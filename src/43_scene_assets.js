@@ -124,7 +124,7 @@ BMH.sceneMaterialTexture = (THREE, scene, kind, channel='color') => {
 
 BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
   const cache = scene.userData.finishMaterials ||= new Map();
-  const key = JSON.stringify([finish.wall, finish.floor, finish.accent, finish.fabric, finish.surface,finish.pillow,finish.rug,finish.shape,finish.table,finish.visualMaterials,finish.stoneVisualMaterial]);
+  const key = JSON.stringify([finish.wall, finish.floor, finish.accent, finish.fabric, finish.surface,finish.pillow,finish.rug,finish.shape,finish.table,finish.visualMaterials,finish.stoneVisualMaterial,finish.catalogMaterials]);
   if (cache.has(key)) return cache.get(key);
   const texture=(kind,channel='color')=>BMH.sceneMaterialTexture(THREE,scene,kind,channel);
   const make = (color, roughness, kind, scale) => {
@@ -175,6 +175,18 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
   }
   const stoneProfile=BMH.VISUAL_MATERIALS?.find(p=>p.id===finish.stoneVisualMaterial&&p.role==='floor'&&p.surface==='stone');
   if(stoneProfile){const material=make(stoneProfile.color,stoneProfile.roughness,stoneProfile.kind,stoneProfile.scale);material.normalScale?.setScalar(stoneProfile.normalStrength);material.userData.visualMaterial=stoneProfile.id;replace('stone',material);}
+  // A customer-provided sample replaces the generic colour map only on its
+  // validated product/room binding. Physical response remains a preview.
+  for(const [category,binding] of Object.entries(finish.catalogMaterials||{})){
+   const sample=BMH.materialSampleForBinding?.(binding),role=BMH.catalogSurfaceSlots?.[category],target={floor:'floor',wall:'wall',accent:'wood'}[role];
+   if(!sample||!target)continue;
+   const textures=scene.userData.surfaceTextures||=new Map(),key='catalog-sample:'+sample.mediaId;
+   if(!textures.has(key)){const t=new THREE.Texture(sample.image);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;t.needsUpdate=true;textures.set(key,t);}
+   const previous=materials[target],material=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:previous.roughness,map:textures.get(key)});
+   material.userData={...previous.userData,surfaceScale:[...binding.sample.realWorldScale],surfaceRotation:binding.sample.rotationDeg*Math.PI/180,catalogProductId:binding.productId,catalogSku:binding.sku,materialSampleId:sample.mediaId,sampleBasis:'customer-provided-colour-sample'};
+   replace(target,material);
+   if(role==='accent'){const slatted=material.clone();slatted.userData={...material.userData};replace('slattedWood',slatted);}
+  }
   for (const material of Object.values(materials)) if(material.isMaterial)material.envMapIntensity = BMH.state?.ui?.sceneTheme === 'night' ? .3 : .65;
   for(const [slot,material] of Object.entries(materials))if(material?.isMaterial)material.userData.finishSlot=slot;
   materials.floor.userData.finishSlot='floor';
@@ -190,8 +202,8 @@ BMH.sceneSurfaceUvs = (geometry, material, origin = {x:0,y:0,z:0}) => {
   for (let i = 0; i < p.count; i++) {
     const x = p.getX(i) + origin.x, y = p.getY(i) + origin.y, z = p.getZ(i) + origin.z;
     const ax = Math.abs(n.getX(i)), ay = Math.abs(n.getY(i)), az = Math.abs(n.getZ(i));
-    const u=(ax > ay && ax > az ? z : x)/scale[0],v=(ay >= ax && ay >= az ? z : y)/scale[1],angle=material.userData.surfaceRotation||0;
-    uv.setXY(i,u*Math.cos(angle)-v*Math.sin(angle),u*Math.sin(angle)+v*Math.cos(angle));
+    const u=ax > ay && ax > az ? z : x,v=ay >= ax && ay >= az ? z : y,angle=material.userData.surfaceRotation||0;
+    uv.setXY(i,(u*Math.cos(angle)-v*Math.sin(angle))/scale[0],(u*Math.sin(angle)+v*Math.cos(angle))/scale[1]);
   }
   uv.needsUpdate = true;
   return geometry;

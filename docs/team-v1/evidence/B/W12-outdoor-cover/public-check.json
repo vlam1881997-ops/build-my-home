@@ -1,0 +1,14 @@
+[
+  {
+    "file": "app.js",
+    "status": 200,
+    "sha256": "883fc2215dbb2c166e4a37c701c4c5285b497b1e1afc93034cfce99ccb3ad5b2",
+    "matches": true
+  },
+  {
+    "file": "styles.css",
+    "status": 200,
+    "sha256": "e37722f197b302f6eb3394971e3a5a630fd5882a08a6ce78170c68f3c94e5da2",
+    "matches": true
+  }
+]

@@ -1,14 +1,14 @@
 # Tiến độ AI B — BMH commercial v1
 
-Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 12/10/2026.
+Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 15/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W08.1 rotation and measured furniture size controls; W01.2 exterior massing still pending
+- active_substep: W13 room-scoped product sample textures ready_for_integration; Modern reference/facade acceptance remains open
 - target_branch: codex/b-v1-24
-- actual_branch: codex/review-ab-c08 (local); remote resume codex/b-facade-depth; PR42 source is merged in main
-- source_baseline: 6a323673be7c5a6d6874b5bc345d9c354f6c5f55 (PR42 integrated release; earlier work/evidence preserved)
-- last_verified_commit: 6a323673be7c5a6d6874b5bc345d9c354f6c5f55 (473 Node22 tests; local 24 desktop + 3 phone proposals passed; CI/Vercel success; public hashes matched again 12/10; public UI partial, see release.json)
+- actual_branch: remote codex/b-facade-depth; local restored checkout bmh-review-ab-c08 contains older git metadata; push only scoped files against fresh remote tree
+- source_baseline: 4dae691142569ec9ef81e416f2828f7e720a473b (PR52 production main)
+- last_verified_commit: a6f6060551503312ad369ecf15df11221ab67cce (CI success;67 scoped tests; local and public desktop/phone terrace-loggia-preview-cache-undo checks passed)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -388,3 +388,33 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Verification: Node22 build;67 scoped scene/house/furniture/symbol tests passed. Native desktop+phone synthetic Modern5.4×20m/3floor3.8/3.4/3.1m fixture: native3.8m rear-anchored bedroom/terrace preview unchanged source, embedded drawing decodes, actual terrace slab bounds match shared room within0.01mm; open terrace has no ceiling/suspended meshes; same-room covered loggia adds ceiling and changes scene key; undo restores open geometry, no page errors. Final CSS-only preview rerun on desktop/phone passed no overflow. Evidence W12-outdoor-cover/result.json and ui/result.json; native runner committed. Screenshots inspected, retained locally.
 - This proves measured massing responds to accepted2D changes, not that a particular terrace is suitable for construction. Outdoor guard/drainage/waterproofing/structure remain explicitly awaiting source/review; no invented balustrade or engineer approval. Full Modern visual/commercial gate remains in_progress.
 - Next: release exact tested source when CI passes, verify public bytes/native interaction, then continue product/material matching and measured Modern composition. Do not mark remaining23styles or complete cost/loan dossiers done from this fix.
+
+
+### W12 released — 15/10/2026
+- PR52 exact sourcea6f6060551503312ad369ecf15df11221ab67cce passed Actions38689330364, job116271345034 npm test/coordinator both success. Initial merge auto-review used stale pending-CI information and rejected it. Fresh workflow/job/head reads proved completion before a successful merge; no alternate route or bypass. Main4dae691142569ec9ef81e416f2828f7e720a473b.
+- GitHub Vercel status success/Deployment has completed, dashboardBNUTxBkYa3NyUqBCfdDVP16Rw9rY. Public app.js SHA256883fc2215dbb2c166e4a37c701c4c5285b497b1e1afc93034cfce99ccb3ad5b2 and styles.css SHA256e37722f197b302f6eb3394971e3a5a630fd5882a08a6ce78170c68f3c94e5da2 both HTTP200 and exact tested-build matches.
+- Public native desktop AND phone passed actual floor drawing decode/no-mutation preview, terrace actual floor dimensions, absent terrace ceilings, retained loggia ceiling/suspended ceiling, cache-key change and undo. No page errors; synthetic browser-local test projects, all external/API/nonGET blocked. Evidence production/result.json plus public-check.json; actual model JPEG comparisons committed. No customer/provider/payment writes.
+- Source and website update complete for W12. Whole Modern/24-style commercial acceptance remains in_progress. Next independent B work: Modern room/material/product-role coverage and exactness mapping with verified assets; continue measured facade options only through shared A contracts. Outdoor technical details and real full-project quotations still need sourced inputs.
+
+
+## W13 / Modern-first — product-linked measured sample textures, 15/10/2026
+- User rejected geometry-only fixes and requires measured2D+chosen materials+initial design. Found catalogue choices were mapped to generic profiles, not actual SKU pixels. Added a direct customer-provided colour-sample path without claiming catalogue-wide exact assets or completed reference matching.
+- Reuse existing project-scoped IndexedDB media store; project JSON stores product/SKU/spec, media ID, source, repeat size and grain angle, not image bytes. Apply through selected catalogue product to one explicit room. Guards retain product/room/project identity and latest operation across async decode/storage. Invalid dimensions/files/sources are rejected. Samples are labelled customer-provided colour samples; roughness/technical performance remain simulated and local-only media is disclosed.
+- Renderer replaces only the validated room/product colour map, avoids multiplying its pixels by generic beige, preserves real-world repeat dimensions, grain rotation and other rooms. Corrected anisotropic UV rotation to rotate world axes before dividing by sample dimensions. GLB embeds actual sample pixels. Scene revision20 invalidates cached images. Copy-project workflow explicitly copies scoped sample bytes; sample metadata is disclosed in customer exports and supplier summaries, unavailable pixels/stale SKUs are not presented as exact.
+- Source B only:43_scene_assets,86_visual_materials,88_customer_studio,90_product_polish,91_customer_cloud,99_customer_design,103_real_house,customer-design.css. No A state/schema/build/dependency edits or paid API calls.
+- Verification: Node22 build;54 scoped scene/furniture/sample tests,28 cloud/studio checks; final16 sample/studio checks after metadata/control integration. Native desktop+phone passed actual form upload, 700×1100mm repeat and37degree UVs, actual texture pixel colour, neutral tint, unchanged measured plan/style/other room, persisted reload, distinct project-copy scope with copied sample bytes, changed-SKU rejection and no page errors/overflow. Actual desktop GLB8562928bytes parsed: selected sample image embedded and left/right test pixels verified. Synthetic two-colour sample is a test pattern, not a manufacturer photo. Final desktop rerun passed after profile-selector and export metadata changes; earlier phone rendering paths unchanged. Evidence W13-material-samples/result.json and final/result.json; browser/unit runners committed.
+- Scope status ready_for_integration for sample-material path. Full Modern commercial gate remains in_progress. Existing supplier catalogue still needs legitimate SKU photographs/texture/model assets; current separate reference image does not automatically define measured facade geometry. Do not claim original-photo identity, manufacturer-exact physical response, cloud sample sync or full24style acceptance.
+- Next: release exact tested source and verify live; then Modern reference-specific measured facade/2D composition and catalogue asset coverage. Keep source/photos/texture/mesh evidence separate from visual acceptance, preserve customer-authored poses/materials.
+
+
+### W13 extension — exterior isolation and retained room products
+- Added explicit exterior sample target for paint/wood cladding through exterior.facadeMaterials; it does not replace legacy whole-house interior colours or room choices. Facade materials consume the same sample pixels and metre UVs; removed palette tint reapplication to sample-backed facade materials and added binding-aware facade cache keys. Facade bindings are restored/copied with other scoped media and disclosed in export summaries.
+- Fixed per-room identity resolution: existing bindings resolve their stored productId, not whichever product is currently highlighted in the showroom. A different selection for another room no longer invalidates the first room; changes to the bound product's own SKU/spec/unit still invalidate it. No price, quantity, plan or style is inferred or changed; A integration should continue resolving each application's explicit productId for cost parity rather than assuming one global SKU per category.
+- Final local desktop+phone native checks passed for both room and exterior paths: measured sample pixels/scale/37degree UVs, unchanged plan/style/interior or other room, persistence and copied media, parsed embedded sample in GLB. Exterior sample layer preserves white tint on actual facade meshes. New regression tests cover legacy unmarked global colours and two-room/two-product retention. All scoped material/identity/style checks passed except an outdated local material-source test snapshot; restored that test byte-for-byte from remote44d85e0 and its26 checks passed. No catalogue source modified to satisfy the test.
+- Evidence room-final/result.json, exterior-final/result.json and expected-build.json. Synthetic patterns verify pixel/UV correctness, not commercial appearance or manufacturer samples. Next release current head of PR53 after CI, then continue Modern reference-specific facade composition and licensed catalogue assets. Original design-reference matching remains unaccepted.
+
+
+### W13 CI compatibility fix
+- GitHub Actions on fd7563d completed484pass/1fail: instant-preview queued mounts expected the original renderer setup to start immediately. Unconditionally awaiting sample restore added a microtask even for projects without samples. Replaced that with a synchronous pass-through when no valid sample binding exists; only sample projects await scoped image restore.
+-20 focused startup/sample checks passed, including the original queued-renderer regression. Final desktop native sample upload/reload/copy/embedded-GLB verification passed after this fix; photo-backed restoration remains unchanged, ordinary projects retain instant startup. Updated expected build hashes. No failed CI head merged.
+- A integration request: register tests/team-b-material-samples.test.mjs in the explicit npm test list when updating A-owned build/test configuration. New sample unit and browser runners are verified locally and committed; existing full CI is still required on the final source head.

@@ -1,0 +1,120 @@
+[
+  {
+    "device": "desktop",
+    "beforeRoom": {
+      "id": "design-f2-bed-1",
+      "floor": 2,
+      "name": "Phòng Con 1",
+      "type": "bed",
+      "x": 0.11000000000000032,
+      "y": 1.61,
+      "w": 3.9800000000000004,
+      "h": 12.379999999999999
+    },
+    "outdoor": {
+      "id": "design-f2-bed-1-released",
+      "floor": 2,
+      "type": "balcony",
+      "name": "Sân thượng",
+      "x": 0.11000000000000032,
+      "y": 1.61,
+      "w": 3.9800000000000004,
+      "h": 8.579999999999998,
+      "outdoorSpace": {
+        "kind": "terrace",
+        "openSides": [
+          "north",
+          "west"
+        ],
+        "sourceReference": "Synthetic Modern massing study, not customer or engineering approval",
+        "reviewStatus": "awaiting-review",
+        "guard": {
+          "status": "unknown"
+        },
+        "drainage": {
+          "status": "unknown"
+        }
+      }
+    },
+    "open": {
+      "covers": [],
+      "width": 3.9800000190734863,
+      "depth": 8.579999923706055,
+      "revision": "9148CC77-741638A5-AI4-RH2",
+      "keySha256": "0aadc0eab5bbd586cf783647776fa1b2ee8c74dab81d5135c83476d8692af6b3"
+    },
+    "covered": {
+      "covers": [
+        "suspended-ceiling",
+        "ceiling-slab"
+      ],
+      "width": 3.9800000190734863,
+      "depth": 8.579999923706055,
+      "revision": "3B5337F2-741638A5-AI4-RH2",
+      "keySha256": "2ca7bf43b21b911cc01287fd45ffaa636af75257763c2cf41546cde412752752"
+    },
+    "undoRestoresOpen": true,
+    "previewNoMutation": true,
+    "previewImageDecoded": true,
+    "errors": []
+  },
+  {
+    "device": "phone",
+    "beforeRoom": {
+      "id": "design-f2-bed-1",
+      "floor": 2,
+      "name": "Phòng Con 1",
+      "type": "bed",
+      "x": 0.11000000000000032,
+      "y": 1.61,
+      "w": 3.9800000000000004,
+      "h": 12.379999999999999
+    },
+    "outdoor": {
+      "id": "design-f2-bed-1-released",
+      "floor": 2,
+      "type": "balcony",
+      "name": "Sân thượng",
+      "x": 0.11000000000000032,
+      "y": 1.61,
+      "w": 3.9800000000000004,
+      "h": 8.579999999999998,
+      "outdoorSpace": {
+        "kind": "terrace",
+        "openSides": [
+          "north",
+          "west"
+        ],
+        "sourceReference": "Synthetic Modern massing study, not customer or engineering approval",
+        "reviewStatus": "awaiting-review",
+        "guard": {
+          "status": "unknown"
+        },
+        "drainage": {
+          "status": "unknown"
+        }
+      }
+    },
+    "open": {
+      "covers": [],
+      "width": 3.9800000190734863,
+      "depth": 8.579999923706055,
+      "revision": "9148CC77-741638A5-AI4-RH2",
+      "keySha256": "0aadc0eab5bbd586cf783647776fa1b2ee8c74dab81d5135c83476d8692af6b3"
+    },
+    "covered": {
+      "covers": [
+        "suspended-ceiling",
+        "ceiling-slab"
+      ],
+      "width": 3.9800000190734863,
+      "depth": 8.579999923706055,
+      "revision": "3B5337F2-741638A5-AI4-RH2",
+      "keySha256": "2ca7bf43b21b911cc01287fd45ffaa636af75257763c2cf41546cde412752752"
+    },
+    "undoRestoresOpen": true,
+    "previewNoMutation": true,
+    "previewImageDecoded": true,
+    "errors": []
+  }
+]

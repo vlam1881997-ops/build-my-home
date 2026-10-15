@@ -50,7 +50,7 @@
  };
  B.evidenceRemoveBytes=async id=>remove(B.projectMediaKey(await B.projectMediaScope(),id));
  if(B.newCustomerProject){const create=B.newCustomerProject;B.newCustomerProject=async options=>{
-  const copyId=options?.copyId,source=copyId?await B.projectGet(copyId):null,ids=source?[...(source.state.project.dossier.evidence||[]),...(source.state.project.sourceRefs||[])].map(r=>r.id):[],media=[];
+  const copyId=options?.copyId,source=copyId?await B.projectGet(copyId):null,f=source?.state.project.materials?.finish||{},sampleIds=[f.exterior,...Object.values(f.rooms||{})].filter(Boolean).flatMap(r=>[...Object.values(r.catalogMaterials||{}),...Object.values(r.facadeMaterials||{})]).filter(b=>B.catalogSampleMetadataValid?.(b)).map(b=>b.sample.mediaId),ids=source?[...new Set([...(source.state.project.dossier.evidence||[]).map(r=>r.id),...(source.state.project.sourceRefs||[]).map(r=>r.id),...sampleIds])]:[],media=[];
   for(const id of ids){const blob=await get(B.projectMediaKey(copyId,id));const image=await B.styleReferenceStore?.get(id,{scope:copyId,legacy:false});if(blob||image)media.push({id,blob,image});}
   const scope=await create(options);for(const row of media){if(row.blob)await put(B.projectMediaKey(scope,row.id),row.blob);if(row.image)await B.styleReferenceStore.put(row.id,row.image,{scope});}return scope;
  };}
