@@ -4,11 +4,11 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 15/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W13 room-scoped product sample textures ready_for_integration; Modern reference/facade acceptance remains open
+- active_substep: W13 product-linked room/exterior samples released; next measured initial-reference facade contract and licensed catalogue asset coverage
 - target_branch: codex/b-v1-24
 - actual_branch: remote codex/b-facade-depth; local restored checkout bmh-review-ab-c08 contains older git metadata; push only scoped files against fresh remote tree
-- source_baseline: 4dae691142569ec9ef81e416f2828f7e720a473b (PR52 production main)
-- last_verified_commit: a6f6060551503312ad369ecf15df11221ab67cce (CI success;67 scoped tests; local and public desktop/phone terrace-loggia-preview-cache-undo checks passed)
+- source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
+- last_verified_commit: d4b71f70630f7a97b111c4c9020ae53d871c51f2 (full CI success; local room/exterior desktop+phone; public desktop-room/phone-facade/GLB verified)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -418,3 +418,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - GitHub Actions on fd7563d completed484pass/1fail: instant-preview queued mounts expected the original renderer setup to start immediately. Unconditionally awaiting sample restore added a microtask even for projects without samples. Replaced that with a synchronous pass-through when no valid sample binding exists; only sample projects await scoped image restore.
 -20 focused startup/sample checks passed, including the original queued-renderer regression. Final desktop native sample upload/reload/copy/embedded-GLB verification passed after this fix; photo-backed restoration remains unchanged, ordinary projects retain instant startup. Updated expected build hashes. No failed CI head merged.
 - A integration request: register tests/team-b-material-samples.test.mjs in the explicit npm test list when updating A-owned build/test configuration. New sample unit and browser runners are verified locally and committed; existing full CI is still required on the final source head.
+
+
+### W13 production release — 15/10/2026
+- Exact PR53 head d4b71f70630f7a97b111c4c9020ae53d871c51f2 passed Actions38692982194/job116282952288 npm test and coordinator. Merged to main4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 only after fresh success checks. Previous failed mount head was not merged. GitHub Vercel status success/Deployment has completed, dashboard4KpZQeYUjQHq6PqkEFDL5wFUY7N3.
+- Public www.huiminhbach.id.vn/app.js HTTP200 SHA256fa111495ebf0debc9494e49753a1377370c7112c6e261fa2b25e987b2a96103c and styles.css HTTP200 SHA2566c953af35795e71e73daff1a5390f1ba9232614f02a09e7e90706d5ea7487c84 exactly match tested local build.
+- Public native desktop-room path passed sample form upload, actual pixels, measured UVs, unchanged2D/style/other room, reopen/copy/media scope, parsed embedded GLB pixels and changed-SKU rejection. Public phone-facade path passed exterior sample map/tint/scale/angle, unchanged interior/2D/style, reload and no overflow. No page errors; synthetic browser-local projects, all API/external/nonGET writes blocked. Public evidence production-room/result.json, production-facade/result.json and public-check.json. No real provider/payment/customer writes.
+- W13 sample pipeline complete and live within its declared scope; no claim catalogue SKU assets are complete or Modern reference geometry is accepted. Concrete next handoff is MODERN-REFERENCE-NEXT.md: styleReferenceId currently guides Gemini images, not measured house geometry. Need selected design/reference tied to the same confirmed2D facade components before asserting exact original-design matching. Continue independent verified asset coverage while that contract is prepared; do not edit A source or synthesize engineering dimensions.
