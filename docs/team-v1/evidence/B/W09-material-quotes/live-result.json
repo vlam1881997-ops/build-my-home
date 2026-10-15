@@ -1,0 +1,18 @@
+[
+  {
+    "device": "desktop",
+    "quoteSourcePrefilled": true,
+    "projectPriceUnconfirmed": true,
+    "roleExplicit": true,
+    "unchangedCostPlan": true,
+    "errors": []
+  },
+  {
+    "device": "phone",
+    "quoteSourcePrefilled": true,
+    "projectPriceUnconfirmed": true,
+    "roleExplicit": true,
+    "unchangedCostPlan": true,
+    "errors": []
+  }
+]
