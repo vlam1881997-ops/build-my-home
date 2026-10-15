@@ -58,6 +58,7 @@ BMH.resolveFacadeMaterialBindings=palette=>{
 // Sample pixels stay in the project-scoped media store, never in the project JSON.
 // A provided colour sample is not a measured normal/roughness map or certification.
 const sampleRuntime=new WeakMap(),sampleOperations=new WeakMap();
+const projectSampleBindings=project=>{const f=project?.materials?.finish||{};return [f.exterior,...Object.values(f.rooms||{})].filter(Boolean).flatMap(r=>[...Object.values(r.catalogMaterials||{}),...Object.values(r.facadeMaterials||{})]);};
 BMH.catalogSampleMetadataValid=b=>{
  const s=b?.sample;return !!s&&typeof s.mediaId==='string'&&/^material-sample-[a-zA-Z0-9-]+$/.test(s.mediaId)&&s.productId===b.productId&&s.sku===b.sku&&s.specification===b.specification&&typeof s.sourceReference==='string'&&s.sourceReference.trim().length>0&&s.sourceReference.length<=240&&Array.isArray(s.realWorldScale)&&s.realWorldScale.length===2&&s.realWorldScale.every(n=>Number.isFinite(n)&&n>=.01&&n<=20)&&Number.isFinite(s.rotationDeg)&&s.rotationDeg>=0&&s.rotationDeg<360;
 };
@@ -65,7 +66,7 @@ BMH.materialSampleForBinding=b=>BMH.catalogSampleMetadataValid(b)?sampleRuntime.
 BMH.restoreMaterialSamples=async()=>{
  const project=BMH.state.project;if(!BMH.styleReferenceStore)return;
  let cache=sampleRuntime.get(project);if(!cache)sampleRuntime.set(project,cache=new Map());
- const f=project.materials.finish||{},bindings=[f.exterior,...Object.values(f.rooms||{})].filter(Boolean).flatMap(r=>[...Object.values(r.catalogMaterials||{}),...Object.values(r.facadeMaterials||{})]);
+ const bindings=projectSampleBindings(project);
  await Promise.allSettled(bindings.filter(BMH.catalogSampleMetadataValid).map(async b=>{
   const s=b.sample;if(cache.has(s.mediaId))return;const data=await BMH.styleReferenceStore.get(s.mediaId,{legacy:false});
   if(!/^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(data||''))return;
@@ -97,7 +98,7 @@ BMH.applyCatalogSample=async(category,{roomId=null,scope='room',profileId,file,w
   BMH.finishInvalidate?.();BMH.save();return {ok:true,mediaId};
  }catch(_){return fail('Chưa hoàn tất việc gắn ảnh mẫu. Kiểm tra file, kho ảnh và thử lại.');}
 };
-const sampleMount=BMH.mountStudio3D;BMH.mountStudio3D=async()=>{await BMH.restoreMaterialSamples();await sampleMount();};
+const sampleMount=BMH.mountStudio3D;BMH.mountStudio3D=(...args)=>projectSampleBindings(BMH.state.project).some(BMH.catalogSampleMetadataValid)?BMH.restoreMaterialSamples().then(()=>sampleMount(...args)):sampleMount(...args);
 BMH.catalogSelectedProduct=category=>{const id=BMH.state.project.materials.choices?.[category],q=BMH.state.project.dataEngine?.materialOverrides?.[id]?.product,x=q||BMH.materialResearch?.products?.find(x=>x.id===id);return x&&x.id===id&&x.category===category?x:null;};
 BMH.catalogBoundProduct=(category,binding)=>{const id=binding?.productId,x=BMH.state.project.dataEngine?.materialOverrides?.[id]?.product||BMH.materialResearch?.products?.find(x=>x.id===id);return x&&x.id===id&&x.category===category?x:null;};
 BMH.createCatalogMaterialBinding=(product,profileId,{roomId=null}={})=>{
