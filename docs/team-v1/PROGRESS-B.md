@@ -1,14 +1,14 @@
 # Tiến độ AI B — BMH commercial v1
 
-Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 12/10/2026.
+Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 15/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W08.1 rotation and measured furniture size controls; W01.2 exterior massing still pending
+- active_substep: W12 terrace/loggia parity released; next B-R3 Modern room/material matching and customer-ready visual review
 - target_branch: codex/b-v1-24
-- actual_branch: codex/review-ab-c08 (local); remote resume codex/b-facade-depth; PR42 source is merged in main
-- source_baseline: 6a323673be7c5a6d6874b5bc345d9c354f6c5f55 (PR42 integrated release; earlier work/evidence preserved)
-- last_verified_commit: 6a323673be7c5a6d6874b5bc345d9c354f6c5f55 (473 Node22 tests; local 24 desktop + 3 phone proposals passed; CI/Vercel success; public hashes matched again 12/10; public UI partial, see release.json)
+- actual_branch: remote codex/b-facade-depth; local restored checkout bmh-review-ab-c08 contains older git metadata; push only scoped files against fresh remote tree
+- source_baseline: 4dae691142569ec9ef81e416f2828f7e720a473b (PR52 production main)
+- last_verified_commit: a6f6060551503312ad369ecf15df11221ab67cce (CI success;67 scoped tests; local and public desktop/phone terrace-loggia-preview-cache-undo checks passed)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -388,3 +388,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Verification: Node22 build;67 scoped scene/house/furniture/symbol tests passed. Native desktop+phone synthetic Modern5.4×20m/3floor3.8/3.4/3.1m fixture: native3.8m rear-anchored bedroom/terrace preview unchanged source, embedded drawing decodes, actual terrace slab bounds match shared room within0.01mm; open terrace has no ceiling/suspended meshes; same-room covered loggia adds ceiling and changes scene key; undo restores open geometry, no page errors. Final CSS-only preview rerun on desktop/phone passed no overflow. Evidence W12-outdoor-cover/result.json and ui/result.json; native runner committed. Screenshots inspected, retained locally.
 - This proves measured massing responds to accepted2D changes, not that a particular terrace is suitable for construction. Outdoor guard/drainage/waterproofing/structure remain explicitly awaiting source/review; no invented balustrade or engineer approval. Full Modern visual/commercial gate remains in_progress.
 - Next: release exact tested source when CI passes, verify public bytes/native interaction, then continue product/material matching and measured Modern composition. Do not mark remaining23styles or complete cost/loan dossiers done from this fix.
+
+
+### W12 released — 15/10/2026
+- PR52 exact sourcea6f6060551503312ad369ecf15df11221ab67cce passed Actions38689330364, job116271345034 npm test/coordinator both success. Initial merge auto-review used stale pending-CI information and rejected it. Fresh workflow/job/head reads proved completion before a successful merge; no alternate route or bypass. Main4dae691142569ec9ef81e416f2828f7e720a473b.
+- GitHub Vercel status success/Deployment has completed, dashboardBNUTxBkYa3NyUqBCfdDVP16Rw9rY. Public app.js SHA256883fc2215dbb2c166e4a37c701c4c5285b497b1e1afc93034cfce99ccb3ad5b2 and styles.css SHA256e37722f197b302f6eb3394971e3a5a630fd5882a08a6ce78170c68f3c94e5da2 both HTTP200 and exact tested-build matches.
+- Public native desktop AND phone passed actual floor drawing decode/no-mutation preview, terrace actual floor dimensions, absent terrace ceilings, retained loggia ceiling/suspended ceiling, cache-key change and undo. No page errors; synthetic browser-local test projects, all external/API/nonGET blocked. Evidence production/result.json plus public-check.json; actual model JPEG comparisons committed. No customer/provider/payment writes.
+- Source and website update complete for W12. Whole Modern/24-style commercial acceptance remains in_progress. Next independent B work: Modern room/material/product-role coverage and exactness mapping with verified assets; continue measured facade options only through shared A contracts. Outdoor technical details and real full-project quotations still need sourced inputs.
