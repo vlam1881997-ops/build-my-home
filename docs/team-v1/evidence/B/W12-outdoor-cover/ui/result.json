@@ -1,0 +1,16 @@
+[
+  {
+    "device": "desktop",
+    "previewImageDecoded": true,
+    "noOverflow": true,
+    "previewNoMutation": true,
+    "errors": []
+  },
+  {
+    "device": "phone",
+    "previewImageDecoded": true,
+    "noOverflow": true,
+    "previewNoMutation": true,
+    "errors": []
+  }
+]
