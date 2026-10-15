@@ -75,3 +75,16 @@ details:has(>[data-team-a-boq])>summary{min-height:44px;align-content:center;fon
 .team-b-catalogue-preview span{font-size:.85rem;font-variant-numeric:tabular-nums}
 .team-b-catalogue-preview small{font-size:.78rem;line-height:1.5;color:var(--muted,#58685f)}
 .team-b-furniture-editor [data-furniture-add]{min-width:0}
+.team-b-room-depth{margin:18px 0;padding:18px;border:1px solid #d8e4df;border-radius:16px;background:#fff;color:#25433d}
+.team-b-room-depth>summary{font-weight:700;cursor:pointer;min-height:32px}
+.team-b-room-depth p,.team-b-room-depth small{line-height:1.55}
+.team-b-room-depth form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:16px 0;align-items:end}
+.team-b-room-depth label{display:grid;gap:6px;font-size:13px;min-width:0}
+.team-b-room-depth input,.team-b-room-depth select,.team-b-room-depth button{min-height:44px;width:100%;max-width:100%;box-sizing:border-box;border:1px solid #cadbd3;border-radius:9px;background:#fff;color:inherit;padding:10px;font:inherit}
+.team-b-room-depth button{background:#205b4b;color:white;font-weight:600;cursor:pointer}
+.team-b-depth-preview{border-top:1px solid #d8e4df;padding-top:12px}
+.team-b-depth-preview>small{display:block;margin-top:10px}
+.team-b-depth-drawing{margin:12px 0;padding:8px;background:#f4f7f5;border-radius:10px}
+.team-b-depth-drawing img{display:block;width:100%;height:auto;max-height:560px;object-fit:contain;background:white}
+.team-b-depth-drawing figcaption{font-size:12px;line-height:1.5;margin-top:8px;color:#526c62}
+@media(max-width:600px){.team-b-room-depth{padding:14px}.team-b-room-depth form{grid-template-columns:1fr}.team-b-depth-drawing{margin:12px -6px}}
