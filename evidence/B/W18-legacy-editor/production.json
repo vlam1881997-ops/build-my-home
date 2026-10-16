@@ -1,0 +1,23 @@
+{
+  "source": "f91ba17edf4b8c7ebba073c9ae56a8cbd8d8d97c",
+  "main": "d1d96654568a18dc1f43dace95944074530c2ea8",
+  "pr": 61,
+  "ci": 38898528440,
+  "publicBundleHash": "2e5f2a80c356a402d3dfcfd2223ea42c997edce86c4091cec3a39dce99758a44",
+  "native": {
+    "fixture": "default 5x20 two-floor plan",
+    "before_release_delete_rejected": true,
+    "after_release_delete": true,
+    "room_count_after_delete": 4,
+    "undo_count": 5,
+    "stair_width_edit_persists_reload": true,
+    "delete_persists_reload": true,
+    "invalid_unchanged_room_rename_persists_reload": true,
+    "legacy_warnings_retained": true
+  },
+  "limits": [
+    "Synthetic UI verification, not engineering approval",
+    "Setback violations require actual measured layout corrections",
+    "Vercel connector access and materials Search unrelated to this bounded fix"
+  ]
+}
