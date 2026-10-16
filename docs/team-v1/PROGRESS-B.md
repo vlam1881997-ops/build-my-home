@@ -477,3 +477,5 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Node22 build plus72 focused architecture/customer-design/real-house/reference tests passed. New regression: 3-storey landing completion, same direction/dimensions, undo, locks, occupied upper-floor rejection, intermediate holes retained and weather roof closed. Native UI check pending release.
 - Live public config: geminiConfigured=true,imageConfigured=true,placesConfigured=false. This proves configuration only, not a successful AI call. Existing product-search and site/places paths are separate; complete merchant product/photo/price ingestion is still open.
 - Next: exact source CI, publish and native stair-edit/reload check; continue actual supplier asset acquisition. Commercial acceptance and facade styling still open.
+
+- Follow-up boundary found before native acceptance: a newly reserved landing must retain the source stair's existing door layout. Added fresh-ID/floor copies of source landing doors; no guessed dimensions. Atomic validation still rejects collisions.47 relevant tests pass including receiving-floor entry opening.

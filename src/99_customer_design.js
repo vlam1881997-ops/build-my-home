@@ -234,7 +234,7 @@
    if(!room&&rows.length===1)room=rows[0];
    if(!room&&rows.length>1)return directReject('Tầng '+(floor+1)+' có nhiều cầu thang; cần xác định đúng ô cùng trục trước khi đồng bộ.');
    if(room){if(B.isRoomLocked(room.id))return directReject('Ô thang hoặc tầng '+(floor+1)+' đang khóa.');group.push(room);}
-   else if(complete){if(B.isFloorLocked(floor))return directReject('Tầng '+(floor+1)+' đang khóa.');room={...clone(source),id:B.uid('stairs'),floor,name:'Cầu thang · tầng '+(floor+1)};plan.rooms.push(room);group.push(room);}
+   else if(complete){if(B.isFloorLocked(floor))return directReject('Tầng '+(floor+1)+' đang khóa.');room={...clone(source),id:B.uid('stairs'),floor,name:'Cầu thang · tầng '+(floor+1)};plan.rooms.push(room);group.push(room);for(const o of p.plan.openings.filter(o=>o.roomId===source.id&&o.kind==='door'))plan.openings.push({...clone(o),id:B.uid('opening'),roomId:room.id,floor});}
   }
   const common={x:source.x,y:source.y,w:source.w,h:source.h,stairDirection:B.stairSpec(source).direction,stairShape:source.stairShape||'u',...values};
   for(const room of group)Object.assign(room,common);

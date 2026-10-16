@@ -2,8 +2,8 @@ import test from 'node:test';import assert from 'node:assert/strict';import fs f
 import {designClient} from './fixtures/design-client.mjs';
 test('stair editor completes a third landing, synchronizes dimensions/direction, and retains undo and locks',()=>{
  const b=designClient(),p=b.state.project;Object.assign(p.site,{width:10,depth:15,floors:3});
- p.plan.rooms=[0,1].map(f=>({id:'stair-'+f,name:'Thang',type:'stairs',floor:f,x:1,y:1,w:3.4,h:4,stairShape:'u',stairDirection:0}));p.plan.openings=[];p.plan.fixtures=[];p.plan.furniture=[];b.state.ui.planner.floor=0;b.state.ui.planner.selected='stair-0';
- assert.equal(b.editStairStack('stair-0',{},true),true);assert.equal(p.plan.rooms.length,3);assert.equal(b.stairAlignmentIssues().filter(i=>i.sev==='error').length,0);
+ p.plan.rooms=[0,1].map(f=>({id:'stair-'+f,name:'Thang',type:'stairs',floor:f,x:1,y:1,w:3.4,h:4,stairShape:'u',stairDirection:0}));p.plan.openings=[{id:'entry',floor:0,roomId:'stair-0',kind:'door',side:'east',width:.9,height:2.1,sill:0,offset:.6}];p.plan.fixtures=[];p.plan.furniture=[];b.state.ui.planner.floor=0;b.state.ui.planner.selected='stair-0';
+ assert.equal(b.editStairStack('stair-0',{},true),true);assert.equal(p.plan.rooms.length,3);assert.equal(p.plan.openings.filter(o=>o.floor===2&&o.kind==='door').length,1);assert.equal(b.stairAlignmentIssues().filter(i=>i.sev==='error').length,0);
  assert.equal(b.editDirectItem('room','stair-0','stairDirection','90'),true);assert.ok(p.plan.rooms.every(r=>r.stairDirection===90));
  assert.equal(b.editDirectItem('room','stair-0','w','3.6'),true);assert.ok(p.plan.rooms.every(r=>r.w===3.6));b.undoPlan();assert.ok(p.plan.rooms.every(r=>r.w===3.4));
  p.plan.lockedFloors=[2];const before=JSON.stringify(p.plan);assert.equal(b.editStairStack('stair-0',{stairDirection:180}),false);assert.equal(JSON.stringify(p.plan),before);
