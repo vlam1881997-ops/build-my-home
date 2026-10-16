@@ -106,3 +106,6 @@ details:has(>[data-team-a-boq])>summary{min-height:44px;align-content:center;fon
 @media(max-width:640px){.reference-design-grid{grid-template-columns:1fr}.reference-design-grid img{height:220px}.reference-design-review{padding:12px}}
 .reference-design-grid .style-concept{height:300px;aspect-ratio:auto;border-radius:0}
 @media(max-width:640px){.reference-design-grid .style-concept{height:220px}}
+/* Long uploaded filenames must not widen the mobile reference selector. */
+.model-style-reference label{min-width:0;max-width:100%}
+.model-style-reference select{min-width:0;width:100%;box-sizing:border-box}

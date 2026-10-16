@@ -29,12 +29,18 @@ BMH.outdoorPlanSvg=plan=>'<g class="outdoor-plan">'+(plan.outdoor||[]).map(z=>'<
 /* A coordinated design kit is a proposal; only explicit selection replaces a plan. */
 BMH.designState=()=>{const p=BMH.state.project;const s=p.designStudio||(p.designStudio={});if(!Array.isArray(s.kits))s.kits=[];return s;};
 BMH.designInputKey=()=>{const s=BMH.state.project.site;return JSON.stringify({site:Object.fromEntries(['width','depth','floors','floorHeight','slabThickness','ceilingDrop','frontDirection','setbackFront','setbackRear','setbackSide','targetCoverage','province','district','useParcelGeometry','lotPoints','frontEdge'].map(k=>[k,s[k]])),household:BMH.state.project.household,program:BMH.state.project.designStudio?.program||null});};
-BMH.designAppliedKey=()=>JSON.stringify({plan:BMH.state.project.plan,finish:BMH.state.project.materials.finish,style:BMH.state.project.style});
+// Object field order can change when a saved project is merged with defaults.
+// Canonicalize field order so a reload alone never changes design identity.
+BMH.designIdentityKey=value=>{
+ const ordered=v=>Array.isArray(v)?v.map(ordered):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,ordered(v[k])])):v;
+ return JSON.stringify(ordered(value));
+};
+BMH.designAppliedKey=()=>BMH.designIdentityKey({plan:BMH.state.project.plan,finish:BMH.state.project.materials.finish,style:BMH.state.project.style});
 BMH.designApprovalKey=()=>{
  const p=BMH.state.project;
  // Satisfaction belongs to this measured revision, including the selected
  // reference, not just room rectangles and a style label. Camera is excluded.
- return JSON.stringify({design:BMH.designAppliedKey(),input:BMH.designInputKey(),drawingRevision:BMH.drawingRevision?.()||null,measuredDesign:p.measuredDesign||null,floorHeights:p.site.floorHeights||null,referenceId:p.styleReferenceId||null,activeKit:p.designStudio?.activeKit||null,products:p.materials.choices,productCodes:Object.values(p.materials.choices||{}).map(id=>[id,p.dataEngine?.materialOverrides?.[id]?.sku||''])});
+ return BMH.designIdentityKey({design:BMH.designAppliedKey(),input:BMH.designInputKey(),drawingRevision:BMH.drawingRevision?.()||null,measuredDesign:p.measuredDesign||null,floorHeights:p.site.floorHeights||null,referenceId:p.styleReferenceId||null,activeKit:p.designStudio?.activeKit||null,products:p.materials.choices,productCodes:Object.values(p.materials.choices||{}).map(id=>[id,p.dataEngine?.materialOverrides?.[id]?.sku||''])});
 };
 BMH.designCanApprove=()=>{
  const p=BMH.state.project,rooms=p.plan.rooms,floors=Number(p.site.floors);

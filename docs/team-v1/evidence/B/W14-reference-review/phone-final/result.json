@@ -1,0 +1,36 @@
+[
+  {
+    "device": "phone",
+    "first": {
+      "revision": "48694D25-741638A5-AI4-RH2",
+      "heights": [
+        3.8,
+        3.4
+      ],
+      "reference": {
+        "id": "synthetic-reference",
+        "name": "Ảnh kiểm thử đối chiếu · không phải thiết kế khách",
+        "available": true,
+        "catalogStyleId": null,
+        "geometryMatch": "not-verified"
+      },
+      "plan": "{\"rooms\":[{\"id\":\"room-0\",\"floor\":0,\"type\":\"living\",\"name\":\"Phòng khách\",\"x\":1,\"y\":2,\"w\":6,\"h\":6},{\"id\":\"room-1\",\"floor\":1,\"type\":\"bed\",\"name\":\"Phòng ngủ\",\"x\":1,\"y\":2,\"w\":6,\"h\":6}],\"openings\":[{\"id\":\"window-0\",\"floor\":0,\"roomId\":\"room-0\",\"side\":\"north\",\"kind\":\"window\",\"offset\":0.3,\"width\":2,\"height\":1.6,\"sill\":1},{\"id\":\"window-1\",\"floor\":1,\"roomId\":\"room-1\",\"side\":\"north\",\"kind\":\"window\",\"offset\":0.3,\"width\":2,\"height\":1.6,\"sill\":1}],\"fixtures\":[],\"furniture\":[],\"outdoor\":[],\"lockedRoomIds\":[],\"lockedFloors\":[]}",
+      "style": "Hiện đại",
+      "missingMeshIds": [],
+      "approval": false,
+      "overflow": false
+    },
+    "reopened": {
+      "review": {
+        "id": "synthetic-reference",
+        "name": "Ảnh kiểm thử đối chiếu · không phải thiết kế khách",
+        "available": true,
+        "catalogStyleId": null,
+        "geometryMatch": "not-verified"
+      },
+      "approval": true,
+      "revision": "E2AB5007-741638A5-AI4-RH2"
+    },
+    "errors": []
+  }
+]

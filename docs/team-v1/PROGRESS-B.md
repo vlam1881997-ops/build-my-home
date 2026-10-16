@@ -4,7 +4,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 15/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W14 reference/elevation/model review and measured-revision satisfaction; native desktop/phone validation in progress
+- active_substep: W14 B reference/revision review verified desktop+phone; draft PR54 held for A-owned parapet persistence defect
 - target_branch: codex/b-v1-24
 - actual_branch: remote codex/b-facade-depth; local restored checkout bmh-review-ab-c08 contains older git metadata; push only scoped files against fresh remote tree
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
@@ -434,3 +434,12 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Customer snapshot carries source-reference metadata, measured rooms/openings, same facade component IDs and per-room/exterior product summaries. No local image bytes exported in the JSON review; geometryMatch remains not-verified and engineeringApproved false.
 - Node22 build and26 focused reference/design/dossier tests passed. Native desktop reached comparison/mesh-ID/3800+3400mm/elevation-switch/acceptance invalidation checks; reload/phone run still in progress at this checkpoint. Earlier runner mistakenly looked for acceptance on3D instead of its actual Handover screen; runner corrected, not application code.
 - Whole Modern commercial/reference visual gate remains in_progress. This fixes traceability and a real stale-approval defect; it does not change generic facade composition into the original two-storey reference house. Shared approved reference-specific facade geometry and legitimate product assets remain required as detailed in MODERN-REFERENCE-NEXT.md.
+
+
+### W14 verified B checkpoint — 16/10/2026
+- Canonicalized design identity object-field order so reload/merge defaults do not invalidate satisfaction merely by reordering fields. Actual roof dimensions, floor heights, selected reference, plan/material or kit changes still invalidate it. Camera/elevation view changes do not.
+- Node22 build and27 focused reference/design/dossier tests passed; one additional proposed-schema contract test passed using an in-memory candidate default only. No A source edited.
+- Native Chromium desktop and phone now pass same facade IDs in actual scene meshes/elevations, 3800/3400mm floor heights, unchanged plan/style, all four native elevation choices with same renderer, actual customer satisfaction in Handover, invalidation after mono-roof/pitch17 edit, persistence/reopened reference+approval and no page errors. Phone exposed a long reference filename selector overflow, fixed with bounded label/select widths; final phone has no document overflow. Synthetic reference is only a QA pattern, not a photorealistic house/design approval. Evidence result.json and phone-final/result.json; screenshots inspected locally.
+- Important unresolved data-loss defect: explicit roof.parapetHeight=0.77 is dropped by A10 default-state merge on reopen; geometry reverts to the suggested parapet. New revision-aware satisfaction correctly rejects the old approval. A-PARAPET-PERSISTENCE.md documents it and A-SCHEMA-PARAPET.patch contains the exact proposed one-field default (-1 automatic sentinel). Candidate merge test retains0/0.77/1.2 and handles old projects. Patch is prepared but NOT applied, pending A ownership handoff or explicit user scope authorization.
+- Draft PR54 source946d54d passed Actions38736614101, but that is the prior source checkpoint, not a claim that this follow-up has passed CI. Keep PR draft and do not release while the measured persistence defect remains. Current production remains PR53/main4db7845.
+- Next concrete action: apply the prepared A-owned schema fix once ownership is transferred/authorized; test actual0/0.77/1.2 reopen and drawing/mesh parity, then CI/release the exact verified head. Original selected-reference facade geometry and legitimate product asset coverage still remain open separately (W13 MODERN-REFERENCE-NEXT.md); W14 does not claim Modern/24-style commercial completion.
