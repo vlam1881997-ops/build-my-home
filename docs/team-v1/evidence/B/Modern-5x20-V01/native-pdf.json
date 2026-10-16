@@ -1,0 +1,20 @@
+{
+  "revision": "7BADC039-741638A5-AI4-RH3",
+  "source": "native production PDF export, PR62 website",
+  "pages": 28,
+  "paper_mm": [
+    420,
+    297
+  ],
+  "sha256": "9263806724cabb23fd77fda4aa20505b8f63681960fe61910fadb194182aba24",
+  "every_page_same_revision": true,
+  "all_pages_rendered_and_visually_reviewed": true,
+  "status": "preliminary-architecture-not-for-construction",
+  "missing": [
+    "survey/planning",
+    "customer approval",
+    "structural/MEP",
+    "SKU/quotes",
+    "terrace guard/drainage"
+  ]
+}
