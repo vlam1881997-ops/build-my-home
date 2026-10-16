@@ -462,3 +462,18 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Node22 build and 35 focused tests passed, including actual product-card HTML and wrong-product/SKU/project isolation. New native browser verification pending (local Chromium still SIGTRAP).
 - Asset audit: 103 catalogue products, 61 source image URLs, 0 verified commercial image licences. Remaining catalogue-photo acquisition is still open; this patch completes customer-sample card consistency only.
 - Next: native shelf/sample/reload check on preview, exact-head CI and production verification before release. Continue real asset acquisition for B1 after this boundary is verified; 24 exterior/interior visual acceptance remains open.
+
+- Release result: PR55 merged to main 53cf2f86988747a8553f4e1c8c9260a7c109d0c2; exact source commit Actions run 38868240946 succeeded; merge Vercel status success.
+- Live native desktop proof: fresh empty project, default site with synthetic 2000m budget; select 6060DB034; upload JPEG labelled BMH TEST ONLY through real file chooser; enter 600x600mm and37deg with explicit synthetic source; submit to room; return showroom; expanded comparison card contains loaded customer sample and room/dimensions caption. Direct reload into showroom retains decoded card image. Synthetic image is NOT manufacturer product evidence. Cloud browser shows lightweight 3D fallback, so this run does NOT verify WebGL material pixels. Existing W13 rendering tests remain separate.
+- Local screenshot bmh-w15-shelf-proof.jpg confirms card after direct reload. No customer data or billable AI calls used. Full manufacturer-photo gate and 24-style commercial acceptance remain open.
+
+
+## 2026-10-16 — W16 user-reported stair stack and roof opening
+- User supplied three actual screenshots: measured 3-storey exterior, roof pierced over stairwell, and generic steel product cards. Files became readable after initial attachment error; inspected all three.
+- Active B3/B1: fix measured stair controls and weather-roof boundary; material manufacturer assets remain incomplete. Direct user request authorizes these repairs. Changed B-owned99/103 only; A-owned stair79/planner/schema untouched.
+- Root cause roof: intermediate stair-floor holes were reused by roof panels above the top landing. Final building envelope now stops stair/elevator slab holes at occupied floors; courtyard/notched footprint preserved. Drawing revision RH3 invalidates prior design approval/cache basis.
+- Added direct stair inspector shape and first-flight direction controls, existing x/y/w/h numeric edits update the stack atomically. Explicit sync button creates missing landing reservations on all storeys. It refuses overlaps, locked storeys and ambiguous multiple stairs without deleting rooms. Uses existing measured plan, commitDirectPlan, undo and persistence.
+- Legacy direction/shape controls route to same stack helper. Top landing has no invented upward flight to a roof terrace.
+- Node22 build plus72 focused architecture/customer-design/real-house/reference tests passed. New regression: 3-storey landing completion, same direction/dimensions, undo, locks, occupied upper-floor rejection, intermediate holes retained and weather roof closed. Native UI check pending release.
+- Live public config: geminiConfigured=true,imageConfigured=true,placesConfigured=false. This proves configuration only, not a successful AI call. Existing product-search and site/places paths are separate; complete merchant product/photo/price ingestion is still open.
+- Next: exact source CI, publish and native stair-edit/reload check; continue actual supplier asset acquisition. Commercial acceptance and facade styling still open.

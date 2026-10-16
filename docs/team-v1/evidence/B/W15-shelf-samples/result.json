@@ -1,0 +1,28 @@
+{
+  "sourceCommit": "6bc2e7f802d37c35766b1266f79866279f3ef5f7",
+  "productionCommit": "53cf2f86988747a8553f4e1c8c9260a7c109d0c2",
+  "pr": 55,
+  "ciRun": 38868240946,
+  "ci": "success",
+  "vercel": "success",
+  "native": {
+    "device": "desktop",
+    "origin": "https://www.huiminhbach.id.vn/",
+    "fixture": "synthetic JPEG marked BMH TEST ONLY; not manufacturer evidence",
+    "sku": "6060DB034",
+    "repeatMm": [
+      600,
+      600
+    ],
+    "rotationDeg": 37,
+    "sampleCardDecoded": true,
+    "directShowroomReload": true,
+    "webglPixelsVerified": false
+  },
+  "catalogue": {
+    "products": 103,
+    "sourceImageUrls": 61,
+    "verifiedCommercialPhotos": 0
+  },
+  "commercialAccepted": false
+}

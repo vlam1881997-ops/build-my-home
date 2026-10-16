@@ -5,6 +5,12 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 import {designClient} from './fixtures/design-client.mjs';
 const client=()=>{const b=designClient({realHouse:true});assert.equal(b.autoPlanConcept(),true);return b;};
+test('stairs open intermediate slabs but never cut the weather roof above the top landing',()=>{
+ const b=client(),p=b.state.project;p.site.floors=3;p.plan.rooms=[0,1,2].map(f=>({id:'s'+f,floor:f,type:'stairs',name:'Thang',x:1,y:1,w:3.4,h:4}));p.plan.openings=[];
+ assert.equal(b.stairFloorHoles(1).length,1);assert.equal(b.stairFloorHoles(2).length,1);assert.equal(b.stairFloorHoles(3).length,0);
+ assert.ok(b.stairGeometry(p.plan.rooms[1]).length>0);assert.equal(b.stairGeometry(p.plan.rooms[2]).length,0);
+ const panels=b.slabPanels(p.plan.rooms[2],b.stairFloorHoles(3));assert.equal(panels.reduce((n,q)=>n+q.w*q.d,0),3.4*4);assert.match(b.drawingRevision(),/-RH3$/);
+});
 
 test('pitched roofs survive a notched measured footprint without covering its courtyard',()=>{
  const b=client(),p=b.state.project;Object.assign(p.site,{width:9,depth:12,floors:1});
