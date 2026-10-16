@@ -109,3 +109,7 @@ details:has(>[data-team-a-boq])>summary{min-height:44px;align-content:center;fon
 /* Long uploaded filenames must not widen the mobile reference selector. */
 .model-style-reference label{min-width:0;max-width:100%}
 .model-style-reference select{min-width:0;width:100%;box-sizing:border-box}
+.customer-direct-fields>[data-direct-stair-sync],.customer-direct-fields>.stair-stack-note{grid-column:1/-1;width:100%}
+.stair-repair-actions{display:flex;flex-wrap:wrap;gap:.6rem;margin:.75rem 0}
+.stair-repair-actions>p{flex-basis:100%;margin:.25rem 0}
+.stair-repair-actions>button{white-space:normal;text-align:left}

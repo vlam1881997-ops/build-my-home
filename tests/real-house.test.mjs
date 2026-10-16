@@ -11,6 +11,11 @@ test('stairs open intermediate slabs but never cut the weather roof above the to
  assert.ok(b.stairGeometry(p.plan.rooms[1]).length>0);assert.equal(b.stairGeometry(p.plan.rooms[2]).length,0);
  const panels=b.slabPanels(p.plan.rooms[2],b.stairFloorHoles(3));assert.equal(panels.reduce((n,q)=>n+q.w*q.d,0),3.4*4);assert.match(b.drawingRevision(),/-RH3$/);
 });
+test('missing third landing exposes the exact repair action and disappears only after measured completion',()=>{
+ const b=client(),p=b.state.project;Object.assign(p.site,{width:12,depth:15,floors:3});p.plan.rooms=[0,1].map(f=>({id:'s'+f,floor:f,type:'stairs',name:'Thang',x:1,y:3,w:3.4,h:4}));p.plan.openings=[];p.plan.fixtures=[];p.plan.furniture=[];
+ assert.match(b.stairRepairActionsHtml(),/data-repair-stair-stack="s1"/);assert.match(b.stairRepairActionsHtml(),/tầng 3 theo tầng 2/);
+ assert.equal(b.editStairStack('s1',{},true),true);assert.equal(b.stairRepairActionsHtml(),'');assert.equal(b.stairAlignmentIssues().filter(i=>i.sev==='error').length,0);
+});
 
 test('pitched roofs survive a notched measured footprint without covering its courtyard',()=>{
  const b=client(),p=b.state.project;Object.assign(p.site,{width:9,depth:12,floors:1});

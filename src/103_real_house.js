@@ -200,10 +200,20 @@
   if((c.focus==='all'||c.roomFocus)&&!c.explode&&B.state.ui.sceneTheme!=='night')(c.scene.userData.surfaceLoads||=[]).push(B.installHouseEnvironment(c));
  };
  const panel=B.measuredDesignPanel;
+ B.stairRepairActionsHtml=()=>{
+  const rooms=B.state.project.plan.rooms.filter(r=>r.type==='stairs'),floors=Number(B.state.project.site.floors),actions=rooms.filter(r=>r.floor<floors-1&&!rooms.some(q=>q.floor===r.floor+1&&['x','y','w','h'].every(k=>Math.abs(q[k]-r[k])<.001)&&B.stairSpec(q).direction===B.stairSpec(r).direction&&(q.stairShape||'u')===(r.stairShape||'u')));
+  if(!actions.length)return '';
+  return '<div class="stair-repair-actions"><p>Ô nhận thang cần trùng vị trí với tầng dưới. Căn theo số đo hiện tại; không xóa hoặc dời phòng khác.</p>'+actions.map(r=>'<button type="button" data-repair-stair-stack="'+B.esc(r.id)+'">Căn ô thang tầng '+(r.floor+2)+' theo tầng '+(r.floor+1)+'</button><button type="button" data-inspect-stair-stack="'+B.esc(r.id)+'">Mở số đo ô thang tầng '+(r.floor+1)+'</button>').join('')+(B.state.ui.planner.directNotice?'<p role="alert">'+B.esc(B.state.ui.planner.directNotice)+'</p>':'')+'</div>';
+ };
  B.measuredDesignPanel=()=>{
   const roof=B.roofParapetSpec(),input=B.roofDesignSpec().type==='flat'?'<label>Tường chắn mái (m)<input type="number" data-measured-field="roof.parapetHeight" min="0" max="1.2" step="0.01" value="'+roof.height+'"></label>':'';
-  return panel().replace('</div><p>Đổi mái/tường',input+'</div><p>Đổi mái/tường').replace('Bề dày tường, sàn và mái cần hồ sơ kỹ thuật xác nhận.','Bề dày tường, sàn và mái cần hồ sơ kỹ thuật xác nhận. '+(roof.height>0?'Tường chắn mái '+Math.round(roof.height*1000)+' mm '+(roof.source==='customer'?'theo số đo bạn nhập.':'là gợi ý phương án; nhập số đo thực hoặc 0 để bỏ.') :''));
+  return panel().replace('<div class="guided-errors">','<div class="guided-errors">'+B.stairRepairActionsHtml()).replace('</div><p>Đổi mái/tường',input+'</div><p>Đổi mái/tường').replace('Bề dày tường, sàn và mái cần hồ sơ kỹ thuật xác nhận.','Bề dày tường, sàn và mái cần hồ sơ kỹ thuật xác nhận. '+(roof.height>0?'Tường chắn mái '+Math.round(roof.height*1000)+' mm '+(roof.source==='customer'?'theo số đo bạn nhập.':'là gợi ý phương án; nhập số đo thực hoặc 0 để bỏ.') :''));
  };
+ document.addEventListener('click',e=>{
+  const t=e.target.closest?.('[data-repair-stair-stack],[data-inspect-stair-stack]');if(!t)return;const id=t.dataset.repairStairStack||t.dataset.inspectStairStack,r=B.state.project.plan.rooms.find(r=>r.id===id&&r.type==='stairs');if(!r)return;
+  if(t.hasAttribute('data-repair-stair-stack')){B.editStairStack(r.id,{},true);B.render({preserveScroll:true});}
+  else{Object.assign(B.state.ui.planner,{floor:r.floor,selected:r.id,selectedOpening:'',selectedFixture:'',view:'plan',directTool:'select'});B.navigateTo(4);}
+ });
  const review=B.architecturalIdentityReview;
  B.architecturalIdentityReview=()=>{const result=review(),roof=B.sceneRoofSpec();return {...result,roof:{...result.roof,modeled:!!roof,compound:!!roof?.compound,effectiveOverhang:roof?.overhang??null,notice:roof?.notice||null},constructionDetailRevision:version,parapet:B.roofParapetSpec(),context:'Bầu trời và mặt đất minh họa; công trình lấy từ bản vẽ.',engineeringApproved:false};};
  const drawingRevision=B.drawingRevision;B.drawingRevision=()=>drawingRevision()+'-RH3';

@@ -1,0 +1,46 @@
+{
+  "source": "7f81913148212b63c658b0f01845a48b41a5d092",
+  "production": "abf90cfa1b7ea54f4a506973305f202db37d6d95",
+  "pullRequests": [
+    56,
+    57,
+    58
+  ],
+  "ciRun": 38872005805,
+  "ci": "success",
+  "tests": {
+    "focused": 68,
+    "threeStoreyMissingLanding": true,
+    "receivingLandingDoor": true,
+    "intermediateHolesRetained": true,
+    "roofHoleClosed": true,
+    "lockedAndOccupiedFloorRejected": true,
+    "undo": true
+  },
+  "native": {
+    "origin": "https://www.huiminhbach.id.vn/",
+    "device": "desktop",
+    "fixture": "existing synthetic QA project, 5x20m, 2storeys; not construction-approved",
+    "direction": "180; first flight towards rear",
+    "widthM": 1.5,
+    "editedFloor": 1,
+    "observedFloor": 0,
+    "reloadRetained": true,
+    "threeStoreyCompletionNative": false,
+    "webglRoofPixelsVerified": false
+  },
+  "materialSearch": {
+    "geminiConfigured": true,
+    "placesConfigured": false,
+    "http": 200,
+    "status": "not_allowed",
+    "count": 0,
+    "providerCallMade": false
+  },
+  "remaining": [
+    "Complete supplier image/model collection",
+    "Search/Places configuration",
+    "Facade/reference visual quality",
+    "Full 24-style commercial acceptance"
+  ]
+}
