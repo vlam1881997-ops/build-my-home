@@ -486,3 +486,13 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 
 - Final release W16: PR56/57/58 integrated; production abf90cfa1b7ea54f4a506973305f202db37d6d95, exact-source CI38872005805 success. Native desktop synthetic default plan: first-flight direction180 changed on floor0 and read on floor1; numeric width1.5m changed on floor1, read on floor0 and preserved after reload. This narrow-width QA value is NOT an approved stair design. Three-storey completion/roof coverage proven by measured tests; native browser lacks full GPU roof proof. Screenshot bmh-stair-editor-proof.jpg saved locally.
 - Live material-search public request returned200/not_allowed/0 products before provider invocation. GEMINI_SEARCH_ENABLED and GEMINI_MATERIAL_SEARCH_QUOTA are required in existing server implementation; Places has separate key+enabled flags. No flags or limits changed. Product-photo/model completeness remains open.
+
+
+## 2026-10-16 — W17 missing top landing warning repair
+- User's fourth screenshot still shows missing aligned third-storey landing in their saved project. Prior software fix does not silently rewrite browser-local project geometry.
+- Add measured warning actions bound to the exact lower-stair room ID: align/create landing using existing editStairStack; inspect measured well on the planner; persistent failure notice remains beside the warning. Error is removed only by actual successful measured-plan change. Also route differing stair direction/shape through the same action.
+- Make direct stair sync action full width with shorter label; preserve controls and detailed note.
+- Native test preparation exposed modal JSON chooser inertness: header file input is outside active project dialog. Add local modal chooser plus scoped capture event and existing guarded import path; preserve current project through existing save/import/recovery behavior.
+- Node22 build and52 focused local project/customer design/real-house tests passed. Native third-storey import→repair→reload verification pending deployment.
+- Search configuration is externally blocked: connected Vercel account lists team_vDX7I7zG36VBbi7444e5CCiw but zero accessible projects; exact project lookup404 and targeted lists empty, including all projects in the same team. Did not alter permissions, keys, quota flags or use another account. GitHub auto-deploy continues to work independently.
+- Next: exact-head CI, deploy, native 3storey repair proof; user must restore Vercel connection with BMH project access for server Search configuration. Supplier asset/model collection and commercial24-style acceptance remain open.
