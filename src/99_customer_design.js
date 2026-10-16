@@ -238,6 +238,11 @@
   }
   const common={x:source.x,y:source.y,w:source.w,h:source.h,stairDirection:B.stairSpec(source).direction,stairShape:source.stairShape||'u',...values};
   for(const room of group)Object.assign(room,common);
+  // An existing parcel/layout error must not lock a direction-only edit.
+  // This path may change no room rectangle, opening, floor or fixture.
+  if(!complete&&Object.keys(values).length&&Object.keys(values).every(k=>['stairDirection','stairShape'].includes(k))&&group.every(r=>{const old=p.plan.rooms.find(q=>q.id===r.id);return old&&['x','y','w','h','floor'].every(k=>r[k]===old[k]);})){
+   if(!same(plan,p.plan)){B.pushPlanHistory();p.plan=plan;}ui().directNotice='';update();return true;
+  }
   return B.commitDirectPlan(plan,{selected:id,selectedOpening:'',selectedFixture:''});
  };
  document.addEventListener('change',e=>{

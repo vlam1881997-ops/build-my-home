@@ -479,3 +479,5 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Next: exact source CI, publish and native stair-edit/reload check; continue actual supplier asset acquisition. Commercial acceptance and facade styling still open.
 
 - Follow-up boundary found before native acceptance: a newly reserved landing must retain the source stair's existing door layout. Added fresh-ID/floor copies of source landing doors; no guessed dimensions. Atomic validation still rejects collisions.47 relevant tests pass including receiving-floor entry opening.
+
+- Native production test found existing invalid-layout checks rejected direction-only edits on legacy plans. Corrected the bounded direction/shape-only path: no rectangle/opening/floor/fixture can change, all stack locks still checked; size/movement/sync still require atomic geometry validation.48 focused tests pass including legacy invalid unrelated room and prohibited oversized stair. Direction UI on current production still rejected until this follow-up deploys; not marked native pass yet.
