@@ -2,8 +2,8 @@ import test from 'node:test';import assert from 'node:assert/strict';import fs f
 import {designClient} from './fixtures/design-client.mjs';
 test('stair editor completes a third landing, synchronizes dimensions/direction, and retains undo and locks',()=>{
  const b=designClient(),p=b.state.project;Object.assign(p.site,{width:10,depth:15,floors:3});
- p.plan.rooms=[0,1].map(f=>({id:'stair-'+f,name:'Thang',type:'stairs',floor:f,x:1,y:1,w:3.4,h:4,stairShape:'u',stairDirection:0}));p.plan.openings=[];p.plan.fixtures=[];p.plan.furniture=[];b.state.ui.planner.floor=0;b.state.ui.planner.selected='stair-0';
- assert.equal(b.editStairStack('stair-0',{},true),true);assert.equal(p.plan.rooms.length,3);assert.equal(b.stairAlignmentIssues().filter(i=>i.sev==='error').length,0);
+ p.plan.rooms=[0,1].map(f=>({id:'stair-'+f,name:'Thang',type:'stairs',floor:f,x:1,y:1,w:3.4,h:4,stairShape:'u',stairDirection:0}));p.plan.openings=[{id:'entry',floor:0,roomId:'stair-0',kind:'door',side:'east',width:.9,height:2.1,sill:0,offset:.6}];p.plan.fixtures=[];p.plan.furniture=[];b.state.ui.planner.floor=0;b.state.ui.planner.selected='stair-0';
+ assert.equal(b.editStairStack('stair-0',{},true),true);assert.equal(p.plan.rooms.length,3);assert.equal(p.plan.openings.filter(o=>o.floor===2&&o.kind==='door').length,1);assert.equal(b.stairAlignmentIssues().filter(i=>i.sev==='error').length,0);
  assert.equal(b.editDirectItem('room','stair-0','stairDirection','90'),true);assert.ok(p.plan.rooms.every(r=>r.stairDirection===90));
  assert.equal(b.editDirectItem('room','stair-0','w','3.6'),true);assert.ok(p.plan.rooms.every(r=>r.w===3.6));b.undoPlan();assert.ok(p.plan.rooms.every(r=>r.w===3.4));
  p.plan.lockedFloors=[2];const before=JSON.stringify(p.plan);assert.equal(b.editStairStack('stair-0',{stairDirection:180}),false);assert.equal(JSON.stringify(p.plan),before);
@@ -14,6 +14,11 @@ test('stair completion rejects an occupied third floor without moving or deletin
  const b=designClient(),p=b.state.project;Object.assign(p.site,{width:10,depth:15,floors:3});
  p.plan.rooms=[{id:'stair',type:'stairs',name:'Thang',floor:0,x:1,y:1,w:3.4,h:4},{id:'bed',type:'bed',name:'Ngủ',floor:2,x:1,y:1,w:3.4,h:4}];p.plan.openings=[];p.plan.fixtures=[];
  const before=JSON.stringify(p.plan);assert.equal(b.editStairStack('stair',{},true),false);assert.equal(JSON.stringify(p.plan),before);assert.match(b.state.ui.planner.directNotice,/chồng|ranh/);
+});
+test('an existing out-of-bounds room does not block a stair direction change that moves no geometry',()=>{
+ const b=designClient(),p=b.state.project;Object.assign(p.site,{width:10,depth:15,floors:2});p.plan.rooms=[0,1].map(f=>({id:'s'+f,type:'stairs',name:'Thang',floor:f,x:1,y:1,w:3.4,h:4}));p.plan.rooms.push({id:'bad',type:'bed',name:'Old invalid room',floor:0,x:999,y:999,w:4,h:4});p.plan.openings=[];p.plan.fixtures=[];
+ const before=p.plan.rooms.map(r=>[r.id,r.x,r.y,r.w,r.h,r.floor]);assert.equal(b.editStairStack('s0',{stairDirection:180}),true);assert.deepEqual(p.plan.rooms.map(r=>[r.id,r.x,r.y,r.w,r.h,r.floor]),before);assert.ok(p.plan.rooms.filter(r=>r.type==='stairs').every(r=>r.stairDirection===180));
+ assert.equal(b.editStairStack('s0',{w:999}),false);
 });
 function client(){
  const storage=new Map();
