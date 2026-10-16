@@ -1,5 +1,34 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';
 import {designClient} from './fixtures/design-client.mjs';
+function legacyEditClient(){
+ const b=designClient(),p=b.state.project;Object.assign(p.site,{width:10,depth:15,floors:2});
+ p.plan.rooms=[{id:'legacy',type:'bed',name:'Old out-of-bounds room',floor:0,x:999,y:999,w:3,h:3},{id:'good',type:'bed',name:'Editable room',floor:0,x:1,y:3,w:3,h:3}];
+ p.plan.openings=[];p.plan.fixtures=[];p.plan.furniture=[];return b;
+}
+test('legacy envelope warnings do not block deleting a room and its children or undo/redo',()=>{
+ const b=legacyEditClient(),p=b.state.project;
+ p.plan.openings=[{id:'door',roomId:'legacy',floor:0,kind:'door',side:'north',width:.9,height:2.1,sill:0,offset:.5}];
+ const before=JSON.stringify(p.plan);assert.equal(b.removePlanItem('room','legacy'),true);assert.equal(p.plan.rooms.length,1);assert.equal(p.plan.openings.length,0);
+ b.undoPlan();assert.equal(JSON.stringify(p.plan),before);b.redoPlan();assert.equal(p.plan.rooms.length,1);
+});
+test('unchanged invalid rooms do not block valid room edits, names, additions and door removal',()=>{
+ const b=legacyEditClient(),p=b.state.project;
+ assert.equal(b.editDirectItem('room','good','w','3.2'),true);assert.equal(p.plan.rooms.find(r=>r.id==='good').w,3.2);
+ assert.equal(b.editDirectItem('room','legacy','name','Keep warning visible'),true);
+ const candidate=b.planSnapshot();candidate.rooms.push({id:'new',type:'bed',name:'New',floor:0,x:5,y:3,w:2,h:2});assert.equal(b.commitDirectPlan(candidate),true);
+ p.plan.openings.push({id:'door',roomId:'good',floor:0,kind:'door',side:'north',width:.9,height:2.1,sill:0,offset:.5});
+ assert.equal(b.removePlanItem('opening','door'),true);assert.equal(p.plan.rooms.find(r=>r.id==='legacy').x,999);assert.equal(b.customerBaseLayoutValid(p.plan.rooms),false);
+});
+test('legacy editing still rejects new collisions, new out-of-bounds changes and locked deletions',()=>{
+ const b=legacyEditClient(),p=b.state.project;p.plan.rooms.push({id:'near',type:'bed',name:'Neighbor',floor:0,x:5,y:3,w:2,h:2});
+ const before=JSON.stringify(p.plan);assert.equal(b.editDirectItem('room','good','w','7'),false);assert.equal(JSON.stringify(p.plan),before);
+ assert.equal(b.editDirectItem('room','good','x','999'),false);assert.equal(JSON.stringify(p.plan),before);
+ p.plan.lockedRoomIds=['legacy'];assert.equal(b.removePlanItem('room','legacy'),false);assert.ok(p.plan.rooms.some(r=>r.id==='legacy'));
+});
+test('same coordinates on different old floors do not license a new same-floor collision',()=>{
+ const b=legacyEditClient(),p=b.state.project;p.plan.rooms.push({id:'up',type:'bed',name:'Upstairs',floor:1,x:1,y:3,w:3,h:3});
+ const candidate=b.planSnapshot();candidate.rooms.find(r=>r.id==='up').floor=0;const before=JSON.stringify(p.plan);assert.equal(b.commitDirectPlan(candidate),false);assert.equal(JSON.stringify(p.plan),before);
+});
 test('stair editor completes a third landing, synchronizes dimensions/direction, and retains undo and locks',()=>{
  const b=designClient(),p=b.state.project;Object.assign(p.site,{width:10,depth:15,floors:3});
  p.plan.rooms=[0,1].map(f=>({id:'stair-'+f,name:'Thang',type:'stairs',floor:f,x:1,y:1,w:3.4,h:4,stairShape:'u',stairDirection:0}));p.plan.openings=[{id:'entry',floor:0,roomId:'stair-0',kind:'door',side:'east',width:.9,height:2.1,sill:0,offset:.6}];p.plan.fixtures=[];p.plan.furniture=[];b.state.ui.planner.floor=0;b.state.ui.planner.selected='stair-0';
