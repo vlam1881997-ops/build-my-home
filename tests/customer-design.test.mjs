@@ -18,6 +18,7 @@ test('stair completion rejects an occupied third floor without moving or deletin
 test('an existing out-of-bounds room does not block a stair direction change that moves no geometry',()=>{
  const b=designClient(),p=b.state.project;Object.assign(p.site,{width:10,depth:15,floors:2});p.plan.rooms=[0,1].map(f=>({id:'s'+f,type:'stairs',name:'Thang',floor:f,x:1,y:1,w:3.4,h:4}));p.plan.rooms.push({id:'bad',type:'bed',name:'Old invalid room',floor:0,x:999,y:999,w:4,h:4});p.plan.openings=[];p.plan.fixtures=[];
  const before=p.plan.rooms.map(r=>[r.id,r.x,r.y,r.w,r.h,r.floor]);assert.equal(b.editStairStack('s0',{stairDirection:180}),true);assert.deepEqual(p.plan.rooms.map(r=>[r.id,r.x,r.y,r.w,r.h,r.floor]),before);assert.ok(p.plan.rooms.filter(r=>r.type==='stairs').every(r=>r.stairDirection===180));
+ assert.equal(b.editStairStack('s0',{w:3.6}),true);assert.ok(p.plan.rooms.filter(r=>r.type==='stairs').every(r=>r.w===3.6));assert.equal(p.plan.rooms.find(r=>r.id==='bad').x,999);
  assert.equal(b.editStairStack('s0',{w:999}),false);
 });
 function client(){

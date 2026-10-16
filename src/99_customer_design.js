@@ -135,14 +135,21 @@
  const wallLocked=(plan,r,side)=>B.sharedWallNeighbors(plan.rooms,r,side).some(q=>B.isRoomLocked(q.id));
  const moved=(a,b)=>!a||!b||['x','y','w','h','floor'].some(k=>a[k]!==b[k]);
  // Validate a detached candidate before touching the project or its timeline.
- B.directPlanError=(plan,source=B.state.project.plan)=>{
+ B.directPlanError=(plan,source=B.state.project.plan,{stairRepair=false}={})=>{
   for(const key of ['rooms','openings','fixtures']){const items=plan[key]||[];if(items.some(q=>!q?.id)||new Set(items.map(q=>q.id)).size!==items.length)return 'ID đối tượng bị thiếu hoặc trùng.';}
   for(const r of plan.rooms){if(!Number.isInteger(r.floor)||r.floor<0||r.floor>=Number(B.state.project.site.floors))return 'Tầng của phòng không hợp lệ.';if(![r.x,r.y,r.w,r.h].every(Number.isFinite)||r.w<.6||r.h<.6)return 'Phòng cần số đo hữu hạn, rộng và dài tối thiểu 0,60 m.';}
   for(const id of new Set([...source.rooms,...plan.rooms].map(r=>r.id))){const before=source.rooms.find(r=>r.id===id),after=plan.rooms.find(r=>r.id===id);if(same(before,after))continue;
    if(before&&B.isRoomLocked(id)||after&&B.isFloorLocked(after.floor))return 'Phòng hoặc tầng đang khóa. Mở khóa trước khi sửa.';
    if(moved(before,after))for(const [p,r]of [[source,before],[plan,after]])if(r&&sides.some(([side])=>wallLocked(p,r,side)))return 'Tường chung tiếp giáp phòng đang khóa; không thể dời, đổi kích thước hoặc xóa phòng.';
   }
-  if(!validLayout(plan.rooms))return 'Phòng chồng nhau hoặc vượt ranh / khoảng lùi. Chọn vùng trống trong đất.';
+  if(!validLayout(plan.rooms)){
+   // Repair an existing stair without requiring unrelated legacy rooms to be
+   // rebuilt first. Changed wells must fit; no overlap may be introduced/grown.
+   const area=(a,b)=>a&&b?Math.max(0,Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x))*Math.max(0,Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)):0;
+   const old=id=>source.rooms.find(r=>r.id===id),changed=plan.rooms.filter(r=>moved(old(r.id),r));
+   const safe=stairRepair&&changed.every(r=>r.type==='stairs'&&validLayout([r]))&&plan.rooms.every((r,i)=>plan.rooms.slice(i+1).every(q=>r.floor!==q.floor||area(r,q)<=area(old(r.id),old(q.id))+1e-8));
+   if(!safe)return 'Phòng chồng nhau hoặc vượt ranh / khoảng lùi. Chọn vùng trống trong đất.';
+  }
   for(const key of ['openings','fixtures'])for(const id of new Set([...(source[key]||[]),...(plan[key]||[])].map(q=>q.id))){const before=(source[key]||[]).find(q=>q.id===id),after=(plan[key]||[]).find(q=>q.id===id),oldRoom=before&&source.rooms.find(r=>r.id===before.roomId),newRoom=after&&plan.rooms.find(r=>r.id===after.roomId);if(same(before,after)&&!moved(oldRoom,newRoom))continue;
    if(before&&B.isRoomLocked(before.roomId)||after&&(B.isRoomLocked(after.roomId)||B.isFloorLocked(after.floor)))return 'Phòng hoặc tầng của đối tượng đang khóa.';
    if(key==='openings'&&[[source,oldRoom,before],[plan,newRoom,after]].some(([p,r,o])=>r&&o&&wallLocked(p,r,o.side)))return 'Phòng phía bên kia tường đang khóa; không thể thay đổi ô mở.';
@@ -162,10 +169,10 @@
   });
  };
  B.layoutValid=rooms=>{const source=B.drag?.originalPlan||B.state.project.plan,plan={...source,rooms,fixtures:B.translatedFixtures(rooms,source)},reason=B.directPlanError(plan,source);if(B.drag)B.drag.directReason=reason;return !reason;};
- B.commitDirectPlan=(plan,selection,{translateFixtures=true}={})=>{
+ B.commitDirectPlan=(plan,selection,{translateFixtures=true,stairRepair=false}={})=>{
   plan=clone(plan);
   if(translateFixtures)plan.fixtures=B.translatedFixtures(plan.rooms,{...B.state.project.plan,fixtures:plan.fixtures||[]});
-  const reason=B.directPlanError(plan);if(reason)return directReject(reason);
+  const reason=B.directPlanError(plan,B.state.project.plan,{stairRepair});if(reason)return directReject(reason);
   if(same(plan,B.state.project.plan)){if(selection)Object.assign(ui(),selection);ui().directNotice='';return true;}
   B.pushPlanHistory();B.state.project.plan=plan;if(selection)Object.assign(ui(),selection);ui().directNotice='';update();return true;
  };
@@ -243,7 +250,7 @@
   if(!complete&&Object.keys(values).length&&Object.keys(values).every(k=>['stairDirection','stairShape'].includes(k))&&group.every(r=>{const old=p.plan.rooms.find(q=>q.id===r.id);return old&&['x','y','w','h','floor'].every(k=>r[k]===old[k]);})){
    if(!same(plan,p.plan)){B.pushPlanHistory();p.plan=plan;}ui().directNotice='';update();return true;
   }
-  return B.commitDirectPlan(plan,{selected:id,selectedOpening:'',selectedFixture:''});
+  return B.commitDirectPlan(plan,{selected:id,selectedOpening:'',selectedFixture:''},{stairRepair:true});
  };
  document.addEventListener('change',e=>{
   const t=e.target;if(!t.matches?.('[data-stair-direction],[data-stair-shape]'))return;const r=B.selectedRoom();if(r?.type!=='stairs')return;
