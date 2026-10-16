@@ -452,3 +452,13 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Build Node 22 succeeded; 39 focused tests passed (reference approval/schema persistence, sample identity, selected SKU isolation, source-image rules). Existing W14 desktop/mobile evidence still applies to unchanged reference UI. New local browser run could not start Chromium (SIGTRAP under current environment); not reported as passed.
 - Catalogue limitation remains: 103 official products have no commercially verified product-photo entry. Do not claim complete SKU photography or commercial completion.
 - Next: exact-head CI, merge PR54 under user publishing authorization, verify production deployment and material-image UI. Reference-specific facade geometry remains provisional.
+
+
+## 2026-10-16 — W15: same customer sample on shelf and measured model
+- Baseline: main e81a01ecec9ff948f37bd576c91df2206c1bca25 (PR54 deployed; Actions/Vercel successful, public app.js/styles.css hashes matched tested bundle).
+- B1 remains in_progress. Active substep: supplier/customer sample identity and shelf consistency. No reset of 24-style commercial scope.
+- Added catalogProductSample: resolve a loaded sample from focused room, other measured rooms or exterior using existing finish bindings, exact product/category/spec/SKU validation, and project-scoped image cache.
+- Product shelf cards now reuse the same customer surface sample as 3D. Caption identifies room and measured repeat. Showroom preview resolves the same binding. No new geometry/media store; no fabricated supplier photos, prices, licence flags or model fidelity claims.
+- Node22 build and 35 focused tests passed, including actual product-card HTML and wrong-product/SKU/project isolation. New native browser verification pending (local Chromium still SIGTRAP).
+- Asset audit: 103 catalogue products, 61 source image URLs, 0 verified commercial image licences. Remaining catalogue-photo acquisition is still open; this patch completes customer-sample card consistency only.
+- Next: native shelf/sample/reload check on preview, exact-head CI and production verification before release. Continue real asset acquisition for B1 after this boundary is verified; 24 exterior/interior visual acceptance remains open.
