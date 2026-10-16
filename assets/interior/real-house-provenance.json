@@ -54,8 +54,10 @@
           "file": "assets/interior/textures/roof_07-nor_gl.png",
           "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/roof_07/roof_07_nor_gl_1k.jpg",
           "sourceMd5": "9e300977c51811d98d6c86dda14e8d5a",
-          "sha256": "56df42682d66534c167c433bbc522a1b2790dd3abffef19a8664904f1f4e7679",
-          "bytes": 262221
+          "sha256": "c2353e9d85f6b6f0623b5e3f0c6b9eb44402f6b41019c004864741e79252cce4",
+          "bytes": 328048,
+          "recoveredAt": "2026-10-16",
+          "recovery": "Rebuilt from the recorded CC0 photograph after detecting incomplete PNG data; full pixel raster decoded."
         },
         {
           "file": "assets/interior/textures/roof_07-rough.png",
