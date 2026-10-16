@@ -67,9 +67,25 @@
  };
  const signature=B.cinematicSignature;
  B.cinematicSignature=focus=>signature(focus)+'|style-reference:'+(B.state.project.styleReferenceId||'none');
+ // Read-only bridge: reference, elevations and model use the current project.
+ // A reference image is never converted into invented construction dimensions.
+ B.referenceDesignReview=()=>{
+  const p=B.state.project,id=p.styleReferenceId||null,source=(p.sourceRefs||[]).find(r=>r.id===id),levels=B.studioLevels(),parts=B.facadeComponents();
+  return {revision:B.drawingRevision(),style:p.style,styleId:B.houseStyle()?.id||null,reference:{id,name:source?.name||null,available:!!B.cinematicStyleReference(),catalogStyleId:id?null:B.houseStyle()?.id||null,geometryMatch:'not-verified'},activeKit:p.designStudio?.activeKit||null,units:'m',site:{width:Number(p.site.width),depth:Number(p.site.depth)},floors:Array.from({length:Number(p.site.floors)},(_,floor)=>{const level=B.studioFloorLevel(floor);return {floor,base:level.base,height:level.height,rooms:p.plan.rooms.filter(r=>r.floor===floor).map(r=>({id:r.id,x:r.x,y:r.y,width:r.w,depth:r.h}))};}),openings:p.plan.openings.map(o=>({id:o.id,roomId:o.roomId,floor:o.floor,kind:o.kind,side:o.side,width:o.width,height:o.height,sill:o.sill||0})),facade:{componentIds:parts.map(c=>c.id),basis:'shared-measured-elevation-and-model',provisional:parts.some(c=>c.provisional===true)},roof:{...B.roofDesignSpec(),top:levels.roofBase},materials:{exterior:B.showroomFinishInfo?.()||[],rooms:p.plan.rooms.map(r=>({roomId:r.id,products:B.showroomFinishInfo?.(r.id)||[]}))},engineeringApproved:false};
+ };
+ B.referenceDesignReviewHtml=()=>{
+  const p=B.state.project;if(!p.plan.rooms.length)return '';
+  const r=B.referenceDesignReview(),source=B.cinematicStyleReference(),side=['front','back','left','right'].includes(B.state.ui.referenceElevation)?B.state.ui.referenceElevation:'front',esc=B.esc;
+  const concept=!r.reference.id&&B.houseStyle()&&B.styleIllustration?B.styleIllustration(B.houseStyle()):'',svg=B.elevationSvg(side),drawing='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg),labels={front:'Mặt trước',back:'Mặt sau',left:'Mặt trái',right:'Mặt phải'};
+  return '<details class="reference-design-review" data-guided-panel="reference-design-review" '+(B.state.ui.guidedPanels?.['reference-design-review']?'open':'')+'><summary>Đối chiếu mẫu nhà · bản vẽ · 3D</summary><p>'+esc(r.style)+' · '+r.site.width+' × '+r.site.depth+' m · '+r.floors.length+' tầng · bản '+esc(r.revision)+'</p><div class="reference-design-grid"><figure>'+(source?'<img src="'+esc(source.image)+'" alt="Ảnh thiết kế ban đầu: '+esc(source.name)+'">':concept||'<div class="reference-design-empty">'+(r.reference.id?'Ảnh đã chọn chưa có trên thiết bị. Tải lại ở Ý tưởng để đối chiếu.':'Thêm ảnh mẫu nhà tại Ý tưởng để đối chiếu.')+'</div>')+'<figcaption>Mẫu ban đầu'+(r.reference.catalogStyleId?' · minh họa '+esc(r.style):'')+(r.reference.name?' · '+esc(r.reference.name):'')+'</figcaption></figure><figure><label>Hướng bản vẽ<select data-reference-elevation>'+Object.entries(labels).map(([key,label])=>'<option value="'+key+'" '+(key===side?'selected':'')+'>'+label+'</option>').join('')+'</select></label><img data-reference-measured-elevation src="'+esc(drawing)+'" alt="'+labels[side]+' từ cùng dữ liệu dựng 3D"><figcaption>Bản vẽ đang dựng 3D · số đo bằng mm</figcaption></figure></div><p>Cao tầng: '+r.floors.map(f=>'T'+(f.floor+1)+' '+Math.round(f.height*1000)+' mm').join(' · ')+'</p><p>Ô cửa: '+r.openings.length+' · chi tiết mặt đứng: '+r.facade.componentIds.length+'. Bản vẽ và mô hình dùng cùng mã chi tiết. Ảnh mẫu chưa được xác nhận khớp hình học; chi tiết gợi ý cần được duyệt.</p><button type="button" data-nav="4">Chỉnh bản vẽ & kích thước</button></details>';
+ };
+ const snapshot=B.customerDesignSnapshot;
+ B.customerDesignSnapshot=()=>{const result=snapshot();result.project.referenceDesign=B.referenceDesignReview();return result;};
  const screen=B.screen7;
  B.screen7=()=>{
   const t=document.createElement('template');t.innerHTML=screen();
+  const workspace=t.content.querySelector('.model-scene-wrap')||t.content.querySelector('.design-canvas');
+  if(workspace)workspace.insertAdjacentHTML('afterend',B.referenceDesignReviewHtml());
   const prompt=t.content.querySelector('.model-render-prompt');if(!prompt)return t.innerHTML;
   const images=(B.state.project.sourceRefs||[]).filter(x=>x.kind==='image'),selected=B.state.project.styleReferenceId,source=B.cinematicStyleReference();
   const box=document.createElement('div');box.className='model-style-reference';
@@ -79,6 +95,7 @@
   if(selected&&B.cloud?.config?.mediaConfigured)box.insertAdjacentHTML('beforeend','<button data-cloud-media-upload="'+B.esc(selected)+'">Lưu ảnh tham khảo lên tài khoản</button>');prompt.append(box);return t.innerHTML;
  };B.SCREENS[5]=B.screen7;
  document.addEventListener('change',e=>{if(!e.target.matches?.('[data-style-reference]'))return;B.rememberFinishCamera?.();B.state.project.styleReferenceId=e.target.value;B.save();B.render({preserveScroll:true});});
+ document.addEventListener('change',e=>{if(!e.target.matches?.('[data-reference-elevation]')||!['front','back','left','right'].includes(e.target.value))return;B.state.ui.referenceElevation=e.target.value;B.state.ui.guidedPanels||={};B.state.ui.guidedPanels['reference-design-review']=true;const panel=e.target.closest('.reference-design-review');if(panel)panel.outerHTML=B.referenceDesignReviewHtml();});
 })();
 
 /* Team B / B3: select and drag the same measured furniture in the real canvas.

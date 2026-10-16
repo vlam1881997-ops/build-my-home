@@ -4,11 +4,11 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 15/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W13 room-scoped product sample textures ready_for_integration; Modern reference/facade acceptance remains open
+- active_substep: W14 B reference/revision review verified desktop+phone; draft PR54 held for A-owned parapet persistence defect
 - target_branch: codex/b-v1-24
 - actual_branch: remote codex/b-facade-depth; local restored checkout bmh-review-ab-c08 contains older git metadata; push only scoped files against fresh remote tree
-- source_baseline: 4dae691142569ec9ef81e416f2828f7e720a473b (PR52 production main)
-- last_verified_commit: a6f6060551503312ad369ecf15df11221ab67cce (CI success;67 scoped tests; local and public desktop/phone terrace-loggia-preview-cache-undo checks passed)
+- source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
+- last_verified_commit: d4b71f70630f7a97b111c4c9020ae53d871c51f2 (full CI success; local room/exterior desktop+phone; public desktop-room/phone-facade/GLB verified)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -418,3 +418,37 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - GitHub Actions on fd7563d completed484pass/1fail: instant-preview queued mounts expected the original renderer setup to start immediately. Unconditionally awaiting sample restore added a microtask even for projects without samples. Replaced that with a synchronous pass-through when no valid sample binding exists; only sample projects await scoped image restore.
 -20 focused startup/sample checks passed, including the original queued-renderer regression. Final desktop native sample upload/reload/copy/embedded-GLB verification passed after this fix; photo-backed restoration remains unchanged, ordinary projects retain instant startup. Updated expected build hashes. No failed CI head merged.
 - A integration request: register tests/team-b-material-samples.test.mjs in the explicit npm test list when updating A-owned build/test configuration. New sample unit and browser runners are verified locally and committed; existing full CI is still required on the final source head.
+
+
+### W13 production release — 15/10/2026
+- Exact PR53 head d4b71f70630f7a97b111c4c9020ae53d871c51f2 passed Actions38692982194/job116282952288 npm test and coordinator. Merged to main4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 only after fresh success checks. Previous failed mount head was not merged. GitHub Vercel status success/Deployment has completed, dashboard4KpZQeYUjQHq6PqkEFDL5wFUY7N3.
+- Public www.huiminhbach.id.vn/app.js HTTP200 SHA256fa111495ebf0debc9494e49753a1377370c7112c6e261fa2b25e987b2a96103c and styles.css HTTP200 SHA2566c953af35795e71e73daff1a5390f1ba9232614f02a09e7e90706d5ea7487c84 exactly match tested local build.
+- Public native desktop-room path passed sample form upload, actual pixels, measured UVs, unchanged2D/style/other room, reopen/copy/media scope, parsed embedded GLB pixels and changed-SKU rejection. Public phone-facade path passed exterior sample map/tint/scale/angle, unchanged interior/2D/style, reload and no overflow. No page errors; synthetic browser-local projects, all API/external/nonGET writes blocked. Public evidence production-room/result.json, production-facade/result.json and public-check.json. No real provider/payment/customer writes.
+- W13 sample pipeline complete and live within its declared scope; no claim catalogue SKU assets are complete or Modern reference geometry is accepted. Concrete next handoff is MODERN-REFERENCE-NEXT.md: styleReferenceId currently guides Gemini images, not measured house geometry. Need selected design/reference tied to the same confirmed2D facade components before asserting exact original-design matching. Continue independent verified asset coverage while that contract is prepared; do not edit A source or synthesize engineering dimensions.
+
+
+## W14 / reference-to-measured-model review — 15/10/2026
+- Resumed checkpoint0b66dfd. B-owned source only:81_design_studio,104_style_reference,customer-design.css. No A schema, geometry store, build or dependency change.
+- Fixed customer satisfaction retaining approval after roof/parapet, per-floor height, chosen reference or active-kit changes. Acceptance now includes the shared drawing revision and measured inputs; camera/view selection does not invalidate it. This is customer satisfaction, never professional approval.
+- Added one disclosure beside the actual3D: original uploaded reference (or the selected catalogue style illustration) beside one of four elevations from the shared measured model. Missing uploaded bytes are disclosed, never silently replaced by another picture. Exposes floor heights/current revision; changing elevation updates only the panel and retains the3D renderer/camera.
+- Customer snapshot carries source-reference metadata, measured rooms/openings, same facade component IDs and per-room/exterior product summaries. No local image bytes exported in the JSON review; geometryMatch remains not-verified and engineeringApproved false.
+- Node22 build and26 focused reference/design/dossier tests passed. Native desktop reached comparison/mesh-ID/3800+3400mm/elevation-switch/acceptance invalidation checks; reload/phone run still in progress at this checkpoint. Earlier runner mistakenly looked for acceptance on3D instead of its actual Handover screen; runner corrected, not application code.
+- Whole Modern commercial/reference visual gate remains in_progress. This fixes traceability and a real stale-approval defect; it does not change generic facade composition into the original two-storey reference house. Shared approved reference-specific facade geometry and legitimate product assets remain required as detailed in MODERN-REFERENCE-NEXT.md.
+
+
+### W14 verified B checkpoint — 16/10/2026
+- Canonicalized design identity object-field order so reload/merge defaults do not invalidate satisfaction merely by reordering fields. Actual roof dimensions, floor heights, selected reference, plan/material or kit changes still invalidate it. Camera/elevation view changes do not.
+- Node22 build and27 focused reference/design/dossier tests passed; one additional proposed-schema contract test passed using an in-memory candidate default only. No A source edited.
+- Native Chromium desktop and phone now pass same facade IDs in actual scene meshes/elevations, 3800/3400mm floor heights, unchanged plan/style, all four native elevation choices with same renderer, actual customer satisfaction in Handover, invalidation after mono-roof/pitch17 edit, persistence/reopened reference+approval and no page errors. Phone exposed a long reference filename selector overflow, fixed with bounded label/select widths; final phone has no document overflow. Synthetic reference is only a QA pattern, not a photorealistic house/design approval. Evidence result.json and phone-final/result.json; screenshots inspected locally.
+- Important unresolved data-loss defect: explicit roof.parapetHeight=0.77 is dropped by A10 default-state merge on reopen; geometry reverts to the suggested parapet. New revision-aware satisfaction correctly rejects the old approval. A-PARAPET-PERSISTENCE.md documents it and A-SCHEMA-PARAPET.patch contains the exact proposed one-field default (-1 automatic sentinel). Candidate merge test retains0/0.77/1.2 and handles old projects. Patch is prepared but NOT applied, pending A ownership handoff or explicit user scope authorization.
+- Draft PR54 source946d54d passed Actions38736614101, but that is the prior source checkpoint, not a claim that this follow-up has passed CI. Keep PR draft and do not release while the measured persistence defect remains. Current production remains PR53/main4db7845.
+- Next concrete action: apply the prepared A-owned schema fix once ownership is transferred/authorized; test actual0/0.77/1.2 reopen and drawing/mesh parity, then CI/release the exact verified head. Original selected-reference facade geometry and legitimate product asset coverage still remain open separately (W13 MODERN-REFERENCE-NEXT.md); W14 does not claim Modern/24-style commercial completion.
+
+
+## 2026-10-16 — W14 release follow-up: visible material samples
+- User explicitly requests publishing to the website after the prepared one-field parapet fix was proposed. Applied only `measuredDesign.roof.parapetHeight:-1` in A-owned schema; checked against remote: no other schema change.
+- Selected material preview now displays its loaded customer sample prominently, with SKU and measured repeat. Another selected SKU cannot inherit the prior sample photograph.
+- Showroom restores persisted sample pixels when entered directly; reference surface gallery remains visible for categories without their own photo subset. Reference photos remain explicitly separate from exact SKU photographs.
+- Build Node 22 succeeded; 39 focused tests passed (reference approval/schema persistence, sample identity, selected SKU isolation, source-image rules). Existing W14 desktop/mobile evidence still applies to unchanged reference UI. New local browser run could not start Chromium (SIGTRAP under current environment); not reported as passed.
+- Catalogue limitation remains: 103 official products have no commercially verified product-photo entry. Do not claim complete SKU photography or commercial completion.
+- Next: exact-head CI, merge PR54 under user publishing authorization, verify production deployment and material-image UI. Reference-specific facade geometry remains provisional.

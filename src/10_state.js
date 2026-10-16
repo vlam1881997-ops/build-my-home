@@ -36,7 +36,7 @@ BMH.defaultState = () => ({
     materials:{tier:'standard',climatePackage:'recommended',choices:{floor:'viglacera',paint:'dulux',door:'xingfa'},finish:{exterior:null,rooms:{}},lastDelta:0},
     aiScan:{sourceName:'',mimeType:'',scannedAt:'',model:'',provider:'',intent:'reference',appliedAt:'',result:{}},
     homeFinish:{photos:[],activePhotoId:'',preferences:{style:'Hiện đại',budget:'balanced',notes:''},analyses:{},selected:{},satisfaction:{signature:'',confirmedAt:''},geometryKey:''},
-    measuredDesign:{roof:{type:'auto',pitchDeg:0,overhang:-1,ridge:'auto',surface:'auto',color:''},wallThickness:{exterior:.22,interior:.12}},
+    measuredDesign:{roof:{type:'auto',pitchDeg:0,overhang:-1,ridge:'auto',surface:'auto',color:'',parapetHeight:-1},wallThickness:{exterior:.22,interior:.12}},
     costPlan:{contingencyPct:10,pricing:{},extras:{},applications:[],quotes:{},conversions:[],exclusions:[],scopeCoverage:[]},
     performance:{solarEnabled:true,rainwaterEnabled:true,coolRoof:true,smartShading:true,mode:'balanced'},
     dataEngine: BMH.defaultDataEngineState(),
