@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-16",
+  "source": "83020ca0b72d0c08fedd5bea61ac6686da58494c",
+  "production": "d5371b7a671e61f50730274a376bbc76fac53369",
+  "website": "https://www.huiminhbach.id.vn/",
+  "ci": 38877345445,
+  "native": {
+    "modal_import": true,
+    "missing_landing_action": true,
+    "explicit_repair": true,
+    "third_floor_rooms": 4,
+    "reload_persisted": true,
+    "new_stair": {
+      "id": "stairs-mvaqr1nw-xfdhj",
+      "floor": 2,
+      "x": 3.2,
+      "y": 10,
+      "w": 1.5,
+      "h": 4
+    }
+  },
+  "limitations": [
+    "Synthetic narrow fixture, not engineering approval",
+    "Remaining setback and insufficient U-stair width warnings retained",
+    "Roof pixels not verified with native WebGL",
+    "Search not_allowed and Vercel connector project visibility blocked"
+  ]
+}
