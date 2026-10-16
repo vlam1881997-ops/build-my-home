@@ -29,6 +29,8 @@ node tests/team-b-modern-reference.mjs
 node tests/team-b-modern-scene.mjs exterior
 node tests/team-b-modern-scene.mjs living
 node tests/team-b-modern-scene.mjs bed
+node tests/team-b-modern-scene.mjs kitchen
+node tests/team-b-modern-scene.mjs bath
 ```
 
 The scene extractor runs the geometry portion of the production Three constructor
@@ -40,7 +42,8 @@ The offline renderer uses official Blender4.5.13 LTS/Cycles CPU. Archive SHA256:
 `da4e69b06b75b9e642d106496c50e7e240218b411d2f6e18271c1d1d819cef91`.
 Source: https://download.blender.org/release/Blender4.5/ .
 Supply absolute paths for the script, sceneJSON, repo and image output; optional
-final argument `batch` renders exterior/living/bed in one process. Presentation
+final argument `batch` renders exterior/living/bed in one process; `details`
+renders kitchen/bath only. Five views share the same revision. Presentation
 lights are not electrical or daylight engineering. The browser roof canvas is
 adapted as a neutral offline material; no roof vertices change.
 
@@ -55,6 +58,24 @@ adapted as a neutral offline material; no roof vertices change.
 - No surveyed inputs, exact-SKU library, complete quotes, KTS/KS approval or
   commercial gate is implied by this fixture or the28-page count.
 
-Resume: inspect the latest render; correct only this model's remaining visible
-and material problems. Then coordinate its source-backed bill of materials and
-engineering gaps. Do not relabel this fixture as a customer's finished house.
+## W20 follow-up review
+
+- PR64 repaired two truncated PNGs from their recorded CC0 sources. Main commit
+  `dc36b92daefa1b5aec6ff6758c0b542e0059ffa7` passed CI and Vercel; both public
+  image bytes/hashes and full decoding match the recovered512px maps.
+- Cycles now respects production castShadow flags and single-material groups,
+  uses the production plaster photo's8% contrast and records a0.01mm render-only
+  modifier for WebGL skin depth priority. Original measured vertices remain
+  unchanged. The black facade triangle is gone; no architecture was invented.
+- Five exact-model views were inspected: exterior/living/bed/kitchen/bath. They
+  expose remaining architectural/material issues, rather than proving approval.
+  Guard/drainage remain unknown; the furniture and appliances are generic. Exact
+  SKU and a facade composition that meets the reference still need review.
+- New PDF helper prepends six review/image pages to the unmodified28 native A3
+  pages. The34-page review packet explicitly says NOT APPROVED, and preserves
+  the same revision. It does not convert SVG or replace measured drawings.
+
+Resume from `visual-review.json`. Close only this model's visible architecture,
+material identity and documented technical inputs. Do not repeat passed import,
+geometry or raster checks unless their inputs change. Do not relabel this review
+fixture as a customer's finished house or use an AI image as geometry evidence.

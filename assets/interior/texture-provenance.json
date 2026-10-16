@@ -58,7 +58,11 @@
           "channel": "diff",
           "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/4k/wood_table_001/wood_table_001_diff_4k.jpg",
           "file": "assets/interior/textures/wood_table_001-diff.png",
-          "bytes": 180454
+          "bytes": 126318,
+          "sha256": "3cc9e26f19bcfcd7c0b09a712efc0865be1ae285fc950f4135976ec9c74d3bba",
+          "recoveredAt": "2026-10-16",
+          "recovery": "Rebuilt from the recorded CC0 photograph after detecting incomplete PNG data; full pixel raster decoded.",
+          "sourceMd5": "a091443bf883e836b9d604dba4eda765"
         },
         {
           "asset": "wood_table_001",

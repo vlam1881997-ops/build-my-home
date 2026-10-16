@@ -8,7 +8,9 @@ import {modernReference} from './team-b-modern-reference.mjs';
 const THREE={...BaseThree,RoundedBoxGeometry};
 const {B,review}=modernReference();
 const view=process.argv[2]||'exterior',out=process.argv[3]||'docs/team-v1/evidence/B/Modern-5x20-V01';fs.mkdirSync(out,{recursive:true});
-const room=view==='exterior'?null:B.state.project.plan.rooms.find(r=>r.type===(view==='bed'?'bed':'living'));
+if(!['exterior','living','bed','kitchen','bath'].includes(view))throw Error('Unsupported review view: '+view);
+const room=view==='exterior'?null:B.state.project.plan.rooms.find(r=>r.type===view);
+if(view!=='exterior'&&!room)throw Error('Missing measured room for view: '+view);
 B.state.ui.sceneFocus=room?'room:'+room.id:'all';B.state.ui.roomCamera='inside';B.state.ui.sceneExploded=false;
 // The browser roof material paints a canvas; offline texture preparation is
 // deferred to Blender. This adapter changes no roof vertices or dimensions.
@@ -25,11 +27,11 @@ function material(m){
  if(materials.has(m.uuid))return m.uuid;
  const profile=B.VISUAL_MATERIALS.find(p=>p.id===m.userData.visualMaterial),slot=m.userData.finishSlot;
  const kind=profile?.kind||({wood:'wood',slattedWood:'woodVertical',fabric:'fabric',linen:'fabric',pillow:'fabric',rug:'fabric',wall:'plaster',plank:'plank'}[slot]);
- materials.set(m.uuid,{id:m.uuid,color:m.color?.toArray()||[.5,.5,.5],roughness:m.roughness??.6,metalness:m.metalness||0,opacity:m.opacity??1,transmission:m.transmission||0,slot:slot||null,profileId:profile?.id||null,photo:photoKinds[kind]||null});return m.uuid;
+ materials.set(m.uuid,{id:m.uuid,color:m.color?.toArray()||[.5,.5,.5],roughness:m.roughness??.6,metalness:m.metalness||0,opacity:m.opacity??1,transmission:m.transmission||0,slot:slot||null,profileId:profile?.id||null,photo:photoKinds[kind]||null,photoAlpha:kind==='plaster'?.08:1,normalStrength:kind==='plaster'?.06:kind==='fabric'?.42:.20});return m.uuid;
 }
 scene.traverse(o=>{if(!o.isMesh||!o.visible)return;const g=o.geometry,p=g.attributes.position;if(!p)return;
  const attrs={};for(const key of ['position','normal','uv'])if(g.attributes[key])attrs[key]=Array.from(g.attributes[key].array);
- const ms=Array.isArray(o.material)?o.material:[o.material];meshes.push({name:o.name||o.userData.kind||'mesh',identity:{kind:o.userData.kind||null,roomId:o.userData.roomId||null,floor:o.userData.floor??null,openingId:o.userData.openingId||null},castShadow:o.castShadow,receiveShadow:o.receiveShadow,matrix:o.matrixWorld.toArray(),attributes:attrs,index:g.index?Array.from(g.index.array):null,groups:g.groups,materials:ms.map(material)});
+ const ms=Array.isArray(o.material)?o.material:[o.material];meshes.push({name:o.name||o.userData.kind||'mesh',identity:{kind:o.userData.kind||null,roomId:o.userData.roomId||null,floor:o.userData.floor??null,openingId:o.userData.openingId||null},facadeSkin:!!o.userData.facadeSkin,castShadow:o.castShadow,receiveShadow:o.receiveShadow,matrix:o.matrixWorld.toArray(),attributes:attrs,index:g.index?Array.from(g.index.array):null,groups:g.groups,materials:ms.map(material)});
 });
 const camera=room?B.roomInteriorCamera(room,B.roomFurnitureLayout(room)):null;
 const model={revision:review.revision,fixture:review.id,status:review.status,view,roomId:room?.id||null,room:room?{x:room.x,y:room.y,w:room.w,h:room.h}:null,site:{width:W,depth:D},camera,materials:[...materials.values()],meshes};

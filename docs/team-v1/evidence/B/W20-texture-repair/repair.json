@@ -1,0 +1,45 @@
+{
+  "scope": "Modern-5x20-V01; repair two corrupt shared texture maps only",
+  "date": "2026-10-16",
+  "fixtureRevision": "7BADC039-741638A5-AI4-RH3",
+  "cause": "PNG files had incomplete IDAT chunks/IEND; HTTP 200 and PNG signature alone did not establish valid image data.",
+  "verifiedLocal": {
+    "pngFiles": 30,
+    "fullRasterDecode": true,
+    "realHouseTests": "18/18",
+    "node": "22.23.0",
+    "build": "passed"
+  },
+  "assets": [
+    {
+      "path": "assets/interior/textures/wood_table_001-diff.png",
+      "bytes": 126318,
+      "sha256": "3cc9e26f19bcfcd7c0b09a712efc0865be1ae285fc950f4135976ec9c74d3bba",
+      "license": "CC0",
+      "cacheRevision": "20261016-recovered"
+    },
+    {
+      "path": "assets/interior/textures/roof_07-nor_gl.png",
+      "bytes": 328048,
+      "sha256": "c2353e9d85f6b6f0623b5e3f0c6b9eb44402f6b41019c004864741e79252cce4",
+      "license": "CC0",
+      "cacheRevision": "20261016-recovered"
+    }
+  ],
+  "acceptance": {
+    "modernVisual": "pending",
+    "commercial": "not passed",
+    "nativeDossier": "28 A3 review sheets, not construction-approved"
+  },
+  "deployment": {
+    "mainMerge": "dc36b92daefa1b5aec6ff6758c0b542e0059ffa7",
+    "ci": "success",
+    "vercel": "success",
+    "publicBytesAndRaster": "verified both recovered images"
+  },
+  "cache": {
+    "productionHeader": "public, max-age=0, must-revalidate",
+    "sourceCacheChanges": "excluded from this asset-only release"
+  },
+  "releaseScope": "Two raster image replacements and their provenance only; no application source, fixture or progress-history replacement."
+}

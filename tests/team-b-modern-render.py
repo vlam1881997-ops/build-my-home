@@ -6,8 +6,8 @@ import bpy, json, sys, math, os, runpy
 from mathutils import Matrix, Vector
 args=sys.argv[sys.argv.index('--')+1:]
 scene_path,repo,output=args[:3]
-if len(args)>3 and args[3]=='batch':
-    for view in ['exterior','living','bed']:
+if len(args)>3 and args[3] in ['batch','details']:
+    for view in (['exterior','living','bed'] if args[3]=='batch' else ['kitchen','bath']):
         sys.argv=['blender','--',scene_path.replace('scene-exterior.json','scene-'+view+'.json'),repo,output.replace('exterior.png',view+'.png')]
         runpy.run_path(__file__,run_name='__main__')
     raise SystemExit(0)
@@ -18,7 +18,7 @@ scene.cycles.samples=24;scene.cycles.use_denoising=True
 scene.render.resolution_x=1100;scene.render.resolution_y=900;scene.render.resolution_percentage=100
 scene.render.image_settings.file_format='PNG';scene.render.filepath=output
 scene.view_settings.view_transform='AgX'
-scene.view_settings.exposure=.8
+scene.view_settings.exposure=-.5
 scene.unit_settings.system='METRIC';scene.unit_settings.scale_length=1
 rotation=Matrix.Rotation(math.pi/2,4,'X')
 materials={};images={}
@@ -43,13 +43,19 @@ for row in data['materials']:
             if not img:continue
             tex=nodes.new('ShaderNodeTexImage');tex.image=img;tex.extension='REPEAT'
             if channel=='diff':
+                color=tex.outputs['Color']
+                if row.get('photoAlpha',1)<1:
+                    # Production Canvas mixes plaster photography at 8% over
+                    # its near-white procedural paint map, not full contrast.
+                    subtle=nodes.new('ShaderNodeMixRGB');subtle.blend_type='MIX';subtle.inputs[0].default_value=row['photoAlpha'];subtle.inputs[1].default_value=(.94,.94,.94,1)
+                    links.new(color,subtle.inputs[2]);color=subtle.outputs[0]
                 mix=nodes.new('ShaderNodeMixRGB');mix.blend_type='MULTIPLY';mix.inputs[0].default_value=1;mix.inputs[2].default_value=(*row['color'],1)
-                links.new(tex.outputs['Color'],mix.inputs[1]);links.new(mix.outputs[0],bs.inputs['Base Color'])
+                links.new(color,mix.inputs[1]);links.new(mix.outputs[0],bs.inputs['Base Color'])
             elif channel=='rough':
                 scale=nodes.new('ShaderNodeMath');scale.operation='MULTIPLY';scale.inputs[1].default_value=max(.05,row['roughness'])
                 links.new(tex.outputs['Color'],scale.inputs[0]);links.new(scale.outputs[0],bs.inputs['Roughness'])
             else:
-                normal=nodes.new('ShaderNodeNormalMap');normal.inputs['Strength'].default_value=.15
+                normal=nodes.new('ShaderNodeNormalMap');normal.inputs['Strength'].default_value=row.get('normalStrength',.2)
                 links.new(tex.outputs['Color'],normal.inputs['Color']);links.new(normal.outputs[0],bs.inputs['Normal'])
     materials[row['id']]=m
 vertices=0;triangles=0
@@ -61,6 +67,12 @@ for i,row in enumerate(data['meshes']):
     mesh=bpy.data.meshes.new('BMH-'+str(i));mesh.from_pydata(verts,[],faces);mesh.update()
     obj=bpy.data.objects.new(row['name']+'-'+str(i),mesh);bpy.context.collection.objects.link(obj)
     obj.visible_shadow=bool(row.get('castShadow',True))
+    # Cycles has no raster polygonOffset. Reproduce the production skin's
+    # depth priority with an explicit 0.01mm render modifier. Original measured
+    # vertices remain unchanged; this is not an architectural thickness edit.
+    if row.get('facadeSkin'):
+        bias=obj.modifiers.new('WebGL skin depth priority: 0.01mm presentation only','DISPLACE')
+        bias.strength=.00001;bias.mid_level=0;bias.direction='NORMAL'
     obj['bmh_revision']=data['revision'];obj['bmh_identity']=json.dumps(row['identity'])
     for mid in row['materials']:mesh.materials.append(materials[mid])
     # Three ignores BoxGeometry face groups when a mesh has one material.
@@ -86,7 +98,7 @@ def fill_light(name,location,target,energy,size):
     obj.rotation_euler=(Vector(target)-Vector(location)).to_track_quat('-Z','Y').to_euler()
 if data.get('room'):
     r=data['room'];x=r['x']+r['w']/2-data['site']['width']/2;y=data['site']['depth']/2-r['y']-r['h']/2
-    fill_light('Presentation fill only, not an electrical design',(x,y,3.02),(x,y,0),500,2.4)
+    fill_light('Presentation fill only, not an electrical design',(x,y,3.02),(x,y,0),150,2.4)
 else:
     fill_light('Presentation facade fill',(10,4,8),(0,0,3),2600,10)
 cam_data=bpy.data.cameras.new('BMH measured view');cam=bpy.data.objects.new('BMH measured view',cam_data);bpy.context.collection.objects.link(cam);scene.camera=cam
@@ -99,6 +111,7 @@ else:
     cam.location=(10,25,7);target=Vector((0,2.8,3.2));cam_data.lens=48
 cam.rotation_euler=(target-Vector(cam.location)).to_track_quat('-Z','Y').to_euler();cam_data.clip_start=.03;cam_data.clip_end=250
 scene['bmh_revision']=data['revision'];scene['bmh_approval']='REVIEW ONLY — not surveyed, not engineering-approved'
+scene['bmh_raster_depth_priority']='Facade skins only: 0.01mm render modifier emulates WebGL polygonOffset; original vertices retained.'
 scene.render.film_transparent=False
 os.makedirs(os.path.dirname(os.path.abspath(output)),exist_ok=True)
 bpy.ops.wm.save_as_mainfile(filepath=os.path.splitext(output)[0]+'.blend')

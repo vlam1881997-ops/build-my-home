@@ -1,0 +1,132 @@
+{
+  "task": "W20-one-modern-house",
+  "date": "2026-10-16",
+  "state": "in_progress",
+  "approved": false,
+  "commercialApproved": false,
+  "fixtureRevision": "7BADC039-741638A5-AI4-RH3",
+  "checkpointBase": "7834af447542803b989bb3ba8bbb1d9b8117dfaa",
+  "images": [
+    {
+      "revision": "7BADC039-741638A5-AI4-RH3",
+      "view": "exterior",
+      "vertices": 183701,
+      "triangles": 105098,
+      "samples": 24,
+      "renderer": "Blender4.5.13 Cycles CPU",
+      "status": "review-not-approved",
+      "geometrySource": "production Three.js scene vertices",
+      "sha256": "0adbb73023e03a29972aebcc18e22cd79933311bc40529ae8c35325a138437f7",
+      "pixels": [
+        1100,
+        900
+      ]
+    },
+    {
+      "revision": "7BADC039-741638A5-AI4-RH3",
+      "view": "living",
+      "vertices": 48982,
+      "triangles": 36112,
+      "samples": 24,
+      "renderer": "Blender4.5.13 Cycles CPU",
+      "status": "review-not-approved",
+      "geometrySource": "production Three.js scene vertices",
+      "sha256": "c9c9c142128cd2ceb012033a5aec9a106cf83b7ddf1558d1db51dda320485b4a",
+      "pixels": [
+        1100,
+        900
+      ]
+    },
+    {
+      "revision": "7BADC039-741638A5-AI4-RH3",
+      "view": "bed",
+      "vertices": 25093,
+      "triangles": 15800,
+      "samples": 24,
+      "renderer": "Blender4.5.13 Cycles CPU",
+      "status": "review-not-approved",
+      "geometrySource": "production Three.js scene vertices",
+      "sha256": "65db7f1694f61af3657772b74c8bc78a5e0e321068b5c737b1f221d00971f0a2",
+      "pixels": [
+        1100,
+        900
+      ]
+    },
+    {
+      "revision": "7BADC039-741638A5-AI4-RH3",
+      "view": "kitchen",
+      "vertices": 33287,
+      "triangles": 14106,
+      "samples": 24,
+      "renderer": "Blender4.5.13 Cycles CPU",
+      "status": "review-not-approved",
+      "geometrySource": "production Three.js scene vertices",
+      "sha256": "2e7af0cc1e5339d73bea7a183892474d3d9a02bebd7d83de00c159f195c14cb1",
+      "pixels": [
+        1100,
+        900
+      ]
+    },
+    {
+      "revision": "7BADC039-741638A5-AI4-RH3",
+      "view": "bath",
+      "vertices": 18213,
+      "triangles": 9290,
+      "samples": 24,
+      "renderer": "Blender4.5.13 Cycles CPU",
+      "status": "review-not-approved",
+      "geometrySource": "production Three.js scene vertices",
+      "sha256": "07c7e0a9a63c4357c5cfb635e0dfd2c67759d7597b62dc07a8d3a9e3143946d3",
+      "pixels": [
+        1100,
+        900
+      ]
+    }
+  ],
+  "renderLimits": [
+    "Offline Blender/Cycles CPU, not a verified browser GPU render.",
+    "Production geometry/UVs/shadow flags exported; neutral roof material adapter.",
+    "Plaster photo contrast and normal response adapted; 0.01mm modifier emulates raster skin depth priority, original vertices retained.",
+    "Lighting/sky are generic presentation, not surveyed context or solar/MEP verification."
+  ],
+  "dossier": {
+    "nativePages": 28,
+    "nativeSha256": "9263806724cabb23fd77fda4aa20505b8f63681960fe61910fadb194182aba24",
+    "reviewPacketPages": 34,
+    "reviewPacketSha256": "260aca1324ef912b5de609fa656534e19387dbc4a1dcb1522ad8c9d4d06936e3",
+    "nativeContentStreamsUnchanged": true,
+    "status": "not-approved",
+    "deliveredSha256": "260aca1324ef912b5de609fa656534e19387dbc4a1dcb1522ad8c9d4d06936e3",
+    "libraryFileId": "libfile_5744a890e38c8191bd49db6a82bd8dd1"
+  },
+  "materialRelease": {
+    "pr": 64,
+    "head": "fb86500e8da9cc7698045f6ea6901e07eeef69e4",
+    "mainMerge": "dc36b92daefa1b5aec6ff6758c0b542e0059ffa7",
+    "ciRun": 38907736054,
+    "ci": "success",
+    "vercel": "success",
+    "publicRasterDecode": "both recovered 512x512 PNGs match expected SHA256",
+    "applicationSourceChanged": false
+  },
+  "passed": [
+    "Shared geometry/stair/circulation regression before unchanged fixture checkpoint.",
+    "Actual website JSON import and 28-page native A3 export preserve same design revision.",
+    "All 30 shipped PBR PNGs decode; two corrupt rasters repaired and verified publicly.",
+    "Black facade triangle eliminated in offline renderer.",
+    "Five model views inspected, no AI reconstruction used."
+  ],
+  "open": [
+    "Exterior composition still does not convincingly meet the selected Modern reference.",
+    "Terrace guard/drainage/waterproofing/structural details unknown; cannot approve terrace.",
+    "Generic kitchen/appliance/furniture models, not exact manufacturer SKU.",
+    "12 design inputs, 6 construction inputs and 46 BOQ rows remain pending in native handover for this fixture.",
+    "Survey/planning/customer brief/engineering signoffs are not provided."
+  ],
+  "resume": {
+    "scope": "Only Modern-5x20-V01. No second house/style or unrelated feature.",
+    "next": "Resolve this exact model facade/terrace details and manufacturer-bound materials through shared measured inputs; then re-render only affected views.",
+    "doNotRepeat": "Do not re-read whole repository or re-run passed import/geometry/raster checks without relevant changes.",
+    "doNotClaim": "This review packet is not a finished commercial/construction dossier."
+  }
+}
