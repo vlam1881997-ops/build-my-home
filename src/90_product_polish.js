@@ -55,6 +55,12 @@
   const id=B.state.project.materials.choices[category],product=B.state.project.dataEngine?.materialOverrides?.[id]?.product||B.materialResearch?.products.find(x=>x.id===id);
   return product&&product.id===id&&product.category===category?product:null;
  };
+ B.catalogProductSample=product=>{
+  if(!product?.id||!product.category)return null;
+  const p=B.state.project,focus=B.state.ui.sceneFocus,rooms=regularRooms(),focused=rooms.find(r=>'room:'+r.id===focus),finish=p.materials.finish||{},roomRows=[...(focused?[focused]:[]),...rooms.filter(r=>r!==focused)].map(r=>({roomId:r.id,name:r.name,palette:B.finishPalette(r.id)})),outside={roomId:null,name:'Ngoại thất',palette:B.facadeFinishPalette?.()||finish.exterior||{}},rows=focus==='all'?[outside,...roomRows]:[...roomRows,outside];
+  for(const row of rows){const binding=row.palette?.catalogMaterials?.[product.category];if(binding?.productId!==product.id||!B.catalogBindingStatus?.(product.category,binding,product,row.palette).valid)continue;const sample=B.materialSampleForBinding?.(binding);if(sample)return {...row,binding,sample};}
+  return null;
+ };
  B.showroomFinishInfo=roomId=>{
   const palette=roomId?B.finishPalette(roomId):B.facadeFinishPalette?.()||B.finishPalette(),bindings=palette.catalogMaterials||{};
   return Object.entries(categories).flatMap(([category,config])=>{
@@ -98,7 +104,7 @@
  const sampleShowroom=B.showroomPreviewHtml;
  B.showroomPreviewHtml=category=>{
   let html=sampleShowroom(category);const product=B.selectedShowroomProduct(category),config=categories[category],rooms=regularRooms();if(!html||!product||!config||!rooms.length)return html;
-  const room=rooms.find(r=>'room:'+r.id===B.state.ui.sceneFocus)||rooms.find(r=>r.type==='living')||rooms[0],roomBinding=B.finishPalette(room.id).catalogMaterials?.[category],exteriorBinding=B.facadeFinishPalette?.().catalogMaterials?.[category],binding=(B.state.ui.sceneFocus==='all'?[exteriorBinding,roomBinding]:[roomBinding,exteriorBinding]).find(v=>v?.productId===product.id&&B.catalogBindingStatus?.(category,v,product).valid),sample=B.materialSampleForBinding?.(binding),profile=binding?.visualProfileId||config.profile,esc=B.esc;
+  const room=rooms.find(r=>'room:'+r.id===B.state.ui.sceneFocus)||rooms.find(r=>r.type==='living')||rooms[0],match=B.catalogProductSample(product),roomBinding=B.finishPalette(room.id).catalogMaterials?.[category],binding=match?.binding||(roomBinding?.productId===product.id?roomBinding:null),sample=match?.sample,profile=binding?.visualProfileId||config.profile,esc=B.esc;
   if(sample)html=html.replace(/<figure class="showroom-material-image[^"]*">[\s\S]*?<\/figure>/,'<figure class="showroom-material-image showroom-surface-photo"><img data-selected-material-sample src="'+esc(sample.image.src)+'" alt="Ảnh mẫu khách cung cấp · '+esc(product.sku||product.name)+'"><figcaption>Ảnh mẫu đã gắn · '+esc(product.sku||product.name)+' · '+binding.sample.realWorldScale.map(n=>Math.round(n*1000)).join(' × ')+' mm</figcaption></figure>');
   return html+'<details class="material-sample-editor"><summary>Dùng ảnh mẫu bề mặt của mã hàng này</summary><p>Chọn ảnh chụp thẳng phần bề mặt đã cắt gọn, không có logo, phối cảnh hay đồ vật. Nhập kích thước phần ảnh đại diện để vân lặp đúng tỷ lệ.</p>'+(sample?'<figure><img src="'+sample.image.src+'" alt="Ảnh mẫu khách cung cấp cho '+esc(product.sku||product.name)+'"><figcaption>Ảnh mẫu đã gắn · '+esc(product.sku||product.name)+'</figcaption></figure>':binding?.sample?'<p role="status">Ảnh mẫu chưa có trên thiết bị này. Chọn lại file để thể hiện đúng mẫu.</p>':'')+'<form data-catalog-sample="'+category+'"><label>Nơi áp dụng<select name="roomId">'+(['paint','cabinetry'].includes(category)?'<option value="__exterior__">Ngoại thất · giữ nội thất</option>':'')+rooms.map(r=>'<option value="'+esc(r.id)+'" '+(r.id===room.id?'selected':'')+'>T'+(r.floor+1)+' · '+esc(r.name)+'</option>').join('')+'</select></label><input type="hidden" name="profileId" value="'+esc(profile)+'"><label>Ảnh mẫu JPG / PNG / WebP<input name="sample" type="file" accept="image/jpeg,image/png,image/webp" required></label><label>Rộng phần mẫu / mm<input name="widthMm" type="number" min="10" max="20000" step="any" required></label><label>Dài phần mẫu / mm<input name="depthMm" type="number" min="10" max="20000" step="any" required></label><label>Góc đặt vân / °<input name="rotationDeg" type="number" min="0" max="359.999" step="any" value="0" required></label><label>Nguồn ảnh / mẫu thực<input name="sourceReference" maxlength="240" placeholder="Mã mẫu, hãng hoặc ảnh khách cung cấp" required></label><button>Gắn mẫu & xem trong phòng 3D →</button><p role="status" aria-live="polite"></p></form><small>Ảnh lưu trên thiết bị này, chưa đồng bộ cloud. Chỉ dùng ảnh bạn có quyền sử dụng. Mẫu màu không xác nhận độ nhám, chống trượt hoặc thông số kỹ thuật của sản phẩm.</small></details>';
  };
@@ -116,7 +122,10 @@
  B.materialStyleFits=product=>!['different-style','different-role','unknown-style','missing-product'].includes(B.styleMaterialCompatibility(product).status);
  const productCard=B.webProductCard;if(productCard)B.webProductCard=product=>{
   const status=B.styleMaterialCompatibility(product),label=status.status==='design-suggestion'?'Gợi ý theo phong cách':status.status==='different-style'?'Gợi ý cho phong cách khác':'Cần đối chiếu mẫu';
-  return productCard(product).replace('<h3>','<small class="style-material-status" title="'+B.esc(status.reason)+'">'+label+'</small><h3>');
+  let html=productCard(product).replace('<h3>','<small class="style-material-status" title="'+B.esc(status.reason)+'">'+label+'</small><h3>');
+  const match=B.catalogProductSample(product);
+  if(match){const {binding,sample,name}=match,esc=B.esc;html=html.replace(/<figure class="material-product-visual">[\s\S]*?<\/figure>/,'<figure class="material-product-visual"><img data-material-customer-sample src="'+esc(sample.image.src)+'" alt="Ảnh mẫu bề mặt khách cung cấp · '+esc(product.sku||product.name)+'" loading="lazy" decoding="async"><figcaption>Ảnh mẫu bề mặt đã gắn · '+esc(name)+' · '+binding.sample.realWorldScale.map(n=>Math.round(n*1000)).join(' × ')+' mm</figcaption></figure>');}
+  return html;
  };
  const catalog=B.materialCatalogHtml;if(catalog)B.materialCatalogHtml=category=>{const brief=B.styleMaterialBriefHtml(category),preview=B.showroomPreviewHtml(category),alternatives=catalog(category);return brief+B.materialPhotoGallery(category)+preview+(preview&&B.guidedDetails?B.guidedDetails('showroom:'+category,'So sánh sản phẩm khác',alternatives):alternatives);};
  const studio=B.screen7;B.screen7=()=>{
