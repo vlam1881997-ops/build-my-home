@@ -143,11 +143,12 @@
    if(moved(before,after))for(const [p,r]of [[source,before],[plan,after]])if(r&&sides.some(([side])=>wallLocked(p,r,side)))return 'Tường chung tiếp giáp phòng đang khóa; không thể dời, đổi kích thước hoặc xóa phòng.';
   }
   if(!validLayout(plan.rooms)){
-   // Repair an existing stair without requiring unrelated legacy rooms to be
-   // rebuilt first. Changed wells must fit; no overlap may be introduced/grown.
-   const area=(a,b)=>a&&b?Math.max(0,Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x))*Math.max(0,Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)):0;
+   // A legacy room outside the envelope must not trap the whole editor.
+   // Validate every changed/new rectangle; retain warnings for unchanged rooms.
+   // Deletion cannot add a collision, and no overlap may be introduced/grown.
+   const area=(a,b)=>a&&b&&a.floor===b.floor?Math.max(0,Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x))*Math.max(0,Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)):0;
    const old=id=>source.rooms.find(r=>r.id===id),changed=plan.rooms.filter(r=>moved(old(r.id),r));
-   const safe=stairRepair&&changed.every(r=>r.type==='stairs'&&validLayout([r]))&&plan.rooms.every((r,i)=>plan.rooms.slice(i+1).every(q=>r.floor!==q.floor||area(r,q)<=area(old(r.id),old(q.id))+1e-8));
+   const safe=changed.every(r=>validLayout([r]))&&plan.rooms.every((r,i)=>plan.rooms.slice(i+1).every(q=>r.floor!==q.floor||area(r,q)<=area(old(r.id),old(q.id))+1e-8));
    if(!safe)return 'Phòng chồng nhau hoặc vượt ranh / khoảng lùi. Chọn vùng trống trong đất.';
   }
   for(const key of ['openings','fixtures'])for(const id of new Set([...(source[key]||[]),...(plan[key]||[])].map(q=>q.id))){const before=(source[key]||[]).find(q=>q.id===id),after=(plan[key]||[]).find(q=>q.id===id),oldRoom=before&&source.rooms.find(r=>r.id===before.roomId),newRoom=after&&plan.rooms.find(r=>r.id===after.roomId);if(same(before,after)&&!moved(oldRoom,newRoom))continue;
