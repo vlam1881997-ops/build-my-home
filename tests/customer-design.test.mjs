@@ -1,4 +1,20 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';
+import {designClient} from './fixtures/design-client.mjs';
+test('stair editor completes a third landing, synchronizes dimensions/direction, and retains undo and locks',()=>{
+ const b=designClient(),p=b.state.project;Object.assign(p.site,{width:10,depth:15,floors:3});
+ p.plan.rooms=[0,1].map(f=>({id:'stair-'+f,name:'Thang',type:'stairs',floor:f,x:1,y:1,w:3.4,h:4,stairShape:'u',stairDirection:0}));p.plan.openings=[];p.plan.fixtures=[];p.plan.furniture=[];b.state.ui.planner.floor=0;b.state.ui.planner.selected='stair-0';
+ assert.equal(b.editStairStack('stair-0',{},true),true);assert.equal(p.plan.rooms.length,3);assert.equal(b.stairAlignmentIssues().filter(i=>i.sev==='error').length,0);
+ assert.equal(b.editDirectItem('room','stair-0','stairDirection','90'),true);assert.ok(p.plan.rooms.every(r=>r.stairDirection===90));
+ assert.equal(b.editDirectItem('room','stair-0','w','3.6'),true);assert.ok(p.plan.rooms.every(r=>r.w===3.6));b.undoPlan();assert.ok(p.plan.rooms.every(r=>r.w===3.4));
+ p.plan.lockedFloors=[2];const before=JSON.stringify(p.plan);assert.equal(b.editStairStack('stair-0',{stairDirection:180}),false);assert.equal(JSON.stringify(p.plan),before);
+ p.plan.lockedFloors=[];assert.equal(b.editStairStack('stair-0',{stairDirection:45}),false);
+ assert.match(b.directEditHtml(),/data-direct-stair-sync/);assert.match(b.directEditHtml(),/Hướng vế đầu đi lên/);
+});
+test('stair completion rejects an occupied third floor without moving or deleting its rooms',()=>{
+ const b=designClient(),p=b.state.project;Object.assign(p.site,{width:10,depth:15,floors:3});
+ p.plan.rooms=[{id:'stair',type:'stairs',name:'Thang',floor:0,x:1,y:1,w:3.4,h:4},{id:'bed',type:'bed',name:'Ngủ',floor:2,x:1,y:1,w:3.4,h:4}];p.plan.openings=[];p.plan.fixtures=[];
+ const before=JSON.stringify(p.plan);assert.equal(b.editStairStack('stair',{},true),false);assert.equal(JSON.stringify(p.plan),before);assert.match(b.state.ui.planner.directNotice,/chồng|ranh/);
+});
 function client(){
  const storage=new Map();
  let id=0;const B={VERSION:'test',STORAGE_KEY:'architect-test',LEGACY_STORAGE_KEYS:[],SCREENS:[],planHistory:{undo:[],redo:[]},MATERIALS:{},REGIONS:{'TP. Hồ Chí Minh':{defaultDistrict:'Phường Sài Gòn',districts:[['Phường Sài Gòn',10,106]]}},REGION_ALIASES:{},regionPoint:()=>({district:'Phường Sài Gòn',lat:10,lng:106}),defaultDataEngineState:()=>({cost:{},quote:{},materialOverrides:{},status:{},snapshots:[]}),uid:p=>p+'-'+(++id),roundTo:(n,s)=>Math.round(n/s)*s,clamp:(n,a,b)=>Math.max(a,Math.min(b,n)),esc:v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),render(){},toast(){},$:()=>null,screen1:()=>'',screen4:()=>'',screen5:()=>'',screen7:()=>'',screen8:()=>'',screen9:()=>'',screen10:()=>'',roomEditingPanel:()=>'',architecturalRenderControlsHtml:()=>'',architectDocument:()=>({}),studioStructureKey:()=>'',cinematicRender:{views:{}},customerDesignSnapshot:()=>({project:{},checks:[]}),customerPackageFiles:()=>[],exportCustomerPackage:async()=>true,finishPalette:id=>B.state.project.materials.finish.rooms[id]||B.state.project.materials.finish.exterior,navigateTo(step){B.state.ui.step=step;},externalSides:()=>['north','west'],num:String};

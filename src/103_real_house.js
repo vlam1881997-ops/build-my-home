@@ -3,6 +3,10 @@
  * Sky and ground are locally authored presentation context, not a surveyed site. */
 (()=>{
  const B=BMH,version='measured-house-1',finite=Number.isFinite;
+ // A stairwell connects occupied floors. It does not automatically pierce
+ // the weather roof above the final landing; courtyards remain outside rooms.
+ const occupiedFloorHoles=B.stairFloorHoles;
+ B.stairFloorHoles=floor=>Number(floor)>=Number(B.state.project.site.floors)?[]:occupiedFloorHoles(floor);
  const noise=(x,y)=>{const h=Math.sin(x*127.1+y*311.7)*43758.5453123;return h-Math.floor(h);};
  const smooth=t=>t*t*(3-2*t),mix=(a,b,t)=>a+(b-a)*t;
  const field=(x,y)=>{const a=Math.floor(x),b=Math.floor(y),u=smooth(x-a),v=smooth(y-b);return mix(mix(noise(a,b),noise(a+1,b),u),mix(noise(a,b+1),noise(a+1,b+1),u),v);};
@@ -202,6 +206,6 @@
  };
  const review=B.architecturalIdentityReview;
  B.architecturalIdentityReview=()=>{const result=review(),roof=B.sceneRoofSpec();return {...result,roof:{...result.roof,modeled:!!roof,compound:!!roof?.compound,effectiveOverhang:roof?.overhang??null,notice:roof?.notice||null},constructionDetailRevision:version,parapet:B.roofParapetSpec(),context:'Bầu trời và mặt đất minh họa; công trình lấy từ bản vẽ.',engineeringApproved:false};};
- const drawingRevision=B.drawingRevision;B.drawingRevision=()=>drawingRevision()+'-RH2';
+ const drawingRevision=B.drawingRevision;B.drawingRevision=()=>drawingRevision()+'-RH3';
  B.ARCH_RENDER_REVISION='customer-measured-house-20';
 })();
