@@ -69,6 +69,12 @@ html.bmh-v60 .material-photo-library h3{margin:6px 0 8px;font-size:22px}
 html.bmh-v60 .material-photo-library p{max-width:720px;color:#616960;font-size:13px;line-height:1.6}
 html.bmh-v60 .material-photo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:18px 0}
 html.bmh-v60 .material-photo-grid a{display:block;overflow:hidden;border-radius:10px;color:#314a3e;background:white;text-decoration:none}
+html.bmh-v60 .material-photo-grid article{display:flex;flex-direction:column;background:#fff;border:1px solid #e1e5db;border-radius:12px;overflow:hidden}
+html.bmh-v60 .material-photo-grid article>small{display:block;padding:0 12px 12px;font-size:11px;line-height:1.6;color:#58665b}
+html.bmh-v60 .material-photo-grid article>button{margin:auto 10px 12px;min-height:44px;border:1px solid #375e45;border-radius:9px;background:#375e45;color:#fff;padding:9px 12px;font-size:12px;cursor:pointer}
+html.bmh-v60 .material-photo-grid article>button:disabled{opacity:.5;cursor:default}
+html.bmh-v60 .material-photo-target{display:grid;gap:7px;max-width:420px;font-size:12px;color:#3b5945}
+html.bmh-v60 .material-photo-target select{width:100%;min-height:44px;padding:9px;border:1px solid #cbd3c7;border-radius:9px;background:white;font:inherit}
 html.bmh-v60 .material-photo-grid img{display:block;width:100%;aspect-ratio:1.25;object-fit:cover;transition:transform .2s}
 html.bmh-v60 .material-photo-grid a:hover img{transform:scale(1.035)}
 html.bmh-v60 .material-photo-grid span{display:block;padding:12px;font-size:12px;line-height:1.5}

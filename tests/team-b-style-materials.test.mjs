@@ -6,6 +6,30 @@ import {materialPriceEvidence} from '../server/_material_catalog.mjs';
 const plain=x=>JSON.parse(JSON.stringify(x));
 const make=()=>{const b=designClient({identity:true});b.autoPlanConcept();b.state.project.materials.finish={exterior:null,rooms:{}};b.materialPriceEvidence=materialPriceEvidence;return b;};
 
+test('photographed surface choices change only the target room and survive project serialization',()=>{
+ const b=make(),p=b.state.project,living=p.plan.rooms.find(r=>r.type==='living'),bed=p.plan.rooms.find(r=>r.type==='bed');
+ const plan=JSON.stringify(p.plan),choices=JSON.stringify(p.materials.choices),other=JSON.stringify(b.finishPalette(bed.id)),style=p.style;
+ assert.equal(b.applyMaterialPhoto('marble_01',living.id),true);assert.equal(b.finishPalette(living.id).visualMaterials.floor,'white-marble');
+ assert.equal(JSON.stringify(p.plan),plan);assert.equal(JSON.stringify(p.materials.choices),choices);assert.equal(JSON.stringify(b.finishPalette(bed.id)),other);assert.equal(p.style,style);
+ const restored=make();restored.state.project=plain(p);assert.equal(restored.finishPalette(living.id).visualMaterials.floor,'white-marble');
+ assert.equal(b.applyMaterialPhoto('terrazzo_tiles',living.id),true);assert.equal(b.finishPalette(living.id).visualMaterials.floor,'ivory-terrazzo');
+});
+test('photograph selection cannot target a removed room, shaft or a reference-only image',()=>{
+ const b=make(),p=b.state.project,room=p.plan.rooms.find(r=>r.type==='living'),stair=p.plan.rooms.find(r=>r.type==='stairs'),before=JSON.stringify(p);
+ for(const [photo,id] of [['unknown',room.id],['wood_floor','missing'],['brick_wall_001',room.id],['wood_floor',stair.id]])assert.equal(b.applyMaterialPhoto(photo,id),false);
+ assert.equal(JSON.stringify(p),before);
+});
+test('every selectable surface photograph has local colour/normal/roughness maps and honest SKU wording',()=>{
+ const b=make(),manifest=JSON.parse(fs.readFileSync('assets/interior/photographic-provenance.json'));
+ assert.equal(manifest.license,'CC0-1.0');
+ for(const photo of b.MATERIAL_PHOTOS.filter(p=>p.profileId)){
+  assert.ok(b.VISUAL_MATERIALS.some(p=>p.id===photo.profileId));assert.ok(fs.existsSync('assets/interior/photos/'+photo.id+'.jpg'));
+  for(const channel of ['diff','nor_gl','rough'])assert.ok(fs.existsSync('assets/interior/textures/'+photo.id+'-'+channel+'.png'),photo.id+':'+channel);
+ }
+ const html=b.materialPhotoGallery('floor');assert.match(html,/data-material-photo-room/);assert.match(html,/data-material-photo-apply="marble_01"/);assert.match(html,/chưa phải ảnh đúng mã hàng/);assert.doesNotMatch(html,/<option value="all"/);
+ b.state.project.plan.rooms=[];assert.match(b.materialPhotoGallery('floor'),/data-material-photo-apply="marble_01" disabled/);
+});
+
 test('whole-house collection defaults follow a new style without freezing colours or losing subsequent manual surfaces',()=>{
  const b=make(),p=b.state.project,r=p.plan.rooms.find(x=>x.type==='living');b.selectHouseStyle('japandi');b.applyInteriorCollection('warm-oak');
  const floorId=p.materials.choices.floor;b.applyVisualMaterial('floor','white-marble',r.id);b.applyFinishColor('wall','#abc123',r.id);

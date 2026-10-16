@@ -74,19 +74,25 @@
  // Original photographs are labelled independently of the supplier catalogue.
  // These are licensed surface studies, never invented photos of a chosen SKU.
  B.MATERIAL_PHOTOS=[
-  {id:'wood_floor',name:'Sàn gỗ · ảnh bề mặt gốc',category:'floor'},
-  {id:'marble_01',name:'Đá lát · ảnh bề mặt gốc',category:'floor'},
-  {id:'terrazzo_tiles',name:'Terrazzo · ảnh bề mặt gốc',category:'floor'},
-  {id:'concrete_floor_02',name:'Bê tông · ảnh bề mặt gốc',category:'floor'},
-  {id:'white_plaster_02',name:'Vữa khoáng · ảnh bề mặt gốc',category:'paint'},
-  {id:'wood_table_001',name:'Gỗ hoàn thiện · ảnh bề mặt gốc',category:'cabinetry'},
-  {id:'terlenka',name:'Vải dệt · ảnh bề mặt gốc',category:'cabinetry'},
-  {id:'brown_leather',name:'Da nâu · ảnh bề mặt gốc',category:'cabinetry'},
+  {id:'wood_floor',name:'Sàn gỗ · ảnh bề mặt gốc',category:'floor',profileId:'oak-floor'},
+  {id:'marble_01',name:'Đá lát · ảnh bề mặt gốc',category:'floor',profileId:'white-marble'},
+  {id:'terrazzo_tiles',name:'Terrazzo · ảnh bề mặt gốc',category:'floor',profileId:'ivory-terrazzo'},
+  {id:'concrete_floor_02',name:'Bê tông · ảnh bề mặt gốc',category:'floor',profileId:'grey-concrete'},
+  {id:'white_plaster_02',name:'Vữa khoáng · ảnh bề mặt gốc',category:'paint',profileId:'ivory-paint'},
+  {id:'wood_table_001',name:'Gỗ hoàn thiện · ảnh bề mặt gốc',category:'cabinetry',profileId:'natural-oak'},
+  {id:'terlenka',name:'Vải dệt · ảnh bề mặt gốc',category:'cabinetry',profileId:'natural-linen'},
+  {id:'brown_leather',name:'Da nâu · ảnh bề mặt gốc',category:'cabinetry',profileId:'cognac-leather'},
   {id:'brick_wall_001',name:'Gạch xây · ảnh bề mặt gốc',category:'brick'}
  ];
+ B.applyMaterialPhoto=(photoId,roomId)=>{
+  const photo=B.MATERIAL_PHOTOS.find(p=>p.id===photoId),profile=B.VISUAL_MATERIALS.find(p=>p.id===photo?.profileId),room=regularRooms().find(r=>r.id===roomId);
+  if(!photo||!profile||!room)return false;
+  return B.applyVisualMaterial(profile.role,profile.id,room.id);
+ };
  B.materialPhotoGallery=category=>{
   const matching=B.MATERIAL_PHOTOS.filter(p=>p.category===category),photos=matching.length?matching:B.MATERIAL_PHOTOS.filter(p=>['wood_floor','marble_01','white_plaster_02','brick_wall_001'].includes(p.id));
-  return '<section class="material-photo-library" aria-label="Ảnh bề mặt vật liệu thật"><header><span>ẢNH BỀ MẶT THẬT</span><h3>Thư viện ảnh bề mặt</h3><p>Ảnh chụp/quét bề mặt gốc. Màu trong 3D theo lựa chọn của bạn; đây chưa phải ảnh đúng mã hàng bên dưới.</p></header><div class="material-photo-grid">'+photos.map(p=>'<a href="assets/interior/photos/'+p.id+'.jpg" target="_blank" rel="noopener" aria-label="Phóng to '+B.esc(p.name)+'"><img data-material-surface-photo src="assets/interior/photos/'+p.id+'.jpg" alt="'+B.esc(p.name)+'" loading="lazy" decoding="async"><span>'+B.esc(p.name)+' ↗</span></a>').join('')+'</div><small>Powered by <a href="https://polyhaven.com/license" target="_blank" rel="noopener noreferrer">Poly Haven · CC0</a>. Ảnh sản phẩm cụ thể: mở nguồn hãng trên từng thẻ.</small></section>';
+  const rooms=regularRooms(),selected=rooms.find(r=>'room:'+r.id===B.state.ui.sceneFocus)||rooms.find(r=>r.type==='living')||rooms[0],esc=B.esc;
+  return '<section class="material-photo-library" aria-label="Ảnh bề mặt vật liệu thật"><header><span>ẢNH BỀ MẶT THẬT</span><h3>'+ (matching.length?'Chọn bề mặt để xem trong phòng':'Ảnh bề mặt tham khảo khác')+'</h3><p>'+ (matching.length?'Ảnh chụp/quét bề mặt gốc. Mô hình dùng bộ vân, độ nhám và pháp tuyến tương ứng; màu hoàn thiện theo mẫu BMH.':'Danh mục này chưa có ảnh bề mặt riêng; các ảnh dưới chỉ tham khảo, không phải mẫu sản phẩm đang chọn.')+'</p></header>'+(rooms.length&&matching.length?'<label class="material-photo-target">Phòng xem thử<select data-material-photo-room>'+rooms.map(r=>'<option value="'+esc(r.id)+'" '+(r===selected?'selected':'')+'>T'+(r.floor+1)+' · '+esc(r.name)+'</option>').join('')+'</select></label>':matching.length?'<p>Tạo phòng ở mục Bản vẽ để áp dụng bề mặt.</p>':'')+'<div class="material-photo-grid">'+photos.map(p=>{const profile=matching.length?B.VISUAL_MATERIALS.find(v=>v.id===p.profileId):null,role={floor:'Sàn',wall:'Tường',accent:'Gỗ & tủ',fabric:'Sofa & vải'}[profile?.role];return '<article><a href="assets/interior/photos/'+p.id+'.jpg" target="_blank" rel="noopener" aria-label="Phóng to '+esc(p.name)+'"><img data-material-surface-photo src="assets/interior/photos/'+p.id+'.jpg" alt="'+esc(p.name)+'" loading="lazy" decoding="async"><span>'+esc(p.name)+' ↗</span></a>'+(profile?'<small>'+role+' · '+esc(profile.name)+'<br>Ô lặp tham khảo '+profile.scale.map(n=>Math.round(n*1000)).join(' × ')+' mm</small><button type="button" data-material-photo-apply="'+p.id+'" '+(!rooms.length?'disabled':'')+'>Dùng '+esc(profile.name)+' trong 3D →</button>':'<small>Ảnh tham khảo · chưa hỗ trợ áp trực tiếp</small>')+'</article>';}).join('')+'</div><p role="status" data-material-photo-status aria-live="polite"></p><small>Ảnh và texture <a href="https://polyhaven.com/license" target="_blank" rel="noopener noreferrer">Poly Haven · CC0</a>. Thay bề mặt của phòng đã chọn; giữ nguyên hình học, mã sản phẩm và giá. Liên kết mô phỏng cũ của vai trò đó được bỏ. Đây chưa phải ảnh đúng mã hàng (SKU); đối chiếu mẫu hãng trước khi đặt hàng.</small></section>';
  };
  B.showroomPreviewHtml=category=>{
   const config=categories[category],product=B.selectedShowroomProduct(category);if(!config||!product)return '';
@@ -133,8 +139,13 @@
   const selected=info.length?'<section class="studio-supplier-choice"><b>Sản phẩm đã chọn</b>'+info.map(x=>'<p>'+esc(x.name)+'<small>'+esc([x.sku,'Mô phỏng: '+x.profileName].filter(Boolean).join(' · '))+'</small></p>').join('')+'<a href="#" data-nav="5">Mở showroom →</a></section>':'';
   return html.replace('<div class="visual-material-quick">',selected+'<div class="visual-material-quick">').replace('Đổi vân, độ nhám và độ bóng ngay trong 3D.</small>','Đổi vân, độ nhám và độ bóng ngay trong 3D.</small><output data-finish-update-status role="status" aria-live="polite"></output>');
  };B.SCREENS[5]=B.screen7;
- document.addEventListener('change',e=>{const select=e.target;if(!select.matches?.('[data-showroom-profile]'))return;const profile=B.VISUAL_MATERIALS.find(p=>p.id===select.value),swatch=select.closest('.showroom-preview')?.querySelector('.finish-swatch');if(profile&&swatch){swatch.className='finish-swatch finish-'+profile.kind;swatch.style.setProperty('--finish-color',profile.color);}});
+ document.addEventListener('change',e=>{const select=e.target;if(!select.matches?.('[data-showroom-profile]'))return;const profile=B.VISUAL_MATERIALS.find(p=>p.id===select.value),preview=select.closest('.showroom-preview'),swatch=preview?.querySelector('.finish-swatch');if(profile&&swatch)swatch.outerHTML=B.finishSampleHtml(profile);});
  document.addEventListener('click',e=>{
+  const photo=e.target.closest?.('[data-material-photo-apply]');if(photo){
+   const gallery=photo.closest('.material-photo-library'),roomId=gallery?.querySelector('[data-material-photo-room]')?.value,notice=gallery?.querySelector('[data-material-photo-status]');
+   if(!B.applyMaterialPhoto(photo.dataset.materialPhotoApply,roomId)){if(notice)notice.textContent='Phòng đã thay đổi; mở lại danh sách và chọn phòng trước khi áp dụng.';return;}
+   B.state.ui.sceneFocus='room:'+roomId;B.state.ui.designView='room';B.state.ui.roomCamera='inside';B.state.ui.modelLook='materials';B.save();B.navigateTo(6);return;
+  }
   const button=e.target.closest?.('[data-showroom-3d]');if(!button)return;
   const category=button.getAttribute('data-showroom-3d'),config=categories[category],product=B.selectedShowroomProduct(category),preview=button.closest('.showroom-preview'),profileId=preview?.querySelector('[data-showroom-profile]')?.value,target=preview?.querySelector('[data-showroom-scope]')?.value||'unassigned',rooms=regularRooms(),roomId=target.startsWith('room:')?target.slice(5):undefined,scope=roomId?'room':target;
   if(!config||!product||!rooms.length)return;
