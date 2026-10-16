@@ -559,10 +559,22 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     if(tv){box(.32,.015,.20,-d.w*.32,d.h+.008,.025,m.linen,.01);cylinder(.055,.045,.11,d.w*.37,d.h+.055,0,m.stone);}
   } else if (/^kitchen/.test(model)) {
     if(model==='kitchenFridge') {
-      box(d.w,d.h,d.d,0,d.h/2,0,m.white,.025);
-      front(d.w-.03,d.h*.62,d.h*.32,d.d/2+.008,1);
-      box(d.w-.025,d.h*.32,.024,0,d.h*.82,d.d/2+.01,m.white,.012);
-      box(.022,.37,.025,d.w*.34,d.h*.44,d.d/2+.035,m.metal,.009);
+      // Generic enamel appliance: never inherit the cabinetry's timber front.
+      // All detailing stays in the existing measured envelope and local +Z front.
+      const partBox=(name,w,h,depth,x,y,z,material,radius=.008)=>{
+        const o=box(w,h,depth,x,y,z,material,radius);
+        o.userData={kind:name,generic:true};return o;
+      };
+      const gap=Math.min(.008,d.h*.006),faceDepth=d.d*.035;
+      const frontZ=d.d/2-faceDepth/2;
+      partBox('appliance-body',d.w,d.h,d.d*.91,0,d.h/2,-d.d*.045,m.white,.025);
+      partBox('door-gasket',d.w*.96,d.h*.96,.008,0,d.h*.50,d.d*.416,m.dark,.005);
+      partBox('freezer-door',d.w*.97,d.h*.30-gap,faceDepth,0,d.h*.825,frontZ,m.white,.018);
+      partBox('refrigerator-door',d.w*.97,d.h*.64-gap,faceDepth,0,d.h*.345,frontZ,m.white,.018);
+      for(const [y,h] of [[d.h*.825,d.h*.18],[d.h*.47,d.h*.20]]) {
+        partBox('handle',d.w*.025,h,d.d*.025,-d.w*.36,y,d.d*.4875,m.metal,.006);
+      }
+      for(let i=0;i<5;i++)partBox('vent-slot',d.w*.62,d.h*.003,.004,0,d.h*(.012+i*.005),d.d*.413,m.dark,.001);
     } else {
       box(d.w-.01,d.h-.08,d.d-.03,0,(d.h-.08)/2,0,m.wood,.008);
       box(d.w,.055,d.d,0,d.h-.025,0,m.stone,.015);
