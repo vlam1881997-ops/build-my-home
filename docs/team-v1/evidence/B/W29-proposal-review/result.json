@@ -1,0 +1,78 @@
+{
+  "candidate": "00bcbcb3dac37d05aeb87709b528385fad3241e2",
+  "status": "in_progress_not_commercial_acceptance",
+  "fixture": "modern-5x20-2f-v01",
+  "fixtureStatus": "review-fixture-not-approved",
+  "revision": "0D95EF1D-810099E-AI4-RH3",
+  "proposals": [
+    {
+      "roomId": "design-f0-kitchen-1",
+      "additions": 7,
+      "updates": 1
+    },
+    {
+      "roomId": "design-f1-bed-1",
+      "additions": 4,
+      "updates": 1
+    },
+    {
+      "roomId": "design-f1-bed-2",
+      "additions": 5,
+      "updates": 1
+    }
+  ],
+  "terrace": {
+    "roomId": "design-f1-bed-1-released",
+    "width": 3.58,
+    "depth": 1.8900000000000006,
+    "units": "m",
+    "source": "BMH V01 review proposal; not a customer-approved or surveyed terrace.",
+    "openSides": [
+      "north",
+      "west"
+    ],
+    "access": [
+      {
+        "id": "design-f1-bed-1-released-access",
+        "side": "east",
+        "width": 0.9,
+        "height": 2.1,
+        "sill": 0
+      }
+    ],
+    "circulationReachable": true,
+    "technicalStatus": "missing",
+    "guard": {
+      "status": "unknown"
+    },
+    "drainage": {
+      "status": "unknown"
+    }
+  },
+  "remaining": [
+    "Native preview/apply/edit/undo/redo/reload",
+    "Enabled GPU desktop/mobile appearance and performance",
+    "Source-confirmed terrace guard/drainage/waterproofing and professional review",
+    "Customer visual/design acceptance"
+  ],
+  "checks": {
+    "furniture": 47,
+    "passed": 47,
+    "localNode": "v24.19.0",
+    "sourceSyntax": "pass"
+  },
+  "deployment": {
+    "id": "dpl_BWg3ktwJ7rJNLgAN6fQL3HDAUX4Y",
+    "state": "READY",
+    "target": "preview",
+    "sha": "00bcbcb3dac37d05aeb87709b528385fad3241e2"
+  },
+  "productionUnchanged": "8620d46067531049dd4d370fd0076ab03c812721",
+  "exactHeadCI": {
+    "id": 39123567287,
+    "sha": "00bcbcb3dac37d05aeb87709b528385fad3241e2",
+    "conclusion": "success",
+    "node": "22.x"
+  },
+  "scope": "Measured extraction and CI from the identified parent source; follow-up source checkpoint identified by git history. Not native or commercial acceptance."
+}

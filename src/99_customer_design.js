@@ -546,7 +546,7 @@
  // renderer-only layout. The stamp covers geometry/openings/locks/materials.
  let setPreview=null;
  const setModels=new Set(['kitchenBaseCabinet','kitchenFillerPanel','kitchenWallCabinet','kitchenHood','wardrobeModern','bedsideLamp','bedBench']);
- const stampSet=r=>{let h=2166136261;const text=JSON.stringify({r,rows:B.resolvedFurniture(r.id,{includeRemoved:true}),openings:plan().openings,fixtures:plan().fixtures,level:B.studioFloorLevel(r.floor),locked:B.isRoomLocked(r.id),style:B.state.project.style,finish:B.finishPalette(r.id)});for(let n=0;n<text.length;n++)h=Math.imul(h^text.charCodeAt(n),16777619);return(h>>>0).toString(16);};
+ const stampSet=r=>{let h=2166136261;const text=JSON.stringify({revision:B.drawingRevision?.(),r,rows:B.resolvedFurniture(r.id,{includeRemoved:true}),openings:plan().openings,fixtures:plan().fixtures,level:B.studioFloorLevel(r.floor),locked:B.isRoomLocked(r.id),style:B.state.project.style,finish:B.finishPalette(r.id)});for(let n=0;n<text.length;n++)h=Math.imul(h^text.charCodeAt(n),16777619);return(h>>>0).toString(16);};
  B.furnitureAccessZone=i=>{
   const reach={wardrobeModern:.60,kitchenBaseCabinet:.80,kitchenSink:.80,kitchenStove:.80,kitchenFridge:.65}[i.modelId];if(!reach||i.pose.z>.12)return null;
   const sign=i.modelId==='wardrobeModern'?-1:1,a=i.pose.rotationDeg*Math.PI/180,u={x:Math.cos(a),y:Math.sin(a)},f={x:-Math.sin(a)*sign,y:Math.cos(a)*sign},width=i.size.width/2-.005,near=i.size.depth/2+.005;

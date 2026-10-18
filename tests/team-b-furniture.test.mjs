@@ -313,11 +313,12 @@ test('opening the furniture editor does no hidden proposal or SVG work; explicit
 });
 
 test('displayed furniture proposals become stale after geometry, finish or lock edits without recomputing or exposing apply',()=>{
- for(const edit of [B=>{B.state.project.plan.openings[0].width+=.05;},B=>{B.state.project.materials.finish.exterior='white';},B=>{const r=B.state.project.plan.rooms.find(r=>r.type==='kitchen');B.state.project.plan.lockedRoomIds.push(r.id);},B=>{B.state.project.plan.rooms.find(r=>r.type==='kitchen').w-=.05;}]){
+ for(const edit of [B=>{B.state.project.plan.rooms.find(r=>r.type==='bed').w-=.05;},B=>{B.state.project.measuredDesign.roof.color='#445566';},B=>{B.state.project.plan.openings[0].width+=.05;},B=>{B.state.project.materials.finish.exterior='white';},B=>{const r=B.state.project.plan.rooms.find(r=>r.type==='kitchen');B.state.project.plan.lockedRoomIds.push(r.id);},B=>{B.state.project.plan.rooms.find(r=>r.type==='kitchen').w-=.05;}]){
   const {B}=modernReference(),r=B.state.project.plan.rooms.find(r=>r.type==='kitchen'),p=B.showFurnitureSetPreview(r.id);
   edit(B);const before=JSON.stringify(B.state.project.plan),history=B.planHistory.undo.length;
-  B.previewFurnitureSet=()=>{throw Error('rendering a stale view must not recalculate');};
+  const preview=B.previewFurnitureSet;B.previewFurnitureSet=()=>{throw Error('rendering a stale view must not recalculate');};
   const html=B.furnitureSetHtml(r);assert.match(html,/Thiết kế hoặc vật liệu đã đổi/);assert.match(html,/data-furniture-set-preview=/);assert.doesNotMatch(html,/data-furniture-set="/);assert.doesNotMatch(html,/data:image\/svg\+xml/);
+  B.previewFurnitureSet=preview;assert.equal(B.applyFurnitureSet(r.id,p.stamp),false,'a stale click also rejects atomically');
   assert.equal(JSON.stringify(B.state.project.plan),before);assert.equal(B.planHistory.undo.length,history);assert.ok(p.stamp);
  }
 });
