@@ -4,11 +4,11 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 18/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W31 measured lightweight model and terrace review UI; exact-head preview/CI pending
+- active_substep: W31 lightweight/terrace UI released; remaining R1 GPU/device and actual technical/customer review gates open
 - target_branch: codex/b-v1-24
-- actual_branch: codex/b-facade-depth, parent QA15209c; runtime baseline released PR66 main f3bce504. Preview permission resolved.
+- actual_branch: codex/b-facade-depth, QA checkpoint based on PR69 main b6dd47d5; runtime equals production. Preview permission resolved.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
-- last_verified_commit: 70c5741009ae061bdc2f98aed2c7c6aea95d63f2 (Node22 CI39127354806; native preview and production accepted for W30 scope)
+- last_verified_commit: 48e003e73a95c35e3364b7e973d3e838a91e6598 (Node22 CI39129079814; native preview and production accepted for W31 scope)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -711,3 +711,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 -12 registered related workflow checks PASS on local Node24.19.0; three new regressions cover independently projected37deg coordinates + measured slab/mounting + chosen colour/deletion, synthetic Modern terrace open edges/revision, and actual access/missing data/source escaping/no mutation. Changed JS syntax passes. Unrelated accepted suites not rerun.
 - Source files: src/78_design_workflow.js, src/99_customer_design.js, src/customer-design.css; tests/team-b-workflow.test.mjs; this progress/evidence. Native final-preview acceptance and exact-head Node22 CI pending before merge. Full R1 remains IN_PROGRESS: enabled-GPU desktop/mobile appearance/performance, actual terrace source/professional inputs and customer review.
 - Next: exact-head CI and preview; visible angle/colour/delete/reload and terrace panel checks on isolated fixture, then release only this verified increment to the existing GitHub/Vercel project.
+
+
+### W31 release acceptance
+- Exact source48e003e passed full declared Node22 CI39129079814; preview dpl_Bb9GpX46u9aRjnMM3rH89RAA15LZ READY. Native isolated fixture: same37deg/z1.6/walnut cabinet has5 measured faces; changing53deg updates points and survives reload. Delete gives0faces and remains0 after reload. Terrace review agrees in drawing and3D:3580x1890mm,900x2100mm door/sill0, north/west open, technical documents missing, no horizontal overflow.
+- PR69 merged as main b6dd47d50a3227dda7651eb9e4f1aed3ba9911fc; merge tree d97a787fe9509b5ee7d9161906faaac54cbbb900 equals tested source tree. Existing Vercel project production dpl_6Dc5cGv2zCoukVqpz27s5QmbYsqU READY with that main SHA and public aliases assigned.
+- Actual-domain reload shows new source/semantic IDs and retains prior synthetic project; saved bedroom6items render30faces. Selected terrace shows exact same dimensions/access/missing technical status,5slab faces and0invented furniture; no overflow. Preview/production screenshots and result.json retained in W31-lightweight-terrace. No real customer project or paid API/payment changed.
+- This final checkpoint is QA/progress only, based on released main; no application changes or extra production release required. last_verified_commit48e003e. Full R1 remains IN_PROGRESS: actual enabled-GPU desktop/mobile visual/performance evidence, source-confirmed terrace guard/drainage/waterproofing/structure and customer/professional acceptance. No permission blocker remains. Resume only actual outstanding work; do not repeat accepted W26/W30/W31 checks or add invented engineering data.

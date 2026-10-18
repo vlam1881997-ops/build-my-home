@@ -7,8 +7,8 @@
     "registeredWorkflowTests": 12,
     "pass": 12,
     "syntax": true,
-    "nativeFinalPreview": "pending",
-    "exactHeadNode22CI": "pending"
+    "nativeFinalPreview": "passed for lightweight/UI scope",
+    "exactHeadNode22CI": "success"
   },
   "knownLimitations": [
     "Cloud WebGL disabled; no GPU/mobile visual-performance acceptance",
@@ -20,5 +20,84 @@
     "src/99_customer_design.js": "d6054f7b950358a10c55d8a7dbf0e990823757fd5b3a068b4348d41bd2c80c6e",
     "src/customer-design.css": "ca558c12a8efa982f3512016c43a122a1ecfbc0a8278b6fc4650ca9b73e09f78",
     "tests/team-b-workflow.test.mjs": "80e3d48a8728dd4beb98ac8ac8bd640af980d14963cdab92b68fd86adbe8ccef"
+  },
+  "sourceCommit": "48e003e73a95c35e3364b7e973d3e838a91e6598",
+  "mergedPR": 69,
+  "mainCommit": "b6dd47d50a3227dda7651eb9e4f1aed3ba9911fc",
+  "releaseTree": "d97a787fe9509b5ee7d9161906faaac54cbbb900",
+  "ci": {
+    "node": "22.x",
+    "run": 39129079814,
+    "status": "success",
+    "checks": [
+      "npm test",
+      "Team coordinator"
+    ]
+  },
+  "preview": {
+    "deployment": "dpl_Bb9GpX46u9aRjnMM3rH89RAA15LZ",
+    "status": "READY",
+    "url": "https://buildmyhomefullv12github-ep86jqz9x-vlam1881997-9266.vercel.app/",
+    "native": {
+      "isolatedFixture": true,
+      "cabinetInitial": {
+        "id": "furniture-set:design-f0-kitchen-1:kitchenWallCabinet:0",
+        "x": 1.8,
+        "y": 9.5,
+        "z": 1.6,
+        "rotationDeg": 37,
+        "fill": "#65432e",
+        "faces": 5
+      },
+      "changeTo53Degrees": true,
+      "retainedAfterReload": true,
+      "deleteFaces": 0,
+      "deletedAfterReloadFaces": 0,
+      "terracePanelDrawingAnd3D": true,
+      "terrace": {
+        "widthMm": 3580,
+        "depthMm": 1890,
+        "accessWidthMm": 900,
+        "accessHeightMm": 2100,
+        "sillMm": 0,
+        "openSides": [
+          "north",
+          "west"
+        ],
+        "technicalDetails": "missing"
+      },
+      "horizontalOverflow": false,
+      "gpuEnabled": false
+    }
+  },
+  "production": {
+    "deployment": "dpl_6Dc5cGv2zCoukVqpz27s5QmbYsqU",
+    "target": "production",
+    "status": "READY",
+    "projectId": "prj_PcB996IRamEZqWrKpA5qk9T290kh",
+    "mainCommit": "b6dd47d50a3227dda7651eb9e4f1aed3ba9911fc",
+    "url": "https://www.huiminhbach.id.vn/",
+    "native": {
+      "runtimeSourceMarkersPresent": true,
+      "priorSyntheticProjectRetained": true,
+      "bedroomFurnitureFaces": 30,
+      "terracePanelVisibleAndAccurate": true,
+      "terraceFloorFaces": 5,
+      "terraceFurnitureFaces": 0,
+      "horizontalOverflow": false,
+      "drawingRevision": "89B02A19-CF7DA952-AI4-RH3"
+    }
+  },
+  "screenshots": {
+    "preview-terrace.jpg": {
+      "sha256": "118986062297c39973b62f0999ac5b0e4cba154033a1fe485466425d287d6c44",
+      "bytes": 90435,
+      "kind": "native UI only; not shaded GPU approval"
+    },
+    "production-terrace.jpg": {
+      "sha256": "30a2df564e69289d9bf1b0c7a8e87beb59181f0d4aa1080a5801dbaafef95bdb",
+      "bytes": 89645,
+      "kind": "native UI only; not shaded GPU approval"
+    }
   }
 }
