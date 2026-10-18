@@ -43,7 +43,7 @@
     "related": 108,
     "passed": 108,
     "node": "24.19.0",
-    "finalHeadCI": "pending"
+    "finalHeadCI": "success"
   },
   "nativeGPU": "GL_VENDOR Disabled / GL_RENDERER Disabled; fallback only",
   "fullR1": "in_progress",
@@ -51,5 +51,65 @@
     "Enabled-GPU desktop/mobile visual/performance acceptance",
     "Terrace guard/drainage/waterproofing sources and professional review",
     "Customer visual/design review"
+  ],
+  "releasedSource": "70c5741009ae061bdc2f98aed2c7c6aea95d63f2",
+  "mergeCommit": "f3bce504a90cbce72883f7f49d33309f3c840e01",
+  "exactHeadCI": {
+    "id": 39127354806,
+    "node": "22.x",
+    "conclusion": "success"
+  },
+  "finalPreview": {
+    "id": "dpl_7kZD1CBsLMkskdmUi7tD7sUmL9at",
+    "nativeHistory": "undo18/redo25 with redo visible without selection",
+    "kitchenCardAfterHoodDelete": 13,
+    "bedroomCardAfterApply": 6,
+    "catalogueImagesLoaded": 7,
+    "catalogueDimensions": [
+      640,
+      480
+    ]
+  },
+  "production": {
+    "id": "dpl_EKuN2Pcf1XmfbdC4jnY1yNBVa7J1",
+    "target": "production",
+    "state": "READY",
+    "sha": "f3bce504a90cbce72883f7f49d33309f3c840e01",
+    "domain": "https://www.huiminhbach.id.vn/",
+    "nativeKitchen": {
+      "undo": 18,
+      "redoAndReload": 25,
+      "cardCount": 14
+    },
+    "nativeBedroom": {
+      "cardCount": 6,
+      "models": [
+        "bedDouble",
+        "cabinetBed",
+        "wardrobeModern",
+        "cabinetBed",
+        "bedsideLamp",
+        "bedsideLamp"
+      ]
+    },
+    "priorPersonalRoomAfterUpgrade": {
+      "x": 0.317,
+      "y": 2.113,
+      "width": 3.137,
+      "depth": 3.843,
+      "unchanged": true
+    }
+  },
+  "screenshots": [
+    {
+      "file": "preview-room-cards.jpg",
+      "sha256": "68d2b529d6e6175ec05b896a0a9f6fde264045e11a6b854a206af90fabc1025f",
+      "scope": "native UI/shared plan evidence; no enabled-GPU realism claim"
+    },
+    {
+      "file": "production-room-cards.jpg",
+      "sha256": "003a84f86c241dab0b90077e28a60918f55d26da88bfa60bcae3af466fe99070",
+      "scope": "native UI/shared plan evidence; no enabled-GPU realism claim"
+    }
   ]
 }
