@@ -544,6 +544,7 @@
  };
  // A proposal is derived from the current shared records, never an extra
  // renderer-only layout. The stamp covers geometry/openings/locks/materials.
+ let setPreview=null;
  const setModels=new Set(['kitchenBaseCabinet','kitchenFillerPanel','kitchenWallCabinet','kitchenHood','wardrobeModern','bedsideLamp','bedBench']);
  const stampSet=r=>{let h=2166136261;const text=JSON.stringify({r,rows:B.resolvedFurniture(r.id,{includeRemoved:true}),openings:plan().openings,fixtures:plan().fixtures,level:B.studioFloorLevel(r.floor),locked:B.isRoomLocked(r.id),style:B.state.project.style,finish:B.finishPalette(r.id)});for(let n=0;n<text.length;n++)h=Math.imul(h^text.charCodeAt(n),16777619);return(h>>>0).toString(16);};
  B.furnitureAccessZone=i=>{
@@ -604,7 +605,7 @@
   if(!p.additions.length&&!p.updates.length)return reject('Các món phù hợp đã có; giữ nguyên đồ đang chọn.');
   B.pushPlanHistory();materialize(roomId);
   for(const change of p.updates){const index=plan().furniture.findIndex(i=>i.id===change.before.id);plan().furniture[index]=clone(change.after);}
-  plan().furniture.push(...p.additions.map(clone));B.state.ui.planner.furnitureNotice='Đã lưu '+p.additions.length+' món thêm và '+p.updates.length+' điều chỉnh vào cùng bản vẽ /3D.';B.customerFrameCache=null;B.finishInvalidate?.();changed();return true;
+  plan().furniture.push(...p.additions.map(clone));B.state.ui.planner.furnitureNotice='Đã lưu '+p.additions.length+' món thêm và '+p.updates.length+' điều chỉnh vào cùng bản vẽ /3D.';B.customerFrameCache=null;B.finishInvalidate?.();setPreview=null;changed();return true;
  };
  B.furnitureSetPreviewPlan=p=>{
   if(!p?.ok)return null;const next=clone(plan());next.furniture||=[];
@@ -616,9 +617,25 @@
   if(!p.ok||!B.withPlan||!B.interiorSheetSvg||!p.additions.length&&!p.updates.length)return '';const r=room(p.roomId),svg=B.withPlan(B.furnitureSetPreviewPlan(p),()=>B.interiorSheetSvg(r.floor));
   return '<figure class="team-b-depth-drawing"><img src="data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)+'" alt="Bản vẽ xem trước bộ nội thất · '+esc(r.name)+'"><figcaption>Cùng vị trí / số đo sẽ dùng trong3D · chưa thay bản vẽ đang lưu.</figcaption></figure>';
  };
+ // Keep proposal generation and SVG work behind the customer's explicit action.
+ // This transient view is scoped to the project and current measured inputs.
+ B.showFurnitureSetPreview=roomId=>{
+  const r=room(roomId);if(!r||!['kitchen','bed'].includes(r.type))return false;
+  const proposal=B.previewFurnitureSet(roomId);
+  setPreview={project:B.state.project,roomId,stamp:proposal.stamp,proposal,drawing:proposal.ok?B.furnitureSetDrawingHtml(proposal):''};
+  for(const panel of document.querySelectorAll('[data-furniture-set-room]'))if(panel.dataset.furnitureSetRoom===roomId)panel.outerHTML=B.furnitureSetHtml(r);
+  return proposal;
+ };
  B.furnitureSetHtml=r=>{
-  if(!['kitchen','bed'].includes(r.type))return '';const p=B.previewFurnitureSet(r.id),label=r.type==='kitchen'?'Hoàn thiện bộ bếp':'Hoàn thiện bộ phòng ngủ',mm=v=>Math.round(v*1000);
-  return '<details class="team-b-furniture-set"><summary>'+label+'</summary><p>Đề xuất từ số đo phòng và đồ hiện có. Xem danh sách trước khi áp dụng; giữ các món đã khóa / xóa.</p>'+(p.ok?B.furnitureSetDrawingHtml(p)+'<ul>'+p.additions.map(i=>'<li>'+esc(models[i.modelId])+' · '+mm(i.size.width)+' × '+mm(i.size.depth)+' × '+mm(i.size.height)+' mm'+(i.pose.z?' · đáy cao '+mm(i.pose.z)+' mm':'')+'</li>').join('')+p.updates.map(c=>'<li>'+esc(c.reason)+' · '+esc(models[c.before.modelId])+(c.after.placementStatus==='removed'?'':': cao '+mm(c.before.size.height)+' → '+mm(c.after.size.height)+' mm')+'</li>').join('')+'</ul>'+p.notices.map(n=>'<p>'+esc(n)+'</p>').join('')+p.skipped.map(i=>'<small>Chưa thêm '+esc(models[i.modelId])+': '+esc(i.reason)+'</small>').join('')+(p.additions.length||p.updates.length?'<button type="button" data-furniture-set="'+esc(r.id)+'" data-furniture-set-stamp="'+p.stamp+'">Áp dụng các món phù hợp</button>':'<p>Đã có các món phù hợp hoặc không còn chỗ trống. Có thể thêm từng món bên dưới.</p>'):'<p>'+esc(p.reason)+'</p>')+'<small>Mẫu BMH theo kích thước; chưa phải sản phẩm hãng hoặc cấu tạo lắp đặt được duyệt.</small></details>';
+  if(!['kitchen','bed'].includes(r.type))return '';
+  const cached=setPreview?.project===B.state.project&&setPreview.roomId===r.id?setPreview:null,
+   stale=!!cached&&cached.stamp!==stampSet(r),p=cached&&!stale?cached.proposal:null,
+   label=r.type==='kitchen'?'Hoàn thiện bộ bếp':'Hoàn thiện bộ phòng ngủ',mm=v=>Math.round(v*1000),
+   refresh='<button type="button" data-furniture-set-preview="'+esc(r.id)+'">'+(cached?'Xem lại đề xuất theo số đo':'Xem đề xuất theo số đo')+'</button>';
+  const content=!p?(stale?'<p role="status">Thiết kế hoặc vật liệu đã đổi. Xem lại đề xuất trước khi áp dụng.</p>':'')+refresh:
+   p.ok?cached.drawing+'<ul>'+p.additions.map(i=>'<li>'+esc(models[i.modelId])+' · '+mm(i.size.width)+' × '+mm(i.size.depth)+' × '+mm(i.size.height)+' mm'+(i.pose.z?' · đáy cao '+mm(i.pose.z)+' mm':'')+'</li>').join('')+p.updates.map(c=>'<li>'+esc(c.reason)+' · '+esc(models[c.before.modelId])+(c.after.placementStatus==='removed'?'':': cao '+mm(c.before.size.height)+' → '+mm(c.after.size.height)+' mm')+'</li>').join('')+'</ul>'+p.notices.map(n=>'<p>'+esc(n)+'</p>').join('')+p.skipped.map(i=>'<small>Chưa thêm '+esc(models[i.modelId])+': '+esc(i.reason)+'</small>').join('')+(p.additions.length||p.updates.length?'<button type="button" data-furniture-set="'+esc(r.id)+'" data-furniture-set-stamp="'+p.stamp+'">Áp dụng các món phù hợp</button>':'<p>Đã có các món phù hợp hoặc không còn chỗ trống. Có thể thêm từng món bên dưới.</p>'):
+   '<p role="status">'+esc(p.reason)+'</p>'+refresh;
+  return '<details class="team-b-furniture-set" data-furniture-set-room="'+esc(r.id)+'" '+(cached?'open':'')+'><summary>'+label+'</summary><p>Đề xuất từ số đo phòng và đồ hiện có. Xem danh sách trước khi áp dụng; giữ các món đã khóa / xóa.</p>'+content+'<small>Mẫu BMH theo kích thước; chưa phải sản phẩm hãng hoặc cấu tạo lắp đặt được duyệt.</small></details>';
  };
  B.roomFurnitureLayout=r=>B.resolvedFurniture(r.id).map(i=>{
   const poly=B.furnitureFootprint(i),xs=poly.map(p=>p.x),ys=poly.map(p=>p.y);
@@ -723,7 +740,7 @@
  document.addEventListener('click',e=>{if(e.target.closest?.('[data-room-depth-apply]'))B.applySelectedRoomDepth();});
  const editor=B.screen5,studio=B.screen7;B.screen5=()=>editor()+B.furnitureEditorHtml()+B.roomDepthEditorHtml();B.SCREENS[3]=B.screen5;B.screen7=()=>studio()+B.furnitureEditorHtml();B.SCREENS[5]=B.screen7;
  const select=id=>{B.state.ui.planner.selectedFurniture=id;const i=B.resolvedFurniture().find(i=>i.id===id);if(i)B.state.ui.planner.selected=i.roomId;B.rememberFinishCamera?.();B.render({preserveScroll:true});};
- document.addEventListener('click',e=>{const button=e.target.closest?.('[data-furniture-set]');if(button)B.applyFurnitureSet(button.dataset.furnitureSet,button.dataset.furnitureSetStamp);});
+ document.addEventListener('click',e=>{const preview=e.target.closest?.('[data-furniture-set-preview]');if(preview){B.showFurnitureSetPreview(preview.dataset.furnitureSetPreview);return;}const button=e.target.closest?.('[data-furniture-set]');if(button)B.applyFurnitureSet(button.dataset.furnitureSet,button.dataset.furnitureSetStamp);});
  document.addEventListener('submit',e=>{const form=e.target;if(form.matches?.('[data-furniture-pose]')){e.preventDefault();const data=Object.fromEntries(new FormData(form));B.editFurniture(form.dataset.furniturePose,{pose:Object.fromEntries(Object.entries(data).map(([k,v])=>[k,Number(v)]))});}else if(form.matches?.('[data-furniture-size]')){e.preventDefault();const data=Object.fromEntries(new FormData(form));B.editFurniture(form.dataset.furnitureSize,{size:Object.fromEntries(Object.entries(data).map(([k,v])=>[k,Number(v)]))});}else if(form.matches?.('[data-furniture-add]')){e.preventDefault();B.addFurniture(form.dataset.furnitureAdd,new FormData(form).get('modelId'));}});
  document.addEventListener('change',e=>{if(e.target.matches?.('[data-furniture-add] select[name="modelId"]')){const id=e.target.value;if(models[id]){B.state.ui.planner.furnitureCatalogueModel=id;const preview=e.target.closest('form').querySelector('[data-furniture-catalogue]');if(preview)preview.innerHTML=B.furnitureCatalogueHtml(id);}return;}if(e.target.matches?.('[data-furniture-turn-step]')){const n=Number(e.target.value);if([15,45,90].includes(n))B.state.ui.planner.furnitureRotationStep=n;}else if(e.target.matches?.('[data-furniture-select]'))select(e.target.value);else if(e.target.matches?.('[data-furniture-material]'))B.setFurnitureVisualMaterial(e.target.dataset.furnitureOwner,e.target.dataset.furnitureMaterial,e.target.value);});
  document.addEventListener('click',e=>{

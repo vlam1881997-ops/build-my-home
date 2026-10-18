@@ -296,3 +296,35 @@ test('generated artwork uses measured furniture clearances and cannot intersect 
  for(const r of B.state.project.plan.rooms.filter(r=>['living','bed'].includes(r.type))){const items=B.roomFurnitureLayout(r),walls=B.scenePlanGeometry({rooms:[r],openings:B.state.project.plan.openings,wallContext:B.state.project.plan.rooms},r.floor).walls,art=B.roomArtPlacement(r,items,walls);if(!art)continue;assert.ok(art.top<=B.studioFloorLevel(r.floor).clearHeight-.02);for(const i of items){const hit=(i.base||0)<art.top&&(i.base||0)+i.h>art.bottom&&i.x<art.rect.x+art.rect.w&&i.x+i.w>art.rect.x&&i.y<art.rect.y+art.rect.d&&i.y+i.d>art.rect.y;assert.equal(hit,false,r.id+' art intersects '+i.model);}}
  const r={id:'tiny',floor:0,type:'bed',x:0,y:0,w:2,h:2},walls=[{kind:'wall',horizontal:true,axis:0,a:0,b:2}];assert.equal(B.roomArtPlacement(r,[{x:0,y:0,w:2,d:2,base:0,h:3}],walls),null,'no invented free wall when room is blocked');
 });
+
+test('opening the furniture editor does no hidden proposal or SVG work; explicit preview is pure and reused',()=>{
+ const {B}=modernReference(),r=B.state.project.plan.rooms.find(r=>r.type==='kitchen'),before=JSON.stringify(B.state.project),history=B.planHistory.undo.length;
+ B.render=()=>{throw Error('opening a proposal must not rebuild the editor or WebGL canvas');};
+ let proposals=0,drawings=0;const preview=B.previewFurnitureSet,drawing=B.furnitureSetDrawingHtml;
+ B.previewFurnitureSet=id=>{proposals++;return preview(id);};B.furnitureSetDrawingHtml=p=>{drawings++;return drawing(p);};
+ for(let n=0;n<4;n++)assert.match(B.furnitureSetHtml(r),/data-furniture-set-preview=/);
+ assert.equal(proposals,0);assert.equal(drawings,0);assert.equal(JSON.stringify(B.state.project),before);
+ const p=B.showFurnitureSetPreview(r.id);assert.equal(p.ok,true);assert.equal(proposals,1);assert.equal(drawings,1);
+ const html=B.furnitureSetHtml(r);assert.match(html,/data-furniture-set="/);assert.match(html,/data:image\/svg\+xml/);
+ for(let n=0;n<4;n++)assert.equal(B.furnitureSetHtml(r),html);
+ assert.equal(proposals,1);assert.equal(drawings,1);assert.equal(JSON.stringify(B.state.project),before);assert.equal(B.planHistory.undo.length,history);
+ B.render=()=>{};assert.equal(B.applyFurnitureSet(r.id,p.stamp),true);assert.equal(B.planHistory.undo.length,history+1);
+ assert.doesNotMatch(B.furnitureSetHtml(r),/data-furniture-set="/);assert.match(B.furnitureSetHtml(r),/data-furniture-set-preview=/);
+});
+
+test('displayed furniture proposals become stale after geometry, finish or lock edits without recomputing or exposing apply',()=>{
+ for(const edit of [B=>{B.state.project.plan.openings[0].width+=.05;},B=>{B.state.project.materials.finish.exterior='white';},B=>{const r=B.state.project.plan.rooms.find(r=>r.type==='kitchen');B.state.project.plan.lockedRoomIds.push(r.id);},B=>{B.state.project.plan.rooms.find(r=>r.type==='kitchen').w-=.05;}]){
+  const {B}=modernReference(),r=B.state.project.plan.rooms.find(r=>r.type==='kitchen'),p=B.showFurnitureSetPreview(r.id);
+  edit(B);const before=JSON.stringify(B.state.project.plan),history=B.planHistory.undo.length;
+  B.previewFurnitureSet=()=>{throw Error('rendering a stale view must not recalculate');};
+  const html=B.furnitureSetHtml(r);assert.match(html,/Thiết kế hoặc vật liệu đã đổi/);assert.match(html,/data-furniture-set-preview=/);assert.doesNotMatch(html,/data-furniture-set="/);assert.doesNotMatch(html,/data:image\/svg\+xml/);
+  assert.equal(JSON.stringify(B.state.project.plan),before);assert.equal(B.planHistory.undo.length,history);assert.ok(p.stamp);
+ }
+});
+
+test('transient furniture previews cannot leak into another project, another room, or a JSON-restored project',()=>{
+ const {B}=modernReference(),r=B.state.project.plan.rooms.find(r=>r.type==='kitchen'),bed=B.state.project.plan.rooms.find(r=>r.type==='bed');B.showFurnitureSetPreview(r.id);
+ assert.doesNotMatch(B.furnitureSetHtml(bed),/data-furniture-set="/);
+ B.state=B.mergeState(B.defaultState(),plain(B.state));assert.doesNotMatch(B.furnitureSetHtml(B.state.project.plan.rooms.find(i=>i.id===r.id)),/data-furniture-set="/);
+ assert.equal(B.showFurnitureSetPreview('missing'),false);
+});
