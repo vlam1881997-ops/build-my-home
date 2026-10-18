@@ -39,8 +39,8 @@ test('deleting the last room opens drawing tools; empty land survives reload and
  assert.equal(B.openPersonalPlanner(),true);assert.equal(B.state.ui.designProposalsOpen,false);
  assert.equal(B.planHistory.undo.length,history);assert.equal(B.state.project.plan.rooms.length,0);
  assert.match(B.directEditHtml(),/data-direct-room-form/);
- const r=B.addDirectRoom({x:.317,y:2.113},{x:3.454,y:5.956},'living',{snap:false});
- assert.ok(r,B.state.ui.planner.directNotice);assert.equal(r.x,.317);assert.ok(Math.abs(r.w-3.137)<1e-9);
+ const r=B.addDirectRoom({x:.317,y:2.113},{x:3.454,y:5.956},'living',{snap:false,dimensions:{width:3.137,depth:3.843}});
+ assert.ok(r,B.state.ui.planner.directNotice);assert.equal(r.x,.317);assert.equal(r.w,3.137);assert.equal(r.h,3.843);
  const exact=JSON.stringify(B.state.project.plan);B.undoPlan();assert.equal(B.state.project.plan.rooms.length,0);
  B.redoPlan();assert.equal(JSON.stringify(B.state.project.plan),exact);
  B.state=B.mergeState(B.defaultState(),JSON.parse(JSON.stringify(B.state)));B.normalizeState();
