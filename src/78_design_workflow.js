@@ -76,7 +76,9 @@ BMH.roomFurnitureLayout=r=>{
   }
   items.splice(0,items.length,...best);
  }
- if(r.type==='balcony'){add('chair',.4,.4);add('pottedPlant',W-.4,D-.4);}
+ // An unconfirmed released terrace stays empty; never invent a chair at an
+ // unguarded edge. Explicit customer furniture records are resolved unchanged.
+ if(r.type==='balcony'&&r.outdoorSpace?.kind!=='terrace'){add('chair',.4,.4);add('pottedPlant',W-.4,D-.4);}
  // Corridors stay clear; stairs use their actual rise in the shared stair model.
  return items;
 };
@@ -110,7 +112,7 @@ BMH.replaceSceneFurniture=(group,model,THREE,scene)=>{
 };
 // Licensed detailed geometry is a visual replacement inside the SAME measured
 // furniture node. Preserve IDs, exact pose/size, semantic finishes and fallback.
-BMH.detailedFurnitureAsset=(item,roomId)=>item.model==='tableCoffeeModern'?'modern-coffee-table':item.model==='loungeChairModern'?'modern-armchair':item.model==='loungeChair'&&['warm-oak','nordic-light','mid-century','loft-leather','urban-stone','coastal'].includes(BMH.interiorCollection?.(roomId)?.id)?'modern-armchair':null;
+BMH.detailedFurnitureAsset=(item,roomId)=>item.model==='tableCoffeeModern'?'modern-coffee-table':item.model==='loungeChairModern'?'modern-armchair':item.model==='loungeChair'&&['modern-natural','warm-oak','nordic-light','mid-century','loft-leather','urban-stone','coastal'].includes(BMH.interiorCollection?.(roomId)?.id)?'modern-armchair':null;
 BMH.upgradeMeasuredFurniture=(group,asset,THREE,scene)=>{
  const task=BMH.loadFurnitureModel(asset).then(source=>{
   if(scene.userData.disposed||!group.parent||BMH.studio3d?.scene!==scene)return false;
@@ -212,3 +214,4 @@ document.addEventListener('change',e=>{if(e.target.matches?.('[data-opening-form
 document.addEventListener('click',e=>{const z=e.target.closest?.('[data-light-zoom]');if(z){BMH.lightPreviewZoom=BMH.clamp(BMH.lightPreviewZoom*Number(z.dataset.lightZoom),.5,3);const host=BMH.$('[data-light-model]');if(host)host.innerHTML=BMH.lightPreviewSvg();}});
 
 BMH.materialImageSrc=url=>{try{const u=new URL(url);return ['dongtam.com.vn','jotun.com','eurowindow.biz','inax.com.vn','rangdong.com.vn','ancuong.com','vinhtuong.com','cadivi.vn','binhminhplastic.com.vn','ximanghatienkiengiang.vn','hoaphat.com.vn','hoasengroup.vn','sika.com','sika.scene7.com','storage.sudospaces.com'].some(d=>u.hostname===d||u.hostname.endsWith('.'+d))?'/api/material-image?url='+encodeURIComponent(url):url;}catch{return url;}};
+

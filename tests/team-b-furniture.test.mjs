@@ -36,6 +36,7 @@ import * as BaseThree from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 const THREE={...BaseThree,RoundedBoxGeometry};
 function finishFixture(modelId='loungeDesignSofa'){
  const B=designClient({realHouse:true}),p=B.state.project,d=B.FURNITURE_DIMENSIONS[modelId];
@@ -106,4 +107,110 @@ test('live room changes and a rebuilt scene retain the same individual finish, g
  for(const m of actual){assert.equal(m.color.getHexString(),rebuilt.color.getHexString());assert.equal(m.roughness,rebuilt.roughness);assert.equal(m.sheen,rebuilt.sheen);assert.deepEqual(plain(m.userData.surfaceScale),plain(rebuilt.userData.surfaceScale));}
  assert.equal(B.studio3d.renderer,renderer);assert.equal(floor.material,floorMaterial);assert.equal(JSON.stringify(B.resolvedFurniture()[0].pose),pose);
  for(const [o,vertices]of positions)assert.deepEqual(o.geometry.attributes.position.array,vertices);
+});
+
+test('stone finishes affect worktops, never ceramic props, sanitary ware or appliance enamel',()=>{
+ for(const model of ['tableCoffee','tableCoffeeModern','bathroomSink','toilet','washingMachine']){
+  const B=finishFixture(model),scene=new THREE.Scene(),palette={...B.furnitureFinishPalette(B.resolvedFurniture()[0]),stoneVisualMaterial:'white-marble'},m=B.sceneAssetMaterials(THREE,scene,palette),root=B.createRoomAsset(model,B.FURNITURE_DIMENSIONS[model],THREE,m);
+  const stones=[];root.traverse(o=>{if(o.material?.userData.finishSlot==='stone')stones.push(o);});
+  assert.equal(stones.length,['toilet','washingMachine'].includes(model)?0:1,model+' only its worktop is stone');
+  for(const o of stones)assert.equal(o.material.userData.visualMaterial,'white-marble');
+  for(const o of root.children.filter(o=>['ceramic-basin','toilet-seat-ring'].includes(o.userData.kind))){assert.equal(o.material,m.white);assert.equal(o.material.map,null);}
+ }
+});
+
+test('sanitary models have an actual basin cavity and open toilet seat inside the saved envelope',()=>{
+ for(const model of ['bathroomSink','toilet']){
+  const B=finishFixture(model),d=B.FURNITURE_DIMENSIONS[model],m=B.sceneAssetMaterials(THREE,new THREE.Scene(),B.furnitureFinishPalette(B.resolvedFurniture()[0])),root=B.createRoomAsset(model,d,THREE,m);root.updateMatrixWorld(true);
+  const total=new THREE.Box3().setFromObject(root).getSize(new THREE.Vector3());for(const [n,v]of [['x',d.w],['y',d.h],['z',d.d]])assert.ok(Math.abs(total[n]-v)<1e-5,model+' measured size');
+  const bowl=root.children.find(o=>o.userData.kind==='ceramic-basin');assert.ok(bowl);assert.equal(bowl.geometry.type,'LatheGeometry');assert.ok(bowl.geometry.attributes.position.array.every(Number.isFinite));assert.ok(bowl.geometry.attributes.normal.array.every(Number.isFinite));
+  const bounds=new THREE.Box3().setFromObject(bowl),centre=bounds.getCenter(new THREE.Vector3()),ray=new THREE.Raycaster(new THREE.Vector3(centre.x+.001,bounds.max.y+.5,centre.z),new THREE.Vector3(0,-1,0)),hits=ray.intersectObject(bowl);
+  assert.ok(hits.length&&hits[0].point.y<bounds.min.y+(bounds.max.y-bounds.min.y)*.4,model+' cavity is below its rim');
+  const seat=root.children.find(o=>o.userData.kind==='toilet-seat-ring');if(seat)assert.equal(ray.intersectObject(seat).length,0,'seat has a real opening, not a painted or stone cap');
+ }
+});
+
+test('final room presentation preserves opening-aligned light and the intended material contrast',()=>{
+ const B=finishFixture(),room=B.state.project.plan.rooms[0],scene=new THREE.Scene(),sun=new THREE.DirectionalLight(),fill=new THREE.DirectionalLight(),hemi=new THREE.HemisphereLight();sun.castShadow=true;scene.add(sun,fill,hemi);B.state.ui.sceneTheme='day';B.houseSkyTexture=()=>null;
+ B.configureRoomShadows(THREE,sun,room,B.state.project.site);const direction=sun.position.clone().sub(sun.target.position).toArray(),renderer={toneMappingExposure:1};
+ const studioSource=fs.readFileSync('src/45_studio3d.js','utf8');
+ vm.runInNewContext(studioSource.slice(studioSource.indexOf('  const centerRoom='),studioSource.indexOf('  const facadeCamera=')),{BMH:B,THREE,roomFocus:room,visibleFloors:[0],W:B.state.project.site.width,D:B.state.project.site.depth,roofBase:6.8,sun,scene});
+ B.configureHousePresentation({THREE,scene,renderer,focus:'room:'+room.id,roomFocus:room,floorFocus:null,explode:0});
+ assert.equal(sun.intensity,3.5);assert.equal(hemi.intensity,.3);assert.equal(fill.intensity,.08);assert.deepEqual(sun.position.clone().sub(sun.target.position).toArray(),direction);assert.equal(sun.userData.presentationLighting.solarStudy,false);
+ B.state.ui.sceneTheme='night';sun.intensity=.15;B.configureHousePresentation({THREE,scene,renderer,focus:'room:'+room.id,roomFocus:room,floorFocus:null,explode:0});assert.equal(sun.intensity,.15);
+});
+
+test('automatic whole-house finishes retain bathroom defaults while respecting an explicit customer floor',()=>{
+ const B=finishFixture(),r=B.state.project.plan.rooms[0];r.type='bath';
+ for(const c of B.INTERIOR_COLLECTIONS){B.applyInteriorCollection(c.id);const p=B.finishPalette(r.id);assert.equal(p.visualMaterials.floor,'sand-travertine',c.id+' bathroom default');const m=B.sceneAssetMaterials(THREE,new THREE.Scene(),p);assert.equal(m.floor.userData.visualMaterial,'sand-travertine');}
+ for(const s of B.HOUSE_STYLES){B.selectHouseStyle(s.id);assert.equal(B.finishPalette(r.id).visualMaterials.floor,'sand-travertine',s.id);}
+ assert.equal(B.applyVisualMaterial('floor','ivory-tile',r.id),true);
+ for(const s of B.HOUSE_STYLES){B.selectHouseStyle(s.id);assert.equal(B.finishPalette(r.id).visualMaterials.floor,'ivory-tile',s.id+' customer override');}
+ B.state=B.mergeState(B.defaultState(),plain(B.state));assert.equal(B.finishPalette(r.id).visualMaterials.floor,'ivory-tile');
+});
+
+test('Modern natural uses the licensed chair with the same saved size, pose and selected semantic finishes',async()=>{
+ const B=finishFixture('loungeChair'),p=B.state.project,item=B.resolvedFurniture()[0],plan=JSON.stringify(p.plan),bytes=fs.readFileSync('assets/interior/models/modern-armchair-facing.glb'),asset=await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
+ assert.equal(B.detailedFurnitureAsset({model:'loungeChair'},item.roomId),'modern-armchair');B.loadFurnitureModel=()=>Promise.resolve(asset.scene);
+ const scene=new THREE.Scene();B.studio3d={scene,renderer:{shadowMap:{}},requestRender(){}};B.addRoomSceneFurniture(p.plan.rooms[0],.14,THREE,scene,{},p.site);assert.ok((await Promise.all(scene.userData.furnitureLoads)).every(Boolean));
+ const group=scene.children.find(o=>o.userData.furnitureId===item.id);assert.equal(group.userData.source,'licensed-mesh');assert.equal(group.userData.asset,'modern-armchair');assert.equal(group.userData.license,'CC0-1.0');assert.equal(group.rotation.y,-37*Math.PI/180);assert.equal(JSON.stringify(p.plan),plan);
+ const local=group.children[0].clone(true),size=new THREE.Box3().setFromObject(local).getSize(new THREE.Vector3());for(const [axis,v]of [['x',item.size.width],['y',item.size.height],['z',item.size.depth]])assert.ok(Math.abs(size[axis]-v)<1e-5,axis+' measured GLB envelope');
+ let wood=0,fabric=0;group.traverse(o=>{if(!o.isMesh)return;if(o.material.userData.finishSlot==='wood'){wood++;assert.equal(o.material.userData.visualMaterial,'natural-oak');}if(o.material.userData.finishSlot==='fabric'){fabric++;assert.equal(o.material.userData.visualMaterial,'natural-linen');}});assert.ok(wood&&fabric);
+});
+
+test('bathroom view frames fixture footprints without moving them or placing the camera inside a fixture',()=>{
+ const B=finishFixture('toilet'),p=B.state.project,r=p.plan.rooms[0];Object.assign(r,{type:'bath',w:3.58,h:2.2});p.plan.furniture=[];
+ const items=B.roomFurnitureLayout(r),before=JSON.stringify(p.plan),view=B.roomInteriorCamera(r,items);assert.ok(view.horizontalFov>=62&&view.horizontalFov<=105);assert.equal(B.interiorCameraIsClear(r,{...view.camera,height:1.55},items),true);
+ const aim=Math.atan2(view.target.x-view.camera.x,view.target.y-view.camera.y);
+ for(const i of items)for(const [x,y]of [[i.x,i.y],[i.x+i.w,i.y],[i.x+i.w,i.y+i.d],[i.x,i.y+i.d]]){const delta=Math.atan2(x-view.camera.x,y-view.camera.y)-aim;assert.ok(Math.abs(Math.atan2(Math.sin(delta),Math.cos(delta)))<view.horizontalFov*Math.PI/360,i.model+' fits the horizontal view');}
+ assert.equal(JSON.stringify(p.plan),before);
+});
+
+test('unconfirmed terrace receives no invented furniture but preserves explicitly placed customer items',()=>{
+ const B=finishFixture('chair'),p=B.state.project,r=p.plan.rooms[0];Object.assign(r,{type:'balcony',outdoorSpace:{kind:'terrace',openSides:['north'],guard:{status:'unknown'},drainage:{status:'unknown'}}});
+ const saved=JSON.stringify(p.plan.furniture);assert.equal(B.roomFurnitureLayout(r).length,1);assert.equal(JSON.stringify(p.plan.furniture),saved);
+ p.plan.furniture=[];assert.equal(B.generatedFurniture(r).length,0);assert.equal(B.roomFurnitureLayout(r).length,0);
+});
+
+test('measured kitchen sink has a through-cut stone top, hollow stainless basin and no solid cabinet cap',()=>{
+ for(const scale of [1,.7,1.3]){
+  const B=finishFixture('kitchenSink'),base=B.FURNITURE_DIMENSIONS.kitchenSink,d=Object.fromEntries(Object.entries(base).map(([k,v])=>[k,v*scale])),before=JSON.stringify(B.state.project),m=B.sceneAssetMaterials(THREE,new THREE.Scene(),{...B.furnitureFinishPalette(B.resolvedFurniture()[0]),stoneVisualMaterial:'white-marble'}),root=B.createRoomAsset('kitchenSink',d,THREE,m);root.updateMatrixWorld(true);
+  const bounds=new THREE.Box3().setFromObject(root),size=bounds.getSize(new THREE.Vector3());for(const [axis,v]of [['x',d.w],['y',d.h],['z',d.d]])assert.ok(Math.abs(size[axis]-v)<1e-5,'saved envelope '+axis);
+  const top=root.children.find(o=>o.userData.kind==='stone-worktop-cutout'),bowl=root.children.find(o=>o.userData.kind==='stainless-sink-basin');assert.ok(top&&bowl);assert.equal(top.material,m.stone);assert.equal(bowl.material,m.metal);
+  const tb=new THREE.Box3().setFromObject(top),centre=tb.getCenter(new THREE.Vector3()),ray=new THREE.Raycaster(new THREE.Vector3(centre.x+.001,tb.max.y+.5,centre.z),new THREE.Vector3(0,-1,0));assert.equal(ray.intersectObject(top).length,0,'real cutout, not a black decal');
+  const inner=ray.intersectObject(bowl),bb=new THREE.Box3().setFromObject(bowl);assert.ok(inner.length&&inner[0].point.y<bb.min.y+(bb.max.y-bb.min.y)*.4,'actual bowl depth');
+  ray.ray.origin.x=tb.min.x+(tb.max.x-tb.min.x)*.08;assert.ok(ray.intersectObject(top).length,'stone remains around the opening');
+  for(const o of root.children){assert.ok(o.geometry.attributes.position.array.every(Number.isFinite));assert.ok(o.geometry.attributes.normal.array.every(Number.isFinite));}
+  assert.equal(root.children.filter(o=>o.userData.kind==='cabinet-side').length,2);assert.equal(JSON.stringify(B.state.project),before,'mesh refinement never changes the shared plan');
+ }
+});
+
+test('oven glass, fascia and controls retain appliance finishes under selected stone and any-angle placement',()=>{
+ const B=finishFixture('kitchenStove'),d=B.FURNITURE_DIMENSIONS.kitchenStove,m=B.sceneAssetMaterials(THREE,new THREE.Scene(),{...B.furnitureFinishPalette(B.resolvedFurniture()[0]),stoneVisualMaterial:'white-marble'}),root=B.createRoomAsset('kitchenStove',d,THREE,m);root.updateMatrixWorld(true);
+ const size=new THREE.Box3().setFromObject(root).getSize(new THREE.Vector3());for(const [axis,v]of [['x',d.w],['y',d.h],['z',d.d]])assert.ok(Math.abs(size[axis]-v)<1e-5);
+ const byKind=k=>root.children.filter(o=>o.userData.kind===k);assert.equal(byKind('oven-fascia')[0].material,m.metal);assert.equal(byKind('oven-window')[0].material,m.screen);assert.equal(byKind('hob-glass')[0].material,m.screen);assert.equal(byKind('oven-control').length,2);assert.equal(byKind('hob-ring').length,4);assert.equal(byKind('stone-worktop')[0].material,m.stone);
+ const window=byKind('oven-window')[0],point=window.getWorldPosition(new THREE.Vector3());assert.ok(point.z>0,'oven front retains shared +Z convention');
+ for(const angle of [0,37,90,180,270]){const holder=new THREE.Group();holder.add(root);holder.rotation.y=-angle*Math.PI/180;holder.updateMatrixWorld(true);const front=window.getWorldPosition(new THREE.Vector3()),expected=new THREE.Vector3(0,0,1).applyAxisAngle(new THREE.Vector3(0,1,0),-angle*Math.PI/180);front.y=0;assert.ok(front.normalize().dot(expected)>.999,'front follows saved rotation');holder.remove(root);}
+});
+
+test('production flat roof retains coplanar depth priority without moving the roof or slab or changing pitched roofs',()=>{
+ const B=finishFixture(),measured=fs.readFileSync('src/92_measured_design.js','utf8'),house=fs.readFileSync('src/103_real_house.js','utf8');
+ vm.runInNewContext('const B=BMH;'+measured.slice(measured.indexOf(' B.roofSceneMaterial='),measured.indexOf(' B.roofSurfaceUvs='))+house.slice(house.indexOf(' const roofMaterial='),house.indexOf(' const roofUvs=')),{BMH:B,document:{createElement:()=>({width:256,height:256,getContext:()=>({fillRect(){}})})}});
+ B.measuredDesignSettings().roof.type='flat';B.measuredDesignSettings().roof.surface='concrete';
+ const scene=new THREE.Scene(),geometry=new THREE.PlaneGeometry(2,4).rotateX(-Math.PI/2),flat=new THREE.Mesh(geometry,B.roofSceneMaterial(THREE)),slab=new THREE.Mesh(geometry.clone(),new THREE.MeshStandardMaterial({color:'#eeeeee',side:THREE.DoubleSide})),pitched=new THREE.Mesh(geometry.clone(),new THREE.MeshStandardMaterial());
+ flat.userData={kind:'roof',roofType:'flat'};pitched.userData={kind:'roof',roofType:'gable'};slab.userData={kind:'ceiling-slab'};for(const o of [flat,slab,pitched]){o.position.y=3.4;scene.add(o);}pitched.position.x=5;
+ const before=[flat,slab,pitched].map(o=>({position:o.position.toArray(),vertices:Array.from(o.geometry.attributes.position.array)}));
+ B.configureHousePresentation({THREE,scene,renderer:{toneMappingExposure:1},focus:'floor:0',roomFocus:null,floorFocus:0,explode:0});scene.updateMatrixWorld(true);
+ assert.equal(flat.material.polygonOffset,true);assert.ok(flat.material.polygonOffsetFactor<0&&flat.material.polygonOffsetUnits<0);assert.equal(flat.material.userData.finishSlot,'roof');assert.equal(pitched.material.polygonOffset,false);assert.equal(slab.material.polygonOffset,false);
+ assert.deepEqual([flat,slab,pitched].map(o=>({position:o.position.toArray(),vertices:Array.from(o.geometry.attributes.position.array)})),before,'no architectural offset or slab removal');
+ assert.ok(new THREE.Raycaster(new THREE.Vector3(.2,5,.3),new THREE.Vector3(0,-1,0)).intersectObject(flat).length,'existing roof covering remains intact');
+});
+
+
+test('automatic terrace floor is separate from indoor oak while explicit customer decking remains unchanged',()=>{
+ const B=finishFixture(),r=B.state.project.plan.rooms[0];r.type='balcony';r.outdoorSpace={kind:'terrace'};B.state.project.materials.finish={exterior:null,rooms:{}};const before=JSON.stringify(B.state.project.plan);
+ for(const c of B.INTERIOR_COLLECTIONS){B.applyInteriorCollection(c.id);assert.equal(B.finishPalette(r.id).visualMaterials.floor,'grey-concrete',c.id+' outdoor proposal');}
+ assert.equal(JSON.stringify(B.state.project.plan),before);assert.equal(B.applyVisualMaterial('floor','oak-floor',r.id),true);
+ for(const style of ['Hiện đại','Japandi','Industrial']){B.state.project.style=style;assert.equal(B.finishPalette(r.id).visualMaterials.floor,'oak-floor','explicit floor belongs to customer');}
+ B.state=B.mergeState(B.defaultState(),plain(B.state));assert.equal(B.finishPalette(r.id).visualMaterials.floor,'oak-floor');
 });

@@ -1,12 +1,13 @@
 {
   "type": "actual-measured-fixture-render",
-  "author": "BMH procedural geometry and artwork",
+  "author": "BMH measured production scene; licensed CC0 ModernArmChair01 geometry by Vibrant Nordic / Poly Haven",
   "basis": "Modern review fixture with synthetic inputs; not manufacturer SKU or approved construction",
   "fixture": "modern-5x20-2f-v01",
-  "revision": "FF68F57C-741638A5-AI4-RH3",
+  "revision": "FF68F57C-9AD609B4-AI4-RH3",
   "renderer": "Blender4.5.13 Cycles CPU",
   "renderStatus": "review-not-approved",
   "image": "assets/interior/collections/modern-natural.jpg",
-  "sha256": "0c5d92d21c37ab20b7fc23873767885a8811afd08fe1bb22eb55460fd23551ee",
-  "externalInputs": "Existing vendored CC0 PBR/HDR sources; see texture-provenance.json and real-house-provenance.json; production photograph plus original bounded fabric weave shading."
+  "sha256": "2a875c613b32ef4f8c4fb532def2c5b81e7d9a2ea2a4dd7dd1acb8783ae4cc20",
+  "externalInputs": "Existing vendored CC0 PBR/HDR; ModernArmChair01 CC0 geometry with customer-selected generic oak/linen finishes. Not the manufacturer original upholstery or a verified product SKU.",
+  "rendererRevision": "customer-measured-house-23"
 }

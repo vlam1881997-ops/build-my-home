@@ -171,7 +171,7 @@ BMH.mountStudio3D = async () => {
     }
   };
   const roomFocus=focus.startsWith('room:')?BMH.state.project.plan.rooms.find(r=>r.id===focus.slice(5)):null;
-  if(typeof sun!=='undefined'&&roomFocus){BMH.configureRoomShadows?.(THREE,sun,roomFocus,site);scene.add(sun.target);if(BMH.state.ui.sceneTheme!=='night'){hemi.intensity=.3;fill.intensity=.08;sun.intensity=3.5;}}
+  if(typeof sun!=='undefined'&&roomFocus){BMH.configureRoomShadows?.(THREE,sun,roomFocus,site);scene.add(sun.target);}
   const floorFocus=focus.startsWith('floor:')?BMH.clamp(Number(focus.split(':')[1])||0,0,floors-1):null;
   const visibleFloors=roomFocus?[Number(roomFocus.floor)]:floorFocus!==null?[floorFocus]:Array.from({length:floors},(_,f)=>f);
   const interiorCamera=roomFocus&&!['stairs','elevator','corridor','balcony'].includes(roomFocus.type)&&BMH.state.ui.roomCamera==='inside'?BMH.roomInteriorCamera(roomFocus):null,insideRoom=!!interiorCamera;
@@ -244,7 +244,7 @@ BMH.mountStudio3D = async () => {
   }
 
   const centerRoom=roomFocus?new THREE.Vector3(roomFocus.x+roomFocus.w/2-W/2,roomFocus.type==='stairs'?BMH.studioFloorLevel(roomFocus.floor).height*.55:1.12,roomFocus.y+roomFocus.h/2-D/2):null;
-  const focusedBounds=BMH.sceneFootprintBounds(roomFocus?[roomFocus]:visibleFloors.flatMap(f=>BMH.floorRooms(f)));if(focusedBounds){const cx=focusedBounds.cx-W/2,cz=focusedBounds.cy-D/2,extent=Math.max(focusedBounds.width,focusedBounds.depth,roofBase)+2;sun.target.position.set(cx,0,cz);scene.add(sun.target);sun.position.set(cx-10,18,cz-12);sun.shadow.camera.left=sun.shadow.camera.bottom=-extent;sun.shadow.camera.right=sun.shadow.camera.top=extent;sun.shadow.camera.updateProjectionMatrix();}
+  const focusedBounds=BMH.sceneFootprintBounds(roomFocus?[roomFocus]:visibleFloors.flatMap(f=>BMH.floorRooms(f)));if(focusedBounds&&!roomFocus){const cx=focusedBounds.cx-W/2,cz=focusedBounds.cy-D/2,extent=Math.max(focusedBounds.width,focusedBounds.depth,roofBase)+2;sun.target.position.set(cx,0,cz);scene.add(sun.target);sun.position.set(cx-10,18,cz-12);sun.shadow.camera.left=sun.shadow.camera.bottom=-extent;sun.shadow.camera.right=sun.shadow.camera.top=extent;sun.shadow.camera.updateProjectionMatrix();}
   const facadeCamera=focus==='all'&&!BMH.state.ui.sceneExploded&&BMH.state.ui.exteriorCamera==='front',frameBounds=facadeCamera&&focusedBounds?{...focusedBounds,depth:Math.min(1,focusedBounds.depth)}:focusedBounds;
   BMH.configureModelPresentation?.({THREE,scene,renderer,camera,ground,displayBase,visibleFloors,roomFocus,floorFocus,W,D,fh,explode,focus});
   const defaultPitch=roomFocus?(insideRoom?.13:.62):floorFocus!==null?.84:.38;
@@ -278,7 +278,7 @@ BMH.mountStudio3D = async () => {
    camera.lookAt(state.target);BMH.refreshCinematicHero?.();if(BMH.studio3d?.archRender)BMH.stopArchitecturalRender();requestRender();
   };updateCamera();
   let lastSize='';
-  const resize=()=>{const r=stage.getBoundingClientRect(),w=Math.max(280,Math.floor(r.width)),h=Math.max(360,Math.floor(r.height)),size=w+'x'+h;if(size===lastSize)return;lastSize=size;renderer.setSize(w,h,false);if(composer){composer.setSize(w,h);fxaa.material.uniforms.resolution.value.set(1/w,1/h);}camera.aspect=w/h;camera.updateProjectionMatrix();updateCamera();
+  const resize=()=>{const r=stage.getBoundingClientRect(),w=Math.max(280,Math.floor(r.width)),h=Math.max(360,Math.floor(r.height)),size=w+'x'+h;if(size===lastSize)return;lastSize=size;renderer.setSize(w,h,false);if(composer){composer.setSize(w,h);fxaa.material.uniforms.resolution.value.set(1/w,1/h);}camera.aspect=w/h;if(insideRoom&&interiorCamera.horizontalFov)camera.fov=BMH.clamp(2*Math.atan(Math.tan(interiorCamera.horizontalFov*Math.PI/360)/camera.aspect)*180/Math.PI,52,110);camera.updateProjectionMatrix();updateCamera();
     if(!state.framed&&focusedBounds&&!insideRoom){
       const b=frameBounds,height=focus==='all'?Math.max(roofBase+(floors-1)*explode+levels.slab,roof?(roof.envelopeTop??roof.eave+roof.rise):0):(roomFocus?BMH.studioFloorLevel(roomFocus.floor).height:BMH.studioFloorLevel(floorFocus??0).height)+(roomFocus?.type==='stairs'?.95:0);
       for(let n=0;n<6;n++){camera.updateMatrixWorld();let edge=0;for(const x of [b.x-.2,b.x+b.width+.2])for(const z of [b.y-.2,b.y+b.depth+.2])for(const y of [0,height]){const v=new THREE.Vector3(x-W/2,y,z-D/2).project(camera);edge=Math.max(edge,Math.abs(v.x)/.88,Math.abs(v.y)/.82);}if(edge<=1)break;state.dist*=Math.min(1.8,Math.max(1.08,edge));updateCamera();}
