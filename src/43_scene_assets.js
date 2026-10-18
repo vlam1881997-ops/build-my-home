@@ -537,7 +537,7 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
       pillow.rotation.z=angle; pillow.rotation.x=.16;
     }
     if(shape==='linen')for(let j=0;j<7;j++){const line=box(.018,.008,.18,-seatW*.35+j*seatW*.12,.38,-d.d*.47,m.fabric,.003);line.rotation.y=.04*Math.sin(j);}
-  } else if (/^bed/.test(model)) {
+  } else if (/^(bedDouble|bedSingle)$/.test(model)) {
     legs(.16,d.w-.1,d.d-.05);
     box(d.w,.18,d.d-.025,0,.23,0,m.wood,.03);
     box(d.w-.055,.19,d.d-.12,0,.405,.015,m.linen,.07);
@@ -616,7 +616,7 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
   } else if(model==='bedBench') {
     legs(d.h*.25,d.w-.06,d.d-.05,m.wood);
     box(d.w*.98,d.h*.25,d.d*.98,0,d.h*.375,0,m.wood,.014);
-    cushion(d.w,d.h*.5,d.d,0,d.h*.75,0,m.fabric);
+    const seat=cushion(d.w,d.h*.5,d.d,0,d.h*.75,0,m.fabric);seat.userData={kind:'bench-upholstery',generic:true};
   } else if(model==='wardrobeModern') {
     const toe=d.h*.035;
     box(d.w*.94,toe,d.d*.92,0,toe/2,0,m.dark,.003);

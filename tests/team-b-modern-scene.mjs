@@ -25,12 +25,22 @@ const textureSource=fs.readFileSync('src/43_scene_assets.js','utf8'),artSource=f
 const canvasContext={BMH:B,document:{createElement:()=>createCanvas(1,1),createElementNS:()=>({})},setTimeout,clearTimeout,console};
 vm.runInNewContext(textureSource.slice(textureSource.indexOf('BMH.sceneSurfaceTexture ='),textureSource.indexOf('// Project texture coordinates')),canvasContext);
 vm.runInNewContext(artSource.slice(artSource.indexOf('BMH.collectionArtTexture='),artSource.indexOf('const collectionDecorate=')),canvasContext);
-const beforePlan=JSON.stringify(B.state.project.plan),collection=process.env.BMH_REVIEW_COLLECTION;
+let beforePlan=JSON.stringify(B.state.project.plan);const collection=process.env.BMH_REVIEW_COLLECTION;
 if(collection){if(!B.applyInteriorCollection(collection))throw Error('Unknown collection '+collection);if(JSON.stringify(B.state.project.plan)!==beforePlan)throw Error('Finish edit changed measured plan');review.revision=B.drawingRevision();}
+const furnitureSetEvidence=[],catalogueModel=process.env.BMH_REVIEW_CATALOGUE_MODEL||null;
+if(process.env.BMH_REVIEW_FURNITURE_SETS==='1')for(const r of B.state.project.plan.rooms.filter(r=>['kitchen','bed'].includes(r.type))){
+ const proposal=B.previewFurnitureSet(r.id);if(!proposal.ok)throw Error('Furniture set cannot be reviewed: '+proposal.reason);
+ if(proposal.additions.length||proposal.updates.length){if(!B.applyFurnitureSet(r.id,proposal.stamp))throw Error('Furniture set apply failed');furnitureSetEvidence.push({roomId:r.id,additions:proposal.additions,updates:proposal.updates,notices:proposal.notices});}
+}
+if(catalogueModel){
+ if(!B.FURNITURE_DIMENSIONS[catalogueModel])throw Error('Unknown catalogue model');const d=B.FURNITURE_DIMENSIONS[catalogueModel],p=B.state.project;
+ Object.assign(p.site,{width:4,depth:4,floors:1});p.plan={rooms:[{id:'catalogue',floor:0,type:'custom',name:'Generic measured asset preview',x:0,y:0,w:4,h:4}],openings:[],fixtures:[],outdoor:[],lockedRoomIds:[],lockedFloors:[],furniture:[{id:'catalogue:'+catalogueModel,roomId:'catalogue',floor:0,modelId:catalogueModel,origin:'customer-added',placementStatus:'present',locked:false,pose:{x:2,y:2,z:0,rotationDeg:0},size:{width:d.w,depth:d.d,height:d.h},materialBindings:[]}]};B.applyInteriorCollection('modern-natural','catalogue');
+}
+beforePlan=JSON.stringify(B.state.project.plan);
 const view=process.argv[2]||'exterior',out=process.argv[3]||'docs/team-v1/evidence/B/Modern-5x20-V01';fs.mkdirSync(out,{recursive:true});
-if(!['exterior','whole','living','bed','kitchen','bath','stairs','terrace'].includes(view))throw Error('Unsupported review view: '+view);
-const houseView=['exterior','whole'].includes(view),inspection=['stairs','terrace'].includes(view);
-const room=houseView?null:B.state.project.plan.rooms.find(r=>view==='terrace'?r.outdoorSpace?.kind==='terrace':r.type===view);
+if(!['exterior','whole','living','bed','kitchen','bath','stairs','terrace','catalogue'].includes(view))throw Error('Unsupported review view: '+view);
+const houseView=['exterior','whole'].includes(view),inspection=['stairs','terrace'].includes(view)||process.env.BMH_REVIEW_ROOM_CAMERA==='overview';
+const room=houseView?null:B.state.project.plan.rooms.find(r=>catalogueModel?r.id==='catalogue':view==='terrace'?r.outdoorSpace?.kind==='terrace':r.type===view);
 if(!houseView&&!room)throw Error('Missing measured room for view: '+view);
 const measuredSnapshot=()=>JSON.stringify({site:B.state.project.site,plan:{...B.state.project.plan,furniture:undefined},furniture:B.resolvedFurniture().map(({materialBindings,...i})=>i)}),beforeGeometry=measuredSnapshot();
 const itemFinishes=JSON.parse(process.env.BMH_REVIEW_ITEM_FINISHES||'[]');
@@ -60,6 +70,12 @@ if(furnitureResults.some(ok=>!ok))throw Error('A licensed furniture upgrade fail
 // convolution is left to the renderer, not simulated by a second scene model.
 B.configureHousePresentation({THREE,...context.output,renderer:{toneMappingExposure:1}});
 await Promise.all(scene.userData.surfaceLoads||[]);scene.updateMatrixWorld(true);
+if(catalogueModel){
+ // Keep the actual furniture at its native floor-finish base. Remove room
+ // architecture only for this explicitly labelled neutral catalogue image.
+ for(const child of [...scene.children])if(!child.isLight&&child!==context.output.sun.target&&child!==context.output.ground&&child.userData.kind!=='furniture')scene.remove(child);
+ context.output.ground.position.y=B.studioFloorLevel(0).slab-.001;scene.updateMatrixWorld(true);
+}
 const materials=new Map(),meshes=[],textureFiles=new Map();
 fs.mkdirSync(path.join(out,'scene-textures'),{recursive:true});
 function texture(t){
@@ -83,8 +99,9 @@ scene.traverse(o=>{if(!o.isMesh||!o.visible)return;const g=o.geometry,p=g.attrib
 let camera=room&&!inspection?B.roomInteriorCamera(room,B.roomFurnitureLayout(room)):null;
 if(inspection){const span=Math.max(room.w,room.h),height=view==='stairs'?B.studioFloorLevel(room.floor).height:1.2;camera={position:{x:room.x+room.w*.5+span*.9,y:room.y+room.h*.5-span,height:height+span*.6},target:{x:room.x+room.w/2,y:room.y+room.h/2},targetHeight:view==='stairs'?height*.45:.4,lens:32,basis:'Measured room inspection from the production north/east cutaway; no invented guard or drainage.'};}
 if(houseView){const b=B.sceneFootprintBounds(B.state.project.plan.rooms),height=B.studioLevels().roofBase+B.studioLevels().slab,span=Math.max(b.width,b.depth,height);camera=view==='exterior'?{position:{x:b.cx+b.width*.6,y:b.y-Math.max(height*1.9,b.width*2),height:height*.46},target:{x:b.cx,y:b.y},targetHeight:height*.46,lens:45,basis:'Facade of measured envelope'}:{position:{x:b.cx+span*.85,y:b.y-span*.85,height:span*.85},target:{x:b.cx,y:b.cy},targetHeight:height*.45,lens:35,basis:'Whole measured envelope; roof retained'};}
+if(catalogueModel){const d=B.FURNITURE_DIMENSIONS[catalogueModel],span=Math.max(d.w,d.h,d.d),sign=catalogueModel==='wardrobeModern'?-1:1;camera={position:{x:2+span*1.6,y:2+sign*span*2.7,height:.14+d.h*.8+span*.5},target:{x:2,y:2},targetHeight:.14+d.h/2,lens:55,basis:'Actual measured production asset; generic neutral catalogue, not manufacturer photograph'};}
 const furnitureAssets=[];scene.traverse(o=>{if(o.userData.kind==='furniture')furnitureAssets.push({id:o.userData.furnitureId,modelId:o.userData.model,source:o.userData.source,asset:o.userData.asset||null,licence:o.userData.license||null});});
-const model={sun:{position:context.output.sun.position.toArray(),target:context.output.sun.target.position.toArray(),color:context.output.sun.color.toArray(),intensity:context.output.sun.intensity},collection:collection||null,itemFinishes,furnitureAssets,geometryPreserved:measuredSnapshot()===beforeGeometry,planPreserved:JSON.stringify(B.state.project.plan)===beforePlan,revision:review.revision,rendererRevision:B.ARCH_RENDER_REVISION,fixture:review.id,status:review.status,view,roomId:room?.id||null,room:room?{x:room.x,y:room.y,w:room.w,h:room.h}:null,site:{width:W,depth:D},camera,materials:[...materials.values()],meshes};
+const model={furnitureSetEvidence,catalogueModel,sun:{position:context.output.sun.position.toArray(),target:context.output.sun.target.position.toArray(),color:context.output.sun.color.toArray(),intensity:context.output.sun.intensity},collection:collection||null,itemFinishes,furnitureAssets,geometryPreserved:measuredSnapshot()===beforeGeometry,planPreserved:JSON.stringify(B.state.project.plan)===beforePlan,revision:review.revision,rendererRevision:B.ARCH_RENDER_REVISION,fixture:review.id,status:review.status,view,roomId:room?.id||null,room:room&&!catalogueModel?{x:room.x,y:room.y,w:room.w,h:room.h}:null,site:{width:W,depth:D},camera,materials:[...materials.values()],meshes};
 fs.writeFileSync(path.join(out,'scene-'+view+'.json'),JSON.stringify(model));
 console.log(JSON.stringify({view,revision:review.revision,meshes:meshes.length,vertices:meshes.reduce((n,m)=>n+m.attributes.position.length/3,0),camera}));
 

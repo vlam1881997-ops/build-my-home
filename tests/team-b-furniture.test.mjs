@@ -77,7 +77,7 @@ test('a room supplier sample cannot overwrite a different per-item finish or its
 });
 
 test('stone controls reach actual Modern table, kitchen and vanity meshes without recolouring the floor',()=>{
- for(const model of ['tableCoffee','tableCoffeeModern','sideTable','kitchenSink','kitchenStove','bathroomSink']){
+ for(const model of ['tableCoffee','tableCoffeeModern','sideTable','kitchenSink','kitchenStove','bathroomSink','kitchenBaseCabinet','kitchenFillerPanel']){
   const B=finishFixture(model),p=B.state.project,item=B.resolvedFurniture()[0],floor=JSON.stringify(B.finishPalette('room'));
   assert.ok(B.furnitureMaterialRoles(item).some(([role])=>role==='floor'),model+' stone control');
   assert.equal(B.setFurnitureVisualMaterial(item.id,'floor','white-marble'),true,model);
@@ -218,7 +218,7 @@ test('automatic terrace floor is separate from indoor oak while explicit custome
 test('Modern cabinet, hood, wardrobe, lamp and bench meshes fit measured envelopes and selected semantic surfaces',()=>{
  const B=finishFixture(),ids=['kitchenBaseCabinet','kitchenFillerPanel','kitchenWallCabinet','kitchenHood','wardrobeModern','bedsideLamp','bedBench'];
  for(const id of ids)for(const scale of [.7,1,1.3]){
-  const d=Object.fromEntries(Object.entries(B.FURNITURE_DIMENSIONS[id]).map(([k,v])=>[k,v*scale])),m=B.sceneAssetMaterials(THREE,new THREE.Scene(),{...B.finishPalette('room'),stoneVisualMaterial:'white-marble'}),root=B.createRoomAsset(id,d,THREE,m);assert.ok(root,id);root.updateMatrixWorld(true);
+  const d=Object.fromEntries(Object.entries(B.FURNITURE_DIMENSIONS[id]).map(([k,v])=>[k,v*scale])),m=B.sceneAssetMaterials(THREE,new THREE.Scene(),{...B.finishPalette('room'),stoneVisualMaterial:'white-marble'}),root=B.createRoomAsset(id,d,THREE,m);assert.ok(root,id);if(id==='bedsideLamp')assert.ok(root.children.some(o=>o.userData.kind==='lamp-shade'),'lamp must not match a bed prefix');if(id==='bedBench')assert.ok(root.children.some(o=>o.userData.kind==='bench-upholstery'),'bench must not match a bed prefix');root.updateMatrixWorld(true);
   const size=new THREE.Box3().setFromObject(root).getSize(new THREE.Vector3());for(const [axis,v]of [['x',d.w],['y',d.h],['z',d.d]])assert.ok(Math.abs(size[axis]-v)<1e-5,id+' '+axis);
   root.traverse(o=>{if(o.isMesh){assert.ok(o.geometry.attributes.position.array.every(Number.isFinite),id);assert.ok(o.geometry.attributes.normal.array.every(Number.isFinite),id);if(o.material.userData.finishSlot==='stone')assert.equal(o.material.userData.visualMaterial,'white-marble');}});
  }
@@ -265,4 +265,22 @@ test('furniture-set apply rejects stale or locked proposals, retains bindings an
 
 test('kitchen set follows all four saved room orientations with collision-free measured additions',()=>{
  for(const rotation of [0,90,180,270]){const B=fixture(),r=B.state.project.plan.rooms[0];r.type='kitchen';r.furnitureRotation=rotation;B.state.project.site.width=B.state.project.site.depth=6;const before=JSON.stringify(B.state.project.plan.rooms),p=B.previewFurnitureSet(r.id);assert.equal(p.ok,true);assert.ok(p.additions.some(i=>i.modelId==='kitchenBaseCabinet'),rotation+' base module');assert.ok(p.additions.some(i=>i.modelId==='kitchenHood'),rotation+' hood');assert.equal(B.applyFurnitureSet(r.id,p.stamp),true);const rows=B.resolvedFurniture(r.id);for(const i of p.additions){assert.equal(i.pose.rotationDeg,rotation);assert.deepEqual(plain(B.furniturePlacementIssues(i,rows)),[],i.modelId+' '+rotation);}assert.equal(JSON.stringify(B.state.project.plan.rooms),before);}
+});
+
+test('new exported module GLBs retain metre bounds, semantic slots and valid Architect3D asset paths',async()=>{
+ const {B}=modernReference(),room=B.state.project.plan.rooms.find(r=>r.floor===0),ids=['kitchenBaseCabinet','kitchenFillerPanel','kitchenWallCabinet','kitchenHood','wardrobeModern','bedsideLamp','bedBench'];
+ for(const id of ids){const path='assets/interior/models/'+id+'.glb',bytes=fs.readFileSync(path),gltf=await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),''),d=B.FURNITURE_DIMENSIONS[id],bounds=new THREE.Box3().setFromObject(gltf.scene).getSize(new THREE.Vector3());for(const [axis,value]of [['x',d.w],['y',d.h],['z',d.d]])assert.ok(Math.abs(bounds[axis]-value)<1e-5,id+' metre bounds');
+  const slots=new Set();gltf.scene.traverse(o=>{if(o.isMesh){assert.ok(o.geometry.attributes.position.array.every(Number.isFinite));slots.add(o.material.userData.finishSlot);}});assert.ok(slots.has(id==='kitchenHood'?'metal':id==='bedsideLamp'?'fabric':'wood'),id+' semantic material');
+  const item={id:'export',roomId:room.id,floor:0,modelId:id,origin:'customer-added',placementStatus:'present',locked:false,pose:{x:3,y:3,z:0,rotationDeg:37},size:{width:d.w,depth:d.d,height:d.h},materialBindings:[]};B.state.project.plan.furniture=[item];assert.equal(B.furnitureAssetUrl(id),'../interior/models/'+id+'.glb');assert.equal(B.furnitureExportScale(item).scale_x,100);assert.equal(B.roomFurnitureLayout(room)[0].rotation,37);
+ }
+});
+
+test('the shown set preview plan equals the committed plan and explains items excluded by access or locks',()=>{
+ const {B}=modernReference(),r=B.state.project.plan.rooms.find(r=>r.type==='bed'),before=plain(B.state.project.plan),p=B.previewFurnitureSet(r.id),preview=B.furnitureSetPreviewPlan(p);assert.deepEqual(plain(B.state.project.plan),before);assert.ok(p.skipped.some(i=>i.modelId==='bedBench'&&/khoảng sử dụng/.test(i.reason)));assert.equal(B.applyFurnitureSet(r.id,p.stamp),true);assert.deepEqual(plain(B.state.project.plan),plain(preview));
+});
+
+test('generated artwork uses measured furniture clearances and cannot intersect the proposed wardrobes',()=>{
+ const {B}=modernReference();for(const r of B.state.project.plan.rooms.filter(r=>['bed','kitchen'].includes(r.type))){const p=B.previewFurnitureSet(r.id);if(p.ok&&(p.additions.length||p.updates.length))B.applyFurnitureSet(r.id,p.stamp);}
+ for(const r of B.state.project.plan.rooms.filter(r=>['living','bed'].includes(r.type))){const items=B.roomFurnitureLayout(r),walls=B.scenePlanGeometry({rooms:[r],openings:B.state.project.plan.openings,wallContext:B.state.project.plan.rooms},r.floor).walls,art=B.roomArtPlacement(r,items,walls);if(!art)continue;assert.ok(art.top<=B.studioFloorLevel(r.floor).clearHeight-.02);for(const i of items){const hit=(i.base||0)<art.top&&(i.base||0)+i.h>art.bottom&&i.x<art.rect.x+art.rect.w&&i.x+i.w>art.rect.x&&i.y<art.rect.y+art.rect.d&&i.y+i.d>art.rect.y;assert.equal(hit,false,r.id+' art intersects '+i.model);}}
+ const r={id:'tiny',floor:0,type:'bed',x:0,y:0,w:2,h:2},walls=[{kind:'wall',horizontal:true,axis:0,a:0,b:2}];assert.equal(B.roomArtPlacement(r,[{x:0,y:0,w:2,d:2,base:0,h:3}],walls),null,'no invented free wall when room is blocked');
 });

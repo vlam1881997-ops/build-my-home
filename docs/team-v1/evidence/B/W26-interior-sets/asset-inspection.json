@@ -1,0 +1,72 @@
+[
+  {
+    "file": "assets/interior/models/kitchenBaseCabinet.glb",
+    "bytes": 268528,
+    "nodes": 10,
+    "meshes": 9,
+    "declared_triangles": 2700,
+    "materials": 4,
+    "images": 0,
+    "extensions_required": []
+  },
+  {
+    "file": "assets/interior/models/kitchenFillerPanel.glb",
+    "bytes": 60328,
+    "nodes": 3,
+    "meshes": 2,
+    "declared_triangles": 600,
+    "materials": 2,
+    "images": 0,
+    "extensions_required": []
+  },
+  {
+    "file": "assets/interior/models/kitchenWallCabinet.glb",
+    "bytes": 149384,
+    "nodes": 6,
+    "meshes": 5,
+    "declared_triangles": 1500,
+    "materials": 2,
+    "images": 0,
+    "extensions_required": []
+  },
+  {
+    "file": "assets/interior/models/kitchenHood.glb",
+    "bytes": 327436,
+    "nodes": 12,
+    "meshes": 11,
+    "declared_triangles": 3300,
+    "materials": 3,
+    "images": 0,
+    "extensions_required": []
+  },
+  {
+    "file": "assets/interior/models/wardrobeModern.glb",
+    "bytes": 297792,
+    "nodes": 11,
+    "meshes": 10,
+    "declared_triangles": 3000,
+    "materials": 3,
+    "images": 0,
+    "extensions_required": []
+  },
+  {
+    "file": "assets/interior/models/bedsideLamp.glb",
+    "bytes": 26568,
+    "nodes": 5,
+    "meshes": 4,
+    "declared_triangles": 384,
+    "materials": 3,
+    "images": 0,
+    "extensions_required": []
+  },
+  {
+    "file": "assets/interior/models/bedBench.glb",
+    "bytes": 95836,
+    "nodes": 8,
+    "meshes": 7,
+    "declared_triangles": 2156,
+    "materials": 2,
+    "images": 0,
+    "extensions_required": []
+  }
+]

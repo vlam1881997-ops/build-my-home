@@ -54,6 +54,20 @@ BMH.collectionArtTexture=(THREE,c)=>{
  ctx.fillStyle=c.fabric;ctx.beginPath();ctx.arc(116,182,39,0,Math.PI*2);ctx.fill();
  const map=new THREE.CanvasTexture(canvas);map.colorSpace=THREE.SRGBColorSpace;map.userData={generic:true,kind:'collection-art'};return map;
 };
+// Generated artwork uses the same measured furniture envelopes. A tall
+// wardrobe must not pass through a picture; omit it if no wall area is clear.
+BMH.roomArtPlacement=(r,items,walls,score=()=>0)=>{
+ const height=1.35,clear=BMH.studioFloorLevel(r.floor).clearHeight,centres=[1.75,clear-(height+.065)/2-.035];
+ for(const wall of walls.filter(w=>w.kind==='wall'&&w.b-w.a>.95).sort((a,b)=>score(b)-score(a))){
+  const width=Math.min(1.05,wall.b-wall.a-.25),side=wall.horizontal?(Math.abs(wall.axis-r.y)<.01?'north':'south'):(Math.abs(wall.axis-r.x)<.01?'west':'east'),inward={north:1,south:-1,west:1,east:-1}[side];
+  for(const middle of [(wall.a+wall.b)/2,wall.a+width/2+.15,wall.b-width/2-.15])for(const centreY of centres){
+   const bottom=centreY-(height+.065)/2,top=centreY+(height+.065)/2;if(bottom<.65||top>clear-.02)continue;
+   const x=wall.horizontal?middle:wall.axis+inward*.13,y=wall.horizontal?wall.axis+inward*.13:middle,rect={x:x-(wall.horizontal?(width+.065)/2:.03),y:y-(wall.horizontal?.03:(width+.065)/2),w:wall.horizontal?width+.065:.06,d:wall.horizontal?.06:width+.065};
+   const blocked=items.some(i=>(i.base||0)<top&&(i.base||0)+i.h>bottom&&i.x<rect.x+rect.w&&i.x+i.w>rect.x&&i.y<rect.y+rect.d&&i.y+i.d>rect.y);
+   if(!blocked)return{wall,width,height,side,inward,middle,centreY,rect,bottom,top};
+  }
+ }return null;
+};
 const collectionDecorate=BMH.decorateStudioScene;
 BMH.decorateStudioScene=options=>{
  collectionDecorate(options);
@@ -61,7 +75,7 @@ BMH.decorateStudioScene=options=>{
  for(const f of visibleFloors)for(const r of BMH.floorRooms(f).filter(r=>!roomFocus||r.id===roomFocus.id)){
   if(!['living','bed'].includes(r.type))continue;
   const base=roomFocus||floorFocus!==null?0:BMH.studioFloorLevel(f).base+f*explode,finish=BMH.finishPalette(r.id),c=BMH.interiorCollection(r.id),materials=BMH.sceneAssetMaterials(THREE,scene,finish),items=BMH.roomFurnitureLayout(r);
-  const table=items.find(i=>i.model==='tableCoffee'),bed=items.find(i=>/^bed/.test(i.model));
+  const table=items.find(i=>i.model==='tableCoffee'),bed=items.find(i=>/^(bedDouble|bedSingle)$/.test(i.model));
   // Place the rug under the actual seating/bed group rather than in an empty room centre.
   for(const old of [...scene.children])if(old.userData.kind==='finish-detail'&&old.userData.roomId===r.id&&old.geometry?.parameters?.height===.012){scene.remove(old);old.geometry.dispose();}
   const anchor=table||bed;if(anchor){
@@ -72,13 +86,13 @@ BMH.decorateStudioScene=options=>{
   }
   const walls=BMH.scenePlanGeometry({rooms:[r],openings:BMH.state.project.plan.openings,wallContext:BMH.state.project.plan.rooms},f).walls;
   const view=BMH.roomInteriorCamera(r,items),score=w=>{const x=w.horizontal?(w.a+w.b)/2:w.axis,z=w.horizontal?w.axis:(w.a+w.b)/2,dx=x-(view?.camera.x||r.x+r.w/2),dz=z-(view?.camera.y||r.y+r.h),tx=(view?.target.x||r.x+r.w/2)-(view?.camera.x||r.x+r.w/2),tz=(view?.target.y||r.y)-(view?.camera.y||r.y+r.h);return (dx*tx+dz*tz)/(Math.hypot(dx,dz)*Math.hypot(tx,tz)||1)*5+Math.min(w.b-w.a,2);};
-  const candidates=walls.filter(w=>w.kind==='wall'&&w.b-w.a>.95).sort((a,b)=>score(b)-score(a));
-  const wall=candidates[0];if(wall){
-   const width=Math.min(1.05,wall.b-wall.a-.25),height=1.35,side=wall.horizontal?(Math.abs(wall.axis-r.y)<.01?'north':'south'):(Math.abs(wall.axis-r.x)<.01?'west':'east'),inward={north:1,south:-1,west:1,east:-1}[side],middle=(wall.a+wall.b)/2;
-   const group=new THREE.Group();group.position.set((wall.horizontal?middle:wall.axis+inward*.13)-W/2,base+levels.slab+1.75,(wall.horizontal?wall.axis+inward*.13:middle)-D/2);group.rotation.y={north:0,south:Math.PI,west:Math.PI/2,east:-Math.PI/2}[side];
+  const placement=BMH.roomArtPlacement(r,items,walls,score);
+  if(placement){
+   const {wall,width,height,side,inward,middle,centreY}=placement;
+   const group=new THREE.Group();group.position.set((wall.horizontal?middle:wall.axis+inward*.13)-W/2,base+levels.slab+centreY,(wall.horizontal?wall.axis+inward*.13:middle)-D/2);group.rotation.y={north:0,south:Math.PI,west:Math.PI/2,east:-Math.PI/2}[side];
    const frameMaterial=materials.wood.clone(),paper=materials.white.clone(),inspection=floorFocus!==null||roomFocus&&BMH.state.ui.roomCamera!=='inside'&&['north','east'].includes(side);if(inspection){const planes=[new THREE.Plane(new THREE.Vector3(0,-1,0),base+(roomFocus?.85:1.05))];frameMaterial.clippingPlanes=planes;paper.clippingPlanes=planes;}
    const frame=new THREE.Mesh(new THREE.BoxGeometry(width+.065,height+.065,.035),frameMaterial);paper.map=BMH.collectionArtTexture(THREE,c);paper.roughness=.94;
-   const picture=new THREE.Mesh(new THREE.PlaneGeometry(width,height),paper);picture.position.z=.021;frame.castShadow=true;group.add(frame,picture);group.userData={kind:'interior-art',roomId:r.id,generic:true,side};scene.add(group);
+   const picture=new THREE.Mesh(new THREE.PlaneGeometry(width,height),paper);picture.position.z=.021;frame.castShadow=true;group.add(frame,picture);group.userData={kind:'interior-art',roomId:r.id,generic:true,side,placement:{...placement,wall:undefined}};scene.add(group);
   }
  }
 };
