@@ -1,0 +1,32 @@
+{
+  "base": "cd13c27e41806e91b43eab53b9c8634890a30833",
+  "branch": "codex/b-personal-plan-hotfix",
+  "localRuntime": "Node24.19.0",
+  "localChecks": {
+    "passed": 59,
+    "failed": 0,
+    "files": [
+      "customer-design.test.mjs",
+      "design-studio.test.mjs",
+      "team-b-workflow.test.mjs"
+    ]
+  },
+  "before": {
+    "origin": "https://www.huiminhbach.id.vn/",
+    "project": "QA BMH · tự bố trí · không phải hồ sơ khách",
+    "case": "ApplyB then uncheck kitchen and generate; feasible requests falsely rejected",
+    "screenshotSha256": "b91146dfae61e706357dc5cf22d4e7c33b616df8f0e0fb3c4e7584f1682fa7fd"
+  },
+  "sourceSha256": {
+    "src/81_design_studio.js": "3eff345c6f250c6918c07adbfdfe37f7c099b0bb2bc717fe1aedc252cffde2f4",
+    "src/99_customer_design.js": "07ff1423d76d3794a2272497921763739baa4750c709551d95f370bf210adaf6",
+    "src/101_visual_studio.js": "2c1accc922e65dff4958df984d9af1ccb6ba376e82da30160b2175c801db715e",
+    "src/customer-design.css": "67a597c9b7114ac1d99f1c6009bb41bd5e446a12ec03fa9034af25b371eeeb4e",
+    "tests/team-b-workflow.test.mjs": "3a5f733ed954cbab8d8cc39914ab665c6ed8e039c10435991d7a37ee5511ff0d"
+  },
+  "pending": [
+    "exact-head Node22 CI",
+    "deployed native request/regenerate/manual numerical draw/delete/undo/reload",
+    "native mobile/GPU and Modern R1 acceptance"
+  ]
+}

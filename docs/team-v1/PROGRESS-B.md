@@ -1,12 +1,12 @@
 # Tiến độ AI B — BMH commercial v1
 
-Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 15/10/2026.
+Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 18/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W14 B reference/revision review verified desktop+phone; draft PR54 held for A-owned parapet persistence defect
+- active_substep: W27 personal-plan hotfix; valid suggestions after customer edits, empty-land/manual numerical drawing; CI/deployment/native final checks pending
 - target_branch: codex/b-v1-24
-- actual_branch: remote codex/b-facade-depth; local restored checkout bmh-review-ab-c08 contains older git metadata; push only scoped files against fresh remote tree
+- actual_branch: codex/b-personal-plan-hotfix; reconstructed local checkout bmh-hotfix; push scoped files against main cd13c27. PR66 W26 remains on codex/b-facade-depth untouched.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
 - last_verified_commit: d4b71f70630f7a97b111c4c9020ae53d871c51f2 (full CI success; local room/exterior desktop+phone; public desktop-room/phone-facade/GLB verified)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
@@ -605,3 +605,13 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Refined roof/kitchen/terrace/facade images inspected. Living/bed/bath/stairs retain the already inspected unchanged W24 images. Public collection thumbnail uses the actual licensed-chair living render and updated provenance. No AI target image substituted for measured output.
 - Latest source correction restores actual production roof factories in the offline exporter and removes the unnecessary runtime depth reassertion. Related production roof-factory regression passes. No further unchanged suites rerun locally; exact final-head CI and production UI remain next.
 - R1 NOT COMPLETE: sparse kitchen/bedroom composition, terrace access/guard/drainage, verified product assets/engineering inputs and native GPU/customer acceptance remain open. Next concrete action: publish the verified incremental source/images, confirm renderer24 and exact thumbnail bytes on the production domain, then native WC default/explicit floor/reload verification. Do not expand to another style or audit A.
+
+
+## W27 · personal-plan editing hotfix (2026-10-18)
+- User specifically requested fixing blocked requirements / personal drawing after deleting rooms, and publishing GitHub + Vercel. This is a bounded hotfix from production main cd13c27, separate from still-draft PR66 /5da7ea4. No W26 modules or assets are included, and production is not used to evade that preview gate.
+- Reproduced with actual production UI on an isolated QA5x20m/two-floor project: select garage+living+kitchen / two bedrooms+oneWC, applyB, reopen requests, uncheck kitchen, regenerate -> false generic insufficient-land error despite a feasible proposal. Source regression confirms candidate rooms were checked against the existing plan's opening room IDs.
+- B81 now checks a full detached candidate in withPlan context and retains the generator's specific reason. B99 supplies an explicit personal-drawing action without clearing the saved design or requirements; deleted-last-room selects drawing mode, with exact numeric X/Y/width/depth inputs using the same measured commit/history. Bounds, setbacks, overlaps, locks and undo/redo/reload remain enforced. B101 keeps the real drawing first for empty projects too.
+-59 related existing/new checks pass locally on Node24.19.0:37customer-design,13design-studio and9workflow (including4new personal-plan regressions). Four new expectations failed before implementation; the initial test compared normalized JSON serialization rather than the requested floor values and was corrected. Exact release-head Node22 CI is required next.
+- Actual production before screenshot: evidence/B/W27-personal-plan/before.jpg. New-source browser checks and production identity are pending; the current container has no installed Chromium. Cloud Browser rejects file:// QA pages, so no alternate local-page access was attempted. No native mobile/GPU or commercial acceptance claim.
+- Files: src/81_design_studio.js,99_customer_design.js,101_visual_studio.js,customer-design.css; tests/team-b-workflow.test.mjs. No A schema, measurements, build or dependency changes.
+- Next: push this scoped source and checkpoints, confirm exact-head CI and preview status, release the requested bounded hotfix, verify the previously failing flow and numeric draw/delete/undo/reload on the real domain. Modern R1 remains IN_PROGRESS; PR66 W26 native acceptance and terrace/GPU/customer gates stay open.

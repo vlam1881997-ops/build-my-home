@@ -21,8 +21,8 @@ BMH.programChooserHtml=()=>{
 };
 BMH.createProgramDesign=skip=>{
  const s=BMH.designState(),old=structuredClone(s.program||{});
- s.program=skip?{mode:'initial'}:{...old,mode:'custom',bedrooms:Number(old.bedrooms)||BMH.householdNeeds().bedrooms};
- if(!BMH.generateDesignKits()){s.programNotice='Chưa bố trí đủ các lựa chọn trên khu đất hiện tại. Hãy giảm số phòng / công năng hoặc tăng số tầng trong hồ sơ.';s.programOpen=true;BMH.save();BMH.render({preserveScroll:true});return false;}
+ s.program=skip?{mode:'initial'}:{...old,mode:'custom',bedrooms:Number(old.bedrooms)||BMH.householdNeeds().bedrooms};s.programNotice='';
+ if(!BMH.generateDesignKits()){s.programNotice=s.programNotice||'Chưa bố trí tự động được theo yêu cầu này. Bạn vẫn có thể tự bố trí trên bản vẽ, giữ nguyên các yêu cầu đã chọn.';s.programOpen=true;BMH.save();BMH.render({preserveScroll:true});return false;}
  s.programOpen=false;s.programNotice='';BMH.save();BMH.render({preserveScroll:true});return true;
 };
 BMH.outdoorPlanSvg=plan=>'<g class="outdoor-plan">'+(plan.outdoor||[]).map(z=>'<g data-outdoor-id="'+BMH.esc(z.id)+'"><rect x="'+z.x+'" y="'+z.y+'" width="'+z.w+'" height="'+z.h+'" rx=".08" fill="'+(z.type==='pond'?'#bdd8d3':'#d6dec8')+'" stroke="#72866e" stroke-width=".025"/>'+ (z.type==='garden'?[.25,.6,.85].map(t=>'<circle cx="'+(z.x+z.w*t)+'" cy="'+(z.y+z.h*.5)+'" r="'+Math.min(.25,z.w*.15,z.h*.2)+'" fill="#9aac87"/>').join(''):'')+'<title>'+BMH.esc(z.name)+' · '+z.w.toFixed(2)+' × '+z.h.toFixed(2)+' m</title></g>').join('')+'</g>';
@@ -63,8 +63,10 @@ BMH.DESIGN_KITS=[
 BMH.generateDesignKits=()=>{
  if(BMH.planHasLocks())return BMH.toast('Có phòng hoặc tầng đã khóa. Mở khóa nếu bạn muốn tạo bố trí mới.');
  const s=BMH.designState(),kits=[];
- for(const def of BMH.DESIGN_KITS){const plan=BMH.generateAutoPlanSnapshot(def.strategy);if(!plan||!BMH.layoutValid(plan.rooms))continue;const metrics=BMH.planMetrics(plan);kits.push({...def,plan,metrics});}
- if(!kits.length){BMH.toast('Khu đất chưa đủ cho nhu cầu hiện tại. Kiểm tra số phòng, số tầng và khoảng lùi để gợi ý bố trí phù hợp.');return false;}
+ // A suggestion owns its rooms, openings and fixtures. Validating its rooms
+ // against the customer's current openings can reject every valid suggestion.
+ for(const def of BMH.DESIGN_KITS){const plan=BMH.generateAutoPlanSnapshot(def.strategy);if(!plan||!BMH.withPlan(plan,()=>BMH.layoutValid(plan.rooms)))continue;const metrics=BMH.planMetrics(plan);kits.push({...def,plan,metrics});}
+ if(!kits.length){BMH.toast(s.programNotice||'Chưa tìm được gợi ý tự động phù hợp. Bạn vẫn có thể tự bố trí trên bản vẽ.');return false;}
  BMH.state.ui.designProposalsOpen=true;s.kits=kits;s.inputSignature=BMH.designInputKey();s.notice='Chọn một bộ để áp dụng đồng thời mặt bằng, cửa, cầu thang và bảng hoàn thiện. Mọi phần đều chỉnh tiếp được.';BMH.save();BMH.render({preserveScroll:true});return true;
 };
 BMH.prepareDesignPlanner=()=>{
