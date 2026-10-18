@@ -4,11 +4,11 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 18/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W28 integrate released W27 into PR66 W26; exact combined-head CI and native W26 acceptance pending
+- active_substep: W31 measured lightweight model and terrace review UI; exact-head preview/CI pending
 - target_branch: codex/b-v1-24
-- actual_branch: codex/b-facade-depth (PR66); main8620d46 integrated after source b04ab45 release. W26 assets/proposals preserved; protected native preview pending.
+- actual_branch: codex/b-facade-depth, parent QA15209c; runtime baseline released PR66 main f3bce504. Preview permission resolved.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
-- last_verified_commit: d4b71f70630f7a97b111c4c9020ae53d871c51f2 (full CI success; local room/exterior desktop+phone; public desktop-room/phone-facade/GLB verified)
+- last_verified_commit: 70c5741009ae061bdc2f98aed2c7c6aea95d63f2 (Node22 CI39127354806; native preview and production accepted for W30 scope)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -701,3 +701,13 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Actual-domain runtime contains the module/history/shared-card fixes. Prior isolated personal room survives reload with exact X0.317/Y2.113/W3.137/H3.843. New isolated Modern project through visible library import: kitchen apply25, undo18 with redo enabled, redo/reload25; kitchen card14; bedroom apply card6 with correct wardrobe/table/lamps. Native production screenshot retained.
 - This checkpoint is evidence/progress only, based on released main; no application source changes or additional production deployment required. last_verified_commit70c5741009ae061bdc2f98aed2c7c6aea95d63f2. Active branch remains codex/b-facade-depth.
 - R1.1 module/UI increment is released. Full R1 remains IN_PROGRESS: actual enabled-GPU desktop/mobile appearance/performance, terrace guard/drainage/waterproofing source/professional review, and customer visual/design acceptance. Next resume R1.2/R1.3; do not repeat accepted W26/W30 or ask the user to regrant ChatGPT tool permissions.
+
+
+## W31 · measured lightweight model / terrace review (2026-10-18)
+- Resume B checkpoint15209c over production f3bce504. Do not repeat W30 kitchen/native checks or permission requests. No A/source/schema/build/dependency edits.
+- Native status follow-up corrects an earlier observation: the initial loading caption does finish after the module chain settles; it is not proven to wait forever. No timeout or renderer-disable workaround added.
+- Fixed an actual fallback discrepancy: rotated furniture was shown as its axis-aligned collision box. Lightweight SVG now projects the same saved footprint, mounting height and size; follows actual level/slab heights, per-item flat colour, fixture bounds and deletion tombstones. Includes drawing revision and semantic IDs for verification. It remains a simplified measured block view, not a shaded material/GPU approval.
+- Added a pure terrace/loggia review panel in drawing and selected-room3D UI: measured dimensions/area, covered/open sides, actual door width/height/sill, source and current/stale/missing technical-record status. It does not add guards, drains or engineering inputs or certify construction readiness. No design/history writes.
+-12 registered related workflow checks PASS on local Node24.19.0; three new regressions cover independently projected37deg coordinates + measured slab/mounting + chosen colour/deletion, synthetic Modern terrace open edges/revision, and actual access/missing data/source escaping/no mutation. Changed JS syntax passes. Unrelated accepted suites not rerun.
+- Source files: src/78_design_workflow.js, src/99_customer_design.js, src/customer-design.css; tests/team-b-workflow.test.mjs; this progress/evidence. Native final-preview acceptance and exact-head Node22 CI pending before merge. Full R1 remains IN_PROGRESS: enabled-GPU desktop/mobile appearance/performance, actual terrace source/professional inputs and customer review.
+- Next: exact-head CI and preview; visible angle/colour/delete/reload and terrace panel checks on isolated fixture, then release only this verified increment to the existing GitHub/Vercel project.
