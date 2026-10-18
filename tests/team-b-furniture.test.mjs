@@ -329,3 +329,27 @@ test('transient furniture previews cannot leak into another project, another roo
  B.state=B.mergeState(B.defaultState(),plain(B.state));assert.doesNotMatch(B.furnitureSetHtml(B.state.project.plan.rooms.find(i=>i.id===r.id)),/data-furniture-set="/);
  assert.equal(B.showFurnitureSetPreview('missing'),false);
 });
+
+test('furniture history stays reachable when undo removes the selected proposed item',()=>{
+ const {B}=modernReference(),r=B.state.project.plan.rooms.find(r=>r.type==='kitchen'),p=B.previewFurnitureSet(r.id);B.state.ui.planner.selected=r.id;
+ assert.equal(B.applyFurnitureSet(r.id,p.stamp),true);B.state.ui.planner.selectedFurniture=p.additions[0].id;B.undoPlan();
+ assert.equal(B.resolvedFurniture().some(i=>i.id===p.additions[0].id),false);
+ const html=B.furnitureEditorHtml(),history=html.match(/<div class="team-b-item-history">([\s\S]*?)<\/div>/)?.[1];assert.ok(history);assert.match(history,/<button type="button" data-plan-redo >Làm lại<\/button>/);
+ B.redoPlan();assert.equal(B.resolvedFurniture().some(i=>i.id===p.additions[0].id),true);
+});
+
+test('room walkthrough cards use the saved furniture, including proposed modules, edited angles and deletion tombstones',()=>{
+ const {B}=modernReference();
+ for(const r of B.state.project.plan.rooms.filter(r=>['kitchen','bed'].includes(r.type))){
+  const p=B.previewFurnitureSet(r.id);assert.equal(B.applyFurnitureSet(r.id,p.stamp),true);B.state.ui.sceneFocus='room:'+r.id;
+  const target=B.resolvedFurniture(r.id).find(i=>i.modelId===(r.type==='bed'?'bedsideLamp':'kitchenWallCabinet'));
+  if(target)assert.equal(B.editFurniture(target.id,{pose:{rotationDeg:37,...(r.type==='kitchen'?{x:r.x+r.w/2,y:r.y+r.h/2,z:1.6}:{})}}),true);
+  const removed=B.resolvedFurniture(r.id).find(i=>i.modelId===(r.type==='bed'?'wardrobeModern':'kitchenHood'));assert.ok(removed);assert.equal(B.editFurniture(removed.id,{placementStatus:'removed'}),true);
+  const before=JSON.stringify(B.state.project.plan),html=B.customerRoomWalkHtml(),svg=B.designPlanPreview({...B.state.project.plan,rooms:[r]},r.floor);
+  assert.ok(html.includes(svg),'walkthrough uses the shared-plan thumbnail');
+  for(const i of B.resolvedFurniture(r.id))assert.ok(html.includes('data-furniture-id="'+i.id+'"'),i.id+' remains visible');
+  assert.ok(!html.includes('data-furniture-id="'+removed.id+'"'),'deleted item must not regenerate');
+  if(target)assert.ok(html.includes(B.furnitureFootprint(B.resolvedFurniture(r.id).find(i=>i.id===target.id)).map(p=>p.x+','+p.y).join(' ')),'edited footprint is retained');
+  assert.equal(JSON.stringify(B.state.project.plan),before,'thumbnail rendering never writes the plan');
+ }
+});
