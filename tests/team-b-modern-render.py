@@ -76,6 +76,15 @@ for row in data['materials']:
             else:
                 normal=nodes.new('ShaderNodeNormalMap');normal.inputs['Strength'].default_value=row.get('normalStrength',.2)
                 links.new(tex.outputs['Color'],normal.inputs['Color']);links.new(normal.outputs[0],bs.inputs['Normal'])
+    # Reproduce the live inspection's world-space clipping planes in shading.
+    # The measured vertices remain intact; this is not a demolished wall.
+    surface=bs.outputs['BSDF']
+    for plane in row.get('clippingPlanes',[]):
+        coord=nodes.new('ShaderNodeNewGeometry');dot=nodes.new('ShaderNodeVectorMath');dot.operation='DOT_PRODUCT';dot.inputs[1].default_value=rotation.to_3x3()@Vector(plane['normal']);links.new(coord.outputs['Position'],dot.inputs[0])
+        offset=nodes.new('ShaderNodeMath');offset.operation='ADD';offset.inputs[1].default_value=plane['constant'];links.new(dot.outputs['Value'],offset.inputs[0])
+        clipped=nodes.new('ShaderNodeMath');clipped.operation='LESS_THAN';links.new(offset.outputs[0],clipped.inputs[0])
+        clear=nodes.new('ShaderNodeBsdfTransparent');mix=nodes.new('ShaderNodeMixShader');links.new(clipped.outputs[0],mix.inputs[0]);links.new(surface,mix.inputs[1]);links.new(clear.outputs[0],mix.inputs[2]);surface=mix.outputs[0]
+    links.new(surface,nodes.get('Material Output').inputs['Surface'])
     materials[row['id']]=m
 vertices=0;triangles=0
 for i,row in enumerate(data['meshes']):
@@ -128,11 +137,18 @@ if data.get('room'):
 else:
     fill_light('Presentation facade fill',(10,4,8),(0,0,3),2600,10)
 cam_data=bpy.data.cameras.new('BMH measured view');cam=bpy.data.objects.new('BMH measured view',cam_data);bpy.context.collection.objects.link(cam);scene.camera=cam
-if data['camera']:
+if data['camera'] and data['camera'].get('position'):
+    c=data['camera'];p=c['position'];cam.location=(p['x']-data['site']['width']/2,data['site']['depth']/2-p['y'],p['height'])
+    target=Vector((c['target']['x']-data['site']['width']/2,data['site']['depth']/2-c['target']['y'],c['targetHeight']));cam_data.lens=c['lens']
+elif data['camera']:
     c=data['camera'];height=(c.get('targetHeight') or 1.15)+math.sin(c['pitch'])*c['distance']
     cam.location=(c['camera']['x']-data['site']['width']/2,data['site']['depth']/2-c['camera']['y'],height)
     target=Vector((c['target']['x']-data['site']['width']/2,data['site']['depth']/2-c['target']['y'],c.get('targetHeight') or 1.15))
-    cam_data.lens=24
+    cam_data.sensor_fit='VERTICAL';cam_data.sensor_height=24
+    aspect=scene.render.resolution_x/scene.render.resolution_y
+    vertical_fov=2*math.atan(math.tan(math.radians(c['horizontalFov'])/2)/aspect) if c.get('horizontalFov') else math.radians(58)
+    vertical_fov=max(math.radians(52),min(math.radians(110),vertical_fov))
+    cam_data.lens=cam_data.sensor_height/(2*math.tan(vertical_fov/2))
 else:
     cam.location=(10,25,7);target=Vector((0,2.8,3.2));cam_data.lens=48
 cam.rotation_euler=(target-Vector(cam.location)).to_track_quat('-Z','Y').to_euler();cam_data.clip_start=.03;cam_data.clip_end=250

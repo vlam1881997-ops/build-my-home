@@ -20,8 +20,12 @@
  };
  B.styleDefaultPalette=roomId=>{
   const profile=B.customerStyleProfile(),c=B.interiorCollection(roomId),v=finish().interior||{},authored=roomId&&v.rooms?.[roomId]?v.authored?.[roomId]:v.authored?.default;
-  if(!profile.specification||c.id!==profile.collection.id||authored==='manual')return null;
-  const defaults={...c,visualMaterials:{...c.visualMaterials,...profile.specification.defaultMaterials}};
+  const followsStyle=!!profile.specification&&c.id===profile.collection.id&&authored!=='manual',wetRoom=B.state.project.plan.rooms.some(r=>r.id===roomId&&r.type==='bath');
+  if(!followsStyle&&!wetRoom)return null;
+  const defaults={...c,visualMaterials:{...c.visualMaterials,...(followsStyle?profile.specification.defaultMaterials:{})}};
+  // Automatic whole-house finishes use a separate bathroom proposal. An
+  // explicitly authored room floor still overrides this default below.
+  if(wetRoom)defaults.visualMaterials.floor='sand-travertine';
   for(const [role,id]of Object.entries(defaults.visualMaterials)){const material=B.VISUAL_MATERIALS.find(x=>x.id===id&&x.role===role);if(material){defaults[role]=material.color;if(role==='floor')defaults.surface=material.surface;}}
   return defaults;
  };

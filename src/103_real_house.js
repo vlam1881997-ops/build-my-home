@@ -167,8 +167,8 @@
   }
   if(day){
    for(const light of scene.children.filter(o=>o.isLight)){
-    if(light.isHemisphereLight){light.color.set('#eef4ff');light.groundColor.set('#c4c7bb');light.intensity=whole?.42:roomFocus?.68:1.1;}
-    else if(light.isDirectionalLight){light.color.set(light.castShadow?'#fff5e8':'#dcecff');light.intensity=light.castShadow?3.1:.16;}
+    if(light.isHemisphereLight){light.color.set('#eef4ff');light.groundColor.set('#c4c7bb');light.intensity=whole?.42:roomFocus?.3:1.1;}
+    else if(light.isDirectionalLight){light.color.set(light.castShadow?'#fff5e8':'#dcecff');light.intensity=light.castShadow?(roomFocus?3.5:3.1):(roomFocus?.08:.16);}
    }renderer.toneMappingExposure=whole?.93:1.05;
   }
   if(whole&&day){
@@ -217,6 +217,6 @@
  const review=B.architecturalIdentityReview;
  B.architecturalIdentityReview=()=>{const result=review(),roof=B.sceneRoofSpec();return {...result,roof:{...result.roof,modeled:!!roof,compound:!!roof?.compound,effectiveOverhang:roof?.overhang??null,notice:roof?.notice||null},constructionDetailRevision:version,parapet:B.roofParapetSpec(),context:'Bầu trời và mặt đất minh họa; công trình lấy từ bản vẽ.',engineeringApproved:false};};
  const drawingRevision=B.drawingRevision;B.drawingRevision=()=>drawingRevision()+'-RH3';
- B.ARCH_RENDER_REVISION='customer-measured-house-22';
+ B.ARCH_RENDER_REVISION='customer-measured-house-23';
 })();
 

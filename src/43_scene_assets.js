@@ -339,12 +339,18 @@ BMH.roomInteriorCamera = (room, items = BMH.roomFurnitureLayout(room)) => {
     let best=null;
     for(const [u,v] of [[.94,.86],[.06,.86],[.94,.5],[.06,.5],[.94,.14],[.06,.14],[.5,.86],[.5,.14]]){
       const camera={x:room.x+Math.max(.2,Math.min(room.w-.2,room.w*u)),y:room.y+Math.max(.2,Math.min(room.h-.2,room.h*v))};
-      if(items.some(i=>camera.x>i.x-.08&&camera.x<i.x+i.w+.08&&camera.y>i.y-.08&&camera.y<i.y+i.d+.08)||items.some(i=>blocksView(camera,i)))continue;
-      const dx=camera.x-target.x,dy=camera.y-target.y,horizontal=Math.hypot(dx,dy);
+      if(items.some(i=>camera.x>i.x-.08&&camera.x<i.x+i.w+.08&&camera.y>i.y-.08&&camera.y<i.y+i.d+.08))continue;
+      // Fit the actual fixture footprints, including the near vanity. Aiming
+      // only at their mean centre can crop it while still scoring two centres.
+      const tau=Math.PI*2,angles=items.flatMap(i=>[[i.x,i.y],[i.x+i.w,i.y],[i.x+i.w,i.y+i.d],[i.x,i.y+i.d]].map(([x,y])=>(Math.atan2(x-camera.x,y-camera.y)+tau)%tau)).sort((a,b)=>a-b);
+      let gap=-1,start=0;for(let n=0;n<angles.length;n++){const next=(n+1)%angles.length,difference=angles[next]+(next===0?tau:0)-angles[n];if(difference>gap){gap=difference;start=angles[next];}}
+      const span=tau-gap,aim=start+span/2,mean={x:points.reduce((sum,p)=>sum+p.x,0)/points.length,y:points.reduce((sum,p)=>sum+p.y,0)/points.length},horizontal=Math.hypot(camera.x-mean.x,camera.y-mean.y);
       if(horizontal<.5)continue;
-      const visible=points.reduce((sum,p)=>{const px=p.x-camera.x,py=p.y-camera.y,cos=(-dx*px-dy*py)/(horizontal*Math.hypot(px,py));return sum+(cos>Math.cos(.5)?1:0);},0);
-      const score=visible*10+horizontal;
-      if(!best||score>best.score)best={score,camera,target,targetHeight:.65,yaw:Math.atan2(dx,dy),pitch:Math.atan2(.9,horizontal),distance:Math.hypot(horizontal,.9)};
+      const framedTarget={x:camera.x+Math.sin(aim)*horizontal,y:camera.y+Math.cos(aim)*horizontal};
+      if(framedTarget.x<room.x||framedTarget.x>room.x+room.w||framedTarget.y<room.y||framedTarget.y>room.y+room.h)continue;
+      target=framedTarget;if(items.some(i=>blocksView(camera,i)))continue;
+      const score=-span*100+horizontal,horizontalFov=Math.min(105,Math.max(62,span*180/Math.PI+12));
+      if(!best||score>best.score)best={score,camera,target:framedTarget,targetHeight:.65,horizontalFov,yaw:Math.atan2(camera.x-target.x,camera.y-target.y),pitch:Math.atan2(.9,horizontal),distance:Math.hypot(horizontal,.9)};
     }
     if(best)return best;
   }
@@ -446,6 +452,13 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     const o = mesh(new THREE.SphereGeometry(1,24,16),material,x,y,z);
     o.scale.set(w/2,h/2,depth/2);
     return o;
+  };
+  // A closed ceramic shell has a real inner cavity and rounded lip. All radii
+  // are fractions of the measured envelope; this is a generic vessel, not a SKU.
+  const ceramicBowl=(w,h,depth,x,y,z)=>{
+    const profile=[[0,.03],[.12,.02],[.30,.03],[.43,.15],[.49,.65],[.5,.92],[.498,1],[.47,1.025],[.44,.96],[.43,.75],[.36,.32],[.20,.20],[0,.18]];
+    const geometry=new THREE.LatheGeometry(profile.map(([r,v])=>new THREE.Vector2(r,v)),48);geometry.scale(w,h,depth);
+    const bowl=mesh(geometry,m.white,x,y,z);bowl.userData={kind:'ceramic-basin',generic:true};return bowl;
   };
   // A soft, slightly compressed superellipsoid gives upholstery a continuous
   // silhouette. It remains inside the same measured furniture envelope.
@@ -569,14 +582,14 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
        if(table==='rattan'){box(d.w*.76,.025,d.d*.68,0,.14,0,m.wood,.025);for(let x=-d.w*.34;x<d.w*.34;x+=.035)box(.012,.012,d.d*.62,x,.16,0,m.slattedWood,.003);}
       }
       const book=box(.28,.034,.20,-d.w*.19,d.h+.017,-.055,m.pillow,.003);book.rotation.y=.1;box(.24,.023,.18,-d.w*.20,d.h+.046,-.06,m.linen,.003);
-      cylinder(.10,.10,.013,d.w*.22,d.h+.008,.04,m.wood);cylinder(.043,.035,.08,d.w*.22,d.h+.053,.04,m.stone);
-      const handle=mesh(new THREE.TorusGeometry(.026,.006,6,14),m.stone,d.w*.22+.04,d.h+.055,.04);handle.rotation.y=Math.PI/2;
+      cylinder(.10,.10,.013,d.w*.22,d.h+.008,.04,m.wood);cylinder(.043,.035,.08,d.w*.22,d.h+.053,.04,m.white);
+      const handle=mesh(new THREE.TorusGeometry(.026,.006,6,14),m.white,d.w*.22+.04,d.h+.055,.04);handle.rotation.y=Math.PI/2;
     } else {
       legs(d.h-.045,d.w-.08,d.d-.08);
       box(d.w,.045,d.d,0,d.h-.023,0,m.wood,.07);
       if(model==='table') {
         cylinder(.105,.105,.012,0,d.h+.006,0,m.white);
-        cylinder(.055,.04,.14,d.w*.22,d.h+.07,0,m.stone);
+        cylinder(.055,.04,.14,d.w*.22,d.h+.07,0,m.white);
       } else box(.3,.014,.2,d.w*.15,d.h+.007,-d.d*.15,m.linen,.015);
     }
   } else if(model==='sideTable'){
@@ -602,7 +615,7 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     front(d.w-.02,bed?(d.h-leg)/2-.012:d.h-leg-.035,bed?leg+(d.h-leg)*.75:(d.h+leg)/2,-d.d/2-.012,tv?3:bed?1:2);
     if(tv&&['soft','channel','timber'].includes(m.collection?.shape))for(let x=-d.w/2+.025;x<d.w/2-.02;x+=.04)box(.022,d.h-leg-.055,.012,x,(d.h+leg)/2,-d.d/2-.032,m.slattedWood,.003);
     if(bed)front(d.w-.02,(d.h-leg)/2-.012,leg+(d.h-leg)*.25,-d.d/2-.012,1);
-    if(tv){box(.32,.015,.20,-d.w*.32,d.h+.008,.025,m.linen,.01);cylinder(.055,.045,.11,d.w*.37,d.h+.055,0,m.stone);}
+    if(tv){box(.32,.015,.20,-d.w*.32,d.h+.008,.025,m.linen,.01);cylinder(.055,.045,.11,d.w*.37,d.h+.055,0,m.white);}
   } else if (/^kitchen/.test(model)) {
     if(model==='kitchenFridge') {
       // Generic enamel appliance: never inherit the cabinetry's timber front.
@@ -650,7 +663,7 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     const foliage=BMH.createSceneFoliage(THREE,{w:.40,h:.96,d:.43},m.leaf,m.collection?.shape==='tailored'?14:48);foliage.position.y=.32;root.add(foliage);
   } else if(model==='washingMachine') {
     box(d.w,d.h,d.d,0,d.h/2,0,m.white,.025);
-    box(d.w-.05,.13,.012,0,d.h-.08,d.d/2+.008,m.stone,.008);
+    box(d.w-.05,.13,.012,0,d.h-.08,d.d/2+.008,m.white,.008);
     const rim=cylinder(.19,.19,.024,0,.40,d.d/2+.016,m.metal);rim.rotation.x=Math.PI/2;
     const glass=cylinder(.151,.151,.026,0,.40,d.d/2+.020,m.screen);glass.rotation.x=Math.PI/2;
     box(.18,.035,.014,-.13,d.h-.08,d.d/2+.018,m.dark,.005);
@@ -659,15 +672,16 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     box(d.w,.54,d.d-.04,0,.41,0,m.wood,.025);
     front(d.w-.03,.45,.42,d.d/2-.012,2);
     box(d.w,.055,d.d,0,.715,0,m.stone,.018);
-    sphere(d.w*.75,.14,d.d*.72,0,.79,.025,m.white);
-    sphere(d.w*.60,.035,d.d*.55,0,.85,.025,m.stone);
+    ceramicBowl(d.w*.75,.14,d.d*.72,0,.72,.025);
+    cylinder(.014,.014,.005,0,.748,.025,m.metal);
     cylinder(.012,.012,.20,0,.82,-d.d*.3,m.metal);
     box(.025,.025,.15,0,.92,-d.d*.19,m.metal,.01);
     box(d.w*.75,.30,.02,0,.965,-d.d/2+.015,m.screen,.02);
   } else if(model==='toilet') {
     sphere(d.w*.72,.4,d.d*.58,0,.22,.1,m.white);
-    sphere(d.w,.22,d.d*.75,0,.43,.075,m.white);
-    sphere(d.w*.75,.03,d.d*.59,0,.55,.085,m.stone);
+    ceramicBowl(d.w,.19,d.d*.75,0,.35,.075);
+    const seatProfile=[[.5,0],[.5,.7],[.48,1],[.40,1],[.38,.7],[.38,0],[.5,0]],seatGeometry=new THREE.LatheGeometry(seatProfile.map(([r,v])=>new THREE.Vector2(r,v)),48);seatGeometry.scale(d.w,.026,d.d*.75);
+    const seat=mesh(seatGeometry,m.white,0,.545,.075);seat.userData={kind:'toilet-seat-ring',generic:true};
     box(d.w*.85,d.h*.65,.19,0,d.h*.57,-d.d/2+.095,m.white,.055);
     cylinder(.025,.025,.008,0,d.h*.9,-d.d/2+.11,m.metal);
   } else if(model==='shower') {
