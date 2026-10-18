@@ -171,3 +171,43 @@ test('unconfirmed terrace receives no invented furniture but preserves explicitl
  const saved=JSON.stringify(p.plan.furniture);assert.equal(B.roomFurnitureLayout(r).length,1);assert.equal(JSON.stringify(p.plan.furniture),saved);
  p.plan.furniture=[];assert.equal(B.generatedFurniture(r).length,0);assert.equal(B.roomFurnitureLayout(r).length,0);
 });
+
+test('measured kitchen sink has a through-cut stone top, hollow stainless basin and no solid cabinet cap',()=>{
+ for(const scale of [1,.7,1.3]){
+  const B=finishFixture('kitchenSink'),base=B.FURNITURE_DIMENSIONS.kitchenSink,d=Object.fromEntries(Object.entries(base).map(([k,v])=>[k,v*scale])),before=JSON.stringify(B.state.project),m=B.sceneAssetMaterials(THREE,new THREE.Scene(),{...B.furnitureFinishPalette(B.resolvedFurniture()[0]),stoneVisualMaterial:'white-marble'}),root=B.createRoomAsset('kitchenSink',d,THREE,m);root.updateMatrixWorld(true);
+  const bounds=new THREE.Box3().setFromObject(root),size=bounds.getSize(new THREE.Vector3());for(const [axis,v]of [['x',d.w],['y',d.h],['z',d.d]])assert.ok(Math.abs(size[axis]-v)<1e-5,'saved envelope '+axis);
+  const top=root.children.find(o=>o.userData.kind==='stone-worktop-cutout'),bowl=root.children.find(o=>o.userData.kind==='stainless-sink-basin');assert.ok(top&&bowl);assert.equal(top.material,m.stone);assert.equal(bowl.material,m.metal);
+  const tb=new THREE.Box3().setFromObject(top),centre=tb.getCenter(new THREE.Vector3()),ray=new THREE.Raycaster(new THREE.Vector3(centre.x+.001,tb.max.y+.5,centre.z),new THREE.Vector3(0,-1,0));assert.equal(ray.intersectObject(top).length,0,'real cutout, not a black decal');
+  const inner=ray.intersectObject(bowl),bb=new THREE.Box3().setFromObject(bowl);assert.ok(inner.length&&inner[0].point.y<bb.min.y+(bb.max.y-bb.min.y)*.4,'actual bowl depth');
+  ray.ray.origin.x=tb.min.x+(tb.max.x-tb.min.x)*.08;assert.ok(ray.intersectObject(top).length,'stone remains around the opening');
+  for(const o of root.children){assert.ok(o.geometry.attributes.position.array.every(Number.isFinite));assert.ok(o.geometry.attributes.normal.array.every(Number.isFinite));}
+  assert.equal(root.children.filter(o=>o.userData.kind==='cabinet-side').length,2);assert.equal(JSON.stringify(B.state.project),before,'mesh refinement never changes the shared plan');
+ }
+});
+
+test('oven glass, fascia and controls retain appliance finishes under selected stone and any-angle placement',()=>{
+ const B=finishFixture('kitchenStove'),d=B.FURNITURE_DIMENSIONS.kitchenStove,m=B.sceneAssetMaterials(THREE,new THREE.Scene(),{...B.furnitureFinishPalette(B.resolvedFurniture()[0]),stoneVisualMaterial:'white-marble'}),root=B.createRoomAsset('kitchenStove',d,THREE,m);root.updateMatrixWorld(true);
+ const size=new THREE.Box3().setFromObject(root).getSize(new THREE.Vector3());for(const [axis,v]of [['x',d.w],['y',d.h],['z',d.d]])assert.ok(Math.abs(size[axis]-v)<1e-5);
+ const byKind=k=>root.children.filter(o=>o.userData.kind===k);assert.equal(byKind('oven-fascia')[0].material,m.metal);assert.equal(byKind('oven-window')[0].material,m.screen);assert.equal(byKind('hob-glass')[0].material,m.screen);assert.equal(byKind('oven-control').length,2);assert.equal(byKind('hob-ring').length,4);assert.equal(byKind('stone-worktop')[0].material,m.stone);
+ const window=byKind('oven-window')[0],point=window.getWorldPosition(new THREE.Vector3());assert.ok(point.z>0,'oven front retains shared +Z convention');
+ for(const angle of [0,37,90,180,270]){const holder=new THREE.Group();holder.add(root);holder.rotation.y=-angle*Math.PI/180;holder.updateMatrixWorld(true);const front=window.getWorldPosition(new THREE.Vector3()),expected=new THREE.Vector3(0,0,1).applyAxisAngle(new THREE.Vector3(0,1,0),-angle*Math.PI/180);front.y=0;assert.ok(front.normalize().dot(expected)>.999,'front follows saved rotation');holder.remove(root);}
+});
+
+test('flat roof finish wins coplanar depth without moving the roof or slab or changing pitched roofs',()=>{
+ const B=finishFixture(),scene=new THREE.Scene(),geometry=new THREE.PlaneGeometry(2,4).rotateX(-Math.PI/2),flat=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color:'#777777',side:THREE.DoubleSide})),slab=new THREE.Mesh(geometry.clone(),new THREE.MeshStandardMaterial({color:'#eeeeee',side:THREE.DoubleSide})),pitched=new THREE.Mesh(geometry.clone(),new THREE.MeshStandardMaterial());
+ flat.userData={kind:'roof',roofType:'flat'};pitched.userData={kind:'roof',roofType:'gable'};slab.userData={kind:'ceiling-slab'};for(const o of [flat,slab,pitched]){o.position.y=3.4;scene.add(o);}pitched.position.x=5;
+ const before=[flat,slab,pitched].map(o=>({position:o.position.toArray(),vertices:Array.from(o.geometry.attributes.position.array)}));
+ B.configureHousePresentation({THREE,scene,renderer:{toneMappingExposure:1},focus:'floor:0',roomFocus:null,floorFocus:0,explode:0});scene.updateMatrixWorld(true);
+ assert.equal(flat.material.polygonOffset,true);assert.ok(flat.material.polygonOffsetFactor<0&&flat.material.polygonOffsetUnits<0);assert.ok(flat.renderOrder>slab.renderOrder);assert.equal(flat.userData.roofDepthPriority,true);assert.equal(pitched.material.polygonOffset,false);assert.equal(slab.material.polygonOffset,false);
+ assert.deepEqual([flat,slab,pitched].map(o=>({position:o.position.toArray(),vertices:Array.from(o.geometry.attributes.position.array)})),before,'no architectural offset or slab removal');
+ assert.ok(new THREE.Raycaster(new THREE.Vector3(.2,5,.3),new THREE.Vector3(0,-1,0)).intersectObject(flat).length,'existing roof covering remains intact');
+});
+
+
+test('automatic terrace floor is separate from indoor oak while explicit customer decking remains unchanged',()=>{
+ const B=finishFixture(),r=B.state.project.plan.rooms[0];r.type='balcony';r.outdoorSpace={kind:'terrace'};B.state.project.materials.finish={exterior:null,rooms:{}};const before=JSON.stringify(B.state.project.plan);
+ for(const c of B.INTERIOR_COLLECTIONS){B.applyInteriorCollection(c.id);assert.equal(B.finishPalette(r.id).visualMaterials.floor,'grey-concrete',c.id+' outdoor proposal');}
+ assert.equal(JSON.stringify(B.state.project.plan),before);assert.equal(B.applyVisualMaterial('floor','oak-floor',r.id),true);
+ for(const style of ['Hiện đại','Japandi','Industrial']){B.state.project.style=style;assert.equal(B.finishPalette(r.id).visualMaterials.floor,'oak-floor','explicit floor belongs to customer');}
+ B.state=B.mergeState(B.defaultState(),plain(B.state));assert.equal(B.finishPalette(r.id).visualMaterials.floor,'oak-floor');
+});

@@ -101,6 +101,9 @@ for i,row in enumerate(data['meshes']):
     if row.get('facadeSkin'):
         bias=obj.modifiers.new('WebGL skin depth priority: 0.01mm presentation only','DISPLACE')
         bias.strength=.00001;bias.mid_level=0;bias.direction='NORMAL'
+    if row.get('roofDepthPriority'):
+        bias=obj.modifiers.new('WebGL flat roof depth priority: 0.01mm presentation only','DISPLACE')
+        bias.strength=.00001;bias.mid_level=0;bias.direction='Z';bias.space='GLOBAL'
     obj['bmh_revision']=data['revision'];obj['bmh_identity']=json.dumps(row['identity'])
     for mid in row['materials']:mesh.materials.append(materials[mid])
     # Three ignores BoxGeometry face groups when a mesh has one material.
@@ -153,7 +156,7 @@ else:
     cam.location=(10,25,7);target=Vector((0,2.8,3.2));cam_data.lens=48
 cam.rotation_euler=(target-Vector(cam.location)).to_track_quat('-Z','Y').to_euler();cam_data.clip_start=.03;cam_data.clip_end=250
 scene['bmh_revision']=data['revision'];scene['bmh_approval']='REVIEW ONLY — not surveyed, not engineering-approved'
-scene['bmh_raster_depth_priority']='Facade skins only: 0.01mm render modifier emulates WebGL polygonOffset; original vertices retained.'
+scene['bmh_raster_depth_priority']='Facade and flat roof skins: 0.01mm render modifier emulates WebGL polygonOffset; original vertices retained.'
 scene.render.film_transparent=False
 os.makedirs(os.path.dirname(os.path.abspath(output)),exist_ok=True)
 bpy.ops.wm.save_as_mainfile(filepath=os.path.splitext(output)[0]+'.blend')

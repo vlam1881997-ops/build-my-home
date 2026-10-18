@@ -635,22 +635,43 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
       }
       for(let i=0;i<5;i++)partBox('vent-slot',d.w*.62,d.h*.003,.004,0,d.h*(.012+i*.005),d.d*.413,m.dark,.001);
     } else {
-      box(d.w-.01,d.h-.08,d.d-.03,0,(d.h-.08)/2,0,m.wood,.008);
-      box(d.w,.055,d.d,0,d.h-.025,0,m.stone,.015);
-      front(d.w-.025,d.h-.15,(d.h-.15)/2+.04,d.d/2-.004,2);
+      // Hollow measured cabinet: the sink cavity must not intersect a solid
+      // cabinet top. The selected stone is only the worktop, never the basin.
+      const thickness=Math.min(.018,d.w*.035,d.d*.035),bodyHeight=d.h-.08;
+      const part=(kind,o)=>{o.userData={kind,generic:true};return o;};
+      for(const x of [-1,1])part('cabinet-side',box(thickness,bodyHeight,d.d-.03,x*(d.w-.01-thickness)/2,bodyHeight/2,0,m.wood,.003));
+      part('cabinet-back',box(d.w-.01-2*thickness,bodyHeight,thickness,0,bodyHeight/2,-(d.d-.03-thickness)/2,m.wood,.003));
+      part('cabinet-bottom',box(d.w-.01-2*thickness,thickness,d.d-.03,0,thickness/2,0,m.wood,.003));
       box(d.w-.055,.07,.02,0,.035,d.d/2-.018,m.dark,.004);
       if(model==='kitchenStove') {
-        box(d.w*.8,.012,d.d*.56,0,d.h+.004,0,m.dark,.02);
+        part('stone-worktop',box(d.w,.055,d.d,0,d.h-.025,0,m.stone,.015));
+        // Independent oven fascia and glass; no timber door behind its window.
+        const frontZ=d.d/2,fasciaWidth=d.w*.78,fasciaHeight=bodyHeight*.69;
+        part('oven-fascia',box(fasciaWidth,fasciaHeight,.027,0,bodyHeight*.59,frontZ,m.metal,.009));
+        part('oven-window',box(fasciaWidth*.82,fasciaHeight*.61,.009,0,bodyHeight*.55,frontZ+.019,m.screen,.012));
+        part('oven-handle',box(fasciaWidth*.72,.021,.031,0,bodyHeight*.78,frontZ+.028,m.metal,.008));
+        for(const x of [-1,1]){const knob=cylinder(.018,.018,.018,x*fasciaWidth*.32,bodyHeight*.87,frontZ+.027,m.dark);knob.rotation.x=Math.PI/2;part('oven-control',knob);}
+        part('cabinet-drawer',box(d.w-.03,bodyHeight*.16,.025,0,bodyHeight*.12,frontZ,m.wood,.005));
+        part('hob-glass',box(d.w*.8,.012,d.d*.56,0,d.h+.004,0,m.screen,.02));
         for(const x of [-d.w*.19,d.w*.19])for(const z of [-d.d*.14,d.d*.14]){
-          const ring=mesh(new THREE.TorusGeometry(.072,.003,8,24),m.metal,x,d.h+.012,z);ring.rotation.x=Math.PI/2;
+          const ring=mesh(new THREE.TorusGeometry(.072,.003,8,24),m.metal,x,d.h+.012,z);ring.rotation.x=Math.PI/2;part('hob-ring',ring);
         }
-        box(d.w*.6,.27,.017,0,d.h*.5,d.d/2+.018,m.dark,.025);
       } else {
-        box(d.w*.65,.012,d.d*.55,0,d.h+.004,0,m.metal,.035);
-        box(d.w*.53,.008,d.d*.42,0,d.h+.012,0,m.dark,.025);
+        front(d.w-.025,d.h-.15,(d.h-.15)/2+.04,d.d/2-.004,2);
+        // A true through-opening is cut in the stone top. The same elliptical
+        // outline is used for the stainless shell; original footprint is kept.
+        const basinW=d.w*.65,basinD=d.d*.55,lip=.012,topY=d.h+.002,depth=Math.min(.18,d.h*.2);
+        const outline=new THREE.Shape();outline.moveTo(-d.w/2,-d.d/2);outline.lineTo(d.w/2,-d.d/2);outline.lineTo(d.w/2,d.d/2);outline.lineTo(-d.w/2,d.d/2);outline.closePath();
+        const hole=new THREE.Path();hole.absellipse(0,0,basinW/2-lip,basinD/2-lip,0,Math.PI*2,true,0);outline.holes.push(hole);
+        const topGeometry=new THREE.ExtrudeGeometry(outline,{depth:.055,bevelEnabled:false,curveSegments:48,steps:1});topGeometry.rotateX(-Math.PI/2);
+        part('stone-worktop-cutout',mesh(topGeometry,m.stone,0,topY-.055,0));
+        const profile=[[0,.04],[.28,.04],[.40,.12],[.47,.73],[.49,.98],[.5,1],[.46,1],[.44,.88],[.37,.22],[.22,.13],[0,.13]];
+        const bowlGeometry=new THREE.LatheGeometry(profile.map(([r,y])=>new THREE.Vector2(r,y)),48);bowlGeometry.scale(basinW,depth,basinD);
+        part('stainless-sink-basin',mesh(bowlGeometry,m.metal,0,topY-depth,0));
+        part('sink-drain',cylinder(.025,.025,.003,0,topY-depth*.86,0,m.dark));
         const faucet=mesh(new THREE.TorusGeometry(.09,.014,10,24,Math.PI),m.metal,0,d.h+.18,-d.d*.32);
-        faucet.rotation.y=Math.PI/2;
-        cylinder(.014,.014,.16,0,d.h+.08,-d.d*.32,m.metal);
+        faucet.rotation.y=Math.PI/2;part('sink-faucet',faucet);
+        part('sink-faucet-stem',cylinder(.014,.014,.16,0,d.h+.08,-d.d*.32,m.metal));
       }
     }
   } else if(model==='pottedPlant') {
