@@ -19,14 +19,29 @@
   },
   "sourceSha256": {
     "src/81_design_studio.js": "3eff345c6f250c6918c07adbfdfe37f7c099b0bb2bc717fe1aedc252cffde2f4",
-    "src/99_customer_design.js": "07ff1423d76d3794a2272497921763739baa4750c709551d95f370bf210adaf6",
+    "src/99_customer_design.js": "faf5607111c996d33ef65ce7d369b95a4aceb559fd99056621617d0301848d64",
     "src/101_visual_studio.js": "2c1accc922e65dff4958df984d9af1ccb6ba376e82da30160b2175c801db715e",
     "src/customer-design.css": "67a597c9b7114ac1d99f1c6009bb41bd5e446a12ec03fa9034af25b371eeeb4e",
-    "tests/team-b-workflow.test.mjs": "3a5f733ed954cbab8d8cc39914ab665c6ed8e039c10435991d7a37ee5511ff0d"
+    "tests/team-b-workflow.test.mjs": "f34eac1c0574a717fd3b3d700c862f29f2b0f2adf45034a9ecfb4a8ffaa538a6"
   },
   "pending": [
-    "exact-head Node22 CI",
-    "deployed native request/regenerate/manual numerical draw/delete/undo/reload",
+    "exact-head Node22 CI/deployment/native check for numerical display follow-up",
     "native mobile/GPU and Modern R1 acceptance"
-  ]
+  ],
+  "production67": {
+    "commit": "0335042aac5c0a33360e6b066b84f695aac18343",
+    "ci": "39114734154",
+    "deployment": "dpl_GPGmg6NpoSiepcbEHhaa8v7wPG79",
+    "status": "READY",
+    "nativePassed": [
+      "regenerate after removing kitchen request",
+      "personal edit without automatic proposal",
+      "numeric position and size",
+      "delete last room keeps draw mode",
+      "undo/redo",
+      "same room ID/geometry after reload"
+    ],
+    "jsErrors": [],
+    "precisionFollowup": "entered3.843 displayed3.8429999999999995; preserve entered dimensions before accepting numeric UI"
+  }
 }
