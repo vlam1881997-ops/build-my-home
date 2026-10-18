@@ -414,7 +414,7 @@
 (()=>{
  const B=BMH,clone=v=>structuredClone(v),esc=B.esc,legacy=B.roomFurnitureLayout;
  const angle=n=>((Number(n)%360)+360)%360;
- const models={bedDouble:'Giường đôi',bedSingle:'Giường đơn',loungeDesignSofa:'Sofa',loungeChair:'Ghế thư giãn',loungeChairModern:'Ghế thư giãn Modern',tableCoffee:'Bàn trà',tableCoffeeModern:'Bàn trà Modern · gỗ và đá',table:'Bàn ăn',chair:'Ghế',cabinetTelevision:'Tủ TV',televisionModern:'TV',kitchenSink:'Chậu bếp',kitchenStove:'Bếp',kitchenFridge:'Tủ lạnh',bathroomSink:'Lavabo',toilet:'Bồn cầu',shower:'Cabin tắm',bookcaseClosedWide:'Tủ sách',desk:'Bàn làm việc',chairDesk:'Ghế làm việc',cabinetBed:'Tủ đầu giường',pottedPlant:'Cây',sideTable:'Bàn phụ',floorLamp:'Đèn đứng',washingMachine:'Máy giặt'};
+ const models={bedDouble:'Giường đôi',bedSingle:'Giường đơn',loungeDesignSofa:'Sofa',loungeChair:'Ghế thư giãn',loungeChairModern:'Ghế thư giãn Modern',tableCoffee:'Bàn trà',tableCoffeeModern:'Bàn trà Modern · gỗ và đá',table:'Bàn ăn',chair:'Ghế',cabinetTelevision:'Tủ TV',televisionModern:'TV',kitchenSink:'Chậu bếp',kitchenStove:'Bếp',kitchenFridge:'Tủ lạnh',bathroomSink:'Lavabo',toilet:'Bồn cầu',shower:'Cabin tắm',bookcaseClosedWide:'Tủ sách',desk:'Bàn làm việc',chairDesk:'Ghế làm việc',cabinetBed:'Tủ đầu giường',pottedPlant:'Cây',sideTable:'Bàn phụ',floorLamp:'Đèn đứng',washingMachine:'Máy giặt',kitchenBaseCabinet:'Tủ bếp dưới',kitchenFillerPanel:'Tấm bù / nối mặt bếp',kitchenWallCabinet:'Tủ bếp treo',kitchenHood:'Hút mùi',wardrobeModern:'Tủ áo Hiện đại',bedsideLamp:'Đèn đầu giường',bedBench:'Ghế cuối giường'};
  const plan=()=>B.state.project.plan;
  const room=id=>plan().rooms.find(r=>r.id===id);
  const selected=()=>B.state.ui.planner.selectedFurniture||'';
@@ -456,6 +456,13 @@
    const rect=['north','south'].includes(o.side)?box(g.x-w/2-.1,o.side==='north'?r.y-.02:r.y+r.h-reach,w+.2,reach+.02):box(o.side==='west'?r.x-.02:r.x+r.w-reach,g.y-w/2-.1,reach+.02,w+.2);
    if(intersects(polygon,rect))out.push('Chắn cửa / vùng mở cửa.');
   }
+  if(['kitchenWallCabinet','kitchenHood','wardrobeModern'].includes(candidate.modelId))for(const o of plan().openings.filter(o=>o.roomId===r.id&&o.kind==='window')){
+   const sill=Number.isFinite(Number(o.sill))?Number(o.sill):.9,height=Number(o.height)||1.4;if(candidate.pose.z+candidate.size.height<=sill||candidate.pose.z>=sill+height)continue;
+   const g=B.openingGeometry(o);if(!g)continue;const w=Number(o.width)||.9,reach=.25,area=['north','south'].includes(o.side)?box(g.x-w/2,o.side==='north'?r.y:r.y+r.h-reach,w,reach):box(o.side==='west'?r.x:r.x+r.w-reach,g.y-w/2,reach,w);
+   if(intersects(polygon,area))out.push('Tủ / thiết bị che cửa sổ tại cao độ đang chọn.');
+  }
+  const access=['wardrobeModern','kitchenBaseCabinet'].includes(candidate.modelId)?B.furnitureAccessZone?.(candidate):null;if(access){if(access.some(p=>p.x<r.x+.02||p.x>r.x+r.w-.02||p.y<r.y+.02||p.y>r.y+r.h-.02))out.push('Thiếu khoảng đứng sử dụng trước tủ.');for(const other of rows)if(other.id!==candidate.id&&other.placementStatus!=='removed'&&other.pose.z<1.2&&intersects(access,B.furnitureFootprint(other)))out.push('Khoảng sử dụng trước tủ vướng '+(models[other.modelId]||other.modelId)+'.');}
+  if(candidate.pose.z<1.2)for(const other of rows){if(other.id===candidate.id||other.placementStatus==='removed'||!setModels.has(candidate.modelId)&&!['wardrobeModern','kitchenBaseCabinet'].includes(other.modelId))continue;const zone=B.furnitureAccessZone?.(other);if(zone&&intersects(polygon,zone))out.push('Chắn khoảng sử dụng trước '+models[other.modelId]+'.');}
   if(r.type==='corridor'||r.type==='stairs'||r.type==='elevator')out.push('Giữ trống hành lang, thang và giếng thang máy.');
   return [...new Set(out)];
  };
@@ -485,8 +492,8 @@
  // Facing follows the local mesh: seat backs/TV screens/cabinet fronts face -Z;
  // bed foot and toilet bowl face +Z. Symmetric tables have no asserted front.
  B.furnitureFacing=i=>{
-  const negative=['loungeDesignSofa','loungeChair','loungeChairModern','chair','chairDesk','cabinetTelevision','televisionModern','bookcaseClosedWide','cabinetBed'];
-  const sign=negative.includes(i.modelId)?-1:['bedDouble','bedSingle','toilet','washingMachine'].includes(i.modelId)?1:0;
+  const negative=['loungeDesignSofa','loungeChair','loungeChairModern','chair','chairDesk','cabinetTelevision','televisionModern','bookcaseClosedWide','cabinetBed','wardrobeModern'];
+  const sign=negative.includes(i.modelId)?-1:['bedDouble','bedSingle','toilet','washingMachine','kitchenSink','kitchenStove','kitchenFridge','kitchenBaseCabinet','kitchenWallCabinet','kitchenHood','kitchenFillerPanel'].includes(i.modelId)?1:0;
   const a=i.pose.rotationDeg*Math.PI/180;return {x:-Math.sin(a)*sign,y:Math.cos(a)*sign,defined:sign!==0};
  };
  B.furnitureDirectionSvg=i=>{
@@ -505,16 +512,16 @@
  };
  B.furnitureMaterialRoles=i=>{
   if(i.modelId==='tableCoffeeModern')return [['accent','Phần gỗ'],['floor','Đế đá / bề mặt khoáng']];
-  if(['televisionModern','kitchenFridge','washingMachine','toilet','shower','floorLamp','pottedPlant'].includes(i.modelId))return [];
+  if(['televisionModern','kitchenFridge','washingMachine','toilet','shower','floorLamp','pottedPlant','kitchenHood'].includes(i.modelId))return [];
   const roles=[['accent','Gỗ / bề mặt']];
-  if(['sideTable','kitchenSink','kitchenStove','bathroomSink'].includes(i.modelId)||i.modelId==='tableCoffee'&&['stone','travertine','nested'].includes(B.finishPalette(i.roomId).table))roles.push(['floor','Mặt đá']);
-  if(['bedDouble','bedSingle','loungeDesignSofa','loungeChair','loungeChairModern','chair','chairDesk'].includes(i.modelId))roles.push(['fabric','Vải / da']);
+  if(['sideTable','kitchenSink','kitchenStove','bathroomSink','kitchenBaseCabinet','kitchenFillerPanel'].includes(i.modelId)||i.modelId==='tableCoffee'&&['stone','travertine','nested'].includes(B.finishPalette(i.roomId).table))roles.push(['floor','Mặt đá']);
+  if(['bedDouble','bedSingle','loungeDesignSofa','loungeChair','loungeChairModern','chair','chairDesk','bedBench','bedsideLamp'].includes(i.modelId))roles.push(['fabric','Vải / da']);
   return roles;
  };
  B.furnitureMaterialChoices=(i,role)=>B.furnitureMaterialRoles(i).some(([key])=>key===role)?B.VISUAL_MATERIALS.filter(p=>p.role===role&&(role!=='floor'||p.surface==='stone')):[];
  B.furnitureFinishPalette=i=>{
   const palette=clone(B.finishPalette(i.roomId));palette.visualMaterials||={};
-  for(const binding of i.materialBindings||[]){const profile=B.VISUAL_MATERIALS.find(p=>p.id===binding.visualProfileId&&p.role===binding.role);if(profile&&['tableCoffeeModern','tableCoffee','sideTable','kitchenSink','kitchenStove','bathroomSink'].includes(i.modelId||i.model)&&profile.role==='floor'&&profile.surface==='stone'){palette.stoneVisualMaterial=profile.id;}else if(profile&&['accent','fabric'].includes(profile.role)){palette.visualMaterials[profile.role]=profile.id;palette[profile.role]=profile.color;palette.catalogMaterials=B.clearCatalogSurface(palette,profile.role);}}
+  for(const binding of i.materialBindings||[]){const profile=B.VISUAL_MATERIALS.find(p=>p.id===binding.visualProfileId&&p.role===binding.role);if(profile&&['tableCoffeeModern','tableCoffee','sideTable','kitchenSink','kitchenStove','bathroomSink','kitchenBaseCabinet','kitchenFillerPanel'].includes(i.modelId||i.model)&&profile.role==='floor'&&profile.surface==='stone'){palette.stoneVisualMaterial=profile.id;}else if(profile&&['accent','fabric'].includes(profile.role)){palette.visualMaterials[profile.role]=profile.id;palette[profile.role]=profile.color;palette.catalogMaterials=B.clearCatalogSurface(palette,profile.role);}}
   return palette;
  };
  B.setFurnitureVisualMaterial=(id,role,profileId)=>{
@@ -529,11 +536,106 @@
   const r=room(roomId),d=B.FURNITURE_DIMENSIONS[modelId];if(!r||!models[modelId]||!d||B.isRoomLocked(roomId))return reject('Chọn phòng chưa khóa và mẫu hợp lệ.');
   const rows=B.resolvedFurniture(roomId);let candidate;
   for(let y=r.y+d.d/2+.05;y<r.y+r.h-d.d/2-.02&&!candidate;y+=.2)for(let x=r.x+d.w/2+.05;x<r.x+r.w-d.w/2-.02;x+=.2){
-   const i={id:B.uid('furniture'),roomId,floor:r.floor,modelId,origin:'customer-added',placementStatus:'present',locked:false,pose:{x,y,z:0,rotationDeg:0},size:{width:d.w,depth:d.d,height:d.h},materialBindings:[],costTreatment:'unconfirmed'};
+   const i={id:B.uid('furniture'),roomId,floor:r.floor,modelId,origin:'customer-added',placementStatus:'present',locked:false,pose:{x,y,z:B.FURNITURE_MOUNTING?.[modelId]||0,rotationDeg:0},size:{width:d.w,depth:d.d,height:d.h},materialBindings:[],costTreatment:'unconfirmed'};
    if(!B.furniturePlacementIssues(i,rows).length){candidate=i;break;}
   }
   if(!candidate)return reject('Không còn vị trí trống cho mẫu này. Dời / xóa đồ trước.');
   B.pushPlanHistory();materialize(roomId);plan().furniture.push(candidate);B.state.ui.planner.selectedFurniture=candidate.id;changed();return candidate;
+ };
+ // A proposal is derived from the current shared records, never an extra
+ // renderer-only layout. The stamp covers geometry/openings/locks/materials.
+ let setPreview=null;
+ const setModels=new Set(['kitchenBaseCabinet','kitchenFillerPanel','kitchenWallCabinet','kitchenHood','wardrobeModern','bedsideLamp','bedBench']);
+ const stampSet=r=>{let h=2166136261;const text=JSON.stringify({revision:B.drawingRevision?.(),r,rows:B.resolvedFurniture(r.id,{includeRemoved:true}),openings:plan().openings,fixtures:plan().fixtures,level:B.studioFloorLevel(r.floor),locked:B.isRoomLocked(r.id),style:B.state.project.style,finish:B.finishPalette(r.id)});for(let n=0;n<text.length;n++)h=Math.imul(h^text.charCodeAt(n),16777619);return(h>>>0).toString(16);};
+ B.furnitureAccessZone=i=>{
+  const reach={wardrobeModern:.60,kitchenBaseCabinet:.80,kitchenSink:.80,kitchenStove:.80,kitchenFridge:.65}[i.modelId];if(!reach||i.pose.z>.12)return null;
+  const sign=i.modelId==='wardrobeModern'?-1:1,a=i.pose.rotationDeg*Math.PI/180,u={x:Math.cos(a),y:Math.sin(a)},f={x:-Math.sin(a)*sign,y:Math.cos(a)*sign},width=i.size.width/2-.005,near=i.size.depth/2+.005;
+  return [[-width,near],[width,near],[width,near+reach],[-width,near+reach]].map(([x,y])=>({x:i.pose.x+u.x*x+f.x*y,y:i.pose.y+u.y*x+f.y*y}));
+ };
+ B.previewFurnitureSet=roomId=>{
+  const r=room(roomId),result={ok:false,roomId,stamp:'',additions:[],updates:[],notices:[],skipped:[]};
+  if(!r||!['kitchen','bed'].includes(r.type)){result.reason='Chọn phòng bếp hoặc phòng ngủ.';return result;}
+  result.stamp=stampSet(r);if(!B.furnitureContractReady()||B.isRoomLocked(roomId)){result.reason='Phòng đang khóa hoặc dữ liệu nội thất chưa sẵn sàng.';return result;}
+  const saved=B.resolvedFurniture(roomId,{includeRemoved:true}),rows=saved.filter(i=>i.placementStatus==='present').map(clone),removedModel=id=>saved.some(i=>i.modelId===id&&i.placementStatus==='removed'),has=id=>rows.some(i=>i.modelId===id),near=(a,b)=>Math.abs(a-b)<.002;
+  const make=(modelId,x,y,z=0,turn=0,size)=>{const d=B.FURNITURE_DIMENSIONS[modelId];let n=0,id;do{id='furniture-set:'+roomId+':'+modelId+':'+n++;}while(saved.some(i=>i.id===id)||result.additions.some(i=>i.id===id));return{id,roomId,floor:r.floor,modelId,origin:'customer-added',placementStatus:'present',locked:false,pose:{x,y,z,rotationDeg:angle(turn)},size:size||{width:d.w,depth:d.d,height:d.h},materialBindings:[],costTreatment:'unconfirmed'};};
+  const offer=(i,against=rows)=>{const issues=removedModel(i.modelId)?['Giữ trạng thái món đã xóa.']:B.furniturePlacementIssues(i,against);if(issues.length){if(!result.skipped.some(s=>s.modelId===i.modelId))result.skipped.push({modelId:i.modelId,reason:issues.join(' ')});return false;}result.additions.push(i);rows.push(i);return i;};
+  if(r.type==='kitchen'){
+   const stove=rows.find(i=>i.modelId==='kitchenStove'),sink=rows.find(i=>i.modelId==='kitchenSink');
+   if(!stove){result.reason='Đặt bếp nấu theo bản vẽ trước khi đề xuất bộ tủ.';return result;}
+   if(Math.abs(stove.pose.rotationDeg/90-Math.round(stove.pose.rotationDeg/90))>1e-6){result.reason='Bếp đang xoay góc riêng. Giữ bố trí hiện tại; thêm từng mô-đun ở mục bên dưới.';return result;}
+   const a=stove.pose.rotationDeg*Math.PI/180,u={x:Math.cos(a),y:Math.sin(a)},f={x:-Math.sin(a),y:Math.cos(a)},height=B.furnitureWorktopHeight(stove),depth=stove.size.depth,origin=stove.pose;
+   const along=p=>(p.x-origin.x)*u.x+(p.y-origin.y)*u.y,toPoint=(x,y)=>({x:origin.x+x*u.x+y*f.x,y:origin.y+x*u.y+y*f.y});
+   if(sink&&!sink.locked&&sink.origin==='generated'&&near(sink.size.height,B.FURNITURE_DIMENSIONS.kitchenSink.h)&&!near(B.furnitureWorktopHeight(sink),height)){
+    const next={...clone(sink),size:{...sink.size,height:height/.75}};
+    if(!B.furniturePlacementIssues(next,rows).length){result.updates.push({before:clone(sink),after:next,reason:'Cân mặt bàn chậu rửa với bếp nấu'});Object.assign(sink,next);}
+   }
+   if(sink&&!near(B.furnitureWorktopHeight(sink),height))result.notices.push('Giữ chậu rửa đang khóa / có số đo riêng; mặt bàn hiện tại '+Math.round(B.furnitureWorktopHeight(sink)*1000)+' mm cần đối chiếu với bếp '+Math.round(height*1000)+' mm.');
+   const row=rows.filter(i=>/^kitchen/.test(i.modelId)&&!['kitchenWallCabinet','kitchenHood'].includes(i.modelId)&&near(i.pose.rotationDeg,stove.pose.rotationDeg)&&i.pose.z<.12);
+   const limits=box(r.x+.04,r.y+.04,r.w-.08,r.h-.08).map(along),low=Math.min(...limits),high=Math.max(...limits),spans=row.map(i=>[along(i.pose)-i.size.width/2,along(i.pose)+i.size.width/2]).sort((a,b)=>a[0]-b[0]);let cursor=low;
+   for(const [start,end]of [...spans,[high,high]]){
+    const gap=start-cursor,width=gap-.02;
+    if(width>=.035){const p=toPoint((cursor+start)/2,0),modelId=width<.25?'kitchenFillerPanel':'kitchenBaseCabinet';offer(make(modelId,p.x,p.y,stove.pose.z,stove.pose.rotationDeg,{width,depth,height}));}cursor=Math.max(cursor,end);
+   }
+   const bases=rows.filter(i=>['kitchenSink','kitchenBaseCabinet'].includes(i.modelId)&&near(i.pose.rotationDeg,stove.pose.rotationDeg));
+   for(const i of bases){const p={x:i.pose.x-f.x*(i.size.depth-.34)/2,y:i.pose.y-f.y*(i.size.depth-.34)/2};if(!rows.some(o=>o.modelId==='kitchenWallCabinet'&&Math.hypot(o.pose.x-p.x,o.pose.y-p.y)<.15))offer(make('kitchenWallCabinet',p.x,p.y,stove.pose.z+height+.62,stove.pose.rotationDeg,{width:i.size.width,depth:.34,height:.72}));}
+   if(!has('kitchenHood')){const p=toPoint(0,-(depth-.48)/2);offer(make('kitchenHood',p.x,p.y,stove.pose.z+height+.68,stove.pose.rotationDeg));}
+   result.notices.push('Mặt bàn đề xuất cao '+Math.round(height*1000)+' mm. Kích thước mô phỏng; khoảng cách hút mùi cần đối chiếu hướng dẫn thiết bị.');
+  }else{
+   const bed=rows.find(i=>/^bed(Double|Single)$/.test(i.modelId));if(!bed){result.reason='Đặt giường theo bản vẽ trước khi thêm bộ phòng ngủ.';return result;}
+   if(!has('wardrobeModern')&&!removedModel('wardrobeModern')){
+    const old=rows.find(i=>i.modelId==='bookcaseClosedWide'&&i.origin==='generated'&&!i.locked&&!i.materialBindings?.length),others=rows.filter(i=>i.id!==old?.id),candidates=[];
+    if(old)candidates.push(make('wardrobeModern',old.pose.x,old.pose.y,old.pose.z,old.pose.rotationDeg));
+    for(const width of [1.8,1.5,1.2,.9])for(const side of ['south','east','west','north']){
+     const horizontal=['north','south'].includes(side),span=horizontal?r.w:r.h,step=Math.max(.15,(span-width)/20);if(span<width+.06)continue;
+     for(let along=width/2+.03;along<=span-width/2-.03+1e-7;along+=step){const x=horizontal?r.x+along:side==='west'?r.x+.32:r.x+r.w-.32,y=horizontal?(side==='north'?r.y+.32:r.y+r.h-.32):r.y+along,turn={south:0,north:180,west:90,east:270}[side];candidates.push(make('wardrobeModern',x,y,0,turn,{width,depth:.6,height:2.4}));}
+    }
+    const candidate=candidates.find(i=>!B.furniturePlacementIssues(i,others).length);
+    if(candidate){if(old){result.updates.push({before:clone(old),after:{...clone(old),placementStatus:'removed'},reason:'Đổi tủ thấp mặc định sang tủ áo, giữ món cũ trong đồ đã xóa'});rows.splice(rows.indexOf(old),1);}offer(candidate,others);}
+    else result.notices.push('Chưa đủ chỗ cho tủ áo và khoảng đứng sử dụng; giữ nguyên bố trí, cần chỉnh phòng / đồ hiện có.');
+   }
+   const cabinets=rows.filter(i=>i.modelId==='cabinetBed'),angleBed=bed.pose.rotationDeg*Math.PI/180,u={x:Math.cos(angleBed),y:Math.sin(angleBed)};
+   if(cabinets.length===1&&!removedModel('cabinetBed')){const old=cabinets[0],side=(old.pose.x-bed.pose.x)*u.x+(old.pose.y-bed.pose.y)*u.y;offer(make('cabinetBed',old.pose.x-2*side*u.x,old.pose.y-2*side*u.y,old.pose.z,old.pose.rotationDeg));}
+   for(const c of rows.filter(i=>i.modelId==='cabinetBed'))if(!rows.some(i=>i.modelId==='bedsideLamp'&&Math.hypot(i.pose.x-c.pose.x,i.pose.y-c.pose.y)<.12))offer(make('bedsideLamp',c.pose.x,c.pose.y,c.pose.z+c.size.height,bed.pose.rotationDeg));
+   if(!has('bedBench')){const f={x:-Math.sin(angleBed),y:Math.cos(angleBed)},d=B.FURNITURE_DIMENSIONS.bedBench,reach=bed.size.depth/2+d.d/2+.1;offer(make('bedBench',bed.pose.x+f.x*reach,bed.pose.y+f.y*reach,0,bed.pose.rotationDeg));}
+  }
+  result.ok=true;return result;
+ };
+ B.applyFurnitureSet=(roomId,expectedStamp)=>{
+  const p=B.previewFurnitureSet(roomId);if(!p.ok)return reject(p.reason);if(p.stamp!==expectedStamp)return reject('Bản vẽ hoặc đồ đã đổi. Xem lại đề xuất mới trước khi áp dụng.');
+  if(!p.additions.length&&!p.updates.length)return reject('Các món phù hợp đã có; giữ nguyên đồ đang chọn.');
+  B.pushPlanHistory();materialize(roomId);
+  for(const change of p.updates){const index=plan().furniture.findIndex(i=>i.id===change.before.id);plan().furniture[index]=clone(change.after);}
+  plan().furniture.push(...p.additions.map(clone));B.state.ui.planner.furnitureNotice='Đã lưu '+p.additions.length+' món thêm và '+p.updates.length+' điều chỉnh vào cùng bản vẽ /3D.';B.customerFrameCache=null;B.finishInvalidate?.();setPreview=null;changed();return true;
+ };
+ B.furnitureSetPreviewPlan=p=>{
+  if(!p?.ok)return null;const next=clone(plan());next.furniture||=[];
+  if(!next.furniture.some(i=>i.roomId===p.roomId))next.furniture.push(...B.resolvedFurniture(p.roomId,{includeRemoved:true}));
+  for(const c of p.updates){const n=next.furniture.findIndex(i=>i.id===c.before.id);if(n>=0)next.furniture[n]=clone(c.after);}
+  next.furniture.push(...p.additions.map(clone));return next;
+ };
+ B.furnitureSetDrawingHtml=p=>{
+  if(!p.ok||!B.withPlan||!B.interiorSheetSvg||!p.additions.length&&!p.updates.length)return '';const r=room(p.roomId),svg=B.withPlan(B.furnitureSetPreviewPlan(p),()=>B.interiorSheetSvg(r.floor));
+  return '<figure class="team-b-depth-drawing"><img src="data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)+'" alt="Bản vẽ xem trước bộ nội thất · '+esc(r.name)+'"><figcaption>Cùng vị trí / số đo sẽ dùng trong3D · chưa thay bản vẽ đang lưu.</figcaption></figure>';
+ };
+ // Keep proposal generation and SVG work behind the customer's explicit action.
+ // This transient view is scoped to the project and current measured inputs.
+ B.showFurnitureSetPreview=roomId=>{
+  const r=room(roomId);if(!r||!['kitchen','bed'].includes(r.type))return false;
+  const proposal=B.previewFurnitureSet(roomId);
+  setPreview={project:B.state.project,roomId,stamp:proposal.stamp,proposal,drawing:proposal.ok?B.furnitureSetDrawingHtml(proposal):''};
+  for(const panel of document.querySelectorAll('[data-furniture-set-room]'))if(panel.dataset.furnitureSetRoom===roomId)panel.outerHTML=B.furnitureSetHtml(r);
+  return proposal;
+ };
+ B.furnitureSetHtml=r=>{
+  if(!['kitchen','bed'].includes(r.type))return '';
+  const cached=setPreview?.project===B.state.project&&setPreview.roomId===r.id?setPreview:null,
+   stale=!!cached&&cached.stamp!==stampSet(r),p=cached&&!stale?cached.proposal:null,
+   label=r.type==='kitchen'?'Hoàn thiện bộ bếp':'Hoàn thiện bộ phòng ngủ',mm=v=>Math.round(v*1000),
+   refresh='<button type="button" data-furniture-set-preview="'+esc(r.id)+'">'+(cached?'Xem lại đề xuất theo số đo':'Xem đề xuất theo số đo')+'</button>';
+  const content=!p?(stale?'<p role="status">Thiết kế hoặc vật liệu đã đổi. Xem lại đề xuất trước khi áp dụng.</p>':'')+refresh:
+   p.ok?cached.drawing+'<ul>'+p.additions.map(i=>'<li>'+esc(models[i.modelId])+' · '+mm(i.size.width)+' × '+mm(i.size.depth)+' × '+mm(i.size.height)+' mm'+(i.pose.z?' · đáy cao '+mm(i.pose.z)+' mm':'')+'</li>').join('')+p.updates.map(c=>'<li>'+esc(c.reason)+' · '+esc(models[c.before.modelId])+(c.after.placementStatus==='removed'?'':': cao '+mm(c.before.size.height)+' → '+mm(c.after.size.height)+' mm')+'</li>').join('')+'</ul>'+p.notices.map(n=>'<p>'+esc(n)+'</p>').join('')+p.skipped.map(i=>'<small>Chưa thêm '+esc(models[i.modelId])+': '+esc(i.reason)+'</small>').join('')+(p.additions.length||p.updates.length?'<button type="button" data-furniture-set="'+esc(r.id)+'" data-furniture-set-stamp="'+p.stamp+'">Áp dụng các món phù hợp</button>':'<p>Đã có các món phù hợp hoặc không còn chỗ trống. Có thể thêm từng món bên dưới.</p>'):
+   '<p role="status">'+esc(p.reason)+'</p>'+refresh;
+  return '<details class="team-b-furniture-set" data-furniture-set-room="'+esc(r.id)+'" '+(cached?'open':'')+'><summary>'+label+'</summary><p>Đề xuất từ số đo phòng và đồ hiện có. Xem danh sách trước khi áp dụng; giữ các món đã khóa / xóa.</p>'+content+'<small>Mẫu BMH theo kích thước; chưa phải sản phẩm hãng hoặc cấu tạo lắp đặt được duyệt.</small></details>';
  };
  B.roomFurnitureLayout=r=>B.resolvedFurniture(r.id).map(i=>{
   const poly=B.furnitureFootprint(i),xs=poly.map(p=>p.x),ys=poly.map(p=>p.y);
@@ -548,7 +650,7 @@
    line=(x,y,a,b)=>'<path fill="none" d="M'+x*w+' '+y*d+' L'+a*w+' '+b*d+'"/>',
    ellipse=(x,y,a,b)=>'<ellipse cx="'+x*w+'" cy="'+y*d+'" rx="'+a*w+'" ry="'+b*d+'"/>',id=i.modelId;
   let detail='',kind='cabinet';
-  if(/^bed/.test(id)){
+  if(/^(bedDouble|bedSingle)$/.test(id)){
    kind='bed';detail=rect(-.48,-.49,.96,.07)+rect(-.45,-.40,.9,.86,.035)+line(-.45,-.12,.45,-.12);
    const n=id==='bedDouble'?2:1;for(let j=0;j<n;j++)detail+=rect(-.4+j*.8/n,-.36,.72/n,.18,.04);
   }else if(/^(lounge|chair)/.test(id)){
@@ -568,14 +670,16 @@
    kind='washer';detail=rect(-.46,-.46,.92,.92,.03)+line(-.46,.32,.46,.32)+line(-.22,.44,.22,.44);
   }else if(id==='pottedPlant'){
    kind='plant';detail=ellipse(0,0,.22,.22);for(let n=0;n<6;n++){const a=n*Math.PI/3;detail+=ellipse(Math.cos(a)*.23,Math.sin(a)*.23,.18,.18);}
-  }else if(id==='floorLamp'){
+  }else if(id==='bedBench'){
+   kind='bench';detail=rect(-.47,-.44,.94,.88,.08)+line(-.42,0,.42,0);
+  }else if(id==='floorLamp'||id==='bedsideLamp'){
    kind='lamp';detail=ellipse(0,0,.44,.44)+ellipse(0,0,.08,.08);
   }else if(/^(table|sideTable|desk)/.test(id)){
    kind='table';detail=rect(-.46,-.46,.92,.92,.04);if(id==='desk')detail+=rect(-.28,-.3,.56,.30,.01);
   }else{
    detail=rect(-.46,-.46,.92,.92)+line(0,-.46,0,.46)+line(-.30,-.35,-.15,-.35)+line(.15,-.35,.30,-.35);
   }
-  return '<g class="furniture-plan-symbol" data-symbol-kind="'+kind+'" data-symbol-model="'+esc(id)+'" transform="translate('+p.x+' '+p.y+') rotate('+p.rotationDeg+')" pointer-events="none" fill="#faf8f3" stroke="#536b70" stroke-width=".018">'+detail+'</g>';
+  return '<g class="furniture-plan-symbol" data-symbol-kind="'+kind+'" data-symbol-model="'+esc(id)+'" data-mount-height="'+(p.z||0)+'" stroke-dasharray="'+((p.z||0)>1.2?'.05 .025':'none')+'" transform="translate('+p.x+' '+p.y+') rotate('+p.rotationDeg+')" pointer-events="none" fill="#faf8f3" stroke="#536b70" stroke-width=".018">'+detail+'</g>';
  };
  const oldSvg=B.furnitureSvg;B.furnitureSvg=r=>{
   if(['stairs','garage'].includes(r.type))return oldSvg(r);
@@ -583,13 +687,14 @@
  };
  // Scale vendored assets from catalog dimensions to the customer's saved size.
  B.furnitureExportScale=i=>{
-  const d=B.FURNITURE_DIMENSIONS[i.modelId],factor=['loungeChairModern','tableCoffeeModern'].includes(i.modelId)?100:200;
+  const d=B.FURNITURE_DIMENSIONS[i.modelId],factor=(['loungeChairModern','tableCoffeeModern'].includes(i.modelId)||setModels.has(i.modelId))?100:200;
   return d?{scale_x:factor*i.size.width/d.w,scale_y:factor*i.size.height/d.h,scale_z:factor*i.size.depth/d.d}:{scale_x:factor,scale_y:factor,scale_z:factor};
  };
+ B.furnitureAssetUrl=id=>id==='tableCoffeeModern'?'../interior/models/modern-coffee-table.glb':id==='loungeChairModern'?'../interior/models/modern-armchair-facing.glb':setModels.has(id)?'../interior/models/'+id+'.glb':'models/'+id+'.glb';
  const doc=B.architectDocument;B.architectDocument=focus=>{
   const result=doc(focus);for(const [f,level] of result.levels.entries()){
    const rows=B.resolvedFurniture().filter(i=>i.floor===f&&(!focus?.startsWith('room:')||i.roomId===focus.slice(5)));
-   const items=rows.map(i=>({id:i.id,item_name:i.modelId,item_type:1,format:'gltf',model_url:i.modelId==='tableCoffeeModern'?'../interior/models/modern-coffee-table.glb':i.modelId==='loungeChairModern'?'../interior/models/modern-armchair-facing.glb':'models/'+i.modelId+'.glb',xpos:i.pose.x*100,zpos:i.pose.y*100,ypos:i.pose.z*100,rotation:-i.pose.rotationDeg*Math.PI/180,...B.furnitureExportScale(i),fixed:i.locked===true}));
+   const items=rows.map(i=>({id:i.id,item_name:i.modelId,item_type:1,format:'gltf',model_url:B.furnitureAssetUrl(i.modelId),xpos:i.pose.x*100,zpos:i.pose.y*100,ypos:i.pose.z*100,rotation:-i.pose.rotationDeg*Math.PI/180,...B.furnitureExportScale(i),fixed:i.locked===true}));
    if(f===0)result.items=[...(result.items||[]).filter(i=>i.item_type!==1),...items];else level.items=[...(level.items||[]).filter(i=>i.item_type!==1),...items];
   }return result;
  };
@@ -614,7 +719,7 @@
   const ui=B.state.ui,r=B.state.ui.step===6?(room((ui.sceneFocus||'').replace(/^room:/,''))||room(ui.modelRoomId)):B.selectedRoom();if(!r)return '';
   const catalogueModel=models[ui.planner.furnitureCatalogueModel]?ui.planner.furnitureCatalogueModel:'bedDouble';
   const rows=B.resolvedFurniture(r.id,{includeRemoved:true}),item=rows.find(i=>i.id===selected()&&i.placementStatus==='present'),ready=B.furnitureContractReady(),disabled=(!ready||B.isRoomLocked(r.id)||item?.locked)?'disabled':'';
-  return '<details class="team-b-furniture-editor" '+(selected()?'open':'')+'><summary>Nội thất từng món · '+esc(r.name)+'</summary><div><p>Chọn trên bản vẽ / mô hình; kéo để dời, nhập góc bất kỳ. Vật thể mô phỏng theo số đo.</p>'+(!ready?'<p role="status">Chỉnh từng món nội thất chưa sẵn sàng trong bản này. Bạn vẫn xem được bố trí hiện tại.</p>':'')+'<label>Vật thể<select data-furniture-select><option value="">Chọn một món</option>'+rows.filter(i=>i.placementStatus==='present').map(i=>'<option value="'+esc(i.id)+'" '+(item?.id===i.id?'selected':'')+'>'+esc(models[i.modelId])+(i.locked?' · khóa':'')+'</option>').join('')+'</select></label>'+(item?(ui.step===6&&ui.designView==='room'&&ui.roomCamera!=='inside'?'<button type="button" data-furniture-focus="'+esc(item.id)+'">Xem gần trong 3D</button>':'')+B.furnitureRotationHtml(item,disabled)+'<form data-furniture-pose="'+esc(item.id)+'" class="team-b-pose-fields">'+[['x','Tâm X / m',item.pose.x],['y','Tâm Y / m',item.pose.y],['rotationDeg','Góc / °',item.pose.rotationDeg]].map(([k,label,v])=>'<label>'+label+'<input name="'+k+'" type="number" step="any" value="'+v+'" '+disabled+' required></label>').join('')+'<button '+disabled+'>Áp dụng vị trí / góc</button></form><div class="team-b-item-actions"><button data-furniture-lock="'+esc(item.id)+'" '+(!ready||B.isRoomLocked(r.id)?'disabled':'')+'>'+(item.locked?'Mở khóa':'Khóa món này')+'</button><button data-furniture-remove="'+esc(item.id)+'" '+disabled+'>Xóa món này</button><button data-plan-undo>Hoàn tác</button><button data-plan-redo>Làm lại</button></div>':'')+(item?'<details><summary>Kích thước mẫu · '+esc(models[item.modelId])+'</summary><form data-furniture-size="'+esc(item.id)+'" class="team-b-pose-fields">'+[['width','Rộng / m'],['depth','Sâu / m'],['height','Cao / m']].map(([k,label])=>'<label>'+label+'<input name="'+k+'" type="number" min="0.01" step="any" value="'+item.size[k]+'" '+disabled+' required></label>').join('')+'<button '+disabled+'>Lưu kích thước</button></form><small>Nhập số đo từ sản phẩm bạn chọn. Hình dáng hiện là mẫu mô phỏng BMH, chưa phải model được hãng xác nhận.</small></details><details><summary>Vật liệu riêng của món</summary>'+B.furnitureMaterialRoles(item).map(([role,label])=>'<label>'+label+'<select data-furniture-material="'+role+'" data-furniture-owner="'+esc(item.id)+'" '+disabled+'><option value="">Theo phòng / phong cách</option>'+B.furnitureMaterialChoices(item,role).map(p=>'<option value="'+p.id+'" '+((item.materialBindings||[]).some(b=>b.role===role&&b.visualProfileId===p.id)?'selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select></label>').join('')+'<small>'+(B.furnitureMaterialRoles(item).length?'Bề mặt BMH mô phỏng; giữ SKU đã chọn, cần đối chiếu mẫu thực.':'Mẫu này giữ bề mặt theo mô hình, chưa hỗ trợ đổi vật liệu riêng.')+'</small></details>':'')+'<p role="status" aria-live="polite">'+esc(ui.planner.furnitureNotice||'')+'</p><details '+(rows.some(i=>i.placementStatus==='removed')?'open':'')+'><summary>Thêm món / đồ đã xóa</summary><form data-furniture-add="'+esc(r.id)+'"><label>Mẫu đồ<select name="modelId">'+Object.entries(models).map(([id,label])=>'<option value="'+id+'" '+(id===catalogueModel?'selected':'')+'>'+label+'</option>').join('')+'</select></label><div data-furniture-catalogue aria-live="polite">'+B.furnitureCatalogueHtml(catalogueModel)+'</div><button '+(!ready||B.isRoomLocked(r.id)?'disabled':'')+'>Thêm vào phòng</button></form>'+rows.filter(i=>i.placementStatus==='removed').map(i=>'<button data-furniture-restore="'+esc(i.id)+'" '+(!ready?'disabled':'')+'>Khôi phục '+esc(models[i.modelId])+'</button>').join('')+'</details></div></details>';
+  return B.furnitureSetHtml(r)+'<details class="team-b-furniture-editor" '+(selected()?'open':'')+'><summary>Nội thất từng món · '+esc(r.name)+'</summary><div><p>Chọn trên bản vẽ / mô hình; kéo để dời, nhập góc bất kỳ. Vật thể mô phỏng theo số đo.</p>'+(!ready?'<p role="status">Chỉnh từng món nội thất chưa sẵn sàng trong bản này. Bạn vẫn xem được bố trí hiện tại.</p>':'')+'<label>Vật thể<select data-furniture-select><option value="">Chọn một món</option>'+rows.filter(i=>i.placementStatus==='present').map(i=>'<option value="'+esc(i.id)+'" '+(item?.id===i.id?'selected':'')+'>'+esc(models[i.modelId])+(i.locked?' · khóa':'')+'</option>').join('')+'</select></label>'+(item?(ui.step===6&&ui.designView==='room'&&ui.roomCamera!=='inside'?'<button type="button" data-furniture-focus="'+esc(item.id)+'">Xem gần trong 3D</button>':'')+B.furnitureRotationHtml(item,disabled)+'<form data-furniture-pose="'+esc(item.id)+'" class="team-b-pose-fields">'+[['x','Tâm X / m',item.pose.x],['y','Tâm Y / m',item.pose.y],['z','Cao độ đáy / m',item.pose.z],['rotationDeg','Góc / °',item.pose.rotationDeg]].map(([k,label,v])=>'<label>'+label+'<input name="'+k+'" type="number" step="any" value="'+v+'" '+disabled+' required></label>').join('')+'<button '+disabled+'>Áp dụng vị trí / góc</button></form><div class="team-b-item-actions"><button data-furniture-lock="'+esc(item.id)+'" '+(!ready||B.isRoomLocked(r.id)?'disabled':'')+'>'+(item.locked?'Mở khóa':'Khóa món này')+'</button><button data-furniture-remove="'+esc(item.id)+'" '+disabled+'>Xóa món này</button></div>':'')+(item?'<details><summary>Kích thước mẫu · '+esc(models[item.modelId])+'</summary><form data-furniture-size="'+esc(item.id)+'" class="team-b-pose-fields">'+[['width','Rộng / m'],['depth','Sâu / m'],['height','Cao / m']].map(([k,label])=>'<label>'+label+'<input name="'+k+'" type="number" min="0.01" step="any" value="'+item.size[k]+'" '+disabled+' required></label>').join('')+'<button '+disabled+'>Lưu kích thước</button></form><small>Nhập số đo từ sản phẩm bạn chọn. Hình dáng hiện là mẫu mô phỏng BMH, chưa phải model được hãng xác nhận.</small></details><details><summary>Vật liệu riêng của món</summary>'+B.furnitureMaterialRoles(item).map(([role,label])=>'<label>'+label+'<select data-furniture-material="'+role+'" data-furniture-owner="'+esc(item.id)+'" '+disabled+'><option value="">Theo phòng / phong cách</option>'+B.furnitureMaterialChoices(item,role).map(p=>'<option value="'+p.id+'" '+((item.materialBindings||[]).some(b=>b.role===role&&b.visualProfileId===p.id)?'selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select></label>').join('')+'<small>'+(B.furnitureMaterialRoles(item).length?'Bề mặt BMH mô phỏng; giữ SKU đã chọn, cần đối chiếu mẫu thực.':'Mẫu này giữ bề mặt theo mô hình, chưa hỗ trợ đổi vật liệu riêng.')+'</small></details>':'')+'<div class="team-b-item-history"><button type="button" data-plan-undo '+(!B.planHistory.undo.length?'disabled':'')+'>Hoàn tác</button><button type="button" data-plan-redo '+(!B.planHistory.redo.length?'disabled':'')+'>Làm lại</button></div><p role="status" aria-live="polite">'+esc(ui.planner.furnitureNotice||'')+'</p><details '+(rows.some(i=>i.placementStatus==='removed')?'open':'')+'><summary>Thêm món / đồ đã xóa</summary><form data-furniture-add="'+esc(r.id)+'"><label>Mẫu đồ<select name="modelId">'+Object.entries(models).map(([id,label])=>'<option value="'+id+'" '+(id===catalogueModel?'selected':'')+'>'+label+'</option>').join('')+'</select></label><div data-furniture-catalogue aria-live="polite">'+B.furnitureCatalogueHtml(catalogueModel)+'</div><button '+(!ready||B.isRoomLocked(r.id)?'disabled':'')+'>Thêm vào phòng</button></form>'+rows.filter(i=>i.placementStatus==='removed').map(i=>'<button data-furniture-restore="'+esc(i.id)+'" '+(!ready?'disabled':'')+'>Khôi phục '+esc(models[i.modelId])+'</button>').join('')+'</details></div></details>';
  };
  B.roomDepthDrawingHtml=p=>{
   if(!p?.ok||!B.withPlan||!B.interiorSheetSvg)return '';
@@ -635,6 +740,7 @@
  document.addEventListener('click',e=>{if(e.target.closest?.('[data-room-depth-apply]'))B.applySelectedRoomDepth();});
  const editor=B.screen5,studio=B.screen7;B.screen5=()=>editor()+B.furnitureEditorHtml()+B.roomDepthEditorHtml();B.SCREENS[3]=B.screen5;B.screen7=()=>studio()+B.furnitureEditorHtml();B.SCREENS[5]=B.screen7;
  const select=id=>{B.state.ui.planner.selectedFurniture=id;const i=B.resolvedFurniture().find(i=>i.id===id);if(i)B.state.ui.planner.selected=i.roomId;B.rememberFinishCamera?.();B.render({preserveScroll:true});};
+ document.addEventListener('click',e=>{const preview=e.target.closest?.('[data-furniture-set-preview]');if(preview){B.showFurnitureSetPreview(preview.dataset.furnitureSetPreview);return;}const button=e.target.closest?.('[data-furniture-set]');if(button)B.applyFurnitureSet(button.dataset.furnitureSet,button.dataset.furnitureSetStamp);});
  document.addEventListener('submit',e=>{const form=e.target;if(form.matches?.('[data-furniture-pose]')){e.preventDefault();const data=Object.fromEntries(new FormData(form));B.editFurniture(form.dataset.furniturePose,{pose:Object.fromEntries(Object.entries(data).map(([k,v])=>[k,Number(v)]))});}else if(form.matches?.('[data-furniture-size]')){e.preventDefault();const data=Object.fromEntries(new FormData(form));B.editFurniture(form.dataset.furnitureSize,{size:Object.fromEntries(Object.entries(data).map(([k,v])=>[k,Number(v)]))});}else if(form.matches?.('[data-furniture-add]')){e.preventDefault();B.addFurniture(form.dataset.furnitureAdd,new FormData(form).get('modelId'));}});
  document.addEventListener('change',e=>{if(e.target.matches?.('[data-furniture-add] select[name="modelId"]')){const id=e.target.value;if(models[id]){B.state.ui.planner.furnitureCatalogueModel=id;const preview=e.target.closest('form').querySelector('[data-furniture-catalogue]');if(preview)preview.innerHTML=B.furnitureCatalogueHtml(id);}return;}if(e.target.matches?.('[data-furniture-turn-step]')){const n=Number(e.target.value);if([15,45,90].includes(n))B.state.ui.planner.furnitureRotationStep=n;}else if(e.target.matches?.('[data-furniture-select]'))select(e.target.value);else if(e.target.matches?.('[data-furniture-material]'))B.setFurnitureVisualMaterial(e.target.dataset.furnitureOwner,e.target.dataset.furnitureMaterial,e.target.value);});
  document.addEventListener('click',e=>{

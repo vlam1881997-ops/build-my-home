@@ -25,8 +25,7 @@
     "tests/team-b-workflow.test.mjs": "f34eac1c0574a717fd3b3d700c862f29f2b0f2adf45034a9ecfb4a8ffaa538a6"
   },
   "pending": [
-    "exact-head Node22 CI/deployment/native check for numerical display follow-up",
-    "native mobile/GPU and Modern R1 acceptance"
+    "native mobile/GPU and Modern R1 acceptance; PR66 W26 native acceptance; terrace access/guard/drainage source inputs"
   ],
   "production67": {
     "commit": "0335042aac5c0a33360e6b066b84f695aac18343",
@@ -43,5 +42,31 @@
     ],
     "jsErrors": [],
     "precisionFollowup": "entered3.843 displayed3.8429999999999995; preserve entered dimensions before accepting numeric UI"
+  },
+  "production68": {
+    "commit": "8620d46067531049dd4d370fd0076ab03c812721",
+    "sourceHead": "b04ab4521ad2db7129e4c283976b3b7dcb97021d",
+    "node22Ci": "39120940974",
+    "deployment": "dpl_EuGAsEoR2MnURWhXLXtTJZiEEeNg",
+    "status": "READY",
+    "url": "https://www.huiminhbach.id.vn/",
+    "native": {
+      "exactDimensionsAfterCreateAndReload": {
+        "x": 0.317,
+        "y": 2.113,
+        "width": 3.137,
+        "depth": 3.843
+      },
+      "roomId": "r-mvdpkxqy-maxgm",
+      "lastRoomDeletionKeepsDrawingTools": true,
+      "undoRedoReloadPassed": true,
+      "overlapAndSetbackRejectedWithoutChangingRoom": true,
+      "drawingVisible": true,
+      "jsErrors": []
+    },
+    "screenshots": {
+      "after-generation.jpg": "855de9e01bf7c8fcf9fff00b78be10a36eaabd3c36201bbb9ab154a3e9a04453",
+      "final-personal-drawing.jpg": "6b362d98ed185908fa26b16b66415a1dee06051ce600ed2669cc79ed0ed9087f"
+    }
   }
 }

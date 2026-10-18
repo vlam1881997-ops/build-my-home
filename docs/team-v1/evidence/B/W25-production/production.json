@@ -1,0 +1,40 @@
+{
+  "url": "https://www.huiminhbach.id.vn/",
+  "status": 200,
+  "renderer24": true,
+  "kitchenBasin": true,
+  "oven": true,
+  "thumbnailStatus": 200,
+  "thumbnailSha256": "2a875c613b32ef4f8c4fb532def2c5b81e7d9a2ea2a4dd7dd1acb8783ae4cc20",
+  "expectedThumbnailSha256": "2a875c613b32ef4f8c4fb532def2c5b81e7d9a2ea2a4dd7dd1acb8783ae4cc20",
+  "thumbnailMatches": true,
+  "timestamp": "2026-10-18T06:10:50.630953+00:00",
+  "sourceCommit": "8d6e24d7d84ff887ce6322f2424fb2e8116cfa30",
+  "productionMerge": "cd13c27e41806e91b43eab53b9c8634890a30833",
+  "pr": 65,
+  "ci": {
+    "run": 39102913295,
+    "conclusion": "success"
+  },
+  "nativeUI": {
+    "before": "WC inherited Sồi sáng after whole-house Modern collection",
+    "after": "Same saved WC resolves automatic Travertine cát after reload",
+    "explicit": "Gạch kem mờ retained through style change to Japandi and reload",
+    "project": "Disposable synthetic default5x20 two-storey project"
+  },
+  "nativeGPU": {
+    "status": "blocked-environment",
+    "reason": "WebGL VENDOR/RENDERER Disabled; screenshot uses lightweight fallback, not final shaded 3D"
+  },
+  "screenshots": {
+    "wc-explicit-reload.jpg": "ac667a94558ca45a6726d7cdf94244f618219a3519df67c6dea8722346be4b93",
+    "wc-default.jpg": "4e3567f9900a6b04a4d1b4934eea58e1014073888c602c004f92ffb988af0efc"
+  },
+  "commercialStatus": "Modern R1 in_progress; not commercial approved",
+  "vercel": {
+    "state": "success",
+    "deployment": "BHbpT8ZxZBijLdx3chZXMW6VCUy1",
+    "dashboard": "https://vercel.com/vlam1881997-9266/build_my_home_full_v1.2_github/BHbpT8ZxZBijLdx3chZXMW6VCUy1"
+  },
+  "last_verified_commit": "8d6e24d7d84ff887ce6322f2424fb2e8116cfa30"
+}

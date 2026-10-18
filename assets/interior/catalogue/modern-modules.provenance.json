@@ -1,0 +1,82 @@
+{
+  "models": [
+    {
+      "modelId": "kitchenBaseCabinet",
+      "image": "assets/interior/catalogue/kitchenBaseCabinet.webp",
+      "sha256": "32892ddca7ef63b8b5e20b27b8c64654b359a77dadaccc904706a878540a09f4",
+      "geometrySource": "production BMH createRoomAsset",
+      "purpose": "generic measured neutral model preview, not manufacturer product photo",
+      "renderer": "Blender4.5.13 Cycles",
+      "samples": 12,
+      "width": 640,
+      "height": 480
+    },
+    {
+      "modelId": "kitchenFillerPanel",
+      "image": "assets/interior/catalogue/kitchenFillerPanel.webp",
+      "sha256": "9c56a250ec8418b2d51b3b941871f384885ec63d32e57fc0f70faf9e6a138ec8",
+      "geometrySource": "production BMH createRoomAsset",
+      "purpose": "generic measured neutral model preview, not manufacturer product photo",
+      "renderer": "Blender4.5.13 Cycles",
+      "samples": 12,
+      "width": 640,
+      "height": 480
+    },
+    {
+      "modelId": "kitchenWallCabinet",
+      "image": "assets/interior/catalogue/kitchenWallCabinet.webp",
+      "sha256": "8052e02495a3b8cc318cce8d9607ee3c819fd4ef19a6181d2211835d68ceabf0",
+      "geometrySource": "production BMH createRoomAsset",
+      "purpose": "generic measured neutral model preview, not manufacturer product photo",
+      "renderer": "Blender4.5.13 Cycles",
+      "samples": 12,
+      "width": 640,
+      "height": 480
+    },
+    {
+      "modelId": "kitchenHood",
+      "image": "assets/interior/catalogue/kitchenHood.webp",
+      "sha256": "8f46ce28afde22f52e6773157d2abde430fb48e87106fd0ffa8fbc01e38cfb23",
+      "geometrySource": "production BMH createRoomAsset",
+      "purpose": "generic measured neutral model preview, not manufacturer product photo",
+      "renderer": "Blender4.5.13 Cycles",
+      "samples": 12,
+      "width": 640,
+      "height": 480
+    },
+    {
+      "modelId": "wardrobeModern",
+      "image": "assets/interior/catalogue/wardrobeModern.webp",
+      "sha256": "8f999dcbb6f3861c2e61d7d49933e1bdf3a2b118b0cb7495583b952d3aaab0cc",
+      "geometrySource": "production BMH createRoomAsset",
+      "purpose": "generic measured neutral model preview, not manufacturer product photo",
+      "renderer": "Blender4.5.13 Cycles",
+      "samples": 12,
+      "width": 640,
+      "height": 480
+    },
+    {
+      "modelId": "bedsideLamp",
+      "image": "assets/interior/catalogue/bedsideLamp.webp",
+      "sha256": "2b6f1750679bb703d5ca61280616ccb14e9af6ef486ad59e46c9e179661e196a",
+      "geometrySource": "production BMH createRoomAsset",
+      "purpose": "generic measured neutral model preview, not manufacturer product photo",
+      "renderer": "Blender4.5.13 Cycles",
+      "samples": 12,
+      "width": 640,
+      "height": 480
+    },
+    {
+      "modelId": "bedBench",
+      "image": "assets/interior/catalogue/bedBench.webp",
+      "sha256": "12d1a241020d959f95a3656e7e3ce9abae6a4637609ed10270c9eba2e027e235",
+      "geometrySource": "production BMH createRoomAsset",
+      "purpose": "generic measured neutral model preview, not manufacturer product photo",
+      "renderer": "Blender4.5.13 Cycles",
+      "samples": 12,
+      "width": 640,
+      "height": 480
+    }
+  ],
+  "status": "actual-parametric-model-catalogue"
+}

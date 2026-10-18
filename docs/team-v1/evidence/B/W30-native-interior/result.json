@@ -1,0 +1,55 @@
+{
+  "nativeVerifiedSource": "40fd8472ea2dc6f898d9bc949e3cb3365f28d7a0",
+  "deployment": "dpl_H7K1zwc4XMFbGTBLHKB2XYNqaVEj",
+  "scope": "synthetic Modern5x20 two-floor isolated local project in real preview UI",
+  "kitchen": {
+    "before": 18,
+    "after": 25,
+    "undo": 18,
+    "redo": 25,
+    "editedPoseAfterReload": {
+      "x": 1.8,
+      "y": 9.5,
+      "z": 1.6,
+      "rotationDeg": 37
+    },
+    "materialAfterReload": "dark-walnut",
+    "delete": 24,
+    "reloadDeleted": 24,
+    "restore": 25
+  },
+  "bedroom": {
+    "before": 9,
+    "after": 12,
+    "addedModels": [
+      "wardrobeModern",
+      "cabinetBed",
+      "bedsideLamp",
+      "bedsideLamp"
+    ],
+    "removedGenerated": "bookcaseClosedWide",
+    "benchSkipped": "wardrobe use clearance",
+    "lampRotationAfterReloadAndRestore": 37,
+    "lampMountingAfterReloadAndRestore": 0.4664,
+    "delete": 11,
+    "reloadDeleted": 11,
+    "restore": 12
+  },
+  "foundAndFixed": [
+    "History controls hidden after undo removes the selected addition",
+    "Room cards regenerated defaults because partial plan omitted furniture"
+  ],
+  "localChecks": {
+    "related": 108,
+    "passed": 108,
+    "node": "24.19.0",
+    "finalHeadCI": "pending"
+  },
+  "nativeGPU": "GL_VENDOR Disabled / GL_RENDERER Disabled; fallback only",
+  "fullR1": "in_progress",
+  "remaining": [
+    "Enabled-GPU desktop/mobile visual/performance acceptance",
+    "Terrace guard/drainage/waterproofing sources and professional review",
+    "Customer visual/design review"
+  ]
+}

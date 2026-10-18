@@ -1,0 +1,112 @@
+{
+  "type": "actual-production-parametric-model-exports",
+  "units": "metres",
+  "sourceFactorySha256": "61b1dca530524e21b4fb9ed3096e611b875bcbd8a0d003d9861c17ff622a5a33",
+  "models": [
+    {
+      "id": "kitchenBaseCabinet",
+      "file": "assets/interior/models/kitchenBaseCabinet.glb",
+      "sha256": "3056dcf56d93757e22ac427214623a7f71e4dcb452a1dca8a0e157fadcf56fb2",
+      "bytes": 268528,
+      "dimensionsMetres": {
+        "w": 0.6,
+        "h": 0.9,
+        "d": 0.6
+      },
+      "source": "BMH original parametric geometry from src/43_scene_assets.js",
+      "materialMode": "generic-neutral; native scene applies shared room/item selections",
+      "licence": "BMH project source; no third-party model geometry",
+      "exactness": "generic-design-module-not-manufacturer-SKU"
+    },
+    {
+      "id": "kitchenFillerPanel",
+      "file": "assets/interior/models/kitchenFillerPanel.glb",
+      "sha256": "e1ef0de114a6ae54aecb11416531a0d229eba777457690ce8354c586467d80c2",
+      "bytes": 60328,
+      "dimensionsMetres": {
+        "w": 0.12,
+        "h": 0.9,
+        "d": 0.6
+      },
+      "source": "BMH original parametric geometry from src/43_scene_assets.js",
+      "materialMode": "generic-neutral; native scene applies shared room/item selections",
+      "licence": "BMH project source; no third-party model geometry",
+      "exactness": "generic-design-module-not-manufacturer-SKU"
+    },
+    {
+      "id": "kitchenWallCabinet",
+      "file": "assets/interior/models/kitchenWallCabinet.glb",
+      "sha256": "d1d519931016272a4fd16a3d66b3c7d0964a7c5f43626936b56a2424eab7f2ec",
+      "bytes": 149384,
+      "dimensionsMetres": {
+        "w": 0.8,
+        "h": 0.72,
+        "d": 0.34
+      },
+      "source": "BMH original parametric geometry from src/43_scene_assets.js",
+      "materialMode": "generic-neutral; native scene applies shared room/item selections",
+      "licence": "BMH project source; no third-party model geometry",
+      "exactness": "generic-design-module-not-manufacturer-SKU"
+    },
+    {
+      "id": "kitchenHood",
+      "file": "assets/interior/models/kitchenHood.glb",
+      "sha256": "2ee6cc2efb339ffe31ee782aee39991937568bef613af98e4f3209bd7fe69745",
+      "bytes": 327436,
+      "dimensionsMetres": {
+        "w": 0.75,
+        "h": 0.65,
+        "d": 0.48
+      },
+      "source": "BMH original parametric geometry from src/43_scene_assets.js",
+      "materialMode": "generic-neutral; native scene applies shared room/item selections",
+      "licence": "BMH project source; no third-party model geometry",
+      "exactness": "generic-design-module-not-manufacturer-SKU"
+    },
+    {
+      "id": "wardrobeModern",
+      "file": "assets/interior/models/wardrobeModern.glb",
+      "sha256": "3facd97a1bb7a48c3337669f9a5a6f5602fb273d0c031803b01a48cec3633ada",
+      "bytes": 297792,
+      "dimensionsMetres": {
+        "w": 1.8,
+        "h": 2.4,
+        "d": 0.6
+      },
+      "source": "BMH original parametric geometry from src/43_scene_assets.js",
+      "materialMode": "generic-neutral; native scene applies shared room/item selections",
+      "licence": "BMH project source; no third-party model geometry",
+      "exactness": "generic-design-module-not-manufacturer-SKU"
+    },
+    {
+      "id": "bedsideLamp",
+      "file": "assets/interior/models/bedsideLamp.glb",
+      "sha256": "d843f8e179f114ec38cbd3c887631d3742715654fa3540efe4d7a19c019fdf45",
+      "bytes": 26568,
+      "dimensionsMetres": {
+        "w": 0.22,
+        "h": 0.42,
+        "d": 0.22
+      },
+      "source": "BMH original parametric geometry from src/43_scene_assets.js",
+      "materialMode": "generic-neutral; native scene applies shared room/item selections",
+      "licence": "BMH project source; no third-party model geometry",
+      "exactness": "generic-design-module-not-manufacturer-SKU"
+    },
+    {
+      "id": "bedBench",
+      "file": "assets/interior/models/bedBench.glb",
+      "sha256": "e383d9fbf25b69e4124cded484185b925494f4697d724af7f3bb7af300fc8082",
+      "bytes": 95836,
+      "dimensionsMetres": {
+        "w": 1.1,
+        "h": 0.44,
+        "d": 0.38
+      },
+      "source": "BMH original parametric geometry from src/43_scene_assets.js",
+      "materialMode": "generic-neutral; native scene applies shared room/item selections",
+      "licence": "BMH project source; no third-party model geometry",
+      "exactness": "generic-design-module-not-manufacturer-SKU"
+    }
+  ]
+}
