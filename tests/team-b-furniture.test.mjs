@@ -279,6 +279,18 @@ test('the shown set preview plan equals the committed plan and explains items ex
  const {B}=modernReference(),r=B.state.project.plan.rooms.find(r=>r.type==='bed'),before=plain(B.state.project.plan),p=B.previewFurnitureSet(r.id),preview=B.furnitureSetPreviewPlan(p);assert.deepEqual(plain(B.state.project.plan),before);assert.ok(p.skipped.some(i=>i.modelId==='bedBench'&&/khoảng sử dụng/.test(i.reason)));assert.equal(B.applyFurnitureSet(r.id,p.stamp),true);assert.deepEqual(plain(B.state.project.plan),plain(preview));
 });
 
+test('actual architectural SVG preview carries proposed furniture IDs and is identical after explicit apply',()=>{
+ const {B}=modernReference();
+ for(const r of B.state.project.plan.rooms.filter(r=>['kitchen','bed'].includes(r.type))){
+  const before=JSON.stringify(B.state.project.plan),revision=B.drawingRevision(),p=B.previewFurnitureSet(r.id),html=B.furnitureSetDrawingHtml(p);
+  const encoded=html.match(/src="data:image\/svg\+xml;charset=utf-8,([^"]+)"/);assert.ok(encoded,r.id+' actual preview image');
+  const svg=decodeURIComponent(encoded[1]);assert.match(svg,/data-sheet-code="NT-/);assert.match(svg,/data-scale="[1-9]/);
+  for(const i of p.additions)assert.ok(svg.includes(i.id),i.modelId+' shared ID on drawing');
+  assert.equal(JSON.stringify(B.state.project.plan),before,'viewing proposal must not save it');assert.equal(B.drawingRevision(),revision);
+  assert.equal(B.applyFurnitureSet(r.id,p.stamp),true);assert.equal(B.interiorSheetSvg(r.floor),svg,'applied drawing must equal the preview, including its revision');
+ }
+});
+
 test('generated artwork uses measured furniture clearances and cannot intersect the proposed wardrobes',()=>{
  const {B}=modernReference();for(const r of B.state.project.plan.rooms.filter(r=>['bed','kitchen'].includes(r.type))){const p=B.previewFurnitureSet(r.id);if(p.ok&&(p.additions.length||p.updates.length))B.applyFurnitureSet(r.id,p.stamp);}
  for(const r of B.state.project.plan.rooms.filter(r=>['living','bed'].includes(r.type))){const items=B.roomFurnitureLayout(r),walls=B.scenePlanGeometry({rooms:[r],openings:B.state.project.plan.openings,wallContext:B.state.project.plan.rooms},r.floor).walls,art=B.roomArtPlacement(r,items,walls);if(!art)continue;assert.ok(art.top<=B.studioFloorLevel(r.floor).clearHeight-.02);for(const i of items){const hit=(i.base||0)<art.top&&(i.base||0)+i.h>art.bottom&&i.x<art.rect.x+art.rect.w&&i.x+i.w>art.rect.x&&i.y<art.rect.y+art.rect.d&&i.y+i.d>art.rect.y;assert.equal(hit,false,r.id+' art intersects '+i.model);}}

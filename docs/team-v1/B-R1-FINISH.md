@@ -2,7 +2,7 @@
 
 Scope: one measured Modern house from the existing shared plan, preserving the current production release. No A source/dependency/schema edits. Source baseline: PR65 / main cd13c27; B QA checkpoint c8b46a5. This contract defines remaining acceptance gates; it is not a completion claim.
 
-## R1.1 Interior (active W26)
+## R1.1 Interior (W26 source/evidence ready; native acceptance pending)
 
 - Add measured generic kitchen base/wall cabinets, hood, wardrobe, bedside lamps and bed bench through existing plan.furniture records. Record width/depth/height and mounting height in metres. No independent 3D-only fixtures or supplier identity invented.
 - Provide one explicit per-room proposal with visible item dimensions/height adjustments, preview and apply. No automatic replacement of a saved project. Preserve existing IDs, positions, rotation, material bindings, locked items and deletion tombstones. Apply atomically with one undo step; reject stale proposals and invalid room/opening/collision/ceiling positions.
@@ -27,3 +27,9 @@ Scope: one measured Modern house from the existing shared plan, preserving the c
 ## Resume rule
 
 Continue the next incomplete substep in PROGRESS-B.md. Push scoped source and evidence checkpoints. Do not reread the whole repository, audit A, expand to another style or rerun unrelated passed checks. A completed code substep or green deployment does not mean R1 commercial acceptance.
+
+## Current concrete checkpoint
+
+PR66 contains the measured module implementation, seven original GLBs and actual model catalogue previews. Exact source head d5132c4 passed Node22 CI39106316094 and Vercel preview. The related SVG/apply integration check also passes locally; its final evidence-only checkpoint still needs exact-head CI. Native preview is behind Vercel sign-in; automatic review rejected creating a share link without specific authorization. Keep this draft unmerged until native related checks pass. Do not publish production as a way around preview access.
+
+R1.2 requires the actual terrace access/opening, edge/guard details and drainage/waterproofing source with reviewer status. The existing synthetic fixture has only proposed area/open sides. R1.3 requires an enabled WebGL desktop/mobile device and customer visual review. These are missing inputs, not tasks that extra decorative meshes or more unit tests can truthfully close.

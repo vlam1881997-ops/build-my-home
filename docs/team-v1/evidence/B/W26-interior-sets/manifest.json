@@ -1,0 +1,50 @@
+{
+  "status": "measured-review-not-commercially-approved",
+  "sourceCheckpoint": "d5132c4890d3419f538bbb595f4731da71f5b06a",
+  "fixture": "synthetic Modern 5x20 two-storey",
+  "views": [
+    {
+      "name": "kitchen",
+      "drawingRevision": "C565BDD0-810099E-AI4-RH3",
+      "rendererRevision": "customer-measured-house-25",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "imageSha256": "f3a5535ffddb0c3ece81e9b6947bc4783950d9155e090f164a8f5babce2d18db",
+      "sourceSceneSha256": "d43b899319f7a77e4b159c6542130a453c763141bc50b505fb1a1dd8a15867b4",
+      "approval": "measured-review"
+    },
+    {
+      "name": "bedroom",
+      "drawingRevision": "C565BDD0-810099E-AI4-RH3",
+      "rendererRevision": "customer-measured-house-25",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "imageSha256": "91911c47d5773abb2d9fc3376815308fb68c0b4ee2a98d9104fda42f96c6f178",
+      "sourceSceneSha256": "9c94e6274c004270de9be1d1ed424b8429e61c4ced24af70fe93fe4e054cf7da",
+      "approval": "measured-review"
+    },
+    {
+      "name": "bedroom-layout",
+      "drawingRevision": "C565BDD0-810099E-AI4-RH3",
+      "rendererRevision": "customer-measured-house-25",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "imageSha256": "87321e6f9f23452f383af01145e158853115438d40348c3589e04b1ab6d7ba32",
+      "sourceSceneSha256": "b38bea388e9a5afe27fe51c8052f9381720d4dc50e6ea117181994d2535c795d",
+      "approval": "inspection-only-cutaway-artefacts"
+    }
+  ],
+  "limitations": [
+    "Cloud native WebGL disabled; no GPU/mobile performance acceptance.",
+    "Generic BMH modules; no manufacturer identity, installation or prices verified.",
+    "Bedroom overview cutaway has offline glazing/clip artefacts; not accepted as a presentation image.",
+    "Terrace guard/access/drainage and engineering source inputs still pending."
+  ],
+  "sourceHashes": {
+    "src/43_scene_assets.js": "61b1dca530524e21b4fb9ed3096e611b875bcbd8a0d003d9861c17ff622a5a33",
+    "src/78_design_workflow.js": "98245a9f1e3b0173d46773acacb656daa441cd3f7c1de4ccade9d1340acd8b61",
+    "src/85_interior_collections.js": "29a268975332f406c61111c53409b45bb6205d6a931a39a50f62e6c6437c3a5f",
+    "src/99_customer_design.js": "ad2c5f7353e56030e23118b20950077dbd458060f5c00d3890727f9394e88856",
+    "src/103_real_house.js": "19a624ad207af3462e10edd821d4efcaee19b959e757f1a25d70868188e0b99a"
+  }
+}
