@@ -23,6 +23,14 @@ const view=process.argv[2]||'exterior',out=process.argv[3]||'docs/team-v1/eviden
 if(!['exterior','living','bed','kitchen','bath'].includes(view))throw Error('Unsupported review view: '+view);
 const room=view==='exterior'?null:B.state.project.plan.rooms.find(r=>r.type===view);
 if(view!=='exterior'&&!room)throw Error('Missing measured room for view: '+view);
+const measuredSnapshot=()=>JSON.stringify({site:B.state.project.site,plan:{...B.state.project.plan,furniture:undefined},furniture:B.resolvedFurniture().map(({materialBindings,...i})=>i)}),beforeGeometry=measuredSnapshot();
+const itemFinishes=JSON.parse(process.env.BMH_REVIEW_ITEM_FINISHES||'[]');
+for(const selection of itemFinishes){
+ const item=B.resolvedFurniture(room?.id).find(i=>i.modelId===selection.modelId);
+ if(!item||!B.setFurnitureVisualMaterial(item.id,selection.role,selection.profileId))throw Error('Cannot apply measured item finish '+JSON.stringify(selection));
+}
+if(measuredSnapshot()!==beforeGeometry)throw Error('Item finish changed measured geometry or placement');
+review.revision=B.drawingRevision();
 B.state.ui.sceneFocus=room?'room:'+room.id:'all';B.state.ui.roomCamera='inside';B.state.ui.sceneExploded=false;
 // The browser roof material paints a canvas; offline texture preparation is
 // deferred to Blender. This adapter changes no roof vertices or dimensions.
@@ -50,11 +58,12 @@ function material(m){
  materials.set(m.uuid,{id:m.uuid,color:m.color?.toArray()||[.5,.5,.5],roughness:m.roughness??.6,metalness:m.metalness||0,opacity:m.opacity??1,transmission:m.transmission||0,slot:slot||null,profileId:profile?.id||null,photo:photoKinds[kind]||null,photoAlpha:kind==='plaster'?.08:1,normalStrength:m.normalScale?.x??.2,vertexColors:!!m.vertexColors,sheen:m.sheen||0,sheenRoughness:m.sheenRoughness??1,sheenColor:m.sheenColor?.toArray()||null,maps:{color:texture(m.map),normal:texture(m.normalMap),roughness:texture(m.roughnessMap)}});return m.uuid;
 }
 scene.traverse(o=>{if(!o.isMesh||!o.visible)return;const g=o.geometry,p=g.attributes.position;if(!p)return;
+ let parent=o,furniture;while(parent){if(parent.userData.kind==='furniture')furniture=parent.userData;parent=parent.parent;}
  const attrs={};for(const key of ['position','normal','uv','color'])if(g.attributes[key])attrs[key]=Array.from(g.attributes[key].array);
- const ms=Array.isArray(o.material)?o.material:[o.material];meshes.push({name:o.name||o.userData.kind||'mesh',identity:{kind:o.userData.kind||null,roomId:o.userData.roomId||null,floor:o.userData.floor??null,openingId:o.userData.openingId||null},facadeSkin:!!o.userData.facadeSkin,castShadow:o.castShadow,receiveShadow:o.receiveShadow,matrix:o.matrixWorld.toArray(),attributes:attrs,index:g.index?Array.from(g.index.array):null,groups:g.groups,materials:ms.map(material)});
+ const ms=Array.isArray(o.material)?o.material:[o.material];meshes.push({name:o.name||o.userData.kind||'mesh',identity:{kind:o.userData.kind||null,roomId:o.userData.roomId||furniture?.roomId||null,floor:o.userData.floor??furniture?.floor??null,furnitureId:furniture?.furnitureId||null,modelId:furniture?.model||null,openingId:o.userData.openingId||null},facadeSkin:!!o.userData.facadeSkin,castShadow:o.castShadow,receiveShadow:o.receiveShadow,matrix:o.matrixWorld.toArray(),attributes:attrs,index:g.index?Array.from(g.index.array):null,groups:g.groups,materials:ms.map(material)});
 });
 const camera=room?B.roomInteriorCamera(room,B.roomFurnitureLayout(room)):null;
-const model={sun:{position:context.output.sun.position.toArray(),target:context.output.sun.target.position.toArray(),color:context.output.sun.color.toArray(),intensity:context.output.sun.intensity},collection:collection||null,planPreserved:JSON.stringify(B.state.project.plan)===beforePlan,revision:review.revision,fixture:review.id,status:review.status,view,roomId:room?.id||null,room:room?{x:room.x,y:room.y,w:room.w,h:room.h}:null,site:{width:W,depth:D},camera,materials:[...materials.values()],meshes};
+const model={sun:{position:context.output.sun.position.toArray(),target:context.output.sun.target.position.toArray(),color:context.output.sun.color.toArray(),intensity:context.output.sun.intensity},collection:collection||null,itemFinishes,geometryPreserved:measuredSnapshot()===beforeGeometry,planPreserved:JSON.stringify(B.state.project.plan)===beforePlan,revision:review.revision,fixture:review.id,status:review.status,view,roomId:room?.id||null,room:room?{x:room.x,y:room.y,w:room.w,h:room.h}:null,site:{width:W,depth:D},camera,materials:[...materials.values()],meshes};
 fs.writeFileSync(path.join(out,'scene-'+view+'.json'),JSON.stringify(model));
 console.log(JSON.stringify({view,revision:review.revision,meshes:meshes.length,vertices:meshes.reduce((n,m)=>n+m.attributes.position.length/3,0),camera}));
 

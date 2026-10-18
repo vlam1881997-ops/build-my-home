@@ -30,3 +30,80 @@ test('explicit detailed table keeps the selected geometry across all 24 styles a
 
 test('table stone override is isolated, durable across 24 styles and resettable without losing SKU',()=>{const B=fixture(),i=item('table');i.modelId='tableCoffeeModern';i.materialBindings=[{role:'floor',sku:'STONE-KEEP'}];B.state.project.plan.furniture=[i];const before=plain(B.finishPalette('room'));assert.equal(B.setFurnitureVisualMaterial('table','floor','sand-travertine'),true);assert.equal(B.setFurnitureVisualMaterial('table','fabric','linen-natural'),false);const nonStone=B.VISUAL_MATERIALS.find(p=>p.role==='floor'&&p.surface!=='stone');assert.ok(nonStone);assert.equal(B.setFurnitureVisualMaterial('table','floor',nonStone.id),false);assert.deepEqual(plain(B.finishPalette('room')),before);for(const s of B.HOUSE_STYLES){B.selectHouseStyle(s.id);assert.equal(B.furnitureFinishPalette(B.resolvedFurniture()[0]).stoneVisualMaterial,'sand-travertine');}B.state=B.mergeState(B.defaultState(),plain(B.state));const binding=B.customerDesignSnapshot().project.furniture[0].materialBindings[0];assert.equal(binding.sku,'STONE-KEEP');assert.equal(binding.visualProfileId,'sand-travertine');assert.equal(B.setFurnitureVisualMaterial('table','floor',''),true);assert.equal(B.furnitureFinishPalette(B.resolvedFurniture()[0]).stoneVisualMaterial,undefined);assert.equal(B.resolvedFurniture()[0].materialBindings[0].sku,'STONE-KEEP');B.undoPlan();assert.equal(B.furnitureFinishPalette(B.resolvedFurniture()[0]).stoneVisualMaterial,'sand-travertine');B.redoPlan();assert.equal(B.furnitureFinishPalette(B.resolvedFurniture()[0]).stoneVisualMaterial,undefined);});
 test('model-specific controls omit inapplicable finishes',()=>{const B=fixture();assert.deepEqual(plain(B.furnitureMaterialRoles({modelId:'tableCoffeeModern'})).map(x=>x[0]),['accent','floor']);for(const modelId of ['washingMachine','toilet','televisionModern'])assert.equal(B.furnitureMaterialRoles({modelId}).length,0);assert.ok(B.furnitureMaterialRoles({modelId:'loungeChairModern'}).some(x=>x[0]==='fabric'));});
+
+// R1 material → live model → save/export consistency.
+import * as BaseThree from 'three';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const THREE={...BaseThree,RoundedBoxGeometry};
+function finishFixture(modelId='loungeDesignSofa'){
+ const B=designClient({realHouse:true}),p=B.state.project,d=B.FURNITURE_DIMENSIONS[modelId];
+ p.plan={rooms:[{id:'room',name:'Phòng thử vật liệu',floor:0,type:'custom',x:0,y:0,w:6,h:6}],openings:[],fixtures:[],outdoor:[],lockedRoomIds:[],lockedFloors:[],furniture:[{id:'selected',roomId:'room',floor:0,modelId,origin:'customer-added',placementStatus:'present',locked:false,pose:{x:3,y:3,z:0,rotationDeg:37},size:{width:d.w,depth:d.d,height:d.h},materialBindings:[]}]};
+ p.materials.finish={exterior:null,rooms:{}};B.applyInteriorCollection('modern-natural','room');return B;
+}
+
+test('every subsequent item finish invalidates the export revision and survives save, undo and redo',()=>{
+ const B=finishFixture(),p=B.state.project,shape=JSON.stringify({...p.plan,furniture:p.plan.furniture.map(({materialBindings,...i})=>i)});
+ const revisions=[B.drawingRevision()];
+ B.customerFrameCache={oldImage:true};
+ for(const id of ['natural-linen','olive-velvet','cognac-leather']){
+  assert.equal(B.setFurnitureVisualMaterial('selected','fabric',id),true);revisions.push(B.drawingRevision());
+  assert.equal(B.customerFrameCache,null);
+  const item=B.resolvedFurniture()[0],m=B.sceneAssetMaterials(THREE,new THREE.Scene(),B.furnitureFinishPalette(item));
+  assert.equal(m.fabric.userData.visualMaterial,id);assert.equal(B.customerDesignSnapshot().project.furniture[0].materialBindings[0].visualProfileId,id);
+  if(id==='cognac-leather')assert.equal(m.fabric.sheen||0,0,'leather must not retain cloth sheen');
+ }
+ assert.equal(new Set(revisions).size,revisions.length,'a different selection must never reuse an old export image');
+ assert.equal(JSON.stringify({...p.plan,furniture:p.plan.furniture.map(({materialBindings,...i})=>i)}),shape);
+ B.state=B.mergeState(B.defaultState(),plain(B.state));assert.equal(B.furnitureFinishPalette(B.resolvedFurniture()[0]).visualMaterials.fabric,'cognac-leather');assert.equal(B.drawingRevision(),revisions.at(-1));
+ B.undoPlan();assert.equal(B.drawingRevision(),revisions.at(-2));B.redoPlan();assert.equal(B.drawingRevision(),revisions.at(-1));
+});
+
+test('a room supplier sample cannot overwrite a different per-item finish or its metre scale',()=>{
+ const B=finishFixture('cabinetTelevision'),p=B.state.project,product={id:'room-wood',category:'cabinetry',sku:'ROOM-WOOD',unit:'m²',specification:'Mẫu gỗ phòng'};
+ p.materials.choices.cabinetry=product.id;B.materialResearch={products:[product]};assert.equal(B.applyCatalogMaterial('cabinetry','natural-oak',{roomId:'room'}),true);
+ p.materials.finish.rooms.room.catalogMaterials.cabinetry.sample={mediaId:'material-sample-room',productId:product.id,sku:product.sku,specification:product.specification,realWorldScale:[.6,.8],rotationDeg:90,sourceReference:'Test fixture colour sample'};
+ B.materialSampleForBinding=b=>b.productId===product.id?{mediaId:'material-sample-room',image:{width:2,height:2}}:null;
+ const roomBefore=JSON.stringify(p.materials.finish),scene=new THREE.Scene(),inherited=B.sceneAssetMaterials(THREE,scene,B.furnitureFinishPalette(B.resolvedFurniture()[0]));
+ assert.equal(inherited.wood.userData.catalogProductId,product.id);
+ assert.equal(B.setFurnitureVisualMaterial('selected','accent','dark-walnut'),true);
+ const item=B.resolvedFurniture()[0],own=B.sceneAssetMaterials(THREE,scene,B.furnitureFinishPalette(item));
+ assert.equal(own.wood.userData.visualMaterial,'dark-walnut');assert.equal(own.wood.userData.catalogProductId,undefined);assert.deepEqual(plain(own.wood.userData.surfaceScale),[1.5,1.5]);
+ assert.equal(JSON.stringify(p.materials.finish),roomBefore);assert.equal(p.materials.choices.cabinetry,product.id);
+ assert.equal(B.setFurnitureVisualMaterial('selected','accent',''),true);
+ const reset=B.sceneAssetMaterials(THREE,scene,B.furnitureFinishPalette(B.resolvedFurniture()[0]));assert.equal(reset.wood.userData.catalogProductId,product.id);
+});
+
+test('stone controls reach actual Modern table, kitchen and vanity meshes without recolouring the floor',()=>{
+ for(const model of ['tableCoffee','tableCoffeeModern','sideTable','kitchenSink','kitchenStove','bathroomSink']){
+  const B=finishFixture(model),p=B.state.project,item=B.resolvedFurniture()[0],floor=JSON.stringify(B.finishPalette('room'));
+  assert.ok(B.furnitureMaterialRoles(item).some(([role])=>role==='floor'),model+' stone control');
+  assert.equal(B.setFurnitureVisualMaterial(item.id,'floor','white-marble'),true,model);
+  const selected=B.resolvedFurniture()[0],scene=new THREE.Scene(),m=B.sceneAssetMaterials(THREE,scene,B.furnitureFinishPalette(selected)),root=B.createRoomAsset(model,B.FURNITURE_DIMENSIONS[model],THREE,m);
+  let count=0;root.traverse(o=>{if(o.material?.userData.finishSlot==='stone'){count++;assert.equal(o.material.userData.visualMaterial,'white-marble');assert.equal(o.material.roughness,.24);assert.deepEqual(plain(o.material.userData.surfaceScale),[1.2,1.2]);}});assert.ok(count>0,model+' selected stone is used by real geometry');
+  assert.equal(JSON.stringify(B.finishPalette('room')),floor);assert.equal(B.setFurnitureVisualMaterial(item.id,'floor','oak-floor'),false);
+  assert.equal(selected.pose.rotationDeg,37);assert.deepEqual(plain(selected.size),plain(item.size));
+  B.state=B.mergeState(B.defaultState(),plain(B.state));assert.equal(B.furnitureFinishPalette(B.resolvedFurniture()[0]).stoneVisualMaterial,'white-marble');
+ }
+});
+
+test('live room changes and a rebuilt scene retain the same individual finish, geometry and camera renderer',()=>{
+ const B=finishFixture(),p=B.state.project;
+ assert.equal(B.setFurnitureVisualMaterial('selected','fabric','olive-velvet'),true);
+ p.plan.furniture.push({...plain(p.plan.furniture[0]),id:'inherited',modelId:'chair',pose:{x:5,y:5,z:0,rotationDeg:0},size:{width:.4,depth:.4,height:.94},materialBindings:[]});
+ vm.runInNewContext(fs.readFileSync('src/90_product_polish.js','utf8'),{BMH:B,performance,document:{addEventListener(){},querySelector:()=>null}});
+ B.refreshStudioBrief=()=>{};B.refreshCinematicHero=()=>{};
+ Object.assign(B.state.ui,{step:6,sceneFocus:'room:room',roomCamera:'inside'});
+ const room=p.plan.rooms[0],scene=new THREE.Scene();B.addRoomSceneFurniture(room,.14,THREE,scene,{},p.site);
+ const floor=new THREE.Mesh(new THREE.BoxGeometry(6,.14,6),B.sceneAssetMaterials(THREE,scene,B.finishPalette(room.id)).floor);floor.userData.roomId=room.id;scene.add(floor);
+ const renderer={domElement:{isConnected:true}},positions=new Map();scene.traverse(o=>{if(o.isMesh)positions.set(o,o.geometry.attributes.position.array.slice());});
+ B.studio3d={THREE,project:p,scene,renderer,structureKey:B.studioStructureKey(),renderFrame(){}};
+ const floorMaterial=floor.material,pose=JSON.stringify(B.resolvedFurniture()[0].pose);
+ assert.equal(B.applyVisualMaterial('fabric','cognac-leather',room.id),true);assert.equal(B.refreshStudioFinishes('fabric',room.id),true);
+ const actual=[];let inherited=0;scene.traverse(o=>{if(o.material?.userData.finishSlot!=='fabric')return;let parent=o;while(parent&&!parent.userData.furnitureId)parent=parent.parent;if(parent?.userData.furnitureId==='selected'){actual.push(o.material);assert.equal(o.material.userData.visualMaterial,'olive-velvet');}else if(parent?.userData.furnitureId==='inherited'){inherited++;assert.equal(o.material.userData.visualMaterial,'cognac-leather');}});assert.ok(actual.length>0&&inherited>0);
+ const rebuilt=B.sceneAssetMaterials(THREE,new THREE.Scene(),B.furnitureFinishPalette(B.resolvedFurniture()[0])).fabric;
+ for(const m of actual){assert.equal(m.color.getHexString(),rebuilt.color.getHexString());assert.equal(m.roughness,rebuilt.roughness);assert.equal(m.sheen,rebuilt.sheen);assert.deepEqual(plain(m.userData.surfaceScale),plain(rebuilt.userData.surfaceScale));}
+ assert.equal(B.studio3d.renderer,renderer);assert.equal(floor.material,floorMaterial);assert.equal(JSON.stringify(B.resolvedFurniture()[0].pose),pose);
+ for(const [o,vertices]of positions)assert.deepEqual(o.geometry.attributes.position.array,vertices);
+});

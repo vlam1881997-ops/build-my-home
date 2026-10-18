@@ -20,3 +20,17 @@ Without BMH_REVIEW_COLLECTION, the original reference finish selections remain. 
 Only changed related regressions should run. Required new targeted file: team-b-modern-natural.test.mjs. Relevant existing scene tests: upholstery/envelopes, collection selection, finish isolation, texture channels, cache and disposal. Full-house geometry/import gates from W20 need not be repeated for unchanged plan geometry.
 
 Next visual gate: compare actual final living image to user's AI target, then affected other rooms. Keep PR draft until image/geometry/GPU acceptance and the full R1 exterior/interior gates are met. Thumbnail is an actual Cycles render from this measured fixture, never the AI target image.
+
+## W23 material / model consistency
+
+The per-item choices use the same furnitureFinishPalette in parametric and licensed models. Current C01 visualProfileId / textureAssetId / realWorldScale now contribute to the export revision; old images cannot be reused after a subsequent finish edit. Explicit item finishes suppress only the inherited room sample for that role. Resetting the item restores inheritance and preserves SKU references.
+
+For a matched camera/geometry material comparison:
+
+```
+BMH_REVIEW_COLLECTION=modern-natural node tests/team-b-modern-scene.mjs living /tmp/material-base
+BMH_REVIEW_COLLECTION=modern-natural BMH_REVIEW_ITEM_FINISHES='[{"modelId":"loungeDesignSofa","role":"fabric","profileId":"olive-velvet"},{"modelId":"tableCoffee","role":"floor","profileId":"white-marble"}]' node tests/team-b-modern-scene.mjs living /tmp/material-selected
+node --test tests/team-b-furniture.test.mjs
+```
+
+Render each exported scene with the same Cycles command above. The scene extractor asserts unchanged resolved furniture dimensions/poses and measured architecture, and records ancestor furniture IDs on actual meshes. `planPreserved` is a strict JSON comparison and becomes false when explicit item finish records are saved; `geometryPreserved` must stay true. W23 compares positions, normals, transforms and indices of every mesh; UV changes are allowed because stone/cloth repeat scales differ. The two changed item models affect 19 meshes; all 155 remaining meshes retain their materials. Four new consistency regressions are in the existing team-b-furniture.test.mjs CI entry. No application dependency or A-owned CI file was changed.
