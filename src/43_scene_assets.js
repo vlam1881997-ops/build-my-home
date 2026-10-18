@@ -423,7 +423,7 @@ BMH.createSceneFoliage=(THREE,dimensions,material,count=48)=>{
 BMH.createRoomAsset = (model, d, THREE, m) => {
   const selectedModel=model;if(model==='loungeChairModern')model='loungeChair';
   if(model==='tableCoffeeModern')model='tableCoffee';
-  const supported = /^(bedDouble|bedSingle|loungeDesignSofa|loungeChair|tableCoffee|table|desk|chair|chairDesk|cabinetTelevision|televisionModern|kitchenSink|kitchenStove|kitchenFridge|bookcaseClosedWide|cabinetBed|pottedPlant|washingMachine|bathroomSink|toilet|shower|sideTable|floorLamp)$/;
+  const supported = /^(bedDouble|bedSingle|loungeDesignSofa|loungeChair|tableCoffee|table|desk|chair|chairDesk|cabinetTelevision|televisionModern|kitchenSink|kitchenStove|kitchenFridge|kitchenBaseCabinet|kitchenFillerPanel|kitchenWallCabinet|kitchenHood|wardrobeModern|bedsideLamp|bedBench|bookcaseClosedWide|cabinetBed|pottedPlant|washingMachine|bathroomSink|toilet|shower|sideTable|floorLamp)$/;
   if (!supported.test(model) || !d || ![d.w,d.h,d.d].every(v => Number.isFinite(v) && v > 0)) return null;
   const root = new THREE.Group();
   root.name = model;
@@ -608,6 +608,21 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     const height=d.w*9/16;
     box(d.w,height,.05,0,.16+height/2,0,m.dark,.015);
     box(d.w-.035,height-.035,.006,0,.16+height/2,-.029,m.screen,.01);
+  } else if(model==='bedsideLamp') {
+    cylinder(d.w*.36,d.w*.47,d.h*.055,0,d.h*.0275,0,m.metal);
+    cylinder(d.w*.035,d.w*.035,d.h*.62,0,d.h*.34,0,m.metal);
+    const shade=cylinder(d.w*.34,d.w*.5,d.h*.38,0,d.h*.81,0,m.fabric);shade.userData={kind:'lamp-shade',generic:true};
+    cylinder(d.w*.30,d.w*.30,.008,0,d.h*.62,0,m.white);
+  } else if(model==='bedBench') {
+    legs(d.h*.25,d.w-.06,d.d-.05,m.wood);
+    box(d.w*.98,d.h*.25,d.d*.98,0,d.h*.375,0,m.wood,.014);
+    cushion(d.w,d.h*.5,d.d,0,d.h*.75,0,m.fabric);
+  } else if(model==='wardrobeModern') {
+    const toe=d.h*.035;
+    box(d.w*.94,toe,d.d*.92,0,toe/2,0,m.dark,.003);
+    box(d.w,d.h-toe,d.d,0,(d.h+toe)/2,0,m.wood,.01);
+    front(d.w-.025,d.h-toe-.03,(d.h+toe)/2,-d.d/2-.008,3);
+    for(const x of [-d.w/6,d.w/6])box(.006,d.h-toe-.035,.005,x,(d.h+toe)/2,-d.d/2-.025,m.dark,.001);
   } else if (/^(cabinet|bookcase)/.test(model)) {
     const tv=model==='cabinetTelevision',bed=model==='cabinetBed',leg=tv?.1:.07;
     legs(leg,d.w-.04,d.d-.04,m.dark);
@@ -617,7 +632,24 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     if(bed)front(d.w-.02,(d.h-leg)/2-.012,leg+(d.h-leg)*.25,-d.d/2-.012,1);
     if(tv){box(.32,.015,.20,-d.w*.32,d.h+.008,.025,m.linen,.01);cylinder(.055,.045,.11,d.w*.37,d.h+.055,0,m.white);}
   } else if (/^kitchen/.test(model)) {
-    if(model==='kitchenFridge') {
+    if(model==='kitchenFillerPanel') {
+      const top=Math.min(.055,d.h*.08);box(d.w,d.h-top,d.d,0,(d.h-top)/2,0,m.wood,.003);box(d.w,top,d.d,0,d.h-top/2,0,m.stone,.003);
+    } else if(model==='kitchenBaseCabinet') {
+      const toe=Math.min(.10,d.h*.12),top=Math.min(.055,d.h*.08);
+      box(d.w*.94,toe,d.d*.91,0,toe/2,-d.d*.025,m.dark,.003);
+      box(d.w-.01,d.h-toe-top,d.d-.025,0,(d.h+toe-top)/2,-.005,m.wood,.007);
+      box(d.w,top,d.d,0,d.h-top/2,0,m.stone,.01);
+      const h=(d.h-toe-top-.035)/3;
+      for(let j=0;j<3;j++)front(d.w-.025,h-.006,toe+.012+(j+.5)*h,d.d/2-.006,1);
+    } else if(model==='kitchenWallCabinet') {
+      box(d.w,d.h,d.d-.015,0,d.h/2,-.0075,m.wood,.007);
+      front(d.w-.025,d.h-.025,d.h/2,d.d/2-.006,2);
+    } else if(model==='kitchenHood') {
+      const canopy=box(d.w,d.h*.11,d.d,0,d.h*.07,0,m.metal,.014);canopy.userData={kind:'hood-canopy',generic:true};
+      box(d.w*.37,d.h*.90,d.d*.43,0,d.h*.55,-d.d*.21,m.metal,.008);
+      box(d.w*.92,d.h*.035,.008,0,d.h*.1,d.d/2-.004,m.screen,.004);
+      for(let j=0;j<8;j++)box(d.w*.68,.004,.012,0,d.h*.01,-d.d*.23+j*d.d*.065,m.dark,.001);
+    } else if(model==='kitchenFridge') {
       // Generic enamel appliance: never inherit the cabinetry's timber front.
       // All detailing stays in the existing measured envelope and local +Z front.
       const partBox=(name,w,h,depth,x,y,z,material,radius=.008)=>{
@@ -637,14 +669,14 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     } else {
       // Hollow measured cabinet: the sink cavity must not intersect a solid
       // cabinet top. The selected stone is only the worktop, never the basin.
-      const thickness=Math.min(.018,d.w*.035,d.d*.035),bodyHeight=d.h-.08;
+      const counterTop=model==='kitchenSink'?d.h*.75:d.h-Math.min(.012,d.h*.04),thickness=Math.min(.018,d.w*.035,d.d*.035),bodyHeight=counterTop-.055;
       const part=(kind,o)=>{o.userData={kind,generic:true};return o;};
       for(const x of [-1,1])part('cabinet-side',box(thickness,bodyHeight,d.d-.03,x*(d.w-.01-thickness)/2,bodyHeight/2,0,m.wood,.003));
       part('cabinet-back',box(d.w-.01-2*thickness,bodyHeight,thickness,0,bodyHeight/2,-(d.d-.03-thickness)/2,m.wood,.003));
       part('cabinet-bottom',box(d.w-.01-2*thickness,thickness,d.d-.03,0,thickness/2,0,m.wood,.003));
       box(d.w-.055,.07,.02,0,.035,d.d/2-.018,m.dark,.004);
       if(model==='kitchenStove') {
-        part('stone-worktop',box(d.w,.055,d.d,0,d.h-.025,0,m.stone,.015));
+        part('stone-worktop',box(d.w,.055,d.d,0,counterTop-.0275,0,m.stone,.015));
         // Independent oven fascia and glass; no timber door behind its window.
         const frontZ=d.d/2,fasciaWidth=d.w*.78,fasciaHeight=bodyHeight*.69;
         part('oven-fascia',box(fasciaWidth,fasciaHeight,.027,0,bodyHeight*.59,frontZ,m.metal,.009));
@@ -652,15 +684,15 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
         part('oven-handle',box(fasciaWidth*.72,.021,.031,0,bodyHeight*.78,frontZ+.028,m.metal,.008));
         for(const x of [-1,1]){const knob=cylinder(.018,.018,.018,x*fasciaWidth*.32,bodyHeight*.87,frontZ+.027,m.dark);knob.rotation.x=Math.PI/2;part('oven-control',knob);}
         part('cabinet-drawer',box(d.w-.03,bodyHeight*.16,.025,0,bodyHeight*.12,frontZ,m.wood,.005));
-        part('hob-glass',box(d.w*.8,.012,d.d*.56,0,d.h+.004,0,m.screen,.02));
+        part('hob-glass',box(d.w*.8,.012,d.d*.56,0,counterTop+.006,0,m.screen,.02));
         for(const x of [-d.w*.19,d.w*.19])for(const z of [-d.d*.14,d.d*.14]){
-          const ring=mesh(new THREE.TorusGeometry(.072,.003,8,24),m.metal,x,d.h+.012,z);ring.rotation.x=Math.PI/2;part('hob-ring',ring);
+          const ring=mesh(new THREE.TorusGeometry(.072,.003,8,24),m.metal,x,counterTop+.009,z);ring.rotation.x=Math.PI/2;part('hob-ring',ring);
         }
       } else {
-        front(d.w-.025,d.h-.15,(d.h-.15)/2+.04,d.d/2-.004,2);
+        front(d.w-.025,bodyHeight-.065,(bodyHeight+.065)/2,d.d/2-.004,2);
         // A true through-opening is cut in the stone top. The same elliptical
         // outline is used for the stainless shell; original footprint is kept.
-        const basinW=d.w*.65,basinD=d.d*.55,lip=.012,topY=d.h+.002,depth=Math.min(.18,d.h*.2);
+        const basinW=d.w*.65,basinD=d.d*.55,lip=.012,topY=counterTop,depth=Math.min(.18,counterTop*.23);
         const outline=new THREE.Shape();outline.moveTo(-d.w/2,-d.d/2);outline.lineTo(d.w/2,-d.d/2);outline.lineTo(d.w/2,d.d/2);outline.lineTo(-d.w/2,d.d/2);outline.closePath();
         const hole=new THREE.Path();hole.absellipse(0,0,basinW/2-lip,basinD/2-lip,0,Math.PI*2,true,0);outline.holes.push(hole);
         const topGeometry=new THREE.ExtrudeGeometry(outline,{depth:.055,bevelEnabled:false,curveSegments:48,steps:1});topGeometry.rotateX(-Math.PI/2);
@@ -669,9 +701,11 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
         const bowlGeometry=new THREE.LatheGeometry(profile.map(([r,y])=>new THREE.Vector2(r,y)),48);bowlGeometry.scale(basinW,depth,basinD);
         part('stainless-sink-basin',mesh(bowlGeometry,m.metal,0,topY-depth,0));
         part('sink-drain',cylinder(.025,.025,.003,0,topY-depth*.86,0,m.dark));
-        const faucet=mesh(new THREE.TorusGeometry(.09,.014,10,24,Math.PI),m.metal,0,d.h+.18,-d.d*.32);
+        const radius=d.h*.075,tube=d.h*(.014/1.2),arcY=d.h-radius-tube,back=-d.d*.32;
+        const faucet=mesh(new THREE.TorusGeometry(radius,tube,10,24,Math.PI),m.metal,0,arcY,back+radius);
         faucet.rotation.y=Math.PI/2;part('sink-faucet',faucet);
-        part('sink-faucet-stem',cylinder(.014,.014,.16,0,d.h+.08,-d.d*.32,m.metal));
+        part('sink-faucet-stem',cylinder(tube,tube,arcY-counterTop,0,(arcY+counterTop)/2,back,m.metal));
+        part('sink-spout',cylinder(tube,tube,d.h*.04,0,arcY-d.h*.02,back+radius*2,m.metal));
       }
     }
   } else if(model==='pottedPlant') {

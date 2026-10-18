@@ -39,6 +39,18 @@ BMH.FURNITURE_DIMENSIONS.tableCoffeeModern={w:1.1991113424301147,h:.369249671697
 BMH.FURNITURE_DIMENSIONS.sideTable={w:.40,h:.65,d:.40};
 BMH.FURNITURE_DIMENSIONS.floorLamp={w:.40,h:1.62,d:.40};
 BMH.FURNITURE_DIMENSIONS.washingMachine={w:.60,h:.85,d:.65};
+// Generic BMH design modules, not measured manufacturer SKUs. Sizes remain
+// editable in the shared furniture record; wall modules also record pose.z.
+Object.assign(BMH.FURNITURE_DIMENSIONS,{
+ kitchenBaseCabinet:{w:.60,h:.90,d:.60},kitchenFillerPanel:{w:.12,h:.90,d:.60},kitchenWallCabinet:{w:.80,h:.72,d:.34},
+ kitchenHood:{w:.75,h:.65,d:.48},wardrobeModern:{w:1.80,h:2.40,d:.60},
+ bedsideLamp:{w:.22,h:.42,d:.22},bedBench:{w:1.10,h:.44,d:.38}
+});
+BMH.FURNITURE_MOUNTING={kitchenWallCabinet:1.50,kitchenHood:1.65};
+// Whole-object height includes faucet/hob. This is also used by the explicit
+// shared-plan cabinet proposal, so a worktop is never aligned by eye in3D.
+BMH.furnitureWorktopHeight=i=>i.modelId==='kitchenSink'?i.size.height*.75:i.modelId==='kitchenStove'?i.size.height-Math.min(.012,i.size.height*.04):i.modelId==='kitchenBaseCabinet'?i.size.height:null;
+
 BMH.roomFurnitureLayout=r=>{
  const rotation=((Number(r.furnitureRotation)||0)%360+360)%360,odd=rotation%180===90,W=odd?r.h:r.w,D=odd?r.w:r.h,items=[];
  const transform=(x,y)=>rotation===90?{x:r.w-y,y:x}:rotation===180?{x:r.w-x,y:r.h-y}:rotation===270?{x:y,y:r.h-x}:{x,y};

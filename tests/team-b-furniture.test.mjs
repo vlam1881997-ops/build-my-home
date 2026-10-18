@@ -21,7 +21,7 @@ test('24 styles retain the customer model, measured dimensions, arbitrary facing
 
 test('explicit detailed chair keeps the selected geometry across all 24 styles and preserves the customer snapshot',()=>{const B=fixture();const i=item('selected-chair');i.modelId='loungeChairModern';const d=B.FURNITURE_DIMENSIONS[i.modelId];i.size={width:d.w,depth:d.d,height:d.h};i.pose.rotationDeg=37;B.state.project.plan.furniture=[i];for(const style of B.HOUSE_STYLES){B.selectHouseStyle(style.id);const mesh=B.roomFurnitureLayout(B.selectedRoom())[0];assert.equal(mesh.model,'loungeChairModern');assert.equal(B.detailedFurnitureAsset(mesh,'room'),'modern-armchair');assert.equal(mesh.rotation,37);assert.equal(B.resolvedFurniture()[0].size.width,d.w);}const exported=B.customerDesignSnapshot().project.furniture.find(x=>x.id==='selected-chair');assert.equal(exported.modelId,'loungeChairModern');assert.equal(exported.pose.rotationDeg,37);});
 
-test('Architect3D export keeps independently edited dimensions and identity',()=>{const B=fixture();for(const [modelId,d] of Object.entries(B.FURNITURE_DIMENSIONS)){const i={...item('measured'),modelId,size:{width:d.w*1.17,depth:d.d*.83,height:d.h*1.11}},before=JSON.stringify(i),scale=B.furnitureExportScale(i),factor=['loungeChairModern','tableCoffeeModern'].includes(modelId)?100:200;assert.ok(Math.abs(scale.scale_x-factor*1.17)<1e-8,modelId);assert.ok(Math.abs(scale.scale_y-factor*1.11)<1e-8,modelId);assert.ok(Math.abs(scale.scale_z-factor*.83)<1e-8,modelId);assert.equal(JSON.stringify(i),before);}});
+test('Architect3D export keeps independently edited dimensions and identity',()=>{const B=fixture();for(const [modelId,d] of Object.entries(B.FURNITURE_DIMENSIONS)){const i={...item('measured'),modelId,size:{width:d.w*1.17,depth:d.d*.83,height:d.h*1.11}},before=JSON.stringify(i),scale=B.furnitureExportScale(i),factor=['loungeChairModern','tableCoffeeModern','kitchenBaseCabinet','kitchenFillerPanel','kitchenWallCabinet','kitchenHood','wardrobeModern','bedsideLamp','bedBench'].includes(modelId)?100:200;assert.ok(Math.abs(scale.scale_x-factor*1.17)<1e-8,modelId);assert.ok(Math.abs(scale.scale_y-factor*1.11)<1e-8,modelId);assert.ok(Math.abs(scale.scale_z-factor*.83)<1e-8,modelId);assert.equal(JSON.stringify(i),before);}});
 
 test('catalogue shows measured defaults and provenance without changing customer furniture',()=>{const B=fixture(),before=plain(B.state.project);for(const id of Object.keys(B.FURNITURE_DIMENSIONS)){const html=B.furnitureCatalogueHtml(id);assert.ok(html.includes('data-catalogue-model="'+id+'"'));assert.ok(html.includes('assets/interior/catalogue/'+id+'.webp'));assert.match(html,/mm/);assert.match(html,/không phải ảnh sản phẩm hãng/);}assert.equal(B.furnitureCatalogueHtml('../../unknown'),'');assert.deepEqual(plain(B.state.project),before);});
 
@@ -213,4 +213,56 @@ test('automatic terrace floor is separate from indoor oak while explicit custome
  assert.equal(JSON.stringify(B.state.project.plan),before);assert.equal(B.applyVisualMaterial('floor','oak-floor',r.id),true);
  for(const style of ['Hiện đại','Japandi','Industrial']){B.state.project.style=style;assert.equal(B.finishPalette(r.id).visualMaterials.floor,'oak-floor','explicit floor belongs to customer');}
  B.state=B.mergeState(B.defaultState(),plain(B.state));assert.equal(B.finishPalette(r.id).visualMaterials.floor,'oak-floor');
+});
+
+test('Modern cabinet, hood, wardrobe, lamp and bench meshes fit measured envelopes and selected semantic surfaces',()=>{
+ const B=finishFixture(),ids=['kitchenBaseCabinet','kitchenFillerPanel','kitchenWallCabinet','kitchenHood','wardrobeModern','bedsideLamp','bedBench'];
+ for(const id of ids)for(const scale of [.7,1,1.3]){
+  const d=Object.fromEntries(Object.entries(B.FURNITURE_DIMENSIONS[id]).map(([k,v])=>[k,v*scale])),m=B.sceneAssetMaterials(THREE,new THREE.Scene(),{...B.finishPalette('room'),stoneVisualMaterial:'white-marble'}),root=B.createRoomAsset(id,d,THREE,m);assert.ok(root,id);root.updateMatrixWorld(true);
+  const size=new THREE.Box3().setFromObject(root).getSize(new THREE.Vector3());for(const [axis,v]of [['x',d.w],['y',d.h],['z',d.d]])assert.ok(Math.abs(size[axis]-v)<1e-5,id+' '+axis);
+  root.traverse(o=>{if(o.isMesh){assert.ok(o.geometry.attributes.position.array.every(Number.isFinite),id);assert.ok(o.geometry.attributes.normal.array.every(Number.isFinite),id);if(o.material.userData.finishSlot==='stone')assert.equal(o.material.userData.visualMaterial,'white-marble');}});
+ }
+});
+
+import {modernReference} from './team-b-modern-reference.mjs';
+test('shared kitchen proposal is pure, explicit and atomic; real worktops align and existing IDs/poses/finishes persist',()=>{
+ const {B}=modernReference();B.applyInteriorCollection('modern-natural');const r=B.state.project.plan.rooms.find(r=>r.type==='kitchen'),before=plain(B.state.project),original=B.resolvedFurniture(r.id),p=B.previewFurnitureSet(r.id);
+ assert.equal(p.ok,true);assert.deepEqual(plain(B.state.project),before,'preview never writes');assert.ok(p.additions.some(i=>i.modelId==='kitchenBaseCabinet'));assert.ok(p.additions.some(i=>i.modelId==='kitchenWallCabinet'));assert.ok(p.additions.some(i=>i.modelId==='kitchenHood'));assert.equal(p.updates.length,1);assert.equal(p.updates[0].before.modelId,'kitchenSink');assert.equal(p.updates[0].after.size.height,1.184);
+ const history=B.planHistory.undo.length;assert.equal(B.applyFurnitureSet(r.id,p.stamp),true);assert.equal(B.planHistory.undo.length,history+1);assert.deepEqual(plain(B.state.project.plan.rooms),before.plan.rooms);assert.deepEqual(plain(B.state.project.plan.openings),before.plan.openings);
+ for(const old of original){const next=B.resolvedFurniture(r.id).find(i=>i.id===old.id);assert.ok(next);assert.deepEqual(plain(next.pose),plain(old.pose));assert.deepEqual(plain(next.materialBindings),plain(old.materialBindings));}
+ const heights=[];for(const i of B.resolvedFurniture(r.id).filter(i=>['kitchenSink','kitchenStove','kitchenBaseCabinet','kitchenFillerPanel'].includes(i.modelId))){
+  const m=B.sceneAssetMaterials(THREE,new THREE.Scene(),B.furnitureFinishPalette(i)),root=B.createRoomAsset(i.modelId,{w:i.size.width,d:i.size.depth,h:i.size.height},THREE,m);root.updateMatrixWorld(true);root.traverse(o=>{if(o.material?.userData.finishSlot==='stone')heights.push(i.pose.z+new THREE.Box3().setFromObject(o).max.y);});
+ }
+ assert.ok(heights.length>=3);for(const height of heights)assert.ok(Math.abs(height-.888)<1e-5,'actual normalized worktop height');
+ const done=plain(B.state.project.plan);assert.equal(B.applyFurnitureSet(r.id,B.previewFurnitureSet(r.id).stamp),false,'idempotent');assert.deepEqual(plain(B.state.project.plan),done);B.undoPlan();assert.deepEqual(plain(B.state.project.plan),before.plan);B.redoPlan();assert.deepEqual(plain(B.state.project.plan),done);
+ B.state=B.mergeState(B.defaultState(),plain(B.state));assert.deepEqual(plain(B.state.project.plan.furniture),done.furniture);
+});
+
+test('bedroom proposal preserves head-side positions, provides wardrobe access and never regenerates deleted choices',()=>{
+ const {B}=modernReference();B.applyInteriorCollection('modern-natural');for(const r of B.state.project.plan.rooms.filter(r=>r.type==='bed')){
+  const before=B.resolvedFurniture(r.id),p=B.previewFurnitureSet(r.id),bed=before.find(i=>i.modelId==='bedDouble'),oldCab=before.find(i=>i.modelId==='cabinetBed');assert.ok(p.additions.some(i=>i.modelId==='wardrobeModern'),r.id+' wardrobe fits with access');
+  const cab=p.additions.find(i=>i.modelId==='cabinetBed');assert.ok(cab);assert.ok(Math.abs(cab.pose.y-oldCab.pose.y)<1e-6);assert.ok(Math.abs(cab.pose.x+oldCab.pose.x-2*bed.pose.x)<1e-6);
+  assert.equal(B.applyFurnitureSet(r.id,p.stamp),true);const items=B.resolvedFurniture(r.id);for(const i of items.filter(i=>['wardrobeModern','bedsideLamp','bedBench'].includes(i.modelId)))assert.deepEqual(plain(B.furniturePlacementIssues(i,items)),[],i.modelId);
+  const wardrobe=items.find(i=>i.modelId==='wardrobeModern');assert.equal(B.editFurniture(wardrobe.id,{placementStatus:'removed'}),true);assert.ok(!B.previewFurnitureSet(r.id).additions.some(i=>i.modelId==='wardrobeModern'));
+  B.state=B.mergeState(B.defaultState(),plain(B.state));assert.ok(!B.previewFurnitureSet(r.id).additions.some(i=>i.modelId==='wardrobeModern'));
+ }
+});
+
+test('mounted cabinets expose the same z and rotation to editor, drawing, scene and JSON; windows and ceiling remain clear',()=>{
+ const B=fixture(),r=B.state.project.plan.rooms[0];r.type='kitchen';B.state.project.plan.openings=[{id:'window',roomId:'room',floor:0,kind:'window',side:'north',offset:.5,width:2,sill:1,height:1.4}];
+ const upper={...item('upper',3,.22),modelId:'kitchenWallCabinet',size:{width:.8,depth:.34,height:.72},pose:{x:3,y:.22,z:1.5,rotationDeg:0}};assert.ok(B.furniturePlacementIssues(upper,[]).some(x=>/cửa sổ/.test(x)));
+ B.state.project.plan.furniture=[{...upper,pose:{x:3,y:3,z:1.5,rotationDeg:0}}];assert.equal(B.editFurniture('upper',{pose:{z:1.63,rotationDeg:37}}),true);const saved=B.resolvedFurniture()[0],layout=B.roomFurnitureLayout(r)[0];assert.equal(layout.base,1.63);assert.equal(layout.rotation,37);assert.match(B.furniturePlanSymbol(saved),/data-mount-height="1.63"/);assert.match(B.furniturePlanSymbol(saved),/stroke-dasharray=".05 .025"/);assert.match(B.furnitureEditorHtml(),/name="z"/);
+ const scene=new THREE.Scene();B.addRoomSceneFurniture(r,.14,THREE,scene,{},B.state.project.site);const group=scene.children.find(o=>o.userData.furnitureId==='upper');assert.ok(group);assert.ok(Math.abs(group.position.y-1.77)<1e-6);assert.ok(Math.abs(group.rotation.y+37*Math.PI/180)<1e-8);
+ assert.equal(B.editFurniture('upper',{pose:{z:B.studioFloorLevel(0).clearHeight}}),false);B.state=B.mergeState(B.defaultState(),plain(B.state));assert.equal(B.resolvedFurniture()[0].pose.z,1.63);
+});
+
+test('furniture-set apply rejects stale or locked proposals, retains bindings and tombstones, and never partially commits',()=>{
+ const {B}=modernReference(),r=B.state.project.plan.rooms.find(r=>r.type==='kitchen'),p=B.previewFurnitureSet(r.id);B.state.project.plan.openings[0].width+=.05;const before=plain(B.state.project.plan),history=B.planHistory.undo.length;assert.equal(B.applyFurnitureSet(r.id,p.stamp),false);assert.deepEqual(plain(B.state.project.plan),before);assert.equal(B.planHistory.undo.length,history);
+ B.state.project.plan.lockedRoomIds.push(r.id);assert.equal(B.previewFurnitureSet(r.id).ok,false);B.state.project.plan.lockedRoomIds=[];
+ const sink=B.resolvedFurniture(r.id).find(i=>i.modelId==='kitchenSink');assert.equal(B.editFurniture(sink.id,{locked:true}),true);const locked=plain(B.resolvedFurniture(r.id).find(i=>i.id===sink.id)),next=B.previewFurnitureSet(r.id);assert.ok(!next.updates.some(c=>c.before.id===sink.id));assert.equal(B.applyFurnitureSet(r.id,next.stamp),true);assert.deepEqual(plain(B.resolvedFurniture(r.id).find(i=>i.id===sink.id)),locked);
+ const hood=B.resolvedFurniture(r.id).find(i=>i.modelId==='kitchenHood');if(hood){assert.equal(B.editFurniture(hood.id,{placementStatus:'removed'}),true);assert.ok(!B.previewFurnitureSet(r.id).additions.some(i=>i.modelId==='kitchenHood'));}
+});
+
+test('kitchen set follows all four saved room orientations with collision-free measured additions',()=>{
+ for(const rotation of [0,90,180,270]){const B=fixture(),r=B.state.project.plan.rooms[0];r.type='kitchen';r.furnitureRotation=rotation;B.state.project.site.width=B.state.project.site.depth=6;const before=JSON.stringify(B.state.project.plan.rooms),p=B.previewFurnitureSet(r.id);assert.equal(p.ok,true);assert.ok(p.additions.some(i=>i.modelId==='kitchenBaseCabinet'),rotation+' base module');assert.ok(p.additions.some(i=>i.modelId==='kitchenHood'),rotation+' hood');assert.equal(B.applyFurnitureSet(r.id,p.stamp),true);const rows=B.resolvedFurniture(r.id);for(const i of p.additions){assert.equal(i.pose.rotationDeg,rotation);assert.deepEqual(plain(B.furniturePlacementIssues(i,rows)),[],i.modelId+' '+rotation);}assert.equal(JSON.stringify(B.state.project.plan.rooms),before);}
 });
