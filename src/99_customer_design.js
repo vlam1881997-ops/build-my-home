@@ -127,7 +127,9 @@
    box(q.w,q.h*.12,q.d,q.x+q.w/2,q.h*.94,q.y+q.d/2);box(q.w*.9,q.h*.58,q.d*.86,q.x+q.w/2,q.h*.49,q.y+q.d/2);for(const x of [.08,.92])for(const z of [.1,.9])box(.055,q.h*.25,.055,q.x+q.w*x,q.h*.125,q.y+q.d*z);
   }
  };
- const revision=B.drawingRevision;B.drawingRevision=()=>{let hash=2166136261;const text=JSON.stringify(B.state.project.plan.fixtures||[]);for(let i=0;i<text.length;i++)hash=Math.imul(hash^text.charCodeAt(i),16777619);return revision()+'-'+(hash>>>0).toString(16).toUpperCase();};
+ // Include the current C01 finish field names. The base drawing contract also
+ // accepts legacy names; hashing only those could reuse a stale exported image.
+ const revision=B.drawingRevision;B.drawingRevision=()=>{let hash=2166136261;const plan=B.state.project.plan,text=JSON.stringify({fixtures:plan.fixtures||[],furnitureFinishes:(plan.furniture||[]).map(i=>({id:i.id,bindings:(i.materialBindings||[]).map(m=>m&&typeof m==='object'?Object.fromEntries(['role','visualProfileId','textureAssetId','realWorldScale'].filter(k=>m[k]!==undefined).map(k=>[k,m[k]])):m)}))});for(let i=0;i<text.length;i++)hash=Math.imul(hash^text.charCodeAt(i),16777619);return revision()+'-'+(hash>>>0).toString(16).toUpperCase();};
  const geometry=B.measuredGeometryIssues;B.measuredGeometryIssues=()=>[...geometry(),...B.planFixtures().filter(q=>!B.fixtureFits(q)).map(q=>({sev:'error',text:(q.name||'Bàn thờ')+': số đo hoặc vị trí vượt phòng / chắn cửa.'}))];
  const validLayout=B.layoutValid;B.customerBaseLayoutValid=validLayout;
  const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
@@ -453,7 +455,8 @@
   if(!B.furnitureRecordValid(next))return reject('Số đo không hợp lệ.');
   if(JSON.stringify(next)===JSON.stringify(item))return true;
   B.pushPlanHistory();materialize(item.roomId);const index=plan().furniture.findIndex(i=>i.id===id);plan().furniture[index]=next;
-  B.state.ui.planner.selectedFurniture=id;B.state.ui.planner.furnitureNotice='Đã lưu · góc '+next.pose.rotationDeg+'°.';
+  B.state.ui.planner.selectedFurniture=id;B.state.ui.planner.furnitureNotice=changes.materialBindings!==undefined?'Đã lưu vật liệu riêng của món.':'Đã lưu · góc '+next.pose.rotationDeg+'°.';
+  if(changes.materialBindings!==undefined){B.customerFrameCache=null;B.finishInvalidate?.();}
   if(render)changed();else B.save();return true;
  };
  B.rotateFurniture=(id,delta)=>{
@@ -486,13 +489,14 @@
   if(i.modelId==='tableCoffeeModern')return [['accent','Phần gỗ'],['floor','Đế đá / bề mặt khoáng']];
   if(['televisionModern','kitchenFridge','washingMachine','toilet','shower','floorLamp','pottedPlant'].includes(i.modelId))return [];
   const roles=[['accent','Gỗ / bề mặt']];
+  if(['sideTable','kitchenSink','kitchenStove','bathroomSink'].includes(i.modelId)||i.modelId==='tableCoffee'&&['stone','travertine','nested'].includes(B.finishPalette(i.roomId).table))roles.push(['floor','Mặt đá']);
   if(['bedDouble','bedSingle','loungeDesignSofa','loungeChair','loungeChairModern','chair','chairDesk'].includes(i.modelId))roles.push(['fabric','Vải / da']);
   return roles;
  };
  B.furnitureMaterialChoices=(i,role)=>B.furnitureMaterialRoles(i).some(([key])=>key===role)?B.VISUAL_MATERIALS.filter(p=>p.role===role&&(role!=='floor'||p.surface==='stone')):[];
  B.furnitureFinishPalette=i=>{
   const palette=clone(B.finishPalette(i.roomId));palette.visualMaterials||={};
-  for(const binding of i.materialBindings||[]){const profile=B.VISUAL_MATERIALS.find(p=>p.id===binding.visualProfileId&&p.role===binding.role);if(profile&&i.modelId==='tableCoffeeModern'&&profile.role==='floor'&&profile.surface==='stone'){palette.stoneVisualMaterial=profile.id;}else if(profile&&['accent','fabric'].includes(profile.role)){palette.visualMaterials[profile.role]=profile.id;palette[profile.role]=profile.color;}}
+  for(const binding of i.materialBindings||[]){const profile=B.VISUAL_MATERIALS.find(p=>p.id===binding.visualProfileId&&p.role===binding.role);if(profile&&['tableCoffeeModern','tableCoffee','sideTable','kitchenSink','kitchenStove','bathroomSink'].includes(i.modelId||i.model)&&profile.role==='floor'&&profile.surface==='stone'){palette.stoneVisualMaterial=profile.id;}else if(profile&&['accent','fabric'].includes(profile.role)){palette.visualMaterials[profile.role]=profile.id;palette[profile.role]=profile.color;palette.catalogMaterials=B.clearCatalogSurface(palette,profile.role);}}
   return palette;
  };
  B.setFurnitureVisualMaterial=(id,role,profileId)=>{
@@ -637,3 +641,4 @@
  document.addEventListener('pointerup',stop,true);document.addEventListener('pointercancel',stop,true);
  document.addEventListener('keydown',e=>{if(e.target.closest?.('[data-furniture-id]')&&['Enter',' '].includes(e.key)){e.preventDefault();select(e.target.closest('[data-furniture-id]').dataset.furnitureId);}});
 })();
+

@@ -1,0 +1,717 @@
+{
+  "id": "modern-5x20-2f-v01",
+  "status": "review-fixture-not-approved",
+  "styleId": "modern",
+  "revision": "7BADC039-741638A5-AI4-RH3",
+  "units": "m",
+  "source": "5×20m and 2 floors match the visible app example; all other values are explicit review assumptions, not a customer survey.",
+  "assumptions": [
+    "Front/rear/side setbacks 2/1/0m are a design scenario, not verified planning.",
+    "Two 3.4m storeys, two bedrooms, two bathrooms; no elevator.",
+    "Proposed front upper terrace 3.58×1.89m; adjoining bedroom depth3.8m. Requires customer/architect approval.",
+    "Family data are synthetic; no personal feng-shui approval.",
+    "Furniture and CC0 surface profiles are generic; no verified manufacturer SKU."
+  ],
+  "proposalChanges": [
+    {
+      "kind": "outdoor-space",
+      "roomId": "design-f1-bed-1-released",
+      "openSides": [
+        "north",
+        "west"
+      ],
+      "roof": "open",
+      "reviewStatus": "awaiting-review"
+    },
+    {
+      "kind": "room-added",
+      "id": "design-f1-bed-1-released",
+      "type": "terrace"
+    },
+    {
+      "kind": "opening-added",
+      "id": "design-f1-bed-1-released-access"
+    }
+  ],
+  "missing": [
+    "Survey and planning confirmation",
+    "Customer room/budget/style approval",
+    "Structural and MEP engineering",
+    "Supplier SKU assets and complete quotes",
+    "Actual shaded exterior/interior visual approval"
+  ],
+  "geometryIssues": [],
+  "stairs": [],
+  "stairDimensions": [
+    {
+      "roomId": "design-f0-stairs-1",
+      "floor": 0,
+      "shape": "u",
+      "direction": 90,
+      "alongX": true,
+      "W": 3.2,
+      "D": 3.58,
+      "rise": 3.4,
+      "count": 19,
+      "first": 10,
+      "second": 9,
+      "flightWidth": 0.9,
+      "landing": 0.9,
+      "run": 2.48,
+      "tread": 0.27555555555555555,
+      "riser": 0.17894736842105263,
+      "warning": ""
+    },
+    {
+      "roomId": "design-f1-stairs-1",
+      "floor": 1,
+      "shape": "u",
+      "direction": 90,
+      "alongX": true,
+      "W": 3.2,
+      "D": 3.58,
+      "rise": 3.4,
+      "count": 19,
+      "first": 10,
+      "second": 9,
+      "flightWidth": 0.9,
+      "landing": 0.9,
+      "run": 2.48,
+      "tread": 0.27555555555555555,
+      "riser": 0.17894736842105263,
+      "warning": ""
+    }
+  ],
+  "rooms": [
+    {
+      "id": "design-f0-corridor-1",
+      "name": "Sảnh / hành lang T1",
+      "type": "corridor",
+      "floor": 0,
+      "x": 3.69,
+      "y": 2.11,
+      "width": 1.2,
+      "depth": 16.78
+    },
+    {
+      "id": "design-f0-living-1",
+      "name": "Phòng khách",
+      "type": "living",
+      "floor": 0,
+      "x": 0.10999999999999988,
+      "y": 2.11,
+      "width": 3.58,
+      "depth": 5.232
+    },
+    {
+      "id": "design-f0-kitchen-1",
+      "name": "Bếp + ăn",
+      "type": "kitchen",
+      "floor": 0,
+      "x": 0.10999999999999988,
+      "y": 7.3420000000000005,
+      "width": 3.58,
+      "depth": 6.148
+    },
+    {
+      "id": "design-f0-bath-1",
+      "name": "WC T1",
+      "type": "bath",
+      "floor": 0,
+      "x": 0.11,
+      "y": 13.49,
+      "width": 3.58,
+      "depth": 2.2
+    },
+    {
+      "id": "design-f0-stairs-1",
+      "name": "Cầu thang",
+      "type": "stairs",
+      "floor": 0,
+      "x": 0.11,
+      "y": 15.690000000000001,
+      "width": 3.58,
+      "depth": 3.2
+    },
+    {
+      "id": "design-f1-corridor-1",
+      "name": "Sảnh / hành lang T2",
+      "type": "corridor",
+      "floor": 1,
+      "x": 3.69,
+      "y": 2.11,
+      "width": 1.2,
+      "depth": 16.78
+    },
+    {
+      "id": "design-f1-bed-1",
+      "name": "Phòng ngủ 1",
+      "type": "bed",
+      "floor": 1,
+      "x": 0.10999999999999988,
+      "y": 4.000000000000001,
+      "width": 3.58,
+      "depth": 3.8
+    },
+    {
+      "id": "design-f1-bed-2",
+      "name": "Phòng ngủ 2",
+      "type": "bed",
+      "floor": 1,
+      "x": 0.10999999999999988,
+      "y": 7.800000000000001,
+      "width": 3.58,
+      "depth": 5.69
+    },
+    {
+      "id": "design-f1-bath-1",
+      "name": "WC T2",
+      "type": "bath",
+      "floor": 1,
+      "x": 0.11,
+      "y": 13.49,
+      "width": 3.58,
+      "depth": 2.2
+    },
+    {
+      "id": "design-f1-stairs-1",
+      "name": "Cầu thang",
+      "type": "stairs",
+      "floor": 1,
+      "x": 0.11,
+      "y": 15.690000000000001,
+      "width": 3.58,
+      "depth": 3.2
+    },
+    {
+      "id": "design-f1-bed-1-released",
+      "name": "Sân thượng",
+      "type": "balcony",
+      "floor": 1,
+      "x": 0.10999999999999988,
+      "y": 2.11,
+      "width": 3.58,
+      "depth": 1.8900000000000006
+    }
+  ],
+  "finishes": [
+    {
+      "roomId": "design-f0-living-1",
+      "collection": {
+        "id": "urban-stone",
+        "name": "Đá & đường nét",
+        "note": "Sofa thấp, bàn đá chân thép, tông xám dịu.",
+        "shape": "linear",
+        "table": "stone"
+      },
+      "palette": {
+        "wall": "#f2eee5",
+        "floor": "#a9aaa4",
+        "accent": "#65432e",
+        "fabric": "#d9cfbb",
+        "pillow": "#626f72",
+        "rug": "#d2d2cb"
+      },
+      "surface": "stone",
+      "materialSamples": [],
+      "surfaces": [
+        {
+          "role": "floor",
+          "id": "grey-concrete",
+          "name": "Bê tông xám",
+          "color": "#a9aaa4",
+          "kind": "concrete",
+          "scale": [
+            2,
+            2
+          ],
+          "roughness": 0.87,
+          "detail": "Bê tông liền mạch, loang xám nhẹ, bề mặt mờ."
+        },
+        {
+          "role": "accent",
+          "id": "dark-walnut",
+          "name": "Gỗ óc chó",
+          "color": "#65432e",
+          "kind": "wood",
+          "scale": [
+            1.5,
+            1.5
+          ],
+          "roughness": 0.6,
+          "detail": "Gỗ nâu trầm với vân dài, hoàn thiện satin."
+        },
+        {
+          "role": "fabric",
+          "id": "natural-linen",
+          "name": "Linen tự nhiên",
+          "color": "#d9cfbb",
+          "kind": "fabric",
+          "scale": [
+            0.3,
+            0.3
+          ],
+          "roughness": 0.98,
+          "detail": "Vải linen dệt thô, sắc be tự nhiên, bề mặt mờ."
+        },
+        {
+          "role": "wall",
+          "id": "ivory-paint",
+          "name": "Sơn trắng ấm",
+          "color": "#f2eee5",
+          "kind": "plaster",
+          "scale": [
+            0.35,
+            0.35
+          ],
+          "roughness": 0.93,
+          "detail": "Sơn trắng ngà mờ, hạt bề mặt rất nhẹ."
+        }
+      ]
+    },
+    {
+      "roomId": "design-f0-kitchen-1",
+      "collection": {
+        "id": "urban-stone",
+        "name": "Đá & đường nét",
+        "note": "Sofa thấp, bàn đá chân thép, tông xám dịu.",
+        "shape": "linear",
+        "table": "stone"
+      },
+      "palette": {
+        "wall": "#f2eee5",
+        "floor": "#a9aaa4",
+        "accent": "#65432e",
+        "fabric": "#d9cfbb",
+        "pillow": "#626f72",
+        "rug": "#d2d2cb"
+      },
+      "surface": "stone",
+      "materialSamples": [],
+      "surfaces": [
+        {
+          "role": "floor",
+          "id": "grey-concrete",
+          "name": "Bê tông xám",
+          "color": "#a9aaa4",
+          "kind": "concrete",
+          "scale": [
+            2,
+            2
+          ],
+          "roughness": 0.87,
+          "detail": "Bê tông liền mạch, loang xám nhẹ, bề mặt mờ."
+        },
+        {
+          "role": "accent",
+          "id": "dark-walnut",
+          "name": "Gỗ óc chó",
+          "color": "#65432e",
+          "kind": "wood",
+          "scale": [
+            1.5,
+            1.5
+          ],
+          "roughness": 0.6,
+          "detail": "Gỗ nâu trầm với vân dài, hoàn thiện satin."
+        },
+        {
+          "role": "fabric",
+          "id": "natural-linen",
+          "name": "Linen tự nhiên",
+          "color": "#d9cfbb",
+          "kind": "fabric",
+          "scale": [
+            0.3,
+            0.3
+          ],
+          "roughness": 0.98,
+          "detail": "Vải linen dệt thô, sắc be tự nhiên, bề mặt mờ."
+        },
+        {
+          "role": "wall",
+          "id": "ivory-paint",
+          "name": "Sơn trắng ấm",
+          "color": "#f2eee5",
+          "kind": "plaster",
+          "scale": [
+            0.35,
+            0.35
+          ],
+          "roughness": 0.93,
+          "detail": "Sơn trắng ngà mờ, hạt bề mặt rất nhẹ."
+        }
+      ]
+    },
+    {
+      "roomId": "design-f0-bath-1",
+      "collection": {
+        "id": "urban-stone",
+        "name": "Đá & đường nét",
+        "note": "Sofa thấp, bàn đá chân thép, tông xám dịu.",
+        "shape": "linear",
+        "table": "stone"
+      },
+      "palette": {
+        "wall": "#f2eee5",
+        "floor": "#cfc0a0",
+        "accent": "#65432e",
+        "fabric": "#d9cfbb",
+        "pillow": "#626f72",
+        "rug": "#d2d2cb"
+      },
+      "surface": "stone",
+      "materialSamples": [],
+      "surfaces": [
+        {
+          "role": "floor",
+          "id": "sand-travertine",
+          "name": "Travertine cát",
+          "color": "#cfc0a0",
+          "kind": "travertine",
+          "scale": [
+            0.8,
+            0.8
+          ],
+          "roughness": 0.88,
+          "detail": "Đá màu cát, vân ngang và lỗ nhỏ, hoàn thiện honed mờ."
+        },
+        {
+          "role": "accent",
+          "id": "dark-walnut",
+          "name": "Gỗ óc chó",
+          "color": "#65432e",
+          "kind": "wood",
+          "scale": [
+            1.5,
+            1.5
+          ],
+          "roughness": 0.6,
+          "detail": "Gỗ nâu trầm với vân dài, hoàn thiện satin."
+        },
+        {
+          "role": "fabric",
+          "id": "natural-linen",
+          "name": "Linen tự nhiên",
+          "color": "#d9cfbb",
+          "kind": "fabric",
+          "scale": [
+            0.3,
+            0.3
+          ],
+          "roughness": 0.98,
+          "detail": "Vải linen dệt thô, sắc be tự nhiên, bề mặt mờ."
+        },
+        {
+          "role": "wall",
+          "id": "ivory-paint",
+          "name": "Sơn trắng ấm",
+          "color": "#f2eee5",
+          "kind": "plaster",
+          "scale": [
+            0.35,
+            0.35
+          ],
+          "roughness": 0.93,
+          "detail": "Sơn trắng ngà mờ, hạt bề mặt rất nhẹ."
+        }
+      ]
+    },
+    {
+      "roomId": "design-f1-bed-1",
+      "collection": {
+        "id": "urban-stone",
+        "name": "Đá & đường nét",
+        "note": "Sofa thấp, bàn đá chân thép, tông xám dịu.",
+        "shape": "linear",
+        "table": "stone"
+      },
+      "palette": {
+        "wall": "#f2eee5",
+        "floor": "#a9aaa4",
+        "accent": "#65432e",
+        "fabric": "#d9cfbb",
+        "pillow": "#626f72",
+        "rug": "#d2d2cb"
+      },
+      "surface": "stone",
+      "materialSamples": [],
+      "surfaces": [
+        {
+          "role": "floor",
+          "id": "grey-concrete",
+          "name": "Bê tông xám",
+          "color": "#a9aaa4",
+          "kind": "concrete",
+          "scale": [
+            2,
+            2
+          ],
+          "roughness": 0.87,
+          "detail": "Bê tông liền mạch, loang xám nhẹ, bề mặt mờ."
+        },
+        {
+          "role": "accent",
+          "id": "dark-walnut",
+          "name": "Gỗ óc chó",
+          "color": "#65432e",
+          "kind": "wood",
+          "scale": [
+            1.5,
+            1.5
+          ],
+          "roughness": 0.6,
+          "detail": "Gỗ nâu trầm với vân dài, hoàn thiện satin."
+        },
+        {
+          "role": "fabric",
+          "id": "natural-linen",
+          "name": "Linen tự nhiên",
+          "color": "#d9cfbb",
+          "kind": "fabric",
+          "scale": [
+            0.3,
+            0.3
+          ],
+          "roughness": 0.98,
+          "detail": "Vải linen dệt thô, sắc be tự nhiên, bề mặt mờ."
+        },
+        {
+          "role": "wall",
+          "id": "ivory-paint",
+          "name": "Sơn trắng ấm",
+          "color": "#f2eee5",
+          "kind": "plaster",
+          "scale": [
+            0.35,
+            0.35
+          ],
+          "roughness": 0.93,
+          "detail": "Sơn trắng ngà mờ, hạt bề mặt rất nhẹ."
+        }
+      ]
+    },
+    {
+      "roomId": "design-f1-bed-2",
+      "collection": {
+        "id": "urban-stone",
+        "name": "Đá & đường nét",
+        "note": "Sofa thấp, bàn đá chân thép, tông xám dịu.",
+        "shape": "linear",
+        "table": "stone"
+      },
+      "palette": {
+        "wall": "#f2eee5",
+        "floor": "#a9aaa4",
+        "accent": "#65432e",
+        "fabric": "#d9cfbb",
+        "pillow": "#626f72",
+        "rug": "#d2d2cb"
+      },
+      "surface": "stone",
+      "materialSamples": [],
+      "surfaces": [
+        {
+          "role": "floor",
+          "id": "grey-concrete",
+          "name": "Bê tông xám",
+          "color": "#a9aaa4",
+          "kind": "concrete",
+          "scale": [
+            2,
+            2
+          ],
+          "roughness": 0.87,
+          "detail": "Bê tông liền mạch, loang xám nhẹ, bề mặt mờ."
+        },
+        {
+          "role": "accent",
+          "id": "dark-walnut",
+          "name": "Gỗ óc chó",
+          "color": "#65432e",
+          "kind": "wood",
+          "scale": [
+            1.5,
+            1.5
+          ],
+          "roughness": 0.6,
+          "detail": "Gỗ nâu trầm với vân dài, hoàn thiện satin."
+        },
+        {
+          "role": "fabric",
+          "id": "natural-linen",
+          "name": "Linen tự nhiên",
+          "color": "#d9cfbb",
+          "kind": "fabric",
+          "scale": [
+            0.3,
+            0.3
+          ],
+          "roughness": 0.98,
+          "detail": "Vải linen dệt thô, sắc be tự nhiên, bề mặt mờ."
+        },
+        {
+          "role": "wall",
+          "id": "ivory-paint",
+          "name": "Sơn trắng ấm",
+          "color": "#f2eee5",
+          "kind": "plaster",
+          "scale": [
+            0.35,
+            0.35
+          ],
+          "roughness": 0.93,
+          "detail": "Sơn trắng ngà mờ, hạt bề mặt rất nhẹ."
+        }
+      ]
+    },
+    {
+      "roomId": "design-f1-bath-1",
+      "collection": {
+        "id": "urban-stone",
+        "name": "Đá & đường nét",
+        "note": "Sofa thấp, bàn đá chân thép, tông xám dịu.",
+        "shape": "linear",
+        "table": "stone"
+      },
+      "palette": {
+        "wall": "#f2eee5",
+        "floor": "#cfc0a0",
+        "accent": "#65432e",
+        "fabric": "#d9cfbb",
+        "pillow": "#626f72",
+        "rug": "#d2d2cb"
+      },
+      "surface": "stone",
+      "materialSamples": [],
+      "surfaces": [
+        {
+          "role": "floor",
+          "id": "sand-travertine",
+          "name": "Travertine cát",
+          "color": "#cfc0a0",
+          "kind": "travertine",
+          "scale": [
+            0.8,
+            0.8
+          ],
+          "roughness": 0.88,
+          "detail": "Đá màu cát, vân ngang và lỗ nhỏ, hoàn thiện honed mờ."
+        },
+        {
+          "role": "accent",
+          "id": "dark-walnut",
+          "name": "Gỗ óc chó",
+          "color": "#65432e",
+          "kind": "wood",
+          "scale": [
+            1.5,
+            1.5
+          ],
+          "roughness": 0.6,
+          "detail": "Gỗ nâu trầm với vân dài, hoàn thiện satin."
+        },
+        {
+          "role": "fabric",
+          "id": "natural-linen",
+          "name": "Linen tự nhiên",
+          "color": "#d9cfbb",
+          "kind": "fabric",
+          "scale": [
+            0.3,
+            0.3
+          ],
+          "roughness": 0.98,
+          "detail": "Vải linen dệt thô, sắc be tự nhiên, bề mặt mờ."
+        },
+        {
+          "role": "wall",
+          "id": "ivory-paint",
+          "name": "Sơn trắng ấm",
+          "color": "#f2eee5",
+          "kind": "plaster",
+          "scale": [
+            0.35,
+            0.35
+          ],
+          "roughness": 0.93,
+          "detail": "Sơn trắng ngà mờ, hạt bề mặt rất nhẹ."
+        }
+      ]
+    },
+    {
+      "roomId": "design-f1-bed-1-released",
+      "collection": {
+        "id": "urban-stone",
+        "name": "Đá & đường nét",
+        "note": "Sofa thấp, bàn đá chân thép, tông xám dịu.",
+        "shape": "linear",
+        "table": "stone"
+      },
+      "palette": {
+        "wall": "#f2eee5",
+        "floor": "#a9aaa4",
+        "accent": "#65432e",
+        "fabric": "#d9cfbb",
+        "pillow": "#626f72",
+        "rug": "#d2d2cb"
+      },
+      "surface": "stone",
+      "materialSamples": [],
+      "surfaces": [
+        {
+          "role": "floor",
+          "id": "grey-concrete",
+          "name": "Bê tông xám",
+          "color": "#a9aaa4",
+          "kind": "concrete",
+          "scale": [
+            2,
+            2
+          ],
+          "roughness": 0.87,
+          "detail": "Bê tông liền mạch, loang xám nhẹ, bề mặt mờ."
+        },
+        {
+          "role": "accent",
+          "id": "dark-walnut",
+          "name": "Gỗ óc chó",
+          "color": "#65432e",
+          "kind": "wood",
+          "scale": [
+            1.5,
+            1.5
+          ],
+          "roughness": 0.6,
+          "detail": "Gỗ nâu trầm với vân dài, hoàn thiện satin."
+        },
+        {
+          "role": "fabric",
+          "id": "natural-linen",
+          "name": "Linen tự nhiên",
+          "color": "#d9cfbb",
+          "kind": "fabric",
+          "scale": [
+            0.3,
+            0.3
+          ],
+          "roughness": 0.98,
+          "detail": "Vải linen dệt thô, sắc be tự nhiên, bề mặt mờ."
+        },
+        {
+          "role": "wall",
+          "id": "ivory-paint",
+          "name": "Sơn trắng ấm",
+          "color": "#f2eee5",
+          "kind": "plaster",
+          "scale": [
+            0.35,
+            0.35
+          ],
+          "roughness": 0.93,
+          "detail": "Sơn trắng ngà mờ, hạt bề mặt rất nhẹ."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "checkpoint": "W23",
+  "baselineCommit": "b5ce9fc2f52f3abed87691f75b9e9ab3c3c00c5a",
+  "scope": "Upgrade 1: item material / live mesh / save / image export consistency",
+  "fixture": "modern-5x20-2f-v01",
+  "status": "functional consistency passed; visual and commercial acceptance pending",
+  "renderRevision": "customer-measured-house-22",
+  "views": [
+    {
+      "selection": "Modern natural linen + travertine",
+      "revision": "FF68F57C-9AD609B4-AI4-RH3"
+    },
+    {
+      "selection": "Only sofa olive velvet + coffee table white marble",
+      "revision": "3409D2AD-51B6D461-AI4-RH3"
+    }
+  ],
+  "assertions": {
+    "cameraUnchanged": true,
+    "positionsNormalsTransformsIndicesUnchanged": true,
+    "measuredFurniturePreserved": true,
+    "materialChangesOnlyOnSelectedItems": true,
+    "changedMeshesByModel": {
+      "loungeDesignSofa": 16,
+      "tableCoffee": 3
+    },
+    "unchangedMeshCount": 155,
+    "meshCount": 174,
+    "vertices": 57082,
+    "triangles": 51132
+  },
+  "checks": {
+    "relatedPassed": 29,
+    "existingFurnitureChecks": 19,
+    "newMaterialConsistencyChecks": 4,
+    "relatedSceneChecks": 6,
+    "newChecksRegistered": "Appended to existing team-b-furniture.test.mjs, already included in npm test. No package/CI change."
+  },
+  "render": {
+    "engine": "Blender 4.5.13 Cycles CPU, production Three.js transformed vertices and Canvas/PBR maps",
+    "samples": 16,
+    "width": 1100,
+    "height": 900,
+    "aiGenerated": false,
+    "nativeWebGLVerified": false,
+    "planChange": "Only explicit furniture material records were saved; shared geometry and resolved furniture measurements preserved."
+  },
+  "remaining": [
+    "Native browser/GPU and mobile visual acceptance",
+    "Detailed manufacturer-matched models and verified product samples",
+    "Remaining R1 exterior/interior view acceptance; no full commercial approval"
+  ],
+  "images": {
+    "baseline": {
+      "sha256": "d61af26dd65a78723bdcf7062b9dfbae8a85226ac668841ee0054cd1914f50d1"
+    },
+    "selected": {
+      "sha256": "396a4f75bdda54765efd765bb8604f33484ffb97a3ff304f3ea507686fb53b59"
+    }
+  }
+}

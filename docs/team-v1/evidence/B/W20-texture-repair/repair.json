@@ -31,7 +31,12 @@
     "commercial": "not passed",
     "nativeDossier": "28 A3 review sheets, not construction-approved"
   },
-  "deployment": "pending exact-head CI, merge and public byte/decode verification",
+  "deployment": {
+    "mainMerge": "dc36b92daefa1b5aec6ff6758c0b542e0059ffa7",
+    "ci": "success",
+    "vercel": "success",
+    "publicBytesAndRaster": "verified both recovered images"
+  },
   "cache": {
     "productionHeader": "public, max-age=0, must-revalidate",
     "sourceCacheChanges": "excluded from this asset-only release"

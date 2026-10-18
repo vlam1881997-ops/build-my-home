@@ -1,0 +1,25 @@
+{
+  "source": "96d16edab318b334c31935bbc84a89f44b0c8c46",
+  "main": "6d500f829ac2592de479fd4a0b36527143b15a59",
+  "pr": 62,
+  "ci": 38901113637,
+  "publicBundleSHA256": "2b96b82f892e9dba1e13c603edd72b374a69882d0e6bc8f2491deac08566f517",
+  "native": {
+    "old_preview_bug_reproduced": true,
+    "marble_image": "assets/interior/textures/marble_01-diff.png",
+    "concrete_image": "assets/interior/textures/concrete_floor_02-diff.png",
+    "photo_target_room": "r3",
+    "selected_floor": "Marble trắng",
+    "reload_persistence": true,
+    "other_room": "r1",
+    "other_floor": "Bê tông xám",
+    "isolation": true,
+    "photographs_visible": true
+  },
+  "limitations": [
+    "Cloud browser WebGL disabled, shaded image not accepted",
+    "No native mobile proof",
+    "Generic CC0 reference surface, not supplier SKU",
+    "No new price/source coverage"
+  ]
+}

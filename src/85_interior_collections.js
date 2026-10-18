@@ -1,5 +1,6 @@
 /* Measured, editable interior collections. Original BMH parametric designs; no product SKU claims. */
 BMH.INTERIOR_COLLECTIONS=[
+ {id:'modern-natural',name:'Hiện đại · Linen & đá sáng',note:'Sofa ba đệm có đường may, bàn travertine chân gỗ, sồi sáng và linen màu kem.',shape:'tailored',table:'travertine',stoneVisualMaterial:'sand-travertine',wall:'#f2eee5',floor:'#ceb58d',accent:'#ae8658',fabric:'#e4dac7',pillow:'#87917b',rug:'#e4ddce',surface:'wood'},
  {id:'warm-oak',name:'Gỗ ấm · Japandi',note:'Sofa vải thô, bàn oval chân nan, gỗ sồi sáng.',shape:'soft',table:'oak',wall:'#f4eee4',floor:'#c7aa80',accent:'#a47e51',fabric:'#e4dbca',pillow:'#8b947c',rug:'#e1dacb',surface:'wood'},
  {id:'urban-stone',name:'Đá & đường nét',note:'Sofa thấp, bàn đá chân thép, tông xám dịu.',shape:'linear',table:'stone',wall:'#ecebe5',floor:'#c5c2b9',accent:'#645647',fabric:'#aaaead',pillow:'#626f72',rug:'#d2d2cb',surface:'stone'},
  {id:'soft-curves',name:'Đường cong mềm',note:'Sofa bo tròn, bàn đôi tròn, sắc kem và đất nung.',shape:'curved',table:'nested',wall:'#f3e9df',floor:'#cab393',accent:'#b08567',fabric:'#e8dfd0',pillow:'#b77c61',rug:'#ddd3c1',surface:'wood'},
@@ -12,6 +13,7 @@ BMH.INTERIOR_COLLECTIONS=[
  {id:'neo-elegance',name:'Tân cổ điển thanh lịch',note:'Sofa lưng đệm nút, nhung olive, marble trắng và gỗ trầm.',shape:'tufted',table:'stone',wall:'#f1ebde',floor:'#f0ede6',accent:'#65432e',fabric:'#6f7962',pillow:'#c2ad7a',rug:'#dbd0bb',surface:'stone'}
 ];
 const collectionSurfaces={
+ 'modern-natural':['oak-floor','natural-oak','natural-linen'],
  'warm-oak':['oak-floor','natural-oak','natural-linen'], 'urban-stone':['grey-concrete','dark-walnut','natural-linen'],
  'soft-curves':['oak-floor','natural-oak','cream-boucle'], 'indochine':['walnut-floor','dark-walnut','natural-linen'],
  'coastal':['oak-floor','natural-oak','natural-linen'], 'olive-gallery':['sand-travertine','dark-walnut','olive-velvet'],
@@ -31,8 +33,8 @@ BMH.applyInteriorCollection=(id,roomId=null)=>{
  BMH.rememberFinishCamera?.();
  const f=p.materials.finish||=( {exterior:null,rooms:{}} );f.rooms||={};f.interior||={default:'',rooms:{}};f.interior.rooms||={};f.interior.authored||={};
  const target=roomId?p.plan.rooms.filter(r=>r.id===roomId):p.plan.rooms.filter(r=>!['stairs','elevator','balcony'].includes(r.type));
- for(const r of target){f.interior.rooms[r.id]=id;if(roomId)f.interior.authored[r.id]='manual';f.rooms[r.id]={...f.rooms[r.id],catalogMaterials:{},styleRoles:{floor:false,wall:false,accent:false,fabric:false},explicitRoles:{...f.rooms[r.id]?.explicitRoles,floor:true,wall:true,accent:true,fabric:true},wall:c.wall,floor:c.floor,accent:c.accent,fabric:c.fabric,pillow:c.pillow,rug:c.rug,surface:r.type==='bath'?'stone':c.surface,visualMaterials:{...c.visualMaterials,...(r.type==='bath'?{floor:'sand-travertine'}:{})}};}
- if(!roomId){f.interior.default=id;f.exterior={...f.exterior,catalogMaterials:{},styleRoles:{floor:false,wall:false,accent:false,fabric:false},explicitRoles:{...f.exterior?.explicitRoles,floor:true,wall:true,accent:true,fabric:true},wall:c.wall,floor:c.floor,accent:c.accent,fabric:c.fabric,pillow:c.pillow,rug:c.rug,surface:c.surface,visualMaterials:{...c.visualMaterials}};}
+ for(const r of target){f.interior.rooms[r.id]=id;if(roomId)f.interior.authored[r.id]='manual';f.rooms[r.id]={...f.rooms[r.id],catalogMaterials:{},styleRoles:{floor:false,wall:false,accent:false,fabric:false},explicitRoles:{...f.rooms[r.id]?.explicitRoles,floor:true,wall:true,accent:true,fabric:true},stoneVisualMaterial:c.stoneVisualMaterial||null,wall:c.wall,floor:c.floor,accent:c.accent,fabric:c.fabric,pillow:c.pillow,rug:c.rug,surface:r.type==='bath'?'stone':c.surface,visualMaterials:{...c.visualMaterials,...(r.type==='bath'?{floor:'sand-travertine'}:{})}};}
+ if(!roomId){f.interior.default=id;f.exterior={...f.exterior,catalogMaterials:{},styleRoles:{floor:false,wall:false,accent:false,fabric:false},explicitRoles:{...f.exterior?.explicitRoles,floor:true,wall:true,accent:true,fabric:true},stoneVisualMaterial:c.stoneVisualMaterial||null,wall:c.wall,floor:c.floor,accent:c.accent,fabric:c.fabric,pillow:c.pillow,rug:c.rug,surface:c.surface,visualMaterials:{...c.visualMaterials}};}
  BMH.finishInvalidate?.();BMH.save();return true;
 };
 BMH.interiorCollectionsHtml=()=>{
@@ -80,3 +82,4 @@ BMH.decorateStudioScene=options=>{
   }
  }
 };
+

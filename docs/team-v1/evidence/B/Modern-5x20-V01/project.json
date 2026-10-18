@@ -1,0 +1,796 @@
+{
+  "version": "test",
+  "ui": {
+    "step": 4,
+    "guidedPanels": {
+      "style-output": false,
+      "worship-review": false
+    },
+    "programFloor": 0,
+    "proposalFloor": 0,
+    "renderMode": "interactive",
+    "renderQuality": "draft",
+    "sharpResolution": 1280,
+    "designView": "exterior",
+    "presentationMode": false,
+    "designDrawing": "plan",
+    "roomCamera": "overview",
+    "exteriorCamera": "front",
+    "homeMode": "design",
+    "onboardingComplete": true,
+    "onboardingStep": 1,
+    "sidebarCollapsed": false,
+    "designTab": "planner",
+    "materialCategory": "floor",
+    "materialSearchLocal": false,
+    "location": {
+      "drawingLot": false
+    },
+    "planner": {
+      "directTool": "select",
+      "drawRoomType": "bed",
+      "selectedOpening": "",
+      "selectedFixture": "",
+      "floor": 0,
+      "selected": "design-f1-bed-1",
+      "snap": 0.2,
+      "zoom": 1,
+      "tool": "select",
+      "mode": "technical",
+      "view": "plan",
+      "openingPage": 0,
+      "stairDrawingId": "",
+      "sectionCutX": null,
+      "layout": "wide",
+      "textSize": "large",
+      "toolsOpen": false,
+      "inspectorOpen": false,
+      "legendOpen": true,
+      "showFurniture": true,
+      "showDimensions": true,
+      "showFeng": false,
+      "showBelow": false,
+      "showStructure": false,
+      "showEnvironment": false,
+      "showCirculation": false,
+      "showSectionLine": false,
+      "showClimate": false,
+      "showEnvelope": false,
+      "directNotice": ""
+    },
+    "architectureEngine": "existing",
+    "sceneMode": "reference",
+    "sceneTheme": "day",
+    "sceneFocus": "all",
+    "sceneExploded": false,
+    "modelLook": "materials",
+    "modelWalls": "auto",
+    "modelRoomId": "",
+    "modelLightLevel": 75
+  },
+  "access": {
+    "paid": false,
+    "source": "none",
+    "paidAt": null,
+    "verifiedAt": null,
+    "orderCode": null
+  },
+  "project": {
+    "name": "BMH · Hiện đại 5×20 · mẫu kiểm chứng V01",
+    "source": "review-fixture",
+    "style": "Hiện đại",
+    "briefIdea": "",
+    "brief": {
+      "provider": "",
+      "model": "",
+      "notice": "",
+      "updatedAt": "",
+      "result": {},
+      "aiSuggestions": {},
+      "userRequirements": {}
+    },
+    "inputEvidence": {
+      "schemaVersion": 1,
+      "origin": "review-fixture",
+      "records": {}
+    },
+    "sourceRefs": [],
+    "styleReferenceId": "",
+    "designEvidence": {
+      "schemaVersion": 1,
+      "research": [],
+      "site": [],
+      "fengSources": [],
+      "materialSources": [],
+      "context": {
+        "locationKey": "bec7cd04",
+        "boundaryKey": "30acb19b",
+        "geometryKey": "5ff45287",
+        "contextKey": "67749d5c"
+      }
+    },
+    "constructionDesign": {
+      "schemaVersion": 2,
+      "inputs": {},
+      "elements": [],
+      "reviews": [],
+      "issues": []
+    },
+    "site": {
+      "north": {
+        "azimuthDeg": null,
+        "datum": "unknown",
+        "sourceReference": "",
+        "observedAt": "",
+        "status": "unknown"
+      },
+      "elevation": {
+        "metres": null,
+        "datum": "unknown",
+        "sourceReference": "",
+        "observedAt": "",
+        "status": "unknown"
+      },
+      "country": "Việt Nam",
+      "province": "TP. Hồ Chí Minh",
+      "district": "Phường Thủ Dầu Một",
+      "address": "",
+      "lat": 11.16,
+      "lng": 106.65,
+      "geoSource": "Dữ liệu vùng",
+      "pinAddressNeedsReview": false,
+      "mapEngine": "free",
+      "mapStyle": "hybrid",
+      "mapZoom": 17,
+      "mapCenter": {},
+      "showLotOverlay": true,
+      "showClimateMap": true,
+      "showContextRings": true,
+      "lotMode": "rect",
+      "lotSource": "dimensions",
+      "boundaryEvidenceId": "",
+      "lotPoints": [],
+      "useParcelGeometry": false,
+      "frontEdge": 0,
+      "floorHeight": 3.4,
+      "floorHeights": [
+        3.4,
+        3.4
+      ],
+      "slabThickness": 0.14,
+      "ceilingDrop": 0.2,
+      "deedArea": 0,
+      "deedReference": "",
+      "frontDirection": "Nam",
+      "width": 5,
+      "depth": 20,
+      "floors": 2,
+      "road": 4,
+      "soil": "Đất thịt đồng bằng",
+      "shape": "Hình chữ nhật",
+      "targetCoverage": 0.68,
+      "setbackFront": 2,
+      "setbackRear": 1,
+      "setbackSide": 0,
+      "designStrategy": "climate"
+    },
+    "siteIntelligence": {
+      "key": "",
+      "status": "idle",
+      "fetchedAt": "",
+      "elevation_m": null,
+      "flood": {
+        "level": "Chưa đánh giá",
+        "score": 0,
+        "note": "",
+        "waterwayDistanceKm": null,
+        "riverSignal": null
+      },
+      "access": {
+        "level": "Chưa đánh giá",
+        "score": 0,
+        "note": "",
+        "majorRoadDistanceKm": null,
+        "majorRoadName": "",
+        "majorRoadType": ""
+      },
+      "transport": {
+        "level": "Chưa đánh giá",
+        "surchargePct": 0,
+        "note": ""
+      },
+      "suppliers": [],
+      "builders": [],
+      "webSuppliers": [],
+      "webBuilders": [],
+      "citations": [],
+      "sources": [],
+      "aiSummary": "",
+      "warnings": []
+    },
+    "finance": {
+      "scenario": {
+        "schemaVersion": 1,
+        "confirmed": false,
+        "sourceReference": "",
+        "effectiveAt": "",
+        "months": null,
+        "method": "annuity",
+        "ratePeriods": [],
+        "draws": [],
+        "graceMonths": 0,
+        "fees": null,
+        "constructionPayments": []
+      },
+      "cash": 800000000,
+      "income": 25000000,
+      "living": 8000000,
+      "reserve": 100000000,
+      "existingDebt": 0,
+      "loan": 500000000,
+      "targetBudget": 0,
+      "years": 15,
+      "bank": "VCB",
+      "introRate": 6.9,
+      "postRate": 10.9,
+      "promoMonths": 12,
+      "rateMeta": {
+        "bankId": "VCB",
+        "status": "preset",
+        "verified": false,
+        "product": "",
+        "sourceDate": "",
+        "fetchedAt": "",
+        "provider": "",
+        "model": "",
+        "introRate": 0,
+        "postRate": 0,
+        "promoMonths": 0,
+        "citations": [],
+        "note": ""
+      }
+    },
+    "household": {
+      "ownerBirth": 1988,
+      "ownerGender": "Nam",
+      "partnerEnabled": false,
+      "children": [],
+      "relatives": []
+    },
+    "plan": {
+      "rooms": [
+        {
+          "id": "design-f0-corridor-1",
+          "floor": 0,
+          "name": "Sảnh / hành lang T1",
+          "type": "corridor",
+          "x": 3.69,
+          "y": 2.11,
+          "w": 1.2,
+          "h": 16.78
+        },
+        {
+          "id": "design-f0-living-1",
+          "floor": 0,
+          "name": "Phòng khách",
+          "type": "living",
+          "x": 0.10999999999999988,
+          "y": 2.11,
+          "w": 3.58,
+          "h": 5.232
+        },
+        {
+          "id": "design-f0-kitchen-1",
+          "floor": 0,
+          "name": "Bếp + ăn",
+          "type": "kitchen",
+          "x": 0.10999999999999988,
+          "y": 7.3420000000000005,
+          "w": 3.58,
+          "h": 6.148
+        },
+        {
+          "id": "design-f0-bath-1",
+          "floor": 0,
+          "name": "WC T1",
+          "type": "bath",
+          "x": 0.11,
+          "y": 13.49,
+          "w": 3.58,
+          "h": 2.2
+        },
+        {
+          "id": "design-f0-stairs-1",
+          "floor": 0,
+          "name": "Cầu thang",
+          "type": "stairs",
+          "x": 0.11,
+          "y": 15.690000000000001,
+          "w": 3.58,
+          "h": 3.2,
+          "stairShape": "u",
+          "stairDirection": 90
+        },
+        {
+          "id": "design-f1-corridor-1",
+          "floor": 1,
+          "name": "Sảnh / hành lang T2",
+          "type": "corridor",
+          "x": 3.69,
+          "y": 2.11,
+          "w": 1.2,
+          "h": 16.78
+        },
+        {
+          "id": "design-f1-bed-1",
+          "floor": 1,
+          "name": "Phòng ngủ 1",
+          "type": "bed",
+          "x": 0.10999999999999988,
+          "y": 4.000000000000001,
+          "w": 3.58,
+          "h": 3.8
+        },
+        {
+          "id": "design-f1-bed-2",
+          "floor": 1,
+          "name": "Phòng ngủ 2",
+          "type": "bed",
+          "x": 0.10999999999999988,
+          "y": 7.800000000000001,
+          "w": 3.58,
+          "h": 5.69
+        },
+        {
+          "id": "design-f1-bath-1",
+          "floor": 1,
+          "name": "WC T2",
+          "type": "bath",
+          "x": 0.11,
+          "y": 13.49,
+          "w": 3.58,
+          "h": 2.2
+        },
+        {
+          "id": "design-f1-stairs-1",
+          "floor": 1,
+          "name": "Cầu thang",
+          "type": "stairs",
+          "x": 0.11,
+          "y": 15.690000000000001,
+          "w": 3.58,
+          "h": 3.2,
+          "stairShape": "u",
+          "stairDirection": 90
+        },
+        {
+          "id": "design-f1-bed-1-released",
+          "floor": 1,
+          "type": "balcony",
+          "name": "Sân thượng",
+          "x": 0.10999999999999988,
+          "y": 2.11,
+          "w": 3.58,
+          "h": 1.8900000000000006,
+          "outdoorSpace": {
+            "kind": "terrace",
+            "openSides": [
+              "north",
+              "west"
+            ],
+            "sourceReference": "BMH V01 review proposal; not a customer-approved or surveyed terrace.",
+            "reviewStatus": "awaiting-review",
+            "guard": {
+              "status": "unknown"
+            },
+            "drainage": {
+              "status": "unknown"
+            }
+          }
+        }
+      ],
+      "openings": [
+        {
+          "id": "design-o1",
+          "roomId": "design-f0-corridor-1",
+          "floor": 0,
+          "kind": "door",
+          "side": "north",
+          "width": 0.95,
+          "offset": 0.5,
+          "height": 2.4,
+          "sill": 0,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o2",
+          "roomId": "design-f0-living-1",
+          "floor": 0,
+          "kind": "door",
+          "side": "east",
+          "width": 0.9,
+          "offset": 0.76,
+          "height": 2.2,
+          "sill": 0,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o3",
+          "roomId": "design-f0-living-1",
+          "floor": 0,
+          "kind": "window",
+          "side": "north",
+          "width": 2.4,
+          "offset": 0.5,
+          "height": 1.65,
+          "sill": 0.65,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o4",
+          "roomId": "design-f0-living-1",
+          "floor": 0,
+          "kind": "window",
+          "side": "west",
+          "width": 1.4,
+          "offset": 0.38,
+          "height": 1.4,
+          "sill": 0.9,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o5",
+          "roomId": "design-f0-kitchen-1",
+          "floor": 0,
+          "kind": "door",
+          "side": "east",
+          "width": 0.9,
+          "offset": 0.76,
+          "height": 2.2,
+          "sill": 0,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o6",
+          "roomId": "design-f0-kitchen-1",
+          "floor": 0,
+          "kind": "window",
+          "side": "west",
+          "width": 1.4,
+          "offset": 0.38,
+          "height": 1.4,
+          "sill": 0.9,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o9",
+          "roomId": "design-f0-bath-1",
+          "floor": 0,
+          "kind": "door",
+          "side": "east",
+          "width": 0.8,
+          "offset": 0.6,
+          "height": 2.2,
+          "sill": 0,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o10",
+          "roomId": "design-f0-bath-1",
+          "floor": 0,
+          "kind": "window",
+          "side": "west",
+          "width": 0.65,
+          "offset": 0.5,
+          "height": 0.55,
+          "sill": 1.7,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o11",
+          "roomId": "design-f0-stairs-1",
+          "floor": 0,
+          "kind": "door",
+          "side": "east",
+          "width": 0.9,
+          "offset": 0.93,
+          "height": 2.2,
+          "sill": 0,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o12",
+          "roomId": "design-f1-bed-1",
+          "floor": 1,
+          "kind": "door",
+          "side": "east",
+          "width": 0.9,
+          "offset": 0.76,
+          "height": 2.2,
+          "sill": 0,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o13",
+          "roomId": "design-f1-bed-1",
+          "floor": 1,
+          "kind": "window",
+          "side": "north",
+          "width": 1.5,
+          "offset": 0.5,
+          "height": 1.4,
+          "sill": 0.9,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o14",
+          "roomId": "design-f1-bed-1",
+          "floor": 1,
+          "kind": "window",
+          "side": "west",
+          "width": 1.4,
+          "offset": 0.38,
+          "height": 1.4,
+          "sill": 0.9,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o15",
+          "roomId": "design-f1-bed-2",
+          "floor": 1,
+          "kind": "door",
+          "side": "east",
+          "width": 0.9,
+          "offset": 0.76,
+          "height": 2.2,
+          "sill": 0,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o16",
+          "roomId": "design-f1-bed-2",
+          "floor": 1,
+          "kind": "window",
+          "side": "west",
+          "width": 1.4,
+          "offset": 0.38,
+          "height": 1.4,
+          "sill": 0.9,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o19",
+          "roomId": "design-f1-bath-1",
+          "floor": 1,
+          "kind": "door",
+          "side": "east",
+          "width": 0.8,
+          "offset": 0.6,
+          "height": 2.2,
+          "sill": 0,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o20",
+          "roomId": "design-f1-bath-1",
+          "floor": 1,
+          "kind": "window",
+          "side": "west",
+          "width": 0.65,
+          "offset": 0.5,
+          "height": 0.55,
+          "sill": 1.7,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-o21",
+          "roomId": "design-f1-stairs-1",
+          "floor": 1,
+          "kind": "door",
+          "side": "east",
+          "width": 0.9,
+          "offset": 0.93,
+          "height": 2.2,
+          "sill": 0,
+          "hinge": "left",
+          "swing": "in"
+        },
+        {
+          "id": "design-f1-bed-1-released-access",
+          "roomId": "design-f1-bed-1-released",
+          "floor": 1,
+          "kind": "door",
+          "side": "east",
+          "width": 0.9,
+          "offset": 0.49999999999999956,
+          "height": 2.1,
+          "sill": 0,
+          "hinge": "left",
+          "swing": "in"
+        }
+      ],
+      "fixtures": [],
+      "furniture": [],
+      "outdoor": [],
+      "lockedRoomIds": [],
+      "lockedFloors": []
+    },
+    "planVariants": [],
+    "designStudio": {
+      "program": {
+        "mode": "custom",
+        "elevator": false,
+        "floors": [
+          {
+            "bedrooms": 0,
+            "bathrooms": 1,
+            "living": true,
+            "kitchen": true
+          },
+          {
+            "bedrooms": 2,
+            "bathrooms": 1
+          }
+        ]
+      },
+      "kits": []
+    },
+    "planVersions": [],
+    "materials": {
+      "tier": "standard",
+      "climatePackage": "recommended",
+      "choices": {
+        "floor": "UNCONFIRMED-FLOOR",
+        "paint": "UNCONFIRMED-PAINT",
+        "door": "UNCONFIRMED-DOOR"
+      },
+      "finish": {
+        "exterior": null,
+        "rooms": {}
+      },
+      "lastDelta": 0
+    },
+    "aiScan": {
+      "sourceName": "",
+      "mimeType": "",
+      "scannedAt": "",
+      "model": "",
+      "provider": "",
+      "intent": "reference",
+      "appliedAt": "",
+      "result": {}
+    },
+    "homeFinish": {
+      "photos": [],
+      "activePhotoId": "",
+      "preferences": {
+        "style": "Hiện đại",
+        "budget": "balanced",
+        "notes": ""
+      },
+      "analyses": {},
+      "selected": {},
+      "satisfaction": {
+        "signature": "",
+        "confirmedAt": ""
+      },
+      "geometryKey": ""
+    },
+    "measuredDesign": {
+      "roof": {
+        "type": "flat",
+        "pitchDeg": 0,
+        "overhang": 0,
+        "ridge": "auto",
+        "surface": "auto",
+        "color": "",
+        "parapetHeight": -1
+      },
+      "wallThickness": {
+        "exterior": 0.22,
+        "interior": 0.12
+      }
+    },
+    "costPlan": {
+      "contingencyPct": 10,
+      "pricing": {},
+      "extras": {},
+      "applications": [],
+      "quotes": {},
+      "conversions": [],
+      "exclusions": [],
+      "scopeCoverage": []
+    },
+    "performance": {
+      "solarEnabled": true,
+      "rainwaterEnabled": true,
+      "coolRoof": true,
+      "smartShading": true,
+      "mode": "balanced"
+    },
+    "dataEngine": {
+      "cost": {},
+      "quote": {},
+      "materialOverrides": {},
+      "status": {},
+      "snapshots": [],
+      "costSources": {},
+      "pricingMode": "regional"
+    },
+    "wearYear": 0,
+    "checklist": {
+      "pipe114": false,
+      "acWire": false,
+      "pressure": false,
+      "internet": false,
+      "elcb": false,
+      "waterTank": false,
+      "drainSlope": false,
+      "grounding": false,
+      "rcbo": false,
+      "acDrain": false,
+      "kitchenHood": false,
+      "conduitReserve": false
+    },
+    "dossier": {
+      "register": {
+        "schemaVersion": 1,
+        "wbs": [],
+        "journal": [],
+        "inspections": [],
+        "issues": [],
+        "changes": [],
+        "payments": [],
+        "drawdowns": [],
+        "decisions": [],
+        "outputs": [],
+        "warranties": []
+      },
+      "startDate": "",
+      "progress": 0,
+      "currentStage": "foundation",
+      "revision": "A",
+      "architect": "",
+      "contractor": "",
+      "notes": "",
+      "actualCosts": {
+        "foundation": 0,
+        "structure": 0,
+        "walls": 0,
+        "roof": 0,
+        "mep": 0,
+        "finish": 0,
+        "handover": 0
+      },
+      "stageProgress": {},
+      "budgetBaselines": [],
+      "activeBaselineId": "",
+      "evidence": []
+    }
+  },
+  "meta": {
+    "savedAt": "2026-10-16T13:03:46.412Z",
+    "createdAt": null,
+    "localProjectId": "",
+    "cloudProjectId": "",
+    "cloudOwnerId": "",
+    "cloudRevision": null,
+    "cloudUpdatedAt": null
+  }
+}
