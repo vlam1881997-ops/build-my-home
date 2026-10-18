@@ -1,4 +1,37 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';import {designClient} from './fixtures/design-client.mjs';
+import {modernReference} from './team-b-modern-reference.mjs';
+
+test('light model uses the saved 37-degree footprint and mounting height rather than the collision box',()=>{
+ const B=designClient(),p=B.state.project;
+ p.plan={rooms:[{id:'custom',floor:0,type:'custom',name:'Tự bố trí',x:0,y:0,w:6,h:6}],openings:[],fixtures:[],outdoor:[],furniture:[{id:'angled',roomId:'custom',floor:0,modelId:'kitchenWallCabinet',origin:'customer-added',placementStatus:'present',pose:{x:2,y:3,z:1.6,rotationDeg:37},size:{width:.9,depth:.34,height:.72},materialBindings:[{role:'accent',visualProfileId:'dark-walnut'}]}],lockedRoomIds:[],lockedFloors:[]};
+ B.state.ui.sceneFocus='room:custom';B.lightPreviewAngle=35;B.studioFloorLevel=()=>({base:4.1,slab:.23,clearHeight:3});
+ const before=JSON.stringify(p),svg=B.lightPreviewSvg(),angle=37*Math.PI/180,view=35*Math.PI/180;
+ const projected=(x,y,z)=>{x-=p.site.width/2;y-=p.site.depth/2;return (x*Math.cos(view)-y*Math.sin(view)).toFixed(4)+','+((x*Math.sin(view)+y*Math.cos(view))*.52-z*.85).toFixed(4);};
+ const top=[[-.45,-.17],[.45,-.17],[.45,.17],[-.45,.17]].map(([x,y])=>projected(2+x*Math.cos(angle)-y*Math.sin(angle),3+x*Math.sin(angle)+y*Math.cos(angle),4.1+.23+1.6+.72)).join(' ');
+ const faces=[...svg.matchAll(/<polygon[^>]*data-light-furniture-id="angled"[^>]*points="([^"]+)"[^>]*fill="([^"]+)"/g)];
+ assert.equal(faces.length,5);assert.ok(faces.some(m=>m[1]===top),'top follows measured rotated corners and level/slab/mounting height');
+ assert.ok(faces.every(m=>m[2]===B.VISUAL_MATERIALS.find(p=>p.id==='dark-walnut').color));assert.equal(JSON.stringify(p),before);
+ p.plan.furniture[0].placementStatus='removed';assert.doesNotMatch(B.lightPreviewSvg(),/data-light-furniture-id="angled"/);
+});
+
+test('light model retains measured terrace slab, open edges and drawing identity without inventing furniture',()=>{
+ const {B}=modernReference(),r=B.state.project.plan.rooms.find(r=>r.outdoorSpace?.kind==='terrace');B.state.ui.sceneFocus='room:'+r.id;
+ const before=JSON.stringify(B.state.project),svg=B.lightPreviewSvg();
+ assert.equal((svg.match(/data-light-kind="floor-slab"/g)||[]).length,5);
+ assert.doesNotMatch(svg,/data-light-furniture-id=/);assert.ok(svg.includes('data-design-revision="'+B.drawingRevision()+'"'));
+ const g=B.scenePlanGeometry({rooms:[r],openings:B.state.project.plan.openings,wallContext:B.state.project.plan.rooms},r.floor);
+ assert.ok(g.walls.length);assert.ok(g.walls.every(w=>!B.outdoorOpenEdge(r,w.horizontal,w.axis,w.a,w.b)));
+ assert.equal(JSON.stringify(B.state.project),before);
+});
+
+test('terrace review exposes exact dimensions, real access and missing technical inputs without writing the design',()=>{
+ const {B}=modernReference(),r=B.state.project.plan.rooms.find(r=>r.outdoorSpace?.kind==='terrace');B.state.ui.planner.selected=r.id;
+ const before=JSON.stringify(B.state.project),history=B.planHistory.undo.length,html=B.roomDepthEditorHtml();
+ for(const value of ['3.580 mm','1.890 mm','900 mm × 2.100 mm','ngưỡng 0 mm','Bắc, Tây','Không có mái che','Chưa có tài liệu','lan can','thoát nước','chống thấm'])assert.ok(html.includes(value),value);
+ assert.ok(html.includes(r.outdoorSpace.sourceReference));assert.equal(JSON.stringify(B.state.project),before);assert.equal(B.planHistory.undo.length,history);
+ B.state.project.plan.openings=B.state.project.plan.openings.filter(o=>!o.id.endsWith('-access'));assert.match(B.roomDepthEditorHtml(),/Chưa có cửa tiếp cận/);
+ r.outdoorSpace.sourceReference='<img src=x onerror=alert(1)>';assert.ok(B.roomDepthEditorHtml().includes('&lt;img'));assert.doesNotMatch(B.roomDepthEditorHtml(),/<img src=x/);
+});
 
 function personalPlanClient(){
  const B=designClient({nativeParcel:true}),p=B.state.project;

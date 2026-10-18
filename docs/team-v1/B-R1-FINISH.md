@@ -1,8 +1,8 @@
 # B · Modern R1 completion contract
 
-Scope: one measured Modern house from the existing shared plan, preserving the current production release. No A source/dependency/schema edits. Source baseline: PR65 / main cd13c27; B QA checkpoint c8b46a5. This contract defines remaining acceptance gates; it is not a completion claim.
+Scope: one measured Modern house from the existing shared plan, preserving the current production release. No A source/dependency/schema edits. Released interior source:70c5741 / merged PR66 main f3bce504; production dpl_EKuN2Pcf1XmfbdC4jnY1yNBVa7J1 READY. This contract defines remaining acceptance gates; it is not a completion claim.
 
-## R1.1 Interior (W26 source/evidence ready; native acceptance pending)
+## R1.1 Interior (measured module/UI increment released; GPU/customer appearance pending)
 
 - Add measured generic kitchen base/wall cabinets, hood, wardrobe, bedside lamps and bed bench through existing plan.furniture records. Record width/depth/height and mounting height in metres. No independent 3D-only fixtures or supplier identity invented.
 - Provide one explicit per-room proposal with visible item dimensions/height adjustments, preview and apply. No automatic replacement of a saved project. Preserve existing IDs, positions, rotation, material bindings, locked items and deletion tombstones. Apply atomically with one undo step; reject stale proposals and invalid room/opening/collision/ceiling positions.
@@ -30,6 +30,12 @@ Continue the next incomplete substep in PROGRESS-B.md. Push scoped source and ev
 
 ## Current concrete checkpoint
 
-PR66 contains the measured module implementation, seven original GLBs and actual model catalogue previews. Exact source head d5132c4 passed Node22 CI39106316094 and Vercel preview. The related SVG/apply integration check also passes locally; its final evidence-only checkpoint still needs exact-head CI. Native preview is behind Vercel sign-in; automatic review rejected creating a share link without specific authorization. Keep this draft unmerged until native related checks pass. Do not publish production as a way around preview access.
+PR66 is merged: source70c5741009ae061bdc2f98aed2c7c6aea95d63f2, main f3bce504a90cbce72883f7f49d33309f3c840e01. Exact source Node22 CI39127354806 SUCCESS; production dpl_EKuN2Pcf1XmfbdC4jnY1yNBVa7J1 READY on www.huiminhbach.id.vn.108 related local checks passed. Native kitchen/bedroom preview/apply/edit/37deg/material/delete/restore/undo/redo/reload checks passed on isolated synthetic data. Final native history-control and saved-furniture room-card regressions passed on the final preview, then verified again on the public domain. The prior personal drawing remains exact after upgrade.
 
-R1.2 requires the actual terrace access/opening, edge/guard details and drainage/waterproofing source with reviewer status. The existing synthetic fixture has only proposed area/open sides. R1.3 requires an enabled WebGL desktop/mobile device and customer visual review. These are missing inputs, not tasks that extra decorative meshes or more unit tests can truthfully close.
+Preview permission is resolved: user authorized23h shares and direct deployment PATCH works without team scope. Wrapper alias lookup can still return403, which is not evidence that the user failed to grant ChatGPT tool permission. Do not repeat login/reconnection instructions. Do not record access secrets in source/evidence. Normal native preview review is now possible.
+
+Evidence is in W26-interior-sets, W29-proposal-review and W30-native-interior. Screenshots show native interface/plan state, not enabled-GPU realism. Cloud WebGL still reports GL_VENDOR/GL_RENDERER Disabled. Required actual GPU desktop/mobile appearance/performance and customer visual acceptance remain open. Full Modern R1 is not complete.
+
+R1.2 still requires actual terrace edge/guard, drainage/waterproofing and reviewer inputs. The synthetic terrace proposal has measured3.58×1.89m area, a0.90×2.10m east access door with sill0 and reachable circulation. This proves only the review proposal geometry. Never invent source-confirmed engineering details to close the gate.
+
+Resume the next open R1.2/R1.3 gate. Do not regenerate unchanged kitchen/bedroom modules, repeat their accepted native UI tests or ask for the already-resolved preview permission again. Preserve all current customer choices and the released personal drawing fixes.

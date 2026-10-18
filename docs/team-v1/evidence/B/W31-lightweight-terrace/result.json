@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-18",
+  "baselineMain": "f3bce504a90cbce72883f7f49d33309f3c840e01",
+  "parentBCheckpoint": "15209c137b1f8803e1de0e2fb2574fe22d5cee0c",
+  "localNode": "24.19.0",
+  "checks": {
+    "registeredWorkflowTests": 12,
+    "pass": 12,
+    "syntax": true,
+    "nativeFinalPreview": "pending",
+    "exactHeadNode22CI": "pending"
+  },
+  "knownLimitations": [
+    "Cloud WebGL disabled; no GPU/mobile visual-performance acceptance",
+    "Synthetic terrace; actual guard/drainage/waterproofing/structure/reviewer inputs missing",
+    "Simplified block view is not photorealistic material verification"
+  ],
+  "sourceSha256": {
+    "src/78_design_workflow.js": "6887a407ca7871a59a813c8396dbf8aaabecbd386196553ffd98eb1223404189",
+    "src/99_customer_design.js": "d6054f7b950358a10c55d8a7dbf0e990823757fd5b3a068b4348d41bd2c80c6e",
+    "src/customer-design.css": "ca558c12a8efa982f3512016c43a122a1ecfbc0a8278b6fc4650ca9b73e09f78",
+    "tests/team-b-workflow.test.mjs": "80e3d48a8728dd4beb98ac8ac8bd640af980d14963cdab92b68fd86adbe8ccef"
+  }
+}
