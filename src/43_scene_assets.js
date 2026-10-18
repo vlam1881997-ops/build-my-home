@@ -52,6 +52,22 @@ BMH.architecturalSkyEnvironment=(THREE,renderer)=>{
  const cube=new THREE.CubeTexture(faces);cube.colorSpace=THREE.SRGBColorSpace;cube.needsUpdate=true;
  const generator=new THREE.PMREMGenerator(renderer);try{return generator.fromCubemap(cube);}finally{cube.dispose();generator.dispose();}
 };
+// Window-aligned presentation daylight and tight shadows retain contact detail.
+// Presentation-only: this does not assert surveyed daylight or an electrical design.
+BMH.configureRoomShadows=(THREE,sun,room,site,base=0)=>{
+ if(!sun?.shadow||!room)return false;
+ const radius=Math.max(room.w,room.h,3)*.85+1.2;
+ sun.target.position.set(room.x+room.w/2-site.width/2,base+1.3,room.y+room.h/2-site.depth/2);
+ const opening=(BMH.state?.project?.plan?.openings||[]).filter(o=>o.roomId===room.id&&o.kind==='window'&&['north','south','west','east'].includes(o.side)).sort((a,b)=>(b.width||0)*(b.height||1)-(a.width||0)*(a.height||1))[0];
+ const directions={north:[-.24,.55,-1],south:[.24,.55,1],west:[-1,.55,.24],east:[1,.55,-.24]};
+ const direction=opening?new THREE.Vector3(...directions[opening.side]).normalize().multiplyScalar(24):new THREE.Vector3(-10,18,-12);
+ sun.position.copy(sun.target.position).add(direction);
+ sun.userData.presentationLighting={basis:opening?'largest measured window':'default presentation direction',openingId:opening?.id||null,solarStudy:false};
+ Object.assign(sun.shadow.camera,{left:-radius,right:radius,top:radius,bottom:-radius,near:.1,far:70});
+ sun.shadow.camera.updateProjectionMatrix();sun.shadow.bias=-.0002;sun.shadow.normalBias=.006;sun.shadow.radius=3;
+ return true;
+};
+
 BMH.sceneSurfaceTexture = (THREE, kind, channel='color') => {
  if(typeof document==='undefined'||typeof document.createElement!=='function')return null;
  const templates=BMH.surfaceTextureTemplates||=new Map(),key=kind+':'+channel;
@@ -116,6 +132,20 @@ BMH.sceneMaterialTexture = (THREE, scene, kind, channel='color') => {
       // This plaster photograph is a texture, not the colour of the selected
       // paint. Keep its mineral variation subtle for a painted interior wall.
       ctx.globalAlpha=kind==='plaster'&&channel==='color'?.08:1;ctx.drawImage(image,0,0,512,512);ctx.globalAlpha=1;
+      if(kind==='fabric'&&ctx.getImageData&&ctx.putImageData){
+       // The neutral photograph has very weak yarn relief and its raw roughness
+       // multiplied by linen's coefficient looked like coated plastic. Retain
+       // the photo, add bounded woven relief and remap cloth to matte roughness.
+       const pixels=ctx.getImageData(0,0,512,512),data=pixels.data;
+       for(let y=0;y<512;y++)for(let x=0;x<512;x++){
+        const at=(y*512+x)*4,u=x*Math.PI/4,v=y*Math.PI/4,warp=Math.sin(u),weft=Math.sin(v);
+        if(channel==='normal'){
+         const nx=(data[at]/255*2-1)+.16*Math.cos(u)*weft,ny=(data[at+1]/255*2-1)+.16*warp*Math.cos(v),nz=Math.max(.05,data[at+2]/255*2-1),length=Math.hypot(nx,ny,nz);
+         data[at]=(nx/length*.5+.5)*255;data[at+1]=(ny/length*.5+.5)*255;data[at+2]=(nz/length*.5+.5)*255;
+        }else for(let c=0;c<3;c++)data[at+c]=channel==='roughness'?191+data[at+c]*.25:data[at+c]*(1-.045*(.5+.5*warp*weft));
+       }
+       ctx.putImageData(pixels,0,0);
+      }
      }else fallback.image=image;fallback.needsUpdate=true;fallback.userData={...fallback.userData,source:photoSets[kind],license:'CC0-1.0'};return true;});
      (scene.userData.surfaceLoads||=[]).push(task);
     }
@@ -151,7 +181,7 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
     tile: make(finish.floor || '#d8d1c3', .6, 'tile', [.6, .6]),
     plank: make(finish.floor || '#d3b998', .62, 'plank', [1.7,1.7]),
     floorStone: make(finish.floor || '#d8d1c3', .72, 'stone', [.8,.8]),
-    rug: make(finish.rug || '#d4ccba', .99, 'fabric', [.2, .2]),
+    rug: make(finish.rug || '#d4ccba', .99, finish.shape==='tailored'?'boucle':'fabric', finish.shape==='tailored'?[.4,.4]:[.2,.2]),
     stone: make('#e7e1d6', .38, 'stone', [.8, .8]),
     white: make('#f4f2e9', .28),
     dark: make('#343b36', .4),
@@ -161,6 +191,11 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
     glass: new THREE.MeshPhysicalMaterial({color:'#dce5df', roughness:.06, transparent:true, opacity:.25, metalness:.08}),
     screen: new THREE.MeshPhysicalMaterial({color:'#14252a', roughness:.23, clearcoat:.7,envMapIntensity:.2}),
   };
+  // Selected tailored textiles use a grazing-angle fibre response, not a glossy plastic coat.
+  if(finish.shape==='tailored')for(const slot of ['fabric','linen','pillow','rug']){
+    const old=materials[slot],cloth=new THREE.MeshPhysicalMaterial({color:old.color.clone(),roughness:old.roughness,map:old.map,normalMap:old.normalMap,roughnessMap:old.roughnessMap,sheen:.32,sheenRoughness:.92,sheenColor:old.color.clone()});
+    cloth.normalScale.copy(old.normalScale);cloth.userData={...old.userData};old.dispose();materials[slot]=cloth;
+  }
   materials.collection={shape:finish.shape||'soft',table:finish.table||'oak'};
   materials.floor=finish.surface==='wood'?materials.plank:finish.surface==='stone'?materials.floorStone:materials.tile;
   const replace=(key,material)=>{const previous=materials[key];materials[key]=material;if(previous?.isMaterial&&!Object.values(materials).includes(previous))previous.dispose();};
@@ -170,7 +205,7 @@ BMH.sceneAssetMaterials = (THREE, scene, finish = {}) => {
    const target={floor:'floor',wall:'wall',accent:'wood',fabric:'fabric'}[role];if(!target)continue;
    const material=make(finish[role]||profile.color,profile.roughness,profile.kind,profile.scale);
    material.normalScale?.setScalar(profile.normalStrength);material.userData.visualMaterial=profile.id;
-   if(profile.kind==='velvet'){const physical=new THREE.MeshPhysicalMaterial({color:material.color.clone(),map:material.map,normalMap:material.normalMap,roughnessMap:material.roughnessMap,roughness:material.roughness,sheen:.6,sheenRoughness:.85,sheenColor:finish.fabric||profile.color});physical.normalScale.copy(material.normalScale);physical.userData={...material.userData};material.dispose();replace(target,physical);}else replace(target,material);
+   if(profile.kind==='velvet'||finish.shape==='tailored'&&role==='fabric'){const physical=new THREE.MeshPhysicalMaterial({color:material.color.clone(),map:material.map,normalMap:material.normalMap,roughnessMap:material.roughnessMap,roughness:material.roughness,sheen:profile.kind==='velvet'?.6:.32,sheenRoughness:profile.kind==='velvet'?.85:.92,sheenColor:finish.fabric||profile.color});physical.normalScale.copy(material.normalScale);physical.userData={...material.userData};material.dispose();replace(target,physical);}else replace(target,material);
    if(role==='accent')replace('slattedWood',make(finish.accent||profile.color,profile.roughness,profile.kind==='wood'?'woodVertical':profile.kind,profile.scale));
   }
   const stoneProfile=BMH.VISUAL_MATERIALS?.find(p=>p.id===finish.stoneVisualMaterial&&p.role==='floor'&&p.surface==='stone');
@@ -369,7 +404,7 @@ BMH.addFurnitureContact = (THREE, scene, item, base, site) => {
 BMH.createSceneFoliage=(THREE,dimensions,material,count=48)=>{
  const positions=[],colors=[],base=new THREE.Color(material.color),random=n=>{const a=Math.sin(n*127.1+31.7)*43758.5453;return a-Math.floor(a);};count=Math.max(12,Math.min(72,count));
  for(let i=0;i<count;i++){
-  const angle=i*2.39996,level=.12+random(i+5)*.7,spread=.05+random(i+15)*.16,origin=new THREE.Vector3(Math.sin(angle)*spread,level,Math.cos(angle)*spread),rotation=new THREE.Euler(.3+random(i+25)*.65,angle,.15+random(i+35)*.4),quaternion=new THREE.Quaternion().setFromEuler(rotation),length=.17+random(i+45)*.15,width=.05+random(i+55)*.045,vertices=[];
+  const angle=i*2.39996,level=.12+random(i+5)*.7,spread=.05+random(i+15)*.16,origin=new THREE.Vector3(Math.sin(angle)*spread,level,Math.cos(angle)*spread),rotation=new THREE.Euler(.3+random(i+25)*.65,angle,.15+random(i+35)*.4),quaternion=new THREE.Quaternion().setFromEuler(rotation),length=.17+random(i+45)*.15,width=(.05+random(i+55)*.045)*(count<=16?2.2:1),vertices=[];
   for(let row=0;row<=5;row++)for(let col=0;col<=2;col++){const t=row/5,s=col-1,v=new THREE.Vector3(s*width*.5*Math.sin(Math.PI*t),t*length,.018*Math.sin(Math.PI*t)-Math.abs(s)*.01*Math.sin(Math.PI*t));vertices.push(v.applyQuaternion(quaternion).add(origin));}
   const tint=base.clone().multiplyScalar(.72+random(i+65)*.5);
   for(let row=0;row<5;row++)for(let col=0;col<2;col++){const a=row*3+col;for(const triangle of [[a,a+3,a+1],[a+1,a+3,a+4]]){const [v0,v1,v2]=triangle.map(n=>vertices[n]);if(v1.clone().sub(v0).cross(v2.clone().sub(v0)).lengthSq()<1e-14)continue;for(const n of triangle){const p=vertices[n],vein=n%3===1?.88:1;positions.push(p.x,p.y,p.z);colors.push(tint.r*vein,tint.g*vein,tint.b*vein);}}}
@@ -415,11 +450,17 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
   // A soft, slightly compressed superellipsoid gives upholstery a continuous
   // silhouette. It remains inside the same measured furniture envelope.
   const cushion = (w,h,depth,x,y,z,material=m.fabric,orientation='seat',tufted=false) => {
-    const geometry=new THREE.SphereGeometry(1,tufted?64:32,tufted?32:16),p=geometry.attributes.position,power=v=>Math.sign(v)*Math.pow(Math.abs(v),.48);
+    const tailored=m.collection?.shape==='tailored',geometry=new THREE.SphereGeometry(1,tufted?64:tailored?48:32,tufted?32:tailored?24:16),p=geometry.attributes.position,power=v=>Math.sign(v)*Math.pow(Math.abs(v),tailored?.36:.48);
     for(let i=0;i<p.count;i++){
       let px=power(p.getX(i))*w/2,py=power(p.getY(i))*h/2,pz=power(p.getZ(i))*depth/2;
       const centre=Math.max(0,1-(px/(w/2))**2)*Math.max(0,1-(pz/(depth/2))**2);
       if(orientation==='seat'&&py>0)py-=Math.min(.009,h*.06)*centre*(py/(h/2));
+      if(tailored){
+       // Millimetre-scale folds die out at the silhouette: the measured footprint stays fixed.
+       const u=px/(w/2),v=py/(h/2),q=pz/(depth/2),edge=Math.max(0,1-Math.abs(u))**.65;
+       if(orientation==='seat'&&v>0)py-=Math.min(.006,h*.045)*edge*(1-Math.abs(q))*(.55+.45*Math.sin(u*17+q*9)**2);
+       if(orientation==='back'&&q<0)pz+=Math.min(.006,depth*.04)*edge*Math.max(0,1-Math.abs(v))*(.5+.5*Math.sin(u*19+v*11)**2);
+      }
       if(tufted&&pz<0){
        // Recess the real textile surface around buttons; folds are geometry,
        // not dark dots floating in front of a flat backrest.
@@ -454,9 +495,10 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
     }
   };
   if (/^lounge/.test(model)) {
-    const chair=model==='loungeChair',shape=m.collection?.shape||'soft',timber=['timber','midcentury'].includes(shape),curved=shape==='curved',linear=shape==='linear',arms=timber?.085:curved?.17:.13,seatW=d.w-2*arms;
-    legs(shape==='midcentury'?.24:.16,d.w-.1,d.d-.08,shape==='midcentury'?m.wood:m.dark);
-    box(d.w-.035,.16,d.d-.06,0,.24,0,timber?m.wood:m.fabric,linear?.018:.065);
+    const chair=model==='loungeChair',shape=m.collection?.shape||'soft',tailored=shape==='tailored',timber=['timber','midcentury'].includes(shape),curved=shape==='curved',linear=shape==='linear',arms=timber?.085:curved?.17:.13,seatW=d.w-2*arms;
+    legs(shape==='midcentury'?.24:.16,d.w-.1,d.d-.08,shape==='midcentury'||tailored?m.wood:m.dark);
+    if(tailored){box(d.w-.08,.075,d.d-.08,0,.205,0,m.wood,.018);box(d.w-.035,.14,d.d-.06,0,.30,0,m.fabric,.025);}
+    else box(d.w-.035,.16,d.d-.06,0,.24,0,timber?m.wood:m.fabric,linear?.018:.065);
     box(d.w-.035,.40,.14,0,d.h-.22,d.d/2-.095,timber?m.wood:m.fabric,curved?.12:linear?.018:.065);
     for(const x of [-d.w/2+arms/2,d.w/2-arms/2]){
      if(timber){box(arms,.065,d.d-.035,x,.55,0,m.wood,.015);for(const z of [-d.d*.34,d.d*.34])box(.04,.37,.04,x,.345,z,m.wood,.008);for(let z=-d.d*.3;z<d.d*.3;z+=.045)box(.015,.29,.014,x,.38,z,m.slattedWood,.003);}
@@ -464,14 +506,15 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
       box(arms*.75,.25,d.d-.06,x,.32,0,m.fabric,.065);
       const roll=cylinder(arms*.68,arms*.68,d.d-.045,x,.54,0,m.fabric);roll.rotation.x=Math.PI/2;roll.userData={kind:'rolled-arm',generic:true};
      }
+     else if(tailored)box(arms,.41,d.d-.035,x,.43,0,m.fabric,.028);
      else if(curved)cushion(arms,.42,d.d-.06,x,.43,0,m.fabric,'back');
      else box(arms,.41,d.d-.035,x,.43,0,m.fabric,linear?.028:.06);
     }
-    const count=chair?1:curved?3:linear?3:2;
+    const count=chair?1:curved||linear||tailored?3:2;
     for(let i=0;i<count;i++) {
       const x=-seatW/2+(i+.5)*seatW/count;
       cushion(seatW/count-.025,.16,d.d-.24,x,.45,-.055,m.fabric);
-      const back=cushion(seatW/count-.025,curved?.35:.31,curved?.20:.15,x,curved?.63:.67,d.d/2-.185,m.fabric,'back',shape==='tufted');
+      const back=cushion(seatW/count-.025,curved?.35:tailored?.36:.31,curved?.20:tailored?.19:.15,x,curved?.63:.67,d.d/2-.185,m.fabric,'back',shape==='tufted');
       back.rotation.x=-.12;
       if(shape==='channel')for(let j=0;j<4;j++)cushion((seatW/count-.04)/4,.29,.055,x-seatW/count*.375+j*seatW/count*.25,.67,d.d/2-.265,m.fabric,'back');
 
@@ -513,6 +556,9 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
        const glass=new THREE.MeshPhysicalMaterial({color:'#dce6e1',roughness:.08,transparent:true,opacity:.45,transmission:.35,thickness:.012});
        box(d.w,.035,d.d,0,d.h-.018,0,glass,.018);for(const x of [-d.w*.36,d.w*.36])for(const z of [-d.d*.32,d.d*.32])cylinder(.018,.018,d.h-.04,x,(d.h-.04)/2,z,m.dark);
        box(d.w*.75,.015,d.d*.68,0,.12,0,m.dark,.006);
+      }else if(table==='travertine'){
+       box(d.w,.055,d.d,0,d.h-.028,0,m.stone,.022);
+       for(const x of [-d.w*.28,d.w*.28])box(d.w*.16,d.h-.06,d.d*.60,x,(d.h-.06)/2,0,m.wood,.018);
       }else{
        for(const x of [-d.w*.28,d.w*.28]){
         if(table==='stone')box(.11,d.h-.07,d.d*.64,x,(d.h-.07)/2,0,m.dark,.009);
@@ -601,7 +647,7 @@ BMH.createRoomAsset = (model, d, THREE, m) => {
       const a=i*2.4,h=.50+(i%4)*.15;
       cylinder(.005,.008,h,Math.sin(a)*.035,.34+h/2,Math.cos(a)*.035,m.green);
     }
-    const foliage=BMH.createSceneFoliage(THREE,{w:.40,h:.96,d:.43},m.leaf);foliage.position.y=.32;root.add(foliage);
+    const foliage=BMH.createSceneFoliage(THREE,{w:.40,h:.96,d:.43},m.leaf,m.collection?.shape==='tailored'?14:48);foliage.position.y=.32;root.add(foliage);
   } else if(model==='washingMachine') {
     box(d.w,d.h,d.d,0,d.h/2,0,m.white,.025);
     box(d.w-.05,.13,.012,0,d.h-.08,d.d/2+.008,m.stone,.008);
@@ -654,3 +700,4 @@ BMH.addGarageVehicle=(r,base,THREE,scene,site)=>{
  for(const x of [-.80,.80])for(const z of [-1.3,1.3]){const tyre=new THREE.Mesh(new THREE.CylinderGeometry(.31,.31,.19,24),rubber);tyre.rotation.z=Math.PI/2;tyre.position.set(x,.33,z);tyre.castShadow=tyre.receiveShadow=true;group.add(tyre);const rim=new THREE.Mesh(new THREE.CylinderGeometry(.19,.19,.20,20),metal);rim.rotation.z=Math.PI/2;rim.position.copy(tyre.position);group.add(rim);}
  group.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(group),size=bounds.getSize(new THREE.Vector3());group.scale.set(1.85/size.x,1.45/size.y,4.3/size.z);group.rotation.y=v.w>v.d?Math.PI/2:0;group.position.set(v.x+v.w/2-site.width/2,base-bounds.min.y*group.scale.y,v.y+v.d/2-site.depth/2);group.userData={kind:'vehicle',roomId:r.id,vehicle:'car',generic:true,placement:{...v}};scene.add(group);return true;
 };
+

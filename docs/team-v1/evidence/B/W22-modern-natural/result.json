@@ -1,0 +1,58 @@
+{
+  "status": "R1_IN_PROGRESS_NOT_VISUALLY_ACCEPTED",
+  "baselineCommit": "6de507f55edbc8de29a379af0d098e2c25c745f2",
+  "fixture": "modern-5x20-2f-v01",
+  "revision": "FF68F57C-741638A5-AI4-RH3",
+  "collection": "modern-natural",
+  "planPreserved": true,
+  "meshes": 174,
+  "geometrySource": "production Three.js scene and unchanged measured plan; selected collection changes only assets/finishes",
+  "render": {
+    "revision": "FF68F57C-741638A5-AI4-RH3",
+    "view": "living",
+    "vertices": 57082,
+    "triangles": 51132,
+    "samples": 16,
+    "width": 1100,
+    "height": 900,
+    "renderer": "Blender4.5.13 LTS Cycles CPU",
+    "status": "review-not-approved",
+    "geometrySource": "production Three.js scene vertices"
+  },
+  "sun": {
+    "position": [
+      -5.538977675380405,
+      12.618490506080096,
+      -25.853073647418356
+    ],
+    "target": [
+      -0.6000000000000001,
+      1.3,
+      -5.274
+    ],
+    "color": [
+      1,
+      0.8713671191959567,
+      0.6653872982754769
+    ],
+    "intensity": 3.5
+  },
+  "passes": [
+    "Node22.23.0 four new targeted geometry/material/export checks",
+    "Node22.23.0 twelve related existing scene/cache/material regressions",
+    "scene photo/canvas maps and vertex colours exported",
+    "all restored twelve PBR rasters decoded",
+    "actual Blender4.5.13 render inspected"
+  ],
+  "open": [
+    "Actual image still below target photorealism; upholstery, curtain, plant and surroundings need better approved assets",
+    "Native browser GPU appearance/performance not verified",
+    "Other R1 room/exterior views not accepted",
+    "Terrace guard/drainage/waterproofing and actual SKU inputs remain unconfirmed"
+  ],
+  "runtimeDepsChanged": false,
+  "productionRelease": false,
+  "actualImageSha256": "56922a43961bcd3379050157df006c3776919cf83acf73aeb24f228183699a5f",
+  "thumbnailSha256": "0c5d92d21c37ab20b7fc23873767885a8811afd08fe1bb22eb55460fd23551ee",
+  "nextAction": "Replace remaining generic visible assets using source-approved modern models; render affected views only, then native GPU and full R1 gate."
+}

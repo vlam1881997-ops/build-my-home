@@ -117,7 +117,7 @@ BMH.mountStudio3D = async () => {
   try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,preserveDrawingBuffer:true});}catch{stage.classList.add('three-failed');BMH.$('#studio3dLoading')?.remove();return;}
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=BMH.state.ui.sceneTheme==='night'?1.1:.92;
   renderer.localClippingEnabled=true;
-  if(BMH.state.ui.sceneTheme!=='night'&&(BMH.state.ui.sceneFocus||'all')==='all')scene.userData.environmentTarget=BMH.architecturalSkyEnvironment?.(THREE,renderer);
+  if(BMH.state.ui.sceneTheme!=='night')scene.userData.environmentTarget=BMH.architecturalSkyEnvironment?.(THREE,renderer);
   if(!scene.userData.environmentTarget&&THREE.RoomEnvironment){const env=new THREE.RoomEnvironment(),generator=new THREE.PMREMGenerator(renderer);scene.userData.environmentTarget=generator.fromScene(env,.04);env.dispose();generator.dispose();}
   if(scene.userData.environmentTarget)scene.environment=scene.userData.environmentTarget.texture;
   const hemi=new THREE.HemisphereLight(BMH.state.ui.sceneTheme==='night'?0x8da4cf:0xdfe9ef,BMH.state.ui.sceneTheme==='night'?0x9ba49b:0x978773,BMH.state.ui.sceneTheme==='night'?.8:.85);scene.add(hemi);
@@ -171,6 +171,7 @@ BMH.mountStudio3D = async () => {
     }
   };
   const roomFocus=focus.startsWith('room:')?BMH.state.project.plan.rooms.find(r=>r.id===focus.slice(5)):null;
+  if(typeof sun!=='undefined'&&roomFocus){BMH.configureRoomShadows?.(THREE,sun,roomFocus,site);scene.add(sun.target);if(BMH.state.ui.sceneTheme!=='night'){hemi.intensity=.3;fill.intensity=.08;sun.intensity=3.5;}}
   const floorFocus=focus.startsWith('floor:')?BMH.clamp(Number(focus.split(':')[1])||0,0,floors-1):null;
   const visibleFloors=roomFocus?[Number(roomFocus.floor)]:floorFocus!==null?[floorFocus]:Array.from({length:floors},(_,f)=>f);
   const interiorCamera=roomFocus&&!['stairs','elevator','corridor','balcony'].includes(roomFocus.type)&&BMH.state.ui.roomCamera==='inside'?BMH.roomInteriorCamera(roomFocus):null,insideRoom=!!interiorCamera;
@@ -344,3 +345,4 @@ BMH.generateCinematicRender = async () => {
     BMH.cinematicRender.dataUrl=`data:${mime};base64,${data.image}`;BMH.cinematicRender.signature=signature;BMH.cinematicRender.views[signature]=BMH.cinematicRender.dataUrl;(BMH.cinematicRender.cameraKeys||={})[signature]=cameraKey;if(referenceHash)(BMH.cinematicRender.referenceHashes||={})[signature]=referenceHash;BMH.cinematicRender.generatedAt=data.generatedAt||new Date().toISOString();BMH.cinematicRender.error='';
   }catch(err){BMH.cinematicRender.loading=false;BMH.cinematicRender.error=err.message||String(err);BMH.toast(BMH.cinematicRender.error);}finally{BMH.cinematicRender.loading=false;BMH.rememberFinishCamera?.();BMH.render({preserveScroll:true});}
 };
+

@@ -3,10 +3,22 @@
  */
 import fs from 'node:fs';import path from 'node:path';import vm from 'node:vm';
 import * as BaseThree from 'three';
+import {createCanvas,loadImage} from '@napi-rs/canvas';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {modernReference} from './team-b-modern-reference.mjs';
-const THREE={...BaseThree,RoundedBoxGeometry};
+class LocalTextureLoader{
+ load(url,onLoad,_progress,onError){const texture=new BaseThree.Texture();loadImage(fs.readFileSync(url)).then(img=>{texture.image=img;onLoad(texture);},onError);return texture;}
+}
+const THREE={...BaseThree,RoundedBoxGeometry,TextureLoader:LocalTextureLoader};
 const {B,review}=modernReference();
+const textureSource=fs.readFileSync('src/43_scene_assets.js','utf8'),artSource=fs.readFileSync('src/85_interior_collections.js','utf8');
+// Rebind only production texture factories to a local Canvas implementation.
+// This retains the browser's actual procedural/photo blend and artwork.
+const canvasContext={BMH:B,document:{createElement:()=>createCanvas(1,1),createElementNS:()=>({})},setTimeout,clearTimeout,console};
+vm.runInNewContext(textureSource.slice(textureSource.indexOf('BMH.sceneSurfaceTexture ='),textureSource.indexOf('// Project texture coordinates')),canvasContext);
+vm.runInNewContext(artSource.slice(artSource.indexOf('BMH.collectionArtTexture='),artSource.indexOf('const collectionDecorate=')),canvasContext);
+const beforePlan=JSON.stringify(B.state.project.plan),collection=process.env.BMH_REVIEW_COLLECTION;
+if(collection){if(!B.applyInteriorCollection(collection))throw Error('Unknown collection '+collection);if(JSON.stringify(B.state.project.plan)!==beforePlan)throw Error('Finish edit changed measured plan');review.revision=B.drawingRevision();}
 const view=process.argv[2]||'exterior',out=process.argv[3]||'docs/team-v1/evidence/B/Modern-5x20-V01';fs.mkdirSync(out,{recursive:true});
 if(!['exterior','living','bed','kitchen','bath'].includes(view))throw Error('Unsupported review view: '+view);
 const room=view==='exterior'?null:B.state.project.plan.rooms.find(r=>r.type===view);
@@ -19,21 +31,30 @@ const source=fs.readFileSync('src/45_studio3d.js','utf8');
 const body=source.slice(source.indexOf('  const mat=(color,rough='),source.indexOf('  const centerRoom='));
 if(!body.includes('BMH.decorateStudioScene')||!body.includes('const roof='))throw Error('Production scene constructor changed; review extractor.');
 const context={BMH:B,THREE,console};
-vm.runInNewContext('const scene=new THREE.Scene(),palette=BMH.scenePalette();\n'+body+'\nglobalThis.output={scene,W,D,roomFocus,visibleFloors};',context);
-const {scene,W,D}=context.output;scene.updateMatrixWorld(true);
-const materials=new Map(),meshes=[];
+const lighting=source.slice(source.indexOf('  const hemi='),source.indexOf('  const mat=(color,rough='));
+vm.runInNewContext('const scene=new THREE.Scene(),palette=BMH.scenePalette();\n'+lighting+body+'\nglobalThis.output={scene,W,D,roomFocus,visibleFloors,sun};',context);
+const {scene,W,D}=context.output;await Promise.all(scene.userData.surfaceLoads||[]);scene.updateMatrixWorld(true);
+const materials=new Map(),meshes=[],textureFiles=new Map();
+fs.mkdirSync(path.join(out,'scene-textures'),{recursive:true});
+function texture(t){
+ if(!t?.image?.width)return null;if(textureFiles.has(t.uuid))return textureFiles.get(t.uuid);
+ const im=t.image,canvas=createCanvas(im.width,im.height);canvas.getContext('2d').drawImage(im,0,0);
+ const file='scene-textures/'+t.uuid+'.png';fs.writeFileSync(path.join(out,file),canvas.toBuffer('image/png'));
+ const row={file,colorSpace:t.colorSpace||'',width:im.width,height:im.height};textureFiles.set(t.uuid,row);return row;
+}
 const photoKinds={wood:'wood_table_001',woodVertical:'wood_table_001',plank:'wood_floor',marble:'marble_01',plaster:'white_plaster_02',fabric:'terlenka',leather:'brown_leather',concrete:'concrete_floor_02',terrazzo:'terrazzo_tiles'};
 function material(m){
  if(materials.has(m.uuid))return m.uuid;
  const profile=B.VISUAL_MATERIALS.find(p=>p.id===m.userData.visualMaterial),slot=m.userData.finishSlot;
  const kind=profile?.kind||({wood:'wood',slattedWood:'woodVertical',fabric:'fabric',linen:'fabric',pillow:'fabric',rug:'fabric',wall:'plaster',plank:'plank'}[slot]);
- materials.set(m.uuid,{id:m.uuid,color:m.color?.toArray()||[.5,.5,.5],roughness:m.roughness??.6,metalness:m.metalness||0,opacity:m.opacity??1,transmission:m.transmission||0,slot:slot||null,profileId:profile?.id||null,photo:photoKinds[kind]||null,photoAlpha:kind==='plaster'?.08:1,normalStrength:kind==='plaster'?.06:kind==='fabric'?.42:.20});return m.uuid;
+ materials.set(m.uuid,{id:m.uuid,color:m.color?.toArray()||[.5,.5,.5],roughness:m.roughness??.6,metalness:m.metalness||0,opacity:m.opacity??1,transmission:m.transmission||0,slot:slot||null,profileId:profile?.id||null,photo:photoKinds[kind]||null,photoAlpha:kind==='plaster'?.08:1,normalStrength:m.normalScale?.x??.2,vertexColors:!!m.vertexColors,sheen:m.sheen||0,sheenRoughness:m.sheenRoughness??1,sheenColor:m.sheenColor?.toArray()||null,maps:{color:texture(m.map),normal:texture(m.normalMap),roughness:texture(m.roughnessMap)}});return m.uuid;
 }
 scene.traverse(o=>{if(!o.isMesh||!o.visible)return;const g=o.geometry,p=g.attributes.position;if(!p)return;
- const attrs={};for(const key of ['position','normal','uv'])if(g.attributes[key])attrs[key]=Array.from(g.attributes[key].array);
+ const attrs={};for(const key of ['position','normal','uv','color'])if(g.attributes[key])attrs[key]=Array.from(g.attributes[key].array);
  const ms=Array.isArray(o.material)?o.material:[o.material];meshes.push({name:o.name||o.userData.kind||'mesh',identity:{kind:o.userData.kind||null,roomId:o.userData.roomId||null,floor:o.userData.floor??null,openingId:o.userData.openingId||null},facadeSkin:!!o.userData.facadeSkin,castShadow:o.castShadow,receiveShadow:o.receiveShadow,matrix:o.matrixWorld.toArray(),attributes:attrs,index:g.index?Array.from(g.index.array):null,groups:g.groups,materials:ms.map(material)});
 });
 const camera=room?B.roomInteriorCamera(room,B.roomFurnitureLayout(room)):null;
-const model={revision:review.revision,fixture:review.id,status:review.status,view,roomId:room?.id||null,room:room?{x:room.x,y:room.y,w:room.w,h:room.h}:null,site:{width:W,depth:D},camera,materials:[...materials.values()],meshes};
+const model={sun:{position:context.output.sun.position.toArray(),target:context.output.sun.target.position.toArray(),color:context.output.sun.color.toArray(),intensity:context.output.sun.intensity},collection:collection||null,planPreserved:JSON.stringify(B.state.project.plan)===beforePlan,revision:review.revision,fixture:review.id,status:review.status,view,roomId:room?.id||null,room:room?{x:room.x,y:room.y,w:room.w,h:room.h}:null,site:{width:W,depth:D},camera,materials:[...materials.values()],meshes};
 fs.writeFileSync(path.join(out,'scene-'+view+'.json'),JSON.stringify(model));
 console.log(JSON.stringify({view,revision:review.revision,meshes:meshes.length,vertices:meshes.reduce((n,m)=>n+m.attributes.position.length/3,0),camera}));
+
