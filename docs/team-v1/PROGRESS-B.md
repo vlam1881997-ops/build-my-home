@@ -1,12 +1,12 @@
 # Tiến độ AI B — BMH commercial v1
 
-Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 15/10/2026.
+Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 18/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W14 B reference/revision review verified desktop+phone; draft PR54 held for A-owned parapet persistence defect
+- active_substep: W28 integrate released W27 into PR66 W26; exact combined-head CI and native W26 acceptance pending
 - target_branch: codex/b-v1-24
-- actual_branch: remote codex/b-facade-depth; local restored checkout bmh-review-ab-c08 contains older git metadata; push only scoped files against fresh remote tree
+- actual_branch: codex/b-facade-depth (PR66); main8620d46 integrated after source b04ab45 release. W26 assets/proposals preserved; protected native preview pending.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
 - last_verified_commit: d4b71f70630f7a97b111c4c9020ae53d871c51f2 (full CI success; local room/exterior desktop+phone; public desktop-room/phone-facade/GLB verified)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
@@ -606,6 +606,32 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Latest source correction restores actual production roof factories in the offline exporter and removes the unnecessary runtime depth reassertion. Related production roof-factory regression passes. No further unchanged suites rerun locally; exact final-head CI and production UI remain next.
 - R1 NOT COMPLETE: sparse kitchen/bedroom composition, terrace access/guard/drainage, verified product assets/engineering inputs and native GPU/customer acceptance remain open. Next concrete action: publish the verified incremental source/images, confirm renderer24 and exact thumbnail bytes on the production domain, then native WC default/explicit floor/reload verification. Do not expand to another style or audit A.
 
+
+## W27 · personal-plan editing hotfix (2026-10-18)
+- User specifically requested fixing blocked requirements / personal drawing after deleting rooms, and publishing GitHub + Vercel. This is a bounded hotfix from production main cd13c27, separate from still-draft PR66 /5da7ea4. No W26 modules or assets are included, and production is not used to evade that preview gate.
+- Reproduced with actual production UI on an isolated QA5x20m/two-floor project: select garage+living+kitchen / two bedrooms+oneWC, applyB, reopen requests, uncheck kitchen, regenerate -> false generic insufficient-land error despite a feasible proposal. Source regression confirms candidate rooms were checked against the existing plan's opening room IDs.
+- B81 now checks a full detached candidate in withPlan context and retains the generator's specific reason. B99 supplies an explicit personal-drawing action without clearing the saved design or requirements; deleted-last-room selects drawing mode, with exact numeric X/Y/width/depth inputs using the same measured commit/history. Bounds, setbacks, overlaps, locks and undo/redo/reload remain enforced. B101 keeps the real drawing first for empty projects too.
+-59 related existing/new checks pass locally on Node24.19.0:37customer-design,13design-studio and9workflow (including4new personal-plan regressions). Four new expectations failed before implementation; the initial test compared normalized JSON serialization rather than the requested floor values and was corrected. Exact release-head Node22 CI is required next.
+- Actual production before screenshot: evidence/B/W27-personal-plan/before.jpg. New-source browser checks and production identity are pending; the current container has no installed Chromium. Cloud Browser rejects file:// QA pages, so no alternate local-page access was attempted. No native mobile/GPU or commercial acceptance claim.
+- Files: src/81_design_studio.js,99_customer_design.js,101_visual_studio.js,customer-design.css; tests/team-b-workflow.test.mjs. No A schema, measurements, build or dependency changes.
+- Next: push this scoped source and checkpoints, confirm exact-head CI and preview status, release the requested bounded hotfix, verify the previously failing flow and numeric draw/delete/undo/reload on the real domain. Modern R1 remains IN_PROGRESS; PR66 W26 native acceptance and terrace/GPU/customer gates stay open.
+
+
+### W27 production verified / exact numeric dimensions follow-up
+- PR67 merged to main0335042aac5c0a33360e6b066b84f695aac18343; source45e5b6715f681279a9d523adeeebfb9e25bceb6f passed exact-head Node22 CI39114734154. Vercel production dpl_GPGmg6NpoSiepcbEHhaa8v7wPG79 READY at the same merge, with www.huiminhbach.id.vn alias. Actual inline production source contains the candidate-plan context, personal action and numeric form.
+- Native public QA on5x20/twofloor synthetic project PASSED: generate/applyB -> uncheck kitchen -> all3valid proposals; current drawing remains until apply. Undo to empty -> personal action -> numeric room atX0.317/Y2.113, W3.137/D3.843m -> delete last room -> drawing mode remains -> undo/redo -> reload same room ID and geometry. No actual-domain JS errors were captured. No real project/paid API tested.
+- Found UI-only binary floating subtraction in the new numeric path:3.843 was displayed as3.8429999999999995. Follow-up keeps the entered width/depth numbers directly in the same addDirectRoom/commit path (all existing boundary/lock/collision checks retained). Existing regression now asserts exact numeric equality;59related checks pass. Source onlyB99 plus existing Bworkflow test. Exact follow-up CI/deploy/native check pending; no Modern R1 completion claim.
+- Last_verified_commit45e5b6715f681279a9d523adeeebfb9e25bceb6f. Final production verification screenshots/result will be retained on the B hotfix branch. PR66 still remains outside main.
+
+
+### W27 final source and actual-domain acceptance
+- PR68 merged at8620d46067531049dd4d370fd0076ab03c812721. Sourceb04ab4521ad2db7129e4c283976b3b7dcb97021d passed exact-head Node22 CI39120940974; Vercel dpl_EuGAsEoR2MnURWhXLXtTJZiEEeNg READY/production and public aliases verified.
+- Actual public inline source has exact numeric-dimensions path. Native create/reload now shows X0.317/Y2.113/W3.137/D3.843 exactly. Overlap and setback-crossing proposals reject without changing the saved room. Actual drawn room is visible on the parcel, delete-last-room keeps numeric drawing mode, undo/redo and reload preserve it. Evidence/result and before/after JPGs retained. No actual-domain JS errors captured.
+- Reported personal-plan blocker is fixed/released. Modern R1 is still IN_PROGRESS; native mobile/GPU, PR66 W26 and source-confirmed terrace/engineering/customer acceptance remain open. Next independent step: merge these verified main hotfixes into PR66 without dropping W26 source/assets/history, then verify its exact combined head. No unreviewed W26 production release.
+
+
+## Preserved W26 checkpoints (from PR66 before main integration)
+
 ## W25 production verified · 18/10/2026
 - PR65 merged to main cd13c27e41806e91b43eab53b9c8634890a30833. Last_verified_commit:8d6e24d7d84ff887ce6322f2424fb2e8116cfa30; exact-head Node22 CI39102913295 SUCCESS. Vercel production status SUCCESS, deploymentBHbpT8ZxZBijLdx3chZXMW6VCUy1. Public https://www.huiminhbach.id.vn/ HTTP200 contains renderer customer-measured-house-24, stainless-sink-basin and oven-window.
 - Public modern-natural.jpg HTTP200 SHA2562a875c613b32ef4f8c4fb532def2c5b81e7d9a2ea2a4dd7dd1acb8783ae4cc20 exactly matches the source/provenance. Current production thumbnail is the actual measured licensed-chair living render.
@@ -637,3 +663,8 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Native preview is blocked by Vercel sign-in. Automatic approval review rejected creation of a temporary share URL because it bypasses deployment protection and the specific access-control change/recipients were not authorized. No protection settings changed, no alternate bypass attempted and no production release used to evade this block. Native preview/apply/edit/reload remains pending.
 - R1.2 source dependency: existing outdoorSpaceSheet explicitly records guard/drainage unknown and waterproofing/structure awaiting-review; the proposed terrace is3.58x1.89m and not customer/architect approved. No source-confirmed guard, access or drainage dimensions exist in this reviewed fixture. Do not fabricate those details or amend A schema. R1.2 remains blocked on source/review inputs; R1.3 remains blocked on native preview and enabled-GPU/device acceptance.
 - Resume at PR66: authorize normal preview access or a23h preview share scoped to this deployment, then verify contextual proposal2D/apply, mounting height/rotation/material, undo/redo/reload and asset loading. Keep draft outside main until related gates pass. Source/models/images are preserved on the B branch. No unrelated passed suites repeated, A audited or new style added.
+
+
+## W28 · preserve W26 while integrating released personal-plan fixes
+- Merge parents: PR66 source5da7ea4 and production main8620d46067531049dd4d370fd0076ab03c812721. Detached three-way B99 merge preserves measured seven-module proposals plus personal/numeric drawing. Other W26 source blob hashes verified against PR66 before integration; no reset or regeneration of assets. Main hotfix files/evidence included; no A-owned changes.
+-59related local workflow/editor/design checks pass on combined source. Exact combined-head CI/Vercel preview and W26 native UI acceptance remain next. Existing protected-preview share API is403 despite the user's explicit23h authorization; a separate browser authentication session was not established. No protection settings changed and W26 stays draft/unmerged. Do not repeat unchanged tests or audit A.
