@@ -210,6 +210,34 @@ BMH.mountLightPreview=(reason='Chế độ tương thích cho thiết bị này'
  const stage=BMH.$('#studio3dStage');if(!stage)return;BMH.$('.light-model-preview')?.remove();if(!pending)stage.classList.add('three-failed');BMH.$('#studio3dLoading')?.remove();const canvas=BMH.$('#studio3dCanvas');if(canvas)canvas.style.display='none';
  stage.classList.add('light-preview-active');const host=document.createElement('div');host.className='light-model-preview';host.innerHTML='<div class="light-model-controls"><b>Chế độ xem nhẹ</b><label>Chọn tầng / phòng<select data-scene-focus>'+[['all','Toàn nhà'],...Array.from({length:BMH.state.project.site.floors},(_,i)=>['floor:'+i,'Tầng '+(i+1)]),...BMH.state.project.plan.rooms.map(r=>['room:'+r.id,'T'+(r.floor+1)+' · '+r.name])].map(([v,n])=>'<option value="'+BMH.esc(v)+'" '+(BMH.state.ui.sceneFocus===v?'selected':'')+'>'+BMH.esc(n)+'</option>').join('')+'</select></label><button data-light-turn="-20">↶ Xoay</button><button data-light-turn="20">Xoay ↷</button><button data-light-zoom="0.8">Thu nhỏ</button><button data-light-zoom="1.25">Phóng to</button><span>'+BMH.esc(reason)+' · Khối đơn giản theo số đo; xoay và zoom bằng các nút phía trên.</span></div><div data-light-model>'+BMH.lightPreviewSvg()+'</div>';stage.appendChild(host);
 };
+// Export the measured fallback itself; it is never labelled a shaded 3D render.
+BMH.lightPreviewFrame=async(longEdge)=>{
+ const stage=BMH.$('#studio3dStage');if(!stage?.querySelector('.light-model-preview')||BMH.studio3d?.renderer)return null;
+ const project=BMH.state.project,revision=BMH.drawingRevision?.()||'',view=BMH.state.ui.sceneFocus||'all',cameraKey=JSON.stringify([view,BMH.lightPreviewAngle,BMH.lightPreviewZoom]),designKey=BMH.cinematicSignature?.()||'';
+ const current=()=>BMH.state.project===project&&BMH.$('#studio3dStage')===stage&&!!stage.querySelector('.light-model-preview')&&!BMH.studio3d?.renderer&&revision===(BMH.drawingRevision?.()||'')&&designKey===(BMH.cinematicSignature?.()||'')&&cameraKey===JSON.stringify([BMH.state.ui.sceneFocus||'all',BMH.lightPreviewAngle,BMH.lightPreviewZoom]);
+ const svg=BMH.lightPreviewSvg(),box=svg.match(/\bviewBox="([^"]+)"/)?.[1].split(/\s+/).map(Number);if(!box||box.length!==4||!box.every(Number.isFinite)||box[2]<=0||box[3]<=0)return null;
+ const edge=BMH.clamp(Number(longEdge)||Number(BMH.state.ui.sharpResolution)||1280,640,2560),aspect=box[2]/box[3],pixels=edge>1920?5000000:edge>1280?3000000:1800000,limit=Math.min(edge,Math.sqrt(pixels*Math.max(aspect,1/aspect)));
+ const width=Math.max(1,Math.floor(aspect>=1?limit:limit*aspect)),height=Math.max(64,Math.floor(aspect>=1?limit/aspect:limit)),footer=32;
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');if(!ctx)throw Error('Không mở được bộ xuất ảnh.');
+ const image=document.createElement('img'),url=URL.createObjectURL(new Blob([svg.replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+(height-footer)+'" ')],{type:'image/svg+xml;charset=utf-8'}));let timer;
+ try{
+  await new Promise((resolve,reject)=>{timer=setTimeout(()=>reject(Error('Ảnh bố trí chưa tải được.')),15000);image.onload=resolve;image.onerror=()=>reject(Error('Ảnh bố trí chưa đọc được.'));image.src=url;});
+  if(!current())return null;
+  ctx.fillStyle='#f1eee7';ctx.fillRect(0,0,width,height);ctx.drawImage(image,0,0,width,height-footer);ctx.fillStyle='#344b3d';ctx.font='12px Arial';ctx.fillText('Khối theo số đo · '+revision,12,height-12,width-24);
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+  return blob&&current()?{blob,width,height,designRevision:revision,view,cameraKey,mode:'lightweight'}:null;
+ }finally{clearTimeout(timer);image.onload=image.onerror=null;image.src='';URL.revokeObjectURL(url);canvas.width=canvas.height=1;}
+};
+BMH.captureLightPreview=async()=>{
+ if(BMH.lightExportBusy)return false;BMH.lightExportBusy=true;const started=performance.now(),buttons=[...document.querySelectorAll('[data-sharp-download],[data-preview-download]')].map(el=>({el,disabled:el.disabled}));buttons.forEach(({el})=>el.disabled=true);BMH.archRenderStatus?.('Đang xuất ảnh bố trí theo số đo…');
+ try{
+  const frame=await BMH.lightPreviewFrame();if(!frame){BMH.archRenderStatus?.('Góc nhìn hoặc thiết kế đã đổi. Mở góc muốn lấy rồi tải ảnh lại.');return false;}
+  BMH.download('BMH-khoi-theo-so-do-'+frame.view.replace(/[^a-z0-9_-]/gi,'-')+'-'+frame.designRevision+'-'+frame.width+'x'+frame.height+'.png',frame.blob,'image/png');
+  BMH.lastLightExport={mode:frame.mode,width:frame.width,height:frame.height,designRevision:frame.designRevision,view:frame.view,cameraKey:frame.cameraKey,elapsedMs:Math.round(performance.now()-started)};
+  BMH.archRenderStatus?.('Đã xuất ảnh bố trí nhẹ '+frame.width+' × '+frame.height+' px · khối theo số đo, chưa phải phối cảnh vật liệu.');return true;
+ }catch(error){console.warn('BMH lightweight image export',error);BMH.archRenderStatus?.('Chưa xuất được ảnh bố trí. Thử tải lại từ góc đang xem.');return false;}
+ finally{BMH.lightExportBusy=false;buttons.forEach(({el,disabled})=>el.disabled=disabled);}
+};
 const workflowMount=BMH.mountStudio3D;BMH.mountStudio3D=async()=>{const stage=BMH.$('#studio3dStage');if(!stage)return;BMH.mountLightPreview('Đang khởi tạo đồ họa 3D…',true);try{await workflowMount();}catch(e){if(BMH.$('#studio3dStage')===stage)BMH.mountLightPreview('Thiết bị đang dùng chế độ tương thích');return;}if(BMH.$('#studio3dStage')!==stage)return;if(stage.classList.contains('three-ready')){stage.querySelector('.light-model-preview')?.remove();stage.classList.remove('light-preview-active');stage.querySelector('canvas').style.display='';}else BMH.mountLightPreview();};
 document.addEventListener('click',e=>{const turn=e.target.closest?.('[data-light-turn]');if(turn){BMH.lightPreviewAngle=(BMH.lightPreviewAngle+Number(turn.dataset.lightTurn)+360)%360;const host=BMH.$('[data-light-model]');if(host)host.innerHTML=BMH.lightPreviewSvg();}});
 

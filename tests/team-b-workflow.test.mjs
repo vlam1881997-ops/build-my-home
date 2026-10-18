@@ -1,6 +1,49 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';import {designClient} from './fixtures/design-client.mjs';
 import {modernReference} from './team-b-modern-reference.mjs';
 
+function lightExportClient({decode='load',encode='ready',context2d=true}={}){
+ const B=designClient(),p=B.state.project;p.plan={rooms:[{id:'own-room',floor:0,type:'custom',name:'Phòng tự vẽ',x:0,y:0,w:6,h:6}],openings:[],furniture:[],fixtures:[],outdoor:[],lockedRoomIds:[],lockedFloors:[]};B.state.ui.sceneFocus='room:own-room';
+ const saved={downloads:[],urls:[],revoked:[],buttons:[{disabled:false},{disabled:true}],status:[],caption:[],image:null,timer:null,draws:0,clears:0},host={};let active=true;
+ const stage={querySelector:()=>active?host:null};B.$=s=>s==='#studio3dStage'?stage:null;B.archRenderStatus=s=>saved.status.push(s);B.download=(...args)=>saved.downloads.push(args);
+ const canvas={width:0,height:0,getContext:()=>context2d?{fillRect(){},drawImage(){saved.draws++;},fillText(s){saved.caption.push(s);}}:null,toBlob(done,type){assert.equal(type,'image/png');saved.encode=()=>done(encode==='empty'?null:new Blob(['PNG TEST DOUBLE'],{type}));if(encode!=='defer')saved.encode();}};
+ const image={set src(value){if(!value)return;saved.image=this;if(decode==='load')queueMicrotask(()=>this.onload?.());else if(decode==='error')queueMicrotask(()=>this.onerror?.());}};
+ const ctx={BMH:B,Blob,URL:{createObjectURL(blob){saved.urls.push(blob);return 'blob:local-test';},revokeObjectURL(url){saved.revoked.push(url);}},document:{createElement:tag=>tag==='canvas'?canvas:image,querySelectorAll:()=>saved.buttons},performance:{now:()=>123},setTimeout(fn){saved.timer=fn;return 1;},clearTimeout(){saved.clears++;},console:{warn(){}}};
+ const source=fs.readFileSync('src/78_design_workflow.js','utf8');vm.runInNewContext(source.slice(source.indexOf('BMH.lightPreviewFrame='),source.indexOf('const workflowMount=')),ctx);
+ return {B,saved,canvas,ctx,hide:()=>active=false};
+}
+
+test('fallback PNG is bounded, revision-labelled and design-only; concurrent clicks do not duplicate downloads',async()=>{
+ const {B,saved,canvas}=lightExportClient({decode:'defer'}),before=JSON.stringify(B.state.project),revision=B.drawingRevision();B.state.ui.sharpResolution=2560;
+ const pending=B.captureLightPreview();assert.equal(B.lightExportBusy,true);assert.ok(saved.buttons.every(b=>b.disabled));assert.equal(await B.captureLightPreview(),false);saved.image.onload();assert.equal(await pending,true);
+ assert.equal(saved.downloads.length,1);assert.match(saved.downloads[0][0],/^BMH-khoi-theo-so-do-room-own-room-/);assert.ok(saved.downloads[0][0].includes(revision));assert.equal(saved.downloads[0][2],'image/png');
+ assert.ok(B.lastLightExport.width<=2560&&B.lastLightExport.height<=2560);assert.ok(B.lastLightExport.width*B.lastLightExport.height<=5000000);assert.equal(B.lastLightExport.mode,'lightweight');assert.equal(B.lastLightExport.designRevision,revision);assert.ok(saved.caption[0].includes('Khối theo số đo'));
+ const svg=await saved.urls[0].text();assert.match(svg,/xmlns="http:\/\/www.w3.org\/2000\/svg"/);assert.ok(svg.includes('data-design-revision="'+revision+'"'));assert.equal(JSON.stringify(B.state.project),before);
+ assert.deepEqual(saved.revoked,['blob:local-test']);assert.equal(canvas.width,1);assert.equal(canvas.height,1);assert.equal(B.lightExportBusy,false);assert.deepEqual(saved.buttons.map(b=>b.disabled),[false,true]);assert.equal(B.archRenderModules,undefined);
+});
+
+test('fallback export cancels on project, revision, room, angle, zoom, retired host or upgraded renderer',async()=>{
+ for(const change of [c=>c.B.state.project=structuredClone(c.B.state.project),c=>c.B.state.project.plan.rooms[0].w=6.1,c=>c.B.state.ui.sceneFocus='all',c=>c.B.lightPreviewAngle+=20,c=>c.B.lightPreviewZoom*=1.25,c=>c.hide(),c=>c.B.studio3d={renderer:{}}]){
+  const c=lightExportClient({decode:'defer'}),pending=c.B.captureLightPreview();change(c);c.saved.image.onload();assert.equal(await pending,false);assert.equal(c.saved.downloads.length,0);assert.equal(c.saved.revoked.length,1);assert.equal(c.B.lightExportBusy,false);
+ }
+});
+
+test('fallback encoding rejects later edits and every decode/canvas/timeout failure restores controls and releases resources',async()=>{
+ const c=lightExportClient({encode:'defer'}),pending=c.B.captureLightPreview();await Promise.resolve();await Promise.resolve();assert.equal(typeof c.saved.encode,'function');c.B.state.project.plan.rooms[0].h=6.2;c.saved.encode();assert.equal(await pending,false);assert.equal(c.saved.downloads.length,0);assert.equal(c.saved.revoked.length,1);
+ for(const options of [{decode:'error'},{encode:'empty'},{context2d:false},{decode:'defer'}]){
+  const f=lightExportClient(options),work=f.B.captureLightPreview();if(options.decode==='defer')f.saved.timer();assert.equal(await work,false);assert.equal(f.saved.downloads.length,0);assert.equal(f.B.lightExportBusy,false);assert.deepEqual(f.saved.buttons.map(b=>b.disabled),[false,true]);assert.equal(f.saved.revoked.length,f.saved.urls.length);
+ }
+ const empty=lightExportClient();empty.B.state.project.plan.rooms=[];assert.equal(await empty.B.captureLightPreview(),false);assert.equal(empty.saved.urls.length,0);
+});
+
+test('existing quick and sharp buttons route only unavailable WebGL to the labelled fallback',async()=>{
+ const {B,ctx,saved}=lightExportClient(),source=fs.readFileSync('src/46_architectural_render.js','utf8');
+ vm.runInNewContext(source.slice(source.indexOf('BMH.captureStudioPreview='),source.indexOf('BMH.sharpStudioFrame='))+source.slice(source.indexOf('BMH.captureSharpStudioPreview='),source.indexOf('BMH.captureArchitecturalRender=')),ctx);
+ let fallbacks=0;B.captureLightPreview=async()=>{fallbacks++;return true;};assert.equal(await B.captureStudioPreview(),true);assert.equal(await B.captureSharpStudioPreview(),true);assert.equal(fallbacks,2);
+ let rendered=0;B.studio3d={scene:{},camera:{},renderer:{render(){rendered++;},domElement:{width:800,height:600,toBlob:done=>done(new Blob(['TEST'],{type:'image/png'}))}}};
+ assert.equal(await B.captureStudioPreview(),true);assert.equal(fallbacks,2);assert.equal(rendered,1);assert.match(saved.downloads[0][0],/-xem-nhanh.png$/);
+ B.sharpStudioFrame=async()=>({blob:new Blob(['TEST'],{type:'image/png'}),width:1280,height:720,designRevision:B.drawingRevision(),view:'all',cameraKey:'native'});assert.equal(await B.captureSharpStudioPreview(),true);assert.equal(fallbacks,2);assert.match(saved.downloads[1][0],/^BMH-anh-net-nhanh-/);
+});
+
 test('light model uses the saved 37-degree footprint and mounting height rather than the collision box',()=>{
  const B=designClient(),p=B.state.project;
  p.plan={rooms:[{id:'custom',floor:0,type:'custom',name:'Tự bố trí',x:0,y:0,w:6,h:6}],openings:[],fixtures:[],outdoor:[],furniture:[{id:'angled',roomId:'custom',floor:0,modelId:'kitchenWallCabinet',origin:'customer-added',placementStatus:'present',pose:{x:2,y:3,z:1.6,rotationDeg:37},size:{width:.9,depth:.34,height:.72},materialBindings:[{role:'accent',visualProfileId:'dark-walnut'}]}],lockedRoomIds:[],lockedFloors:[]};

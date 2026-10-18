@@ -116,6 +116,7 @@ BMH.startArchitecturalRender=async()=>{
 BMH.stopArchitecturalRender=()=>{const s=BMH.studio3d;BMH.disposeArchitecturalRender(s);BMH.state.ui.renderMode='interactive';BMH.save();document.querySelectorAll('[data-architectural-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.architecturalMode==='interactive')));s?.renderFrame();};
 BMH.resumeArchitecturalRender=()=>{const r=BMH.studio3d?.archRender;if(!r?.paused||r.complete||r.cancelled||r.signature!==BMH.cinematicSignature())return false;r.paused=false;r.startedAt=performance.now();r.raf=requestAnimationFrame(r.draw);return true;};
 BMH.captureStudioPreview=async()=>{
+ if(!BMH.studio3d?.renderer&&BMH.captureLightPreview)return BMH.captureLightPreview();
  const s=BMH.studio3d;if(!s?.renderer){BMH.archRenderStatus('Mô hình đang tải. Khi thấy 3D, bạn có thể lấy ảnh ngay.');return false;}
  const revision=BMH.drawingRevision?.()||'',designKey=BMH.cinematicSignature?.()||'',cameraKey=BMH.cinematicCameraKey?.()||'',view=BMH.state.ui.sceneFocus||'all';
  try{
@@ -162,6 +163,7 @@ BMH.sharpStudioFrame=async(longEdge)=>{
  })();s.sharpExport=work;try{return await work;}finally{if(s.sharpExport===work)s.sharpExport=null;}
 };
 BMH.captureSharpStudioPreview=async()=>{
+ if(!BMH.studio3d?.renderer&&BMH.captureLightPreview)return BMH.captureLightPreview();
  const started=performance.now();BMH.archRenderStatus('Đang xuất ảnh nét từ góc nhìn hiện tại…');
  const buttons=[...document.querySelectorAll('[data-sharp-download]')];buttons.forEach(b=>b.disabled=true);
  try{const frame=await BMH.sharpStudioFrame();if(!frame){BMH.archRenderStatus('Mở một góc 3D rồi xuất ảnh nét.');return false;}BMH.download('BMH-anh-net-nhanh-'+(frame.designRevision?frame.designRevision+'-':'')+frame.width+'x'+frame.height+'.png',frame.blob,'image/png');BMH.lastSharpExport={width:frame.width,height:frame.height,designRevision:frame.designRevision,view:frame.view,cameraKey:frame.cameraKey,elapsedMs:Math.round(performance.now()-started)};BMH.archRenderStatus('Đã xuất ảnh nét '+frame.width+' × '+frame.height+' px · '+(BMH.lastSharpExport.elapsedMs/1000).toFixed(1)+' giây.');return true;}
