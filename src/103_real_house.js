@@ -181,12 +181,6 @@
    for(const m of materials){const prior=m.onBeforeCompile.bind(m),key=m.customProgramCacheKey.bind(m);m.onBeforeCompile=(shader,renderer)=>{prior(shader,renderer);shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>','outgoingLight *= 0.38;\n#include <opaque_fragment>');};m.customProgramCacheKey=()=>key()+'-house-indoor-fill-v1';m.needsUpdate=true;}
   }
   scene.traverse(mesh=>{
-   if(mesh.userData.kind==='roof'&&mesh.userData.roofType==='flat'){
-    // The roof finish and the measured slab share the same top plane. Give
-    // the finish raster priority instead of changing approved elevations.
-    mesh.material.polygonOffset=true;mesh.material.polygonOffsetFactor=-2;mesh.material.polygonOffsetUnits=-2;mesh.material.needsUpdate=true;
-    mesh.renderOrder=1;mesh.userData.roofDepthPriority=true;
-   }
    if(mesh.userData.kind==='roof'&&mesh.material.userData.roofSurface==='tile')for(const [slot,channel]of [['map','diff'],['normalMap','nor_gl'],['roughnessMap','rough']]){
     const texture=mesh.material[slot];if(!texture?.image?.getContext)continue;const canvas=texture.image,ctx=canvas.getContext('2d');
     const task=B.scenePhotoSurface(THREE,scene,'roof_07',channel).then(image=>{if(!image||scene.userData.disposed)return false;ctx.drawImage(image,0,0,512,512);texture.needsUpdate=true;texture.userData={...texture.userData,source:'roof_07',license:'CC0-1.0'};return true;});(scene.userData.surfaceLoads||=[]).push(task);

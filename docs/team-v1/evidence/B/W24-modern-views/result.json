@@ -1,0 +1,1514 @@
+{
+  "checkpoint": "dedd01a3b3a45e7598ffacfd970c58d4aad7012c",
+  "fixture": "modern-5x20-2f-v01",
+  "drawingRevision": "FF68F57C-9AD609B4-AI4-RH3",
+  "rendererRevision": "customer-measured-house-23",
+  "status": "reviewed-incremental-fixes-not-R1-accepted",
+  "sourceHashes": {
+    "src/43_scene_assets.js": "fd8a3868bfe887fa39f99cb99667f775aef2ede2f6768d95abbe51d852e5fa56",
+    "src/45_studio3d.js": "c3deb1d62382560488647d90a735b660a4de67e046bc40def7299360f73d27fc",
+    "src/78_design_workflow.js": "de487df897f5b694f7df675d58bd94e4520c45b6aff622e81228c2b78eeac4da",
+    "src/99_customer_design.js": "da8179cb8ef2263823ea2d84da506c7e83cac0c5ffcf062401cb481e29dddef4",
+    "src/103_real_house.js": "3bdff14c6e0373fcf2cae6c6bbd5848ca2e6b0a786d947d41564321efa613e9b"
+  },
+  "targetedTests": {
+    "command": "node --test --test-name-pattern='stone finishes|sanitary models|final room presentation|automatic whole-house|Modern natural uses|bathroom view frames|unconfirmed terrace' tests/team-b-furniture.test.mjs",
+    "node": "22.23.0",
+    "pass": 7,
+    "fail": 0
+  },
+  "ci": {
+    "run": 39101376137,
+    "conclusion": "success",
+    "source": "dedd01a3b3a45e7598ffacfd970c58d4aad7012c"
+  },
+  "nativeGPU": {
+    "status": "blocked-environment",
+    "reason": "Cloud browser WebGL vendor/renderer Disabled; lightweight UI is not native GPU acceptance."
+  },
+  "openGates": [
+    "Kitchen/bedroom visual detail remains below selected reference",
+    "Terrace guard/drainage/waterproofing/structural inputs unknown",
+    "Manufacturer-matched geometry, material SKU and price verification",
+    "Native GPU visuals and mobile performance",
+    "Customer/architect visual acceptance"
+  ],
+  "baselineViews": [
+    {
+      "view": "exterior",
+      "sourceCheckpoint": "dedd01a3b3a45e7598ffacfd970c58d4aad7012c",
+      "drawingRevision": "FF68F57C-9AD609B4-AI4-RH3",
+      "rendererRevision": "customer-measured-house-23",
+      "image": "exterior.jpg",
+      "sha256": "93e2c8e077e2b936a9253450168760c28ab4f42f5d9e7d6ecb85c0e9d9df5a7e",
+      "renderPngSha256": "eb2131cb2fe159d27c8384c8470b4478b2b92d330f2e493fe8cfd1874408708b",
+      "sceneJsonSha256": "84c16bade4334a5505b9a951e79d47088440086759130dbf5b250b84529f4bed",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "architectureHash": "2ad41bc0621cf3a16ea70241442ce64d1adb06595066d231e0c8f445a54a28bc",
+      "room": null,
+      "camera": {
+        "position": {
+          "x": 5.368,
+          "y": -11.075999999999999,
+          "height": 3.1924
+        },
+        "target": {
+          "x": 2.5,
+          "y": 2.11
+        },
+        "targetHeight": 3.1924,
+        "lens": 45,
+        "basis": "Facade of measured envelope"
+      },
+      "furnitureAssets": [
+        {
+          "id": "furniture:design-f0-living-1:loungeDesignSofa:0",
+          "modelId": "loungeDesignSofa",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:tableCoffee:0",
+          "modelId": "tableCoffee",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:cabinetTelevision:0",
+          "modelId": "cabinetTelevision",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:televisionModern:0",
+          "modelId": "televisionModern",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:sideTable:0",
+          "modelId": "sideTable",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:floorLamp:0",
+          "modelId": "floorLamp",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:loungeChair:0",
+          "modelId": "loungeChair",
+          "source": "licensed-mesh",
+          "asset": "modern-armchair",
+          "licence": "CC0-1.0"
+        },
+        {
+          "id": "furniture:design-f0-living-1:pottedPlant:0",
+          "modelId": "pottedPlant",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenSink:0",
+          "modelId": "kitchenSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenStove:0",
+          "modelId": "kitchenStove",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenFridge:0",
+          "modelId": "kitchenFridge",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:table:0",
+          "modelId": "table",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:0",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:1",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:2",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-bath-1:toilet:0",
+          "modelId": "toilet",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-bath-1:shower:0",
+          "modelId": "shower",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-bath-1:bathroomSink:0",
+          "modelId": "bathroomSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-1:bedDouble:0",
+          "modelId": "bedDouble",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-1:cabinetBed:0",
+          "modelId": "cabinetBed",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-1:bookcaseClosedWide:0",
+          "modelId": "bookcaseClosedWide",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-2:bedDouble:0",
+          "modelId": "bedDouble",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-2:cabinetBed:0",
+          "modelId": "cabinetBed",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-2:bookcaseClosedWide:0",
+          "modelId": "bookcaseClosedWide",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bath-1:toilet:0",
+          "modelId": "toilet",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bath-1:shower:0",
+          "modelId": "shower",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bath-1:bathroomSink:0",
+          "modelId": "bathroomSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        }
+      ],
+      "meshCount": 630,
+      "vertices": 191762,
+      "triangles": 122042,
+      "samples": 24,
+      "width": 1100,
+      "height": 900,
+      "renderer": "Blender4.5.13 LTS Cycles CPU",
+      "status": "review-not-visual-approved"
+    },
+    {
+      "view": "whole",
+      "sourceCheckpoint": "dedd01a3b3a45e7598ffacfd970c58d4aad7012c",
+      "drawingRevision": "FF68F57C-9AD609B4-AI4-RH3",
+      "rendererRevision": "customer-measured-house-23",
+      "image": "whole.jpg",
+      "sha256": "8a3ce6fca74d14a2806bf1bc3d7923a8549ba41b7d2e2091403720866ddb4be5",
+      "renderPngSha256": "69acf46667dc808597f22e643c61f37aa46aee37abebcb37b403d62d340b90f0",
+      "sceneJsonSha256": "99c83c0bb0f8b630465ff4601978b33f16a76e9bc7812c62b69960f6db6e20eb",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "architectureHash": "2ad41bc0621cf3a16ea70241442ce64d1adb06595066d231e0c8f445a54a28bc",
+      "room": null,
+      "camera": {
+        "position": {
+          "x": 16.762999999999998,
+          "y": -12.153,
+          "height": 14.263
+        },
+        "target": {
+          "x": 2.5,
+          "y": 10.5
+        },
+        "targetHeight": 3.1229999999999998,
+        "lens": 35,
+        "basis": "Whole measured envelope; roof retained"
+      },
+      "furnitureAssets": [
+        {
+          "id": "furniture:design-f0-living-1:loungeDesignSofa:0",
+          "modelId": "loungeDesignSofa",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:tableCoffee:0",
+          "modelId": "tableCoffee",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:cabinetTelevision:0",
+          "modelId": "cabinetTelevision",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:televisionModern:0",
+          "modelId": "televisionModern",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:sideTable:0",
+          "modelId": "sideTable",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:floorLamp:0",
+          "modelId": "floorLamp",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:loungeChair:0",
+          "modelId": "loungeChair",
+          "source": "licensed-mesh",
+          "asset": "modern-armchair",
+          "licence": "CC0-1.0"
+        },
+        {
+          "id": "furniture:design-f0-living-1:pottedPlant:0",
+          "modelId": "pottedPlant",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenSink:0",
+          "modelId": "kitchenSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenStove:0",
+          "modelId": "kitchenStove",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenFridge:0",
+          "modelId": "kitchenFridge",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:table:0",
+          "modelId": "table",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:0",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:1",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:2",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-bath-1:toilet:0",
+          "modelId": "toilet",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-bath-1:shower:0",
+          "modelId": "shower",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-bath-1:bathroomSink:0",
+          "modelId": "bathroomSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-1:bedDouble:0",
+          "modelId": "bedDouble",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-1:cabinetBed:0",
+          "modelId": "cabinetBed",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-1:bookcaseClosedWide:0",
+          "modelId": "bookcaseClosedWide",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-2:bedDouble:0",
+          "modelId": "bedDouble",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-2:cabinetBed:0",
+          "modelId": "cabinetBed",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-2:bookcaseClosedWide:0",
+          "modelId": "bookcaseClosedWide",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bath-1:toilet:0",
+          "modelId": "toilet",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bath-1:shower:0",
+          "modelId": "shower",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bath-1:bathroomSink:0",
+          "modelId": "bathroomSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        }
+      ],
+      "meshCount": 630,
+      "vertices": 191762,
+      "triangles": 122042,
+      "samples": 24,
+      "width": 1100,
+      "height": 900,
+      "renderer": "Blender4.5.13 LTS Cycles CPU",
+      "status": "review-not-visual-approved"
+    },
+    {
+      "view": "living",
+      "sourceCheckpoint": "dedd01a3b3a45e7598ffacfd970c58d4aad7012c",
+      "drawingRevision": "FF68F57C-9AD609B4-AI4-RH3",
+      "rendererRevision": "customer-measured-house-23",
+      "image": "living.jpg",
+      "sha256": "d56159ee0a7550fdbf9dfb6dd4ede77243074f3e589f1c46d5cf31c96abf6bb7",
+      "renderPngSha256": "16c0e095a06e67cf3ee6e5aa559fb9dbf837de2c30b74116fb1f6d2a4757a565",
+      "sceneJsonSha256": "9c5a43e039ac95fb7647f4912d9349ce1c148c286aa6d600b716c0943bd11d87",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "architectureHash": "f109ad301d278a66419ebec0a49b64b5f8934300971bcd45774616a78c888ce3",
+      "room": {
+        "x": 0.10999999999999988,
+        "y": 2.11,
+        "w": 3.58,
+        "h": 5.232
+      },
+      "camera": {
+        "yaw": -0.4,
+        "pitch": 0.13,
+        "distance": 3.3484800000000003,
+        "target": {
+          "x": 1.9,
+          "y": 3.78424
+        },
+        "camera": {
+          "x": 0.6070434182592881,
+          "y": 6.842369895270263
+        }
+      },
+      "furnitureAssets": [
+        {
+          "id": "furniture:design-f0-living-1:loungeDesignSofa:0",
+          "modelId": "loungeDesignSofa",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:tableCoffee:0",
+          "modelId": "tableCoffee",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:cabinetTelevision:0",
+          "modelId": "cabinetTelevision",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:televisionModern:0",
+          "modelId": "televisionModern",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:sideTable:0",
+          "modelId": "sideTable",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:floorLamp:0",
+          "modelId": "floorLamp",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:loungeChair:0",
+          "modelId": "loungeChair",
+          "source": "licensed-mesh",
+          "asset": "modern-armchair",
+          "licence": "CC0-1.0"
+        },
+        {
+          "id": "furniture:design-f0-living-1:pottedPlant:0",
+          "modelId": "pottedPlant",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        }
+      ],
+      "meshCount": 159,
+      "vertices": 51641,
+      "triangles": 47284,
+      "samples": 24,
+      "width": 1100,
+      "height": 900,
+      "renderer": "Blender4.5.13 LTS Cycles CPU",
+      "status": "review-not-visual-approved"
+    },
+    {
+      "view": "kitchen",
+      "sourceCheckpoint": "dedd01a3b3a45e7598ffacfd970c58d4aad7012c",
+      "drawingRevision": "FF68F57C-9AD609B4-AI4-RH3",
+      "rendererRevision": "customer-measured-house-23",
+      "image": "kitchen.jpg",
+      "sha256": "8d9adf7486f6e0b9fc902ecb8b5ed8c65383b04cf537cb581478e00207683dec",
+      "renderPngSha256": "ac96b78782744dbe51f21ca33553cefa391089ace7f18d5a48cb8b9111c1a516",
+      "sceneJsonSha256": "af7ed8b623646ae8ec2cfc5aaedae1a22f73ab290c7a8462c33e50595114505b",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "architectureHash": "f249c2ee4e26e20b04dfb2c2d3a136087e166faf28548d0cc890918c0b25aadf",
+      "room": {
+        "x": 0.10999999999999988,
+        "y": 7.3420000000000005,
+        "w": 3.58,
+        "h": 6.148
+      },
+      "camera": {
+        "yaw": -0.4,
+        "pitch": 0.13,
+        "distance": 3.93472,
+        "target": {
+          "x": 1.9,
+          "y": 9.30936
+        },
+        "camera": {
+          "x": 0.38067716656309325,
+          "y": 12.902896428922318
+        }
+      },
+      "furnitureAssets": [
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenSink:0",
+          "modelId": "kitchenSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenStove:0",
+          "modelId": "kitchenStove",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenFridge:0",
+          "modelId": "kitchenFridge",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:table:0",
+          "modelId": "table",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:0",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:1",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:2",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        }
+      ],
+      "meshCount": 96,
+      "vertices": 38687,
+      "triangles": 15906,
+      "samples": 24,
+      "width": 1100,
+      "height": 900,
+      "renderer": "Blender4.5.13 LTS Cycles CPU",
+      "status": "review-not-visual-approved"
+    },
+    {
+      "view": "bed",
+      "sourceCheckpoint": "dedd01a3b3a45e7598ffacfd970c58d4aad7012c",
+      "drawingRevision": "FF68F57C-9AD609B4-AI4-RH3",
+      "rendererRevision": "customer-measured-house-23",
+      "image": "bed.jpg",
+      "sha256": "325be9982f26aeb42771a391bcc732f5f12901c539173b0145238a60880ed7f4",
+      "renderPngSha256": "d5fcfedc855af2ae024115a31eed5e5cf0f4d42e11775bb4447e94f076b3441f",
+      "sceneJsonSha256": "720d1b2d617d818c56dfbf2dc8a7541fb8db9229513a32dc5b461c4f3abd752e",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "architectureHash": "b4a66c93bd7de0d57596c2a1c38f06035f39aecf526a5110c803df9d50c00b3c",
+      "room": {
+        "x": 0.10999999999999988,
+        "y": 4.000000000000001,
+        "w": 3.58,
+        "h": 3.8
+      },
+      "camera": {
+        "yaw": -0.65,
+        "pitch": 0.13,
+        "distance": 2.432,
+        "target": {
+          "x": 1.9,
+          "y": 5.216
+        },
+        "camera": {
+          "x": 0.4406059786343173,
+          "y": 7.135738984710952
+        }
+      },
+      "furnitureAssets": [
+        {
+          "id": "furniture:design-f1-bed-1:bedDouble:0",
+          "modelId": "bedDouble",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-1:cabinetBed:0",
+          "modelId": "cabinetBed",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-1:bookcaseClosedWide:0",
+          "modelId": "bookcaseClosedWide",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        }
+      ],
+      "meshCount": 81,
+      "vertices": 26385,
+      "triangles": 18284,
+      "samples": 24,
+      "width": 1100,
+      "height": 900,
+      "renderer": "Blender4.5.13 LTS Cycles CPU",
+      "status": "review-not-visual-approved"
+    },
+    {
+      "view": "bath",
+      "sourceCheckpoint": "dedd01a3b3a45e7598ffacfd970c58d4aad7012c",
+      "drawingRevision": "FF68F57C-9AD609B4-AI4-RH3",
+      "rendererRevision": "customer-measured-house-23",
+      "image": "bath.jpg",
+      "sha256": "c9d3b977934aa11099a864471f92539399b7c0c70bbac1685d2e4eb0d00f165b",
+      "renderPngSha256": "9dacb98bef6a8f2d64a4a876b1124a4d7745927668fd11005ff332c3f956f664",
+      "sceneJsonSha256": "ed4aa3338bf0ff156096cce62cf34e1ec4ec3c3f4044ba1fa4dbc8ecbfe6f16e",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "architectureHash": "8072c4ee3d9263cf98601bcafea2a8b5dc21539301772d4ca7bf4645d31ec299",
+      "room": {
+        "x": 0.11,
+        "y": 13.49,
+        "w": 3.58,
+        "h": 2.2
+      },
+      "camera": {
+        "score": -179.73526399513295,
+        "camera": {
+          "x": 0.3248,
+          "y": 15.382
+        },
+        "target": {
+          "x": 1.7382627305668075,
+          "y": 14.134886027497993
+        },
+        "targetHeight": 0.65,
+        "horizontalFov": 105,
+        "yaw": -0.8478404532680573,
+        "pitch": 0.44545133475165954,
+        "distance": 2.0888202773601923
+      },
+      "furnitureAssets": [
+        {
+          "id": "furniture:design-f0-bath-1:toilet:0",
+          "modelId": "toilet",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-bath-1:shower:0",
+          "modelId": "shower",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-bath-1:bathroomSink:0",
+          "modelId": "bathroomSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        }
+      ],
+      "meshCount": 54,
+      "vertices": 18278,
+      "triangles": 9386,
+      "samples": 24,
+      "width": 1100,
+      "height": 900,
+      "renderer": "Blender4.5.13 LTS Cycles CPU",
+      "status": "review-not-visual-approved"
+    },
+    {
+      "view": "stairs",
+      "sourceCheckpoint": "dedd01a3b3a45e7598ffacfd970c58d4aad7012c",
+      "drawingRevision": "FF68F57C-9AD609B4-AI4-RH3",
+      "rendererRevision": "customer-measured-house-23",
+      "image": "stairs.jpg",
+      "sha256": "f41fc70939feca2d716ae97dd8f4ea108ab8efbd9a76b78ce488464263053ea0",
+      "renderPngSha256": "398805b822a6f9bf60d4d0a95f32c1d7435a6682bf0e8cc36788c0b3492eb328",
+      "sceneJsonSha256": "32e1889e0d606588ef41311683345bb0152f83a6aa311ebc772d515bf93da1ca",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "architectureHash": "b22c8f0fa53f33b966fe56c81da66601c9d98b5e62d350804c299fbf416e3910",
+      "room": {
+        "x": 0.11,
+        "y": 15.690000000000001,
+        "w": 3.58,
+        "h": 3.2
+      },
+      "camera": {
+        "position": {
+          "x": 5.122,
+          "y": 13.710000000000003,
+          "height": 5.548
+        },
+        "target": {
+          "x": 1.9000000000000001,
+          "y": 17.290000000000003
+        },
+        "targetHeight": 1.53,
+        "lens": 32,
+        "basis": "Measured room inspection from the production north/east cutaway; no invented guard or drainage."
+      },
+      "furnitureAssets": [],
+      "meshCount": 61,
+      "vertices": 2852,
+      "triangles": 1538,
+      "samples": 24,
+      "width": 1100,
+      "height": 900,
+      "renderer": "Blender4.5.13 LTS Cycles CPU",
+      "status": "review-not-visual-approved"
+    },
+    {
+      "view": "terrace",
+      "sourceCheckpoint": "dedd01a3b3a45e7598ffacfd970c58d4aad7012c",
+      "drawingRevision": "FF68F57C-9AD609B4-AI4-RH3",
+      "rendererRevision": "customer-measured-house-23",
+      "image": "terrace.jpg",
+      "sha256": "776dc3848270d103b191ed5394d038e96cdef663ea55fd01a11bef47719723ce",
+      "renderPngSha256": "c7174b135c62b85123c10be4344ab28b8927dea08006e929e5794da6e587d9e1",
+      "sceneJsonSha256": "4adb4a6a7d819ed5fc6b2cdbd5479b0ba56f91b73394c9ae2935b33c2a4b28c8",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "architectureHash": "2223ea52cfa6d47fd3df612c4823003172958be5102624191a4b5f9d44f30665",
+      "room": {
+        "x": 0.10999999999999988,
+        "y": 2.11,
+        "w": 3.58,
+        "h": 1.8900000000000006
+      },
+      "camera": {
+        "position": {
+          "x": 5.122,
+          "y": -0.5249999999999999,
+          "height": 3.348
+        },
+        "target": {
+          "x": 1.9,
+          "y": 3.055
+        },
+        "targetHeight": 0.4,
+        "lens": 32,
+        "basis": "Measured room inspection from the production north/east cutaway; no invented guard or drainage."
+      },
+      "furnitureAssets": [],
+      "meshCount": 23,
+      "vertices": 868,
+      "triangles": 434,
+      "samples": 24,
+      "width": 1100,
+      "height": 900,
+      "renderer": "Blender4.5.13 LTS Cycles CPU",
+      "status": "review-not-visual-approved"
+    }
+  ],
+  "refinements": [
+    {
+      "view": "whole",
+      "sourceCheckpoint": "working-branch: see commit containing this evidence",
+      "drawingRevision": "FF68F57C-9AD609B4-AI4-RH3",
+      "rendererRevision": "customer-measured-house-24",
+      "image": "whole-after.jpg",
+      "sha256": "cba5ff10e107bb1291695f2269cfeaa81ccdf2229a439f8c037ec858f7076b5f",
+      "renderPngSha256": "e2945cf4faf68e137b44454bf0cbb722289428326ed930fe9497457e8d7bb0bd",
+      "sceneJsonSha256": "ece1b6001980a0e440f4771252d5c3ef64e1bbcffc64c38852177fa1b399b38d",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "architectureHash": "2ad41bc0621cf3a16ea70241442ce64d1adb06595066d231e0c8f445a54a28bc",
+      "room": null,
+      "camera": {
+        "position": {
+          "x": 16.762999999999998,
+          "y": -12.153,
+          "height": 14.263
+        },
+        "target": {
+          "x": 2.5,
+          "y": 10.5
+        },
+        "targetHeight": 3.1229999999999998,
+        "lens": 35,
+        "basis": "Whole measured envelope; roof retained"
+      },
+      "furnitureAssets": [
+        {
+          "id": "furniture:design-f0-living-1:loungeDesignSofa:0",
+          "modelId": "loungeDesignSofa",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:tableCoffee:0",
+          "modelId": "tableCoffee",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:cabinetTelevision:0",
+          "modelId": "cabinetTelevision",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:televisionModern:0",
+          "modelId": "televisionModern",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:sideTable:0",
+          "modelId": "sideTable",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:floorLamp:0",
+          "modelId": "floorLamp",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:loungeChair:0",
+          "modelId": "loungeChair",
+          "source": "licensed-mesh",
+          "asset": "modern-armchair",
+          "licence": "CC0-1.0"
+        },
+        {
+          "id": "furniture:design-f0-living-1:pottedPlant:0",
+          "modelId": "pottedPlant",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenSink:0",
+          "modelId": "kitchenSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenStove:0",
+          "modelId": "kitchenStove",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenFridge:0",
+          "modelId": "kitchenFridge",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:table:0",
+          "modelId": "table",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:0",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:1",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:2",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-bath-1:toilet:0",
+          "modelId": "toilet",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-bath-1:shower:0",
+          "modelId": "shower",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-bath-1:bathroomSink:0",
+          "modelId": "bathroomSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-1:bedDouble:0",
+          "modelId": "bedDouble",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-1:cabinetBed:0",
+          "modelId": "cabinetBed",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-1:bookcaseClosedWide:0",
+          "modelId": "bookcaseClosedWide",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-2:bedDouble:0",
+          "modelId": "bedDouble",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-2:cabinetBed:0",
+          "modelId": "cabinetBed",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-2:bookcaseClosedWide:0",
+          "modelId": "bookcaseClosedWide",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bath-1:toilet:0",
+          "modelId": "toilet",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bath-1:shower:0",
+          "modelId": "shower",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bath-1:bathroomSink:0",
+          "modelId": "bathroomSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        }
+      ],
+      "meshCount": 637,
+      "vertices": 195757,
+      "triangles": 124294,
+      "samples": 24,
+      "width": 1100,
+      "height": 900,
+      "renderer": "Blender4.5.13 LTS Cycles CPU",
+      "status": "review-not-visual-approved",
+      "architectureUnchangedFromBaseline": true,
+      "furnitureEnvelopesUnchanged": true
+    },
+    {
+      "view": "kitchen",
+      "sourceCheckpoint": "working-branch: see commit containing this evidence",
+      "drawingRevision": "FF68F57C-9AD609B4-AI4-RH3",
+      "rendererRevision": "customer-measured-house-24",
+      "image": "kitchen-after.jpg",
+      "sha256": "84d04ddf66b0aa7bff7a8c7bb2520458fb5db63ceb4ccd4d45fe57881b96ec75",
+      "renderPngSha256": "7764d14f5112132316f8ed7a6e8d856520eb5ecb2941f8c6af7dbada326404b5",
+      "sceneJsonSha256": "f8b7845f27e93e88ac2dbd5b1fd1724de0e2d9b206e2fde26a70ba56bbef3068",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "architectureHash": "f249c2ee4e26e20b04dfb2c2d3a136087e166faf28548d0cc890918c0b25aadf",
+      "room": {
+        "x": 0.10999999999999988,
+        "y": 7.3420000000000005,
+        "w": 3.58,
+        "h": 6.148
+      },
+      "camera": {
+        "yaw": -0.4,
+        "pitch": 0.13,
+        "distance": 3.93472,
+        "target": {
+          "x": 1.9,
+          "y": 9.30936
+        },
+        "camera": {
+          "x": 0.38067716656309325,
+          "y": 12.902896428922318
+        }
+      },
+      "furnitureAssets": [
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenSink:0",
+          "modelId": "kitchenSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenStove:0",
+          "modelId": "kitchenStove",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenFridge:0",
+          "modelId": "kitchenFridge",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:table:0",
+          "modelId": "table",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:0",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:1",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:2",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        }
+      ],
+      "meshCount": 103,
+      "vertices": 42682,
+      "triangles": 18158,
+      "samples": 24,
+      "width": 1100,
+      "height": 900,
+      "renderer": "Blender4.5.13 LTS Cycles CPU",
+      "status": "review-not-visual-approved",
+      "architectureUnchangedFromBaseline": true,
+      "furnitureEnvelopesUnchanged": true
+    },
+    {
+      "view": "terrace",
+      "sourceCheckpoint": "working-branch: see commit containing this evidence",
+      "drawingRevision": "FF68F57C-9AD609B4-AI4-RH3",
+      "rendererRevision": "customer-measured-house-24",
+      "image": "terrace-after.jpg",
+      "sha256": "8602402140ca961296292894f8383326e846e717161e464706892e7d66310f3c",
+      "renderPngSha256": "7715222821554137e39744e1e583d223f9112a6083a55f8d1fe1bc6517c1061e",
+      "sceneJsonSha256": "4daa91474e797a2307dc95e3a78d7dc2176aa71e789a86c800806a8cd14cc7d6",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "architectureHash": "2223ea52cfa6d47fd3df612c4823003172958be5102624191a4b5f9d44f30665",
+      "room": {
+        "x": 0.10999999999999988,
+        "y": 2.11,
+        "w": 3.58,
+        "h": 1.8900000000000006
+      },
+      "camera": {
+        "position": {
+          "x": 5.122,
+          "y": -0.5249999999999999,
+          "height": 3.348
+        },
+        "target": {
+          "x": 1.9,
+          "y": 3.055
+        },
+        "targetHeight": 0.4,
+        "lens": 32,
+        "basis": "Measured room inspection from the production north/east cutaway; no invented guard or drainage."
+      },
+      "furnitureAssets": [],
+      "meshCount": 23,
+      "vertices": 868,
+      "triangles": 434,
+      "samples": 24,
+      "width": 1100,
+      "height": 900,
+      "renderer": "Blender4.5.13 LTS Cycles CPU",
+      "status": "review-not-visual-approved",
+      "architectureUnchangedFromBaseline": true,
+      "furnitureEnvelopesUnchanged": true
+    },
+    {
+      "view": "exterior",
+      "sourceCheckpoint": "working-branch: see commit containing this evidence",
+      "drawingRevision": "FF68F57C-9AD609B4-AI4-RH3",
+      "rendererRevision": "customer-measured-house-24",
+      "image": "exterior-after.jpg",
+      "sha256": "2e19d148912808ce00b221f83a1a74efb592b3ed3f0f7ce5675167c88e87a9bd",
+      "renderPngSha256": "a8753009f10c6900cbf722f7ccc794e9903622bc1a9aeba4eb2f419eeeb520f8",
+      "sceneJsonSha256": "64d2f82ee4db17a261c0aa769705143f7fb5195a796c1f6558e2e562f4f48d82",
+      "geometryPreserved": true,
+      "planPreserved": true,
+      "architectureHash": "2ad41bc0621cf3a16ea70241442ce64d1adb06595066d231e0c8f445a54a28bc",
+      "room": null,
+      "camera": {
+        "position": {
+          "x": 5.368,
+          "y": -11.075999999999999,
+          "height": 3.1924
+        },
+        "target": {
+          "x": 2.5,
+          "y": 2.11
+        },
+        "targetHeight": 3.1924,
+        "lens": 45,
+        "basis": "Facade of measured envelope"
+      },
+      "furnitureAssets": [
+        {
+          "id": "furniture:design-f0-living-1:loungeDesignSofa:0",
+          "modelId": "loungeDesignSofa",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:tableCoffee:0",
+          "modelId": "tableCoffee",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:cabinetTelevision:0",
+          "modelId": "cabinetTelevision",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:televisionModern:0",
+          "modelId": "televisionModern",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:sideTable:0",
+          "modelId": "sideTable",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:floorLamp:0",
+          "modelId": "floorLamp",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-living-1:loungeChair:0",
+          "modelId": "loungeChair",
+          "source": "licensed-mesh",
+          "asset": "modern-armchair",
+          "licence": "CC0-1.0"
+        },
+        {
+          "id": "furniture:design-f0-living-1:pottedPlant:0",
+          "modelId": "pottedPlant",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenSink:0",
+          "modelId": "kitchenSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenStove:0",
+          "modelId": "kitchenStove",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:kitchenFridge:0",
+          "modelId": "kitchenFridge",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:table:0",
+          "modelId": "table",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:0",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:1",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-kitchen-1:chair:2",
+          "modelId": "chair",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-bath-1:toilet:0",
+          "modelId": "toilet",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-bath-1:shower:0",
+          "modelId": "shower",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f0-bath-1:bathroomSink:0",
+          "modelId": "bathroomSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-1:bedDouble:0",
+          "modelId": "bedDouble",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-1:cabinetBed:0",
+          "modelId": "cabinetBed",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-1:bookcaseClosedWide:0",
+          "modelId": "bookcaseClosedWide",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-2:bedDouble:0",
+          "modelId": "bedDouble",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-2:cabinetBed:0",
+          "modelId": "cabinetBed",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bed-2:bookcaseClosedWide:0",
+          "modelId": "bookcaseClosedWide",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bath-1:toilet:0",
+          "modelId": "toilet",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bath-1:shower:0",
+          "modelId": "shower",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        },
+        {
+          "id": "furniture:design-f1-bath-1:bathroomSink:0",
+          "modelId": "bathroomSink",
+          "source": "parametric",
+          "asset": null,
+          "licence": null
+        }
+      ],
+      "meshCount": 637,
+      "vertices": 195757,
+      "triangles": 124294,
+      "samples": 24,
+      "width": 1100,
+      "height": 900,
+      "renderer": "Blender4.5.13 LTS Cycles CPU",
+      "status": "review-not-visual-approved",
+      "architectureUnchangedFromBaseline": true,
+      "furnitureEnvelopesUnchanged": true
+    }
+  ],
+  "currentViewImages": {
+    "exterior": "exterior-after.jpg",
+    "whole": "whole-after.jpg",
+    "living": "living.jpg",
+    "kitchen": "kitchen-after.jpg",
+    "bed": "bed.jpg",
+    "bath": "bath.jpg",
+    "stairs": "stairs.jpg",
+    "terrace": "terrace-after.jpg"
+  },
+  "refinementSourceHashes": {
+    "src/43_scene_assets.js": "2d709995210a4ea0722a6b0c96067f1d031b4495d95d78234b73046789d2e8c1",
+    "src/99_customer_design.js": "aee7dcfaa99aecf81d48a607335b9c55115904298c97fe9a3aa01c3fdf7f49c2",
+    "src/103_real_house.js": "d45e050289ca4fa4b5d39ae4cf6882dd5194643807f4776156508808083c9a25",
+    "tests/team-b-modern-scene.mjs": "8c0e26f464e944f004d8eb02e38ae28acb51870160f33746bd6dc1c119f53e9c",
+    "tests/team-b-modern-render.py": "8825a6865cce0de93d7ce62d8e210dc5dd9ffe888e4d264539f2488c017a5be7"
+  },
+  "targetedRefinementTests": {
+    "new": 4,
+    "relatedExisting": 2,
+    "fail": 0
+  },
+  "roofFinding": "Offline adapter had replaced the production roof factory and lost PBR/depth priority. Production92 already provided polygonOffset. Restored actual factories; 0.01mm Cycles-only modifier emulates native raster priority without editing measured source vertices."
+}

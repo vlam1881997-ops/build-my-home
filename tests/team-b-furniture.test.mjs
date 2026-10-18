@@ -193,12 +193,15 @@ test('oven glass, fascia and controls retain appliance finishes under selected s
  for(const angle of [0,37,90,180,270]){const holder=new THREE.Group();holder.add(root);holder.rotation.y=-angle*Math.PI/180;holder.updateMatrixWorld(true);const front=window.getWorldPosition(new THREE.Vector3()),expected=new THREE.Vector3(0,0,1).applyAxisAngle(new THREE.Vector3(0,1,0),-angle*Math.PI/180);front.y=0;assert.ok(front.normalize().dot(expected)>.999,'front follows saved rotation');holder.remove(root);}
 });
 
-test('flat roof finish wins coplanar depth without moving the roof or slab or changing pitched roofs',()=>{
- const B=finishFixture(),scene=new THREE.Scene(),geometry=new THREE.PlaneGeometry(2,4).rotateX(-Math.PI/2),flat=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color:'#777777',side:THREE.DoubleSide})),slab=new THREE.Mesh(geometry.clone(),new THREE.MeshStandardMaterial({color:'#eeeeee',side:THREE.DoubleSide})),pitched=new THREE.Mesh(geometry.clone(),new THREE.MeshStandardMaterial());
+test('production flat roof retains coplanar depth priority without moving the roof or slab or changing pitched roofs',()=>{
+ const B=finishFixture(),measured=fs.readFileSync('src/92_measured_design.js','utf8'),house=fs.readFileSync('src/103_real_house.js','utf8');
+ vm.runInNewContext('const B=BMH;'+measured.slice(measured.indexOf(' B.roofSceneMaterial='),measured.indexOf(' B.roofSurfaceUvs='))+house.slice(house.indexOf(' const roofMaterial='),house.indexOf(' const roofUvs=')),{BMH:B,document:{createElement:()=>({width:256,height:256,getContext:()=>({fillRect(){}})})}});
+ B.measuredDesignSettings().roof.type='flat';B.measuredDesignSettings().roof.surface='concrete';
+ const scene=new THREE.Scene(),geometry=new THREE.PlaneGeometry(2,4).rotateX(-Math.PI/2),flat=new THREE.Mesh(geometry,B.roofSceneMaterial(THREE)),slab=new THREE.Mesh(geometry.clone(),new THREE.MeshStandardMaterial({color:'#eeeeee',side:THREE.DoubleSide})),pitched=new THREE.Mesh(geometry.clone(),new THREE.MeshStandardMaterial());
  flat.userData={kind:'roof',roofType:'flat'};pitched.userData={kind:'roof',roofType:'gable'};slab.userData={kind:'ceiling-slab'};for(const o of [flat,slab,pitched]){o.position.y=3.4;scene.add(o);}pitched.position.x=5;
  const before=[flat,slab,pitched].map(o=>({position:o.position.toArray(),vertices:Array.from(o.geometry.attributes.position.array)}));
  B.configureHousePresentation({THREE,scene,renderer:{toneMappingExposure:1},focus:'floor:0',roomFocus:null,floorFocus:0,explode:0});scene.updateMatrixWorld(true);
- assert.equal(flat.material.polygonOffset,true);assert.ok(flat.material.polygonOffsetFactor<0&&flat.material.polygonOffsetUnits<0);assert.ok(flat.renderOrder>slab.renderOrder);assert.equal(flat.userData.roofDepthPriority,true);assert.equal(pitched.material.polygonOffset,false);assert.equal(slab.material.polygonOffset,false);
+ assert.equal(flat.material.polygonOffset,true);assert.ok(flat.material.polygonOffsetFactor<0&&flat.material.polygonOffsetUnits<0);assert.equal(flat.material.userData.finishSlot,'roof');assert.equal(pitched.material.polygonOffset,false);assert.equal(slab.material.polygonOffset,false);
  assert.deepEqual([flat,slab,pitched].map(o=>({position:o.position.toArray(),vertices:Array.from(o.geometry.attributes.position.array)})),before,'no architectural offset or slab removal');
  assert.ok(new THREE.Raycaster(new THREE.Vector3(.2,5,.3),new THREE.Vector3(0,-1,0)).intersectObject(flat).length,'existing roof covering remains intact');
 });

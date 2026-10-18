@@ -41,9 +41,11 @@ for(const selection of itemFinishes){
 if(measuredSnapshot()!==beforeGeometry)throw Error('Item finish changed measured geometry or placement');
 review.revision=B.drawingRevision();
 B.state.ui.sceneFocus=room?'room:'+room.id:'all';B.state.ui.roomCamera=inspection?'overview':'inside';B.state.ui.exteriorCamera=view==='exterior'?'front':'overview';B.state.ui.sceneExploded=false;
-// The browser roof material paints a canvas; offline texture preparation is
-// deferred to Blender. This adapter changes no roof vertices or dimensions.
-B.roofSceneMaterial=()=>new THREE.MeshStandardMaterial({color:B.roofSurfaceSpec().color||'#777976',roughness:.85});
+// Rebind the actual roof factories to local Canvas, just like wall/fabric
+// factories above. Do not replace the production material: its PBR maps and
+// polygonOffset are required when the finish shares the measured slab plane.
+const measuredSource=fs.readFileSync('src/92_measured_design.js','utf8'),houseSource=fs.readFileSync('src/103_real_house.js','utf8');
+vm.runInNewContext('const B=BMH;'+measuredSource.slice(measuredSource.indexOf(' B.roofSceneMaterial='),measuredSource.indexOf(' B.roofSurfaceUvs='))+houseSource.slice(houseSource.indexOf(' const roofMaterial='),houseSource.indexOf(' const roofUvs=')),{...canvasContext});
 const source=fs.readFileSync('src/45_studio3d.js','utf8');
 const body=source.slice(source.indexOf('  const mat=(color,rough='),source.indexOf('  const facadeCamera='));
 if(!body.includes('BMH.decorateStudioScene')||!body.includes('const roof='))throw Error('Production scene constructor changed; review extractor.');
@@ -76,7 +78,7 @@ function material(m){
 scene.traverse(o=>{if(!o.isMesh||!o.visible)return;const g=o.geometry,p=g.attributes.position;if(!p)return;
  let parent=o,furniture;while(parent){if(parent.userData.kind==='furniture')furniture=parent.userData;parent=parent.parent;}
  const attrs={};for(const key of ['position','normal','uv','color'])if(g.attributes[key])attrs[key]=Array.from(g.attributes[key].array);
- const ms=Array.isArray(o.material)?o.material:[o.material];meshes.push({name:o.name||o.userData.kind||'mesh',identity:{kind:o.userData.kind||null,roomId:o.userData.roomId||furniture?.roomId||null,floor:o.userData.floor??furniture?.floor??null,furnitureId:furniture?.furnitureId||null,modelId:furniture?.model||null,openingId:o.userData.openingId||null},facadeSkin:!!o.userData.facadeSkin,roofDepthPriority:!!o.userData.roofDepthPriority,castShadow:o.castShadow,receiveShadow:o.receiveShadow,matrix:o.matrixWorld.toArray(),attributes:attrs,index:g.index?Array.from(g.index.array):null,groups:g.groups,materials:ms.map(material)});
+ const ms=Array.isArray(o.material)?o.material:[o.material];meshes.push({name:o.name||o.userData.kind||'mesh',identity:{kind:o.userData.kind||null,roomId:o.userData.roomId||furniture?.roomId||null,floor:o.userData.floor??furniture?.floor??null,furnitureId:furniture?.furnitureId||null,modelId:furniture?.model||null,openingId:o.userData.openingId||null},facadeSkin:!!o.userData.facadeSkin,roofDepthPriority:o.userData.kind==='roof'&&o.userData.roofType==='flat'&&o.material.polygonOffset===true,castShadow:o.castShadow,receiveShadow:o.receiveShadow,matrix:o.matrixWorld.toArray(),attributes:attrs,index:g.index?Array.from(g.index.array):null,groups:g.groups,materials:ms.map(material)});
 });
 let camera=room&&!inspection?B.roomInteriorCamera(room,B.roomFurnitureLayout(room)):null;
 if(inspection){const span=Math.max(room.w,room.h),height=view==='stairs'?B.studioFloorLevel(room.floor).height:1.2;camera={position:{x:room.x+room.w*.5+span*.9,y:room.y+room.h*.5-span,height:height+span*.6},target:{x:room.x+room.w/2,y:room.y+room.h/2},targetHeight:view==='stairs'?height*.45:.4,lens:32,basis:'Measured room inspection from the production north/east cutaway; no invented guard or drainage.'};}
