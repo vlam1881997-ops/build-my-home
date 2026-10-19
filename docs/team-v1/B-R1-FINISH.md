@@ -55,3 +55,10 @@ PR70 source ddb9f70837e3c1d349da05b59868fa10ef77bcda passed exact-head Node22 CI
 Merged main 7139183308f32fceb63f860db5d4aa23b47d218e; Vercel production dpl_AHpknS2sz2YDQ5oNLJWyqNsJjsF6 READY with that exact SHA and www.huiminhbach.id.vn assigned. Source/tested and merge trees match. Post-production native export verification remains pending because the execution environment failed and browser tools became unavailable. Previously inspected binary PNG/PDF files could not be persisted after the failure; their observed hashes/dimensions are recorded in W32 result.json, not advertised as downloadable artifacts.
 
 Full R1 remains IN_PROGRESS. Outstanding evidence is actual enabled-GPU desktop/mobile appearance/performance, customer visual/design review and source-confirmed terrace engineering inputs. No fabricated source, guard, drainage detail, signature or GPU acceptance may close those gates. Existing GitHub/Vercel publishing authorization remains valid; no permission regrant is required.
+
+
+## W33 verified current checkpoint
+
+PR71 source efc26322a2fd9d0b6796d2730aa405a1e365b63f passed Node22 CI39183290259 and19 related local checks. Main aab11137a9706f9081910cdf11ce809cd05afe58 is deployed by Vercel production dpl_sA6qxfPHQPtPXUXoVjZhqDkgSrnb READY. Native public-domain corrected terrace PNG1280x870 exactly matches the visually accepted preview bytes; cut-away walls retain shared openings without floating lintels. PDF30-page A3 layout/revision and previously interrupted PR70 public export checks are now complete. Evidence: W33-release-verification.
+
+The earlier environment interruption is resolved. Full Modern R1 still requires actual GPU desktop/mobile visual/performance evidence, customer design review and source-confirmed terrace engineering inputs. Cloud browser still reports disabled WebGL. These gates remain open; neither synthetic review data, a simple block PNG nor CI supplies professional approval. No extra permissions, application update or repeated accepted test loop is needed to preserve this checkpoint.

@@ -4,11 +4,11 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 19/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W33 recovered production/PDF verification; consistent lightweight wall cut candidate awaiting CI/native preview
+- active_substep: W35 lazy technical layers implemented; exact-head Node22 CI and preview pending
 - target_branch: codex/b-v1-24
-- actual_branch: codex/b-facade-depth, parent QA457373bf over PR70 production71391833; no lost W32 source.
+- actual_branch: codex/b-facade-depth, QA checkpoint based on released PR71 main aab11137; runtime equals production.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
-- last_verified_commit: ddb9f70837e3c1d349da05b59868fa10ef77bcda (Node22 CI39132216370; actual native preview PNG delivery verified; production native recheck still pending)
+- last_verified_commit: efc26322a2fd9d0b6796d2730aa405a1e365b63f (Node22 CI39183290259, native preview and production PNG verified)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -747,3 +747,30 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Export footer explicitly says walls are cut to inspect layout.19 scoped registered workflow checks pass; final expanded actual-slab regression also passes. Three new cases cover removed isolated lintel/full-height source retention, consistent window/sill clipping, and actual terrace shared-opening/slab/pure geometry. No new dependency or A-owned source.
 - WIP source: src/78_design_workflow.js and tests/team-b-workflow.test.mjs; B progress/evidence only. Exact-head Node22 CI and actual final native preview/image inspection pending before release. Full R1 remains IN_PROGRESS: enabled-GPU desktop/mobile visual/performance, actual source-confirmed terrace engineering and customer/professional acceptance.
 - Next: push bounded wall-cut fix, preview/native PNG and exact CI, release if accepted; persist recovered PDF/native evidence and update open acceptance gates. Do not repeat completed W26/W30/W31 acceptance or request tool permissions again.
+
+
+### W33 final release acceptance
+- Source efc26322 passed exact-head Node22 CI39183290259.19 registered related workflow checks passed; final measured-slab check also passed after expansion. Native final preview PNG1280x870/106400bytes inspected: no floating lintel, consistent wall cut, actual adjoining-room opening and explicit cut label. Drawing revision F896BFAC-EE2ED7CE-AI4-RH3 is unchanged.
+- PR71 merged to main aab11137a9706f9081910cdf11ce809cd05afe58; merge tree154f36a5b9f8f1a8b1ef8b84635c99d673468ad0 equals tested source. Vercel production dpl_sA6qxfPHQPtPXUXoVjZhqDkgSrnb READY with exact main SHA and public domain assigned. Actual public reload/export gives the exact preview PNG bytes, SHA256addfb5e28da5e959c6bbb4cf97559aa4a7ef496d84f360193e4b35723b77e2c4. Screenshot shows corrected model and successful download status.
+- Recovered PR70 post-production export and30-page A3 PDF layout/revision review are completed. All PDF pages inspected as contacts, detailed pages4/20/22/30 at1300px; no blank text pages or sampled out-of-page text, no visible overlap/clipping at inspected resolution. This is rendering/layout QA, not building approval. Unknown engineering/BOQ information remains unknown.
+- Persisted native before/after PNGs, lossless kitchen WebP, actual-domain screenshot and3 PDF contact sheets on B QA checkpoint. Original270867-byte PDF remains local with its SHA in result.json; connector did not persist that large blob, so no remote PDF link is claimed. Kitchen WebP preserves exact decoded pixels of original native PNG. Source/progress/results are durable.
+- No additional application change/deployment is required for this QA-only checkpoint. Full Modern R1 remains IN_PROGRESS: actual enabled-GPU desktop/mobile appearance/performance (cloud logs still GL_VENDOR/GL_RENDERER Disabled), actual terrace guard/drainage/waterproofing/structure source and professional/customer review. No permissions or temporary environment blocker remains. These are outstanding evidence/inputs, not completed by green CI or simple block views.
+- Next concrete work requires those actual remaining inputs/device evidence. Preserve current source and customer choices; do not expand to24styles, invent a guard/SKU/signoff or repeat accepted W26/W30/W31/W32/W33 checks merely on another continue request.
+
+
+## W34 · original scope recovered; actual acceptance inputs (2026-10-19)
+- Resumed exact B QA checkpoint a056f1ca50892f0a6451d69cd3b37d5b9a3709e5; source remains released main aab11137a9706f9081910cdf11ce809cd05afe58. Main ref and Vercel production dpl_sA6qxfPHQPtPXUXoVjZhqDkgSrnb rechecked: READY, exact SHA, public aliases assigned. No application changes or unnecessary redeploy.
+- Recovered the user's original narrowing through Personal Context: 18/10 06:28 UTC prioritize one Modern house in three increments (interior, exterior, acceptance), without expanding24 styles. The user also required measured terrace/access/guard parity and explicitly said at07:07 UTC not to invent missing confirmed guard/drainage dimensions to improve pictures. These are actual design-input gaps, not merely a later assistant permission rule.
+- All independent software work from W26–W33 is preserved. No new source defect was established in this continuation; do not manufacture a feature or rerun passed checks to appear busy. Production native tab retains the same synthetic fixture and explicit unknown terrace/source status. No customer project, signoff, GPU state or engineering record was changed.
+- Outstanding action requires actual input: (1) sourced guard/open-edge and terrace drainage/waterproofing/structure details for the current design revision; (2) actual enabled-WebGL desktop/phone views and timing evidence, followed by the product owner's visual review. Cloud browser currently cannot supply enabled-GPU proof; more GitHub/Vercel permission will not change that.
+- Concrete required data and acceptance limits are recorded in evidence/B/W34-open-acceptance/required-inputs.md. Ask for those inputs once, clearly; do not ask for full rights, a reconnection, another approval to publish or a repeated continue message. Never mark full Modern R1 done without the missing evidence; never fabricate professional approval.
+- This is a checkpoint-only change. Last verified runtime source remains efc26322. No tests rerun because there is no runtime/test change. Resume at the supplied real input/device evidence; preserve current customer choices, WIP/evidence and existing source ownership.
+
+
+## W35 · faster material-view setup without hidden technical geometry (2026-10-19)
+- Resumed exact B checkpoint645180d and production main aab11137; preserved current runtime, design inputs and role boundaries. The still-open device performance gate justified a targeted CPU/scene lifecycle check, not another replay of accepted W26–W33 workflows.
+- Found real unconditional work: materials mode built the160m technical grid, light-surface mesh/lamp glows and cloned measured edges, then rebuilt those hidden edges when furniture loads settled. These are now scene-owned lazy caches created only on first technical/neon selection. Neutral cut caps remain available in materials mode. No view/camera/plan/finish/schema/dependency edits.
+- Late furniture marks cached outlines dirty; active technical mode refreshes immediately, inactive material mode defers until needed. Retired edge geometries/materials dispose once. Stale/disposed scene callbacks do nothing. Light-level changes are safe before helper allocation and persist to the first technical view.
+-19 model-presentation checks PASS, including6 new behavior cases: lazy layers, measured export/camera/plan parity, late furniture bounds, cached resource disposal, active-neon refresh, stale scenes and early light preference. Existing19 workflow and10 architectural-render checks also PASS (48 total). The render suite initially could not import missing temporary test dependencies; reran successfully after restoring the exact declared Three0.160.1/pathtracer0.0.23/BVH0.8.3 outside the repo. No package/lock/build change. Local Node24.19.0; declared Node22 CI pending.
+- Reproducible CPU-only500-mesh stress fixture:7 samples each, first excluded, before median54.1455ms/174432 helper-buffer bytes; after1.4244ms/0 helper-buffer bytes in material mode. This is not native GPU, first visible model, phone, whole Modern house or universal latency evidence. Data/script in W35-lazy-technical-layers.
+- Source: src/98_model_presentation.js and tests/model-presentation.test.mjs; B progress/evidence only. Next push bounded source+progress, exact-head CI/preview, native fallback safety and release under existing authorization. Full R1 remains IN_PROGRESS pending actual enabled-GPU/device visual/performance, sourced terrace technical dimensions and user/professional design review. Do not fabricate those inputs or expand styles.

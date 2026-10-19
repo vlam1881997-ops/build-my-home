@@ -93,13 +93,24 @@
   for(const [kind,values] of Object.entries(groups)){const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(values,3));const material=new THREE.LineBasicMaterial({color:kind==='architecture'?0x58dcee:0x7f9bd3,transparent:true,opacity:kind==='architecture'?.58:.25,depthTest:true,depthWrite:false,toneMapped:false,blending:THREE.NormalBlending});const lines=new THREE.LineSegments(geometry,material);lines.renderOrder=2;layer.add(lines);}
   scene.add(layer);scene.userData.modelPresentation.edges=layer;scene.userData.modelPresentation.edgeVertices=count;
  };
+ const ensureTechnicalLayers=st=>{
+  const c=st.context,{THREE,scene}=c;
+  // Material review does not use the grid, light mesh or measured edge copies.
+  // Allocate them on the first technical view; keep one scene-owned cache.
+  if(!st.grid){const grid=new THREE.GridHelper(160,160,0x32526d,0x1a354d);grid.position.y=.002;grid.material.transparent=true;grid.material.opacity=.3;grid.material.depthWrite=false;grid.userData={kind:'model-site-grid',presentationOnly:true};scene.add(grid);st.grid=grid;}
+  if(!st.lightSurface)addLightSurface(c);
+  if(!st.edges||st.edgesDirty){
+   if(st.edges){scene.remove(st.edges);for(const lines of st.edges.children){lines.geometry.dispose();lines.material.dispose();}}
+   buildEdges(c);st.edgesDirty=false;
+  }
+ };
  const cutCaps=c=>{
   const {THREE,scene}=c,group=new THREE.Group();group.userData={kind:'model-cut-caps',presentationOnly:true};
   scene.updateMatrixWorld(true);scene.traverse(o=>{if(o.userData.kind!=='wall'||o.userData.wallSurface==='window')return;const plane=o.material?.clippingPlanes?.[0];if(!plane||Math.abs(plane.normal.y+1)>.001)return;const bounds=new THREE.Box3().setFromObject(o),y=plane.constant;if(y<=bounds.min.y+.002||y>=bounds.max.y-.002)return;const material=new THREE.MeshStandardMaterial({color:o.material.color.clone(),roughness:.94});B.prepareModelMaterial(material,null,null,scene);const cap=new THREE.Mesh(new THREE.BoxGeometry(bounds.max.x-bounds.min.x,.012,bounds.max.z-bounds.min.z),material);cap.position.set((bounds.max.x+bounds.min.x)/2,y-.005,(bounds.max.z+bounds.min.z)/2);cap.userData={kind:'wall-cut-cap',presentationOnly:true,sourceWall:o};group.add(cap);});scene.add(group);return group;
  };
  B.configureModelPresentation=c=>{
   const {THREE,scene,ground,displayBase,renderer,roomFocus,floorFocus,focus,explode}=c,ui=B.state.ui,look={value:B.modelLook()==='neon'?1:0};
-  const state=scene.userData.modelPresentation={look,context:c,walls:[],background:scene.background.clone(),fog:scene.fog,groundColor:ground.material.color.clone(),baseColor:displayBase.material.color.clone(),exposure:renderer.toneMappingExposure,lights:[]};
+  const state=scene.userData.modelPresentation={look,context:c,walls:[],background:scene.background.clone(),fog:scene.fog,groundColor:ground.material.color.clone(),baseColor:displayBase.material.color.clone(),exposure:renderer.toneMappingExposure,lights:[],edgeVertices:0,edgesDirty:true};
   B.mergeModelFringes(THREE,scene);
   const groundCompile=ground.material.onBeforeCompile.bind(ground.material);ground.material.onBeforeCompile=(shader,renderer)=>{groundCompile(shader,renderer);shader.uniforms.bmhGroundLook=look;shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nuniform float bmhGroundLook;').replace('#include <opaque_fragment>','outgoingLight = mix(outgoingLight, vec3(0.0024, 0.0047, 0.011), bmhGroundLook);\n#include <opaque_fragment>');};ground.material.customProgramCacheKey=()=> 'bmh-grid-ground-v1';
   const viewOpen=floorFocus!==null||roomFocus&&ui.roomCamera!=='inside'||ui.sceneExploded;
@@ -118,18 +129,17 @@
    for(const m of Array.isArray(o.material)?o.material:[o.material])B.prepareModelMaterial(m,null,o,scene);
   });
   const used=new Set();scene.traverse(o=>{for(const m of Array.isArray(o.material)?o.material:[o.material])if(m)used.add(m);});for(const m of retired)if(!used.has(m)&&![...(scene.userData.finishMaterials?.values()||[])].some(entry=>Object.values(entry).includes(m)))m.dispose();
-  const grid=new THREE.GridHelper(160,160,0x32526d,0x1a354d);grid.position.y=.002;grid.material.transparent=true;grid.material.opacity=.3;grid.material.depthWrite=false;grid.userData={kind:'model-site-grid',presentationOnly:true};scene.add(grid);state.grid=grid;
-  addLightSurface(c);state.cutCaps=cutCaps(c);buildEdges(c);
+  state.cutCaps=cutCaps(c);
   const selection=new THREE.Group();selection.userData={kind:'model-room-selection',presentationOnly:true};scene.add(selection);state.selection=selection;
   B.applyModelLook({THREE,scene,renderer,camera:c.camera});
  };
  B.applyModelLook=s=>{
-  const st=s.scene?.userData.modelPresentation;if(!st)return;const neon=B.modelLook()==='neon',c=st.context;st.look.value=neon?1:0;
+  const st=s.scene?.userData.modelPresentation;if(!st)return;const neon=B.modelLook()==='neon',c=st.context;if(neon)ensureTechnicalLayers(st);st.look.value=neon?1:0;
   s.scene.background=neon?new s.THREE.Color('#080f1e'):st.background.isTexture?st.background:st.background.clone();s.scene.fog=neon?new s.THREE.Fog('#080f1e',35,105):st.fog;
   c.ground.material.color.copy(neon?new s.THREE.Color('#101c32'):st.groundColor);c.displayBase.material.color.copy(neon?new s.THREE.Color('#172438'):st.baseColor);
   s.renderer.toneMappingExposure=neon?1:st.exposure;
   for(const item of st.lights){item.light.color.copy(item.color);item.light.intensity=neon?item.intensity*.65:item.intensity;}
-  st.grid.visible=st.edges.visible=st.lightSurface.visible=st.lampGlows.visible=neon;st.lightSurface.material.opacity=B.state.ui.modelLightLevel/100;
+  for(const layer of [st.grid,st.edges,st.lightSurface,st.lampGlows])if(layer)layer.visible=neon;if(st.lightSurface)st.lightSurface.material.opacity=B.state.ui.modelLightLevel/100;
   for(const cap of st.cutCaps?.children||[])cap.material.color.copy(neon?new s.THREE.Color('#408b9d'):cap.userData.sourceWall.material.color);
   const stage=document.querySelector('#studio3dStage');stage?.classList.toggle('model-neon',neon);document.querySelector('.design-studio')?.classList.toggle('model-neon-workspace',neon);
   B.updateModelPresentation(s);
@@ -137,7 +147,7 @@
  B.updateModelPresentation=s=>{
   const st=s?.scene?.userData.modelPresentation;if(!st)return;const ui=B.state.ui,site=B.state.project.site,selected=B.modelSelectedRoom(),key=selected?.id||'';
   if(B.modelLook()==='materials')for(const cap of st.cutCaps?.children||[])cap.material.color.copy(cap.userData.sourceWall.material.color);
-  for(const glow of st.lampGlows.children){glow.quaternion.copy(s.camera.quaternion);glow.material.opacity=.6*ui.modelLightLevel/100;}
+  for(const glow of st.lampGlows?.children||[]){glow.quaternion.copy(s.camera.quaternion);glow.material.opacity=.6*ui.modelLightLevel/100;}
   for(const o of st.walls){const m=o.material,patch=materialPatches.get(m);if(!patch)continue;let alpha=1;
    if(ui.modelWalls==='auto'||ui.sceneExploded){const ids=o.userData.roomIds||[ancestor(o,'roomId')].filter(Boolean),rooms=ids.map(id=>B.state.project.plan.rooms.find(r=>r.id===id)).filter(Boolean),exterior=rooms.length===1,r=rooms[0];
     let front=true;if(r&&o.userData.wallAxis){const axis=o.userData.wallAxis,center=axis==='x'?r.x+r.w/2-site.width/2:r.y+r.h/2-site.depth/2,wall=o.userData.wallCoordinate-(axis==='x'?site.width:site.depth)/2,cam=s.camera.position[axis];front=(wall-center)*(cam-wall)>0;}
@@ -237,7 +247,7 @@
   }
   B.applyModelLook(s);s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));
   Promise.allSettled(s.scene.userData.surfaceLoads||[]).then(()=>{if(B.studio3d===s&&!s.scene.userData.disposed){s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));}});
-  if(s.scene.userData.furnitureLoads?.length)Promise.allSettled(s.scene.userData.furnitureLoads).then(()=>{if(B.studio3d!==s||s.scene.userData.disposed)return;const st=s.scene.userData.modelPresentation;s.scene.traverse(o=>{if(!o.isMesh||o.userData.presentationOnly)return;for(const m of Array.isArray(o.material)?o.material:[o.material])B.prepareModelMaterial(m,null,o,s.scene);});s.scene.remove(st.edges);for(const lines of st.edges.children){lines.geometry.dispose();lines.material.dispose();}buildEdges(st.context);st.edges.visible=B.modelLook()==='neon';s.renderer.shadowMap.needsUpdate=true;s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));});
+  if(s.scene.userData.furnitureLoads?.length)Promise.allSettled(s.scene.userData.furnitureLoads).then(()=>{if(B.studio3d!==s||s.scene.userData.disposed)return;const st=s.scene.userData.modelPresentation;s.scene.traverse(o=>{if(!o.isMesh||o.userData.presentationOnly)return;for(const m of Array.isArray(o.material)?o.material:[o.material])B.prepareModelMaterial(m,null,o,s.scene);});st.edgesDirty=true;if(B.modelLook()==='neon')ensureTechnicalLayers(st);s.renderer.shadowMap.needsUpdate=true;s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));});
  };
  const dispose=B.disposeStudio3D;B.disposeStudio3D=()=>{const s=B.studio3d;s?.renderer.domElement.removeEventListener('pointerdown',s.modelDown);s?.renderer.domElement.removeEventListener('pointerup',s.modelUp);return dispose();};
  const refresh=B.refreshStudioFinishes;B.refreshStudioFinishes=(role,id)=>{const ok=refresh(role,id);if(ok){const s=B.studio3d;B.applyModelLook(s);B.refreshModelTraceability();s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));}return ok;};
@@ -253,6 +263,6 @@
   if(el.matches?.('select[data-model-room-inspect]')){B.selectModelRoom(el.value);return;}
   if(el.matches?.('[data-model-look]')){u.modelLook=el.value==='materials'?'materials':'neon';B.customerFrameCache=null;B.stopArchitecturalRender();B.save();const s=B.studio3d;if(s){B.applyModelLook(s);s.requestRender?s.requestRender({thumbnail:true}):(s.renderFrame(),B.cacheModelThumbnail(s));}const badge=document.querySelector('[data-model-look-name]');if(badge)badge.textContent=B.modelLook()==='neon'?'BỐ TRÍ / 3D':'VẬT LIỆU / 3D';}
  });
- document.addEventListener('input',e=>{if(!e.target.matches?.('[data-model-light-level]'))return;const u=B.state.ui;u.modelLightLevel=B.clamp(Number(e.target.value),0,100);B.customerFrameCache=null;const st=B.studio3d?.scene.userData.modelPresentation;if(st)st.lightSurface.material.opacity=u.modelLightLevel/100;(B.studio3d?.requestRender||B.studio3d?.renderFrame)?.call(B.studio3d);const out=document.querySelector('[data-model-light-value]');if(out)out.value=u.modelLightLevel+'%';});
+ document.addEventListener('input',e=>{if(!e.target.matches?.('[data-model-light-level]'))return;const u=B.state.ui;u.modelLightLevel=B.clamp(Number(e.target.value),0,100);B.customerFrameCache=null;const st=B.studio3d?.scene.userData.modelPresentation;if(st?.lightSurface)st.lightSurface.material.opacity=u.modelLightLevel/100;(B.studio3d?.requestRender||B.studio3d?.renderFrame)?.call(B.studio3d);const out=document.querySelector('[data-model-light-value]');if(out)out.value=u.modelLightLevel+'%';});
  document.addEventListener('change',e=>{if(e.target.matches?.('[data-model-light-level]')){B.save();if(B.studio3d)B.cacheModelThumbnail(B.studio3d);}});
 })();
