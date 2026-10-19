@@ -84,6 +84,14 @@ html.bmh-v60 .showroom-surface-photo>figcaption{padding:12px}
 @media(max-width:600px){html.bmh-v60 .material-photo-library{padding:15px}html.bmh-v60 .material-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}html.bmh-v60 .material-photo-library h3{font-size:19px}}
 
 /* Choose and retain finishes before entering the model. */
+html.bmh-v60 .v6-s6:has(>.showroom-choice-board){grid-template-areas:"head head head" "choices choices choices" "context context context" "nav showroom energy"}
+html.bmh-v60 .v6-s6:has(>.showroom-choice-board)>.v6-mat-head{grid-area:head}
+html.bmh-v60 .v6-s6:has(>.showroom-choice-board)>.showroom-choice-board{grid-area:choices}
+html.bmh-v60 .v6-s6:has(>.showroom-choice-board)>.visual-material-context{grid-area:context}
+html.bmh-v60 .v6-s6:has(>.showroom-choice-board)>.v6-mat-nav{grid-area:nav}
+html.bmh-v60 .v6-s6:has(>.showroom-choice-board)>.v6-showroom{grid-area:showroom}
+html.bmh-v60 .v6-s6:has(>.showroom-choice-board)>.v6-energy{grid-area:energy}
+@media(max-width:1180px){html.bmh-v60 .v6-s6:has(>.showroom-choice-board){grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "choices" "context" "nav" "showroom" "energy"}}
 html.bmh-v60 .showroom-choice-board{grid-column:1/-1;min-width:0;padding:24px;background:#fff;border:1px solid #dce4d8;border-radius:18px}
 html.bmh-v60 .showroom-choice-board>header{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:18px}
 html.bmh-v60 .showroom-choice-board header>div>span{font-size:10px;letter-spacing:.13em;font-weight:750;color:#52735d}
