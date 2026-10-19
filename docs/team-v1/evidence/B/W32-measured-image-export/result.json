@@ -1,0 +1,24 @@
+{
+  "baselineMain": "b6dd47d50a3227dda7651eb9e4f1aed3ba9911fc",
+  "parentCheckpoint": "e3fb37e3bd67428c14167226abf8e772d5d1374c",
+  "localNode": "24.19.0",
+  "tests": {
+    "workflowPass": 16,
+    "fail": 0,
+    "newExportCases": 4
+  },
+  "nativeBefore": {
+    "fixture": "isolated synthetic Modern 5x20 two-storey",
+    "button": "Tải ảnh nét ↓",
+    "status": "Mở một góc 3D rồi xuất ảnh nét.",
+    "webglVendor": "Disabled",
+    "webglRenderer": "Disabled"
+  },
+  "nativeAfter": "pending",
+  "exactHeadCI": "pending",
+  "sourceHashes": {
+    "src/46_architectural_render.js": "ce722205f9e99fcea273bcdca7f53adea8d89c75113b5ef88fd6acdd6d316f9a",
+    "src/78_design_workflow.js": "653c81c003723d7dd5a9542fe3071a52ca9b20a76a775e3b6d5102567d8422e1",
+    "tests/team-b-workflow.test.mjs": "d997c8f3bb4f196b9179807c8c38858b0e099a123d2d88883d903e2764f7932d"
+  }
+}

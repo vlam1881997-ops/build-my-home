@@ -39,3 +39,10 @@ Evidence is in W26-interior-sets, W29-proposal-review and W30-native-interior. S
 R1.2 still requires actual terrace edge/guard, drainage/waterproofing and reviewer inputs. The synthetic terrace proposal has measured3.58×1.89m area, a0.90×2.10m east access door with sill0 and reachable circulation. This proves only the review proposal geometry. Never invent source-confirmed engineering details to close the gate.
 
 Resume the next open R1.2/R1.3 gate. Do not regenerate unchanged kitchen/bedroom modules, repeat their accepted native UI tests or ask for the already-resolved preview permission again. Preserve all current customer choices and the released personal drawing fixes.
+
+
+## W31 subsequent verified release
+
+PR69 source48e003e73a95c35e3364b7e973d3e838a91e6598 passed exact-head Node22 CI39129079814 and native preview checks. Merged main b6dd47d50a3227dda7651eb9e4f1aed3ba9911fc; production dpl_6Dc5cGv2zCoukVqpz27s5QmbYsqU READY on the public domain. Twelve scoped local workflow checks passed. Native angle37->53/reload/deletion and terrace panel parity across drawing/3D passed. Production retains saved synthetic furniture, shows measured IDs/revision and exact terrace access/missing technical status. Evidence: W31-lightweight-terrace.
+
+This closes the lightweight block-view discrepancy and terrace information visibility. It does not close enabled-GPU/mobile appearance/performance or source-confirmed terrace engineering/customer/professional approval. Actual technical inputs remain missing; the UI now exposes them clearly. Full Modern R1 remains IN_PROGRESS. No repeat preview permission request, previous accepted test loop or invented guard/drainage design is needed.
