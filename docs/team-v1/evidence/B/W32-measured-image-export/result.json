@@ -14,11 +14,69 @@
     "webglVendor": "Disabled",
     "webglRenderer": "Disabled"
   },
-  "nativeAfter": "pending",
-  "exactHeadCI": "pending",
+  "nativeAfter": {
+    "status": "passed-preview-lightweight-scope-only",
+    "drawingRevision": "F896BFAC-EE2ED7CE-AI4-RH3",
+    "firstPng": {
+      "width": 1280,
+      "height": 1128,
+      "bytes": 194646,
+      "sha256": "7a8e474c27cda53c739748c0c847918ed3819eb2aeabc1c0dc0ae7121a1aedb9",
+      "format": "PNG",
+      "nonblank": true,
+      "caption": "Khối theo số đo"
+    },
+    "rotatedZoomedPng": {
+      "width": 1280,
+      "height": 1042,
+      "sha256": "c7cb6c010887cbc4525c419f78b810875d295d12cdf27b7df709128855a39b04"
+    },
+    "zip": {
+      "crcPassed": true,
+      "svgSheets": 30,
+      "dxfFiles": 2,
+      "dxfUnits": "millimetres",
+      "pdfBytes": 270867,
+      "pdfVisualReview": "pending",
+      "jsonRevision": "F896BFAC-EE2ED7CE-AI4-RH3"
+    }
+  },
+  "exactHeadCI": {
+    "run": 39132216370,
+    "node": "22.x",
+    "status": "success",
+    "npmTest": "success",
+    "coordinator": "success"
+  },
   "sourceHashes": {
     "src/46_architectural_render.js": "ce722205f9e99fcea273bcdca7f53adea8d89c75113b5ef88fd6acdd6d316f9a",
     "src/78_design_workflow.js": "653c81c003723d7dd5a9542fe3071a52ca9b20a76a775e3b6d5102567d8422e1",
     "tests/team-b-workflow.test.mjs": "d997c8f3bb4f196b9179807c8c38858b0e099a123d2d88883d903e2764f7932d"
-  }
+  },
+  "sourceCommit": "ddb9f70837e3c1d349da05b59868fa10ef77bcda",
+  "mainCommit": "7139183308f32fceb63f860db5d4aa23b47d218e",
+  "mergedPR": 70,
+  "releaseTree": "bfc1d2157c245e347f720b0e4c01f49e879d499e",
+  "production": {
+    "deployment": "dpl_AHpknS2sz2YDQ5oNLJWyqNsJjsF6",
+    "target": "production",
+    "status": "READY",
+    "projectId": "prj_PcB996IRamEZqWrKpA5qk9T290kh",
+    "commit": "7139183308f32fceb63f860db5d4aa23b47d218e",
+    "publicAlias": "www.huiminhbach.id.vn",
+    "nativePostDeploy": "pending-environment-unavailable"
+  },
+  "interruption": {
+    "date": "2026-10-19",
+    "error": "exec-server initialize handshake timed out; no usable execution environment",
+    "browserCapability": "unavailable",
+    "binaryArtifactPersistence": "local downloads were inspected before failure; unavailable for subsequent GitHub upload"
+  },
+  "fullR1Status": "in_progress",
+  "openGates": [
+    "Post-production native export check after environment recovery",
+    "Enabled-GPU desktop/mobile visual and performance acceptance",
+    "Actual terrace guard/drainage/waterproofing/structure source and professional review",
+    "Customer visual/design acceptance"
+  ]
 }

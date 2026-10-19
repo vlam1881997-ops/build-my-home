@@ -1,0 +1,32 @@
+[
+  {
+    "file": "production-kitchen.png",
+    "format": "PNG",
+    "size": [
+      1280,
+      1128
+    ],
+    "bytes": 194646,
+    "sha256": "7a8e474c27cda53c739748c0c847918ed3819eb2aeabc1c0dc0ae7121a1aedb9",
+    "stddev": [
+      41.846434536984894,
+      46.32792626404699,
+      49.305034754918104
+    ]
+  },
+  {
+    "file": "production-terrace.png",
+    "format": "PNG",
+    "size": [
+      1280,
+      1099
+    ],
+    "bytes": 108284,
+    "sha256": "b844695b41be9c14add0a24ca43abd149ef1db8a62bdc10f15b7f7dbc86d7a09",
+    "stddev": [
+      21.198946797052177,
+      19.370970560030216,
+      19.483150615693713
+    ]
+  }
+]
