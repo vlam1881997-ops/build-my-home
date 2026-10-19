@@ -1,0 +1,43 @@
+{
+  "baselineMain": "7139183308f32fceb63f860db5d4aa23b47d218e",
+  "parentCheckpoint": "457373bff80064ec40bb567cb025e57b13a082a9",
+  "productionBefore": {
+    "kitchenPngPass": true,
+    "shaMatchesAcceptedPreview": true,
+    "observedDownloadMs": 2078,
+    "timingBasis": "includes automation overhead; not GPU benchmark",
+    "terracePngPass": true
+  },
+  "pdfReview": {
+    "pages": 30,
+    "format": "A3",
+    "revision": "F896BFAC-EE2ED7CE-AI4-RH3",
+    "revisionOnEveryPage": true,
+    "allPagesVisuallyInspectedAsContacts": true,
+    "detailedPages": [
+      4,
+      20,
+      22,
+      30
+    ],
+    "blankTextPages": [],
+    "sampledOutsidePageText": [],
+    "engineeringApproval": false
+  },
+  "sourceChecks": {
+    "registeredWorkflowPass": 19,
+    "newWallCutTests": 3,
+    "exactHeadCI": "pending",
+    "nativeNewSource": "pending"
+  },
+  "sourceHashes": {
+    "src/78_design_workflow.js": "17be676d63fb140c72bb1026a701739a5dba474ee5ecb4815c898ec443042ed0",
+    "tests/team-b-workflow.test.mjs": "242f705ce06bef9b27b7499aa0355a33834dd2012b940a2ad3df27bf6757f846"
+  },
+  "fullR1": "in_progress",
+  "openGates": [
+    "enabled-GPU desktop/mobile visuals/performance",
+    "actual terrace engineering source and review",
+    "customer visual acceptance"
+  ]
+}

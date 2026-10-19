@@ -1,6 +1,28 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';import {designClient} from './fixtures/design-client.mjs';
 import {modernReference} from './team-b-modern-reference.mjs';
 
+test('inspection cut removes an unsupported door lintel while the full-height opening keeps its measured head',()=>{
+ const B=designClient(),door={kind:'door',height:2.1};
+ assert.equal(B.lightPreviewWallBands(door,3.06,1.1).length,0);assert.equal(B.lightPreviewWallBands(door,3.06,1.4).length,0);
+ const full=B.lightPreviewWallBands(door,3.06,3.06);assert.equal(full.length,1);assert.equal(full[0].bottom,2.1);assert.ok(Math.abs(full[0].height-.96)<1e-9);
+});
+
+test('window, sill and wall stop at the same cut and high windows retain only their solid lower wall',()=>{
+ const B=designClient(),window={kind:'window',sill:.9,height:1.4},bands=B.lightPreviewWallBands(window,3.06,1.1);
+ assert.equal(bands.length,2);assert.equal(bands[0].material,'wall');assert.equal(bands[0].height,.9);assert.equal(bands[1].material,'glass');assert.ok(Math.abs(bands[1].height-.2)<1e-9);
+ for(const cut of [1.1,1.4,3.06])for(const b of B.lightPreviewWallBands(window,3.06,cut))assert.ok(b.bottom+b.height<=cut+1e-9);
+ const high=B.lightPreviewWallBands({kind:'window',sill:1.8,height:.6},3.06,1.1);assert.equal(high.length,1);assert.equal(high[0].material,'wall');assert.equal(high[0].height,1.1);
+});
+
+test('light wall bands preserve actual slab level and never add a terrace guard or mutate geometry',()=>{
+ const {B}=modernReference(),r=B.state.project.plan.rooms.find(r=>r.outdoorSpace?.kind==='terrace');B.state.ui.sceneFocus='room:'+r.id;const before=JSON.stringify(B.state.project);
+ B.studioFloorLevel=()=>({base:7.3,slab:.27,clearHeight:3.06});const walls=B.scenePlanGeometry({rooms:[r],openings:B.state.project.plan.openings,wallContext:B.state.project.plan.rooms},r.floor).walls,clear=3.06;
+ const count=walls.reduce((n,w)=>n+B.lightPreviewWallBands(w,clear,1.1).length,0),svg=B.lightPreviewSvg();assert.equal((svg.match(/data-light-kind="wall"/g)||[]).length,count*5);assert.ok(walls.some(w=>w.kind==='door'));assert.ok(walls.every(w=>!B.outdoorOpenEdge(r,w.horizontal,w.axis,w.a,w.b)));assert.equal(JSON.stringify(B.state.project),before);
+ const w=walls.find(w=>w.kind==='wall'),t=w.thickness,x=w.horizontal?w.a:w.axis-t/2,y=w.horizontal?w.axis-t/2:w.a,width=w.horizontal?w.b-w.a:t,depth=w.horizontal?t:w.b-w.a,a=B.lightPreviewAngle*Math.PI/180;
+ const project=(x,y)=>{x-=B.state.project.site.width/2;y-=B.state.project.site.depth/2;return (x*Math.cos(a)-y*Math.sin(a)).toFixed(4)+','+((x*Math.sin(a)+y*Math.cos(a))*.52-(7.3+.27+1.1)*.85).toFixed(4);};
+ const top=[[x,y],[x+width,y],[x+width,y+depth],[x,y+depth]].map(p=>project(...p)).join(' ');assert.ok(svg.includes('points="'+top+'"'),'wall cut starts at the actual slab top');
+});
+
 function lightExportClient({decode='load',encode='ready',context2d=true}={}){
  const B=designClient(),p=B.state.project;p.plan={rooms:[{id:'own-room',floor:0,type:'custom',name:'Phòng tự vẽ',x:0,y:0,w:6,h:6}],openings:[],furniture:[],fixtures:[],outdoor:[],lockedRoomIds:[],lockedFloors:[]};B.state.ui.sceneFocus='room:own-room';
  const saved={downloads:[],urls:[],revoked:[],buttons:[{disabled:false},{disabled:true}],status:[],caption:[],image:null,timer:null,draws:0,clears:0},host={};let active=true;

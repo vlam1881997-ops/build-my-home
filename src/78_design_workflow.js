@@ -169,6 +169,16 @@ BMH.addRoomSceneFurniture=(r,base,THREE,scene,mats,site)=>{
  if(r.type==='garage'){if(BMH.addGarageVehicle?.(r,base,THREE,scene,site))return;const v=BMH.garageVehicle(r);if(v){const car=new THREE.Mesh(new THREE.BoxGeometry(v.w,.8,v.d),material(0x567a86,.32));car.position.set(v.x+v.w/2-site.width/2,base+.55,v.y+v.d/2-site.depth/2);car.userData={kind:'vehicle',roomId:r.id,vehicle:v.kind};scene.add(car);const cab=new THREE.Mesh(new THREE.BoxGeometry(v.w*.8,.4,v.d*.45),mats.glass);cab.position.copy(car.position);cab.position.y+=.5;scene.add(cab);}}
 };
 BMH.lightPreviewAngle=BMH.lightPreviewAngle??35;BMH.lightPreviewZoom=BMH.lightPreviewZoom??1;
+// All opening bands share the same inspection cut; no floating full-height
+// lintel may remain after its supporting wall has been cut from the view.
+BMH.lightPreviewWallBands=(wall,clearHeight,cutHeight)=>{
+ const top=Math.min(clearHeight,cutHeight),bands=[];
+ const band=(bottom,height,material='wall')=>{const end=Math.min(top,bottom+height);if(end>bottom+.001)bands.push({bottom,height:end-bottom,material});};
+ if(wall.kind==='door')band(wall.height,clearHeight-wall.height);
+ else if(wall.kind==='window'){band(0,wall.sill);band(wall.sill,wall.height,'glass');band(wall.sill+wall.height,clearHeight-wall.sill-wall.height);}
+ else band(0,clearHeight);
+ return bands;
+};
 BMH.lightPreviewSvg=()=>{
  const p=BMH.state.project,l=BMH.projectLevels(),focus=BMH.state.ui.sceneFocus||'all',room=focus.startsWith('room:')?p.plan.rooms.find(r=>r.id===focus.slice(5)):null;
  const finish=BMH.finishPalette?.(room?.id),wallColor=/^#[0-9a-f]{6}$/i.test(finish?.wall||'')?finish.wall:'#e9e6df';
@@ -195,11 +205,9 @@ BMH.lightPreviewSvg=()=>{
    if(r.type==='stairs')for(const part of BMH.stairGeometry?.(r)||[])block(part.x,part.y,part.w,part.d,base+part.base,part.h,'#a18d74');
    const pos=project(r.x+r.w/2,r.y+r.h/2,base+slab+.13);labels.push('<text x="'+pos.x+'" y="'+pos.y+'" font-size=".22" text-anchor="middle">'+BMH.esc(r.name)+'</text>');
   }
-  const geometry=BMH.scenePlanGeometry({rooms,openings:p.plan.openings.filter(o=>!room||o.roomId===room.id),wallContext:p.plan.rooms},f);
+  const geometry=BMH.scenePlanGeometry({rooms,openings:p.plan.openings,wallContext:p.plan.rooms},f);
   for(const w of geometry.walls){const length=w.b-w.a,t=w.thickness||.12,x=w.horizontal?w.a:w.axis-t/2,y=w.horizontal?w.axis-t/2:w.a,width=w.horizontal?length:t,depth=w.horizontal?t:length;
-   if(w.kind==='door')block(x,y,width,depth,base+w.height,Math.max(.02,clear-w.height),wallColor);
-   else if(w.kind==='window'){block(x,y,width,depth,base,w.sill,wallColor);block(x,y,width,depth,base+w.sill,w.height,'#afc8ce');block(x,y,width,depth,base+w.sill+w.height,Math.max(.02,clear-w.sill-w.height),wallColor);}
-   else block(x,y,width,depth,base,Math.min(clear,room?1.1:1.4),wallColor);
+   for(const band of BMH.lightPreviewWallBands(w,clear,room?1.1:1.4))block(x,y,width,depth,base+slab+band.bottom,band.height,band.material==='glass'?'#afc8ce':wallColor,{kind:'wall',roomId:w.roomIds?.[0]});
   }
  }
  faces.sort((x,y)=>x.z-y.z);const points=faces.flatMap(f=>f.points.split(' ').map(p=>p.split(',').map(Number)));if(!points.length)return '<p>Tầng này chưa có phòng. Thêm phòng ở Tab 4.</p>';
@@ -223,7 +231,7 @@ BMH.lightPreviewFrame=async(longEdge)=>{
  try{
   await new Promise((resolve,reject)=>{timer=setTimeout(()=>reject(Error('Ảnh bố trí chưa tải được.')),15000);image.onload=resolve;image.onerror=()=>reject(Error('Ảnh bố trí chưa đọc được.'));image.src=url;});
   if(!current())return null;
-  ctx.fillStyle='#f1eee7';ctx.fillRect(0,0,width,height);ctx.drawImage(image,0,0,width,height-footer);ctx.fillStyle='#344b3d';ctx.font='12px Arial';ctx.fillText('Khối theo số đo · '+revision,12,height-12,width-24);
+  ctx.fillStyle='#f1eee7';ctx.fillRect(0,0,width,height);ctx.drawImage(image,0,0,width,height-footer);ctx.fillStyle='#344b3d';ctx.font='12px Arial';ctx.fillText('Khối theo số đo · cắt tường để xem bố trí · '+revision,12,height-12,width-24);
   const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
   return blob&&current()?{blob,width,height,designRevision:revision,view,cameraKey,mode:'lightweight'}:null;
  }finally{clearTimeout(timer);image.onload=image.onerror=null;image.src='';URL.revokeObjectURL(url);canvas.width=canvas.height=1;}
