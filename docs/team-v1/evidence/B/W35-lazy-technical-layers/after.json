@@ -1,0 +1,59 @@
+{
+  "scope": "CPU-only synthetic 500-mesh presentation fixture; no WebGL renderer, native device or first-visible-model benchmark",
+  "three": "160",
+  "node": "v24.19.0",
+  "mode": "materials",
+  "warmupExcluded": 1,
+  "samples": [
+    {
+      "run": 0,
+      "elapsedMs": 5.148948000000004,
+      "helperVertices": 0,
+      "helperBytes": 0,
+      "helperMeshes": 0
+    },
+    {
+      "run": 1,
+      "elapsedMs": 1.4627670000000137,
+      "helperVertices": 0,
+      "helperBytes": 0,
+      "helperMeshes": 0
+    },
+    {
+      "run": 2,
+      "elapsedMs": 1.2345030000000037,
+      "helperVertices": 0,
+      "helperBytes": 0,
+      "helperMeshes": 0
+    },
+    {
+      "run": 3,
+      "elapsedMs": 1.8457049999999953,
+      "helperVertices": 0,
+      "helperBytes": 0,
+      "helperMeshes": 0
+    },
+    {
+      "run": 4,
+      "elapsedMs": 1.015351999999993,
+      "helperVertices": 0,
+      "helperBytes": 0,
+      "helperMeshes": 0
+    },
+    {
+      "run": 5,
+      "elapsedMs": 1.6197239999999908,
+      "helperVertices": 0,
+      "helperBytes": 0,
+      "helperMeshes": 0
+    },
+    {
+      "run": 6,
+      "elapsedMs": 1.3860509999999948,
+      "helperVertices": 0,
+      "helperBytes": 0,
+      "helperMeshes": 0
+    }
+  ],
+  "medianMs": 1.4244090000000043
+}

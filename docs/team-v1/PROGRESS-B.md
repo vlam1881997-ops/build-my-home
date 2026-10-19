@@ -4,7 +4,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 19/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W34 original scope recovered; released software preserved; awaiting actual terrace dimensions/source and enabled-GPU/device visual evidence
+- active_substep: W35 lazy technical layers implemented; exact-head Node22 CI and preview pending
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-facade-depth, QA checkpoint based on released PR71 main aab11137; runtime equals production.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
@@ -765,3 +765,12 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Outstanding action requires actual input: (1) sourced guard/open-edge and terrace drainage/waterproofing/structure details for the current design revision; (2) actual enabled-WebGL desktop/phone views and timing evidence, followed by the product owner's visual review. Cloud browser currently cannot supply enabled-GPU proof; more GitHub/Vercel permission will not change that.
 - Concrete required data and acceptance limits are recorded in evidence/B/W34-open-acceptance/required-inputs.md. Ask for those inputs once, clearly; do not ask for full rights, a reconnection, another approval to publish or a repeated continue message. Never mark full Modern R1 done without the missing evidence; never fabricate professional approval.
 - This is a checkpoint-only change. Last verified runtime source remains efc26322. No tests rerun because there is no runtime/test change. Resume at the supplied real input/device evidence; preserve current customer choices, WIP/evidence and existing source ownership.
+
+
+## W35 · faster material-view setup without hidden technical geometry (2026-10-19)
+- Resumed exact B checkpoint645180d and production main aab11137; preserved current runtime, design inputs and role boundaries. The still-open device performance gate justified a targeted CPU/scene lifecycle check, not another replay of accepted W26–W33 workflows.
+- Found real unconditional work: materials mode built the160m technical grid, light-surface mesh/lamp glows and cloned measured edges, then rebuilt those hidden edges when furniture loads settled. These are now scene-owned lazy caches created only on first technical/neon selection. Neutral cut caps remain available in materials mode. No view/camera/plan/finish/schema/dependency edits.
+- Late furniture marks cached outlines dirty; active technical mode refreshes immediately, inactive material mode defers until needed. Retired edge geometries/materials dispose once. Stale/disposed scene callbacks do nothing. Light-level changes are safe before helper allocation and persist to the first technical view.
+-19 model-presentation checks PASS, including6 new behavior cases: lazy layers, measured export/camera/plan parity, late furniture bounds, cached resource disposal, active-neon refresh, stale scenes and early light preference. Existing19 workflow and10 architectural-render checks also PASS (48 total). The render suite initially could not import missing temporary test dependencies; reran successfully after restoring the exact declared Three0.160.1/pathtracer0.0.23/BVH0.8.3 outside the repo. No package/lock/build change. Local Node24.19.0; declared Node22 CI pending.
+- Reproducible CPU-only500-mesh stress fixture:7 samples each, first excluded, before median54.1455ms/174432 helper-buffer bytes; after1.4244ms/0 helper-buffer bytes in material mode. This is not native GPU, first visible model, phone, whole Modern house or universal latency evidence. Data/script in W35-lazy-technical-layers.
+- Source: src/98_model_presentation.js and tests/model-presentation.test.mjs; B progress/evidence only. Next push bounded source+progress, exact-head CI/preview, native fallback safety and release under existing authorization. Full R1 remains IN_PROGRESS pending actual enabled-GPU/device visual/performance, sourced terrace technical dimensions and user/professional design review. Do not fabricate those inputs or expand styles.

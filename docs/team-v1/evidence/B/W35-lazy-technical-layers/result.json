@@ -1,0 +1,34 @@
+{
+  "scope": "W35 material-view CPU work and scene lifecycle only",
+  "sourceBaseline": "645180d7983c3485da1877667731657f86772fcf",
+  "productionBaseline": "aab11137a9706f9081910cdf11ce809cd05afe58",
+  "status": "ready-for-ci-preview",
+  "localChecks": {
+    "node": "24.19.0",
+    "modelPresentation": 19,
+    "workflow": 19,
+    "architecturalRender": 10,
+    "total": 48
+  },
+  "newBehaviorCases": 6,
+  "cpuFixture": {
+    "meshes": 500,
+    "samplesPerRevision": 7,
+    "warmupExcluded": 1,
+    "beforeMedianMs": 54.14551750000004,
+    "afterMedianMs": 1.4244090000000043,
+    "beforeHelperBufferBytes": 174432,
+    "afterHelperBufferBytes": 0,
+    "nativeGpu": false,
+    "mobile": false,
+    "firstVisibleModel": false
+  },
+  "remaining": [
+    "exact-head Node22 CI and preview",
+    "actual enabled-GPU desktop/phone appearance and timings",
+    "sourced terrace guard/drainage/waterproofing/structure inputs",
+    "owner visual and applicable professional review"
+  ],
+  "designWrites": false,
+  "packageChanges": false
+}

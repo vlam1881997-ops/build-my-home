@@ -1,8 +1,8 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';import * as THREE from 'three';
-function client(visual=false){
+function client(visual=false,documentOverrides={}){
  const rooms=[{id:'r',type:'living',name:'Khách',floor:0,x:0,y:0,w:4,h:4}],project={site:{width:4,depth:4,floors:1},plan:{rooms},materials:{finish:{rooms:{}}}},ui={sceneFocus:'floor:0',modelWalls:'auto',modelLook:'neon',modelLightLevel:75};
  const b={state:{ui,project},defaultState:()=>({ui:{},project}),normalizeState(){},SCREENS:[],screen7:()=>'',cinematicSignature:()=>'',studioStructureKey:()=>'',mountStudio3D:async()=>{},disposeStudio3D(){},refreshStudioFinishes(){},startArchitecturalRender(){},updateModelRoomLabels(){},clamp:(n,a,z)=>Math.max(a,Math.min(n,z)),projectLevels:()=>({floorHeight:3.4,slab:.14}),floorRooms:()=>rooms,roomFurnitureLayout:()=>[],stairFloorHoles:()=>[],slabPanels:r=>[{x:r.x,y:r.y,w:r.w,d:r.h}],esc:String,sceneSurfaceUvs(){}};
- const ctx={BMH:b,document:{addEventListener(){},querySelector:()=>null,querySelectorAll:()=>[]},console,Blob,structuredClone,Uint8Array,performance:{now:()=>0},window:{}};
+ const ctx={BMH:b,document:{addEventListener(){},querySelector:()=>null,querySelectorAll:()=>[],...documentOverrides},console,Blob,structuredClone,Uint8Array,performance:{now:()=>0},window:{}};
  vm.runInNewContext(fs.readFileSync('src/46_architectural_render.js','utf8'),ctx);vm.runInNewContext(fs.readFileSync('src/98_model_presentation.js','utf8'),ctx);
  if(visual){
   const completion=fs.readFileSync('src/75_completion.js','utf8');
@@ -27,6 +27,47 @@ test('presentation preserves measured buffers and colour selections; export rest
 });
 test('cutaway outlines and caps stop at the viewing cut while source wall height is retained',()=>{
  const b=client();b.state.ui.modelWalls='cut';const {c,wall}=fixture(b);b.configureModelPresentation(c);const caps=c.scene.children.find(o=>o.userData.kind==='model-cut-caps');assert.equal(caps.children.length,1);assert.ok(Math.abs(caps.children[0].position.y-1.045)<1e-6);assert.equal(wall.geometry.parameters.height,3.26);const exported=b.architecturalRenderScene(THREE,c.scene).children.find(o=>o.userData.kind==='wall'),bounds=new THREE.Box3().setFromObject(exported);assert.ok(Math.abs(bounds.max.y-1.05)<1e-6);
+});
+test('material inspection skips technical geometry and lazily caches it without changing the design or camera',()=>{
+ const b=client();b.state.ui.modelLook='materials';b.state.ui.modelWalls='cut';const {c,wall}=fixture(b),before=JSON.stringify(b.state.project),position=wall.geometry.attributes.position.array,camera=c.camera.matrixWorld.clone();
+ b.configureModelPresentation(c);const st=c.scene.userData.modelPresentation,kinds=()=>c.scene.children.map(o=>o.userData.kind);
+ for(const kind of ['model-site-grid','model-outlines','model-room-light','model-lamp-glows'])assert.equal(kinds().includes(kind),false,kind+' must not delay material inspection');
+ assert.equal(st.cutCaps.children.length,1,'the neutral wall cut cap is still required');
+ const exportBefore=b.architecturalRenderScene(THREE,c.scene,{purpose:'model'}),boundsBefore=new THREE.Box3().setFromObject(exportBefore);
+ b.state.ui.modelLook='neon';b.applyModelLook(c);const cached=[st.grid,st.edges,st.lightSurface,st.lampGlows];assert.ok(st.edgeVertices>0);assert.ok(cached.every(o=>o.visible));
+ b.state.ui.modelLook='materials';b.applyModelLook(c);assert.ok(cached.every(o=>!o.visible));b.state.ui.modelLook='neon';b.applyModelLook(c);assert.ok([st.grid,st.edges,st.lightSurface,st.lampGlows].every((o,i)=>o===cached[i]),'switches reuse the same bounded helpers');
+ for(const kind of ['model-site-grid','model-outlines','model-room-light','model-lamp-glows'])assert.equal(kinds().filter(x=>x===kind).length,1);
+ const exportAfter=b.architecturalRenderScene(THREE,c.scene,{purpose:'model'}),boundsAfter=new THREE.Box3().setFromObject(exportAfter);
+ assert.equal(exportBefore.children.length,exportAfter.children.length);assert.ok(boundsBefore.equals(boundsAfter));assert.equal(exportAfter.children.some(o=>o.userData.presentationOnly),false);
+ assert.equal(wall.geometry.attributes.position.array,position);assert.ok(c.camera.matrixWorld.equals(camera));assert.equal(JSON.stringify(b.state.project),before);
+});
+function asyncModelFixture(look='materials'){
+ const b=client(false,{querySelector:selector=>selector==='#studio3dStage'?{classList:{toggle(){}}}:null});b.state.ui.modelLook=look;const {c}=fixture(b);b.configureModelPresentation(c);c.requestRender=()=>{c.requestCount=(c.requestCount||0)+1;};c.modelPickBound=true;c.structureKey='test';c.renderer.shadowMap={};b.studio3d=c;
+ let resolve;c.scene.userData.furnitureLoads=[new Promise(done=>resolve=done)];return {b,c,resolve};
+}
+test('late furniture stays out of technical work in material mode and appears in the first technical view',async()=>{
+ const {b,c,resolve}=asyncModelFixture();await b.mountStudio3D();const st=c.scene.userData.modelPresentation;
+ const model=new THREE.Group();model.userData={model:'cabinet',roomId:'r'};const mesh=new THREE.Mesh(new THREE.BoxGeometry(.8,1.8,.5),new THREE.MeshStandardMaterial());model.add(mesh);c.scene.add(model);
+ resolve(true);await new Promise(done=>setImmediate(done));assert.equal(c.scene.children.some(o=>o.userData.kind==='model-outlines'),false);assert.equal(st.edgeVertices||0,0);
+ b.state.ui.modelLook='neon';b.applyModelLook(c);const values=st.edges.children.flatMap(o=>Array.from(o.geometry.attributes.position.array));assert.ok(values.length>0);assert.ok(st.edgeVertices>48,'new cabinet participates in the outlines');assert.ok(values.some((v,i)=>i%3===0&&Math.abs(v-.402)<1e-5&&Math.abs(values[i+1]-.902)<1e-5&&Math.abs(values[i+2]-.252)<1e-5),'the saved cabinet bounds are projected, not merely a larger edge count');assert.equal(st.edges.visible,true);
+});
+test('a hidden cached outline is rebuilt once after furniture arrives and retires its resources once',async()=>{
+ const {b,c,resolve}=asyncModelFixture('neon');await b.mountStudio3D();const st=c.scene.userData.modelPresentation,old=st.edges,retired=[];
+ for(const line of old.children)for(const resource of [line.geometry,line.material]){let count=0;resource.addEventListener('dispose',()=>count++);retired.push(()=>count);}
+ b.state.ui.modelLook='materials';b.applyModelLook(c);resolve(true);await new Promise(done=>setImmediate(done));assert.equal(st.edges===old,true);assert.ok(retired.every(count=>count()===0));
+ b.state.ui.modelLook='neon';b.applyModelLook(c);assert.equal(st.edges===old,false);assert.equal(c.scene.children.includes(old),false);assert.ok(retired.every(count=>count()===1));const current=st.edges;b.applyModelLook(c);assert.equal(st.edges===current,true);assert.ok(retired.every(count=>count()===1));
+});
+test('furniture finishing in the active technical view refreshes its visible outline immediately',async()=>{
+ const {b,c,resolve}=asyncModelFixture('neon');await b.mountStudio3D();const st=c.scene.userData.modelPresentation,old=st.edges,count=st.edgeVertices,mesh=new THREE.Mesh(new THREE.BoxGeometry(.7,1.2,.6),new THREE.MeshStandardMaterial());mesh.userData={model:'wardrobe',roomId:'r'};mesh.position.set(0,.6,0);c.scene.add(mesh);
+ resolve(true);await new Promise(done=>setImmediate(done));assert.equal(st.edges===old,false);assert.equal(st.edges.visible,true);assert.ok(st.edgeVertices>count);assert.equal(c.scene.children.filter(o=>o.userData.kind==='model-outlines').length,1);
+});
+test('pending furniture cannot allocate helpers or redraw after its scene is disposed or superseded',async()=>{
+ for(const stale of ['disposed','superseded']){const {b,c,resolve}=asyncModelFixture();await b.mountStudio3D();const count=c.requestCount;c.scene.userData.disposed=stale==='disposed';if(stale==='superseded')b.studio3d=null;resolve(true);await new Promise(done=>setImmediate(done));assert.equal(c.requestCount,count);assert.equal(c.scene.children.some(o=>o.userData.kind==='model-outlines'),false);}
+});
+test('changing presentation light before the first technical view remains safe and keeps that preference',()=>{
+ const handlers=new Map(),b=client(false,{addEventListener:(name,fn)=>handlers.set(name,fn)});b.state.ui.modelLook='materials';const {c}=fixture(b);b.configureModelPresentation(c);b.studio3d=c;c.requestRender=()=>{};
+ handlers.get('input')({target:{matches:()=>true,value:'23'}});assert.equal(b.state.ui.modelLightLevel,23);assert.equal(c.scene.children.some(o=>o.userData.kind==='model-room-light'),false);
+ b.state.ui.modelLook='neon';b.applyModelLook(c);assert.equal(c.scene.userData.modelPresentation.lightSurface.material.opacity,.23);
 });
 test('batching repetitive rug details preserves triangle count, world bounds and material',()=>{
  const b=client(),scene=new THREE.Scene(),material=new THREE.MeshStandardMaterial(),group=new THREE.Group();group.position.set(2,3,4);scene.add(group);let originalTriangles=0;
