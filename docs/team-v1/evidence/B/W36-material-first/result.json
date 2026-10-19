@@ -1,0 +1,14 @@
+{
+  "status": "implemented-pending-ci-preview",
+  "baselineMain": "005b1838985103fbd2be8f619b12009f6df0eae0",
+  "baselineBranch": "c29e8c15dfd4ec2fe3dc6a046d7a67ff7dbc93f5",
+  "scope": "pictured surface choice before explicit 3D preview",
+  "profiles": 17,
+  "localChecks": 31,
+  "newCases": 4,
+  "supplierPhotosVerified": 0,
+  "newAssets": 0,
+  "schemaBuildOrAChanges": false,
+  "nativePhoneAcceptance": false,
+  "fullCommercialAcceptance": false
+}

@@ -3,12 +3,12 @@
 Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 19/10/2026.
 - role: B
 - status: in_progress
-- active_task: B4
-- active_substep: R2.2 sourced BOQ/funding dashboard and export; CI/native preview pending
+- active_task: B1
+- active_substep: W36 picture-first materials implemented; exact CI/native preview pending
 - target_branch: codex/b-v1-24
-- actual_branch: codex/b-facade-depth, QA checkpoint based on released PR72 main a7ce3e83; runtime equals production.
+- actual_branch: codex/b-facade-depth, QA checkpoint based on released PR73 main 005b1838; runtime equals production.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
-- last_verified_commit: fc8370ad11948c6ba485678a04f8f998f3604ad1 (Node22 CI39189668658, native preview safety and production PNG verified)
+- last_verified_commit: 192c6f0c4889b20d23379770bbda66e29cfededd (Node22 CI39207642951, native sourced CSV/ZIP and production verified)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -809,3 +809,21 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Actual native ZIP downloaded and CRC passed,30SVG/2DXF/PDF/planning JSON/canonical handover JSON present; canonical JSON retained11076310VND/revision/priceKey and full-null. Found its old CSV consumer still used quote.source/date and lost canonical sourceReference/quotedAt.
 - B97 now wraps the existing customerPackageFiles API and replaces only boq-co-nguon.csv with the same canonical CSV used by Dự toán. Keep every other original file untouched; verify snapshot revision and price identity before/after upstream package assembly. No A source or formula changes. New behavior test covers preserved other files, exact CSV/source/date and stale snapshot/price rejection.29registered checks PASS.
 - Next exact final-source CI/native ZIP proof and production release; previous d076 source superseded by this package correction.
+
+### R2.2/R2.3 final release and actual-domain proof
+- Exact final source192c6f0c passed Node22 CI39207642951. PR73 merged as005b1838985103fbd2be8f619b12009f6df0eae0; tree4e02ae89ec5eecaf8b870b1ac1f094b82a7bf031 equals tested tree. Final preview dpl_44yEpgF2jZQw5oUHVfSSqaYRVMeo and production dpl_FCdHQA5jmFJL3nVDBWPEwfZ9horH READY, correct project/team/main/public domain.
+- Actual public import/reload keeps test quote11076310VND,51missing, full total/requiredLoan unknown, revision F896BFAC-EE2ED7CE-AI4-RH3/priceKey b8bfd906. Fractional legacy schedule now shows5585285VND principal+interest. Direct CSV, preview ZIP CSV and production ZIP CSV equal exact bytes. Production ZIP1945618bytes,41files/30SVG/2DXF/PDF, CRC passes. Detail/hashes/sampleCSV/screenshot in R2-commercial.
+- Actual public optional-account UI correctly says service unavailable and offers a working JSON backup. Downloaded backup retains11rooms and test quote. No customer data, real price, payment/order/email or paid provider action.
+- Capability probe200: AI/image true; cloud/media/payment/account quota/guest service false. Do not claim enabled services or ask for full access again. Follow existing customer-cloud-release.md once actual provider resources/configuration are available.
+-29 related workflow checks passed; no broader rerun after passing. These are scoped software/desktop fallback/export checks, not phone/nativeGPU aesthetic acceptance or professional construction approval. Preserve R1-GPU/R1-OUTDOOR/R1-VISUAL and fullCommercialAcceptance=false.
+- Next dependency: actual hosted Supabase/Auth/media/merchant setup and test resources for R2.4; actual enabledGPU desktop/phone and sourced outdoor/technical/real-quote/owner review for remaining integration gates. Do not repeat accepted R1 checks, fabricate missing inputs, broaden styles or edit A source. QA checkpoint only, no extra runtime release needed.
+
+## W36 · customer chooses pictured finishes before 3D
+- User corrected the customer story: materials must have pictures for selection before entering3D. Actual public desktop showed four original-photo choices below a long style brief inside the narrow middle column; selecting one immediately navigated to3D. Most supplier cards still share category illustrations, not exact SKU photographs. This is a real visual/sequence gap;103catalog records are not103ready pictures.
+- Added a full-width choice board immediately below the material page header. It exposes all17existing finish profiles across floor/wall/wood-and-fabric with large preview swatches, explicit per-room selection, selected state and a four-part chosen palette. Existing licensed source photographs/textures are reused; photo-based and procedural samples are labelled separately. No external product photo, generated exact-SKU claim, price or licence flag invented.
+- Choosing a finish saves through applyVisualMaterial and stays on step5. Separate explicit preview enters step6 using the same selected room and stored finishes. The original-photo library remains available in a disclosure and its apply action also stays in materials. Keep supplier products/quotes,10routes and all technical controls. No geometry/schema/build/A-source change.
+-31related style/material/sample tests PASS, including4new behavior cases for17choices/selected state/escaping, room-only mutation+real save/load, explicit preview and stale/empty room handling. Syntax passes. DeclaredNode22 CI and native preview/production check pending.
+- Changed B-owned src/90_product_polish.js, src/product-polish.css, registered tests/team-b-style-materials.test.mjs and B progress/evidence. Next persist scoped source, exactCI and visible preview choices/reload/3D, release under existing authorization. Exact supplier-photo coverage remains incomplete; do not call a procedural swatch or CC0generic texture the manufacturer's SKU photograph.
+
+### W36 native layout correction
+- First preview confirmed all17choices in DOM but desktop grid named areas kept the new full-width board after the long catalogue (y9984px). Correct the grid's actual named areas, including1180px single-column template, to put choices immediately after header and context below. This browser-found issue is why native layout is checked before release. CSS-only follow-up; application behavior/source/tests unchanged. Next updated preview screenshot and save/preview interactions.

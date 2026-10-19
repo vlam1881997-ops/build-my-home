@@ -1,9 +1,9 @@
 {
   "recordedAt": "2026-10-19T05:51:35.563949+00:00",
-  "status": "ready-for-ci-preview",
+  "status": "released-and-production-verified",
   "baselineMain": "a7ce3e837590b7f76126d691dbe2d5dcd6bb63aa",
   "baselineBranch": "dc966c0fe8725787366f4524032cd1418d6081b1",
-  "scope": "R2.2 customer budget/funding/export consumer integration only",
+  "scope": "R2.2 sourced budget/funding/CSV and R2.3 same-price customer ZIP consumer integration",
   "nativeReproduction": {
     "fixture": "isolated synthetic Modern 5x20 two-floor",
     "revision": "F896BFAC-EE2ED7CE-AI4-RH3",
@@ -14,8 +14,8 @@
   },
   "localChecks": {
     "node": "24.19.0",
-    "workflow": 28,
-    "newCases": 9,
+    "workflow": 29,
+    "newCases": 10,
     "syntax": "passed"
   },
   "changed": [
@@ -26,5 +26,40 @@
   "nativeGpuAcceptance": false,
   "realQuote": false,
   "schemaOrPackageChanges": false,
-  "fullCommercialAcceptance": false
+  "fullCommercialAcceptance": false,
+  "verifiedSource": "192c6f0c4889b20d23379770bbda66e29cfededd",
+  "main": "005b1838985103fbd2be8f619b12009f6df0eae0",
+  "testedAndMergedTree": "4e02ae89ec5eecaf8b870b1ac1f094b82a7bf031",
+  "pr": 73,
+  "ci": {
+    "node": 22,
+    "runId": 39207642951,
+    "conclusion": "success"
+  },
+  "preview": {
+    "deployment": "dpl_44yEpgF2jZQw5oUHVfSSqaYRVMeo",
+    "status": "READY"
+  },
+  "production": {
+    "deployment": "dpl_FCdHQA5jmFJL3nVDBWPEwfZ9horH",
+    "status": "READY",
+    "domain": "https://www.huiminhbach.id.vn/"
+  },
+  "nativeEvidence": "native-final.json",
+  "capabilities": {
+    "httpStatus": 200,
+    "aiConfigured": true,
+    "imageConfigured": true,
+    "cloudConfigured": false,
+    "mediaConfigured": false,
+    "paymentConfigured": false,
+    "aiUsageEnabled": false,
+    "guestServiceEnabled": false
+  },
+  "remaining": [
+    "R2 real cloud/media/quota/merchant configuration and hosted-provider verification",
+    "actual enabled-GPU desktop/phone appearance and performance",
+    "sourced construction/terrace inputs and complete real quotes",
+    "actual owner visual approval and professional review"
+  ]
 }
