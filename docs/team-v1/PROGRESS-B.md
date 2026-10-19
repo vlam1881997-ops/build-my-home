@@ -4,7 +4,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 19/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W33 released and production/PDF verified; remaining R1 GPU/device, actual technical-source and customer review gates open
+- active_substep: W34 original scope recovered; released software preserved; awaiting actual terrace dimensions/source and enabled-GPU/device visual evidence
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-facade-depth, QA checkpoint based on released PR71 main aab11137; runtime equals production.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
@@ -756,3 +756,12 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Persisted native before/after PNGs, lossless kitchen WebP, actual-domain screenshot and3 PDF contact sheets on B QA checkpoint. Original270867-byte PDF remains local with its SHA in result.json; connector did not persist that large blob, so no remote PDF link is claimed. Kitchen WebP preserves exact decoded pixels of original native PNG. Source/progress/results are durable.
 - No additional application change/deployment is required for this QA-only checkpoint. Full Modern R1 remains IN_PROGRESS: actual enabled-GPU desktop/mobile appearance/performance (cloud logs still GL_VENDOR/GL_RENDERER Disabled), actual terrace guard/drainage/waterproofing/structure source and professional/customer review. No permissions or temporary environment blocker remains. These are outstanding evidence/inputs, not completed by green CI or simple block views.
 - Next concrete work requires those actual remaining inputs/device evidence. Preserve current source and customer choices; do not expand to24styles, invent a guard/SKU/signoff or repeat accepted W26/W30/W31/W32/W33 checks merely on another continue request.
+
+
+## W34 · original scope recovered; actual acceptance inputs (2026-10-19)
+- Resumed exact B QA checkpoint a056f1ca50892f0a6451d69cd3b37d5b9a3709e5; source remains released main aab11137a9706f9081910cdf11ce809cd05afe58. Main ref and Vercel production dpl_sA6qxfPHQPtPXUXoVjZhqDkgSrnb rechecked: READY, exact SHA, public aliases assigned. No application changes or unnecessary redeploy.
+- Recovered the user's original narrowing through Personal Context: 18/10 06:28 UTC prioritize one Modern house in three increments (interior, exterior, acceptance), without expanding24 styles. The user also required measured terrace/access/guard parity and explicitly said at07:07 UTC not to invent missing confirmed guard/drainage dimensions to improve pictures. These are actual design-input gaps, not merely a later assistant permission rule.
+- All independent software work from W26–W33 is preserved. No new source defect was established in this continuation; do not manufacture a feature or rerun passed checks to appear busy. Production native tab retains the same synthetic fixture and explicit unknown terrace/source status. No customer project, signoff, GPU state or engineering record was changed.
+- Outstanding action requires actual input: (1) sourced guard/open-edge and terrace drainage/waterproofing/structure details for the current design revision; (2) actual enabled-WebGL desktop/phone views and timing evidence, followed by the product owner's visual review. Cloud browser currently cannot supply enabled-GPU proof; more GitHub/Vercel permission will not change that.
+- Concrete required data and acceptance limits are recorded in evidence/B/W34-open-acceptance/required-inputs.md. Ask for those inputs once, clearly; do not ask for full rights, a reconnection, another approval to publish or a repeated continue message. Never mark full Modern R1 done without the missing evidence; never fabricate professional approval.
+- This is a checkpoint-only change. Last verified runtime source remains efc26322. No tests rerun because there is no runtime/test change. Resume at the supplied real input/device evidence; preserve current customer choices, WIP/evidence and existing source ownership.
