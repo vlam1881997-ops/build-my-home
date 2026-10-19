@@ -1,0 +1,31 @@
+{
+  "productionZIP": {
+    "crc": "passed",
+    "sha256": "9179e7132d3054a0f482d74181a9547db09c0643913e73a9707e304c90eff80f",
+    "bytes": 1945618,
+    "files": 41,
+    "svg": 30,
+    "dxf": 2,
+    "pdf": 1
+  },
+  "csvExactBytesEqualAcrossPreviewDirectProductionZIP": true,
+  "csvSHA256": "7cbac0a094b3be0d839d5301883fbfded50642a6fd49fb9fa6450de2200685ba",
+  "revision": "F896BFAC-EE2ED7CE-AI4-RH3",
+  "priceKey": "b8bfd906",
+  "knownSubtotal": 11076310,
+  "completeTotal": null,
+  "unpricedCount": 51,
+  "backup": {
+    "validJSON": true,
+    "rooms": 11,
+    "testQuoteRetained": true,
+    "sha256": "073d71f6e7ac0b2afb738b48731728698e0bd69dc092a6c2dbede06dcd91c4ce",
+    "cloudUnavailableBackupUI": "passed"
+  },
+  "screenshot": {
+    "path": "production-budget.jpg",
+    "width": 1348,
+    "height": 926,
+    "sha256": "5c7ba7354912a4319cc604386fe4c6ead5d2075b4211fca07a6fc92996f61d06"
+  }
+}
