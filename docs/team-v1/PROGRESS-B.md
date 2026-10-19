@@ -3,8 +3,8 @@
 Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 19/10/2026.
 - role: B
 - status: in_progress
-- active_task: B3
-- active_substep: R1 release accepted with reservations for next iteration; recover approved R2 scope before implementation
+- active_task: B4
+- active_substep: R2.2 sourced BOQ/funding dashboard and export; CI/native preview pending
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-facade-depth, QA checkpoint based on released PR72 main a7ce3e83; runtime equals production.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
@@ -789,3 +789,12 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Preserve open gates R1-GPU (actual enabled-GPU desktop/phone8views/timings), R1-OUTDOOR (sourced guard/drainage/waterproofing/structure details) and R1-VISUAL (actual owner picture/revision decision). Carry them into follow-up without renaming them passed or silently deleting the original criteria. Unknown project data remains unknown.
 - No runtime/customer state/payment/access/review flag changed; no new application deployment needed. Last verified runtime source fc8370ad, Node22 CI39189668658. Existing source and QA remain durable.
 - Next: recover the previously approved upgrade2 plan and choose the next dependency-ready B substep. Do not restart accepted R1 work, expand24styles by assumption, inspect/edit A or ask again for publishing permissions.
+
+
+## R2.2 · one sourced budget across customer estimate, funding and export (2026-10-19)
+- Resumed exact B checkpoint dc966c0; production main a7ce3e83/PR72 remains the frozen R1 baseline. Recovered upgrade2 scope in the current conversation: input/save, materials/BOQ, cost/finance, same-revision handover and configured operations for one Modern project. No A audit/source edits or24style expansion.
+- Actual-domain isolated fixture reproduced a misleading customer summary: legacy planning estimate1316388427VND says2missing items while the actual canonical commercial BOQ has52missing rows and knownSubtotal0. Estimated cost and sourced cost were visually conflated.
+- B97 now reads commercialBoq/scopedFundingNeed contracts for sourced subtotal, actual missing-row count and full-loan need. Planning estimate/charts remain explicitly labelled planning; a partial total never becomes the full cost or required loan. Canonical scenario rows/fees drive the payment summary; the existing bank trial still works as an explicitly incomplete principal+interest simulation.
+- Added local UTF8 CSV for the current sourced BOQ with revision, priceKey, row IDs, quantity/unit/SKU/spec/price/source/date/expiry/region/issues. Null remains Chưa có; explicit0 stays0; spreadsheet-formula text is escaped and raw private quote fields are omitted. Reject project/revision/price changes through assembly. Existing planning export remains available with its correct label. Detailed BOQ is disclosed on demand; the source quote form is reused without new saved cost/geometry stores.
+-28 registered workflow checks PASS on local Node24, including9new dashboard/quote-change/expiry/zero/null/export/private-field/stale/save-load/funding/scenario/legacy cases. Source syntax passes. Source changed only B97, project-dashboard.css and B workflow tests; no packages/build/schema/price formulas, paid API or real customer writes.
+- Next: exact-head Node22 CI, native preview quote→estimate→funding→save/reload→CSV/handover, then authorized GitHub/Vercel release. R1 GPU/outdoor/visual reservations remain open and separate. Do not call the whole Modern commercial project complete from this increment alone.

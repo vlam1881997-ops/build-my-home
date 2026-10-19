@@ -1,0 +1,30 @@
+{
+  "recordedAt": "2026-10-19T05:51:35.563949+00:00",
+  "status": "ready-for-ci-preview",
+  "baselineMain": "a7ce3e837590b7f76126d691dbe2d5dcd6bb63aa",
+  "baselineBranch": "dc966c0fe8725787366f4524032cd1418d6081b1",
+  "scope": "R2.2 customer budget/funding/export consumer integration only",
+  "nativeReproduction": {
+    "fixture": "isolated synthetic Modern 5x20 two-floor",
+    "revision": "F896BFAC-EE2ED7CE-AI4-RH3",
+    "planningAmountVnd": 1316388427,
+    "oldDashboardMissing": 2,
+    "canonicalMissingRows": 52,
+    "knownSubtotal": 0
+  },
+  "localChecks": {
+    "node": "24.19.0",
+    "workflow": 28,
+    "newCases": 9,
+    "syntax": "passed"
+  },
+  "changed": [
+    "src/97_project_dashboard.js",
+    "src/project-dashboard.css",
+    "tests/team-b-workflow.test.mjs"
+  ],
+  "nativeGpuAcceptance": false,
+  "realQuote": false,
+  "schemaOrPackageChanges": false,
+  "fullCommercialAcceptance": false
+}
