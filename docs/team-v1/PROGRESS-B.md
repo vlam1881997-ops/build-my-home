@@ -804,3 +804,8 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Native finance review found legacy loan schedule carries fractional VND. B summary incorrectly required integer input and showed Chưa đủ phí despite valid principal+interest. Round only the final displayed legacy peak after checking finite/nonnegative/safe amount. Canonical fee completeness remains unchanged. Extend existing legacy test with fractional and invalid cases; all28registered tests pass again.
 - Public /api/config200 confirms Gemini/image configured; cloud/media/payment/AI quota/guest service false. This is service provisioning, not missing GitHub/Vercel permission. Do not enable readiness flags without real resources.
 - Next: exact updated-source CI/preview, customer ZIP quote/revision check, authorized release and final production proof.
+
+### R2.3 customer ZIP source/date parity
+- Actual native ZIP downloaded and CRC passed,30SVG/2DXF/PDF/planning JSON/canonical handover JSON present; canonical JSON retained11076310VND/revision/priceKey and full-null. Found its old CSV consumer still used quote.source/date and lost canonical sourceReference/quotedAt.
+- B97 now wraps the existing customerPackageFiles API and replaces only boq-co-nguon.csv with the same canonical CSV used by Dự toán. Keep every other original file untouched; verify snapshot revision and price identity before/after upstream package assembly. No A source or formula changes. New behavior test covers preserved other files, exact CSV/source/date and stale snapshot/price rejection.29registered checks PASS.
+- Next exact final-source CI/native ZIP proof and production release; previous d076 source superseded by this package correction.

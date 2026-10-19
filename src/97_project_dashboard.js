@@ -42,6 +42,11 @@
   const current=B.commercialBoq();if(B.state.project!==p||B.drawingRevision()!==s.revision||current.revision!==s.revision||current.priceKey!==s.priceKey)return null;return {csv,revision:s.revision,priceKey:s.priceKey};
  };
  B.exportSourcedBudget=()=>{const file=B.sourcedBudgetCsv();if(!file){B.toast('Thiết kế hoặc báo giá đã đổi. Mở lại Dự toán để đối chiếu.');return false;}B.download('BMH-BOQ-co-nguon-'+file.revision.replace(/[^a-z0-9_-]/gi,'-')+'.csv',file.csv,'text/csv;charset=utf-8');return true;};
+ const packageFiles=B.customerPackageFiles;if(packageFiles)B.customerPackageFiles=(snapshot,...args)=>{
+  const before=B.sourcedBudgetCsv();if(!before||snapshot.revision!==before.revision)throw new Error('Thiết kế hoặc báo giá đã đổi. Xuất lại hồ sơ.');
+  const files=packageFiles(snapshot,...args),after=B.sourcedBudgetCsv();if(!after||after.revision!==before.revision||after.priceKey!==before.priceKey)throw new Error('Thiết kế hoặc báo giá đã đổi. Xuất lại hồ sơ.');
+  return [...files.filter(([name])=>name!=='boq-co-nguon.csv'),['boq-co-nguon.csv',after.csv]];
+ };
  B.dashboardLoanView=()=>{
   const f=B.state.project.finance,t=f.scenario||{},explicit=!!(t.sourceReference||t.confirmed||t.ratePeriods?.length);
   if(!explicit&&Number(f.introRate)>0&&Number(f.postRate)>0&&B.financeSummary){const rows=B.financeSummary().schedule||[],peak=rows.length&&rows.every(r=>typeof r.payment==='number'&&Number.isFinite(r.payment)&&r.payment>=0&&moneyValue(Math.round(r.payment)))?Math.round(Math.max(...rows.map(r=>r.payment))):null;return {rows,peak,partial:true,legacy:true};}

@@ -1,9 +1,9 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';import {designClient} from './fixtures/design-client.mjs';
 import {modernReference} from './team-b-modern-reference.mjs';
 
-function dashboardClient(){
+function dashboardClient(packageFiles){
  const {B}=modernReference();B.screen2=()=>'';B.money=n=>Number(n).toLocaleString('vi-VN')+' đ';B.estimate=()=>({total:1300000000,budget:1200000000,gap:-100000000,area:160.42,areaSource:'plan'});B.boqSchedule=()=>[{group:'Kế hoạch',amount:1300000000,status:'quoted'},{amount:null},{amount:null}];B.dossierSchedule=()=>[];B.activeBudgetBaseline=()=>null;B.fundingNeed=()=>({ownCapital:500000000,remaining:800000000});B.commercialBoq();
- vm.runInNewContext(fs.readFileSync('src/97_project_dashboard.js','utf8'),{BMH:B,document:{addEventListener(){}},Number,Math,Map,console});return B;
+ if(packageFiles)B.customerPackageFiles=(...args)=>packageFiles(B,...args);vm.runInNewContext(fs.readFileSync('src/97_project_dashboard.js','utf8'),{BMH:B,document:{addEventListener(){}},Number,Math,Map,console});return B;
 }
 const dashboardQuote=extra=>({sku:'TEST-ONLY-FLOOR',specification:'TEST fixture floor m2',unit:'m²',unitPrice:100000,quotedAt:'2026-10-01',validUntil:'2027-01-01',sourceReference:'TEST-ONLY quote, not a supplier price',region:'TP. Hồ Chí Minh',scope:'installed',wastePct:0,vatMode:'included',transportMode:'included',...extra});
 function quoteDashboardFloor(B,extra={}){B.setBoqApplication({id:'AP-floor-project',name:'Sàn kiểm thử',roleId:'floor',sku:'TEST-ONLY-FLOOR',specification:'TEST fixture floor m2',quoteId:'test-floor-quote',costTreatment:'purchase'});B.setSourcedQuote('test-floor-quote',dashboardQuote(extra));}
@@ -32,6 +32,10 @@ test('CSV rejects a project, design or price identity that changes during export
   // Changes during the second read must be caught as well as before it.
   assert.equal(B.sourcedBudgetCsv()===null,true,field);
  }
+});
+test('customer ZIP reuses the sourced CSV with source/date and rejects changes during package assembly',()=>{
+ const other=['other.json','unchanged'],B=dashboardClient(()=>[other,['boq-co-nguon.csv','old source/date adapter']]);quoteDashboardFloor(B);let files=B.customerPackageFiles({revision:B.drawingRevision()});assert.equal(files.length,2);assert.equal(files[0],other);assert.equal(files[1][1],B.sourcedBudgetCsv().csv);assert.match(files[1][1],/TEST-ONLY quote, not a supplier price/);assert.match(files[1][1],/2026-10-01/);assert.throws(()=>B.customerPackageFiles({revision:'stale'}),/Xuất lại hồ sơ/);
+ const changing=dashboardClient(b=>{b.setSourcedQuote('test-floor-quote',dashboardQuote({unitPrice:200000}));return [other];});quoteDashboardFloor(changing);assert.throws(()=>changing.customerPackageFiles({revision:changing.drawingRevision()}),/Xuất lại hồ sơ/);
 });
 test('sourced budget and finance terms survive the real save/load path with the same export identity',()=>{
  const B=dashboardClient();quoteDashboardFloor(B);const before=B.sourcedBudgetCsv();B.save();B.state=B.loadState();const after=B.sourcedBudgetCsv();assert.equal(after.csv,before.csv);assert.equal(after.priceKey,before.priceKey);assert.equal(B.projectDashboardData().sourceFunding.requiredLoan,null);
