@@ -3,8 +3,8 @@
 Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 19/10/2026.
 - role: B
 - status: in_progress
-- active_task: B4
-- active_substep: R2.2/R2.3 released and production verified; real services/device/technical gates remain
+- active_task: B1
+- active_substep: W36 picture-first materials implemented; exact CI/native preview pending
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-facade-depth, QA checkpoint based on released PR73 main 005b1838; runtime equals production.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
@@ -817,3 +817,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Capability probe200: AI/image true; cloud/media/payment/account quota/guest service false. Do not claim enabled services or ask for full access again. Follow existing customer-cloud-release.md once actual provider resources/configuration are available.
 -29 related workflow checks passed; no broader rerun after passing. These are scoped software/desktop fallback/export checks, not phone/nativeGPU aesthetic acceptance or professional construction approval. Preserve R1-GPU/R1-OUTDOOR/R1-VISUAL and fullCommercialAcceptance=false.
 - Next dependency: actual hosted Supabase/Auth/media/merchant setup and test resources for R2.4; actual enabledGPU desktop/phone and sourced outdoor/technical/real-quote/owner review for remaining integration gates. Do not repeat accepted R1 checks, fabricate missing inputs, broaden styles or edit A source. QA checkpoint only, no extra runtime release needed.
+
+## W36 · customer chooses pictured finishes before 3D
+- User corrected the customer story: materials must have pictures for selection before entering3D. Actual public desktop showed four original-photo choices below a long style brief inside the narrow middle column; selecting one immediately navigated to3D. Most supplier cards still share category illustrations, not exact SKU photographs. This is a real visual/sequence gap;103catalog records are not103ready pictures.
+- Added a full-width choice board immediately below the material page header. It exposes all17existing finish profiles across floor/wall/wood-and-fabric with large preview swatches, explicit per-room selection, selected state and a four-part chosen palette. Existing licensed source photographs/textures are reused; photo-based and procedural samples are labelled separately. No external product photo, generated exact-SKU claim, price or licence flag invented.
+- Choosing a finish saves through applyVisualMaterial and stays on step5. Separate explicit preview enters step6 using the same selected room and stored finishes. The original-photo library remains available in a disclosure and its apply action also stays in materials. Keep supplier products/quotes,10routes and all technical controls. No geometry/schema/build/A-source change.
+-31related style/material/sample tests PASS, including4new behavior cases for17choices/selected state/escaping, room-only mutation+real save/load, explicit preview and stale/empty room handling. Syntax passes. DeclaredNode22 CI and native preview/production check pending.
+- Changed B-owned src/90_product_polish.js, src/product-polish.css, registered tests/team-b-style-materials.test.mjs and B progress/evidence. Next persist scoped source, exactCI and visible preview choices/reload/3D, release under existing authorization. Exact supplier-photo coverage remains incomplete; do not call a procedural swatch or CC0generic texture the manufacturer's SKU photograph.

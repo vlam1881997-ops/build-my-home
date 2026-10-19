@@ -6,6 +6,27 @@ import {materialPriceEvidence} from '../server/_material_catalog.mjs';
 const plain=x=>JSON.parse(JSON.stringify(x));
 const make=()=>{const b=designClient({identity:true});b.autoPlanConcept();b.state.project.materials.finish={exterior:null,rooms:{}};b.materialPriceEvidence=materialPriceEvidence;return b;};
 
+test('picture-first showroom exposes all 17 finishes with visible selection and honest photo versus simulation labels',()=>{
+ const b=make(),p=b.state.project,room=p.plan.rooms.find(r=>r.type==='living');b.state.ui.step=5;b.state.ui.sceneFocus='room:'+room.id;b.selectShowroomFinish('white-marble',room.id);
+ const seen=new Set();for(const category of ['floor','paint','cabinetry']){b.state.ui.materialCategory=category;const html=b.showroomChoiceBoardHtml();for(const m of html.matchAll(/data-showroom-finish="([^"]+)"/g))seen.add(m[1]);assert.match(html,/Phòng áp dụng/);assert.match(html,/data-showroom-choice-view/);assert.match(html,/chưa phải ảnh đúng mã hàng/);assert.doesNotMatch(html,/data-cinematic-render|data-render-sharp/);}
+ assert.equal(seen.size,17);b.state.ui.materialCategory='floor';let html=b.showroomChoiceBoardHtml();assert.match(html,/data-showroom-finish="white-marble" aria-pressed="true"/);assert.match(html,/Ảnh bề mặt · phối màu BMH/);assert.match(html,/Mẫu bề mặt mô phỏng/);assert.match(html,/data-picked-finish="floor"/);
+ room.name='<img src=x onerror=bad>';html=b.showroomChoiceBoardHtml();assert.ok(html.includes('&lt;img src=x onerror=bad&gt;'));assert.doesNotMatch(html,/<img src=x/);
+});
+test('choosing a pictured finish stays in materials, changes the target room only and survives real save/load',()=>{
+ const b=make(),p=b.state.project,living=p.plan.rooms.find(r=>r.type==='living'),bed=p.plan.rooms.find(r=>r.type==='bed');b.state.ui.step=5;
+ const plan=JSON.stringify(p.plan),choices=JSON.stringify(p.materials.choices),cost=JSON.stringify(p.costPlan),other=JSON.stringify(b.finishPalette(bed.id)),style=p.style;
+ assert.equal(b.selectShowroomFinish('dark-walnut',living.id),true);assert.equal(b.state.ui.step,5);assert.equal(b.state.ui.sceneFocus,'room:'+living.id);assert.equal(b.finishPalette(living.id).visualMaterials.accent,'dark-walnut');assert.equal(JSON.stringify(b.finishPalette(bed.id)),other);assert.equal(JSON.stringify(p.plan),plan);assert.equal(JSON.stringify(p.materials.choices),choices);assert.equal(JSON.stringify(p.costPlan),cost);assert.equal(p.style,style);
+ b.save();b.state=b.loadState();assert.equal(b.state.ui.step,5);assert.equal(b.finishPalette(living.id).visualMaterials.accent,'dark-walnut');
+});
+test('only the explicit preview action enters 3D with the same room and finishes; invalid targets do nothing',()=>{
+ const b=make(),p=b.state.project,room=p.plan.rooms.find(r=>r.type==='living'),stair=p.plan.rooms.find(r=>r.type==='stairs');b.state.ui.step=5;
+ const before=JSON.stringify(b.state);for(const [profile,id]of [['missing',room.id],['white-marble','gone'],['white-marble',stair.id]])assert.equal(b.selectShowroomFinish(profile,id),false);assert.equal(b.openShowroomFinishPreview('gone'),false);assert.equal(JSON.stringify(b.state),before);
+ b.selectShowroomFinish('natural-linen',room.id);const saved=JSON.stringify(p);assert.equal(b.state.ui.step,5);assert.equal(b.openShowroomFinishPreview(room.id),true);assert.equal(b.state.ui.step,6);assert.equal(b.state.ui.sceneFocus,'room:'+room.id);assert.equal(b.state.ui.designView,'room');assert.equal(b.state.ui.modelLook,'materials');assert.equal(JSON.stringify(p),saved);
+});
+test('empty showroom retains browsable pictures and prevents roomless choices',()=>{
+ const b=make();b.state.project.plan.rooms=[];const before=JSON.stringify(b.state.project),html=b.showroomChoiceBoardHtml();assert.match(html,/Chưa có phòng/);assert.match(html,/data-showroom-finish="oak-floor"[^>]*disabled/);assert.match(html,/data-showroom-choice-view disabled/);assert.equal(b.selectShowroomFinish('oak-floor','gone'),false);assert.equal(JSON.stringify(b.state.project),before);
+});
+
 test('photographed surface choices change only the target room and survive project serialization',()=>{
  const b=make(),p=b.state.project,living=p.plan.rooms.find(r=>r.type==='living'),bed=p.plan.rooms.find(r=>r.type==='bed');
  const plan=JSON.stringify(p.plan),choices=JSON.stringify(p.materials.choices),other=JSON.stringify(b.finishPalette(bed.id)),style=p.style;
