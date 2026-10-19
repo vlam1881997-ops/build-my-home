@@ -4,11 +4,11 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 18/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W32 finish measured PNG export on unavailable-WebGL devices; final preview/CI pending
+- active_substep: W32 released; post-production native verification blocked by failed environment. Full R1 GPU/device and technical/customer review gates remain open.
 - target_branch: codex/b-v1-24
-- actual_branch: codex/b-facade-depth, parent QAe3fb37e over PR69 production main b6dd47d5. Preview permission resolved.
+- actual_branch: codex/b-facade-depth, QA checkpoint based on PR70 production main71391833. Source changes safely released; environment unavailable.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
-- last_verified_commit: 48e003e73a95c35e3364b7e973d3e838a91e6598 (Node22 CI39129079814; native preview and production accepted for W31 scope)
+- last_verified_commit: ddb9f70837e3c1d349da05b59868fa10ef77bcda (Node22 CI39132216370; actual native preview PNG delivery verified; production native recheck still pending)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -727,3 +727,13 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Async guards reject project/design/revision/focus/angle/zoom/stage changes or a native renderer arriving during export. Bounded15s image decode, local Blob URL revocation, canvas release, duplicate-click guard and original button-disabled restoration cover failure/retry behavior. No project/history/AI writes.
 -16 registered related workflow tests PASS on local Node24.19.0; four new export tests cover size/revision/privacy/no mutation/concurrency, stale decode/encode, errors/timeouts/empty drawings/cleanup, and native-vs-fallback routing. Changed JS syntax passes. Unrelated tests not rerun locally; exact-head Node22 CI and native PNG/content inspection pending before release.
 - Changed source: src/46_architectural_render.js, src/78_design_workflow.js; tests/team-b-workflow.test.mjs plus B progress/evidence. Next: push exact source, final preview native PNG/angle/reload + actual dossier output inspection, then GitHub/Vercel release. Full R1 GPU/device visual/performance and source-confirmed engineering/customer gates remain open; no permission regrant is needed.
+
+
+### W32 verified delivery and release checkpoint (2026-10-19)
+- Exact source ddb9f708 passed Node22 CI39132216370, including npm test and Team coordinator.16 registered related local workflow checks pass. Preview dpl_A2iW9u8YyzyJ8KRJpndsqztc3G4X READY.
+- Actual native preview downloaded a nonblank1280x1128 PNG194646bytes, SHA2567a8e474c27cda53c739748c0c847918ed3819eb2aeabc1c0dc0ae7121a1aedb9; inspected image has measured furniture/room and visible Khối theo số đo / F896BFAC-EE2ED7CE-AI4-RH3 caption. After visible rotation/zoom, actual1280x1042 PNG has distinct SHA256c7cb6c010887cbc4525c419f78b810875d295d12cdf27b7df709128855a39b04. These prove labelled lightweight delivery only, not GPU realism.
+- Actual Bàn giao ZIP downloaded; CRC passed. It contains30SVG sheets,2millimetre DXFs, metadata/BOQ and a270867-byte A3 PDF. Dossier UI/JSON reports revision F896BFAC-EE2ED7CE-AI4-RH3. PDF rendering/visual review was not completed and must not be reported as passed. Dossier runtime was unchanged by W32.
+- Environment failed after these checks: exec server initialization timed out, no usable execution environment; browser capability unavailable. Binary downloads were inspected locally before failure but could not be uploaded to GitHub afterward. Preserve observed dimensions/hashes here and in result.json; do not claim the old scratch links are retrievable.
+- PR70 merged as main7139183308f32fceb63f860db5d4aa23b47d218e; tested and merged tree bfc1d2157c245e347f720b0e4c01f49e879d499e match. Vercel production dpl_AHpknS2sz2YDQ5oNLJWyqNsJjsF6 READY for prj_PcB996IRamEZqWrKpA5qk9T290kh, exact main SHA, with www.huiminhbach.id.vn assigned. Native public-domain export recheck is PENDING because environment/browser unavailable. No unsupported file-tree or wrapper403 is evidence of missing user consent.
+- This checkpoint contains QA/progress only. Runtime equals released production. No new paid operations, A source/schema/build changes or real customer project edits. Full R1 remains IN_PROGRESS: enabled-GPU desktop/mobile visual/performance, actual terrace guard/drainage/waterproofing/structure inputs and customer/professional acceptance.
+- Next concrete action after environment recovery: verify the same public-domain export once, inspect existing downloaded dossier PDF if recoverable, then address actual remaining acceptance inputs. Do not reimplement W32, repeat accepted kitchen/bedroom checks, recreate permissions or claim full R1 completion from green CI.

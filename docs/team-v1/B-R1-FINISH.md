@@ -46,3 +46,12 @@ Resume the next open R1.2/R1.3 gate. Do not regenerate unchanged kitchen/bedroom
 PR69 source48e003e73a95c35e3364b7e973d3e838a91e6598 passed exact-head Node22 CI39129079814 and native preview checks. Merged main b6dd47d50a3227dda7651eb9e4f1aed3ba9911fc; production dpl_6Dc5cGv2zCoukVqpz27s5QmbYsqU READY on the public domain. Twelve scoped local workflow checks passed. Native angle37->53/reload/deletion and terrace panel parity across drawing/3D passed. Production retains saved synthetic furniture, shows measured IDs/revision and exact terrace access/missing technical status. Evidence: W31-lightweight-terrace.
 
 This closes the lightweight block-view discrepancy and terrace information visibility. It does not close enabled-GPU/mobile appearance/performance or source-confirmed terrace engineering/customer/professional approval. Actual technical inputs remain missing; the UI now exposes them clearly. Full Modern R1 remains IN_PROGRESS. No repeat preview permission request, previous accepted test loop or invented guard/drainage design is needed.
+
+
+## W32 current release and explicit interruption
+
+PR70 source ddb9f70837e3c1d349da05b59868fa10ef77bcda passed exact-head Node22 CI39132216370 and actual native preview PNG delivery (1280x1128 and rotated/zoomed1280x1042). The existing measured fallback is now downloadable with its true drawing revision and measured-block caption. The customer dossier download also passed ZIP CRC/content inventory; PDF visual review was not completed.
+
+Merged main 7139183308f32fceb63f860db5d4aa23b47d218e; Vercel production dpl_AHpknS2sz2YDQ5oNLJWyqNsJjsF6 READY with that exact SHA and www.huiminhbach.id.vn assigned. Source/tested and merge trees match. Post-production native export verification remains pending because the execution environment failed and browser tools became unavailable. Previously inspected binary PNG/PDF files could not be persisted after the failure; their observed hashes/dimensions are recorded in W32 result.json, not advertised as downloadable artifacts.
+
+Full R1 remains IN_PROGRESS. Outstanding evidence is actual enabled-GPU desktop/mobile appearance/performance, customer visual/design review and source-confirmed terrace engineering inputs. No fabricated source, guard, drainage detail, signature or GPU acceptance may close those gates. Existing GitHub/Vercel publishing authorization remains valid; no permission regrant is required.
