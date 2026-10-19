@@ -4,11 +4,11 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 19/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W35 lazy technical layers implemented; exact-head Node22 CI and preview pending
+- active_substep: W35 released and production verified; actual device/terrace review inputs remain open
 - target_branch: codex/b-v1-24
-- actual_branch: codex/b-facade-depth, QA checkpoint based on released PR71 main aab11137; runtime equals production.
+- actual_branch: codex/b-facade-depth, QA checkpoint based on released PR72 main a7ce3e83; runtime equals production.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
-- last_verified_commit: efc26322a2fd9d0b6796d2730aa405a1e365b63f (Node22 CI39183290259, native preview and production PNG verified)
+- last_verified_commit: fc8370ad11948c6ba485678a04f8f998f3604ad1 (Node22 CI39189668658, native preview safety and production PNG verified)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -774,3 +774,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 -19 model-presentation checks PASS, including6 new behavior cases: lazy layers, measured export/camera/plan parity, late furniture bounds, cached resource disposal, active-neon refresh, stale scenes and early light preference. Existing19 workflow and10 architectural-render checks also PASS (48 total). The render suite initially could not import missing temporary test dependencies; reran successfully after restoring the exact declared Three0.160.1/pathtracer0.0.23/BVH0.8.3 outside the repo. No package/lock/build change. Local Node24.19.0; declared Node22 CI pending.
 - Reproducible CPU-only500-mesh stress fixture:7 samples each, first excluded, before median54.1455ms/174432 helper-buffer bytes; after1.4244ms/0 helper-buffer bytes in material mode. This is not native GPU, first visible model, phone, whole Modern house or universal latency evidence. Data/script in W35-lazy-technical-layers.
 - Source: src/98_model_presentation.js and tests/model-presentation.test.mjs; B progress/evidence only. Next push bounded source+progress, exact-head CI/preview, native fallback safety and release under existing authorization. Full R1 remains IN_PROGRESS pending actual enabled-GPU/device visual/performance, sourced terrace technical dimensions and user/professional design review. Do not fabricate those inputs or expand styles.
+
+
+### W35 final release verification
+- Exact source fc8370ad passed declared Node22 CI39189668658 (npm test + Team coordinator). PR72 merged as main a7ce3e837590b7f76126d691dbe2d5dcd6bb63aa; merged tree833fb33337f07d225b5fdca0eee6a1f8df776e01 equals the tested tree. Preview dpl_42R89aucHXkoJjfNhKATRyQawY98 and production dpl_5bmnABYcWhmp93xTnkAwpdcoW5pn both READY for their exact commits. Public domain assigned.
+- Native preview imported the existing isolated synthetic Modern fixture through the visible backup UI. Technical/material mode switch and reload preserve the selected preference and measured revision. Actual public-domain reload contains the lazy-layer source and retains the same project; mode switching and PNG delivery passed.1280x1081 production PNG188574bytes has SHA2560ef52b682862a9a13a966e2dbfe6a6d62f0cdb7f798659b99a6158022045ee68, exactly matching inspected preview bytes. Persisted lossless WebP preserves exact decoded pixels; UI screenshot shows actual public status.
+- Cloud WebGL still explicitly reports GL_VENDOR/GL_RENDERER Disabled; these native checks establish fallback safety only, not lazy-layer GPU aesthetics or device speed. The500-mesh CPU timings are scoped synthetic evidence.48 related local checks pass; no universal speed claim, construction approval, customer signoff, A/schema/build/dependency change or style expansion.
+- This final checkpoint is QA/progress only, based on released main. No additional application deployment needed. Full Modern R1 stays IN_PROGRESS pending actual enabled-GPU desktop/phone appearance/performance, sourced terrace technical dimensions and owner/professional review. Preserve W35 and all previously accepted work; do not rerun passed suites without a related change or repeat permission requests.

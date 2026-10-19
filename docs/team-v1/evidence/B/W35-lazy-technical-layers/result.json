@@ -2,7 +2,7 @@
   "scope": "W35 material-view CPU work and scene lifecycle only",
   "sourceBaseline": "645180d7983c3485da1877667731657f86772fcf",
   "productionBaseline": "aab11137a9706f9081910cdf11ce809cd05afe58",
-  "status": "ready-for-ci-preview",
+  "status": "released-production-verified",
   "localChecks": {
     "node": "24.19.0",
     "modelPresentation": 19,
@@ -24,11 +24,46 @@
     "firstVisibleModel": false
   },
   "remaining": [
-    "exact-head Node22 CI and preview",
     "actual enabled-GPU desktop/phone appearance and timings",
     "sourced terrace guard/drainage/waterproofing/structure inputs",
     "owner visual and applicable professional review"
   ],
   "designWrites": false,
-  "packageChanges": false
+  "packageChanges": false,
+  "sourceCommit": "fc8370ad11948c6ba485678a04f8f998f3604ad1",
+  "pullRequest": 72,
+  "mainCommit": "a7ce3e837590b7f76126d691dbe2d5dcd6bb63aa",
+  "testedAndMergedTree": "833fb33337f07d225b5fdca0eee6a1f8df776e01",
+  "ci": {
+    "node": 22,
+    "runId": 39189668658,
+    "status": "success",
+    "npmTest": "passed",
+    "teamCoordinator": "passed"
+  },
+  "preview": {
+    "id": "dpl_42R89aucHXkoJjfNhKATRyQawY98",
+    "status": "READY"
+  },
+  "production": {
+    "id": "dpl_5bmnABYcWhmp93xTnkAwpdcoW5pn",
+    "status": "READY",
+    "domain": "https://www.huiminhbach.id.vn/"
+  },
+  "nativeSafety": {
+    "fixture": "synthetic Modern 5x20 two-floor, not surveyed/customer-approved",
+    "revision": "F896BFAC-EE2ED7CE-AI4-RH3",
+    "technicalMaterialSwitch": "passed",
+    "previewReloadPreference": "passed",
+    "productionSourceIdentity": "lazy-layer helper present in actual loaded source",
+    "exportMode": "labelled measured lightweight blocks",
+    "width": 1280,
+    "height": 1081,
+    "bytes": 188574,
+    "sha256": "0ef52b682862a9a13a966e2dbfe6a6d62f0cdb7f798659b99a6158022045ee68",
+    "previewBytesEqual": true,
+    "visualInspection": "nonblank measured layout, saved rotated and elevated cabinet, explicit block-view caption",
+    "gpu": "WebGL GL_VENDOR/GL_RENDERER Disabled; not a GPU appearance or latency acceptance",
+    "errors": "Expected disabled-WebGL renderer errors and browser-extension metadata errors; no observed application UI exception"
+  }
 }
