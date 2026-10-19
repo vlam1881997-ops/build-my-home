@@ -47,6 +47,7 @@ test('funding follows sourced BOQ and declared capital, including explicit zero,
 });
 test('existing bank trial remains available as principal and interest only; invalid explicit terms never fall back to it',()=>{
  const B=dashboardClient(),f=B.state.project.finance;f.scenario={};Object.assign(f,{introRate:10,postRate:12,loan:100000000,years:5});B.financeSummary=()=>({schedule:[{month:1,principal:100,interest:20,payment:120},{month:2,principal:100,interest:15,payment:115}],peak:999999});let view=B.dashboardLoanView();assert.equal(view.legacy,true);assert.equal(view.peak,120);assert.equal(view.rows.length,2);assert.match(B.dashboardFinanceMetricsHtml(B.projectDashboardData(),view),/Đỉnh gốc \+ lãi/);assert.match(B.dashboardFinanceMetricsHtml(B.projectDashboardData(),view),/chưa gồm phí và nợ/);
+ B.financeSummary=()=>({schedule:[{month:1,principal:100.14,interest:20.47,payment:120.61},{month:2,principal:100.14,interest:15.23,payment:115.37}]});assert.equal(B.dashboardLoanView().peak,121);B.financeSummary=()=>({schedule:[{payment:NaN}]});assert.equal(B.dashboardLoanView().peak,null);
  f.scenario={sourceReference:'TEST incomplete canonical request',ratePeriods:[]};view=B.dashboardLoanView();assert.equal(view.legacy,false);assert.equal(view.peak,null);assert.equal(view.rows.length,0);
 });
 
