@@ -1,6 +1,60 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';import {designClient} from './fixtures/design-client.mjs';
 import {modernReference} from './team-b-modern-reference.mjs';
 
+function dashboardClient(packageFiles){
+ const {B}=modernReference();B.screen2=()=>'';B.money=n=>Number(n).toLocaleString('vi-VN')+' đ';B.estimate=()=>({total:1300000000,budget:1200000000,gap:-100000000,area:160.42,areaSource:'plan'});B.boqSchedule=()=>[{group:'Kế hoạch',amount:1300000000,status:'quoted'},{amount:null},{amount:null}];B.dossierSchedule=()=>[];B.activeBudgetBaseline=()=>null;B.fundingNeed=()=>({ownCapital:500000000,remaining:800000000});B.commercialBoq();
+ if(packageFiles)B.customerPackageFiles=(...args)=>packageFiles(B,...args);vm.runInNewContext(fs.readFileSync('src/97_project_dashboard.js','utf8'),{BMH:B,document:{addEventListener(){}},Number,Math,Map,console});return B;
+}
+const dashboardQuote=extra=>({sku:'TEST-ONLY-FLOOR',specification:'TEST fixture floor m2',unit:'m²',unitPrice:100000,quotedAt:'2026-10-01',validUntil:'2027-01-01',sourceReference:'TEST-ONLY quote, not a supplier price',region:'TP. Hồ Chí Minh',scope:'installed',wastePct:0,vatMode:'included',transportMode:'included',...extra});
+function quoteDashboardFloor(B,extra={}){B.setBoqApplication({id:'AP-floor-project',name:'Sàn kiểm thử',roleId:'floor',sku:'TEST-ONLY-FLOOR',specification:'TEST fixture floor m2',quoteId:'test-floor-quote',costTreatment:'purchase'});B.setSourcedQuote('test-floor-quote',dashboardQuote(extra));}
+test('commercial dashboard counts the actual sourced BOQ, not two legacy omissions or its estimated total',()=>{
+ const B=dashboardClient(),before=JSON.stringify(B.state.project),d=B.projectDashboardData(),s=B.commercialBoq();assert.equal(d.e.total,1300000000);assert.equal(d.planningQuoted,1300000000);assert.equal(d.quoted,0);assert.equal(d.unpriced.length,s.unpricedCount);assert.ok(d.unpriced.length>10);assert.equal(d.source.completeTotal,null);
+ const html=B.dashboardCostMetricsHtml(d)+B.dashboardSourcedBudgetHtml(d);assert.match(html,/Ngân sách phương án/);assert.match(html,/Chưa đủ dữ liệu để chốt tổng/);assert.ok(html.includes('>'+s.unpricedCount+'<'));assert.doesNotMatch(html,/Ngân sách đã tính|Báo giá đã đủ phạm vi/);assert.equal(JSON.stringify(B.state.project),before);
+});
+test('a valid quote, replacement price and expiry update the same public dashboard scope without changing geometry',()=>{
+ const B=dashboardClient(),plan=JSON.stringify(B.state.project.plan),rev=B.drawingRevision();quoteDashboardFloor(B);let d=B.projectDashboardData(),row=d.source.rows.find(r=>r.code==='AP-floor-project');assert.ok(row.amount>0);assert.equal(d.quoted,row.amount);assert.equal(d.source.completeTotal,null);const key=d.source.priceKey,count=d.unpriced.length;
+ B.setSourcedQuote('test-floor-quote',dashboardQuote({unitPrice:200000}));d=B.projectDashboardData();assert.equal(d.quoted,row.amount*2);assert.notEqual(d.source.priceKey,key);assert.equal(d.unpriced.length,count);
+ B.setSourcedQuote('test-floor-quote',dashboardQuote({validUntil:'2020-01-01'}));d=B.projectDashboardData();assert.equal(d.quoted,0);assert.equal(d.unpriced.length,count+1);assert.equal(d.sourceFunding.requiredLoan,null);assert.equal(B.drawingRevision(),rev);assert.equal(JSON.stringify(B.state.project.plan),plan);
+});
+test('budget UI preserves explicit zero but never converts absent, outdated or provisional complete totals into zero',()=>{
+ const B=dashboardClient(),d=B.projectDashboardData();for(const full of [null,undefined,-1,NaN]){d.source={...d.source,completeTotal:full};assert.match(B.dashboardSourcedBudgetHtml(d),/Chưa đủ dữ liệu để chốt tổng/);}
+ d.source={...d.source,completeTotal:0};d.unpriced=[];assert.match(B.dashboardSourcedBudgetHtml(d),/Tổng dự toán đủ dữ liệu: 0 đ/);
+ d.source.completeTotal=null;assert.match(B.dashboardSourcedBudgetHtml(d),/Cần xác nhận dự phòng/);
+ const current=B.commercialBoq;B.commercialBoq=()=>({...current(),revision:'old-revision'});const stale=B.projectDashboardData();assert.equal(stale.source,null);assert.equal(stale.quoted,null);assert.match(B.dashboardCostMetricsHtml(stale),/Chưa đối chiếu/);assert.equal(B.sourcedBudgetCsv(),null);
+});
+test('sourced CSV retains nulls, exact revision and price identity, escapes formulas and excludes raw private quote fields',()=>{
+ const B=dashboardClient();quoteDashboardFloor(B,{sourceReference:'\t=UNTRUSTED()',privateToken:'CONFIDENTIAL_INTERNAL'});B.state.project.costPlan.applications[0].name=' =UNTRUSTED("x")';const before=JSON.stringify(B.state.project),d=B.projectDashboardData(),file=B.sourcedBudgetCsv();
+ assert.equal(file.revision,d.source.revision);assert.equal(file.priceKey,d.source.priceKey);assert.match(file.csv,/"Tổng dự toán đủ dữ liệu","Chưa có"/);assert.ok(file.csv.includes('"Phần có nguồn đã tính","'+d.quoted+'"'));assert.ok(file.csv.includes('"\' =UNTRUSTED(""x"")"'));assert.ok(file.csv.includes('"\'\t=UNTRUSTED()"'));assert.doesNotMatch(file.csv,/CONFIDENTIAL_INTERNAL/);assert.equal(JSON.stringify(B.state.project),before);
+ let sent;B.download=(...args)=>sent=args;assert.equal(B.exportSourcedBudget(),true);assert.match(sent[0],/^BMH-BOQ-co-nguon-/);assert.equal(sent[1],file.csv);assert.match(sent[2],/text\/csv/);
+});
+test('CSV rejects a project, design or price identity that changes during export assembly',()=>{
+ for(const field of ['project','revision','priceKey']){const B=dashboardClient(),base=B.commercialBoq();let calls=0;B.commercialBoq=()=>{calls++;if(calls===2){if(field==='project')B.state.project=structuredClone(B.state.project);if(field==='revision')B.drawingRevision=()=>'changed';}return {...base,priceKey:field==='priceKey'&&calls===2?'changed':base.priceKey};};
+  // Changes during the second read must be caught as well as before it.
+  assert.equal(B.sourcedBudgetCsv()===null,true,field);
+ }
+});
+test('customer ZIP reuses the sourced CSV with source/date and rejects changes during package assembly',()=>{
+ const other=['other.json','unchanged'],B=dashboardClient(()=>[other,['boq-co-nguon.csv','old source/date adapter']]);quoteDashboardFloor(B);let files=B.customerPackageFiles({revision:B.drawingRevision()});assert.equal(files.length,2);assert.equal(files[0],other);assert.equal(files[1][1],B.sourcedBudgetCsv().csv);assert.match(files[1][1],/TEST-ONLY quote, not a supplier price/);assert.match(files[1][1],/2026-10-01/);assert.throws(()=>B.customerPackageFiles({revision:'stale'}),/Xuất lại hồ sơ/);
+ const changing=dashboardClient(b=>{b.setSourcedQuote('test-floor-quote',dashboardQuote({unitPrice:200000}));return [other];});quoteDashboardFloor(changing);assert.throws(()=>changing.customerPackageFiles({revision:changing.drawingRevision()}),/Xuất lại hồ sơ/);
+});
+test('sourced budget and finance terms survive the real save/load path with the same export identity',()=>{
+ const B=dashboardClient();quoteDashboardFloor(B);const before=B.sourcedBudgetCsv();B.save();B.state=B.loadState();const after=B.sourcedBudgetCsv();assert.equal(after.csv,before.csv);assert.equal(after.priceKey,before.priceKey);assert.equal(B.projectDashboardData().sourceFunding.requiredLoan,null);
+});
+test('finance dashboard uses the canonical scenario and refuses a complete payment peak when fees are unknown',()=>{
+ const B=dashboardClient(),t={principal:120000000,months:12,method:'annuity',graceMonths:0,ratePeriods:[{fromMonth:1,annualRatePct:12}],draws:[{month:1,amount:120000000}],fees:[],constructionPayments:[],sourceReference:'TEST-ONLY terms',confirmed:true};B.setFinanceScenario(t);const view=B.dashboardLoanView(),source=B.financeScenarioSummary();assert.equal(view.rows.length,12);assert.equal(view.peak,source.peakPayment);assert.equal(view.partial,false);let html=B.dashboardFinanceMetricsHtml(B.projectDashboardData(),view);assert.match(html,/Vay cần theo BOQ/);assert.match(html,/Chưa đủ dữ liệu/);assert.match(html,/120\.000\.000 đ/);assert.match(html,/chưa phải phê duyệt vay/);
+ B.setFinanceScenario({...t,fees:null});const partial=B.dashboardLoanView();assert.equal(partial.peak,null);assert.equal(partial.partial,true);assert.match(B.dashboardFinanceMetricsHtml(B.projectDashboardData(),partial),/Chưa đủ phí/);
+});
+test('funding follows sourced BOQ and declared capital, including explicit zero, without substituting the planning budget',()=>{
+ const B=dashboardClient();assert.equal(B.projectDashboardData().sourceFunding.ownCapital,null);Object.assign(B.state.project.finance,{cash:100000000,reserve:20000000});for(const k of ['cash','reserve'])B.recordProjectInput('finance.'+k,{confirmed:true,sourceReference:'TEST declared '+k});
+ let d=B.projectDashboardData();assert.equal(d.sourceFunding.ownCapital,80000000);assert.equal(d.sourceFunding.requiredLoan,null);const base=d.source;B.commercialBoq=()=>({...base,completeTotal:200000000});d=B.projectDashboardData();assert.equal(d.sourceFunding.requiredLoan,120000000);assert.match(B.dashboardFinanceMetricsHtml(d,{peak:null}),/120\.000\.000 đ/);
+ B.commercialBoq=()=>({...base,completeTotal:0});d=B.projectDashboardData();assert.equal(d.sourceFunding.requiredLoan,0);assert.match(B.dashboardFinanceMetricsHtml(d,{peak:null}),/Vay cần theo BOQ<\/span><b>0 đ/);assert.equal(d.e.total,1300000000);
+});
+test('existing bank trial remains available as principal and interest only; invalid explicit terms never fall back to it',()=>{
+ const B=dashboardClient(),f=B.state.project.finance;f.scenario={};Object.assign(f,{introRate:10,postRate:12,loan:100000000,years:5});B.financeSummary=()=>({schedule:[{month:1,principal:100,interest:20,payment:120},{month:2,principal:100,interest:15,payment:115}],peak:999999});let view=B.dashboardLoanView();assert.equal(view.legacy,true);assert.equal(view.peak,120);assert.equal(view.rows.length,2);assert.match(B.dashboardFinanceMetricsHtml(B.projectDashboardData(),view),/Đỉnh gốc \+ lãi/);assert.match(B.dashboardFinanceMetricsHtml(B.projectDashboardData(),view),/chưa gồm phí và nợ/);
+ B.financeSummary=()=>({schedule:[{month:1,principal:100.14,interest:20.47,payment:120.61},{month:2,principal:100.14,interest:15.23,payment:115.37}]});assert.equal(B.dashboardLoanView().peak,121);B.financeSummary=()=>({schedule:[{payment:NaN}]});assert.equal(B.dashboardLoanView().peak,null);
+ f.scenario={sourceReference:'TEST incomplete canonical request',ratePeriods:[]};view=B.dashboardLoanView();assert.equal(view.legacy,false);assert.equal(view.peak,null);assert.equal(view.rows.length,0);
+});
+
 test('inspection cut removes an unsupported door lintel while the full-height opening keeps its measured head',()=>{
  const B=designClient(),door={kind:'door',height:2.1};
  assert.equal(B.lightPreviewWallBands(door,3.06,1.1).length,0);assert.equal(B.lightPreviewWallBands(door,3.06,1.4).length,0);

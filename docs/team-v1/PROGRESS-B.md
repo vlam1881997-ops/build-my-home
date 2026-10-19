@@ -3,12 +3,12 @@
 Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 19/10/2026.
 - role: B
 - status: in_progress
-- active_task: B3
-- active_substep: W35 lazy technical layers implemented; exact-head Node22 CI and preview pending
+- active_task: B4
+- active_substep: R2.2 sourced BOQ/funding dashboard and export; CI/native preview pending
 - target_branch: codex/b-v1-24
-- actual_branch: codex/b-facade-depth, QA checkpoint based on released PR71 main aab11137; runtime equals production.
+- actual_branch: codex/b-facade-depth, QA checkpoint based on released PR72 main a7ce3e83; runtime equals production.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
-- last_verified_commit: efc26322a2fd9d0b6796d2730aa405a1e365b63f (Node22 CI39183290259, native preview and production PNG verified)
+- last_verified_commit: fc8370ad11948c6ba485678a04f8f998f3604ad1 (Node22 CI39189668658, native preview safety and production PNG verified)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -774,3 +774,38 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 -19 model-presentation checks PASS, including6 new behavior cases: lazy layers, measured export/camera/plan parity, late furniture bounds, cached resource disposal, active-neon refresh, stale scenes and early light preference. Existing19 workflow and10 architectural-render checks also PASS (48 total). The render suite initially could not import missing temporary test dependencies; reran successfully after restoring the exact declared Three0.160.1/pathtracer0.0.23/BVH0.8.3 outside the repo. No package/lock/build change. Local Node24.19.0; declared Node22 CI pending.
 - Reproducible CPU-only500-mesh stress fixture:7 samples each, first excluded, before median54.1455ms/174432 helper-buffer bytes; after1.4244ms/0 helper-buffer bytes in material mode. This is not native GPU, first visible model, phone, whole Modern house or universal latency evidence. Data/script in W35-lazy-technical-layers.
 - Source: src/98_model_presentation.js and tests/model-presentation.test.mjs; B progress/evidence only. Next push bounded source+progress, exact-head CI/preview, native fallback safety and release under existing authorization. Full R1 remains IN_PROGRESS pending actual enabled-GPU/device visual/performance, sourced terrace technical dimensions and user/professional design review. Do not fabricate those inputs or expand styles.
+
+
+### W35 final release verification
+- Exact source fc8370ad passed declared Node22 CI39189668658 (npm test + Team coordinator). PR72 merged as main a7ce3e837590b7f76126d691dbe2d5dcd6bb63aa; merged tree833fb33337f07d225b5fdca0eee6a1f8df776e01 equals the tested tree. Preview dpl_42R89aucHXkoJjfNhKATRyQawY98 and production dpl_5bmnABYcWhmp93xTnkAwpdcoW5pn both READY for their exact commits. Public domain assigned.
+- Native preview imported the existing isolated synthetic Modern fixture through the visible backup UI. Technical/material mode switch and reload preserve the selected preference and measured revision. Actual public-domain reload contains the lazy-layer source and retains the same project; mode switching and PNG delivery passed.1280x1081 production PNG188574bytes has SHA2560ef52b682862a9a13a966e2dbfe6a6d62f0cdb7f798659b99a6158022045ee68, exactly matching inspected preview bytes. Persisted lossless WebP preserves exact decoded pixels; UI screenshot shows actual public status.
+- Cloud WebGL still explicitly reports GL_VENDOR/GL_RENDERER Disabled; these native checks establish fallback safety only, not lazy-layer GPU aesthetics or device speed. The500-mesh CPU timings are scoped synthetic evidence.48 related local checks pass; no universal speed claim, construction approval, customer signoff, A/schema/build/dependency change or style expansion.
+- This final checkpoint is QA/progress only, based on released main. No additional application deployment needed. Full Modern R1 stays IN_PROGRESS pending actual enabled-GPU desktop/phone appearance/performance, sourced terrace technical dimensions and owner/professional review. Preserve W35 and all previously accepted work; do not rerun passed suites without a related change or repeat permission requests.
+
+
+## R1 acceptance disposition · owner requested transition to R2 (2026-10-19 09:31 Asia/Saigon)
+- User explicitly requested: nghiệm thu bản1 đi còn làm bản2. Recorded a software release review for PR72/main a7ce3e83 in evidence/B/R1-acceptance-20261019/acceptance.md and acceptance.json. Rechecked current main/B refs and exact production READY; no repeat runtime test cycle or new application code.
+- Disposition: freeze the released R1 software iteration and accept that release with reservations as the baseline for the next iteration. This is not a claim that every original R1 commercial gate passed, nor an invented customer visual/professional signature. Broad implementation_accepted remains false until its original full evidence gates are actually met.
+- Preserve open gates R1-GPU (actual enabled-GPU desktop/phone8views/timings), R1-OUTDOOR (sourced guard/drainage/waterproofing/structure details) and R1-VISUAL (actual owner picture/revision decision). Carry them into follow-up without renaming them passed or silently deleting the original criteria. Unknown project data remains unknown.
+- No runtime/customer state/payment/access/review flag changed; no new application deployment needed. Last verified runtime source fc8370ad, Node22 CI39189668658. Existing source and QA remain durable.
+- Next: recover the previously approved upgrade2 plan and choose the next dependency-ready B substep. Do not restart accepted R1 work, expand24styles by assumption, inspect/edit A or ask again for publishing permissions.
+
+
+## R2.2 · one sourced budget across customer estimate, funding and export (2026-10-19)
+- Resumed exact B checkpoint dc966c0; production main a7ce3e83/PR72 remains the frozen R1 baseline. Recovered upgrade2 scope in the current conversation: input/save, materials/BOQ, cost/finance, same-revision handover and configured operations for one Modern project. No A audit/source edits or24style expansion.
+- Actual-domain isolated fixture reproduced a misleading customer summary: legacy planning estimate1316388427VND says2missing items while the actual canonical commercial BOQ has52missing rows and knownSubtotal0. Estimated cost and sourced cost were visually conflated.
+- B97 now reads commercialBoq/scopedFundingNeed contracts for sourced subtotal, actual missing-row count and full-loan need. Planning estimate/charts remain explicitly labelled planning; a partial total never becomes the full cost or required loan. Canonical scenario rows/fees drive the payment summary; the existing bank trial still works as an explicitly incomplete principal+interest simulation.
+- Added local UTF8 CSV for the current sourced BOQ with revision, priceKey, row IDs, quantity/unit/SKU/spec/price/source/date/expiry/region/issues. Null remains Chưa có; explicit0 stays0; spreadsheet-formula text is escaped and raw private quote fields are omitted. Reject project/revision/price changes through assembly. Existing planning export remains available with its correct label. Detailed BOQ is disclosed on demand; the source quote form is reused without new saved cost/geometry stores.
+-28 registered workflow checks PASS on local Node24, including9new dashboard/quote-change/expiry/zero/null/export/private-field/stale/save-load/funding/scenario/legacy cases. Source syntax passes. Source changed only B97, project-dashboard.css and B workflow tests; no packages/build/schema/price formulas, paid API or real customer writes.
+- Next: exact-head Node22 CI, native preview quote→estimate→funding→save/reload→CSV/handover, then authorized GitHub/Vercel release. R1 GPU/outdoor/visual reservations remain open and separate. Do not call the whole Modern commercial project complete from this increment alone.
+
+### R2.2 native quote verification and fractional legacy payment correction
+- Source934eaef passed exact Node22 CI39206796584. Native preview quote saved through the visible A form (Enter submit); dry floor110.76309999999997m² at test-only100000VND gives11076310VND, missing52→51, revision F896BFAC-EE2ED7CE-AI4-RH3, priceKey24ae669. Reload preserves source identity and actual downloaded CSV matches; full total/loan remain unknown. No real supplier quote or billable call.
+- Native finance review found legacy loan schedule carries fractional VND. B summary incorrectly required integer input and showed Chưa đủ phí despite valid principal+interest. Round only the final displayed legacy peak after checking finite/nonnegative/safe amount. Canonical fee completeness remains unchanged. Extend existing legacy test with fractional and invalid cases; all28registered tests pass again.
+- Public /api/config200 confirms Gemini/image configured; cloud/media/payment/AI quota/guest service false. This is service provisioning, not missing GitHub/Vercel permission. Do not enable readiness flags without real resources.
+- Next: exact updated-source CI/preview, customer ZIP quote/revision check, authorized release and final production proof.
+
+### R2.3 customer ZIP source/date parity
+- Actual native ZIP downloaded and CRC passed,30SVG/2DXF/PDF/planning JSON/canonical handover JSON present; canonical JSON retained11076310VND/revision/priceKey and full-null. Found its old CSV consumer still used quote.source/date and lost canonical sourceReference/quotedAt.
+- B97 now wraps the existing customerPackageFiles API and replaces only boq-co-nguon.csv with the same canonical CSV used by Dự toán. Keep every other original file untouched; verify snapshot revision and price identity before/after upstream package assembly. No A source or formula changes. New behavior test covers preserved other files, exact CSV/source/date and stale snapshot/price rejection.29registered checks PASS.
+- Next exact final-source CI/native ZIP proof and production release; previous d076 source superseded by this package correction.
