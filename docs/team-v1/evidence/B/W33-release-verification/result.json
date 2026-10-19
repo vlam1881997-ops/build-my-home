@@ -27,8 +27,8 @@
   "sourceChecks": {
     "registeredWorkflowPass": 19,
     "newWallCutTests": 3,
-    "exactHeadCI": "pending",
-    "nativeNewSource": "pending"
+    "exactHeadCI": "success",
+    "nativeNewSource": "passed-preview-and-production"
   },
   "sourceHashes": {
     "src/78_design_workflow.js": "17be676d63fb140c72bb1026a701739a5dba474ee5ecb4815c898ec443042ed0",
@@ -39,5 +39,81 @@
     "enabled-GPU desktop/mobile visuals/performance",
     "actual terrace engineering source and review",
     "customer visual acceptance"
+  ],
+  "sourceCommit": "efc26322a2fd9d0b6796d2730aa405a1e365b63f",
+  "mainCommit": "aab11137a9706f9081910cdf11ce809cd05afe58",
+  "mergedPR": 71,
+  "releaseTree": "154f36a5b9f8f1a8b1ef8b84635c99d673468ad0",
+  "ci": {
+    "node": "22.x",
+    "run": 39183290259,
+    "status": "success"
+  },
+  "preview": {
+    "deployment": "dpl_BiEcUwnt6J4Y6LhNZWF9P2Kxdaby",
+    "status": "READY",
+    "pngSize": [
+      1280,
+      870
+    ],
+    "pngBytes": 106400,
+    "pngSha256": "addfb5e28da5e959c6bbb4cf97559aa4a7ef496d84f360193e4b35723b77e2c4",
+    "floatingLintelRemoved": true,
+    "sharedOpeningPreserved": true,
+    "captionExplainsCut": true
+  },
+  "production": {
+    "deployment": "dpl_sA6qxfPHQPtPXUXoVjZhqDkgSrnb",
+    "status": "READY",
+    "target": "production",
+    "mainCommit": "aab11137a9706f9081910cdf11ce809cd05afe58",
+    "projectId": "prj_PcB996IRamEZqWrKpA5qk9T290kh",
+    "url": "https://www.huiminhbach.id.vn/",
+    "nativePostDeploy": "passed-lightweight-scope",
+    "pngMatchesPreviewBytes": true,
+    "pngSize": [
+      1280,
+      870
+    ],
+    "pngSha256": "addfb5e28da5e959c6bbb4cf97559aa4a7ef496d84f360193e4b35723b77e2c4",
+    "nativeWebGLVendor": "Disabled",
+    "nativeWebGLRenderer": "Disabled",
+    "customerProjectEdited": false
+  },
+  "pdfOriginalSha256": "5193f550ef75365716ff88a3c30572d6913a0582ad5702482b1bfb956103b5ec",
+  "archivedReviewFiles": {
+    "production-terrace-fixed.png": {
+      "bytes": 106400,
+      "sha256": "addfb5e28da5e959c6bbb4cf97559aa4a7ef496d84f360193e4b35723b77e2c4"
+    },
+    "production-terrace.png": {
+      "bytes": 108284,
+      "sha256": "b844695b41be9c14add0a24ca43abd149ef1db8a62bdc10f15b7f7dbc86d7a09"
+    },
+    "production-kitchen-reviewed.webp": {
+      "bytes": 48284,
+      "sha256": "b877e7c299950d402691d785c41bac088dac2d5f1127b4c0974c9d5b1fef8ca1"
+    },
+    "production-view.jpg": {
+      "bytes": 102441,
+      "sha256": "06cca3633e2e0e6bee7c49e83927a244042f677251b42d06bc87c188518b752a"
+    },
+    "pdf-contact-1.jpg": {
+      "bytes": 134603,
+      "sha256": "1af0d0f153c2235f07f633030a8c91741f95f51443102b495580be0b0eb753e8"
+    },
+    "pdf-contact-2.jpg": {
+      "bytes": 122757,
+      "sha256": "505559248e8dc66d8651a7c9aea7d754ba670354159be16d9706f28a06bd5d70"
+    },
+    "pdf-contact-3.jpg": {
+      "bytes": 84434,
+      "sha256": "864d15d35b78c309f3e3c7f9380d7d4c396965c35139eb89edb48e6c9e002ecf"
+    }
+  },
+  "reviewFileNotes": [
+    "Kitchen WebP is lossless with exact decoded pixels of the original PNG; original PNG hash remains in image-inspection.json.",
+    "PDF contact sheets and original PDF hash are persisted; the270867-byte source PDF remains in the recovered local QA folder. No remote PDF download link is claimed.",
+    "Images are actual measured lightweight views and PDF inspections, not enabled-GPU appearance approval."
   ]
 }

@@ -64,13 +64,14 @@
     "projectId": "prj_PcB996IRamEZqWrKpA5qk9T290kh",
     "commit": "7139183308f32fceb63f860db5d4aa23b47d218e",
     "publicAlias": "www.huiminhbach.id.vn",
-    "nativePostDeploy": "pending-environment-unavailable"
+    "nativePostDeploy": "passed in W33; kitchen PNG exactly matched accepted preview before W33 release"
   },
   "interruption": {
     "date": "2026-10-19",
     "error": "exec-server initialize handshake timed out; no usable execution environment",
     "browserCapability": "unavailable",
-    "binaryArtifactPersistence": "local downloads were inspected before failure; unavailable for subsequent GitHub upload"
+    "binaryArtifactPersistence": "local downloads were inspected before failure; unavailable for subsequent GitHub upload",
+    "recovery": "2026-10-19: environment recovered; production export and30-page PDF visual review completed in W33"
   },
   "fullR1Status": "in_progress",
   "openGates": [
