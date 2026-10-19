@@ -4,7 +4,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 19/10/2026.
 - role: B
 - status: in_progress
 - active_task: B3
-- active_substep: W35 released and production verified; actual device/terrace review inputs remain open
+- active_substep: R1 release accepted with reservations for next iteration; recover approved R2 scope before implementation
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-facade-depth, QA checkpoint based on released PR72 main a7ce3e83; runtime equals production.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
@@ -781,3 +781,11 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Native preview imported the existing isolated synthetic Modern fixture through the visible backup UI. Technical/material mode switch and reload preserve the selected preference and measured revision. Actual public-domain reload contains the lazy-layer source and retains the same project; mode switching and PNG delivery passed.1280x1081 production PNG188574bytes has SHA2560ef52b682862a9a13a966e2dbfe6a6d62f0cdb7f798659b99a6158022045ee68, exactly matching inspected preview bytes. Persisted lossless WebP preserves exact decoded pixels; UI screenshot shows actual public status.
 - Cloud WebGL still explicitly reports GL_VENDOR/GL_RENDERER Disabled; these native checks establish fallback safety only, not lazy-layer GPU aesthetics or device speed. The500-mesh CPU timings are scoped synthetic evidence.48 related local checks pass; no universal speed claim, construction approval, customer signoff, A/schema/build/dependency change or style expansion.
 - This final checkpoint is QA/progress only, based on released main. No additional application deployment needed. Full Modern R1 stays IN_PROGRESS pending actual enabled-GPU desktop/phone appearance/performance, sourced terrace technical dimensions and owner/professional review. Preserve W35 and all previously accepted work; do not rerun passed suites without a related change or repeat permission requests.
+
+
+## R1 acceptance disposition · owner requested transition to R2 (2026-10-19 09:31 Asia/Saigon)
+- User explicitly requested: nghiệm thu bản1 đi còn làm bản2. Recorded a software release review for PR72/main a7ce3e83 in evidence/B/R1-acceptance-20261019/acceptance.md and acceptance.json. Rechecked current main/B refs and exact production READY; no repeat runtime test cycle or new application code.
+- Disposition: freeze the released R1 software iteration and accept that release with reservations as the baseline for the next iteration. This is not a claim that every original R1 commercial gate passed, nor an invented customer visual/professional signature. Broad implementation_accepted remains false until its original full evidence gates are actually met.
+- Preserve open gates R1-GPU (actual enabled-GPU desktop/phone8views/timings), R1-OUTDOOR (sourced guard/drainage/waterproofing/structure details) and R1-VISUAL (actual owner picture/revision decision). Carry them into follow-up without renaming them passed or silently deleting the original criteria. Unknown project data remains unknown.
+- No runtime/customer state/payment/access/review flag changed; no new application deployment needed. Last verified runtime source fc8370ad, Node22 CI39189668658. Existing source and QA remain durable.
+- Next: recover the previously approved upgrade2 plan and choose the next dependency-ready B substep. Do not restart accepted R1 work, expand24styles by assumption, inspect/edit A or ask again for publishing permissions.
