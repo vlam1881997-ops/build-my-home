@@ -108,15 +108,15 @@ test('every bundled product has a local generic illustration, and untrusted cate
  const {B}=client(),catalog=JSON.parse(fs.readFileSync('assets/materials/official-catalog.json'));for(const p of catalog.products){const file=B.materialIllustration(p);assert.ok(fs.existsSync(file));assert.match(fs.readFileSync(file,'utf8'),/^<svg/);assert.ok(B.webProductCard(p).includes('data-material-illustration'));}
  assert.equal(B.materialIllustration({category:'../../private'}),'assets/materials/illustrations/wall.svg');
 });
-test('catalogue cards reuse the measured customer sample for the same SKU and never another product or project',()=>{
+test('catalogue cards use the active room sample for the same SKU and never another room, product or project',()=>{
  const {B,state,context}=client();context.structuredClone=structuredClone;vm.runInNewContext(fs.readFileSync('src/44_house_styles.js','utf8'),context);vm.runInNewContext(fs.readFileSync('src/90_product_polish.js','utf8'),context);
  const p=product();B.adoptWebMaterial(p);B.applyCatalogMaterial('floor','ivory-tile',{roomId:'a',scope:'room'});
  const binding=state.project.materials.finish.rooms.a.catalogMaterials.floor;
  binding.sample={mediaId:'material-sample-fixture-123',productId:p.id,sku:p.sku,specification:binding.specification,realWorldScale:[.6,.6],rotationDeg:37,sourceReference:'Synthetic sample test'};
  const originalProject=state.project;B.materialSampleForBinding=b=>state.project===originalProject&&b===binding?{image:{src:'data:image/jpeg;base64,TEST'}}:null;
- let html=B.webProductCard(p);assert.match(html,/data-material-customer-sample/);assert.match(html,/600 × 600 mm/);assert.doesNotMatch(html,/data-material-illustration/);
+ state.ui.sceneFocus='room:a';let html=B.webProductCard(p);assert.match(html,/data-material-customer-sample/);assert.match(html,/600 × 600 mm/);assert.doesNotMatch(html,/data-material-illustration/);
  assert.doesNotMatch(B.webProductCard({...p,id:'other'}),/data-material-customer-sample/);
  assert.doesNotMatch(B.webProductCard({...p,sku:'OTHER'}),/data-material-customer-sample/);
- state.ui.sceneFocus='room:b';assert.match(B.webProductCard(p),/data-material-customer-sample/);
+ state.ui.sceneFocus='room:b';assert.doesNotMatch(B.webProductCard(p),/data-material-customer-sample/);
  state.project={...originalProject,materials:{choices:{},finish:{rooms:{},exterior:null}}};assert.doesNotMatch(B.webProductCard(p),/data-material-customer-sample/);
 });
