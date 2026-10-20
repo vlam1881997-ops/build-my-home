@@ -4,7 +4,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 20/10/2026.
 - role: B
 - status: in_progress
 - active_task: B1
-- active_substep: W37 supplied SKU sample stays in materials and appears in chosen palette; CI/native pending
+- active_substep: W37 room/exterior sample isolation corrected; scoped tests pass; protected preview verification blocked
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-facade-depth, W37 work based on released PR74 main ad575e57; source changes pending CI/preview.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
@@ -841,3 +841,13 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 -33related style/sample checks PASS, including2new room/SKU-image and async-navigation boundary cases; syntax passes. ExactNode22 CI/native sample upload/reload/preview pending.
 - Catalogue103records retain0verified commercial vendor photos. The source URLs are not proof of reuse rights. A focused official-site rights search did not establish a usable grant; no manufacturer assets copied or upgraded to verified. This delivery improves actual customer-provided SKU samples, not pretend completion of all vendor imagery.
 - Next: persist source and W36 text proof, exactCI, native supplied-image→Materials palette→reload→explicit3D, then authorized release. Preserve open device/technical/commercial gates; do not replay accepted checks.
+
+
+
+### W37 continuation — room/exterior photo isolation (2026-10-20)
+- Resumed PR75 head3117706fb0462ad34c9fbcc2dabb3dad0e0dc018, mainad575e57. Existing exact-head CI39350325453 succeeded and preview dpl_9Caxmu7hsgRxWnmt3H2duP38Wgjj is READY. These are prior-head results, not evidence for the following change.
+- Reproduced two new failures before the fix: selected product image borrowed the first matching SKU image from a different room; exterior uploader did not retain its exterior destination. B90 now resolves only the explicit room/exterior scope, refuses a removed-room target and selects exterior in the sample form when reviewing exterior. Escapes the secondary sample image source consistently.
+- Local10/10 focused material-sample checks passed on Node24.19.0 after the fix; syntax passed. Two regressions also added to the already-registered style/material test file so Node22 CI covers them. No replay of the previously accepted broad release checks. No manufacturer images or licence/price/schema/build/A source changed.
+- Browser preview reaches Vercel login. Automatic approval review rejected creating a shareable authentication-bypass URL, including the retry after the user's broad continue/publish request, because explicit approval of that access expansion is missing. Do not retry or use an indirect bypass. Normal account sign-in or explicit approval of that specific temporary link is still needed for native upload/reload/3D verification.
+- User authorized completing this work and publishing to the website. Keep PR draft and main stable until the concrete preview gate is complete; do not mark native QA passed from CI. Catalogue103records still have0verified commercial manufacturer photographs; need authorised exact-SKU assets to close that coverage.
+- Next: exact updated-head Node22 CI; normal authenticated preview upload→same-room palette/card→reload→explicit3D, then merge/deploy and verify production under existing publish authorization. R1 and full commercial reservations remain open.

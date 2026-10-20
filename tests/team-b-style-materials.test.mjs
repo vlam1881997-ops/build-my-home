@@ -178,3 +178,22 @@ test('another project/custom style never inherits the active project style, bind
 test('showroom brief is compact, escapes custom input and has no action that changes customer choices',()=>{
  const b=make();b.selectHouseStyle('minimal');const before=JSON.stringify(b.state.project),html=b.styleMaterialBriefHtml('floor');assert.match(html,/Tối giản/);assert.match(html,/Quy cách cần chốt/);assert.match(html,/Khu ướt/);assert.doesNotMatch(html,/<button/);assert.equal(JSON.stringify(b.state.project),before);assert.ok(b.styleMaterialMatrix('minimal').some(x=>x.id==='roof'&&x.category==='waterproof'));
 });
+
+
+function sampleScopeFixture(){const B=designClient();B.state.ui.sceneFocus='room:sample-room';B.state.project.plan.rooms=[{id:'sample-room',type:'living',name:'Sample fixture',floor:0,x:1,y:1,w:4,h:5}];const product={id:'sample-product',category:'floor',sku:'TEST-700-1100',specification:'700x1100 mm',unit:'m²'};B.state.project.materials.choices.floor=product.id;B.state.project.dataEngine.materialOverrides[product.id]={product};B.applyCatalogMaterial('floor','ivory-tile',{roomId:'sample-room',scope:'room'});const binding=B.state.project.materials.finish.rooms['sample-room'].catalogMaterials.floor;binding.sample={mediaId:'material-sample-test-123',productId:binding.productId,sku:binding.sku,specification:binding.specification,realWorldScale:[.7,1.1],rotationDeg:37,sourceReference:'Synthetic test'};return {B,product,binding};}
+test('selected product image never borrows a sample from another room',()=>{
+ const {B,product,binding}=sampleScopeFixture();B.materialSampleForBinding=b=>b===binding?{image:{src:'data:image/png;base64,FIRST_ROOM'}}:null;
+ B.state.project.plan.rooms.push({id:'second',type:'bed',name:'Second',floor:0,x:5,y:1,w:4,h:5});
+ B.state.ui.sceneFocus='room:sample-room';assert.equal(B.catalogProductSample(product).roomId,'sample-room');
+ B.state.ui.sceneFocus='room:second';assert.equal(B.catalogProductSample(product),null);assert.doesNotMatch(B.showroomPreviewHtml('floor'),/FIRST_ROOM|data-selected-material-sample/);
+ B.state.ui.sceneFocus='all';assert.equal(B.catalogProductSample(product),null);
+ B.state.ui.sceneFocus='room:removed';assert.equal(B.catalogProductSample(product),null);
+});
+test('exterior sample editor preserves its explicit exterior target',()=>{
+ const {B}=sampleScopeFixture(),product={id:'paint-sample',category:'paint',name:'Paint fixture',sku:'PAINT-QA',specification:'test paint',unit:'m²'};
+ B.state.project.materials.choices.paint=product.id;B.state.project.dataEngine.materialOverrides[product.id]={product};B.applyCatalogMaterial('paint','sand-plaster',{scope:'exterior'});
+ const binding=B.state.project.materials.finish.exterior.facadeMaterials.paint;binding.sample={mediaId:'material-sample-exterior-123',productId:binding.productId,sku:binding.sku,specification:binding.specification,realWorldScale:[.7,1.1],rotationDeg:0,sourceReference:'Synthetic exterior fixture'};
+ B.materialSampleForBinding=b=>b===binding?{image:{src:'data:image/png;base64,EXTERIOR'}}:null;B.state.ui.sceneFocus='all';
+ assert.equal(B.catalogProductSample(product).roomId,null);assert.match(B.showroomPreviewHtml('paint'),/<option value="__exterior__" selected>/);
+ B.state.ui.sceneFocus='room:sample-room';assert.equal(B.catalogProductSample(product),null);assert.doesNotMatch(B.showroomPreviewHtml('paint'),/data:image\/png;base64,EXTERIOR/);
+});
