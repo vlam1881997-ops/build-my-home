@@ -1,14 +1,14 @@
 # Tiến độ AI B — BMH commercial v1
 
-Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 19/10/2026.
+Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 20/10/2026.
 - role: B
 - status: in_progress
 - active_task: B1
-- active_substep: W36 picture-first materials implemented; exact CI/native preview pending
+- active_substep: W37 supplied SKU sample stays in materials and appears in chosen palette; CI/native pending
 - target_branch: codex/b-v1-24
-- actual_branch: codex/b-facade-depth, QA checkpoint based on released PR73 main 005b1838; runtime equals production.
+- actual_branch: codex/b-facade-depth, W37 work based on released PR74 main ad575e57; source changes pending CI/preview.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
-- last_verified_commit: 192c6f0c4889b20d23379770bbda66e29cfededd (Node22 CI39207642951, native sourced CSV/ZIP and production verified)
+- last_verified_commit: 38614c36c018a690535f37d1d404f86595327dfd (Node22 CI39246110343, native material choice/reload/3D and production verified)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -827,3 +827,17 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 
 ### W36 native layout correction
 - First preview confirmed all17choices in DOM but desktop grid named areas kept the new full-width board after the long catalogue (y9984px). Correct the grid's actual named areas, including1180px single-column template, to put choices immediately after header and context below. This browser-found issue is why native layout is checked before release. CSS-only follow-up; application behavior/source/tests unchanged. Next updated preview screenshot and save/preview interactions.
+
+### W36 final release verification
+- Exact source38614c36 passed Node22 CI39246110343 (npm test + coordinator), PR74 merged asad575e578eaeb2b0cb054760d408d07195ef0224; tree98e10df60612921b5c11b4cc9ecb915f52b3a517 matches tested tree. Final preview dpl_GYqCFTAFDRR16q89LxrkEaGdwwrR and production dpl_7C6w81dxw5QqmPQmhfWWvYp9Ln8z READY, correct project/team/main/public domain.
+- Actual board is now y290.03125px,width1070px,7floor/3wall/7wood-fabric choices. Visible local texture photos decode512px. Selecting marble stays in step5 and survives reload; another room retains its own floor. Grey paint and cognac fabric retain chosen palette; explicit3D action selects the same kitchen; returning to materials retains choices. Actual public reload/selection/reload/3D also passed: room design-f0-kitchen-1 and floor control white-marble. No paid generation or actual customer data. Screenshot/hashes in W36-material-first.
+- Native fixture import in cloud browser took934seconds despite requested timeout; not website timing or GPU performance evidence. No repeated import or fabricated mobile/nativeGPU claim.31related local tests and exactCI suffice for the scoped source.
+- Supplier SKU photos remain incomplete: this release makes existing surface photographs and simulations visible before3D; it does not turn them into exact vendor pictures. Next B1 dependency is manufacturer product imagery with traceable use rights and verified SKU/spec/sample matching. Preserve R1/device/technical/commercial gates. No extra runtime release for this QA-only checkpoint.
+
+## W37 · supplied SKU photograph reviewed before entering3D (2026-10-20)
+- Resumed remote mainad575e57 and B38614c36; source matches releasedPR74. W36 finalQA docs were local after a prior quota/review failure, preserved here. Retried its screenshot upload through the same connector; auto-review rejected external disclosure of an unverified image. Do not bypass or republish via another channel. Keep screenshot local with hash and persist only text QA evidence. No need to change GitHub/Vercel permissions.
+- Found another real sequence gap: the source sample uploader still navigated directly to3D and the new chosen palette still showed the generic profile instead of its actual saved SKU sample. B90 now saves a sample while staying in Materials, and the selected card/palette shows the matching available image for that room. No automatic3D navigation; preview stays explicit.
+- Sample lookup uses existing bound-product/sample validation; another room, changed SKU or unavailable sample cannot supply its image. Async sample completion cannot steal navigation or change the active project after the customer leaves. Existing IndexedDB image storage and metadata contracts retained; no new schema/geometry/price/licence flags/A code.
+-33related style/sample checks PASS, including2new room/SKU-image and async-navigation boundary cases; syntax passes. ExactNode22 CI/native sample upload/reload/preview pending.
+- Catalogue103records retain0verified commercial vendor photos. The source URLs are not proof of reuse rights. A focused official-site rights search did not establish a usable grant; no manufacturer assets copied or upgraded to verified. This delivery improves actual customer-provided SKU samples, not pretend completion of all vendor imagery.
+- Next: persist source and W36 text proof, exactCI, native supplied-image→Materials palette→reload→explicit3D, then authorized release. Preserve open device/technical/commercial gates; do not replay accepted checks.

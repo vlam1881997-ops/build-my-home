@@ -1,0 +1,11 @@
+{
+  "status": "implemented-pending-ci-native",
+  "baselineMain": "ad575e578eaeb2b0cb054760d408d07195ef0224",
+  "baselineBranch": "38614c36c018a690535f37d1d404f86595327dfd",
+  "scope": "supplied SKU sample remains visible before explicit 3D",
+  "checks": 33,
+  "newCases": 2,
+  "schemaBuildOrAChanges": false,
+  "manufacturerPhotoRightsVerified": false,
+  "fullCommercialAcceptance": false
+}

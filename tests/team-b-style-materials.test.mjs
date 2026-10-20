@@ -27,6 +27,20 @@ test('empty showroom retains browsable pictures and prevents roomless choices',(
  const b=make();b.state.project.plan.rooms=[];const before=JSON.stringify(b.state.project),html=b.showroomChoiceBoardHtml();assert.match(html,/Chưa có phòng/);assert.match(html,/data-showroom-finish="oak-floor"[^>]*disabled/);assert.match(html,/data-showroom-choice-view disabled/);assert.equal(b.selectShowroomFinish('oak-floor','gone'),false);assert.equal(JSON.stringify(b.state.project),before);
 });
 
+test('the chosen palette displays the exact available room sample and never borrows another room or stale SKU image',()=>{
+ const b=make(),p=b.state.project,room=p.plan.rooms.find(r=>r.type==='living'),bed=p.plan.rooms.find(r=>r.type==='bed'),product={id:'qa-sample-floor',category:'floor',sku:'QA-700',specification:'700x1100 mm',unit:'m²'};
+ p.materials.choices.floor=product.id;p.dataEngine.materialOverrides[product.id]={product};b.applyCatalogMaterial('floor','white-marble',{roomId:room.id,scope:'room'});const binding=p.materials.finish.rooms[room.id].catalogMaterials.floor;
+ binding.sample={mediaId:'material-sample-board-123',productId:binding.productId,sku:binding.sku,specification:binding.specification,realWorldScale:[.7,1.1],rotationDeg:0,sourceReference:'QA ONLY supplied sample'};b.materialSampleForBinding=x=>x?.sample?.mediaId===binding.sample.mediaId?{image:{src:'data:image/jpeg;base64,QA_SAMPLE'}}:null;
+ b.state.ui.sceneFocus='room:'+room.id;assert.ok(b.showroomRoomSample('floor',room.id));let html=b.showroomChoiceBoardHtml();assert.match(html,/data-showroom-room-sample/);assert.match(html,/Ảnh mẫu đã gắn · QA-700/);assert.match(html,/data:image\/jpeg;base64,QA_SAMPLE/);
+ b.state.ui.sceneFocus='room:'+bed.id;assert.equal(b.showroomRoomSample('floor',bed.id),null);assert.doesNotMatch(b.showroomChoiceBoardHtml(),/QA_SAMPLE/);
+ product.sku='CHANGED';assert.equal(b.showroomRoomSample('floor',room.id),null);b.state.ui.sceneFocus='room:'+room.id;assert.doesNotMatch(b.showroomChoiceBoardHtml(),/QA_SAMPLE/);
+});
+test('saving a supplier sample stays in materials and rejects a late UI jump after navigation or project switch',async()=>{
+ const b=make(),room=b.state.project.plan.rooms.find(r=>r.type==='living');b.state.ui.step=5;b.applyCatalogSample=async()=>({ok:true});let r=await b.saveShowroomSample('floor',{scope:'room',roomId:room.id});assert.equal(r.showInMaterials,true);assert.equal(b.state.ui.step,5);assert.equal(b.state.ui.sceneFocus,'room:'+room.id);
+ for(const move of ['navigate','project']){let finish;b.applyCatalogSample=()=>new Promise(resolve=>finish=resolve);const pending=b.saveShowroomSample('floor',{scope:'room',roomId:room.id});b.state.ui.sceneFocus='unchanged';if(move==='navigate')b.state.ui.step=6;else b.state.project=structuredClone(b.state.project);finish({ok:true});r=await pending;assert.equal(r.showInMaterials,false);assert.equal(b.state.ui.sceneFocus,'unchanged');b.state.ui.step=5;}
+ const before=JSON.stringify(b.state);b.applyCatalogSample=async()=>({ok:false,reason:'invalid fixture'});assert.equal((await b.saveShowroomSample('floor',{})).ok,false);assert.equal(JSON.stringify(b.state),before);
+});
+
 test('photographed surface choices change only the target room and survive project serialization',()=>{
  const b=make(),p=b.state.project,living=p.plan.rooms.find(r=>r.type==='living'),bed=p.plan.rooms.find(r=>r.type==='bed');
  const plan=JSON.stringify(p.plan),choices=JSON.stringify(p.materials.choices),other=JSON.stringify(b.finishPalette(bed.id)),style=p.style;
