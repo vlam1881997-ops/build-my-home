@@ -2,9 +2,10 @@
 
 Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 20/10/2026.
 - role: B
-- status: in_progress
+- status: blocked
+- execution: paused_by_owner_2026-10-20_15:06_Asia-Saigon
 - active_task: B1
-- active_substep: W37 room/exterior sample isolation corrected; scoped tests pass; protected preview verification blocked
+- active_substep: Tạm dừng theo yêu cầu chủ sản phẩm; đã lưu tiêu chí 10 tab, mốc Hiện đại và đủ24phong cách.
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-facade-depth, W37 work based on released PR74 main ad575e57; source changes pending CI/preview.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
@@ -855,3 +856,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 ### W37 CI and authentication follow-up
 - Updated source a8bf767 preview dpl_3r7wvBSkYJxnefYycpRQVp8S8Pp3 READY. Node22 CI39351552087 found one obsolete expectation in material-source.test.mjs: it explicitly expected room b's card to borrow room a's image. Updated that existing test to select room a explicitly and require no room a sample when room b is active, matching the new regression tests and user requirement. No runtime change in this follow-up.
 - Attempted normal Vercel sign-in through secure browserAuth, without a share link or protection changes. It returned user_took_over; subsequent required page inspection was denied by automatic review because browser observation authority was not granted. Authentication success is unknown. Do not route around that rejection. Native preview remains blocked pending user action/approval; production is unchanged.
+
+
+## Tạm dừng theo yêu cầu chủ sản phẩm — 20/10/2026 15:06 Asia/Saigon
+- Chỉ lưu nhiệm vụ, chưa tiếp tục code/test/merge/phát hành. Chờ lệnh làm tiếp.
+- Bộ tiêu chí đầy đủ: [COMMERCIAL-ACCEPTANCE-PAUSED-20261020.md](evidence/B/COMMERCIAL-ACCEPTANCE-PAUSED-20261020.md).
+- Mốc đầu: một căn Hiện đại xuyên10tab. Mục tiêu cuối:24/24phong cách được duyệt riêng, cùng các cổng dữ liệu/ảnhSKU/GPU/cloud/thanh toán/hồ sơ/chuyên môn/production.103catalog và17mẫu không tự là nghiệm thu.
+- Runtime cuối2bb71b6; CI39352083026 success; PR75 chưa merge. Quyền tạo preview23giờ đã được chủ sản phẩm cấp nhưng Vercel trả403 read_protection_bypass; native QA còn thiếu. Giữ nguyên các giới hạn và phần chưa đạt, không hỏi lại quyền đã cấp.
