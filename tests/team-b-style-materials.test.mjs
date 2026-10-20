@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import vm from 'node:vm';
 import {designClient} from './fixtures/design-client.mjs';
 import {materialPriceEvidence} from '../server/_material_catalog.mjs';
 const plain=x=>JSON.parse(JSON.stringify(x));
@@ -181,6 +182,64 @@ test('showroom brief is compact, escapes custom input and has no action that cha
 
 
 function sampleScopeFixture(){const B=designClient();B.state.ui.sceneFocus='room:sample-room';B.state.project.plan.rooms=[{id:'sample-room',type:'living',name:'Sample fixture',floor:0,x:1,y:1,w:4,h:5}];const product={id:'sample-product',category:'floor',sku:'TEST-700-1100',specification:'700x1100 mm',unit:'m²'};B.state.project.materials.choices.floor=product.id;B.state.project.dataEngine.materialOverrides[product.id]={product};B.applyCatalogMaterial('floor','ivory-tile',{roomId:'sample-room',scope:'room'});const binding=B.state.project.materials.finish.rooms['sample-room'].catalogMaterials.floor;binding.sample={mediaId:'material-sample-test-123',productId:binding.productId,sku:binding.sku,specification:binding.specification,realWorldScale:[.7,1.1],rotationDeg:37,sourceReference:'Synthetic test'};return {B,product,binding};}
+
+test('reapplying a SKU preserves only its own valid same-profile room sample',()=>{
+ const {B,product,binding}=sampleScopeFixture(),expected=plain(binding.sample),p=B.state.project;
+ p.plan.rooms.push({id:'other-room',name:'Other room',type:'bed',floor:0,x:5,y:1,w:4,h:5});
+ assert.equal(B.applyCatalogMaterial('floor','ivory-tile',{scope:'all'}),true);
+ assert.deepEqual(plain(B.finishPalette('sample-room').catalogMaterials.floor.sample),expected);
+ assert.equal(B.finishPalette('other-room').catalogMaterials.floor.sample,undefined);
+ assert.equal(p.materials.finish.exterior.catalogMaterials.floor.sample,undefined);
+ B.applyCatalogMaterial('floor','grey-concrete',{scope:'room',roomId:'sample-room'});
+ assert.equal(B.finishPalette('sample-room').catalogMaterials.floor.sample,undefined);
+ B.applyCatalogMaterial('floor','ivory-tile',{scope:'room',roomId:'sample-room'});
+ p.materials.finish.rooms['sample-room'].catalogMaterials.floor.sample=expected;product.sku='CHANGED-SKU';
+ B.applyCatalogMaterial('floor','ivory-tile',{scope:'room',roomId:'sample-room'});
+ assert.equal(B.finishPalette('sample-room').catalogMaterials.floor.sample,undefined);
+});
+
+test('saving showroom product stays in materials and explicit preview does not rewrite bindings',()=>{
+ const {B,binding}=sampleScopeFixture();B.state.ui.step=5;
+ assert.equal(B.applyShowroomProduct('floor','ivory-tile','room:sample-room'),true);
+ assert.equal(B.state.ui.step,5);const before=JSON.stringify(B.state.project);
+ assert.equal(B.openShowroomProductPreview('floor','ivory-tile','room:sample-room'),true);
+ assert.equal(B.state.ui.step,6);assert.equal(JSON.stringify(B.state.project),before);
+ assert.equal(B.finishPalette('sample-room').catalogMaterials.floor.sample.mediaId,binding.sample.mediaId);
+ for(const target of ['room:removed','exterior','all','unassigned'])assert.equal(B.openShowroomProductPreview('floor','ivory-tile',target),false);
+ assert.equal(B.openShowroomProductPreview('floor','grey-concrete','room:sample-room'),false);
+});
+
+test('showroom product defaults to focused room and exposes separate save, preview and sample inspection',()=>{
+ const {B,binding}=sampleScopeFixture();B.materialSampleForBinding=b=>b?.sample?{image:{src:'data:image/jpeg;base64,AAAA'},mediaId:b.sample.mediaId}:null;
+ const html=B.showroomPreviewHtml('floor');assert.match(html,/value="room:sample-room" selected/);assert.match(html,/data-showroom-apply="floor"/);assert.match(html,/data-showroom-3d="floor"/);assert.doesNotMatch(html,/Áp dụng & xem 3D/);
+ assert.match(html,/data-material-sample-open="material-sample-test-123"/);
+ const details=B.materialSampleDetails(binding.sample.mediaId);assert.equal(details.binding.sample.sourceReference,'Synthetic test');assert.deepEqual(plain(details.binding.sample.realWorldScale),[.7,1.1]);
+ B.state.project=structuredClone(B.state.project);B.state.project.materials.finish={exterior:null,rooms:{}};assert.equal(B.materialSampleDetails(binding.sample.mediaId),null);
+});
+
+test('exterior reapply and explicit preview preserve the exterior sample and interior state',()=>{
+ const {B}=sampleScopeFixture(),p=B.state.project,product={id:'outside-paint',category:'paint',sku:'PAINT-OUTSIDE',specification:'Exterior paint sample',unit:'m²'};
+ p.materials.choices.paint=product.id;p.dataEngine.materialOverrides[product.id]={product};B.applyShowroomProduct('paint','sand-plaster','exterior');
+ const binding=p.materials.finish.exterior.facadeMaterials.paint;binding.sample={mediaId:'material-sample-outside',productId:product.id,sku:product.sku,specification:product.specification,sourceReference:'Synthetic exterior',realWorldScale:[1,1],rotationDeg:0};
+ const before=plain(p);B.applyShowroomProduct('paint','sand-plaster','exterior');assert.deepEqual(plain(p),before);
+ const html=B.showroomPreviewHtml('paint');assert.match(html,/value="exterior" selected/);assert.match(html,/value="sand-plaster" selected/);
+ assert.equal(B.openShowroomProductPreview('paint','sand-plaster','exterior'),true);assert.equal(B.state.ui.sceneFocus,'all');assert.equal(B.state.ui.designView,'exterior');assert.deepEqual(plain(p),before);
+});
+
+test('image storage reports success only after commit and rejects a late disk abort',async()=>{
+ for(const abort of [false,true]){
+  let openRequest,request,transaction;
+  const B={projectMediaScope:async()=> 'scope-a',projectMediaKey:(scope,id)=>scope+':'+id};
+  const indexedDB={open(){openRequest={};return openRequest;}};
+  const source=fs.readFileSync('src/104_style_reference.js','utf8');vm.runInNewContext(source.slice(0,source.indexOf(' const preview=B.v6FilePreview;'))+'})();',{BMH:B,indexedDB,Error});
+  let settled=false;const pending=B.styleReferenceStore.put('sample','pixels').then(()=>{settled=true;return true;},()=>{settled=true;return false;});
+  await new Promise(setImmediate);
+  openRequest.result={transaction(){transaction={objectStore:()=>({put(){request={};return request;}})};return transaction;}};openRequest.onsuccess();
+  await new Promise(setImmediate);request.result='key';request.onsuccess();
+  await new Promise(setImmediate);assert.equal(settled,false,'request success is not transaction durability');
+  if(abort)transaction.onabort();else transaction.oncomplete();assert.equal(await pending,!abort);
+ }
+});
 test('selected product image never borrows a sample from another room',()=>{
  const {B,product,binding}=sampleScopeFixture();B.materialSampleForBinding=b=>b===binding?{image:{src:'data:image/png;base64,FIRST_ROOM'}}:null;
  B.state.project.plan.rooms.push({id:'second',type:'bed',name:'Second',floor:0,x:5,y:1,w:4,h:5});

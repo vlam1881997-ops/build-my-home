@@ -12,8 +12,9 @@
   request.onblocked=()=>{database=null;reject(Error('Đóng tab BMH cũ để cập nhật kho ảnh.'));};
  }).catch(error=>{database=null;throw error;});
  const transaction=(mode,work)=>open().then(db=>new Promise((resolve,reject)=>{
-  const tx=db.transaction('images',mode),request=work(tx.objectStore('images'));
-  request.onsuccess=()=>resolve(request.result||null);
+  const tx=db.transaction('images',mode),request=work(tx.objectStore('images'));let result=null;
+  request.onsuccess=()=>{result=request.result||null;};
+  tx.oncomplete=()=>resolve(result);
   request.onerror=()=>reject(Error('Không đọc hoặc lưu được ảnh tham khảo.'));
   tx.onabort=()=>reject(Error('Không lưu được ảnh tham khảo.'));
  }));
@@ -192,3 +193,4 @@
   }
  });
 })();
+

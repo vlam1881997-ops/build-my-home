@@ -2,10 +2,10 @@
 
 Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 20/10/2026.
 - role: B
-- status: blocked
-- execution: paused_by_owner_2026-10-20_15:06_Asia-Saigon
+- status: in_progress
+- execution: resumed_by_owner_2026-10-20_Asia-Saigon
 - active_task: B1
-- active_substep: Tạm dừng theo yêu cầu chủ sản phẩm; đã lưu tiêu chí 10 tab, mốc Hiện đại và đủ24phong cách.
+- active_substep: W38 — preserve SKU samples through explicit save/preview, inspect full sample and confirm durable media writes.
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-facade-depth, W37 work based on released PR74 main ad575e57; source changes pending CI/preview.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
@@ -863,3 +863,16 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Bộ tiêu chí đầy đủ: [COMMERCIAL-ACCEPTANCE-PAUSED-20261020.md](evidence/B/COMMERCIAL-ACCEPTANCE-PAUSED-20261020.md).
 - Mốc đầu: một căn Hiện đại xuyên10tab. Mục tiêu cuối:24/24phong cách được duyệt riêng, cùng các cổng dữ liệu/ảnhSKU/GPU/cloud/thanh toán/hồ sơ/chuyên môn/production.103catalog và17mẫu không tự là nghiệm thu.
 - Runtime cuối2bb71b6; CI39352083026 success; PR75 chưa merge. Quyền tạo preview23giờ đã được chủ sản phẩm cấp nhưng Vercel trả403 read_protection_bypass; native QA còn thiếu. Giữ nguyên các giới hạn và phần chưa đạt, không hỏi lại quyền đã cấp.
+
+
+
+## W38 — owner resumed commercial completion from PR74/PR75 (2026-10-20)
+- User explicitly resumed after the pause, retaining the full 10-tab / Modern-first / 24-style acceptance criteria. PR74 remains released main ad575e57; PR75 draft starts at docs checkpoint 2cfc38d. Prior exact runtime 2bb71b6 passed Node22 CI39352083026; do not call that CI evidence for W38.
+- Found and reproduced: applying the same supplier SKU/profile recreated its binding and discarded the existing sample. Retain only a valid sample already in the exact target scope with matching product/spec/unit/profile. Do not copy a room sample to another room or to exterior; changing profile or SKU clears it.
+- Split supplier action into save within Materials and an explicit read-only 3D preview. Default the target to the focused room/exterior; preview checks the actual saved binding and refuses a mismatched or unapplied choice. Exterior profile selection now reads exterior bindings.
+- Added a keyboard-accessible sample image dialog from the selected sample/product card, showing SKU, specification, scope, physical scale, rotation and escaped source. Sample remains labelled customer-provided surface sample, not a verified manufacturer photograph.
+- Found IndexedDB image store resolved request success before transaction commit. Now resolve on transaction completion and reject late aborts so failed disk writes cannot be reported as durable image saves.
+- Five new registered logic/storage regressions reproduced the failures and now PASS on local Node24.19.0. Syntax checks PASS for three changed JS files. These are scoped tests, not native UI/GPU evidence. Native preview remains blocked by the previously observed provider 403 read_protection_bypass/browser observation denial; no bypass or protection change.
+- Changed only B-owned src/86_visual_materials.js, src/90_product_polish.js, src/104_style_reference.js, src/product-polish.css, tests/team-b-style-materials.test.mjs and this progress file. No A source/schema/price/build/dependency changes. No paid calls or actual customer state.
+- Research: official Dong Tam exact-SKU pages found (6060TAMDAO001 and 6060VAMCOTAY003), but no affirmative commercial photo reuse grant established. No asset copied or licence/approval flag invented. Attachment Markdown đã dán (1)(7).md is supporting tool guidance, not proof that all named skills/tools/services are available.
+- Next: preserve material-sample pixels in portable backup and validate cross-project import isolation, then exact Node22 CI and native preview gate. Entire commercial acceptance remains pending for exact-SKU licensed imagery, real-GPU desktop/phone timing/visuals, cloud/merchant configuration, 24 individual visual reviews and professional technical inputs/signoff.
