@@ -1,0 +1,208 @@
+{
+  "dxf": [
+    {
+      "file": "plan-T1.dxf",
+      "units": 4,
+      "errors": 0,
+      "fixes": 0,
+      "entities": 155,
+      "sha256": "adccaac40c922cbed8254b7c7719e8602ce0b84451697ce3a5d6a150d670e844",
+      "plotDimensionsMm": [
+        5000.0,
+        20000.0
+      ]
+    },
+    {
+      "file": "plan-T2.dxf",
+      "units": 4,
+      "errors": 0,
+      "fixes": 0,
+      "entities": 145,
+      "sha256": "7f5c616c3da3ba41a1bff583231ccb931ce50cbb5a08aed25dcb28f4a14d87b9",
+      "plotDimensionsMm": [
+        5000.0,
+        20000.0
+      ]
+    }
+  ],
+  "svg": [
+    {
+      "file": "sheet-01.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "01050f0b015f25144d55e9f4161035d19f1f8899f1836648cc424601e82528d2"
+    },
+    {
+      "file": "sheet-02.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "dcbb2098263087c13b8f417dc45fa0feaab791b10f593a19b77e74d6717f0bc5"
+    },
+    {
+      "file": "sheet-03.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "4baf4410fe72163b92e3149cd599afbcab397b6e30139215def2b9e7e221715c"
+    },
+    {
+      "file": "sheet-04.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "02516e78da1fab1db0a59375ccae1ea63ff5e037ea0e936603c2bc296f9a7e2e"
+    },
+    {
+      "file": "sheet-05.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "37707ad2af1dcee075ed336974f8e7fe0473d737fc48a2f212ff7c05e680e156"
+    },
+    {
+      "file": "sheet-06.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "462d935a4fc5fdb9b409e1c1d5abcd2a2300e6a57d2ea886dd2081e135060f17"
+    },
+    {
+      "file": "sheet-07.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "de75b27fba1732d8a3730fd59f65e4701f8f25b9108606f5e461fec8d852b286"
+    },
+    {
+      "file": "sheet-08.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "310c65040ea98f8880bbb096bc50ac012139415638dc7d9482088e04be526efc"
+    },
+    {
+      "file": "sheet-09.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "150303197614374d9ae1a04278245ccb54898845b3153e308992ff0fdbcc70ab"
+    },
+    {
+      "file": "sheet-10.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "ee368c416e69b27c06450e93e443e2c7f109ec4ec04b4238e46392a045bb2464"
+    },
+    {
+      "file": "sheet-11.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "d2aa7e00df3712ab353d384d23810aed433346a768d38d1e4278067da76eaef7"
+    },
+    {
+      "file": "sheet-12.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "ed9f7ede27c11f985c5a8f8b249794ccead229216a53d854e1ea0406905363b4"
+    },
+    {
+      "file": "sheet-13.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "be96a0d9589590a37d565f67aed3ab75eecd0b143c52d3d42f0931f24b3ed526"
+    },
+    {
+      "file": "sheet-14.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "455c9dba2a99c45ee376ff26f3c0967505313bb4f5daa258b8208ebad31d3150"
+    },
+    {
+      "file": "sheet-15.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "bbcee1f0dce988cacb27d5a5b16ce1f29902b557f7460a9b0d3b3e6ec90ac170"
+    },
+    {
+      "file": "sheet-16.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "d923b4e028b6da7e23b76be9285367e24a5eb17e84402648ef912936f40f1657"
+    },
+    {
+      "file": "sheet-17.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "86e9b236a1602bc161c65e422ebbd2b848d4484c965e170032214f70fe4b67ae"
+    },
+    {
+      "file": "sheet-18.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "aab3f8b6afe8e0de38d717b6389c84587444e76421002d2475f26e027c5789e9"
+    },
+    {
+      "file": "sheet-19.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "c7f1ac06e6a5258097bae68d40f7ba2ac755181a4f593c422478790b649a6c03"
+    },
+    {
+      "file": "sheet-20.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "f1620be30e57dac5fe88333ca74d8ad9b3e0fb3502a56eb7383ee65a9f10ae21"
+    },
+    {
+      "file": "sheet-21.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "73431df48b3b1ef95055ce3e8da2f23501c3a75172e0b294db9d10ec7eb989e3"
+    },
+    {
+      "file": "sheet-22.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "d0226e94b90209c9ce0630947bcb67232f018b00f27e07b723124b26da2b6e97"
+    },
+    {
+      "file": "sheet-23.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "a15b5b66d7d6f89afa6c314ee464647d33eabd7697c007ab0b16ab5a32136501"
+    },
+    {
+      "file": "sheet-24.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "39e130b929bb000ce3ca1a2fe01a18a70ae73c47a0e1acacd7e001c789447242"
+    },
+    {
+      "file": "sheet-25.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "b1c1fba6d5d9eff3181594cc77d4f36462a0e37bf04616b8d26baca153fe2bf4"
+    },
+    {
+      "file": "sheet-26.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "147ae2e4b9e261d700b6d0b5471a20c7b94e69bc222e3da9539518c0f783ab2c"
+    },
+    {
+      "file": "sheet-27.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "c701d63200a9aeaa16a661764bea5eb819e27f4950ada5beaa0ead3c90ae9c68"
+    },
+    {
+      "file": "sheet-28.svg",
+      "revision": "7BADC039-9AD609B4-AI4-RH3",
+      "viewBox": "0 0 420 297",
+      "sha256": "0dc3e7944d2131ab6aa5624bf8acff2607eed2bdb2219b1a4afe64f3b9b17f92"
+    }
+  ],
+  "sourceCommit": "817367bbbd90caef2703b879bc300ecb7ff65812",
+  "runtime": "Node24.19.0",
+  "pdfGenerated": false,
+  "nativeBrowserAccepted": false,
+  "renderInspection": {
+    "engine": "CairoSVG 2.9.1",
+    "renderedSheets": 28,
+    "fontSubstitution": "Arial,sans-serif -> DejaVu Sans in inspection derivatives only",
+    "inspected": "28-page original contact sheets; second contact sheet and material page21 with DejaVu; native font/layout acceptance remains open"
+  }
+}
