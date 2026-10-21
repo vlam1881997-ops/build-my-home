@@ -290,6 +290,30 @@ test('batch sample writes abort together if a later write cannot be queued',asyn
  openRequest.result={transaction(){return {objectStore:()=>({put(){if(++count===2)throw Error('quota');return {};}}),abort(){aborted=true;this.onabort();}};}};openRequest.onsuccess();
  await assert.rejects(pending);assert.equal(count,2);assert.equal(aborted,true);
 });
+
+function sampleHandoverFixture(upstream){
+ const fixture=sampleScopeFixture(),{B}=fixture;B.customerDesignSnapshot=()=>({revision:B.drawingRevision(),project:{}});B.customerPackageFiles=()=>{upstream?.(B);return [['original.svg','keep-original']];};
+ vm.runInNewContext(fs.readFileSync('src/97_project_dashboard.js','utf8'),{BMH:B,document:{addEventListener(){}},Number,Math,Map,console});
+ B.sourcedBudgetCsv=()=>({revision:B.drawingRevision(),priceKey:'test-price-key',csv:'canonical-csv'});
+ B.materialSampleForBinding=b=>b?.sample?{image:{src:'data:image/jpeg;base64,/9j/AAAA'},mediaId:b.sample.mediaId}:null;return fixture;
+}
+test('customer handover includes room/SKU sample images and traceable scale/source without private finance',()=>{
+ const {B,binding}=sampleHandoverFixture();binding.sample.sourceReference='<script>UNTRUSTED</script>';B.state.project.finance.secret='PRIVATE-FINANCE-TEST';
+ const before=plain(B.state.project),snapshot=B.customerDesignSnapshot(),files=B.customerPackageFiles(snapshot),json=JSON.parse(files.find(([n])=>n==='anh-mau-vat-lieu.json')[1]),html=files.find(([n])=>n==='anh-mau-vat-lieu.html')[1];
+ assert.deepEqual(plain(files[0]),['original.svg','keep-original']);assert.equal(json.revision,snapshot.revision);assert.equal(json.materialSampleKey,snapshot.materialSampleKey);assert.equal(json.rows[0].roomId,'sample-room');assert.equal(json.rows[0].sku,'TEST-700-1100');assert.equal(json.rows[0].kind,'customer-surface-sample');assert.deepEqual(json.rows[0].realWorldScale,[.7,1.1]);assert.equal(json.rows[0].rotationDeg,37);
+ assert.match(html,/data:image\/jpeg;base64,\/9j\/AAAA/);assert.match(html,/&lt;script&gt;/);assert.doesNotMatch(html,/<script>/);assert.doesNotMatch(JSON.stringify(files),/PRIVATE-FINANCE-TEST/);assert.deepEqual(plain(B.state.project),before);
+});
+test('handover discloses unavailable/stale samples and refuses material changes before or during export',()=>{
+ const {B,binding}=sampleHandoverFixture(),snapshot=B.customerDesignSnapshot();B.materialSampleForBinding=()=>null;
+ let files=B.customerPackageFiles(snapshot),json=JSON.parse(files.find(([n])=>n==='anh-mau-vat-lieu.json')[1]);assert.equal(json.rows[0].status,'sample-unavailable');assert.doesNotMatch(files.find(([n])=>n.endsWith('.html'))[1],/data:image/);
+ binding.sample.rotationDeg=25;assert.throws(()=>B.customerPackageFiles(snapshot),/Xuất lại hồ sơ/);
+ binding.sku='CHANGED-SKU';files=B.customerPackageFiles(B.customerDesignSnapshot());json=JSON.parse(files.find(([n])=>n==='anh-mau-vat-lieu.json')[1]);assert.equal(json.rows[0].status,'stale');assert.doesNotMatch(files.find(([n])=>n.endsWith('.html'))[1],/data:image/);
+ binding.sku=binding.sample.sku;binding.roomId='another-room';files=B.customerPackageFiles(B.customerDesignSnapshot());json=JSON.parse(files.find(([n])=>n==='anh-mau-vat-lieu.json')[1]);assert.equal(json.rows[0].status,'stale');assert.match(json.rows[0].notice,/phạm vi khác/);
+ const changed=sampleHandoverFixture(b=>{b.state.project.materials.finish.rooms['sample-room'].catalogMaterials.floor.sample.sourceReference='changed during export';});
+ changed.B.drawingRevision=()=> 'fixed-geometry-revision';
+ assert.throws(()=>changed.B.customerPackageFiles(changed.B.customerDesignSnapshot()),/Xuất lại hồ sơ/);
+ const removed=sampleHandoverFixture();removed.B.drawingRevision=()=> 'fixed-geometry-revision';const prior=removed.B.customerDesignSnapshot();delete removed.binding.sample;assert.throws(()=>removed.B.customerPackageFiles(prior),/Xuất lại hồ sơ/);
+});
 test('selected product image never borrows a sample from another room',()=>{
  const {B,product,binding}=sampleScopeFixture();B.materialSampleForBinding=b=>b===binding?{image:{src:'data:image/png;base64,FIRST_ROOM'}}:null;
  B.state.project.plan.rooms.push({id:'second',type:'bed',name:'Second',floor:0,x:5,y:1,w:4,h:5});

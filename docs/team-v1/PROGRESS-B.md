@@ -1,15 +1,16 @@
 # Tiến độ AI B — BMH commercial v1
 
-Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 20/10/2026.
+Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 21/10/2026.
 - role: B
 - status: in_progress
 - execution: resumed_by_owner_2026-10-20_Asia-Saigon
 - active_task: B1
-- active_substep: W39 — portable material-sample backup/import with project isolation and failed-write recovery; preview access remains blocked.
+- active_substep: W40 — same-revision material sample sheets in customer handover; exact CI next, native preview access remains blocked.
 - target_branch: codex/b-v1-24
-- actual_branch: codex/b-facade-depth, W37 work based on released PR74 main ad575e57; source changes pending CI/preview.
+- actual_branch: codex/b-facade-depth, PR75 based on released PR74 main ad575e57; W39 CI passed, W40 source awaiting exact CI/native preview.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
-- last_verified_commit: 38614c36c018a690535f37d1d404f86595327dfd (Node22 CI39246110343, native material choice/reload/3D and production verified)
+- last_verified_commit: 26fa151739f0668024a7cb569757f8f1d9a1c13a (Node22 CI39524423121 passed; native preview remains blocked)
+- last_native_verified_commit: 38614c36c018a690535f37d1d404f86595327dfd (Node22 CI39246110343, native material choice/reload/3D and production verified; not evidence for later W38-W40 changes)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -886,3 +887,16 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Read-only Supabase discovery through both installed connections returns the same two projects: hui-minh-bach's Project and quan-ly-nha-tro, both INACTIVE. Neither is yet verified as BMH. Do not repurpose, resume or migrate another application's database by name alone; need mapping to actual BMH config. No secret retrieved, schema altered, service enabled or charge incurred.
 - Native preview remains blocked by previously observed Vercel read_protection_bypass403 and cloud-browser observation denial. No retry through another tool, public alias or protection change. Original owner permission for a23hour preview link remains granted; the provider connection permission still needs resolution.
 - Next: exact updated Node22 CI; assess BMH service mapping; carry image/SKU and sample references into the same-revision handover. Native sample upload→Materials→save/reload→3D→portable import still requires authenticated preview access. Full commercial criteria, all24visual approvals, actual GPU/phone timings and technical signoff remain open.
+
+
+## W40 — same-revision material sample handover (2026-10-21 Asia/Saigon)
+- W39 commit26fa151739f0668024a7cb569757f8f1d9a1c13a passed exact Node22 CI39524423121, including npm test and team coordinator. Vercel preview dpl_YTiSV8wtNahtf8KVouKNxe8srrsE READY at buildmyhomefullv12github-64kzx88ou-vlam1881997-9266.vercel.app. This is build evidence, not native/visual acceptance; PR75 remains draft and main PR74 unchanged.
+- Added two outputs to the existing customer package: anh-mau-vat-lieu.html (self-contained sample images, screen/print layout) and anh-mau-vat-lieu.json (traceable metadata, no duplicate pixel payload). Each sample keeps its room/exterior/global scope, SKU, specification, profile, physical scale, angle, source and design revision. Clearly labelled customer-provided surface samples, never verified manufacturer product photos or measured PBR maps.
+- Only valid, current-scope bindings may include image pixels. Missing pixels and stale SKU/spec/profile/room references remain visible with reasons. Escaped text prevents source/name markup from executing. Metadata is allowlisted; no financial state is included, and package assembly does not mutate the design.
+- Added a material-sample snapshot key and before/after package checks. A changed or removed sample during asynchronous preparation or assembly forces regeneration, including when geometry revision is unchanged. Existing package CSV replacement and other output files are preserved. Existing A handover consumes this package wrapper and retains these two new files; no A source/schema/build changes.
+- Validation: JS syntax PASS; three focused cases PASS on local Node24.19.0 (two new handover regressions plus existing ZIP/BOQ compatibility). Covered exact scope/SKU/scale/source/rotation, missing bytes, stale SKU, cross-room binding, source escaping, no private finance or design mutation, changed/removed samples and edits during package assembly. Test data uses synthetic image strings and VM stubs: not JPEG visual decoding, native IndexedDB, browser ZIP opening or real-GPU evidence. Initial legacy ZIP test was blocked by missing local103_real_house.js; recovered the exact W39 source read-only and reran it successfully. No fixture placeholders or suppressed tests.
+- Changes: B-owned src/97_project_dashboard.js, tests/team-b-style-materials.test.mjs, this progress log. No images, credentials, generated dist, dependency or production changes. W40 exact CI must be checked on the subsequent checkpoint SHA.
+- Service evidence: Vercel project config names (decrypt=false) contains only GEMINI_API_KEY for production/preview, no cloud or payment configuration. Both visible Supabase projects are INACTIVE and neither is verified as BMH; do not resume/repurpose them without the correct project mapping. No service credentials were retrieved and no service was provisioned.
+- Asset research: official https://dongtam.com.vn/san-pham/bst-6060tamdao/6060tamdao006/ identifies SKU6060TAMDAO006, 60x60cm grey granite floor/wall tile, while its linked image label refers to6060tamdao005. Page presence alone is therefore not evidence that the photo matches the SKU. No affirmative commercial reuse grant has been established; no image copied or verification/licence flag invented.
+- Next concrete gate: check exact W40 Node22 CI/preview; after provider access is fixed, test native upload -> Materials save/zoom -> explicit3D -> save/reopen -> JSON export/import -> handover opening on desktop and phone with real GPU/timings. The existing Vercel read_protection_bypass403/browser observation rejection prevents this gate; do not retry via another route or weaken protection.
+- Commercial scope remains unchanged: first Modern house through all10tabs, then24/24 individually reviewed style output packages. Exact-SKU product photos/rights, complete sourced quotes, actual cloud/auth/conflict/privacy/media/payment exercises, owner visual approval and professional architectural/structural/MEP/site review remain open. No 100% commercial or final-production claim is made. A/B integration handoff remains PR75 plus this log; no unrequested messages sent to others.

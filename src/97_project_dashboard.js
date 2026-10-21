@@ -42,10 +42,31 @@
   const current=B.commercialBoq();if(B.state.project!==p||B.drawingRevision()!==s.revision||current.revision!==s.revision||current.priceKey!==s.priceKey)return null;return {csv,revision:s.revision,priceKey:s.priceKey};
  };
  B.exportSourcedBudget=()=>{const file=B.sourcedBudgetCsv();if(!file){B.toast('Thiết kế hoặc báo giá đã đổi. Mở lại Dự toán để đối chiếu.');return false;}B.download('BMH-BOQ-co-nguon-'+file.revision.replace(/[^a-z0-9_-]/gi,'-')+'.csv',file.csv,'text/csv;charset=utf-8');return true;};
+ B.materialSampleScopes=()=>{
+  const p=B.state.project,f=p.materials.finish||{},scopes=[{scope:'global',roomId:null,name:'Toàn nhà',bindings:f.exterior?.catalogMaterials},{scope:'exterior',roomId:null,name:'Ngoại thất',bindings:f.exterior?.facadeMaterials},...p.plan.rooms.map(r=>({scope:'room',roomId:r.id,name:r.name,bindings:f.rooms?.[r.id]?.catalogMaterials}))];
+  return scopes.flatMap(row=>Object.entries(row.bindings||{}).filter(([,b])=>b?.sample).map(([category,binding])=>({scope:row.scope,roomId:row.roomId,name:row.name,category,binding,product:B.catalogBoundProduct?.(category,binding)})));
+ };
+ B.materialSamplesKey=()=>{
+  const text=JSON.stringify(B.materialSampleScopes().map(r=>[r.scope,r.roomId,r.name,r.category,r.binding,r.product?.id,r.product?.sku,r.product?.specification||r.product?.spec,r.product?.unit]));let hash=2166136261;
+  for(let i=0;i<text.length;i++)hash=Math.imul(hash^text.charCodeAt(i),16777619);return 'samples-'+(hash>>>0).toString(16);
+ };
+ const designSnapshot=B.customerDesignSnapshot;if(designSnapshot)B.customerDesignSnapshot=(...args)=>{const key=B.materialSamplesKey(),snapshot=designSnapshot(...args);if(key!==B.materialSamplesKey())throw Error('Vật liệu đã đổi. Xuất lại hồ sơ.');return {...snapshot,materialSampleKey:key};};
+ B.materialSampleHandoverFiles=snapshot=>{
+  const scopes=B.materialSampleScopes(),key=B.materialSamplesKey();
+  if((scopes.length||snapshot.materialSampleKey!==undefined)&&snapshot.materialSampleKey!==key)throw Error('Vật liệu đã đổi. Xuất lại hồ sơ.');if(!scopes.length)return [];
+  const str=v=>typeof v==='string'?v.slice(0,240):null,rows=scopes.map(r=>{
+   const b=r.binding,s=b.sample,palette=r.scope==='room'?B.finishPalette?.(r.roomId):null,status=b.roomId!==r.roomId?{valid:false,reason:'Liên kết thuộc phạm vi khác; cần chọn lại bề mặt.'}:B.catalogBindingStatus?.(r.category,b,r.product,palette),sample=status?.valid?B.materialSampleForBinding?.(b):null,dataUrl=sample?.image?.src;
+   const available=!!(status?.valid&&B.materialSampleDataValid?.(dataUrl)),scale=Array.isArray(s.realWorldScale)&&s.realWorldScale.length===2&&s.realWorldScale.every(Number.isFinite)?s.realWorldScale:null;
+   return {scope:r.scope,roomId:r.roomId,roomName:str(r.name),category:r.category,productId:str(b.productId),sku:str(b.sku),specification:str(b.specification),quantityUnit:str(b.quantityUnit),visualProfileId:str(b.visualProfileId),mediaId:str(s.mediaId),kind:'customer-surface-sample',realWorldScale:scale,rotationDeg:Number.isFinite(s.rotationDeg)?s.rotationDeg:null,sourceReference:str(s.sourceReference),status:!status?.valid?'stale':available?'sample':'sample-unavailable',notice:!status?.valid?status?.reason||'Liên kết cần kiểm tra.':available?'Ảnh mẫu khách cung cấp; phản xạ và độ nhám vẫn mô phỏng.':'Không có ảnh mẫu trên thiết bị xuất hồ sơ.',dataUrl:available?dataUrl:null};
+  });
+  const manifest={schemaVersion:1,revision:snapshot.revision,materialSampleKey:key,photoKind:'customer-surface-samples-not-verified-product-photos',financeIncluded:false,rows:rows.map(({dataUrl,...row})=>row)};
+  const html='<!doctype html><html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BMH · Ảnh mẫu vật liệu</title><style>body{font:16px/1.5 system-ui,sans-serif;color:#283d30;background:#faf9f6;margin:24px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:20px}article{border:1px solid #ccd6cc;border-radius:16px;padding:20px;background:white;break-inside:avoid}img{width:100%;height:280px;object-fit:contain}h1,h2{line-height:1.2}p{overflow-wrap:anywhere}small{color:#526452}@media print{@page{size:A3 landscape;margin:15mm}body{margin:0}main{grid-template-columns:1fr 1fr}img{height:200px}}</style><h1>Ảnh mẫu vật liệu</h1><p>Phiên bản '+esc(snapshot.revision)+' · '+esc(key)+'</p><p>Ảnh mẫu bề mặt do khách cung cấp. Chưa xác nhận ảnh sản phẩm chính hãng hoặc thông số kỹ thuật; độ nhám và phản xạ trong 3D vẫn mô phỏng.</p><main>'+rows.map(r=>'<article><h2>'+esc(r.sku||r.productId||'Chưa có mã hàng')+'</h2><p>'+esc(r.roomName||r.scope)+' · '+esc(r.category)+'</p>'+(r.dataUrl?'<img src="'+esc(r.dataUrl)+'" alt="Ảnh mẫu bề mặt '+esc(r.sku||'')+'">':'<p><b>'+esc(r.notice)+'</b></p>')+'<p>Quy cách: '+esc(r.specification||'Chưa xác nhận')+'<br>Phần ảnh đại diện: '+esc(r.realWorldScale?r.realWorldScale.map(n=>Math.round(n*1000)).join(' × ')+' mm':'Chưa xác nhận')+'<br>Góc vân: '+esc(r.rotationDeg===null?'Chưa xác nhận':r.rotationDeg+'°')+'</p><p>Nguồn: '+esc(r.sourceReference||'Chưa có')+'</p><small>'+esc(r.notice)+'</small></article>').join('')+'</main></html>';
+  if(key!==B.materialSamplesKey())throw Error('Vật liệu đã đổi. Xuất lại hồ sơ.');return [['anh-mau-vat-lieu.json',JSON.stringify(manifest,null,2)],['anh-mau-vat-lieu.html',html]];
+ };
  const packageFiles=B.customerPackageFiles;if(packageFiles)B.customerPackageFiles=(snapshot,...args)=>{
   const before=B.sourcedBudgetCsv();if(!before||snapshot.revision!==before.revision)throw new Error('Thiết kế hoặc báo giá đã đổi. Xuất lại hồ sơ.');
-  const files=packageFiles(snapshot,...args),after=B.sourcedBudgetCsv();if(!after||after.revision!==before.revision||after.priceKey!==before.priceKey)throw new Error('Thiết kế hoặc báo giá đã đổi. Xuất lại hồ sơ.');
-  return [...files.filter(([name])=>name!=='boq-co-nguon.csv'),['boq-co-nguon.csv',after.csv]];
+  const project=B.state.project,key=B.materialSamplesKey(),samples=B.materialSampleHandoverFiles(snapshot),files=packageFiles(snapshot,...args),after=B.sourcedBudgetCsv();if(!after||after.revision!==before.revision||after.priceKey!==before.priceKey||B.state.project!==project||key!==B.materialSamplesKey())throw new Error('Thiết kế hoặc báo giá đã đổi. Xuất lại hồ sơ.');
+  return [...files.filter(([name])=>!['boq-co-nguon.csv','anh-mau-vat-lieu.json','anh-mau-vat-lieu.html'].includes(name)),['boq-co-nguon.csv',after.csv],...samples];
  };
  B.dashboardLoanView=()=>{
   const f=B.state.project.finance,t=f.scenario||{},explicit=!!(t.sourceReference||t.confirmed||t.ratePeriods?.length);
@@ -104,3 +125,4 @@
  document.addEventListener('change',event=>{const select=event.target,ui=B.state.ui;if(select.matches?.('[data-model-scope]')){if(select.value==='room')return;B.rememberFinishCamera();ui.sceneExploded=select.value==='stack';ui.sceneFocus=['house','stack'].includes(select.value)?'all':select.value;ui.designView=ui.sceneFocus==='all'?'exterior':'layout';B.save();B.render({preserveScroll:true});}else if(select.matches?.('[data-model-walls]')){B.rememberFinishCamera();ui.modelWalls=['auto','full','cut'].includes(select.value)?select.value:'auto';B.save();B.render({preserveScroll:true});}});
  document.addEventListener('click',event=>{const el=event.target.closest?.('[data-sourced-budget-export],[data-budget-quote-open]');if(!el)return;if(el.hasAttribute('data-sourced-budget-export')){B.exportSourcedBudget();return;}const form=document.querySelector('[data-team-a-boq]');if(!form)return;for(let node=form.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS')node.open=true;form.scrollIntoView?.({block:'start',behavior:'smooth'});form.querySelector('select,input')?.focus({preventScroll:true});});
 })();
+
