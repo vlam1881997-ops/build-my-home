@@ -4,11 +4,11 @@ Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 21/10/2026.
 - role: A
 - status: in_progress
 - active_task: U1-A03 / U3-A03 export-integrity substep (upstream Modern/native gates remain open)
-- active_substep: handover button failure/retry/concurrent-click handling fixed;29commercial checks pass locally; native dossier gate still open.
+- active_substep: A prepareDesignHandover now independently checked with B97 sample/package wrappers;3integration cases pass locally; native media/PDF gate remains open.
 - target_branch: codex/a-massing-20261013
 - actual_branch: codex/a-massing-20261013
 - source_baseline: 8a03c900459cb2b4df03fd11ed8846ed2c0d400b (PR75 common planning source; runtime e73e0af; production PR74 main ad575e57)
-- last_verified_commit: 817367bbbd90caef2703b879bc300ecb7ff65812 (exact Node22 CI39571021121 PASS; local Modern SVG/DXF readback, not native PDF/GPU acceptance)
+- last_verified_commit: 0b043a7d3863d225a419862b95bc433d24fe301a (exact Node22 CI39604445803 PASS; native acceptance still open)
 - last_native_verified_A: 43a66a9587bedf2dfb1fea756897fac840cc3edc (historical A outdoor handoff; later native acceptance must use the actual current candidate)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
@@ -186,3 +186,11 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - A-owned exportDesignHandover now catches preparation/ZIP/download exceptions, gives a retry/backup notice and clears its transient busy flag in finally. A second click while awaiting preparation returns false with a waiting notice. Does not claim OS download completion or persisted backup success.
 - Added failure-injection regression across prepare/ZIP/download: project unchanged, false result and notice, retry succeeds. Concurrent-click test holds preparation pending and verifies one preparation/download. All29 commercial tests pass on local Node24.19.0; no native browser/PDF/storage acceptance implied.
 - Source: src/team-a-handover.js; registered tests/team-a-commercial.test.mjs. No B source, schema, dependency or production changes. Exact Node22 checkpoint CI required; inherited28SVG/2DXF evidence stays bounded to prior runtime. Next native package/font/sample acceptance awaits legitimate browser access; other commercial gates remain open.
+
+
+## U1-A03 — A/B material sample package integration, 21/10/2026
+- Loaded existing B-owned97_project_dashboard before the final A handover wrapper in the export orchestration fixture. This closes the prior test coverage gap where A preparation had only a generic upstream package.
+- Three focused integration cases PASS locally Node24.19.0: A output retains B sample HTML/JSON with matching revision/sampleKey/room/SKU/scale0.6×0.6m/37°/source; only one canonical BOQ CSV, private finance excluded. Changing sample rotation while hashing returns false with no output records and retains the edit. Missing media yields sample-unavailable, no img tag, explicit notice, complete BOQ total still null.
+- The first race assertion expected an exception, but the real revision guard correctly returned false earlier. Corrected the test to the existing false-result contract; no runtime fix was needed or made.
+- Media accessor and PDF bytes remain explicit test doubles; this is code integration evidence only, not image decoding, IndexedDB, real product photo, browserZIP or PDF acceptance. No B files changed. New tests live in the registered A-commercial suite and need exact checkpoint CI.
+- U1-A03 is ready for native validation, not done. Native/sample supplier handoff and approved preview access remain needed before U1-A04 integration acceptance. Full commercial gates and current production remain unchanged.

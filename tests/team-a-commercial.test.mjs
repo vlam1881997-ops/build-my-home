@@ -134,13 +134,14 @@ test('public BOQ quote metadata excludes unrelated imported personal fields whil
 });
 
 // Exercise asynchronous export orchestration; PDF bytes are a test double, not a valid dossier.
-async function exportRaceFixture({digestHook,packageHook}={}){
+async function exportRaceFixture({digestHook,packageHook,materialSamples=false}={}){
  const {default:fs}=await import('node:fs'),vm=await import('node:vm'),{webcrypto}=await import('node:crypto');
  const B=fixture();let calls=0;
  B.measuredDesignReview=()=>({geometryValid:true});B.architecturalSheets=()=>[];
  B.architecturalPdfBytes=async()=>new Uint8Array([1,2,3]);
  B.customerDesignSnapshot=()=>({revision:B.drawingRevision()});B.customerPresentationHtml=()=>'<p>TEST ONLY</p>';
  B.customerPackageFiles=()=>{packageHook?.(B);return [['test-only.txt','synthetic package']];};
+ if(materialSamples)vm.runInNewContext(fs.readFileSync('src/97_project_dashboard.js','utf8'),{BMH:B,document:{addEventListener(){}},console});
  vm.runInNewContext(fs.readFileSync('src/team-a-handover.js','utf8'),{BMH:B,structuredClone,TextEncoder,Uint8Array,Date,document:{addEventListener(){}},crypto:{subtle:{async digest(...args){calls++;await digestHook?.(B,calls);return webcrypto.subtle.digest(...args);}}}});
  return B;
 }
@@ -188,4 +189,37 @@ test('handover button starts one preparation while a prior export is pending',as
  B.prepareDesignHandover=()=>{starts++;return new Promise(resolve=>{release=resolve;});};B.zipStored=()=>new Uint8Array([1]);B.download=()=>downloads++;
  const first=B.exportDesignHandover();assert.equal(await B.exportDesignHandover(),false);assert.equal(starts,1);
  release({revision:'TEST',files:[]});assert.equal(await first,true);assert.equal(downloads,1);assert.equal(B.designHandoverBusy,false);
+});
+
+function attachExportSample(B){
+ const p=B.state.project,product={id:'TEST-export-tile',category:'floor',sku:'TEST-EXPORT-600',specification:'600x600 mm',unit:'m²'};
+ p.materials.choices.floor=product.id;p.dataEngine.materialOverrides[product.id]={product};
+ assert.equal(B.applyCatalogMaterial('floor','ivory-tile',{scope:'room',roomId:'room'}),true);
+ const binding=p.materials.finish.rooms.room.catalogMaterials.floor;
+ binding.sample={mediaId:'material-sample-export-test',productId:binding.productId,sku:binding.sku,specification:binding.specification,realWorldScale:[.6,.6],rotationDeg:37,sourceReference:'TEST-ONLY surface sample, not supplier photo'};
+ // Media accessor is a test double; native IndexedDB/image decoding remains a separate gate.
+ B.materialSampleForBinding=b=>b?.sample?{image:{src:'data:image/jpeg;base64,/9j/AAAA'},mediaId:b.sample.mediaId}:null;
+ return binding;
+}
+test('A handover retains B sample metadata and HTML with matching room/SKU/revision',async()=>{
+ const B=await exportRaceFixture({materialSamples:true});attachExportSample(B);B.state.project.finance.privateNote='PRIVATE-SAMPLE-EXPORT';
+ const result=await B.prepareDesignHandover();assert.ok(result);const files=new Map(result.files);
+ const manifest=JSON.parse(files.get('anh-mau-vat-lieu.json'));
+ assert.equal(manifest.revision,result.revision);assert.equal(manifest.materialSampleKey,B.materialSamplesKey());
+ assert.equal(manifest.rows[0].roomId,'room');assert.equal(manifest.rows[0].sku,'TEST-EXPORT-600');assert.deepEqual(manifest.rows[0].realWorldScale,[.6,.6]);assert.equal(manifest.rows[0].rotationDeg,37);
+ assert.match(files.get('anh-mau-vat-lieu.html'),/TEST-EXPORT-600/);assert.equal(result.files.filter(([n])=>n==='boq-co-nguon.csv').length,1);
+ assert.doesNotMatch(JSON.stringify(result.files),/PRIVATE-SAMPLE-EXPORT/);
+});
+test('A handover refuses changed B sample metadata during hashing without output records',async()=>{
+ let binding;const B=await exportRaceFixture({materialSamples:true,digestHook:(b,n)=>{if(n===2)binding.sample.rotationDeg=19;}});binding=attachExportSample(B);
+ assert.equal(await B.prepareDesignHandover(),false);
+ assert.equal(B.supervisionAdapter.list('outputs').length,0);assert.equal(binding.sample.rotationDeg,19);
+});
+
+test('A handover discloses missing sample bytes instead of substituting a product photo',async()=>{
+ const B=await exportRaceFixture({materialSamples:true});attachExportSample(B);B.materialSampleForBinding=()=>null;
+ const result=await B.prepareDesignHandover();assert.ok(result);const files=new Map(result.files),manifest=JSON.parse(files.get('anh-mau-vat-lieu.json'));
+ assert.equal(manifest.rows[0].status,'sample-unavailable');assert.equal(manifest.rows[0].kind,'customer-surface-sample');
+ assert.doesNotMatch(files.get('anh-mau-vat-lieu.html'),/<img /);assert.match(files.get('anh-mau-vat-lieu.html'),/Không có ảnh mẫu/);
+ assert.equal(B.commercialBoq().completeTotal,null);
 });
