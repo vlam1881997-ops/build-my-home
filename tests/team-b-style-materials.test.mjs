@@ -240,6 +240,56 @@ test('image storage reports success only after commit and rejects a late disk ab
   if(abort)transaction.onabort();else transaction.oncomplete();assert.equal(await pending,!abort);
  }
 });
+
+async function portableSampleFixture(){
+ const {B,binding}=sampleScopeFixture(),bytes='data:image/jpeg;base64,/9j/AAAA',storage=new Map([['source-project:'+binding.sample.mediaId,bytes]]),writes=[];
+ B.state.meta.localProjectId='source-project';B.clearCloudLink=state=>Object.assign(state.meta,{cloudProjectId:'',cloudOwnerId:'',cloudRevision:null,cloudUpdatedAt:null});
+ let sequence=0;const document={addEventListener(){},querySelector:()=>null},window={addEventListener(){}};
+ vm.runInNewContext(fs.readFileSync('src/82_customer_projects.js','utf8'),{BMH:B,document,window,structuredClone,Blob,console,Date,URL,clearTimeout(){},setTimeout(){return 1;},crypto:{randomUUID:()=> 'home-import-'+(++sequence)}});
+ await B.projects.ready;B.projectDb=async()=>({});B.projects.activeId='source-project';
+ B.saveCustomerProject=async()=>{B.projects.activeId||='home-created-'+(++sequence);B.state.meta.localProjectId=B.projects.activeId;writes.push({id:B.projects.activeId,state:structuredClone(B.state)});return B.projects.activeId;};
+ B.projectMediaScope=async()=>B.state.meta.localProjectId;B.styleReferenceStore={get:async(id,options)=>{assert.equal(options.legacy,false);return storage.get(options.scope+':'+id)||null;},putMany:async(rows,{scope})=>{for(const row of rows)storage.set(scope+':'+row.mediaId,row.dataUrl);}};
+ B.validateMaterialSamplePixels=async files=>{for(const row of files)assert.equal(row.dataUrl,bytes);};
+ return {B,binding,bytes,storage,writes};
+}
+
+test('portable backup imports exact sample bytes into a fresh project scope and preserves SKU/scale/room',async()=>{
+ const {B,binding,bytes,storage}=await portableSampleFixture(),snapshot=await B.prepareProjectBackup();
+ assert.equal(snapshot.materialSampleFiles.files.length,1);assert.equal(snapshot.materialSampleFiles.files[0].dataUrl,bytes);assert.deepEqual(plain(snapshot.materialSampleFiles.missing),[]);assert.equal(snapshot.access.paid,false);
+ snapshot.meta.localProjectId='forged-other-project';snapshot.meta.cloudProjectId='foreign-cloud';const before=plain(snapshot.project.materials.finish);
+ const imported=await B.importProjectJson(new Blob([JSON.stringify(snapshot)]));assert.notEqual(imported.meta.localProjectId,'source-project');assert.notEqual(imported.meta.localProjectId,'forged-other-project');assert.equal(imported.meta.cloudProjectId,'');
+ assert.equal(storage.get(imported.meta.localProjectId+':'+binding.sample.mediaId),bytes);assert.equal(storage.get('source-project:'+binding.sample.mediaId),bytes);assert.deepEqual(plain(imported.project.materials.finish),before);
+ const again=await B.prepareProjectBackup();assert.equal(again.materialSampleFiles.files[0].dataUrl,bytes);assert.deepEqual(plain(again.project.materials.finish),before);
+});
+
+test('portable backups disclose missing pixels, never read another project and reject stale assembly',async()=>{
+ const {B,binding,bytes,storage}=await portableSampleFixture();storage.delete('source-project:'+binding.sample.mediaId);storage.set('other-project:'+binding.sample.mediaId,bytes);
+ const snapshot=await B.prepareProjectBackup();assert.deepEqual(plain(snapshot.materialSampleFiles.files),[]);assert.deepEqual(plain(snapshot.materialSampleFiles.missing),[binding.sample.mediaId]);
+ B.styleReferenceStore.get=async()=>{B.state.project.name='Edited while exporting';return bytes;};await assert.rejects(()=>B.prepareProjectBackup(),/thay đổi/);
+});
+
+test('portable import rejects unbound, duplicate, forged images and disk failure before replacing the open design',async()=>{
+ const {B,binding}=await portableSampleFixture(),snapshot=await B.prepareProjectBackup(),old=B.state;
+ const attempts=[s=>s.materialSampleFiles.files[0].mediaId='material-sample-foreign',s=>s.materialSampleFiles.files.push({...s.materialSampleFiles.files[0]}),s=>s.materialSampleFiles.files[0].dataUrl='data:text/html;base64,AAAA',s=>s.materialSampleFiles.missing.push(binding.sample.mediaId),s=>s.materialSampleFiles.files=[]];
+ for(const change of attempts){const input=structuredClone(snapshot);change(input);await assert.rejects(()=>B.importProjectJson(new Blob([JSON.stringify(input)])));assert.equal(B.state,old);}
+ B.styleReferenceStore.putMany=async()=>{throw Error('disk aborted');};await assert.rejects(()=>B.importProjectJson(new Blob([JSON.stringify(snapshot)])),/disk aborted/);assert.equal(B.state,old);assert.equal(B.projects.activeId,'source-project');
+});
+
+test('portable import preserves a concurrent edit and rolls back a failed project write',async()=>{
+ const {B}=await portableSampleFixture(),snapshot=await B.prepareProjectBackup(),old=B.state,oldId=B.projects.activeId;
+ B.validateMaterialSamplePixels=async()=>{B.state.project.name='Keep this edit';};
+ await assert.rejects(()=>B.importProjectJson(new Blob([JSON.stringify(snapshot)])),/đã thay đổi/);assert.equal(B.state,old);assert.equal(B.state.project.name,'Keep this edit');
+ B.validateMaterialSamplePixels=async()=>{};let saves=0;const save=B.saveCustomerProject;B.saveCustomerProject=async()=>{if(++saves===2)throw Error('project disk full');return save();};
+ await assert.rejects(()=>B.importProjectJson(new Blob([JSON.stringify(snapshot)])),/project disk full/);assert.equal(B.state,old);assert.equal(B.projects.activeId,oldId);assert.equal(B.state.project.name,'Keep this edit');
+});
+
+test('batch sample writes abort together if a later write cannot be queued',async()=>{
+ let openRequest,aborted=false,count=0;const B={projectMediaKey:(scope,id)=>scope+':'+id},indexedDB={open(){openRequest={};return openRequest;}};
+ const source=fs.readFileSync('src/104_style_reference.js','utf8');vm.runInNewContext(source.slice(0,source.indexOf(' const preview=B.v6FilePreview;'))+'})();',{BMH:B,indexedDB,Error});
+ const pending=B.styleReferenceStore.putMany([{mediaId:'a',dataUrl:'a'},{mediaId:'b',dataUrl:'b'}],{scope:'new-project'});
+ openRequest.result={transaction(){return {objectStore:()=>({put(){if(++count===2)throw Error('quota');return {};}}),abort(){aborted=true;this.onabort();}};}};openRequest.onsuccess();
+ await assert.rejects(pending);assert.equal(count,2);assert.equal(aborted,true);
+});
 test('selected product image never borrows a sample from another room',()=>{
  const {B,product,binding}=sampleScopeFixture();B.materialSampleForBinding=b=>b===binding?{image:{src:'data:image/png;base64,FIRST_ROOM'}}:null;
  B.state.project.plan.rooms.push({id:'second',type:'bed',name:'Second',floor:0,x:5,y:1,w:4,h:5});

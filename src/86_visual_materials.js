@@ -55,12 +55,26 @@ BMH.resolveFacadeMaterialBindings=palette=>{
  }
  return result;
 };
-// Sample pixels stay in the project-scoped media store, never in the project JSON.
+// Sample pixels stay in the project-scoped media store; portable backups attach them separately.
 // A provided colour sample is not a measured normal/roughness map or certification.
 const sampleRuntime=new WeakMap(),sampleOperations=new WeakMap();
 const projectSampleBindings=project=>{const f=project?.materials?.finish||{};return [f.exterior,...Object.values(f.rooms||{})].filter(Boolean).flatMap(r=>[...Object.values(r.catalogMaterials||{}),...Object.values(r.facadeMaterials||{})]);};
 BMH.catalogSampleMetadataValid=b=>{
  const s=b?.sample;return !!s&&typeof s.mediaId==='string'&&/^material-sample-[a-zA-Z0-9-]+$/.test(s.mediaId)&&s.productId===b.productId&&s.sku===b.sku&&s.specification===b.specification&&typeof s.sourceReference==='string'&&s.sourceReference.trim().length>0&&s.sourceReference.length<=240&&Array.isArray(s.realWorldScale)&&s.realWorldScale.length===2&&s.realWorldScale.every(n=>Number.isFinite(n)&&n>=.01&&n<=20)&&Number.isFinite(s.rotationDeg)&&s.rotationDeg>=0&&s.rotationDeg<360;
+};
+BMH.projectMaterialSampleIds=project=>[...new Set(projectSampleBindings(project).filter(BMH.catalogSampleMetadataValid).map(b=>b.sample.mediaId))];
+BMH.materialSampleDataValid=data=>typeof data==='string'&&data.length<=2000000&&/^data:image\/jpeg;base64,\/9j\/[A-Za-z0-9+/]+={0,2}$/.test(data)&&data.slice(data.indexOf(',')+1).length%4===0;
+BMH.readMaterialSampleBackup=incoming=>{
+ const bundle=incoming?.materialSampleFiles;if(bundle===undefined)return null;
+ const reject=()=>{throw Error('Danh sách ảnh mẫu trong bản sao không hợp lệ. Thiết kế đang mở được giữ nguyên.');};
+ if(!bundle||bundle.schemaVersion!==1||!Array.isArray(bundle.files)||!Array.isArray(bundle.missing)||bundle.files.length+bundle.missing.length>128)reject();
+ const expected=new Set(BMH.projectMaterialSampleIds(incoming.project)),seen=new Set();
+ for(const row of bundle.files){if(!row||!expected.has(row.mediaId)||seen.has(row.mediaId)||!BMH.materialSampleDataValid(row.dataUrl))reject();seen.add(row.mediaId);}
+ for(const id of bundle.missing){if(!expected.has(id)||seen.has(id))reject();seen.add(id);}
+ if(expected.size!==seen.size)reject();return bundle;
+};
+BMH.validateMaterialSamplePixels=async files=>{
+ for(const row of files){const image=new Image();image.src=row.dataUrl;await image.decode();if(!image.naturalWidth||!image.naturalHeight||image.naturalWidth>1024||image.naturalHeight>1024)throw Error('Ảnh mẫu trong bản sao vượt kích thước được hỗ trợ.');}
 };
 BMH.materialSampleForBinding=b=>BMH.catalogSampleMetadataValid(b)?sampleRuntime.get(BMH.state.project)?.get(b.sample.mediaId)||null:null;
 BMH.restoreMaterialSamples=async()=>{

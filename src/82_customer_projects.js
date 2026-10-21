@@ -87,7 +87,7 @@ BMH.projectLibraryHtml=()=>{
   const current=row.id===p.activeId,confirm=p.confirmDelete===row.id;
   return '<article class="customer-project-card">'+BMH.projectThumbnail(row)+'<div><h3>'+esc(row.name)+'</h3><p>'+BMH.num(row.width)+' × '+BMH.num(row.depth)+' m · '+row.floors+' tầng · '+row.roomCount+' phòng</p><small>'+esc(new Date(row.updatedAt).toLocaleString('vi-VN'))+(current?' · Đang mở':'')+'</small><div class="customer-project-card-actions">'+(confirm?'<span>Xóa bản lưu này?</span><button data-project-delete-confirm="'+esc(row.id)+'">Xóa bản lưu</button><button data-project-delete-cancel>Giữ lại</button>':'<button data-project-open="'+esc(row.id)+'">'+(current?'Tiếp tục thiết kế':'Mở thiết kế')+'</button><button data-project-copy="'+esc(row.id)+'">Tạo bản sao</button><button data-project-delete="'+esc(row.id)+'" '+(current?'disabled title="Mở dự án khác trước khi xóa"':'')+'>Xóa</button>')+'</div></div></article>';
  }).join('');
- return '<header><div><small>BUILD MY HOME</small><h2 id="customerProjectsTitle">Dự án của tôi</h2><p>Thiết kế được lưu trên thiết bị này, không cần đăng nhập.</p></div><button data-project-library-close aria-label="Đóng">×</button></header><form id="customerProjectNameForm"><label>Tên thiết kế đang mở<input name="projectName" maxlength="120" value="'+esc(BMH.state.project.name||'')+'" required></label><button type="submit">Lưu tên</button></form><div class="customer-project-tools"><button data-project-new>+ Thiết kế mới</button><button data-project-backup>↓ Tải bản sao JSON</button><button data-project-import>↑ Mở tệp JSON</button><input id="customerProjectJsonUpload" type="file" accept="application/json,.json" hidden aria-label="Chọn bản sao dự án JSON trong hộp dự án"><button data-app-install>Cài BMH vào thiết bị</button></div>'+(p.error?'<p class="customer-project-error" role="alert">'+esc(p.error)+'</p>':'')+'<div class="customer-project-list">'+(rows||'<p>Chưa có bản lưu. Thiết kế đang mở vẫn được giữ trên màn hình.</p>')+'</div>'+(p.rows.length>visible?'<button data-project-load-more>Xem thêm thiết kế ('+(p.rows.length-visible)+')</button>':'')+'<footer>Để chuyển máy hoặc giữ thêm một bản, hãy tải bản sao JSON. Ảnh và tệp hiện trường lưu riêng trên thiết bị.</footer>';
+ return '<header><div><small>BUILD MY HOME</small><h2 id="customerProjectsTitle">Dự án của tôi</h2><p>Thiết kế được lưu trên thiết bị này, không cần đăng nhập.</p></div><button data-project-library-close aria-label="Đóng">×</button></header><form id="customerProjectNameForm"><label>Tên thiết kế đang mở<input name="projectName" maxlength="120" value="'+esc(BMH.state.project.name||'')+'" required></label><button type="submit">Lưu tên</button></form><div class="customer-project-tools"><button data-project-new>+ Thiết kế mới</button><button data-project-backup>↓ Tải bản sao JSON</button><button data-project-import>↑ Mở tệp JSON</button><input id="customerProjectJsonUpload" type="file" accept="application/json,.json" hidden aria-label="Chọn bản sao dự án JSON trong hộp dự án"><button data-app-install>Cài BMH vào thiết bị</button></div>'+(p.error?'<p class="customer-project-error" role="alert">'+esc(p.error)+'</p>':'')+'<div class="customer-project-list">'+(rows||'<p>Chưa có bản lưu. Thiết kế đang mở vẫn được giữ trên màn hình.</p>')+'</div>'+(p.rows.length>visible?'<button data-project-load-more>Xem thêm thiết kế ('+(p.rows.length-visible)+')</button>':'')+'<footer>Bản sao JSON kèm ảnh mẫu vật liệu đang có trên thiết bị. Ảnh tham khảo ý tưởng và tệp hiện trường vẫn lưu riêng; giữ thêm bản gốc của các tệp đó.</footer>';
 };
 BMH.paintProjectLibrary=()=>{const dialog=BMH.$('#customerProjects');if(!dialog||!BMH.projects.open)return;const input=dialog.querySelector('[name="projectName"]'),focused=input&&document.activeElement===input,value=input?.value,start=input?.selectionStart,end=input?.selectionEnd;dialog.innerHTML=BMH.projectLibraryHtml();if(focused){const next=dialog.querySelector('[name="projectName"]');next.value=value;next.focus();next.setSelectionRange(start,end);}};
 BMH.refreshProjectLibrary=async()=>{try{BMH.projects.rows=await BMH.projectList();}catch(error){BMH.projects.error=error.message;}BMH.paintProjectLibrary();};
@@ -100,9 +100,43 @@ BMH.openProjectLibrary=async()=>{
 BMH.closeProjectLibrary=()=>{BMH.projects.open=false;BMH.projects.confirmDelete='';BMH.$('#customerProjects')?.close();};
 BMH.saveBeforeProjects=BMH.save;BMH.save=()=>{const result=BMH.saveBeforeProjects();BMH.queueProjectSave();return result;};
 const customerProjectRender=BMH.render;BMH.render=options=>{customerProjectRender(options);BMH.projectSaveStatus();};
+BMH.prepareProjectBackup=async()=>{
+ const project=BMH.state.project,snapshot=BMH.projectSnapshot(BMH.state),signature=JSON.stringify(project),ids=BMH.projectMaterialSampleIds?.(snapshot.project)||[];
+ if(ids.length>128)throw Error('Bản sao hỗ trợ tối đa 128 ảnh mẫu. Thiết kế vẫn được giữ trên thiết bị.');
+ const files=[],missing=[];let scope=BMH.state.meta.localProjectId||BMH.projects.activeId;
+ if(ids.length&&!scope)try{scope=await BMH.projectMediaScope();}catch(_){}
+ for(const mediaId of ids){let dataUrl;try{if(scope)dataUrl=await BMH.styleReferenceStore?.get(mediaId,{scope,legacy:false});}catch(_){}
+  if(BMH.materialSampleDataValid?.(dataUrl))files.push({mediaId,dataUrl});else missing.push(mediaId);
+ }
+ if(BMH.state.project!==project||JSON.stringify(project)!==signature)throw Error('Thiết kế đã thay đổi khi tạo bản sao. Hãy tải lại bản mới.');
+ BMH.clearCloudLink?.(snapshot);snapshot.meta.localProjectId='';
+ snapshot.materialSampleFiles={schemaVersion:1,files,missing};
+ if(new Blob([JSON.stringify(snapshot,null,2)]).size>50000000)throw Error('Bản sao vượt 50 MB. Thiết kế và ảnh gốc vẫn được giữ trên thiết bị.');
+ return snapshot;
+};
+BMH.exportProjectJson=async()=>{
+ try{const snapshot=await BMH.prepareProjectBackup();BMH.download('BMH-project.json',JSON.stringify(snapshot,null,2),'application/json');const missing=snapshot.materialSampleFiles.missing.length;
+  BMH.toast(missing?'Đã tải thiết kế; còn '+missing+' ảnh mẫu không có trên thiết bị này.':'Đã tải bản sao thiết kế kèm '+snapshot.materialSampleFiles.files.length+' ảnh mẫu vật liệu.');return true;
+ }catch(error){BMH.toast(error.message||'Chưa tạo được bản sao. Thiết kế hiện tại vẫn được giữ.');return false;}
+};
 const customerProjectImport=BMH.importProjectJson;BMH.importProjectJson=async file=>{
- const available=await BMH.projectDb().then(()=>true,()=>false);if(available)await BMH.saveCustomerProject();const imported=await customerProjectImport(file);clearTimeout(BMH.projects.timer);BMH.projects.activeId='';delete imported.meta.localProjectId;BMH.clearCloudLink?.(imported);BMH.projects.dirty=true;
- BMH.restoreProjectRuntime();if(available)await BMH.saveCustomerProject();else BMH.saveBeforeProjects();BMH.closeProjectLibrary();BMH.render();BMH.projectSaveStatus();return imported;
+ if(!file||file.size>50000000)throw Error('Bản sao kèm ảnh mẫu cần nhỏ hơn 50 MB.');
+ let incoming;try{incoming=JSON.parse(await file.text());}catch(_){throw Error('Tệp không phải JSON dự án hợp lệ.');}
+ const samples=BMH.readMaterialSampleBackup?.(incoming),available=await BMH.projectDb().then(()=>true,()=>false);
+ if(samples?.files.length&&(!available||!BMH.styleReferenceStore?.putMany))throw Error('Kho ảnh chưa sẵn sàng. Bản sao và thiết kế đang mở vẫn được giữ nguyên.');
+ if(available)await BMH.saveCustomerProject();
+ const previous=BMH.state,previousId=BMH.projects.activeId,signature=JSON.stringify(previous.project);let scope='';
+ if(samples){delete incoming.materialSampleFiles;scope=globalThis.crypto?.randomUUID?.()||BMH.uid('home');incoming.meta={...incoming.meta,localProjectId:scope};BMH.clearCloudLink?.(incoming);
+  const text=JSON.stringify(incoming);file=new Blob([text],{type:'application/json'});if(file.size>5000000)throw Error('Phần thiết kế trong bản sao vượt 5 MB.');
+  await BMH.validateMaterialSamplePixels(samples.files);if(samples.files.length)await BMH.styleReferenceStore.putMany(samples.files,{scope});
+ }
+ if(BMH.state!==previous||JSON.stringify(previous.project)!==signature)throw Error('Thiết kế đang mở đã thay đổi. Lưu bản hiện tại rồi mở lại tệp sao lưu.');
+ try{
+  const imported=await customerProjectImport(file);clearTimeout(BMH.projects.timer);BMH.projects.activeId=scope;delete imported.meta.localProjectId;BMH.clearCloudLink?.(imported);BMH.projects.dirty=true;
+  if(scope)imported.meta.localProjectId=scope;
+  BMH.restoreProjectRuntime();if(available)await BMH.saveCustomerProject();else BMH.saveBeforeProjects();BMH.closeProjectLibrary();BMH.render();BMH.projectSaveStatus();
+  if(samples)BMH.toast('Đã mở thiết kế và '+samples.files.length+' ảnh mẫu vật liệu.'+(samples.missing.length?' Còn '+samples.missing.length+' ảnh mẫu thiếu trong bản sao.':''));return imported;
+ }catch(error){clearTimeout(BMH.projects.timer);BMH.state=previous;BMH.projects.activeId=previousId;BMH.projects.dirty=false;BMH.restoreProjectRuntime();BMH.saveBeforeProjects();BMH.render();throw error;}
 };
 // A slow disk write cannot let a second project switch replace the first one.
 for(const name of ['openCustomerProject','newCustomerProject','deleteCustomerProject','importProjectJson']){
@@ -131,3 +165,4 @@ BMH.projects.ready=(async()=>{
  try{await BMH.projectDb();const active=await BMH.projectActive();if(BMH.state!==initial||mutation!==BMH.projects.mutation)return true;if(active?.id&&(!BMH.localStateLoaded||!BMH.projects.activeId||String(active.updatedAt)>=String(initial.meta.savedAt)))BMH.projects.activeId=active.id;if(BMH.projects.activeId){const record=await BMH.projectGet(BMH.projects.activeId);if(BMH.state===initial&&mutation===BMH.projects.mutation){if(record&&(!BMH.localStateLoaded||record.id!==initial.meta.localProjectId||String(record.state.meta.savedAt)>String(initial.meta.savedAt)))BMH.useCustomerProject(record,{close:false});else if(!record||String(initial.meta.savedAt)>String(record.state.meta.savedAt))BMH.queueProjectSave();}}return true;}
  catch(error){BMH.projects.error=error.message;BMH.projectSaveStatus();return false;}
 })();
+

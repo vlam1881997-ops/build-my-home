@@ -5,7 +5,7 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 20/10/2026.
 - status: in_progress
 - execution: resumed_by_owner_2026-10-20_Asia-Saigon
 - active_task: B1
-- active_substep: W38 — preserve SKU samples through explicit save/preview, inspect full sample and confirm durable media writes.
+- active_substep: W39 — portable material-sample backup/import with project isolation and failed-write recovery; preview access remains blocked.
 - target_branch: codex/b-v1-24
 - actual_branch: codex/b-facade-depth, W37 work based on released PR74 main ad575e57; source changes pending CI/preview.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
@@ -876,3 +876,13 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Changed only B-owned src/86_visual_materials.js, src/90_product_polish.js, src/104_style_reference.js, src/product-polish.css, tests/team-b-style-materials.test.mjs and this progress file. No A source/schema/price/build/dependency changes. No paid calls or actual customer state.
 - Research: official Dong Tam exact-SKU pages found (6060TAMDAO001 and 6060VAMCOTAY003), but no affirmative commercial photo reuse grant established. No asset copied or licence/approval flag invented. Attachment Markdown đã dán (1)(7).md is supporting tool guidance, not proof that all named skills/tools/services are available.
 - Next: preserve material-sample pixels in portable backup and validate cross-project import isolation, then exact Node22 CI and native preview gate. Entire commercial acceptance remains pending for exact-SKU licensed imagery, real-GPU desktop/phone timing/visuals, cloud/merchant configuration, 24 individual visual reviews and professional technical inputs/signoff.
+
+
+## W39 — portable material sample backup (2026-10-21 Asia/Saigon)
+- W38 commit057930aff61c5f0c74b7a4a947b29aaeefae9b81 passed exact Node22 CI39394442930. Preview dpl_H2vTdAZQXJBe35T998K3SP5vsGaL READY, target preview; no main merge. This does not replace native UI/GPU acceptance.
+- Found JSON backup omitted sample pixels while advertising transfer to another device. Backup now attaches a versioned materialSampleFiles section outside persisted project state, with only sample IDs referenced by the captured project, project-scoped reads, explicit missing-image list, bounded JSON/image counts and no imported paid/cloud identity. Existing project schema remains unchanged.
+- Import validates referenced IDs, duplicate/missing coverage, JPEG data, dimensions and file bounds before replacing the open design; stages all sample writes atomically into a fresh project scope. Legacy design JSON still uses the existing importer. Current edits during asynchronous import are preserved; a failed final project write restores the original project. Source image references/field evidence remain separate and UI states that limit.
+- Added five registered backup/storage cases: bytes+SKU/spec/room/scale roundtrip; missing bytes/cross-project isolation/stale assembly; malformed/unbound/duplicate images and disk abort; concurrent edit/final project-save rollback; batch abort when a write cannot be queued. Focused storage+backup6/6 PASS on Node24.19.0; syntax PASS. Full local style suite34/35 at the preceding snapshot, only failure ENOENT photographic-provenance.json because local source recovery is sparse; no dummy asset or test suppression added. Remote exact CI is the gate for complete repo assets and Node22.
+- Read-only Supabase discovery through both installed connections returns the same two projects: hui-minh-bach's Project and quan-ly-nha-tro, both INACTIVE. Neither is yet verified as BMH. Do not repurpose, resume or migrate another application's database by name alone; need mapping to actual BMH config. No secret retrieved, schema altered, service enabled or charge incurred.
+- Native preview remains blocked by previously observed Vercel read_protection_bypass403 and cloud-browser observation denial. No retry through another tool, public alias or protection change. Original owner permission for a23hour preview link remains granted; the provider connection permission still needs resolution.
+- Next: exact updated Node22 CI; assess BMH service mapping; carry image/SKU and sample references into the same-revision handover. Native sample upload→Materials→save/reload→3D→portable import still requires authenticated preview access. Full commercial criteria, all24visual approvals, actual GPU/phone timings and technical signoff remain open.
