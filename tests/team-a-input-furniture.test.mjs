@@ -36,3 +36,34 @@ test('entered zero differs from unknown and changed values stale confirmation wi
  B.state.project.finance.existingDebt=100;entry=B.projectInputRegister().find(r=>r.field==='finance.existingDebt');assert.equal(entry.status,'stale');assert.equal(entry.confirmed,false);
  assert.equal(B.recordProjectInput('secret',{confirmed:true}),false);
 });
+test('U2 north assessment rejects blank and non-text source references without changing the project',()=>{
+ const B=designClient();
+ for(const sourceReference of ['   ','\n\t',{},true,42]){
+  B.state.project.site.north={azimuthDeg:37,datum:'true-north',sourceReference,observedAt:'2026-01-01',status:'provided'};
+  const before=JSON.stringify(B.state.project);
+  assert.equal(B.siteInputAssessment().north.usable,false,JSON.stringify(sourceReference));
+  assert.ok(B.fengshuiPlacementAdvice().missing.includes('Hướng Bắc thật và nguồn đo'));
+  assert.equal(JSON.stringify(B.state.project),before);
+ }
+ B.state.project.site.north.sourceReference='TEST-ONLY survey reference';
+ assert.equal(B.siteInputAssessment().north.usable,true);
+ assert.equal(B.siteInputAssessment().legalBoundaryVerified,false);
+});
+test('U2 shared Modern inputs and unknown approvals survive local save/load normalization',async()=>{
+ const {modernReference}=await import('./team-b-modern-reference.mjs');
+ const {B}=modernReference();
+ // Apply the existing import defaults before comparing canonical saved states.
+ B.state=B.mergeState(B.defaultState(),B.state);B.normalizeState();
+ const before=structuredClone(B.state.project),revision=B.drawingRevision();
+ B.save();B.state=B.loadState();B.normalizeState();
+ for(const field of ['site','household','finance','briefIdea','style','plan','designStudio','inputEvidence']){
+  assert.deepEqual(JSON.parse(JSON.stringify(B.state.project[field])),JSON.parse(JSON.stringify(before[field])),field);
+ }
+ assert.equal(B.drawingRevision(),revision);
+ assert.ok(B.projectInputRegister().every(row=>!row.confirmed));
+ assert.equal(B.siteInputAssessment().legalBoundaryVerified,false);
+ assert.equal(B.siteInputAssessment().north.usable,false);
+ const saved=JSON.stringify(B.state.project);
+ B.siteInputAssessment();B.fengshuiPlacementAdvice();
+ assert.equal(JSON.stringify(B.state.project),saved);
+});

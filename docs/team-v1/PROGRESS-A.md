@@ -3,12 +3,12 @@
 Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 21/10/2026.
 - role: A
 - status: in_progress
-- active_task: U1-A01 / U1-A02 (gói5bản/2ChatGPT do chủ giao vai tròA ngày21/10)
-- active_substep: U1-A01 baseline checkpoint98c96e2 ready; U1-A02 saved material/BOQ guard implemented and locally checked, awaiting exact Node22 CI and actual B supplier/native handoff; prepare U2-A01 independently.
+- active_task: U2-A01 (gói5bản/2ChatGPT; U1-A02 chờ supplier/native handoff B)
+- active_substep: U2-A01 source-reference validation fixed; shared canonical Modern local roundtrip checked. Await exact checkpoint CI and native/source acceptance.
 - target_branch: codex/a-massing-20261013
 - actual_branch: codex/a-massing-20261013
 - source_baseline: 8a03c900459cb2b4df03fd11ed8846ed2c0d400b (PR75 common planning source; runtime e73e0af; production PR74 main ad575e57)
-- last_verified_commit: e73e0afbc85d4596c806882d8af1d6af10f5ea75 (prior exact Node22 CI39525474492 PASS; not native evidence for later patches)
+- last_verified_commit: fc3e65271b2e1faab10d003ff27454fd9083e004 (exact Node22 CI39538092095 PASS; PR76; not native or commercial acceptance)
 - last_native_verified_A: 43a66a9587bedf2dfb1fea756897fac840cc3edc (historical A outdoor handoff; later native acceptance must use the actual current candidate)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
@@ -144,3 +144,12 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 -5new registered regressions pass locally, plus52/53 across affected A-commercial/B-workflow; sole failure was missing readonly B46file in sparse recovery. Exact8a03c90 B46source restored and only that case rerun1/1PASS. Node24.19.0; syntax PASS; exact Node22 remote CI pending for the subsequent source checkpoint.
 - Source/evidence: src/team-a-boq.js, tests/team-a-commercial.test.mjs, evidence/A/U1-A02-20261021/HANDOFF-B.md and source-hashes.json, plus A progress/integration. No B file/progress, dependency/build/schema/service/production mutation.
 - Next: exact CI; U1-A03 package consumer checks when B supplies actual sample/asset handoff; independent U2-A01 input audit/preparation. Actual imagery/native/GPU/service/professional gates remain open.
+
+
+## U2-A01 — nguồn hướng và đầu vào Hiện đại, 21/10/2026
+- Tiếp tục trên PR76/nhánh A từ fc3e652; CI39538092095 đã success, đã cập nhật PR. Không sửa B hay production.
+- Tái hiện sourceReference chỉ có khoảng trắng bị siteInputAssessment nhận là hướng có nguồn. Sửa guard trong src/team-a-project-contract.js: chỉ chuỗi có nội dung mới được dùng; object/boolean/number cũng bị từ chối, không sửa dữ liệu gốc hoặc tự xác nhận khảo sát.
+- tests/team-a-input-furniture.test.mjs: thêm kiểm malformed source + tư vấn phong thủy không mutate, và vòng lưu/load/normalize của chính modernReference hiện hữu. Chuẩn hóa bằng mergeState/defaults trước khi so canonical state; fixture gốc thiếu một số trường household mặc định, việc bổ sung default không được gọi là khách xác nhận.
+- Local Node24.19.0: 6/6 input tests PASS. Regression khoảng trắng FAIL trước sửa. Kiểm giữ site, household, finance, briefIdea, style, plan, designStudio, inputEvidence và drawingRevision; input confirmations vẫn false, legalBoundaryVerified/north.usable vẫn false trong mẫu.
+- Phạm vi: VM/local storage fixture, không phải browser/GPU/cloud hay review công trình. Không chạy lại bộ outdoor/export đã đạt. U2-A01 vẫn in_progress: ranh/unsupported, program/đồ có sẵn và AI apply cần audit tiếp theo phạm vi chưa có chứng cứ.
+- Bước tiếp: kiểm exact Node22 CI của checkpoint; tiếp tục đánh giá unsupported đất/công năng trên cùng mẫu và đối chiếu bằng chứng hiện có trước thêm test. U1-A03/A04 giữ chờ B supplier/native handoff. Main/Vercel không thay đổi.
