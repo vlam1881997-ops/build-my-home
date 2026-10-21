@@ -7,6 +7,46 @@ function fixture(){const B=designClient();B.state.project.site.floors=1;B.state.
 const chair=(id='chair')=>({id,roomId:'room',floor:0,modelId:'chair',origin:'customer-added',placementStatus:'present',locked:false,pose:{x:3,y:4,z:0,rotationDeg:37},size:{width:.4,depth:.4,height:.94},materialBindings:[{sku:'TEST-ONLY',specification:'Fixture chair',quoteId:'chair-quote'}],costTreatment:'purchase'});
 const terms=(overrides={})=>({principal:120000000,months:12,method:'annuity',graceMonths:0,ratePeriods:[{fromMonth:1,annualRatePct:12},{fromMonth:7,annualRatePct:15}],draws:[{month:1,amount:120000000}],fees:[],sourceReference:'TEST-ONLY user terms',...overrides});
 const quote=(extra={})=>({sku:'TEST-ONLY',specification:'Fixture chair',unit:'cái',unitPrice:100000,quotedAt:'2026-10-01',validUntil:'2027-01-01',sourceReference:'TEST-ONLY supplier Q1',region:'TP. Hồ Chí Minh',scope:'supply',labourPerQuantity:10000,wastePct:0,vatMode:'excluded',taxPct:8,vatBasis:'all',transportMode:'excluded',transportAmount:5000,...extra});
+function materialFixture(){
+ const B=fixture(),p=B.state.project;
+ const add=(id,category='floor')=>{const product={id,category,sku:'TEST-'+id,specification:'TEST-ONLY specification '+id,unit:'m²'};p.dataEngine.materialOverrides[id]={product};return product;};
+ const first=add('FLOOR-A'),second=add('FLOOR-B');
+ const apply=(product,roomId='room',scope='room')=>{p.materials.choices[product.category]=product.id;assert.equal(B.applyCatalogMaterial(product.category,product.category==='paint'?'ivory-paint':'ivory-tile',{roomId,scope}),true);};
+ const price=(product,{id='AP-floor-room',roleId='floor',roomId='room',quoteId='floor-q',...extra}={})=>{B.setSourcedQuote(quoteId,quote({sku:product.sku,specification:product.specification,unit:product.unit,scope:'installed',wastePct:0,vatMode:'included',transportMode:'included',...extra}));B.setBoqApplication({id,roleId,roomId,sku:product.sku,specification:product.specification,quoteId,costTreatment:'purchase'});return ()=>B.commercialBoq().rows.find(r=>r.code===id);};
+ return {B,p,add,first,second,apply,price};
+}
+test('saved room SKU replaces an old quote, while browsing another catalogue item does not apply it',()=>{
+ const {B,p,first,second,apply,price}=materialFixture();apply(first);const row=price(first),initial=row().amount;assert.ok(Number.isSafeInteger(initial)&&initial>0);
+ p.materials.choices.floor=second.id;assert.equal(row().amount,initial,'catalogue choice is not application to this room');
+ apply(second);const changed=row();assert.equal(changed.amount,null);assert.match(changed.issues.join(';'),/vật liệu|SKU|quy cách/);assert.equal(B.commercialBoq().completeTotal,null);
+ const replacement=price(second,{quoteId:'replacement-q',unitPrice:200000});assert.equal(replacement().amount,initial*2);p.costPlan.quotes['replacement-q'].unitPrice=null;assert.equal(replacement().amount,null);
+});
+test('a whole-house quote cannot cover mixed saved room SKUs, but a different room does not invalidate a scoped quote',()=>{
+ const {B,p,first,second,apply,price}=materialFixture();p.plan.rooms.push({id:'second-room',type:'custom',name:'Phòng hai',floor:0,x:1,y:7,w:6,h:4});apply(first,'room');apply(second,'second-room');
+ const scoped=price(first);assert.ok(scoped().amount>0);
+ p.costPlan.applications=[];const whole=price(first,{id:'AP-floor-whole',roomId:null});assert.equal(whole().amount,null);
+ p.plan.rooms[1].type='bath';assert.equal(whole().status,'quoted','wet-area selection does not replace the dry-floor scope');const wet=price(second,{id:'AP-wet',roleId:'wetArea',roomId:null,quoteId:'wet-q'});assert.equal(wet().status,'quoted');
+});
+test('stale product metadata and cross-room bindings are not priced as the formerly selected material',()=>{
+ for(const change of [(p,b)=>p.dataEngine.materialOverrides['FLOOR-A'].product.specification='CHANGED-SPEC',(p,b)=>b.roomId='foreign-room']){
+  const {p,first,apply,price}=materialFixture();apply(first);const row=price(first);assert.ok(row().amount>0);
+  change(p,p.materials.finish.rooms.room.catalogMaterials.floor);assert.equal(row().amount,null);
+ }
+});
+test('exterior paint uses exterior bindings, and alternate quote previews do not change or require applying the candidate',()=>{
+ const {B,p,add,first,second,apply,price}=materialFixture(),inside=add('PAINT-IN','paint'),outside=add('PAINT-OUT','paint');
+ apply(inside);apply(outside,null,'exterior');const interior=price(inside,{id:'AP-wall',roleId:'wall',roomId:null}),exterior=price(outside,{id:'AP-facade',roleId:'facade',roomId:null,quoteId:'exterior-q'});
+ assert.equal(interior().status,'quoted');assert.equal(exterior().status,'quoted');
+ apply(first);const current=price(first,{quoteId:'first-q'}),initial=current().amount;assert.ok(initial>0);B.setSourcedQuote('alternative-q',quote({sku:second.sku,specification:second.specification,unit:'m²',unitPrice:50000,scope:'installed',wastePct:0,vatMode:'included',transportMode:'included'}));
+ const before=JSON.stringify(p),application=p.costPlan.applications.find(a=>a.id==='AP-floor-room'),candidate=B.compareSourcedAlternatives(application,[{sku:second.sku,specification:second.specification,quoteId:'alternative-q',product:second,equivalence:{confirmed:true,sourceReference:'TEST-ONLY comparison'}}])[0];
+ assert.equal(candidate.amount,initial/2);assert.equal(JSON.stringify(p),before);
+ const outsideNext=add('PAINT-OUT-NEXT','paint');apply(outsideNext,null,'exterior');assert.equal(exterior().amount,null);assert.equal(interior().status,'quoted');
+});
+test('an outdated material quote does not consume a shared delivery charge needed by another valid room',()=>{
+ const {p,first,second,apply,price}=materialFixture();p.plan.rooms.push({id:'second-room',type:'custom',name:'Phòng hai',floor:0,x:1,y:7,w:6,h:4});apply(first);apply(first,'second-room');
+ const stale=price(first,{quoteId:'first-q',transportMode:'excluded',transportAmount:5000,transportGroup:'TEST-SHARED'}),valid=price(first,{id:'AP-second',roomId:'second-room',quoteId:'second-q',transportMode:'excluded',transportAmount:5000,transportGroup:'TEST-SHARED'});
+ apply(second);assert.equal(stale().amount,null);assert.equal(valid().transportAmount,5000);assert.equal(valid().amount,valid().supplyAmount+5000);
+});
 test('room rotation uses one atomic transform, preserving 37-degree pose, local size and history',()=>{
  const B=fixture();B.state.project.plan.furniture=[chair()];const before=plain(B.state.project.plan),revision=B.drawingRevision();
  assert.equal(B.rotateSelectedRoom(),true);let i=B.resolvedFurniture()[0];assert.equal(i.pose.rotationDeg,127);assert.equal(i.pose.x,4);assert.equal(i.pose.y,3);assert.deepEqual(plain(i.size),chair().size);assert.notEqual(B.drawingRevision(),revision);

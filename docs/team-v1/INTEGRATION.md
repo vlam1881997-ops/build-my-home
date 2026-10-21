@@ -65,3 +65,9 @@ Auto-review rejected replacement Chromium download after current binary was diag
 - A U1-A01 evidence/HANDOFF: evidence/A/U1-A01-20261021. Basic snapshot/source/API baseline ready_for_integration; local Node24 only, no native/GPU/professional/commercial gate closure. Prior runtime exact Node22 CI39525474492 remains inherited source evidence.
 - B handoff needed for U1-A02: actual category/role/productId/SKU/spec/unit/roomId or exterior scope/visualProfile/image-kind/source/rights/scale/rotation/status/checkpoint. Unknown photos/prices remain unknown. A may fix reproduced consumer contracts using synthetic records without accepting real supplier assets.
 - Production remains PR74 ad575e57. A is sole main/promote/rollback writer; B preview acceptance precedes production and live verification follows it. Existing publication authorization persists; actual evidence gates still required.
+
+
+## 21/10/2026 — U1-A02 material binding to priced application guard
+- A consumer patch in team-a-boq only; existing B finishPalette/catalogMaterials/materialBindingStatuses/facade resolver reused. commercialBoq invalidates saved applications whose current room/exterior SKU/spec or binding is stale, before allocating shared delivery. Null stays unknown; no schema/quote mutation or UI API required.
+- Dryfloor/wetarea/interior/exterior/room scopes remain distinct. Browsing catalog is not application. Standalone alternative quote proposals remain calculable without applying them. Unsupported/unbound manual roles retain existing behavior; real supplier/category coverage still depends on B manifest.
+-5registered regressions local PASS, affected suites covered with sparse-file recovery as recorded in evidence/A/U1-A02-20261021/HANDOFF-B.md. Exact source Node22CI remains the release check. No B files changed; PR75/current native403 and realphoto/service/professional gates remain pending.

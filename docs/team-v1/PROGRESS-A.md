@@ -4,7 +4,7 @@ Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 21/10/2026.
 - role: A
 - status: in_progress
 - active_task: U1-A01 / U1-A02 (gói5bản/2ChatGPT do chủ giao vai tròA ngày21/10)
-- active_substep: U1-A01 baseline ready_for_integration; next inspect material/SKU consumer contracts and dependency-ready U2-A01 without restarting existing engines.
+- active_substep: U1-A01 baseline checkpoint98c96e2 ready; U1-A02 saved material/BOQ guard implemented and locally checked, awaiting exact Node22 CI and actual B supplier/native handoff; prepare U2-A01 independently.
 - target_branch: codex/a-massing-20261013
 - actual_branch: codex/a-massing-20261013
 - source_baseline: 8a03c900459cb2b4df03fd11ed8846ed2c0d400b (PR75 common planning source; runtime e73e0af; production PR74 main ad575e57)
@@ -135,3 +135,12 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Existing17API contracts available; no schema/engine/UI rewrite. BOQ45unpriced and completeTotal:null. U1-A02 real data dependency is B's actual Modern SKU/spec/unit/role/room/image-source/rights manifest; contracts may be exercised with explicit TEST-ONLY records, never called supplier acceptance.
 - Changed only A progress/integration and new A-owned baseline evidence. No app source, dependencies, paid calls, B files or production changes in this checkpoint. Docs/evidence-only validation performed; no repeat of historical160A or native/PDF checks.
 - Next: inspect material binding→BOQ traceability, reproduce any consumer defect before fixing A source; prepare U2-A01 from the existing fixture while B supplies actual imagery/native evidence. Preview403/service/professional inputs remain open, not a reason to stop independent A work.
+
+
+## U1-A02 — saved material to BOQ reconciliation (21/10/2026)
+- U1-A01 baseline persisted at98c96e225775dedac50d78257c9ce8b4046b6ec9; no B/main change. Actual Modern supplier/photo manifest not yet seen on common8a03c90; developed explicit TEST-ONLY consumer regressions independently, not supplier acceptance.
+- Reproduced3defects: old quote remains priced after room SKU replacement; whole-house application prices mixed scoped SKUs; invalid specification/foreign-room binding remains priced. A-owned team-a-boq now reads existing B scoped bindings/status to keep conflicted row amount:null/missing before transport allocation. Merely browsing category, another room, wetarea versus dryfloor and facade versus interior remain distinct.
+- No new persisted fields, rates, UI or engine. Standalone alternative costedApplication comparisons stay proposals without silently applying candidate. Unbound/manual and roles not mapped by current B binding mechanism keep existing explicit-application behavior; full commercial category coverage is not claimed.
+-5new registered regressions pass locally, plus52/53 across affected A-commercial/B-workflow; sole failure was missing readonly B46file in sparse recovery. Exact8a03c90 B46source restored and only that case rerun1/1PASS. Node24.19.0; syntax PASS; exact Node22 remote CI pending for the subsequent source checkpoint.
+- Source/evidence: src/team-a-boq.js, tests/team-a-commercial.test.mjs, evidence/A/U1-A02-20261021/HANDOFF-B.md and source-hashes.json, plus A progress/integration. No B file/progress, dependency/build/schema/service/production mutation.
+- Next: exact CI; U1-A03 package consumer checks when B supplies actual sample/asset handoff; independent U2-A01 input audit/preparation. Actual imagery/native/GPU/service/professional gates remain open.
