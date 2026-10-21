@@ -173,3 +173,19 @@ test('a synchronous design change during package assembly also rejects without o
  assert.equal(B.supervisionAdapter.list('outputs').length,0);
  assert.equal(B.state.project.plan.rooms[0].name,'TEST changed during assembly');
 });
+test('handover button reports failures, preserves design and permits retry',async()=>{
+ for(const stage of ['prepare','zip','download']){
+  const B=fixture(),messages=[];B.toast=s=>messages.push(s);const before=plain(B.state.project);let failing=true;
+  B.prepareDesignHandover=async()=>{if(stage==='prepare'&&failing)throw Error('TEST unavailable font');return {revision:'TEST',files:[['test.txt','test']]};};
+  B.zipStored=()=>{if(stage==='zip'&&failing)throw Error('TEST ZIP');return new Uint8Array([1]);};
+  let downloads=0;B.download=()=>{if(stage==='download'&&failing)throw Error('TEST download');downloads++;};
+  assert.equal(await B.exportDesignHandover(),false);assert.ok(messages.length);assert.equal(B.designHandoverBusy,false);assert.deepEqual(plain(B.state.project),before);
+  failing=false;assert.equal(await B.exportDesignHandover(),true);assert.equal(downloads,1);assert.equal(B.designHandoverBusy,false);
+ }
+});
+test('handover button starts one preparation while a prior export is pending',async()=>{
+ const B=fixture();let release,starts=0,downloads=0;
+ B.prepareDesignHandover=()=>{starts++;return new Promise(resolve=>{release=resolve;});};B.zipStored=()=>new Uint8Array([1]);B.download=()=>downloads++;
+ const first=B.exportDesignHandover();assert.equal(await B.exportDesignHandover(),false);assert.equal(starts,1);
+ release({revision:'TEST',files:[]});assert.equal(await first,true);assert.equal(downloads,1);assert.equal(B.designHandoverBusy,false);
+});

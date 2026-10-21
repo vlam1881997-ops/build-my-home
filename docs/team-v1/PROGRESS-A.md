@@ -4,7 +4,7 @@ Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 21/10/2026.
 - role: A
 - status: in_progress
 - active_task: U1-A03 / U3-A03 export-integrity substep (upstream Modern/native gates remain open)
-- active_substep: Modern28SVG/2DXF generated and read back at817367b; evidence recorded; native PDF/package/sample gate still open.
+- active_substep: handover button failure/retry/concurrent-click handling fixed;29commercial checks pass locally; native dossier gate still open.
 - target_branch: codex/a-massing-20261013
 - actual_branch: codex/a-massing-20261013
 - source_baseline: 8a03c900459cb2b4df03fd11ed8846ed2c0d400b (PR75 common planning source; runtime e73e0af; production PR74 main ad575e57)
@@ -179,3 +179,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - All28SVGs rendered locally. Original renderer lost Arial Vietnamese glyphs; DejaVu inspection derivative restored accents. Source bytes unchanged. Contact-sheet review is bounded; native PDF/font/full-resolution acceptance remains open.
 - Restored missing96_vector_pdf.js read-only from pinned GitHub commit. No renderer/production source modified. CairoSVG installed only under scratch tooling; no repo dependency change.
 - PDF/browser ZIP/sample pixels not accepted; current browser gate remains. No repeat of prior passing runtime tests for this evidence-only checkpoint. Next: actual browser dossier and sample integration when access permits; carry open source/visual/service/professional gates forward.
+
+
+## U3-A03 — export button recovery, 21/10/2026
+- Continued from f5d9dd5 evidence checkpoint. Reproduced rejected prepareDesignHandover escaping the void click handler with no customer failure notice.
+- A-owned exportDesignHandover now catches preparation/ZIP/download exceptions, gives a retry/backup notice and clears its transient busy flag in finally. A second click while awaiting preparation returns false with a waiting notice. Does not claim OS download completion or persisted backup success.
+- Added failure-injection regression across prepare/ZIP/download: project unchanged, false result and notice, retry succeeds. Concurrent-click test holds preparation pending and verifies one preparation/download. All29 commercial tests pass on local Node24.19.0; no native browser/PDF/storage acceptance implied.
+- Source: src/team-a-handover.js; registered tests/team-a-commercial.test.mjs. No B source, schema, dependency or production changes. Exact Node22 checkpoint CI required; inherited28SVG/2DXF evidence stays bounded to prior runtime. Next native package/font/sample acceptance awaits legitimate browser access; other commercial gates remain open.

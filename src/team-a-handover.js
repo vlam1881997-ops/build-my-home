@@ -80,7 +80,16 @@
   files.push(...content.entries(),['revision-va-ban-giao.json',JSON.stringify({...B.designHandoverManifest(),financeIncluded:includeFinance===true},null,2)],...B.privateFinancePackageFiles({includeFinance}));
   return {revision,files,status:B.handoverStatus(),sheets};
  };
- B.exportDesignHandover=async()=>{const result=await B.prepareDesignHandover();if(!result){B.toast('Hình học/báo giá đang lỗi hoặc vừa thay đổi. Kiểm tra rồi xuất lại.');return false;}B.download('BMH-ban-giao-thiet-ke-2D-'+result.revision+'.zip',B.zipStored(result.files),'application/zip');return true;};
+ B.exportDesignHandover=async()=>{
+  if(B.designHandoverBusy){B.toast('Đang chuẩn bị hồ sơ. Vui lòng chờ lần xuất hiện tại.');return false;}
+  B.designHandoverBusy=true;
+  try{
+   const result=await B.prepareDesignHandover();
+   if(!result){B.toast('Hình học/báo giá đang lỗi hoặc vừa thay đổi. Kiểm tra rồi xuất lại.');return false;}
+   B.download('BMH-ban-giao-thiet-ke-2D-'+result.revision+'.zip',B.zipStored(result.files),'application/zip');return true;
+  }catch(error){B.toast('Chưa xuất được hồ sơ. Thiết kế đang mở được giữ nguyên. Kiểm tra kết nối và thử lại; bạn có thể tải bản sao dự án.');return false;}
+  finally{B.designHandoverBusy=false;}
+ };
  B.handoverStatusHtml=()=>{const s=B.handoverStatus();return '<section class="v6-card"><h3>Trạng thái bàn giao · Rev '+s.revision+'</h3><p>'+B.esc(s.notice)+'</p><p>'+B.esc(s.status)+' · '+s.missingDesign.length+' mục thiết kế chờ · '+s.missingConstruction.length+' đầu vào thi công chờ · '+s.unknownCostScopes+' dòng BOQ thiếu</p><button data-team-a-design-handover '+(s.preliminaryDownloadAllowed?'':'disabled')+'>Xuất gói bàn giao thiết kế 2D</button><button data-team-a-private-finance>Xuất riêng tài chính cá nhân</button><p>Chỉ nút tài chính xuất thông tin vốn và dòng tiền; gói bản vẽ mặc định không chứa tài chính gia đình.</p></section>';};
  const screen=B.screen10;if(screen){B.screen10=()=>screen()+B.handoverStatusHtml();for(let i=0;i<B.SCREENS.length;i++)if(B.SCREENS[i]===screen)B.SCREENS[i]=B.screen10;}
  const completeness=B.dossierCompleteness;
