@@ -4,11 +4,11 @@ Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 21/10/2026.
 - role: A
 - status: in_progress
 - active_task: U2-A01 (gói5bản/2ChatGPT; U1-A02 chờ supplier/native handoff B)
-- active_substep: U2-A01 source-reference validation fixed; shared canonical Modern local roundtrip checked. Await exact checkpoint CI and native/source acceptance.
+- active_substep: U2-A01 invalid applied boundary and malformed front edge guards implemented; eight local input checks pass; exact checkpoint CI pending.
 - target_branch: codex/a-massing-20261013
 - actual_branch: codex/a-massing-20261013
 - source_baseline: 8a03c900459cb2b4df03fd11ed8846ed2c0d400b (PR75 common planning source; runtime e73e0af; production PR74 main ad575e57)
-- last_verified_commit: fc3e65271b2e1faab10d003ff27454fd9083e004 (exact Node22 CI39538092095 PASS; PR76; not native or commercial acceptance)
+- last_verified_commit: 3cf870a9de5ea113ae6334ce2919a68de7c385e2 (exact Node22 CI39559820496 PASS; PR76; not native or commercial acceptance)
 - last_native_verified_A: 43a66a9587bedf2dfb1fea756897fac840cc3edc (historical A outdoor handoff; later native acceptance must use the actual current candidate)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
@@ -153,3 +153,11 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Local Node24.19.0: 6/6 input tests PASS. Regression khoảng trắng FAIL trước sửa. Kiểm giữ site, household, finance, briefIdea, style, plan, designStudio, inputEvidence và drawingRevision; input confirmations vẫn false, legalBoundaryVerified/north.usable vẫn false trong mẫu.
 - Phạm vi: VM/local storage fixture, không phải browser/GPU/cloud hay review công trình. Không chạy lại bộ outdoor/export đã đạt. U2-A01 vẫn in_progress: ranh/unsupported, program/đồ có sẵn và AI apply cần audit tiếp theo phạm vi chưa có chứng cứ.
 - Bước tiếp: kiểm exact Node22 CI của checkpoint; tiếp tục đánh giá unsupported đất/công năng trên cùng mẫu và đối chiếu bằng chứng hiện có trước thêm test. U1-A03/A04 giữ chờ B supplier/native handoff. Main/Vercel không thay đổi.
+
+
+## U2-A01 — ranh đã áp dụng phải giữ trạng thái lỗi, 21/10/2026
+- Tái hiện hai lỗi bằng nativeParcel fixture dùng hàm ranh thực: nguồn survey đã mất nhưng siteInputAssessment trả diện tích khung 198m²; frontEdge=0.5 vẫn qua boundary review và có thể làm geometry truy cập đỉnh không tồn tại.
+- src/team-a-project-contract.js: polygon đã áp dụng không dựng được nay có area:null, status:invalid và lý do từ boundary review; không suy lại thành hình chữ nhật. Reference nguồn được giữ để sửa.
+- src/76_architecture.js: từ chối chỉ số cạnh mặt tiền không nguyên trước khi dựng hình; không sắp xếp/sửa tọa độ của khách. Chỉ số nguyên vẫn giữ semantics lựa chọn cạnh hiện hữu.
+- tests/team-a-input-furniture.test.mjs: hai regression FAIL trước sửa, toàn bộ 8/8 PASS sau sửa trên Node24.19.0. Case valid measured rectangle vẫn cho 100m²; project không bị mutate khi review.
+- Chưa đóng U2-A01: công năng theo tầng/unsupported bounds cần đối chiếu bằng chứng hiện có; native/customer/professional vẫn thiếu. Cần exact Node22 CI cho checkpoint mới. Không đổi B source, schema, dữ liệu thật hay production.

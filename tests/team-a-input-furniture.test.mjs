@@ -67,3 +67,25 @@ test('U2 shared Modern inputs and unknown approvals survive local save/load norm
  B.siteInputAssessment();B.fengshuiPlacementAdvice();
  assert.equal(JSON.stringify(B.state.project),saved);
 });
+test('U2 an applied invalid polygon cannot be reported as a rectangular customer boundary',()=>{
+ const B=designClient({nativeParcel:true}),s=B.state.project.site;
+ Object.assign(s,{lotMode:'custom',useParcelGeometry:true,lotSource:'survey-local',boundaryEvidenceId:'missing-survey'});
+ const before=JSON.stringify(B.state.project),review=B.siteInputAssessment();
+ assert.equal(review.boundary.area,null);
+ assert.equal(review.boundary.status,'invalid');
+ assert.ok(review.boundary.errors.length>0);
+ assert.equal(B.roomInsideParcel({x:2,y:3,w:2,h:2}),false);
+ assert.equal(JSON.stringify(B.state.project),before);
+});
+test('U2 malformed measured parcel front edge is rejected without throwing or repairing coordinates',()=>{
+ const B=designClient({nativeParcel:true}),s=B.state.project.site;
+ Object.assign(s,{lotMode:'custom',useParcelGeometry:true,lotSource:'survey-local',boundaryEvidenceId:'test-boundary',frontEdge:.5});
+ B.state.project.designEvidence={site:[{id:'test-boundary',unit:'m',sourceType:'survey',value:{sourceCrs:'LOCAL_METRES',surveyReference:'TEST-ONLY',localVertices:[{x:0,y:0},{x:5,y:0},{x:5,y:20},{x:0,y:20}]}}]};
+ const before=JSON.stringify(B.state.project);
+ assert.equal(B.parcelBoundaryReview().valid,false);
+ assert.equal(B.parcelGeometry(),null);
+ assert.equal(JSON.stringify(B.state.project),before);
+ s.frontEdge=0;
+ assert.equal(B.parcelBoundaryReview().valid,true);
+ assert.equal(B.parcelGeometry().area,100);
+});

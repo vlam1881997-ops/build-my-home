@@ -22,6 +22,7 @@ BMH.validateParcelVertices=points=>{
 };
 BMH.parcelBoundaryReview=(s=BMH.state.project.site)=>{
  if(s.lotMode!=='custom')return {valid:true,points:null,basis:'dimensions',errors:[]};
+ if(!Number.isInteger(Number(s.frontEdge??0)))return {valid:false,errors:['Cạnh mặt tiền phải là chỉ số nguyên của đỉnh ranh. Giữ dữ liệu gốc để chọn lại cạnh.']};
  if(s.lotSource==='survey-local'){
   const row=BMH.state.project.designEvidence?.site?.find(e=>e.id===s.boundaryEvidenceId);
   if(!row||row.verifiedState==='stale'||row.scope?.locationKey&&row.scope.locationKey!==BMH.siteLocationKey?.(s))return {valid:false,errors:['Nguồn ranh theo mét đã cũ hoặc chưa được chọn lại cho vị trí này.']};
