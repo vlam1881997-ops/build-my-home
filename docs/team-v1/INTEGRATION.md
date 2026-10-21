@@ -57,3 +57,11 @@ Scoped R1/R2 patch: A-owned team-a-project-contract.js, tests/fixtures/design-cl
 R2 allocation variants and R5 sourced prepayments implemented in existing A modules, with shared fixture/export test helpers under A prefixes. Node22 restored/checksummed:62 targeted tests/build pass;102SVG/8DXF quantities/revision verification complete. No dependency/build/server/Vercel mutation. B should consume option `changes`, `assessment`, detached `plan`, and explicit apply; normal project plan carries accepted new rooms/openings.
 
 Auto-review rejected replacement Chromium download after current binary was diagnosed truncated; native/PDF remain blocked awaiting explicit user permission. Do not retry an alternate connection/browser route. Keep PR48 Draft until the recorded integration/export/security gates are satisfied. Evidence: A/R2-R5-20261014.
+
+
+## 21/10/2026 — five-upgrade plan, A baseline handoff U1-A01
+- Explicit latest owner assignment: this conversation executes A; B source/progress stays owned by the other ChatGPT. Plan source8a03c90/runtimee73e0af is106commits ahead of A3788479 with0unmerged A commits. Continue existing A branch with that common source; do not revive PR48 old runtime or reset WIP.
+- Shared Modern fixture remains evidence/B/Modern-5x20-V01/project.json and tests/team-b-modern-reference.mjs. Same project data,11rooms/27resolved furniture, current revision7BADC039-9AD609B4-AI4-RH3. Historical output revision label differs; current exports must use current revision. No new geometry/state store.
+- A U1-A01 evidence/HANDOFF: evidence/A/U1-A01-20261021. Basic snapshot/source/API baseline ready_for_integration; local Node24 only, no native/GPU/professional/commercial gate closure. Prior runtime exact Node22 CI39525474492 remains inherited source evidence.
+- B handoff needed for U1-A02: actual category/role/productId/SKU/spec/unit/roomId or exterior scope/visualProfile/image-kind/source/rights/scale/rotation/status/checkpoint. Unknown photos/prices remain unknown. A may fix reproduced consumer contracts using synthetic records without accepting real supplier assets.
+- Production remains PR74 ad575e57. A is sole main/promote/rollback writer; B preview acceptance precedes production and live verification follows it. Existing publication authorization persists; actual evidence gates still required.

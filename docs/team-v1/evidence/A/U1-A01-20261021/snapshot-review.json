@@ -1,0 +1,15 @@
+{
+  "status": "geometry_checks_passed",
+  "errors": 0,
+  "warnings": 0,
+  "issues": [],
+  "unverified": [
+    "parcel polygon/setbacks",
+    "wall topology and door swing",
+    "furniture circulation",
+    "stair geometry/headroom/guards",
+    "structure and MEP",
+    "regulatory compliance"
+  ],
+  "scope": "Basic rectangular snapshot checks only; not construction approval."
+}

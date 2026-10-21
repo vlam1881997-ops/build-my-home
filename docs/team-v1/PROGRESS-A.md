@@ -1,14 +1,15 @@
 # Tiến độ AI A — BMH commercial v1
 
-Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 14/10/2026.
+Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 21/10/2026.
 - role: A
 - status: in_progress
-- active_task: A-R1 / A-R2 (gói tiếp tục 13/10; A1/A2 trong manifest hiện hành)
-- active_substep: R2 chia công năng có cửa thực, R3 SVG/DXF/BOQ parity và R5 trả trước đã kiểm trên Node22; native/PDF đã kiểm; chỉ tiếp tục nhiệm vụ A, hoãn rà B và ghép A+B theo yêu cầu 14/10
+- active_task: U1-A01 / U1-A02 (gói5bản/2ChatGPT do chủ giao vai tròA ngày21/10)
+- active_substep: U1-A01 baseline ready_for_integration; next inspect material/SKU consumer contracts and dependency-ready U2-A01 without restarting existing engines.
 - target_branch: codex/a-massing-20261013
 - actual_branch: codex/a-massing-20261013
-- source_baseline: ddf9dfe348263a28148cfbf8ca5132f1d492f8dc (main, PR #47 merged)
-- last_verified_commit: 8dbff47f6f35f61f7443b86a015917687e44b4ee (148 A checks Node22, native6 massing +2 finance và102 trang PDF; evidence/A/R3-R5-native-20261014)
+- source_baseline: 8a03c900459cb2b4df03fd11ed8846ed2c0d400b (PR75 common planning source; runtime e73e0af; production PR74 main ad575e57)
+- last_verified_commit: e73e0afbc85d4596c806882d8af1d6af10f5ea75 (prior exact Node22 CI39525474492 PASS; not native evidence for later patches)
+- last_native_verified_A: 43a66a9587bedf2dfb1fea756897fac840cc3edc (historical A outdoor handoff; later native acceptance must use the actual current candidate)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -124,3 +125,13 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Security: pattern scan/manual scoped diff review performed; official Codex Security remains pending missing required preflight capability. Existing npm moderate dev esbuild advisory remains; no high/critical reported.
 - User explicitly deferred B review and A+B integration. Do not inspect B or claim integrated done/G1–G6 closure. A option-picker consumer, final2D–3D/live preview acceptance belong to later integration. Independent A implementation and test handoff in this continuation are complete within the stated scope.
 - next_action: use this A contract/fixtures when the user resumes integration; collect measured site/professional/quote/bank inputs for a real project. No fabricated sources or review. No main merge/deploy.
+
+
+## U1-A01 — explicit A assignment and shared baseline (21/10/2026 Asia/Saigon)
+- Owner now explicitly assigns this conversation to A under the five-upgrade/two-ChatGPT plan. Older14/10 instructions to defer B interface review/integration are historical; latest plan permits necessary read-only consumer review and sequential A integration, not editing B source/progress. Preserve all accepted work.
+- Remote inspection: A codex/a-massing-20261013 at3788479 is fully contained in common PR75 source8a03c90,106commits ahead/0behind; no unmerged A commits. Continue this A branch from common source using a separate recovered snapshot bmh-a-five-upgrades. Existing B workspace/branch/progress untouched; no actual git clone claimed for this API-recovered snapshot.
+- Reused existing Modern5x20fixture/project byte-verified from Git. Same project object,11rooms/2floors/27resolved furniture, source choices UNCONFIRMED, no confirmed inputs. Current derived revision7BADC039-9AD609B4-AI4-RH3 differs from historical B output label7BADC039-741638A5-AI4-RH3; preserve design and use current revision on new outputs.
+- Evidence: evidence/A/U1-A01-20261021/baseline.json, source-hashes.json, snapshot-review.json, HANDOFF-B.md.33loaded source/fixture/build inputs verified by Gitblob/SHA256; read-only inspection preserved project. Basic checker0errors/0warnings; enginegeometry/stairs0issues/circulation0unreachable. Local Node24.19.0, no browser/GPU/professional acceptance. Reuse prior Node22 runtime CI39525474492 only within its scope.
+- Existing17API contracts available; no schema/engine/UI rewrite. BOQ45unpriced and completeTotal:null. U1-A02 real data dependency is B's actual Modern SKU/spec/unit/role/room/image-source/rights manifest; contracts may be exercised with explicit TEST-ONLY records, never called supplier acceptance.
+- Changed only A progress/integration and new A-owned baseline evidence. No app source, dependencies, paid calls, B files or production changes in this checkpoint. Docs/evidence-only validation performed; no repeat of historical160A or native/PDF checks.
+- Next: inspect material binding→BOQ traceability, reproduce any consumer defect before fixing A source; prepare U2-A01 from the existing fixture while B supplies actual imagery/native evidence. Preview403/service/professional inputs remain open, not a reason to stop independent A work.
