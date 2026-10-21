@@ -938,3 +938,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Source44afc420b73f2fbe25f692269f3e3224740f8a4a passed exact CI39604271787: npm ci, npm test and Team coordinator success; PR deployment job skipped. GitHub Vercel status success with deployment dashboard recorded in U1-B03-20261021/VERIFICATION.json. This is build/logic evidence only, not native visual approval.
 - Last verified source for these changes:44afc420b73f2fbe25f692269f3e3224740f8a4a.72focused local tests passed previously; no additional runtime changes or redundant tests in this evidence checkpoint.
 - Keep PR75 Draft and native/SKU/device/service/reviewer gates open. A owns integration/main/production under the current package. No browser access bypass, invented asset permission or commercial completion claim.
+
+
+## U1-B03 — custom colour comparison consistency (2026-10-21)
+- Continued B branch from d4562c3; source90 matched remote before editing. Reproduced current comparison losing its pattern and chosen-palette swatch showing the profile base colour after a customer room colour override.
+- Current comparison and selected palette now pass a copied visual profile with the resolved room colour to the existing swatch renderer. Pattern/scale remain associated with the selected material. Custom colours are labelled; original library/state and sample priority are preserved. No new material engine/schema or A edits.
+- Regression failed before fix;73/73focused material-source/style-material tests PASS on local Node24.19.0. Source90syntax PASS. Exact current Node22 CI pending; last_verified_commit44afc420b73f2fbe25f692269f3e3224740f8a4a (CI39604271787).
+- Native/pixel/mobile approval remains unverified due recorded preview/browser access restriction. Test is VM markup/state evidence only. No SKU/rights/service/physical-device evidence invented. No main/production mutation. Next: exactCI, then authorized native comparison and U1 acceptance when access/assets are available.

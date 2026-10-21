@@ -352,3 +352,18 @@ test('finish comparison is read-only, keeps a supplied sample on its current sid
  product.sku='NEW-SKU';assert.doesNotMatch(B.showroomFinishComparisonHtml('sample-room','floor','oak-floor'),/COMPARISON_TEST/);
  assert.match(B.showroomFinishComparisonHtml('removed','floor'),/Phòng hoặc bề mặt đã đổi/);
 });
+
+
+test('finish comparison and chosen palette preserve custom colour with its existing material pattern',()=>{
+ const B=make(),room=B.state.project.plan.rooms.find(r=>!['stairs','elevator','balcony'].includes(r.type));
+ B.applyVisualMaterial('floor','oak-floor',room.id);
+ B.state.project.materials.finish.rooms[room.id].floor='#123abc';
+ B.state.ui.sceneFocus='room:'+room.id;B.state.ui.materialView='floor';
+ const before=JSON.stringify(B.state),profile=B.VISUAL_MATERIALS.find(p=>p.id==='oak-floor');
+ const current=B.showroomFinishComparisonHtml(room.id,'floor','ivory-tile').split('data-finish-comparison-side="candidate"')[0];
+ assert.match(current,/--finish-color:#123abc/);assert.match(current,/finish-plank/);assert.match(current,/màu riêng/);
+ assert.match(current,new RegExp(profile.scale.map(n=>Math.round(n*1000)).join(' × ')+' mm'));
+ const chosen=B.showroomChoiceBoardHtml().split('data-picked-finish="floor"')[1].split('data-picked-finish="wall"')[0];
+ assert.match(chosen,/--finish-color:#123abc/);assert.match(chosen,/màu riêng/);
+ assert.equal(JSON.stringify(B.state),before);assert.notEqual(profile.color,'#123abc');
+});
