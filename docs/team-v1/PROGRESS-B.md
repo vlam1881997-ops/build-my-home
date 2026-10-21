@@ -932,3 +932,9 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 -72/72related material-source and style-material tests PASS on Node24.19.0; syntax PASS. New negative cases failed before fixes. These are VM logic/string/storage tests, not native pixels/GPU/mobile. Exact Node22 CI pending source checkpoint. Last verified source48febf6 has CI39569579679 success from prior checkpoint.
 - Evidence/HANDOFF-A in evidence/B/U1-B03-20261021; TASK_STATUS now marks B03in_progress preparation, not blocked implementation. Source only B catalog/86/90/CSS and registered tests; no A/data/formula/dependency/production change. No vendor photo bytes, credential reads, paid services or contact with suppliers.
 - Remaining gates: legitimate preview observation/access; licensed chosenSKUphotographs; real GPU desktop/phone and owner visual approval; A integrated candidate; BMH cloud mapping/MoMo sandbox/professional inputs. Do not close B01/B02/B03/B04 or commercial completion from source tests. Next exactCI then authorized native comparison/upload/save/reload/backup/export when access is restored; A can consume handoff now.
+
+
+### U1-B02/B03 exact source verification — 2026-10-21
+- Source44afc420b73f2fbe25f692269f3e3224740f8a4a passed exact CI39604271787: npm ci, npm test and Team coordinator success; PR deployment job skipped. GitHub Vercel status success with deployment dashboard recorded in U1-B03-20261021/VERIFICATION.json. This is build/logic evidence only, not native visual approval.
+- Last verified source for these changes:44afc420b73f2fbe25f692269f3e3224740f8a4a.72focused local tests passed previously; no additional runtime changes or redundant tests in this evidence checkpoint.
+- Keep PR75 Draft and native/SKU/device/service/reviewer gates open. A owns integration/main/production under the current package. No browser access bypass, invented asset permission or commercial completion claim.

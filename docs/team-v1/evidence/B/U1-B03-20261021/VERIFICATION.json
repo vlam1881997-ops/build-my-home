@@ -1,0 +1,31 @@
+{
+  "sourceCommit": "44afc420b73f2fbe25f692269f3e3224740f8a4a",
+  "checkedAt": "2026-10-21",
+  "githubActions": {
+    "runId": 39604271787,
+    "url": "https://github.com/vlam1881997-ops/build-my-home/actions/runs/39604271787",
+    "conclusion": "success",
+    "steps": {
+      "npm ci": "success",
+      "npm test": "success",
+      "Check BMH Team coordinator": "success"
+    },
+    "deploymentJob": "skipped"
+  },
+  "vercel": {
+    "githubStatus": "success",
+    "targetUrl": "https://vercel.com/vlam1881997-9266/build_my_home_full_v1.2_github/DaCzPjmK29p9NYFDc7Sq53uea6YC",
+    "nativeVerified": false
+  },
+  "local": {
+    "node": "24.19.0",
+    "focusedTestsPassed": 72
+  },
+  "limits": [
+    "Native browser observation/access remains blocked by recorded denial and provider read_protection_bypass403; no alternate access attempted.",
+    "No physical GPU desktop/phone visual acceptance.",
+    "No confirmed selected-SKU commercial photo evidence.",
+    "A owns integration and production; B did not merge, promote or roll back."
+  ],
+  "commercialComplete": false
+}
