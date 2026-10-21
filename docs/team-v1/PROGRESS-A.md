@@ -161,3 +161,5 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - src/76_architecture.js: từ chối chỉ số cạnh mặt tiền không nguyên trước khi dựng hình; không sắp xếp/sửa tọa độ của khách. Chỉ số nguyên vẫn giữ semantics lựa chọn cạnh hiện hữu.
 - tests/team-a-input-furniture.test.mjs: hai regression FAIL trước sửa, toàn bộ 8/8 PASS sau sửa trên Node24.19.0. Case valid measured rectangle vẫn cho 100m²; project không bị mutate khi review.
 - Chưa đóng U2-A01: công năng theo tầng/unsupported bounds cần đối chiếu bằng chứng hiện có; native/customer/professional vẫn thiếu. Cần exact Node22 CI cho checkpoint mới. Không đổi B source, schema, dữ liệu thật hay production.
+
+- U2-A01 tiếp: kiểm cùng modernReference có tầng trệt 0 ngủ/1 WC/1 khách/1 bếp, tầng trên 2 ngủ/1 WC. Gọi proposal balanced giữ nguyên plan và requirements; số tầng 0/1.5/11 bị từ chối có lý do và không sửa project. Test mới 1/1 PASS local Node24.19.0; không thay engine công năng. Đây là contract test, chưa phải người dùng duyệt phương án.

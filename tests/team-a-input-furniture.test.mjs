@@ -89,3 +89,18 @@ test('U2 malformed measured parcel front edge is rejected without throwing or re
  assert.equal(B.parcelBoundaryReview().valid,true);
  assert.equal(B.parcelGeometry().area,100);
 });
+test('U2 Modern floor requirements and rejected proposals do not overwrite the customer plan',async()=>{
+ const {modernReference}=await import('./team-b-modern-reference.mjs');
+ const {B}=modernReference(),p=B.state.project;
+ for(const [floor,expected] of [[0,{bed:0,bath:1,living:1,kitchen:1}],[1,{bed:2,bath:1}]]){
+  for(const [type,count] of Object.entries(expected))assert.equal(p.plan.rooms.filter(r=>r.floor===floor&&r.type===type).length,count);
+ }
+ const before=JSON.stringify(p.plan),requirements=JSON.stringify(p.designStudio.program);
+ const proposal=B.architectureProposal('balanced');assert.equal(proposal.ok,true,proposal.reason);
+ assert.equal(JSON.stringify(p.plan),before);assert.equal(JSON.stringify(p.designStudio.program),requirements);
+ for(const floors of [0,1.5,11]){
+  p.site.floors=floors;const input=JSON.stringify(p);
+  const rejected=B.architectureProposal('balanced');assert.equal(rejected.ok,false);assert.ok(rejected.reason);
+  assert.equal(JSON.stringify(p),input);
+ }
+});
