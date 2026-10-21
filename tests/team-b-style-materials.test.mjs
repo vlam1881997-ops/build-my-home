@@ -340,3 +340,15 @@ test('Modern SKU image handoff keeps unresolved defaults and candidate products 
  assert.ok(r.products.every(x=>!x.commercialAccepted&&!x.exactSkuPhotoReviewed));assert.ok(r.products.every(x=>!x.displayableSourcePhoto));assert.ok(r.products.some(x=>x.price.amountVnd===null));
  assert.equal(new Set(r.furniture.map(x=>x.id)).size,r.furniture.length);assert.ok(r.furniture.every(x=>roomIds.has(x.roomId)&&!x.supplierPhotoReviewed));
 });
+
+test('finish comparison is read-only, keeps a supplied sample on its current side and never borrows another room',()=>{
+ const {B,product,binding}=sampleScopeFixture();B.state.ui.step=5;
+ B.state.project.plan.rooms.push({id:'other-room',type:'bed',name:'Other',floor:0,x:6,y:1,w:3,h:4});
+ B.materialSampleForBinding=b=>b?.sample?.mediaId===binding.sample.mediaId?{image:{src:'data:image/jpeg;base64,COMPARISON_TEST'}}:null;
+ binding.sample.sourceReference='<script>bad</script>';const before=JSON.stringify(B.state);let html=B.showroomFinishComparisonHtml('sample-room','floor','oak-floor');
+ assert.equal(JSON.stringify(B.state),before);assert.match(html,/Mẫu đang xem · chưa áp dụng/);assert.match(html,/700 × 1100 mm/);assert.match(html,/Góc vân: 37°/);assert.match(html,/&lt;script&gt;bad&lt;\/script&gt;/);assert.doesNotMatch(html,/<script>/);
+ const sides=html.split('data-finish-comparison-side="candidate"');assert.match(sides[0],/COMPARISON_TEST/);assert.doesNotMatch(sides[1],/COMPARISON_TEST/);
+ assert.doesNotMatch(B.showroomFinishComparisonHtml('other-room','floor','oak-floor'),/COMPARISON_TEST/);
+ product.sku='NEW-SKU';assert.doesNotMatch(B.showroomFinishComparisonHtml('sample-room','floor','oak-floor'),/COMPARISON_TEST/);
+ assert.match(B.showroomFinishComparisonHtml('removed','floor'),/Phòng hoặc bề mặt đã đổi/);
+});

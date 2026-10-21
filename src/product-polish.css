@@ -144,3 +144,14 @@ html.bmh-v60 .showroom-choice-board .showroom-sample-preview img{display:block;w
 .material-sample-dialog p{overflow-wrap:anywhere;line-height:1.6}
 .material-sample-dialog button{min-height:44px;padding:10px 18px;border:1px solid #b9c7b9;border-radius:12px;background:#fff;color:inherit;cursor:pointer}
 @media(max-width:640px){.material-sample-dialog{padding:16px}.material-sample-dialog h2{font-size:1.25rem}}
+
+html.bmh-v60 .showroom-finish-comparison{margin:18px 0;padding:12px;border:1px solid #dce4d9;border-radius:12px;min-width:0}
+html.bmh-v60 .showroom-finish-comparison>summary{min-height:44px;align-content:center;cursor:pointer;font-weight:600}
+html.bmh-v60 .showroom-compare-controls,html.bmh-v60 .showroom-compare-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:12px 0}
+html.bmh-v60 .showroom-compare-controls label{min-width:0}
+html.bmh-v60 .showroom-compare-controls select{width:100%;min-height:44px;max-width:100%}
+html.bmh-v60 .showroom-compare-grid article{display:grid;gap:10px;align-content:start;min-width:0;overflow-wrap:anywhere}
+html.bmh-v60 .showroom-compare-grid .finish-swatch{display:block;width:100%;height:180px;border-radius:10px;overflow:hidden}
+html.bmh-v60 .showroom-compare-grid p,html.bmh-v60 .showroom-finish-comparison p{font-size:12px;line-height:1.6}
+html.bmh-v60 .showroom-compare-grid small{font-size:11px;line-height:1.6}
+@media(max-width:480px){html.bmh-v60 .showroom-compare-controls{grid-template-columns:minmax(0,1fr)}html.bmh-v60 .showroom-compare-grid{gap:10px}html.bmh-v60 .showroom-compare-grid .finish-swatch{height:130px}}

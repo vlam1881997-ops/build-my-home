@@ -18,8 +18,8 @@
     },
     {
       "taskId": "U1-B03",
-      "status": "blocked",
-      "reason": "Native preview access, exact-SKU asset rights/review and A integration gates remain open.",
+      "status": "in_progress",
+      "reason": "Comparison and late-upload safeguards implemented; native and actual supplier-image acceptance pending.",
       "done": false
     },
     {

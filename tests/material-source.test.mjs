@@ -131,3 +131,37 @@ test('licensed catalogue photos still require a concrete SKU and specification b
  assert.match(B.webProductCard(x),/data-material-product-image/);
  assert.match(B.webProductCard({...x,spec:'theo quy cách · Xem quy cách tại nguồn chính hãng'}),/data-material-illustration/);
 });
+
+test('refreshing a product page cannot transfer old photo rights to replacement imagery',()=>{
+ const original={...product(),imageUrl:'https://manufacturer.example/old.jpg',photoEvidence:'reviewed-source',photoLicense:{verified:true,commercialUse:true,sourceUrl:'https://manufacturer.example/old-licence'}};
+ const page=image=>({url:original.productUrl,html:'<meta property="og:image" content="'+image+'"><p>TILE-600</p>'});
+ const changed=materialFromVerifiedPage(original,page('https://manufacturer.example/new.jpg'));
+ assert.equal(changed.imageUrl,'https://manufacturer.example/new.jpg');assert.equal(changed.photoLicense.verified,false);assert.equal(changed.photoLicense.commercialUse,false);
+ assert.equal(changed.photoLicense.sourceUrl,null);assert.equal(original.photoLicense.verified,true);
+ const unchanged=materialFromVerifiedPage(original,page(original.imageUrl));assert.deepEqual(unchanged.photoLicense,original.photoLicense);
+ const relocated=materialFromVerifiedPage(original,{...page(original.imageUrl),url:'https://manufacturer.example/another-product'});assert.equal(relocated.photoLicense.verified,false);
+});
+
+function pendingSampleClient(){
+ const {B,state,context}=client();B.adoptWebMaterial(product());B.applyCatalogMaterial('floor','ivory-tile',{roomId:'a',scope:'room'});
+ context.createImageBitmap=async()=>({width:100,height:100,close(){}});context.Image=class{async decode(){}};context.crypto={randomUUID:()=> 'test-race-sample'};
+ context.document.createElement=()=>({getContext:()=>({drawImage(){}}),toDataURL:()=> 'data:image/jpeg;base64,/9j/AAAA'});
+ let ready,finish;const started=new Promise(resolve=>ready=resolve);B.styleReferenceStore={put:()=>{ready();return new Promise(resolve=>finish=resolve);}};
+ const options={roomId:'a',scope:'room',profileId:'ivory-tile',file:{type:'image/jpeg',size:100},widthM:.6,depthM:.6,sourceReference:'TEST ONLY supplied surface'};
+ return {B,state,started,release:()=>finish(),options};
+}
+test('late sample upload preserves a newer target finish or canonical unit change',async()=>{
+ for(const change of ['surface','colour','unit','room-type']){
+  const {B,state,started,release,options}=pendingSampleClient();const pending=B.applyCatalogSample('floor',options);await started;
+  if(change==='surface')B.applyVisualMaterial('floor','oak-floor','a');
+  if(change==='colour')B.applyFinishColor('floor','#123456','a');
+  if(change==='unit')state.project.dataEngine.materialOverrides['tile-a'].product.priceEvidence.quantityUnit='thùng';
+  if(change==='room-type')state.project.plan.rooms[0].type='stairs';
+  const before=JSON.stringify(state.project);release();const result=await pending;assert.equal(result.ok,false,change);assert.equal(JSON.stringify(state.project),before,change);
+ }
+});
+test('sample upload tolerates unrelated room edits without changing that room',async()=>{
+ const {B,state,started,release,options}=pendingSampleClient();const pending=B.applyCatalogSample('floor',options);await started;
+ B.applyVisualMaterial('floor','oak-floor','b');const other=JSON.stringify(state.project.materials.finish.rooms.b);release();const result=await pending;
+ assert.equal(result.ok,true);assert.equal(JSON.stringify(state.project.materials.finish.rooms.b),other);assert.equal(state.project.materials.finish.rooms.a.catalogMaterials.floor.sample.mediaId,'material-sample-test-race-sample');
+});
