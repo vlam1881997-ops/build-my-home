@@ -945,3 +945,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Current comparison and selected palette now pass a copied visual profile with the resolved room colour to the existing swatch renderer. Pattern/scale remain associated with the selected material. Custom colours are labelled; original library/state and sample priority are preserved. No new material engine/schema or A edits.
 - Regression failed before fix;73/73focused material-source/style-material tests PASS on local Node24.19.0. Source90syntax PASS. Exact current Node22 CI pending; last_verified_commit44afc420b73f2fbe25f692269f3e3224740f8a4a (CI39604271787).
 - Native/pixel/mobile approval remains unverified due recorded preview/browser access restriction. Test is VM markup/state evidence only. No SKU/rights/service/physical-device evidence invented. No main/production mutation. Next: exactCI, then authorized native comparison and U1 acceptance when access/assets are available.
+
+
+## U1-B03 — active-scope sample zoom (2026-10-21)
+- Base724c5b47a03dc41289221c7724792c273f383390, latest PR75 checked and local source compared before push. Reproduced zoom lookup returning another room's sample after focus changed; a shared media ID also selected the first room's source/scale.
+- materialSampleDetails now reuses catalogProductSample, the active-scope resolver already used by cards, and returns the matching active binding/sample. Other-room, removed-room and interior-to-exterior mismatches return null. No schema or image-store change; project and library are read-only.
+- Regression failed before fix.74/74focused material-source/style-material tests PASS Node24.19.0. Exact new CI pending. Previous source724c5b4 passed exact CI39606926202 and Vercel status success; last_verified_commit724c5b47a03dc41289221c7724792c273f383390.
+- Changed B90 and registered B tests only, plus B evidence/progress. Native/browser/physical-device/SKU-rights gates remain open; these VM tests do not prove native visual acceptance. No A/main/production edits. Next exactCI then authorized native sample/zoom flow when access is restored.

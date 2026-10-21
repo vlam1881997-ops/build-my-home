@@ -367,3 +367,18 @@ test('finish comparison and chosen palette preserve custom colour with its exist
  assert.match(chosen,/--finish-color:#123abc/);assert.match(chosen,/màu riêng/);
  assert.equal(JSON.stringify(B.state),before);assert.notEqual(profile.color,'#123abc');
 });
+
+
+test('sample zoom resolves only the active room or explicit exterior, including shared image IDs',()=>{
+ const {B,binding}=sampleScopeFixture();B.materialSampleForBinding=b=>b?.sample?{image:{src:'data:image/jpeg;base64,AAAA'}}:null;
+ B.state.project.plan.rooms.push({id:'second-room',name:'Second room',type:'bed',floor:0,x:6,y:1,w:3,h:4});
+ B.state.ui.sceneFocus='room:second-room';assert.equal(B.materialSampleDetails(binding.sample.mediaId),null);
+ const copied=structuredClone(B.state.project.materials.finish.rooms['sample-room']);
+ copied.catalogMaterials.floor.roomId='second-room';copied.catalogMaterials.floor.sample.sourceReference='Second source';copied.catalogMaterials.floor.sample.realWorldScale=[.2,.3];
+ B.state.project.materials.finish.rooms['second-room']=copied;
+ const before=JSON.stringify(B.state),details=B.materialSampleDetails(binding.sample.mediaId);
+ assert.equal(details.name,'Second room');assert.equal(details.binding.sample.sourceReference,'Second source');assert.deepEqual(plain(details.binding.sample.realWorldScale),[.2,.3]);
+ B.state.ui.sceneFocus='all';assert.equal(B.materialSampleDetails(binding.sample.mediaId),null);
+ B.state.ui.sceneFocus='room:removed';assert.equal(B.materialSampleDetails(binding.sample.mediaId),null);
+ B.state.ui.sceneFocus='room:second-room';assert.equal(JSON.stringify(B.state),before);
+});

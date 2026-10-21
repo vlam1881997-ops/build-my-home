@@ -130,8 +130,10 @@
  B.materialSampleDetails=mediaId=>{
   const p=B.state.project,f=p.materials.finish||{},rows=[{name:'Ngoại thất',bindings:f.exterior?.facadeMaterials},...regularRooms().map(r=>({name:r.name,bindings:B.finishPalette(r.id)?.catalogMaterials}))];
   for(const row of rows)for(const [category,binding]of Object.entries(row.bindings||{})){
-   if(binding?.sample?.mediaId!==mediaId)continue;const product=B.catalogBoundProduct?.(category,binding),sample=B.materialSampleForBinding?.(binding);
-   if(product&&sample&&B.catalogBindingStatus?.(category,binding,product).valid)return {name:row.name,product,binding,sample};
+   if(binding?.sample?.mediaId!==mediaId)continue;const product=B.catalogBoundProduct?.(category,binding),match=product&&B.catalogProductSample(product);
+   // Use the same active-scope resolver as the image card. Shared image IDs
+   // must not pick another room's scale/source or reopen a stale room's image.
+   if(match?.binding.sample?.mediaId===mediaId)return {name:match.name,product,binding:match.binding,sample:match.sample};
   }
   return null;
  };
