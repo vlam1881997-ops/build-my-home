@@ -223,3 +223,16 @@ test('A handover discloses missing sample bytes instead of substituting a produc
  assert.doesNotMatch(files.get('anh-mau-vat-lieu.html'),/<img /);assert.match(files.get('anh-mau-vat-lieu.html'),/Không có ảnh mẫu/);
  assert.equal(B.commercialBoq().completeTotal,null);
 });
+test('sample files have SHA256 records matching the returned package bytes',async()=>{
+ const {createHash}=await import('node:crypto'),B=await exportRaceFixture({materialSamples:true});attachExportSample(B);
+ const result=await B.prepareDesignHandover(),files=new Map(result.files),manifest=JSON.parse(files.get('revision-va-ban-giao.json'));
+ for(const name of ['anh-mau-vat-lieu.json','anh-mau-vat-lieu.html']){
+  const row=manifest.outputs.find(r=>r.fileReference===name);assert.ok(row,name);
+  assert.equal(row.designRevision,result.revision);assert.equal(row.fileHash,createHash('sha256').update(files.get(name)).digest('hex'));
+ }
+});
+test('sample change during sample file hashing rejects the package without output records',async()=>{
+ let binding;const B=await exportRaceFixture({materialSamples:true,digestHook:(b,n)=>{if(n===11)binding.sample.sourceReference='TEST changed during sample hash';}});binding=attachExportSample(B);
+ assert.equal(await B.prepareDesignHandover(),false);assert.equal(B.supervisionAdapter.list('outputs').length,0);
+ assert.equal(binding.sample.sourceReference,'TEST changed during sample hash');
+});

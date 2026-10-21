@@ -4,11 +4,11 @@ Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 21/10/2026.
 - role: A
 - status: in_progress
 - active_task: U1-A03 / U3-A03 export-integrity substep (upstream Modern/native gates remain open)
-- active_substep: A prepareDesignHandover now independently checked with B97 sample/package wrappers;3integration cases pass locally; native media/PDF gate remains open.
+- active_substep: sample HTML/JSON now receive SHA256 output records; late sample-key guard added;34commercial tests pass locally; exact CI/native gates pending.
 - target_branch: codex/a-massing-20261013
 - actual_branch: codex/a-massing-20261013
 - source_baseline: 8a03c900459cb2b4df03fd11ed8846ed2c0d400b (PR75 common planning source; runtime e73e0af; production PR74 main ad575e57)
-- last_verified_commit: 0b043a7d3863d225a419862b95bc433d24fe301a (exact Node22 CI39604445803 PASS; native acceptance still open)
+- last_verified_commit: d21cc90dd293554f4d98f39d9de8c7c8539961c8 (exact Node22 CI39606919540 PASS; native acceptance open)
 - last_native_verified_A: 43a66a9587bedf2dfb1fea756897fac840cc3edc (historical A outdoor handoff; later native acceptance must use the actual current candidate)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
@@ -194,3 +194,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - The first race assertion expected an exception, but the real revision guard correctly returned false earlier. Corrected the test to the existing false-result contract; no runtime fix was needed or made.
 - Media accessor and PDF bytes remain explicit test doubles; this is code integration evidence only, not image decoding, IndexedDB, real product photo, browserZIP or PDF acceptance. No B files changed. New tests live in the registered A-commercial suite and need exact checkpoint CI.
 - U1-A03 is ready for native validation, not done. Native/sample supplier handoff and approved preview access remain needed before U1-A04 integration acceptance. Full commercial gates and current production remain unchanged.
+
+
+## U1-A03 — sample artifact hashes, 21/10/2026
+- Reproduced missing output records for anh-mau-vat-lieu.json/html despite their presence in A handover package. These two artifacts now receive SHA256 records from their exact returned bytes, with revision and B sample-snapshot reference.
+- Hashing happens before output registration; after asynchronous sample hashing, check materialSampleKey plus existing project/revision/price/finance guards. Changed sample source during this stage returns false and leaves no output records, while preserving the edit.
+- A-owned src/team-a-handover.js only; B sample-generation code/interfaces unchanged. Added two registered regressions. All34 commercial tests PASS local Node24.19.0. New orchestration cases still use explicit media/PDF doubles; no real supplier/native acceptance claim.
+- Prior SVG/DXF evidence retained. Next: exact checkpoint CI and native PDF/ZIP/sample validation after legitimate preview access is restored. U1-A03 remains awaiting native acceptance; remaining commercial gates are not waived.

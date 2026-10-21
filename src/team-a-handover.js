@@ -74,6 +74,13 @@
   }
   if(B.state.project!==project||B.drawingRevision()!==revision||B.commercialBoq().priceKey!==priceKey||includeFinance&&JSON.stringify(project.finance)!==financeKey)return false;
   const replacements=new Set([...tables.map(t=>t[0]),pdfName,'revision-va-ban-giao.json']),files=B.customerPackageFiles(snapshot,sheets,B.customerPresentationHtml(snapshot,sheets)).filter(([name])=>!replacements.has(name));
+  // B owns the sample payloads; A records hashes of exactly the returned bytes.
+  for(const [fileReference,raw] of files.filter(([name])=>['anh-mau-vat-lieu.json','anh-mau-vat-lieu.html'].includes(name))){
+   const outputType=fileReference.endsWith('.json')?'material-sample-index':'material-sample-images',bytes=typeof raw==='string'?new TextEncoder().encode(raw):raw;
+   const hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(n=>n.toString(16).padStart(2,'0')).join('');
+   pendingOutputs.push({id:'output-'+outputType+'-'+revision+'-'+hash.slice(0,12),title:outputType,outputType,fileReference,fileHash:hash,observedAt:new Date().toISOString().slice(0,10),sourceReference:'Generated from material sample snapshot '+snapshot.materialSampleKey,designRevision:revision});
+  }
+  if(snapshot.materialSampleKey!==undefined&&B.materialSamplesKey?.()!==snapshot.materialSampleKey)return false;
   // Package generation may reject stale samples or throw. Commit output records only after it succeeds.
   if(B.state.project!==project||B.drawingRevision()!==revision||B.commercialBoq().priceKey!==priceKey||includeFinance&&JSON.stringify(project.finance)!==financeKey)return false;
   for(const output of pendingOutputs)if(!register().outputs.some(r=>r?.id===output.id))B.supervisionAdapter.append('outputs',output);
