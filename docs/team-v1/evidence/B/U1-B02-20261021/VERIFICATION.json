@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "owner": "B",
+  "taskId": "U1-B02",
+  "sourceCommit": "48febf685f91539a1f02c032f793c441cc3d958a",
+  "baseCommit": "8a03c900459cb2b4df03fd11ed8846ed2c0d400b",
+  "branch": "codex/b-facade-depth",
+  "status": "inventory-source-ready-assets-native-pending",
+  "local": {
+    "node": "24.19.0",
+    "casesWithPassingResults": 68,
+    "initialSparseSnapshotFailures": 4,
+    "recoveredReadOnlyFile": "src/82_customer_projects.js",
+    "rerunCasesPassed": 4,
+    "photoRegressionFailedBeforeFix": true
+  },
+  "ci": {
+    "runId": 39569579679,
+    "conclusion": "success",
+    "nodeMajor": 22,
+    "steps": [
+      "npm ci",
+      "npm test",
+      "Check BMH Team coordinator"
+    ],
+    "deployJob": "skipped"
+  },
+  "vercelReportedStatus": {
+    "context": "Vercel",
+    "state": "success",
+    "url": "https://vercel.com/vlam1881997-9266/build_my_home_full_v1.2_github/8DRvBwgrgrF5FYh5w4kadtwPzhpU",
+    "nativeVerified": false
+  },
+  "nativeEvidence": [],
+  "assetApproval": [],
+  "productionChanged": false,
+  "limits": [
+    "CI/status are not native GPU or commercial acceptance.",
+    "All20 B tasks remain unfinished pending their recorded gates."
+  ]
+}
