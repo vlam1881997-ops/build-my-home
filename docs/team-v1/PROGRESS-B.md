@@ -5,11 +5,11 @@ Chỉ AI B sửa file này khi thực thi. Ngày cập nhật: 21/10/2026.
 - status: in_progress
 - execution: resumed_by_owner_2026-10-20_Asia-Saigon
 - active_task: B1
-- active_substep: W40 — same-revision material sample sheets in customer handover; exact CI next, native preview access remains blocked.
+- active_substep: W41 — owner-requested five-release upgrade plan saved; next execution is release1 material-photo/native acceptance from PR75.
 - target_branch: codex/b-v1-24
-- actual_branch: codex/b-facade-depth, PR75 based on released PR74 main ad575e57; W39 CI passed, W40 source awaiting exact CI/native preview.
+- actual_branch: codex/b-facade-depth, PR75 based on released PR74 main ad575e57; W40 e73e0af CI passed, native preview remains blocked; W41 changes planning docs only.
 - source_baseline: 4db7845dc95837fccc3e65ffe8c6cf223a4f63d2 (PR53 production main)
-- last_verified_commit: 26fa151739f0668024a7cb569757f8f1d9a1c13a (Node22 CI39524423121 passed; native preview remains blocked)
+- last_verified_commit: e73e0afbc85d4596c806882d8af1d6af10f5ea75 (Node22 CI39525474492 passed; preview dpl_Bj6W4nUE5XRa4VCo4kVtTaeJHnyr READY; native QA remains blocked)
 - last_native_verified_commit: 38614c36c018a690535f37d1d404f86595327dfd (Node22 CI39246110343, native material choice/reload/3D and production verified; not evidence for later W38-W40 changes)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
@@ -900,3 +900,12 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Asset research: official https://dongtam.com.vn/san-pham/bst-6060tamdao/6060tamdao006/ identifies SKU6060TAMDAO006, 60x60cm grey granite floor/wall tile, while its linked image label refers to6060tamdao005. Page presence alone is therefore not evidence that the photo matches the SKU. No affirmative commercial reuse grant has been established; no image copied or verification/licence flag invented.
 - Next concrete gate: check exact W40 Node22 CI/preview; after provider access is fixed, test native upload -> Materials save/zoom -> explicit3D -> save/reopen -> JSON export/import -> handover opening on desktop and phone with real GPU/timings. The existing Vercel read_protection_bypass403/browser observation rejection prevents this gate; do not retry via another route or weaken protection.
 - Commercial scope remains unchanged: first Modern house through all10tabs, then24/24 individually reviewed style output packages. Exact-SKU product photos/rights, complete sourced quotes, actual cloud/auth/conflict/privacy/media/payment exercises, owner visual approval and professional architectural/structural/MEP/site review remain open. No 100% commercial or final-production claim is made. A/B integration handoff remains PR75 plus this log; no unrequested messages sent to others.
+
+
+## W41 — owner-requested five-release completion plan (2026-10-21 Asia/Saigon)
+- Owner requested exactly5clear upgrades, no overlap/restarting passed work. Plan: [UPGRADE-PLAN-5-RELEASES-20261021.md](evidence/B/UPGRADE-PLAN-5-RELEASES-20261021.md). It preserves the locked10tab/Modern-first/24style commercial acceptance criteria.
+- Confirmed current PR75 runtime e73e0afbc85d4596c806882d8af1d6af10f5ea75, exact Node22 CI39525474492 PASS, Vercel preview dpl_Bj6W4nUE5XRa4VCo4kVtTaeJHnyr READY. Main remains PR74 ad575e57. Native/provider/visual/service/professional gates remain open.
+- Exclusive upgrade responsibility:1material images/SKU and native PR75;2Modern inputs/land/program/drawings/editable3D;3Modern costs/funding/handover/supervision and full10tab acceptance;4auth/cloud/media/two-device/MoMo/operations;5remaining23style outputs and24/24final acceptance/production. Later versions consume earlier outputs and do not build duplicate engines/state.
+- Plan specifies reused foundation, numbered work, responsible A/B areas, outputs, acceptance and external dependencies for every upgrade. Existing approved evidence stays valid unless changed code/data affects it; do not rerun everything for each small fix. No narrower scope, invented photos/prices/signoffs, fee-bearing services or autonomous other-account agents introduced.
+- This checkpoint changes only B-owned planning/progress docs. No runtime/source/test/build/config/production mutation and no repeated runtime test needed for a planning-only change. The previous2–4/6–12week ranges remain tentative planning estimates, not deadlines or proof of remaining effort.
+- Next execution: upgrade1.1 legitimate preview access,1.2Modern SKU inventory and1.3verified photo/source/rights intake. Existing service discovery is preparation for upgrade4, not authority to repurpose an unrelated Supabase project. Original publishing permission persists, with preview/integration evidence required before production.
