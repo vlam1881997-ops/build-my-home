@@ -3,12 +3,12 @@
 Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 21/10/2026.
 - role: A
 - status: in_progress
-- active_task: U2-A01 (gói5bản/2ChatGPT; U1-A02 chờ supplier/native handoff B)
-- active_substep: U2-A01 invalid applied boundary and malformed front edge guards implemented; eight local input checks pass; exact checkpoint CI pending.
+- active_task: U1-A03 / U3-A03 export-integrity substep (upstream Modern/native gates remain open)
+- active_substep: defer generated output registration until hashes, revision checks and package assembly succeed; local27 commercial cases pass; exact checkpoint CI pending.
 - target_branch: codex/a-massing-20261013
 - actual_branch: codex/a-massing-20261013
 - source_baseline: 8a03c900459cb2b4df03fd11ed8846ed2c0d400b (PR75 common planning source; runtime e73e0af; production PR74 main ad575e57)
-- last_verified_commit: 3cf870a9de5ea113ae6334ce2919a68de7c385e2 (exact Node22 CI39559820496 PASS; PR76; not native or commercial acceptance)
+- last_verified_commit: f9e80093587319fb37c1762a35987d2219305a6a (Node22 CI39569025279 PASS; not native acceptance)
 - last_native_verified_A: 43a66a9587bedf2dfb1fea756897fac840cc3edc (historical A outdoor handoff; later native acceptance must use the actual current candidate)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
@@ -163,3 +163,12 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Chưa đóng U2-A01: công năng theo tầng/unsupported bounds cần đối chiếu bằng chứng hiện có; native/customer/professional vẫn thiếu. Cần exact Node22 CI cho checkpoint mới. Không đổi B source, schema, dữ liệu thật hay production.
 
 - U2-A01 tiếp: kiểm cùng modernReference có tầng trệt 0 ngủ/1 WC/1 khách/1 bếp, tầng trên 2 ngủ/1 WC. Gọi proposal balanced giữ nguyên plan và requirements; số tầng 0/1.5/11 bị từ chối có lý do và không sửa project. Test mới 1/1 PASS local Node24.19.0; không thay engine công năng. Đây là contract test, chưa phải người dùng duyệt phương án.
+
+
+## U1-A03/U3-A03 — integrity of failed handover preparation, 21/10/2026
+- Resumed from f9e8009 after checking remote A ref. This is dependency-independent export hardening, not completion of the Modern dossier gate.
+- Reproduced prepareDesignHandover writing generated output records before async hashing and package assembly completed. A price change during hashing returned false but left ten records for an undelivered package; digest/package exceptions could also leave partial records.
+- src/team-a-handover.js now stages output metadata, checks revision/price/optional finance, constructs customer package (including B material hooks), rechecks after synchronous assembly, then records outputs. Existing supervision adapter, IDs, hashes and package interface preserved.
+- Added failure-injection tests: price changes during hashing, digest failure, package failure, synchronous room edit during assembly. Failed preparation leaves output records unchanged and retains customer edits. Successful case verifies ten SHA256 hashes against returned bytes, manifest outputs, private-finance exclusion and repeat export without duplicate output IDs.
+- Local Node24.19.0: all27 registered commercial cases PASS. PDF bytes/sheets and upstream package are explicit orchestration doubles in the new tests; these tests do not prove readable A3 PDF, supplier/sample image decoding, actual ZIP download, native GPU or storage failure recovery. No B source changed and no paid service used.
+- Remaining: actual integrated sample/PDF/SVG/DXF package and native preview acceptance; supplier photos/rights, complete quotes, cloud/payment and technical signoff. Prior export evidence is retained; new source needs exact Node22 CI before integration.

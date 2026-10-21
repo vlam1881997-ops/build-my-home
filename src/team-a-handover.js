@@ -67,12 +67,16 @@
    ['technical-register.json',JSON.stringify(B.constructionReview(),null,2)],
    ['outdoor-register.json',JSON.stringify({revision,spaces:B.outdoorSpaceRegister()},null,2)]];
   const pdfName='bo-ban-ve-A3.pdf',outputRefs={plans:pdfName,roof:pdfName,elevations:pdfName,sections:pdfName,openings:'bang-cua.csv',areas:'bang-dien-tich.csv',materials:'bang-vat-lieu.csv',furniture:'bang-noi-that.csv',boq:'boq-co-nguon.csv','technical-register':'technical-register.json'},content=new Map([[pdfName,pdf],...tables]);
+  const pendingOutputs=[];
   for(const [outputType,fileReference]of Object.entries(outputRefs)){
    const raw=content.get(fileReference),bytes=typeof raw==='string'?new TextEncoder().encode(raw):raw,hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(n=>n.toString(16).padStart(2,'0')).join('');
-   const id='output-'+outputType+'-'+revision+'-'+hash.slice(0,12)+(outputType==='boq'?'-'+priceKey:'');if(!register().outputs.some(r=>r?.id===id))B.supervisionAdapter.append('outputs',{id,title:outputType,outputType,fileReference,fileHash:hash,priceKey:outputType==='boq'?priceKey:null,observedAt:new Date().toISOString().slice(0,10),sourceReference:'Generated from measured design '+revision,designRevision:revision});
+   const id='output-'+outputType+'-'+revision+'-'+hash.slice(0,12)+(outputType==='boq'?'-'+priceKey:'');pendingOutputs.push({id,title:outputType,outputType,fileReference,fileHash:hash,priceKey:outputType==='boq'?priceKey:null,observedAt:new Date().toISOString().slice(0,10),sourceReference:'Generated from measured design '+revision,designRevision:revision});
   }
   if(B.state.project!==project||B.drawingRevision()!==revision||B.commercialBoq().priceKey!==priceKey||includeFinance&&JSON.stringify(project.finance)!==financeKey)return false;
   const replacements=new Set([...tables.map(t=>t[0]),pdfName,'revision-va-ban-giao.json']),files=B.customerPackageFiles(snapshot,sheets,B.customerPresentationHtml(snapshot,sheets)).filter(([name])=>!replacements.has(name));
+  // Package generation may reject stale samples or throw. Commit output records only after it succeeds.
+  if(B.state.project!==project||B.drawingRevision()!==revision||B.commercialBoq().priceKey!==priceKey||includeFinance&&JSON.stringify(project.finance)!==financeKey)return false;
+  for(const output of pendingOutputs)if(!register().outputs.some(r=>r?.id===output.id))B.supervisionAdapter.append('outputs',output);
   files.push(...content.entries(),['revision-va-ban-giao.json',JSON.stringify({...B.designHandoverManifest(),financeIncluded:includeFinance===true},null,2)],...B.privateFinancePackageFiles({includeFinance}));
   return {revision,files,status:B.handoverStatus(),sheets};
  };

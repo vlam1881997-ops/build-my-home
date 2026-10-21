@@ -132,3 +132,44 @@ test('A3 material pages consume the same complete BOQ rows and furniture tables 
 test('public BOQ quote metadata excludes unrelated imported personal fields while retaining the saved original',()=>{
  const B=fixture();B.state.project.plan.furniture=[chair()];B.setSourcedQuote('chair-quote',quote({bankAccount:'PRIVATE-FIXTURE',income:987654321}));assert.equal(B.state.project.costPlan.quotes['chair-quote'].bankAccount,'PRIVATE-FIXTURE');assert.doesNotMatch(JSON.stringify(B.designHandoverManifest()),/PRIVATE-FIXTURE|987654321|bankAccount/);assert.equal(B.commercialBoq().knownSubtotal,124200);
 });
+
+// Exercise asynchronous export orchestration; PDF bytes are a test double, not a valid dossier.
+async function exportRaceFixture({digestHook,packageHook}={}){
+ const {default:fs}=await import('node:fs'),vm=await import('node:vm'),{webcrypto}=await import('node:crypto');
+ const B=fixture();let calls=0;
+ B.measuredDesignReview=()=>({geometryValid:true});B.architecturalSheets=()=>[];
+ B.architecturalPdfBytes=async()=>new Uint8Array([1,2,3]);
+ B.customerDesignSnapshot=()=>({revision:B.drawingRevision()});B.customerPresentationHtml=()=>'<p>TEST ONLY</p>';
+ B.customerPackageFiles=()=>{packageHook?.(B);return [['test-only.txt','synthetic package']];};
+ vm.runInNewContext(fs.readFileSync('src/team-a-handover.js','utf8'),{BMH:B,structuredClone,TextEncoder,Uint8Array,Date,document:{addEventListener(){}},crypto:{subtle:{async digest(...args){calls++;await digestHook?.(B,calls);return webcrypto.subtle.digest(...args);}}}});
+ return B;
+}
+test('failed asynchronous handover leaves no generated output records',async()=>{
+ for(const failure of ['price-change','digest-failure','package-failure']){
+  const B=await exportRaceFixture({digestHook:async(b,n)=>{if(n===2){if(failure==='price-change')b.state.project.costPlan.contingencyPct=17;if(failure==='digest-failure')throw Error('TEST digest failure');}},packageHook:()=>{if(failure==='package-failure')throw Error('TEST package failure');}});
+  const original=plain(B.state.project.plan),before=plain(B.supervisionAdapter.list('outputs'));
+  if(failure==='price-change')assert.equal(await B.prepareDesignHandover(),false);
+  else await assert.rejects(B.prepareDesignHandover(),/TEST/);
+  assert.deepEqual(plain(B.supervisionAdapter.list('outputs')),before,failure);
+  assert.deepEqual(plain(B.state.project.plan),original);
+ }
+});
+test('successful handover records hashes of returned files and keeps private finance separate',async()=>{
+ const {createHash}=await import('node:crypto');const B=await exportRaceFixture();
+ B.state.project.finance.privateNote='PRIVATE-EXPORT-SENTINEL';
+ const result=await B.prepareDesignHandover();assert.ok(result);
+ const records=B.supervisionAdapter.list('outputs'),files=new Map(result.files);
+ assert.equal(records.length,10);
+ for(const row of records){assert.equal(row.designRevision,result.revision);assert.equal(row.fileHash,createHash('sha256').update(files.get(row.fileReference)).digest('hex'));}
+ const manifest=JSON.parse(files.get('revision-va-ban-giao.json'));
+ assert.equal(manifest.outputs.length,records.length);assert.equal(manifest.financeIncluded,false);
+ assert.doesNotMatch(JSON.stringify(result.files),/PRIVATE-EXPORT-SENTINEL/);
+ const ids=records.map(r=>r.id);await B.prepareDesignHandover();
+ assert.deepEqual(B.supervisionAdapter.list('outputs').map(r=>r.id),ids);
+});
+test('a synchronous design change during package assembly also rejects without output records',async()=>{
+ const B=await exportRaceFixture({packageHook:b=>{b.state.project.plan.rooms[0].name='TEST changed during assembly';}});
+ assert.equal(await B.prepareDesignHandover(),false);
+ assert.equal(B.supervisionAdapter.list('outputs').length,0);
+ assert.equal(B.state.project.plan.rooms[0].name,'TEST changed during assembly');
+});
