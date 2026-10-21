@@ -120,3 +120,14 @@ test('catalogue cards use the active room sample for the same SKU and never anot
  state.ui.sceneFocus='room:b';assert.doesNotMatch(B.webProductCard(p),/data-material-customer-sample/);
  state.project={...originalProject,materials:{choices:{},finish:{rooms:{},exterior:null}}};assert.doesNotMatch(B.webProductCard(p),/data-material-customer-sample/);
 });
+
+test('licensed catalogue photos still require a concrete SKU and specification before embedding or adoption',()=>{
+ for(const missing of ['sku','spec','productUrl']){
+  const {B,state}=client(),x={...product(),imageUrl:'https://manufacturer.example/sku.jpg',photoLicense:{verified:true,commercialUse:true,sourceUrl:'https://manufacturer.example/licence'}};x[missing]=missing==='sku'?'   ':'';
+  assert.doesNotMatch(B.webProductCard(x),/data-material-product-image/,missing);
+  B.adoptWebMaterial(x);assert.equal(state.project.dataEngine.materialOverrides[x.id].imageUrl,null,missing);
+ }
+ const {B}=client(),x={...product(),imageUrl:'https://manufacturer.example/sku.jpg',photoLicense:{verified:true,commercialUse:true,sourceUrl:'https://manufacturer.example/licence'}};
+ assert.match(B.webProductCard(x),/data-material-product-image/);
+ assert.match(B.webProductCard({...x,spec:'theo quy cách · Xem quy cách tại nguồn chính hãng'}),/data-material-illustration/);
+});

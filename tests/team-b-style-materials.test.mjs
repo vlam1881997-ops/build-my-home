@@ -330,3 +330,13 @@ test('exterior sample editor preserves its explicit exterior target',()=>{
  assert.equal(B.catalogProductSample(product).roomId,null);assert.match(B.showroomPreviewHtml('paint'),/<option value="__exterior__" selected>/);
  B.state.ui.sceneFocus='room:sample-room';assert.equal(B.catalogProductSample(product),null);assert.doesNotMatch(B.showroomPreviewHtml('paint'),/data:image\/png;base64,EXTERIOR/);
 });
+
+test('Modern SKU image handoff keeps unresolved defaults and candidate products separate from confirmed room applications',async()=>{
+ const {skuImageRegister}=await import('./team-b-sku-image-register.mjs');const r=skuImageRegister();
+ assert.equal(r.fixture.styleId,'modern');assert.equal(r.fixture.testOnly,true);assert.equal(r.fixture.designRevision,'7BADC039-9AD609B4-AI4-RH3');
+ const roomIds=new Set(r.fixture.rooms.map(x=>x.id)),productIds=new Set(r.products.map(x=>x.productId));
+ assert.ok(r.applications.length>0);assert.ok(r.furniture.length>0);assert.equal(r.summary.confirmedApplications,0);
+ for(const row of r.applications){assert.equal(row.commercialAccepted,false);assert.equal(row.productId,null);assert.equal(row.quantity,null);assert.ok(!row.roomId||roomIds.has(row.roomId));assert.ok(row.candidateProductIds.every(id=>productIds.has(id)));assert.ok(row.missing.includes('confirmed-role-product'));}
+ assert.ok(r.products.every(x=>!x.commercialAccepted&&!x.exactSkuPhotoReviewed));assert.ok(r.products.every(x=>!x.displayableSourcePhoto));assert.ok(r.products.some(x=>x.price.amountVnd===null));
+ assert.equal(new Set(r.furniture.map(x=>x.id)).size,r.furniture.length);assert.ok(r.furniture.every(x=>roomIds.has(x.roomId)&&!x.supplierPhotoReviewed));
+});
