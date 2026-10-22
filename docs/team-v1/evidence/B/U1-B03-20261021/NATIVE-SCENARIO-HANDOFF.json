@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-22",
+  "task": "U1-B04",
+  "baseCommit": "4a901cb810b7a41bfebb2a84a256d76f3f19e4fc",
+  "script": "tests/team-b-material-samples.browser.cjs",
+  "changes": [
+    "Save stays in Materials",
+    "Zoom Escape and focus restoration",
+    "Read-only comparison",
+    "Active-room sample isolation",
+    "Explicit user action opens 3D",
+    "Result distinguishes viewport emulation/software GPU from physical device acceptance"
+  ],
+  "validation": {
+    "syntax": "pass",
+    "native": "not-run",
+    "physicalDevice": "not-run"
+  },
+  "ciDiscrepancy": {
+    "branch": "4a901cb810b7a41bfebb2a84a256d76f3f19e4fc",
+    "prHead": "724c5b47a03dc41289221c7724792c273f383390",
+    "exactRuns": 0,
+    "exactStatuses": 0
+  },
+  "blockers": [
+    "Existing browser observation denial and Vercel preview access403",
+    "Physical desktop/phone acceptance",
+    "Selected SKU photographs and rights"
+  ],
+  "integrationOwner": "A",
+  "commercialComplete": false
+}
