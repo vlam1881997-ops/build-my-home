@@ -55,12 +55,26 @@ BMH.resolveFacadeMaterialBindings=palette=>{
  }
  return result;
 };
-// Sample pixels stay in the project-scoped media store, never in the project JSON.
+// Sample pixels stay in the project-scoped media store; portable backups attach them separately.
 // A provided colour sample is not a measured normal/roughness map or certification.
 const sampleRuntime=new WeakMap(),sampleOperations=new WeakMap();
 const projectSampleBindings=project=>{const f=project?.materials?.finish||{};return [f.exterior,...Object.values(f.rooms||{})].filter(Boolean).flatMap(r=>[...Object.values(r.catalogMaterials||{}),...Object.values(r.facadeMaterials||{})]);};
 BMH.catalogSampleMetadataValid=b=>{
  const s=b?.sample;return !!s&&typeof s.mediaId==='string'&&/^material-sample-[a-zA-Z0-9-]+$/.test(s.mediaId)&&s.productId===b.productId&&s.sku===b.sku&&s.specification===b.specification&&typeof s.sourceReference==='string'&&s.sourceReference.trim().length>0&&s.sourceReference.length<=240&&Array.isArray(s.realWorldScale)&&s.realWorldScale.length===2&&s.realWorldScale.every(n=>Number.isFinite(n)&&n>=.01&&n<=20)&&Number.isFinite(s.rotationDeg)&&s.rotationDeg>=0&&s.rotationDeg<360;
+};
+BMH.projectMaterialSampleIds=project=>[...new Set(projectSampleBindings(project).filter(BMH.catalogSampleMetadataValid).map(b=>b.sample.mediaId))];
+BMH.materialSampleDataValid=data=>typeof data==='string'&&data.length<=2000000&&/^data:image\/jpeg;base64,\/9j\/[A-Za-z0-9+/]+={0,2}$/.test(data)&&data.slice(data.indexOf(',')+1).length%4===0;
+BMH.readMaterialSampleBackup=incoming=>{
+ const bundle=incoming?.materialSampleFiles;if(bundle===undefined)return null;
+ const reject=()=>{throw Error('Danh sách ảnh mẫu trong bản sao không hợp lệ. Thiết kế đang mở được giữ nguyên.');};
+ if(!bundle||bundle.schemaVersion!==1||!Array.isArray(bundle.files)||!Array.isArray(bundle.missing)||bundle.files.length+bundle.missing.length>128)reject();
+ const expected=new Set(BMH.projectMaterialSampleIds(incoming.project)),seen=new Set();
+ for(const row of bundle.files){if(!row||!expected.has(row.mediaId)||seen.has(row.mediaId)||!BMH.materialSampleDataValid(row.dataUrl))reject();seen.add(row.mediaId);}
+ for(const id of bundle.missing){if(!expected.has(id)||seen.has(id))reject();seen.add(id);}
+ if(expected.size!==seen.size)reject();return bundle;
+};
+BMH.validateMaterialSamplePixels=async files=>{
+ for(const row of files){const image=new Image();image.src=row.dataUrl;await image.decode();if(!image.naturalWidth||!image.naturalHeight||image.naturalWidth>1024||image.naturalHeight>1024)throw Error('Ảnh mẫu trong bản sao vượt kích thước được hỗ trợ.');}
 };
 BMH.materialSampleForBinding=b=>BMH.catalogSampleMetadataValid(b)?sampleRuntime.get(BMH.state.project)?.get(b.sample.mediaId)||null:null;
 BMH.restoreMaterialSamples=async()=>{
@@ -81,16 +95,22 @@ BMH.applyCatalogSample=async(category,{roomId=null,scope='room',profileId,file,w
  if(!file||!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>20*1024*1024)return fail('Chọn ảnh JPG, PNG hoặc WebP tối đa 20 MB.');
  if(![widthM,depthM].every(n=>Number.isFinite(n)&&n>=.01&&n<=20)||!Number.isFinite(rotationDeg)||rotationDeg<0||rotationDeg>=360||typeof sourceReference!=='string'||!sourceReference.trim()||sourceReference.trim().length>240)return fail('Nhập kích thước mẫu từ 10 đến 20.000 mm, góc từ 0 đến dưới 360° và nguồn ảnh.');
  if(!BMH.styleReferenceStore)return fail('Kho ảnh chưa sẵn sàng.');
- const identity=x=>JSON.stringify([x?.id,x?.sku,x?.specification||x?.spec,x?.unit]),productIdentity=identity(product),operation={};
+ const identity=x=>JSON.stringify([x?.id,x?.sku,x?.specification||x?.spec,BMH.materialUnit?.(x?.priceEvidence?.quantityUnit??x?.unit)??x?.unit]),productIdentity=identity(product),operation={};
+ // Decode/storage can finish after the customer changes this surface. Preserve
+ // that newer intent, while allowing edits in other rooms or other surface roles.
+ const targetSignature=()=>{
+  const raw=scope==='exterior'?project.materials.finish?.exterior:project.materials.finish?.rooms?.[roomId],palette=scope==='exterior'?(BMH.facadeFinishPalette?.()||raw||{}):BMH.finishPalette(roomId),room=scope==='room'?project.plan.rooms.find(r=>r.id===roomId):null;
+  return JSON.stringify([room?.type,raw?.[role],raw?.visualMaterials?.[role],raw?.explicitRoles?.[role],raw?.styleRoles?.[role],scope==='exterior'?raw?.facadeMaterials?.[category]:raw?.catalogMaterials?.[category],palette?.[role],palette?.visualMaterials?.[role],palette?.catalogMaterials?.[category],role==='floor'?palette?.surface:null]);
+ },initialTarget=targetSignature();
  let operations=sampleOperations.get(project);if(!operations)sampleOperations.set(project,operations=new Map());const operationKey=category+':'+(scope==='exterior'?'exterior':roomId);operations.set(operationKey,operation);
  try{
   const bitmap=await createImageBitmap(file),ratio=Math.min(1,1024/Math.max(bitmap.width,bitmap.height)),canvas=document.createElement('canvas');
   canvas.width=Math.max(1,Math.round(bitmap.width*ratio));canvas.height=Math.max(1,Math.round(bitmap.height*ratio));canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();
   const data=canvas.toDataURL('image/jpeg',.9),image=new Image();image.src=data;await image.decode();
-  const stillCurrent=()=>BMH.state.project===project&&identity(BMH.catalogSelectedProduct(category))===productIdentity&&operations.get(operationKey)===operation&&(scope==='exterior'||project.plan.rooms.some(r=>r.id===roomId));
-  if(!stillCurrent())return fail('Dự án hoặc sản phẩm đã đổi; chọn lại trước khi gắn ảnh mẫu.');
+  const stillCurrent=()=>BMH.state.project===project&&identity(BMH.catalogSelectedProduct(category))===productIdentity&&operations.get(operationKey)===operation&&targetSignature()===initialTarget&&(scope==='exterior'||project.plan.rooms.some(r=>r.id===roomId&&!['stairs','elevator','balcony'].includes(r.type)));
+  if(!stillCurrent())return fail('Dự án, sản phẩm hoặc bề mặt đã đổi; chọn lại trước khi gắn ảnh mẫu.');
   const mediaId='material-sample-'+crypto.randomUUID();await BMH.styleReferenceStore.put(mediaId,data);
-  if(!stillCurrent())return fail('Dự án hoặc sản phẩm đã đổi; ảnh chưa được áp dụng.');
+  if(!stillCurrent())return fail('Dự án, sản phẩm hoặc bề mặt đã đổi; ảnh chưa được áp dụng.');
   if(!BMH.applyCatalogMaterial(category,profileId,{roomId,scope}))return fail('Không áp dụng được vật liệu cho vị trí đã chọn.');
   const binding=scope==='exterior'?project.materials.finish.exterior.facadeMaterials[category]:project.materials.finish.rooms[roomId].catalogMaterials[category];
   binding.sample={mediaId,productId:binding.productId,sku:binding.sku,specification:binding.specification,realWorldScale:[widthM,depthM],rotationDeg,sourceReference:sourceReference.trim(),basis:'customer-provided-colour-sample'};
@@ -140,9 +160,15 @@ BMH.applyVisualMaterial=(role,id,roomId=null)=>{
 };
 BMH.applyCatalogMaterial=(category,profileId,{roomId=null,scope=roomId?'room':'unassigned'}={})=>{
  const p=BMH.state.project,product=BMH.catalogSelectedProduct(category),role=BMH.catalogSurfaceSlots[category],profile=BMH.VISUAL_MATERIALS.find(x=>x.id===profileId&&x.role===role);if(!product||!profile||!['room','unassigned','all','exterior'].includes(scope)||scope==='exterior'&&!['paint','cabinetry'].includes(category)||scope==='room'&&!p.plan.rooms.some(r=>r.id===roomId&&!['stairs','elevator','balcony'].includes(r.type)))return false;
- if(scope==='exterior'){BMH.rememberFinishCamera();const f=p.materials.finish||={exterior:null,rooms:{}},raw=f.exterior||{};f.exterior={...raw,facadeMaterials:{...raw.facadeMaterials,[category]:{...BMH.createCatalogMaterialBinding(product,profileId),scope:'exterior-only'}}};BMH.state.ui.renderMode='interactive';BMH.finishInvalidate?.();BMH.save();return true;}
+ const bindingFor=(previous,id)=>{
+  const next=BMH.createCatalogMaterialBinding(product,profileId,{roomId:id});
+  // Reapplying the same SKU/profile preserves only this scope's sample, never another room's.
+  if(previous?.roomId===id&&previous.visualProfileId===profileId&&BMH.catalogBindingStatus(category,previous,product).valid&&BMH.catalogSampleMetadataValid(previous))next.sample=structuredClone(previous.sample);
+  return next;
+ };
+ if(scope==='exterior'){BMH.rememberFinishCamera();const f=p.materials.finish||={exterior:null,rooms:{}},raw=f.exterior||{};f.exterior={...raw,facadeMaterials:{...raw.facadeMaterials,[category]:{...bindingFor(raw.facadeMaterials?.[category],null),scope:'exterior-only'}}};BMH.state.ui.renderMode='interactive';BMH.finishInvalidate?.();BMH.save();return true;}
  const f=p.materials.finish||={exterior:null,rooms:{}};f.rooms||={};const authored=row=>!!row&&(row.explicitRoles?row.explicitRoles[role]===true:!!row.visualMaterials?.[role]||Object.hasOwn(row,role)),rooms=scope==='exterior'?[]:p.plan.rooms.filter(r=>!['stairs','elevator','balcony'].includes(r.type)&&(scope!=='room'||r.id===roomId)).filter(r=>scope!=='unassigned'||!authored(f.rooms[r.id]));if(!rooms.length&&scope!=='exterior')return false;
- BMH.rememberFinishCamera();const write=(raw,previous,id)=>({...raw,...previous,[role]:profile.color,visualMaterials:{...previous.visualMaterials,[role]:profile.id},explicitRoles:{...raw.explicitRoles,[role]:true},styleRoles:{...raw.styleRoles,[role]:false},catalogMaterials:{...raw.catalogMaterials,[category]:BMH.createCatalogMaterialBinding(product,profile.id,{roomId:id})},...(role==='floor'?{surface:profile.surface}:{})});
+ BMH.rememberFinishCamera();const write=(raw,previous,id)=>({...raw,...previous,[role]:profile.color,visualMaterials:{...previous.visualMaterials,[role]:profile.id},explicitRoles:{...raw.explicitRoles,[role]:true},styleRoles:{...raw.styleRoles,[role]:false},catalogMaterials:{...raw.catalogMaterials,[category]:bindingFor(raw.catalogMaterials?.[category],id)},...(role==='floor'?{surface:profile.surface}:{})});
  for(const r of rooms){const raw=f.rooms[r.id]||{};f.rooms[r.id]=write(raw,BMH.finishPalette(r.id),r.id);}if(scope==='all'||scope==='exterior'||scope==='unassigned'&&!authored(f.exterior)){const raw=f.exterior||{};f.exterior=write(raw,raw,null);if(scope==='exterior')f.exterior.catalogMaterials[category].scope='exterior-only';}
  BMH.state.ui.renderMode='interactive';BMH.finishInvalidate?.();BMH.save();return true;
 };
@@ -177,3 +203,4 @@ const materialsScreen=BMH.screen7;
 BMH.screen7=()=>materialsScreen().replace('<section class="interior-collections">',BMH.visualMaterialsHtml()+'<section class="interior-collections">').replace('<details open><summary>Ngoại thất</summary>',BMH.visualMaterialsQuickHtml()+'<details open><summary>Ngoại thất</summary>');BMH.SCREENS[5]=BMH.screen7;
 document.addEventListener('click',event=>{const button=event.target.closest?.('[data-visual-material]');if(!button)return;const room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===BMH.state.ui.sceneFocus);if(BMH.applyVisualMaterial(button.dataset.visualRole,button.dataset.visualMaterial,room?.id)){if(!BMH.refreshStudioFinishes?.(button.dataset.visualRole,room?.id))BMH.render({preserveScroll:true});BMH.toast('Đã đổi bề mặt '+(room?room.name:'các phòng trong nhà')+'.');}});
 document.addEventListener('change',event=>{const select=event.target;if(!select.matches?.('[data-visual-material-select]'))return;const room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===BMH.state.ui.sceneFocus);if(BMH.applyVisualMaterial(select.dataset.visualMaterialSelect,select.value,room?.id)&&!BMH.refreshStudioFinishes?.(select.dataset.visualMaterialSelect,room?.id))BMH.render({preserveScroll:true});});
+

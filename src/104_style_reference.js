@@ -12,13 +12,18 @@
   request.onblocked=()=>{database=null;reject(Error('Đóng tab BMH cũ để cập nhật kho ảnh.'));};
  }).catch(error=>{database=null;throw error;});
  const transaction=(mode,work)=>open().then(db=>new Promise((resolve,reject)=>{
-  const tx=db.transaction('images',mode),request=work(tx.objectStore('images'));
-  request.onsuccess=()=>resolve(request.result||null);
-  request.onerror=()=>reject(Error('Không đọc hoặc lưu được ảnh tham khảo.'));
+  const tx=db.transaction('images',mode);let result=null;
+  tx.oncomplete=()=>resolve(result);
   tx.onabort=()=>reject(Error('Không lưu được ảnh tham khảo.'));
+  try{const request=work(tx.objectStore('images'));request.onsuccess=()=>{result=request.result||null;};request.onerror=()=>reject(Error('Không đọc hoặc lưu được ảnh tham khảo.'));}
+  catch(_){tx.abort();reject(Error('Không đọc hoặc lưu được ảnh tham khảo.'));}
  }));
  B.styleReferenceStore={
   put:async(id,data,options={})=>{const scope=options.scope||await B.projectMediaScope();return transaction('readwrite',store=>store.put(data,B.projectMediaKey(scope,id)));},
+  putMany:async(rows,{scope}={})=>{
+   if(!scope)throw Error('Thiếu dự án nhận ảnh mẫu.');if(!rows.length)return;
+   return transaction('readwrite',store=>{let last;for(const row of rows)last=store.put(row.dataUrl,B.projectMediaKey(scope,row.mediaId));return last;});
+  },
   get:async(id,options={})=>{
    const project=B.state.project,scope=options.scope||await B.projectMediaScope(),key=B.projectMediaKey(scope,id),data=await transaction('readonly',store=>store.get(key));
    if(data||options.legacy===false)return data;
@@ -192,3 +197,4 @@
   }
  });
 })();
+

@@ -131,3 +131,27 @@ html.bmh-v60 .showroom-choice-board button:focus-visible,html.bmh-v60 .showroom-
 html.bmh-v60 .showroom-original-photos{margin-top:22px}html.bmh-v60 .showroom-original-photos>summary{min-height:44px;align-content:center;cursor:pointer;font-size:13px;color:#48614d}
 @media(max-width:1000px){html.bmh-v60 .showroom-choice-board>footer{align-items:stretch;flex-direction:column}html.bmh-v60 .showroom-choice-board footer>button{align-self:flex-start}}
 @media(max-width:700px){html.bmh-v60 .showroom-choice-board{padding:16px}html.bmh-v60 .showroom-choice-board>header{display:block}html.bmh-v60 .showroom-choice-board h2{font-size:22px}html.bmh-v60 .showroom-choice-board label{min-width:0;margin-top:15px}html.bmh-v60 .showroom-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}html.bmh-v60 .showroom-choice-grid .finish-swatch{height:140px}html.bmh-v60 .showroom-choice-name{font-size:13px}html.bmh-v60 .showroom-chosen-finishes{grid-template-columns:repeat(2,minmax(0,1fr))}html.bmh-v60 .showroom-choice-tabs{gap:6px}html.bmh-v60 .showroom-choice-tabs button{font-size:12px}}
+
+html.bmh-v60 .showroom-choice-board .showroom-sample-preview img{display:block;width:100%;height:100%;object-fit:cover;mix-blend-mode:normal;opacity:1}
+
+/* Review customer samples without applying them or leaving the material step. */
+.material-sample-zoom{display:block;width:100%;padding:0!important;border:0!important;border-radius:inherit;background:transparent!important;cursor:zoom-in;box-shadow:none!important}
+.material-sample-zoom:focus-visible{outline:3px solid #467864;outline-offset:3px}
+.material-sample-dialog{box-sizing:border-box;width:min(960px,94vw);max-height:92dvh;overflow:auto;border:0;border-radius:20px;padding:24px;background:#faf9f6;color:#27382d;box-shadow:0 20px 70px #17281d40}
+.material-sample-dialog::backdrop{background:#17281d88}
+.material-sample-dialog form{display:flex;justify-content:flex-end}
+.material-sample-dialog img{display:block;width:100%;max-height:65dvh;object-fit:contain;background:#eeeee8}
+.material-sample-dialog p{overflow-wrap:anywhere;line-height:1.6}
+.material-sample-dialog button{min-height:44px;padding:10px 18px;border:1px solid #b9c7b9;border-radius:12px;background:#fff;color:inherit;cursor:pointer}
+@media(max-width:640px){.material-sample-dialog{padding:16px}.material-sample-dialog h2{font-size:1.25rem}}
+
+html.bmh-v60 .showroom-finish-comparison{margin:18px 0;padding:12px;border:1px solid #dce4d9;border-radius:12px;min-width:0}
+html.bmh-v60 .showroom-finish-comparison>summary{min-height:44px;align-content:center;cursor:pointer;font-weight:600}
+html.bmh-v60 .showroom-compare-controls,html.bmh-v60 .showroom-compare-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:12px 0}
+html.bmh-v60 .showroom-compare-controls label{min-width:0}
+html.bmh-v60 .showroom-compare-controls select{width:100%;min-height:44px;max-width:100%}
+html.bmh-v60 .showroom-compare-grid article{display:grid;gap:10px;align-content:start;min-width:0;overflow-wrap:anywhere}
+html.bmh-v60 .showroom-compare-grid .finish-swatch{display:block;width:100%;height:180px;border-radius:10px;overflow:hidden}
+html.bmh-v60 .showroom-compare-grid p,html.bmh-v60 .showroom-finish-comparison p{font-size:12px;line-height:1.6}
+html.bmh-v60 .showroom-compare-grid small{font-size:11px;line-height:1.6}
+@media(max-width:480px){html.bmh-v60 .showroom-compare-controls{grid-template-columns:minmax(0,1fr)}html.bmh-v60 .showroom-compare-grid{gap:10px}html.bmh-v60 .showroom-compare-grid .finish-swatch{height:130px}}

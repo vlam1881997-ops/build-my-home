@@ -1,5 +1,5 @@
 {
-  "status": "implemented-pending-ci-preview",
+  "status": "released-and-production-verified",
   "baselineMain": "005b1838985103fbd2be8f619b12009f6df0eae0",
   "baselineBranch": "c29e8c15dfd4ec2fe3dc6a046d7a67ff7dbc93f5",
   "scope": "pictured surface choice before explicit 3D preview",
@@ -10,5 +10,52 @@
   "newAssets": 0,
   "schemaBuildOrAChanges": false,
   "nativePhoneAcceptance": false,
-  "fullCommercialAcceptance": false
+  "fullCommercialAcceptance": false,
+  "source": "38614c36c018a690535f37d1d404f86595327dfd",
+  "main": "ad575e578eaeb2b0cb054760d408d07195ef0224",
+  "testedAndMergedTree": "98e10df60612921b5c11b4cc9ecb915f52b3a517",
+  "pr": 74,
+  "ci": {
+    "node": 22,
+    "runId": 39246110343,
+    "conclusion": "success"
+  },
+  "preview": {
+    "deployment": "dpl_GYqCFTAFDRR16q89LxrkEaGdwwrR",
+    "status": "READY"
+  },
+  "production": {
+    "deployment": "dpl_7C6w81dxw5QqmPQmhfWWvYp9Ln8z",
+    "status": "READY",
+    "domain": "https://www.huiminhbach.id.vn/"
+  },
+  "native": {
+    "boardTopY": 290.03125,
+    "boardWidth": 1070,
+    "choices": {
+      "floor": 7,
+      "wall": 3,
+      "woodFabric": 7
+    },
+    "visibleFloorTextureDecodeWidth": 512,
+    "chooseKeepsStep5": true,
+    "reloadKeepsChoice": true,
+    "roomsIndependent": true,
+    "wallAndFabricChoice": true,
+    "explicit3DUsesSameRoom": true,
+    "production3DFloorControl": "white-marble",
+    "returnRetainsChoice": true,
+    "nativeGPUAcceptance": false,
+    "note": "Cloud fixture import abnormally delayed934seconds; not website speed evidence. Phone/nativeGPU coverage not claimed."
+  },
+  "screenshot": {
+    "size": [
+      1348,
+      926
+    ],
+    "sha256": "e63488dfff36dc9ae360e45c1c34a85172c9a25de98d0126cba8446c9049bba1",
+    "retainedLocally": true,
+    "repositoryUpload": "blocked by automatic approval review: image content not verified"
+  },
+  "remaining": "Exact manufacturer SKU photograph coverage incomplete; no supplier image rights or verified photo flags invented."
 }

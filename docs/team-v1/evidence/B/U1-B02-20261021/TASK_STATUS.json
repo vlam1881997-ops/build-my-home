@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "owner": "B",
+  "baseCommit": "8a03c900459cb2b4df03fd11ed8846ed2c0d400b",
+  "status": "in_progress-not-commercial-complete",
+  "taskStates": [
+    {
+      "taskId": "U1-B01",
+      "status": "blocked",
+      "reason": "Native preview access, exact-SKU asset rights/review and A integration gates remain open.",
+      "done": false
+    },
+    {
+      "taskId": "U1-B02",
+      "status": "in_progress",
+      "reason": "Native preview access, exact-SKU asset rights/review and A integration gates remain open.",
+      "done": false
+    },
+    {
+      "taskId": "U1-B03",
+      "status": "in_progress",
+      "reason": "Comparison and late-upload safeguards implemented; native and actual supplier-image acceptance pending.",
+      "done": false
+    },
+    {
+      "taskId": "U1-B04",
+      "status": "blocked",
+      "reason": "Existing native scenario prepared for Materials save/zoom/comparison/room isolation, explicit3D, reload, portable JSON UI export/import and scoped image bytes; syntax passed, browser execution blocked by recorded access denial. Physical-device, selected-SKU and integration gates remain open.",
+      "done": false
+    },
+    {
+      "taskId": "U2-B01",
+      "status": "blocked",
+      "reason": "Await real A input/geometry/pose milestone and upgrade1 acceptance; reuse existing editor/render.",
+      "done": false
+    },
+    {
+      "taskId": "U2-B02",
+      "status": "blocked",
+      "reason": "Await real A input/geometry/pose milestone and upgrade1 acceptance; reuse existing editor/render.",
+      "done": false
+    },
+    {
+      "taskId": "U2-B03",
+      "status": "blocked",
+      "reason": "Await real A input/geometry/pose milestone and upgrade1 acceptance; reuse existing editor/render.",
+      "done": false
+    },
+    {
+      "taskId": "U2-B04",
+      "status": "blocked",
+      "reason": "Await real A input/geometry/pose milestone and upgrade1 acceptance; reuse existing editor/render.",
+      "done": false
+    },
+    {
+      "taskId": "U3-B01",
+      "status": "blocked",
+      "reason": "Await integrated A BOQ/finance/handover/supervision milestones and Modern native QA.",
+      "done": false
+    },
+    {
+      "taskId": "U3-B02",
+      "status": "blocked",
+      "reason": "Await integrated A BOQ/finance/handover/supervision milestones and Modern native QA.",
+      "done": false
+    },
+    {
+      "taskId": "U3-B03",
+      "status": "blocked",
+      "reason": "Await integrated A BOQ/finance/handover/supervision milestones and Modern native QA.",
+      "done": false
+    },
+    {
+      "taskId": "U3-B04",
+      "status": "blocked",
+      "reason": "Await integrated A BOQ/finance/handover/supervision milestones and Modern native QA.",
+      "done": false
+    },
+    {
+      "taskId": "U4-B01",
+      "status": "blocked",
+      "reason": "Await BMH service mapping, auth/media configuration, MoMo sandbox and two real devices.",
+      "done": false
+    },
+    {
+      "taskId": "U4-B02",
+      "status": "blocked",
+      "reason": "Await BMH service mapping, auth/media configuration, MoMo sandbox and two real devices.",
+      "done": false
+    },
+    {
+      "taskId": "U4-B03",
+      "status": "blocked",
+      "reason": "Await BMH service mapping, auth/media configuration, MoMo sandbox and two real devices.",
+      "done": false
+    },
+    {
+      "taskId": "U4-B04",
+      "status": "blocked",
+      "reason": "Await BMH service mapping, auth/media configuration, MoMo sandbox and two real devices.",
+      "done": false
+    },
+    {
+      "taskId": "U5-B01",
+      "status": "blocked",
+      "reason": "Await approved Modern baseline, service gates, individual style reviews and A integrated preview/release.",
+      "done": false
+    },
+    {
+      "taskId": "U5-B02",
+      "status": "blocked",
+      "reason": "Await approved Modern baseline, service gates, individual style reviews and A integrated preview/release.",
+      "done": false
+    },
+    {
+      "taskId": "U5-B03",
+      "status": "blocked",
+      "reason": "Await approved Modern baseline, service gates, individual style reviews and A integrated preview/release.",
+      "done": false
+    },
+    {
+      "taskId": "U5-B04",
+      "status": "blocked",
+      "reason": "Await approved Modern baseline, service gates, individual style reviews and A integrated preview/release.",
+      "done": false
+    }
+  ],
+  "provided": [
+    "SKU_IMAGE_REGISTER.json",
+    "HANDOFF-A.md",
+    "materialProductPhotoStatus read-only display helper",
+    "source-photo regression + Modern register regression"
+  ]
+}

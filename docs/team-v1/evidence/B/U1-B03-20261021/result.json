@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "owner": "B",
+  "taskIds": [
+    "U1-B02",
+    "U1-B03"
+  ],
+  "baseCommit": "6e134b70b8e8897713cd3d91f1a511475a9d56e0",
+  "status": "implementation-tested-native-assets-pending",
+  "tests": {
+    "node": "24.19.0",
+    "pass": 72,
+    "fail": 0,
+    "newRegressionFailuresReproduced": 2
+  },
+  "nativeEvidence": [],
+  "supplierImageApprovals": [],
+  "productionChanged": false
+}
