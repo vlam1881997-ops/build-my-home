@@ -155,3 +155,16 @@ html.bmh-v60 .showroom-compare-grid .finish-swatch{display:block;width:100%;heig
 html.bmh-v60 .showroom-compare-grid p,html.bmh-v60 .showroom-finish-comparison p{font-size:12px;line-height:1.6}
 html.bmh-v60 .showroom-compare-grid small{font-size:11px;line-height:1.6}
 @media(max-width:480px){html.bmh-v60 .showroom-compare-controls{grid-template-columns:minmax(0,1fr)}html.bmh-v60 .showroom-compare-grid{gap:10px}html.bmh-v60 .showroom-compare-grid .finish-swatch{height:130px}}
+
+/* Source photographs are separate from local room samples and 3D textures. */
+.material-reference-zoom{position:relative;display:block;width:100%;height:100%;padding:12px 12px 38px;border:0;border-radius:0;background:#fff;cursor:zoom-in;color:#14362d}
+.material-reference-zoom img{width:100%;height:100%;object-fit:contain!important;display:block}
+.material-reference-zoom>span{position:absolute;top:8px;right:8px;padding:4px 8px;border-radius:20px;background:#f1f5f0e8;font-size:11px;font-weight:700}
+.material-reference-zoom:focus-visible{outline:3px solid #246d52;outline-offset:-3px}
+.showroom-source-reference{background:#fff;min-height:260px;position:relative;margin:0;overflow:hidden;border-radius:18px}
+.showroom-source-reference .material-reference-zoom{min-height:260px}
+.showroom-source-reference figcaption{padding:8px 12px;background:#edf3ec;color:#173b30;font-size:12px}
+.material-reference-dialog>img{object-fit:contain;background:#fff}
+.material-reference-dialog a{display:inline-block;padding:8px 0;text-decoration:underline}
+.material-reference-dialog .product-no-image{padding:32px;background:#f3f5f0}
+@media(max-width:600px){.material-reference-dialog{width:calc(100vw - 28px);max-height:calc(100dvh - 28px);padding:16px}.material-reference-dialog>img{max-height:52dvh}}
