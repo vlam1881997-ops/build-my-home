@@ -91,8 +91,9 @@
  // Opening personal editing changes only UI, never regenerates/clears a plan.
  B.openPersonalPlanner=()=>{
   cancelDraw();const s=B.designState(),u=ui();
-  B.state.ui.designProposalsOpen=false;Object.assign(u,{floor:B.clamp(Number(u.floor)||0,0,Number(B.state.project.site.floors)-1),view:'plan',tool:'select',directTool:'room',selectedOpening:'',selectedFixture:''});
-  s.notice='Tự bố trí: vẽ hai góc hoặc nhập số đo phòng. Đất trống được giữ nguyên; không cần chọn phương án gợi ý.';
+  const floor=B.clamp(Number(u.floor)||0,0,Number(B.state.project.site.floors)-1),occupied=B.state.project.plan.rooms.some(r=>r.floor===floor);
+  B.state.ui.designProposalsOpen=false;Object.assign(u,{floor,view:'plan',tool:'select',directTool:occupied?'select':'room',selectedOpening:'',selectedFixture:'',directNotice:''});
+  s.notice=occupied?'Chọn phòng để di chuyển hoặc chỉnh số đo. Chọn Vẽ phòng khi muốn thêm vào vùng trống.':'Tự bố trí: vẽ hai góc hoặc nhập số đo phòng. Đất trống được giữ nguyên; không cần chọn phương án gợi ý.';
   B.navigateTo(4);B.save();return true;
  };
  B.personalRoomFormHtml=()=>{
@@ -168,7 +169,7 @@
    const area=(a,b)=>a&&b&&a.floor===b.floor?Math.max(0,Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x))*Math.max(0,Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)):0;
    const old=id=>source.rooms.find(r=>r.id===id),changed=plan.rooms.filter(r=>moved(old(r.id),r));
    const safe=changed.every(r=>validLayout([r]))&&plan.rooms.every((r,i)=>plan.rooms.slice(i+1).every(q=>r.floor!==q.floor||area(r,q)<=area(old(r.id),old(q.id))+1e-8));
-   if(!safe)return 'Phòng chồng nhau hoặc vượt ranh / khoảng lùi. Chọn vùng trống trong đất.';
+   if(!safe){const outside=changed.find(r=>!validLayout([r]));if(outside)return 'Phòng “'+outside.name+'” vượt ranh / khoảng lùi hoặc không đủ chỗ sau khi xoay. Giảm kích thước hoặc chọn vị trí khác.';for(const r of changed){const other=plan.rooms.find(q=>q.id!==r.id&&area(r,q)>area(old(r.id),old(q.id))+1e-8);if(other)return 'Phòng “'+r.name+'” chồng phòng “'+other.name+'”. Chọn vùng trống hoặc chỉnh kích thước trước khi di chuyển / xoay.';}return 'Mặt bằng chưa hợp lệ. Kiểm tra ranh đất và vị trí các phòng.';}
   }
   for(const key of ['openings','fixtures'])for(const id of new Set([...(source[key]||[]),...(plan[key]||[])].map(q=>q.id))){const before=(source[key]||[]).find(q=>q.id===id),after=(plan[key]||[]).find(q=>q.id===id),oldRoom=before&&source.rooms.find(r=>r.id===before.roomId),newRoom=after&&plan.rooms.find(r=>r.id===after.roomId);if(same(before,after)&&!moved(oldRoom,newRoom))continue;
    if(before&&B.isRoomLocked(before.roomId)||after&&(B.isRoomLocked(after.roomId)||B.isFloorLocked(after.floor)))return 'Phòng hoặc tầng của đối tượng đang khóa.';
@@ -354,13 +355,18 @@
  });
  let drawing=null,anchor=null,ignoreClickUntil=0;
  const cancelDraw=()=>{drawing=null;anchor=null;document.querySelectorAll('.direct-room-preview,.direct-room-anchor').forEach(e=>e.remove());};
+ const restoreProjectRuntime=B.restoreProjectRuntime;
+ if(restoreProjectRuntime)B.restoreProjectRuntime=(...args)=>{cancelDraw();Object.assign(ui(),{directTool:'select',tool:'select',selectedOpening:'',selectedFixture:'',directNotice:''});return restoreProjectRuntime(...args);};
  document.addEventListener('change',e=>{if(e.target.matches?.('[data-guided-floor],[data-floor],[data-guided-plan-view]'))cancelDraw();},true);
  document.addEventListener('click',e=>{if(e.target.closest?.('[data-nav]'))cancelDraw();},true);
  const point=e=>{const svg=B.$('#plannerSvg');return svg?B.svgPoint(e,svg):null;};
  const drawPreview=b=>{const svg=B.$('#plannerSvg'),target=svg?.querySelector('#planDrawing')||svg;if(!target||!anchor)return;target.querySelector('.direct-room-preview')?.remove();const r=document.createElementNS('http://www.w3.org/2000/svg','rect');for(const [k,v]of Object.entries({x:Math.min(anchor.x,b.x),y:Math.min(anchor.y,b.y),width:Math.abs(b.x-anchor.x),height:Math.abs(b.y-anchor.y),class:'direct-room-preview'}))r.setAttribute(k,v);target.append(r);};
  const selectItem=(kind,id)=>{const q=(kind==='room'?B.state.project.plan.rooms:kind==='opening'?B.state.project.plan.openings:B.planFixtures()).find(q=>q.id===id&&q.floor===ui().floor);if(!q)return;Object.assign(ui(),{selected:kind==='room'?id:q.roomId,selectedOpening:kind==='opening'?id:'',selectedFixture:kind==='fixture'?id:'',directNotice:''});update();};
  document.addEventListener('pointerdown',e=>{
-  if(B.state.ui.step!==4||ui().view!=='plan'||!e.target.closest?.('#plannerSvg')||ui().tool!=='select'||e.button>0)return;const tool=ui().directTool,hit=e.target.closest('[data-plan-opening],[data-plan-fixture]'),kind=hit?.hasAttribute('data-plan-opening')?'opening':'fixture',id=hit?.dataset.planOpening||hit?.dataset.planFixture;
+  if(B.state.ui.step!==4||ui().view!=='plan'||!e.target.closest?.('#plannerSvg')||ui().tool!=='select'||e.button>0)return;let tool=ui().directTool;const hit=e.target.closest('[data-plan-opening],[data-plan-fixture]'),kind=hit?.hasAttribute('data-plan-opening')?'opening':'fixture',id=hit?.dataset.planOpening||hit?.dataset.planFixture;
+  // A saved draw tool must not turn a drag of an existing room into a new room.
+  // Keep an in-progress two-corner drawing intact so invalid additions still fail.
+  if(tool==='room'&&!anchor&&e.target.closest('[data-room-id],[data-edge-id],[data-resize-id]')){cancelDraw();tool=ui().directTool='select';ui().directNotice='Đã chuyển sang chọn / di chuyển phòng.';}
   if(tool==='select'){if(hit){e.preventDefault();e.stopImmediatePropagation();selectItem(kind,id);ignoreClickUntil=Date.now()+500;}else{const changed=!!(ui().selectedOpening||ui().selectedFixture||ui().directNotice);ui().selectedOpening='';ui().selectedFixture='';ui().directNotice='';if(changed)queueMicrotask(()=>{if(B.drag?.pointerId===e.pointerId)B.drag.selectionChanged=true;else B.render({preserveScroll:true});});}return;}
   e.preventDefault();e.stopImmediatePropagation();const at=point(e);if(!at)return;
   if(tool==='erase'){let ok;if(hit)ok=B.removePlanItem(kind,id);else{const room=e.target.closest('[data-room-id]');if(room)ok=B.removePlanItem('room',room.dataset.roomId);else directReject('Chạm phòng, ô mở hoặc fixture cần xóa.');}if(!ok)B.render({preserveScroll:true});return;}

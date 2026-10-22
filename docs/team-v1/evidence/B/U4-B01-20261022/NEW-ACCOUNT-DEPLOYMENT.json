@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-22",
+  "task": "U4-B01",
+  "status": "in_progress",
+  "project_ref": "tdcffbetywnhuvtoamqh",
+  "organization_id": "wjeggdcqfzstgojqwjby",
+  "region": "ap-southeast-1",
+  "schema_source_blob": "a24ffd81e58993138227d19e7780522fbff04171",
+  "schema_applied": true,
+  "rollback_tests": "PASS: owner save/read; replay; stale conflict; foreign read/write/delete denial",
+  "site_url": "https://nhanhocuatoi.com",
+  "redirect_urls": [
+    "https://nhanhocuatoi.com/"
+  ],
+  "email_confirmation": true,
+  "custom_smtp": false,
+  "deployment_id": "dpl_7ZZxjwn4DcQkeytR9pM4sn17qusd",
+  "deployment_status": "Ready / Production / Current",
+  "source_commit": "d26e6aab17f4b35e2bec1ac41820a2e67f9e73ab",
+  "deployment_url": "https://buildmyhomefullv12github-o3k4c5auz-vlam1881997-9266.vercel.app/",
+  "api_config": {
+    "cloudConfigured": true,
+    "geminiConfigured": true,
+    "imageConfigured": true,
+    "mediaConfigured": false,
+    "paymentConfigured": false
+  },
+  "ui": "Enabled sign-in form under Dự án > Tài khoản & đồng bộ",
+  "remaining": [
+    "Actual signup/signin and cross-session same-project sync not verified",
+    "Custom SMTP absent",
+    "Canonical domain upstream connection failure in cloud browser; deployment URL works",
+    "Media cloud remains disabled",
+    "Manufacturer photos and commercial acceptance not completed"
+  ]
+}

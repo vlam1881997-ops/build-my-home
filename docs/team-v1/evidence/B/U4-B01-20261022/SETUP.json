@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-22",
+  "project": {
+    "id": "zttggcqkpukjniqtkuzv",
+    "name": "build-my-home",
+    "organizationId": "zbbnivglskblbrjmsjrn",
+    "region": "ap-southeast-1",
+    "status": "ACTIVE_HEALTHY",
+    "url": "https://zttggcqkpukjniqtkuzv.supabase.co"
+  },
+  "authorization": "Owner explicitly requested a separate project in the offered organization. No existing project was repurposed.",
+  "migration": {
+    "path": "sql/BMH_CUSTOMER_CLOUD.sql",
+    "sourceCommit": "d26e6aab17f4b35e2bec1ac41820a2e67f9e73ab",
+    "name": "bmh_customer_cloud",
+    "applied": true
+  },
+  "verification": {
+    "rlsOnBothTables": true,
+    "anonymousRead": false,
+    "authenticatedDirectWrite": false,
+    "ownerSaveRead": "pass",
+    "replay": "pass",
+    "staleConflict": "pass",
+    "otherUserReadWriteDeleteDenied": "pass",
+    "testRowsRolledBack": true,
+    "remainingTestUsers": 0
+  },
+  "advisorReview": [
+    {
+      "finding": "RLS Enabled No Policy on tombstones",
+      "review": "Intentional private table; all direct anon/authenticated privileges revoked. Access only through owner-checked functions.",
+      "reference": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+    },
+    {
+      "finding": "Authenticated SECURITY DEFINER execution on save/delete",
+      "review": "Intentional function-only writes. Both functions check auth.uid(), ownership and revision, have empty search_path, and revoke PUBLIC/anon execute. Cross-owner denial verified. Contract unchanged.",
+      "reference": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable"
+    }
+  ],
+  "hosting": {
+    "connected": false,
+    "reason": "Vercel MCP resolves expected team but list_projects search=build returns empty; get_project/env with known BMH project ID previously returned404. No credentials read, no hosting mutation."
+  },
+  "auth": {
+    "siteRedirectConfigured": false,
+    "emailDeliveryTested": false,
+    "signupSigninTested": false
+  },
+  "cloudReadyFlagEnabled": false,
+  "websiteSyncVerified": false,
+  "next": [
+    "Restore Vercel connector access to the existing BMH project",
+    "Configure Supabase Auth site URL and allowed callback URLs",
+    "Set SUPABASE_URL/SUPABASE_PUBLISHABLE_KEY/BMH_PUBLIC_URL, then BMH_CLOUD_READY only after checks",
+    "Verify actual signup/signin and same project across two contexts/devices; media sync remains separate"
+  ]
+}
