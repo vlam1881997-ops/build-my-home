@@ -330,3 +330,55 @@ test('exterior sample editor preserves its explicit exterior target',()=>{
  assert.equal(B.catalogProductSample(product).roomId,null);assert.match(B.showroomPreviewHtml('paint'),/<option value="__exterior__" selected>/);
  B.state.ui.sceneFocus='room:sample-room';assert.equal(B.catalogProductSample(product),null);assert.doesNotMatch(B.showroomPreviewHtml('paint'),/data:image\/png;base64,EXTERIOR/);
 });
+
+test('Modern SKU image handoff keeps unresolved defaults and candidate products separate from confirmed room applications',async()=>{
+ const {skuImageRegister}=await import('./team-b-sku-image-register.mjs');const r=skuImageRegister();
+ assert.equal(r.fixture.styleId,'modern');assert.equal(r.fixture.testOnly,true);assert.equal(r.fixture.designRevision,'7BADC039-9AD609B4-AI4-RH3');
+ const roomIds=new Set(r.fixture.rooms.map(x=>x.id)),productIds=new Set(r.products.map(x=>x.productId));
+ assert.ok(r.applications.length>0);assert.ok(r.furniture.length>0);assert.equal(r.summary.confirmedApplications,0);
+ for(const row of r.applications){assert.equal(row.commercialAccepted,false);assert.equal(row.productId,null);assert.equal(row.quantity,null);assert.ok(!row.roomId||roomIds.has(row.roomId));assert.ok(row.candidateProductIds.every(id=>productIds.has(id)));assert.ok(row.missing.includes('confirmed-role-product'));}
+ assert.ok(r.products.every(x=>!x.commercialAccepted&&!x.exactSkuPhotoReviewed));assert.ok(r.products.every(x=>!x.displayableSourcePhoto));assert.ok(r.products.some(x=>x.price.amountVnd===null));
+ assert.equal(new Set(r.furniture.map(x=>x.id)).size,r.furniture.length);assert.ok(r.furniture.every(x=>roomIds.has(x.roomId)&&!x.supplierPhotoReviewed));
+});
+
+test('finish comparison is read-only, keeps a supplied sample on its current side and never borrows another room',()=>{
+ const {B,product,binding}=sampleScopeFixture();B.state.ui.step=5;
+ B.state.project.plan.rooms.push({id:'other-room',type:'bed',name:'Other',floor:0,x:6,y:1,w:3,h:4});
+ B.materialSampleForBinding=b=>b?.sample?.mediaId===binding.sample.mediaId?{image:{src:'data:image/jpeg;base64,COMPARISON_TEST'}}:null;
+ binding.sample.sourceReference='<script>bad</script>';const before=JSON.stringify(B.state);let html=B.showroomFinishComparisonHtml('sample-room','floor','oak-floor');
+ assert.equal(JSON.stringify(B.state),before);assert.match(html,/Mẫu đang xem · chưa áp dụng/);assert.match(html,/700 × 1100 mm/);assert.match(html,/Góc vân: 37°/);assert.match(html,/&lt;script&gt;bad&lt;\/script&gt;/);assert.doesNotMatch(html,/<script>/);
+ const sides=html.split('data-finish-comparison-side="candidate"');assert.match(sides[0],/COMPARISON_TEST/);assert.doesNotMatch(sides[1],/COMPARISON_TEST/);
+ assert.doesNotMatch(B.showroomFinishComparisonHtml('other-room','floor','oak-floor'),/COMPARISON_TEST/);
+ product.sku='NEW-SKU';assert.doesNotMatch(B.showroomFinishComparisonHtml('sample-room','floor','oak-floor'),/COMPARISON_TEST/);
+ assert.match(B.showroomFinishComparisonHtml('removed','floor'),/Phòng hoặc bề mặt đã đổi/);
+});
+
+
+test('finish comparison and chosen palette preserve custom colour with its existing material pattern',()=>{
+ const B=make(),room=B.state.project.plan.rooms.find(r=>!['stairs','elevator','balcony'].includes(r.type));
+ B.applyVisualMaterial('floor','oak-floor',room.id);
+ B.state.project.materials.finish.rooms[room.id].floor='#123abc';
+ B.state.ui.sceneFocus='room:'+room.id;B.state.ui.materialView='floor';
+ const before=JSON.stringify(B.state),profile=B.VISUAL_MATERIALS.find(p=>p.id==='oak-floor');
+ const current=B.showroomFinishComparisonHtml(room.id,'floor','ivory-tile').split('data-finish-comparison-side="candidate"')[0];
+ assert.match(current,/--finish-color:#123abc/);assert.match(current,/finish-plank/);assert.match(current,/màu riêng/);
+ assert.match(current,new RegExp(profile.scale.map(n=>Math.round(n*1000)).join(' × ')+' mm'));
+ const chosen=B.showroomChoiceBoardHtml().split('data-picked-finish="floor"')[1].split('data-picked-finish="wall"')[0];
+ assert.match(chosen,/--finish-color:#123abc/);assert.match(chosen,/màu riêng/);
+ assert.equal(JSON.stringify(B.state),before);assert.notEqual(profile.color,'#123abc');
+});
+
+
+test('sample zoom resolves only the active room or explicit exterior, including shared image IDs',()=>{
+ const {B,binding}=sampleScopeFixture();B.materialSampleForBinding=b=>b?.sample?{image:{src:'data:image/jpeg;base64,AAAA'}}:null;
+ B.state.project.plan.rooms.push({id:'second-room',name:'Second room',type:'bed',floor:0,x:6,y:1,w:3,h:4});
+ B.state.ui.sceneFocus='room:second-room';assert.equal(B.materialSampleDetails(binding.sample.mediaId),null);
+ const copied=structuredClone(B.state.project.materials.finish.rooms['sample-room']);
+ copied.catalogMaterials.floor.roomId='second-room';copied.catalogMaterials.floor.sample.sourceReference='Second source';copied.catalogMaterials.floor.sample.realWorldScale=[.2,.3];
+ B.state.project.materials.finish.rooms['second-room']=copied;
+ const before=JSON.stringify(B.state),details=B.materialSampleDetails(binding.sample.mediaId);
+ assert.equal(details.name,'Second room');assert.equal(details.binding.sample.sourceReference,'Second source');assert.deepEqual(plain(details.binding.sample.realWorldScale),[.2,.3]);
+ B.state.ui.sceneFocus='all';assert.equal(B.materialSampleDetails(binding.sample.mediaId),null);
+ B.state.ui.sceneFocus='room:removed';assert.equal(B.materialSampleDetails(binding.sample.mediaId),null);
+ B.state.ui.sceneFocus='room:second-room';assert.equal(JSON.stringify(B.state),before);
+});

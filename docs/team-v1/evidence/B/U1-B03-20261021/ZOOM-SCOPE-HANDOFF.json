@@ -1,0 +1,16 @@
+{
+  "base": "724c5b47a03dc41289221c7724792c273f383390",
+  "task": "U1-B03",
+  "fix": "Sample zoom uses the card's active-scope resolver; shared image IDs retain active room source and physical scale.",
+  "changedSource": [
+    "src/90_product_polish.js"
+  ],
+  "tests": {
+    "failedBeforeFix": true,
+    "passed": 74,
+    "node": "24.19.0",
+    "native": false
+  },
+  "integrationOwner": "A",
+  "commercialComplete": false
+}

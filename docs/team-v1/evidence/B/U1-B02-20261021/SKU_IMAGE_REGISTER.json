@@ -1,0 +1,5691 @@
+{
+  "schemaVersion": 1,
+  "owner": "B",
+  "taskId": "U1-B02",
+  "status": "inventory-ready-assets-pending",
+  "baseCommit": "8a03c900459cb2b4df03fd11ed8846ed2c0d400b",
+  "fixture": {
+    "path": "docs/team-v1/evidence/B/Modern-5x20-V01/project.json",
+    "sha256": "b7bce3dd9a2ff8aaba3a19111848b8734e4a1a1d074b2a6ab6c7361b1989980c",
+    "id": "modern-5x20-2f-v01",
+    "styleId": "modern",
+    "designRevision": "7BADC039-9AD609B4-AI4-RH3",
+    "testOnly": true,
+    "rooms": [
+      {
+        "id": "design-f0-corridor-1",
+        "type": "corridor",
+        "floor": 0,
+        "name": "Sảnh / hành lang T1"
+      },
+      {
+        "id": "design-f0-living-1",
+        "type": "living",
+        "floor": 0,
+        "name": "Phòng khách"
+      },
+      {
+        "id": "design-f0-kitchen-1",
+        "type": "kitchen",
+        "floor": 0,
+        "name": "Bếp + ăn"
+      },
+      {
+        "id": "design-f0-bath-1",
+        "type": "bath",
+        "floor": 0,
+        "name": "WC T1"
+      },
+      {
+        "id": "design-f0-stairs-1",
+        "type": "stairs",
+        "floor": 0,
+        "name": "Cầu thang"
+      },
+      {
+        "id": "design-f1-corridor-1",
+        "type": "corridor",
+        "floor": 1,
+        "name": "Sảnh / hành lang T2"
+      },
+      {
+        "id": "design-f1-bed-1",
+        "type": "bed",
+        "floor": 1,
+        "name": "Phòng ngủ 1"
+      },
+      {
+        "id": "design-f1-bed-2",
+        "type": "bed",
+        "floor": 1,
+        "name": "Phòng ngủ 2"
+      },
+      {
+        "id": "design-f1-bath-1",
+        "type": "bath",
+        "floor": 1,
+        "name": "WC T2"
+      },
+      {
+        "id": "design-f1-stairs-1",
+        "type": "stairs",
+        "floor": 1,
+        "name": "Cầu thang"
+      },
+      {
+        "id": "design-f1-bed-1-released",
+        "type": "balcony",
+        "floor": 1,
+        "name": "Sân thượng"
+      }
+    ]
+  },
+  "summary": {
+    "products": 103,
+    "displayableSourcePhotos": 0,
+    "exactSkuPhotosReviewed": 0,
+    "confirmedApplications": 0,
+    "reviewTargets": 52,
+    "furniture": 27
+  },
+  "limits": [
+    "Candidate IDs are not selections or compatibility approvals.",
+    "Targets are review locations, not A quantity/BOQ applications.",
+    "No supplier image bytes downloaded; source references and existing flags are not licence grants.",
+    "Generic surfaces and customer samples do not certify manufacturer SKU appearance.",
+    "Unknown prices remain null; no quantities or supplier approval inferred."
+  ],
+  "applications": [
+    {
+      "roleId": "roof",
+      "category": "waterproof",
+      "scope": "exterior",
+      "roomId": null,
+      "floor": null,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": null,
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "catalog-1724516b11a1f613",
+        "catalog-643e5858e405f4c6",
+        "catalog-85a7199f5f49fa28",
+        "catalog-b6d5eb5df9995d4d",
+        "catalog-e3a8ff6651e33127",
+        "catalog-b85e1fedaa18bb3b",
+        "catalog-50e8b4cebeb4c425"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "facade",
+      "category": "paint",
+      "scope": "exterior",
+      "roomId": null,
+      "floor": null,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-PAINT",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": null,
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-e0560609bef3a144",
+        "source-0363a48156c9288b",
+        "source-ab7e281bc8724535",
+        "source-b72b3a0e4872ac61",
+        "source-899a98168adc8bf8",
+        "source-d36418537df75a65",
+        "source-56d1a0821fa5f2f8",
+        "reference-dulux-e016m-1l",
+        "reference-dulux-e016m-5l",
+        "reference-dulux-e016m-15l"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "openings",
+      "category": "door",
+      "scope": "room",
+      "roomId": "design-f0-corridor-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-DOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": null,
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-5c96ef125766644c",
+        "source-39b75c10f8cf604f",
+        "source-7c9a512a2f661120",
+        "catalog-0b14d15994793c5b",
+        "catalog-e1faaa2ccb9bdc45",
+        "catalog-2d49230b4873d78d"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "openings",
+      "category": "door",
+      "scope": "room",
+      "roomId": "design-f0-living-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-DOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": null,
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-5c96ef125766644c",
+        "source-39b75c10f8cf604f",
+        "source-7c9a512a2f661120",
+        "catalog-0b14d15994793c5b",
+        "catalog-e1faaa2ccb9bdc45",
+        "catalog-2d49230b4873d78d"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "openings",
+      "category": "door",
+      "scope": "room",
+      "roomId": "design-f0-kitchen-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-DOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": null,
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-5c96ef125766644c",
+        "source-39b75c10f8cf604f",
+        "source-7c9a512a2f661120",
+        "catalog-0b14d15994793c5b",
+        "catalog-e1faaa2ccb9bdc45",
+        "catalog-2d49230b4873d78d"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "openings",
+      "category": "door",
+      "scope": "room",
+      "roomId": "design-f0-bath-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-DOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": null,
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-5c96ef125766644c",
+        "source-39b75c10f8cf604f",
+        "source-7c9a512a2f661120",
+        "catalog-0b14d15994793c5b",
+        "catalog-e1faaa2ccb9bdc45",
+        "catalog-2d49230b4873d78d"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "openings",
+      "category": "door",
+      "scope": "room",
+      "roomId": "design-f1-corridor-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-DOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": null,
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-5c96ef125766644c",
+        "source-39b75c10f8cf604f",
+        "source-7c9a512a2f661120",
+        "catalog-0b14d15994793c5b",
+        "catalog-e1faaa2ccb9bdc45",
+        "catalog-2d49230b4873d78d"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "openings",
+      "category": "door",
+      "scope": "room",
+      "roomId": "design-f1-bed-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-DOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": null,
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-5c96ef125766644c",
+        "source-39b75c10f8cf604f",
+        "source-7c9a512a2f661120",
+        "catalog-0b14d15994793c5b",
+        "catalog-e1faaa2ccb9bdc45",
+        "catalog-2d49230b4873d78d"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "openings",
+      "category": "door",
+      "scope": "room",
+      "roomId": "design-f1-bed-2",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-DOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": null,
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-5c96ef125766644c",
+        "source-39b75c10f8cf604f",
+        "source-7c9a512a2f661120",
+        "catalog-0b14d15994793c5b",
+        "catalog-e1faaa2ccb9bdc45",
+        "catalog-2d49230b4873d78d"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "openings",
+      "category": "door",
+      "scope": "room",
+      "roomId": "design-f1-bath-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-DOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": null,
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-5c96ef125766644c",
+        "source-39b75c10f8cf604f",
+        "source-7c9a512a2f661120",
+        "catalog-0b14d15994793c5b",
+        "catalog-e1faaa2ccb9bdc45",
+        "catalog-2d49230b4873d78d"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "floor",
+      "category": "floor",
+      "scope": "room",
+      "roomId": "design-f0-corridor-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-FLOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "grey-concrete",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "official-6060tamdao006",
+        "official-6060dongvan001",
+        "official-6060pharaon001",
+        "official-6060moment010",
+        "source-9b9354c3349dd314",
+        "source-517ddd688547c2e6",
+        "source-27d48c0ea4ff91f3",
+        "source-e789f9302ed270c5",
+        "source-ad4479be887adb40",
+        "source-079259d2c67b1d92",
+        "source-c0ebd3534344b375",
+        "source-3f67cb4578980636",
+        "source-a358ed703fb1454a",
+        "source-d67e4139eddbee53",
+        "source-e6975d525b225dc3",
+        "source-0bfd1f9ca8775c9f",
+        "supplier-bighouse-6060classic007",
+        "supplier-bighouse-6060tamdao003",
+        "supplier-bighouse-6060tamdao004",
+        "supplier-bighouse-6060thachanh002",
+        "supplier-bighouse-6060tamdao005",
+        "supplier-bighouse-6060truongson006",
+        "supplier-bighouse-6060mekong003",
+        "supplier-bighouse-6060haivan003-fp"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "floor",
+      "category": "floor",
+      "scope": "room",
+      "roomId": "design-f0-living-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-FLOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "grey-concrete",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "official-6060tamdao006",
+        "official-6060dongvan001",
+        "official-6060pharaon001",
+        "official-6060moment010",
+        "source-9b9354c3349dd314",
+        "source-517ddd688547c2e6",
+        "source-27d48c0ea4ff91f3",
+        "source-e789f9302ed270c5",
+        "source-ad4479be887adb40",
+        "source-079259d2c67b1d92",
+        "source-c0ebd3534344b375",
+        "source-3f67cb4578980636",
+        "source-a358ed703fb1454a",
+        "source-d67e4139eddbee53",
+        "source-e6975d525b225dc3",
+        "source-0bfd1f9ca8775c9f",
+        "supplier-bighouse-6060classic007",
+        "supplier-bighouse-6060tamdao003",
+        "supplier-bighouse-6060tamdao004",
+        "supplier-bighouse-6060thachanh002",
+        "supplier-bighouse-6060tamdao005",
+        "supplier-bighouse-6060truongson006",
+        "supplier-bighouse-6060mekong003",
+        "supplier-bighouse-6060haivan003-fp"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "floor",
+      "category": "floor",
+      "scope": "room",
+      "roomId": "design-f0-kitchen-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-FLOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "grey-concrete",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "official-6060tamdao006",
+        "official-6060dongvan001",
+        "official-6060pharaon001",
+        "official-6060moment010",
+        "source-9b9354c3349dd314",
+        "source-517ddd688547c2e6",
+        "source-27d48c0ea4ff91f3",
+        "source-e789f9302ed270c5",
+        "source-ad4479be887adb40",
+        "source-079259d2c67b1d92",
+        "source-c0ebd3534344b375",
+        "source-3f67cb4578980636",
+        "source-a358ed703fb1454a",
+        "source-d67e4139eddbee53",
+        "source-e6975d525b225dc3",
+        "source-0bfd1f9ca8775c9f",
+        "supplier-bighouse-6060classic007",
+        "supplier-bighouse-6060tamdao003",
+        "supplier-bighouse-6060tamdao004",
+        "supplier-bighouse-6060thachanh002",
+        "supplier-bighouse-6060tamdao005",
+        "supplier-bighouse-6060truongson006",
+        "supplier-bighouse-6060mekong003",
+        "supplier-bighouse-6060haivan003-fp"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "floor",
+      "category": "floor",
+      "scope": "room",
+      "roomId": "design-f1-corridor-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-FLOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "grey-concrete",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "official-6060tamdao006",
+        "official-6060dongvan001",
+        "official-6060pharaon001",
+        "official-6060moment010",
+        "source-9b9354c3349dd314",
+        "source-517ddd688547c2e6",
+        "source-27d48c0ea4ff91f3",
+        "source-e789f9302ed270c5",
+        "source-ad4479be887adb40",
+        "source-079259d2c67b1d92",
+        "source-c0ebd3534344b375",
+        "source-3f67cb4578980636",
+        "source-a358ed703fb1454a",
+        "source-d67e4139eddbee53",
+        "source-e6975d525b225dc3",
+        "source-0bfd1f9ca8775c9f",
+        "supplier-bighouse-6060classic007",
+        "supplier-bighouse-6060tamdao003",
+        "supplier-bighouse-6060tamdao004",
+        "supplier-bighouse-6060thachanh002",
+        "supplier-bighouse-6060tamdao005",
+        "supplier-bighouse-6060truongson006",
+        "supplier-bighouse-6060mekong003",
+        "supplier-bighouse-6060haivan003-fp"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "floor",
+      "category": "floor",
+      "scope": "room",
+      "roomId": "design-f1-bed-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-FLOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "grey-concrete",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "official-6060tamdao006",
+        "official-6060dongvan001",
+        "official-6060pharaon001",
+        "official-6060moment010",
+        "source-9b9354c3349dd314",
+        "source-517ddd688547c2e6",
+        "source-27d48c0ea4ff91f3",
+        "source-e789f9302ed270c5",
+        "source-ad4479be887adb40",
+        "source-079259d2c67b1d92",
+        "source-c0ebd3534344b375",
+        "source-3f67cb4578980636",
+        "source-a358ed703fb1454a",
+        "source-d67e4139eddbee53",
+        "source-e6975d525b225dc3",
+        "source-0bfd1f9ca8775c9f",
+        "supplier-bighouse-6060classic007",
+        "supplier-bighouse-6060tamdao003",
+        "supplier-bighouse-6060tamdao004",
+        "supplier-bighouse-6060thachanh002",
+        "supplier-bighouse-6060tamdao005",
+        "supplier-bighouse-6060truongson006",
+        "supplier-bighouse-6060mekong003",
+        "supplier-bighouse-6060haivan003-fp"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "floor",
+      "category": "floor",
+      "scope": "room",
+      "roomId": "design-f1-bed-2",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-FLOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "grey-concrete",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "official-6060tamdao006",
+        "official-6060dongvan001",
+        "official-6060pharaon001",
+        "official-6060moment010",
+        "source-9b9354c3349dd314",
+        "source-517ddd688547c2e6",
+        "source-27d48c0ea4ff91f3",
+        "source-e789f9302ed270c5",
+        "source-ad4479be887adb40",
+        "source-079259d2c67b1d92",
+        "source-c0ebd3534344b375",
+        "source-3f67cb4578980636",
+        "source-a358ed703fb1454a",
+        "source-d67e4139eddbee53",
+        "source-e6975d525b225dc3",
+        "source-0bfd1f9ca8775c9f",
+        "supplier-bighouse-6060classic007",
+        "supplier-bighouse-6060tamdao003",
+        "supplier-bighouse-6060tamdao004",
+        "supplier-bighouse-6060thachanh002",
+        "supplier-bighouse-6060tamdao005",
+        "supplier-bighouse-6060truongson006",
+        "supplier-bighouse-6060mekong003",
+        "supplier-bighouse-6060haivan003-fp"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "wall",
+      "category": "paint",
+      "scope": "room",
+      "roomId": "design-f0-corridor-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-PAINT",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-e0560609bef3a144",
+        "source-0363a48156c9288b",
+        "source-ab7e281bc8724535",
+        "source-b72b3a0e4872ac61",
+        "source-899a98168adc8bf8",
+        "source-d36418537df75a65",
+        "source-56d1a0821fa5f2f8",
+        "reference-dulux-e016m-1l",
+        "reference-dulux-e016m-5l",
+        "reference-dulux-e016m-15l"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "wall",
+      "category": "paint",
+      "scope": "room",
+      "roomId": "design-f0-living-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-PAINT",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-e0560609bef3a144",
+        "source-0363a48156c9288b",
+        "source-ab7e281bc8724535",
+        "source-b72b3a0e4872ac61",
+        "source-899a98168adc8bf8",
+        "source-d36418537df75a65",
+        "source-56d1a0821fa5f2f8",
+        "reference-dulux-e016m-1l",
+        "reference-dulux-e016m-5l",
+        "reference-dulux-e016m-15l"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "wall",
+      "category": "paint",
+      "scope": "room",
+      "roomId": "design-f0-kitchen-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-PAINT",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-e0560609bef3a144",
+        "source-0363a48156c9288b",
+        "source-ab7e281bc8724535",
+        "source-b72b3a0e4872ac61",
+        "source-899a98168adc8bf8",
+        "source-d36418537df75a65",
+        "source-56d1a0821fa5f2f8",
+        "reference-dulux-e016m-1l",
+        "reference-dulux-e016m-5l",
+        "reference-dulux-e016m-15l"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "wall",
+      "category": "paint",
+      "scope": "room",
+      "roomId": "design-f0-bath-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-PAINT",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-e0560609bef3a144",
+        "source-0363a48156c9288b",
+        "source-ab7e281bc8724535",
+        "source-b72b3a0e4872ac61",
+        "source-899a98168adc8bf8",
+        "source-d36418537df75a65",
+        "source-56d1a0821fa5f2f8",
+        "reference-dulux-e016m-1l",
+        "reference-dulux-e016m-5l",
+        "reference-dulux-e016m-15l"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "wall",
+      "category": "paint",
+      "scope": "room",
+      "roomId": "design-f1-corridor-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-PAINT",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-e0560609bef3a144",
+        "source-0363a48156c9288b",
+        "source-ab7e281bc8724535",
+        "source-b72b3a0e4872ac61",
+        "source-899a98168adc8bf8",
+        "source-d36418537df75a65",
+        "source-56d1a0821fa5f2f8",
+        "reference-dulux-e016m-1l",
+        "reference-dulux-e016m-5l",
+        "reference-dulux-e016m-15l"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "wall",
+      "category": "paint",
+      "scope": "room",
+      "roomId": "design-f1-bed-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-PAINT",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-e0560609bef3a144",
+        "source-0363a48156c9288b",
+        "source-ab7e281bc8724535",
+        "source-b72b3a0e4872ac61",
+        "source-899a98168adc8bf8",
+        "source-d36418537df75a65",
+        "source-56d1a0821fa5f2f8",
+        "reference-dulux-e016m-1l",
+        "reference-dulux-e016m-5l",
+        "reference-dulux-e016m-15l"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "wall",
+      "category": "paint",
+      "scope": "room",
+      "roomId": "design-f1-bed-2",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-PAINT",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-e0560609bef3a144",
+        "source-0363a48156c9288b",
+        "source-ab7e281bc8724535",
+        "source-b72b3a0e4872ac61",
+        "source-899a98168adc8bf8",
+        "source-d36418537df75a65",
+        "source-56d1a0821fa5f2f8",
+        "reference-dulux-e016m-1l",
+        "reference-dulux-e016m-5l",
+        "reference-dulux-e016m-15l"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "wall",
+      "category": "paint",
+      "scope": "room",
+      "roomId": "design-f1-bath-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-PAINT",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "source-e0560609bef3a144",
+        "source-0363a48156c9288b",
+        "source-ab7e281bc8724535",
+        "source-b72b3a0e4872ac61",
+        "source-899a98168adc8bf8",
+        "source-d36418537df75a65",
+        "source-56d1a0821fa5f2f8",
+        "reference-dulux-e016m-1l",
+        "reference-dulux-e016m-5l",
+        "reference-dulux-e016m-15l"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "ceiling",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f0-corridor-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "ceiling",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f0-living-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "ceiling",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f0-kitchen-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "ceiling",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f0-bath-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "ceiling",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f1-corridor-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "ceiling",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f1-bed-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "ceiling",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f1-bed-2",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "ceiling",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f1-bath-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "ivory-paint",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "joinery",
+      "category": "cabinetry",
+      "scope": "room",
+      "roomId": "design-f0-corridor-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "dark-walnut",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "catalog-849ccb64ced0b16b",
+        "catalog-0cb882a11f614d0e",
+        "catalog-33f649b8f977fdad",
+        "catalog-ecdb54ba1079ddc3",
+        "catalog-8a463cd5e996a339",
+        "catalog-d9c762036272fb1c",
+        "catalog-c7f3933d34505ad3",
+        "catalog-454080ca365b9157",
+        "catalog-bfc5458a219e4930",
+        "catalog-986f272734a44673",
+        "catalog-9a0c7cb83853e33b",
+        "catalog-b82e87d5f1acd8d6",
+        "catalog-ef82a2f9f36e4523",
+        "catalog-a9182b5db160be58",
+        "catalog-56f303a963d3f2c7",
+        "catalog-16b2c4e4be4ca8b7",
+        "catalog-0da14196c0fa09ed"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "joinery",
+      "category": "cabinetry",
+      "scope": "room",
+      "roomId": "design-f0-living-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "dark-walnut",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "catalog-849ccb64ced0b16b",
+        "catalog-0cb882a11f614d0e",
+        "catalog-33f649b8f977fdad",
+        "catalog-ecdb54ba1079ddc3",
+        "catalog-8a463cd5e996a339",
+        "catalog-d9c762036272fb1c",
+        "catalog-c7f3933d34505ad3",
+        "catalog-454080ca365b9157",
+        "catalog-bfc5458a219e4930",
+        "catalog-986f272734a44673",
+        "catalog-9a0c7cb83853e33b",
+        "catalog-b82e87d5f1acd8d6",
+        "catalog-ef82a2f9f36e4523",
+        "catalog-a9182b5db160be58",
+        "catalog-56f303a963d3f2c7",
+        "catalog-16b2c4e4be4ca8b7",
+        "catalog-0da14196c0fa09ed"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "joinery",
+      "category": "cabinetry",
+      "scope": "room",
+      "roomId": "design-f0-kitchen-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "dark-walnut",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "catalog-849ccb64ced0b16b",
+        "catalog-0cb882a11f614d0e",
+        "catalog-33f649b8f977fdad",
+        "catalog-ecdb54ba1079ddc3",
+        "catalog-8a463cd5e996a339",
+        "catalog-d9c762036272fb1c",
+        "catalog-c7f3933d34505ad3",
+        "catalog-454080ca365b9157",
+        "catalog-bfc5458a219e4930",
+        "catalog-986f272734a44673",
+        "catalog-9a0c7cb83853e33b",
+        "catalog-b82e87d5f1acd8d6",
+        "catalog-ef82a2f9f36e4523",
+        "catalog-a9182b5db160be58",
+        "catalog-56f303a963d3f2c7",
+        "catalog-16b2c4e4be4ca8b7",
+        "catalog-0da14196c0fa09ed"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "joinery",
+      "category": "cabinetry",
+      "scope": "room",
+      "roomId": "design-f0-bath-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "dark-walnut",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "catalog-849ccb64ced0b16b",
+        "catalog-0cb882a11f614d0e",
+        "catalog-33f649b8f977fdad",
+        "catalog-ecdb54ba1079ddc3",
+        "catalog-8a463cd5e996a339",
+        "catalog-d9c762036272fb1c",
+        "catalog-c7f3933d34505ad3",
+        "catalog-454080ca365b9157",
+        "catalog-bfc5458a219e4930",
+        "catalog-986f272734a44673",
+        "catalog-9a0c7cb83853e33b",
+        "catalog-b82e87d5f1acd8d6",
+        "catalog-ef82a2f9f36e4523",
+        "catalog-a9182b5db160be58",
+        "catalog-56f303a963d3f2c7",
+        "catalog-16b2c4e4be4ca8b7",
+        "catalog-0da14196c0fa09ed"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "joinery",
+      "category": "cabinetry",
+      "scope": "room",
+      "roomId": "design-f1-corridor-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "dark-walnut",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "catalog-849ccb64ced0b16b",
+        "catalog-0cb882a11f614d0e",
+        "catalog-33f649b8f977fdad",
+        "catalog-ecdb54ba1079ddc3",
+        "catalog-8a463cd5e996a339",
+        "catalog-d9c762036272fb1c",
+        "catalog-c7f3933d34505ad3",
+        "catalog-454080ca365b9157",
+        "catalog-bfc5458a219e4930",
+        "catalog-986f272734a44673",
+        "catalog-9a0c7cb83853e33b",
+        "catalog-b82e87d5f1acd8d6",
+        "catalog-ef82a2f9f36e4523",
+        "catalog-a9182b5db160be58",
+        "catalog-56f303a963d3f2c7",
+        "catalog-16b2c4e4be4ca8b7",
+        "catalog-0da14196c0fa09ed"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "joinery",
+      "category": "cabinetry",
+      "scope": "room",
+      "roomId": "design-f1-bed-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "dark-walnut",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "catalog-849ccb64ced0b16b",
+        "catalog-0cb882a11f614d0e",
+        "catalog-33f649b8f977fdad",
+        "catalog-ecdb54ba1079ddc3",
+        "catalog-8a463cd5e996a339",
+        "catalog-d9c762036272fb1c",
+        "catalog-c7f3933d34505ad3",
+        "catalog-454080ca365b9157",
+        "catalog-bfc5458a219e4930",
+        "catalog-986f272734a44673",
+        "catalog-9a0c7cb83853e33b",
+        "catalog-b82e87d5f1acd8d6",
+        "catalog-ef82a2f9f36e4523",
+        "catalog-a9182b5db160be58",
+        "catalog-56f303a963d3f2c7",
+        "catalog-16b2c4e4be4ca8b7",
+        "catalog-0da14196c0fa09ed"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "joinery",
+      "category": "cabinetry",
+      "scope": "room",
+      "roomId": "design-f1-bed-2",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "dark-walnut",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "catalog-849ccb64ced0b16b",
+        "catalog-0cb882a11f614d0e",
+        "catalog-33f649b8f977fdad",
+        "catalog-ecdb54ba1079ddc3",
+        "catalog-8a463cd5e996a339",
+        "catalog-d9c762036272fb1c",
+        "catalog-c7f3933d34505ad3",
+        "catalog-454080ca365b9157",
+        "catalog-bfc5458a219e4930",
+        "catalog-986f272734a44673",
+        "catalog-9a0c7cb83853e33b",
+        "catalog-b82e87d5f1acd8d6",
+        "catalog-ef82a2f9f36e4523",
+        "catalog-a9182b5db160be58",
+        "catalog-56f303a963d3f2c7",
+        "catalog-16b2c4e4be4ca8b7",
+        "catalog-0da14196c0fa09ed"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "joinery",
+      "category": "cabinetry",
+      "scope": "room",
+      "roomId": "design-f1-bath-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "dark-walnut",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "catalog-849ccb64ced0b16b",
+        "catalog-0cb882a11f614d0e",
+        "catalog-33f649b8f977fdad",
+        "catalog-ecdb54ba1079ddc3",
+        "catalog-8a463cd5e996a339",
+        "catalog-d9c762036272fb1c",
+        "catalog-c7f3933d34505ad3",
+        "catalog-454080ca365b9157",
+        "catalog-bfc5458a219e4930",
+        "catalog-986f272734a44673",
+        "catalog-9a0c7cb83853e33b",
+        "catalog-b82e87d5f1acd8d6",
+        "catalog-ef82a2f9f36e4523",
+        "catalog-a9182b5db160be58",
+        "catalog-56f303a963d3f2c7",
+        "catalog-16b2c4e4be4ca8b7",
+        "catalog-0da14196c0fa09ed"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "upholstery",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f0-corridor-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "natural-linen",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "upholstery",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f0-living-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "natural-linen",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "upholstery",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f0-kitchen-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "natural-linen",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "upholstery",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f0-bath-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "natural-linen",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "upholstery",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f1-corridor-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "natural-linen",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "upholstery",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f1-bed-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "natural-linen",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "upholstery",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f1-bed-2",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "natural-linen",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "upholstery",
+      "category": null,
+      "scope": "room",
+      "roomId": "design-f1-bath-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": null,
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "natural-linen",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "wetArea",
+      "category": "floor",
+      "scope": "room",
+      "roomId": "design-f0-bath-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-FLOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "sand-travertine",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "official-6060tamdao006",
+        "official-6060dongvan001",
+        "official-6060pharaon001",
+        "official-6060moment010",
+        "source-9b9354c3349dd314",
+        "source-517ddd688547c2e6",
+        "source-27d48c0ea4ff91f3",
+        "source-e789f9302ed270c5",
+        "source-ad4479be887adb40",
+        "source-079259d2c67b1d92",
+        "source-c0ebd3534344b375",
+        "source-3f67cb4578980636",
+        "source-a358ed703fb1454a",
+        "source-d67e4139eddbee53",
+        "source-e6975d525b225dc3",
+        "source-0bfd1f9ca8775c9f",
+        "supplier-bighouse-6060classic007",
+        "supplier-bighouse-6060tamdao003",
+        "supplier-bighouse-6060tamdao004",
+        "supplier-bighouse-6060thachanh002",
+        "supplier-bighouse-6060tamdao005",
+        "supplier-bighouse-6060truongson006",
+        "supplier-bighouse-6060mekong003",
+        "supplier-bighouse-6060haivan003-fp"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "wetArea",
+      "category": "floor",
+      "scope": "room",
+      "roomId": "design-f1-bath-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-FLOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "sand-travertine",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "official-6060tamdao006",
+        "official-6060dongvan001",
+        "official-6060pharaon001",
+        "official-6060moment010",
+        "source-9b9354c3349dd314",
+        "source-517ddd688547c2e6",
+        "source-27d48c0ea4ff91f3",
+        "source-e789f9302ed270c5",
+        "source-ad4479be887adb40",
+        "source-079259d2c67b1d92",
+        "source-c0ebd3534344b375",
+        "source-3f67cb4578980636",
+        "source-a358ed703fb1454a",
+        "source-d67e4139eddbee53",
+        "source-e6975d525b225dc3",
+        "source-0bfd1f9ca8775c9f",
+        "supplier-bighouse-6060classic007",
+        "supplier-bighouse-6060tamdao003",
+        "supplier-bighouse-6060tamdao004",
+        "supplier-bighouse-6060thachanh002",
+        "supplier-bighouse-6060tamdao005",
+        "supplier-bighouse-6060truongson006",
+        "supplier-bighouse-6060mekong003",
+        "supplier-bighouse-6060haivan003-fp"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "stairs",
+      "category": "floor",
+      "scope": "room",
+      "roomId": "design-f0-stairs-1",
+      "floor": 0,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-FLOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "grey-concrete",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "official-6060tamdao006",
+        "official-6060dongvan001",
+        "official-6060pharaon001",
+        "official-6060moment010",
+        "source-9b9354c3349dd314",
+        "source-517ddd688547c2e6",
+        "source-27d48c0ea4ff91f3",
+        "source-e789f9302ed270c5",
+        "source-ad4479be887adb40",
+        "source-079259d2c67b1d92",
+        "source-c0ebd3534344b375",
+        "source-3f67cb4578980636",
+        "source-a358ed703fb1454a",
+        "source-d67e4139eddbee53",
+        "source-e6975d525b225dc3",
+        "source-0bfd1f9ca8775c9f",
+        "supplier-bighouse-6060classic007",
+        "supplier-bighouse-6060tamdao003",
+        "supplier-bighouse-6060tamdao004",
+        "supplier-bighouse-6060thachanh002",
+        "supplier-bighouse-6060tamdao005",
+        "supplier-bighouse-6060truongson006",
+        "supplier-bighouse-6060mekong003",
+        "supplier-bighouse-6060haivan003-fp"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    },
+    {
+      "roleId": "stairs",
+      "category": "floor",
+      "scope": "room",
+      "roomId": "design-f1-stairs-1",
+      "floor": 1,
+      "targetStatus": "review-target-not-confirmed-application",
+      "categoryChoiceId": "UNCONFIRMED-FLOOR",
+      "productId": null,
+      "sku": null,
+      "specification": null,
+      "quantityUnit": null,
+      "visualProfileId": "grey-concrete",
+      "imageKind": "generic-simulation",
+      "sample": null,
+      "sourcePhoto": null,
+      "candidateProductIds": [
+        "official-6060tamdao006",
+        "official-6060dongvan001",
+        "official-6060pharaon001",
+        "official-6060moment010",
+        "source-9b9354c3349dd314",
+        "source-517ddd688547c2e6",
+        "source-27d48c0ea4ff91f3",
+        "source-e789f9302ed270c5",
+        "source-ad4479be887adb40",
+        "source-079259d2c67b1d92",
+        "source-c0ebd3534344b375",
+        "source-3f67cb4578980636",
+        "source-a358ed703fb1454a",
+        "source-d67e4139eddbee53",
+        "source-e6975d525b225dc3",
+        "source-0bfd1f9ca8775c9f",
+        "supplier-bighouse-6060classic007",
+        "supplier-bighouse-6060tamdao003",
+        "supplier-bighouse-6060tamdao004",
+        "supplier-bighouse-6060thachanh002",
+        "supplier-bighouse-6060tamdao005",
+        "supplier-bighouse-6060truongson006",
+        "supplier-bighouse-6060mekong003",
+        "supplier-bighouse-6060haivan003-fp"
+      ],
+      "missing": [
+        "confirmed-role-product",
+        "sku",
+        "eligible-product-photo",
+        "exact-sku-photo-review",
+        "customer-product-approval"
+      ],
+      "commercialAccepted": false,
+      "quantity": null,
+      "quantityOwner": "A"
+    }
+  ],
+  "furniture": [
+    {
+      "roomId": "design-f0-living-1",
+      "floor": 0,
+      "id": "furniture:design-f0-living-1:loungeDesignSofa:0",
+      "modelId": "loungeDesignSofa",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-living-1",
+      "floor": 0,
+      "id": "furniture:design-f0-living-1:tableCoffee:0",
+      "modelId": "tableCoffee",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-living-1",
+      "floor": 0,
+      "id": "furniture:design-f0-living-1:cabinetTelevision:0",
+      "modelId": "cabinetTelevision",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-living-1",
+      "floor": 0,
+      "id": "furniture:design-f0-living-1:televisionModern:0",
+      "modelId": "televisionModern",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-living-1",
+      "floor": 0,
+      "id": "furniture:design-f0-living-1:sideTable:0",
+      "modelId": "sideTable",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-living-1",
+      "floor": 0,
+      "id": "furniture:design-f0-living-1:floorLamp:0",
+      "modelId": "floorLamp",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-living-1",
+      "floor": 0,
+      "id": "furniture:design-f0-living-1:loungeChair:0",
+      "modelId": "loungeChair",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-living-1",
+      "floor": 0,
+      "id": "furniture:design-f0-living-1:pottedPlant:0",
+      "modelId": "pottedPlant",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-kitchen-1",
+      "floor": 0,
+      "id": "furniture:design-f0-kitchen-1:kitchenSink:0",
+      "modelId": "kitchenSink",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-kitchen-1",
+      "floor": 0,
+      "id": "furniture:design-f0-kitchen-1:kitchenStove:0",
+      "modelId": "kitchenStove",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-kitchen-1",
+      "floor": 0,
+      "id": "furniture:design-f0-kitchen-1:kitchenFridge:0",
+      "modelId": "kitchenFridge",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-kitchen-1",
+      "floor": 0,
+      "id": "furniture:design-f0-kitchen-1:table:0",
+      "modelId": "table",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-kitchen-1",
+      "floor": 0,
+      "id": "furniture:design-f0-kitchen-1:chair:0",
+      "modelId": "chair",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-kitchen-1",
+      "floor": 0,
+      "id": "furniture:design-f0-kitchen-1:chair:1",
+      "modelId": "chair",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-kitchen-1",
+      "floor": 0,
+      "id": "furniture:design-f0-kitchen-1:chair:2",
+      "modelId": "chair",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-bath-1",
+      "floor": 0,
+      "id": "furniture:design-f0-bath-1:toilet:0",
+      "modelId": "toilet",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-bath-1",
+      "floor": 0,
+      "id": "furniture:design-f0-bath-1:shower:0",
+      "modelId": "shower",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f0-bath-1",
+      "floor": 0,
+      "id": "furniture:design-f0-bath-1:bathroomSink:0",
+      "modelId": "bathroomSink",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f1-bed-1",
+      "floor": 1,
+      "id": "furniture:design-f1-bed-1:bedDouble:0",
+      "modelId": "bedDouble",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f1-bed-1",
+      "floor": 1,
+      "id": "furniture:design-f1-bed-1:cabinetBed:0",
+      "modelId": "cabinetBed",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f1-bed-1",
+      "floor": 1,
+      "id": "furniture:design-f1-bed-1:bookcaseClosedWide:0",
+      "modelId": "bookcaseClosedWide",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f1-bed-2",
+      "floor": 1,
+      "id": "furniture:design-f1-bed-2:bedDouble:0",
+      "modelId": "bedDouble",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f1-bed-2",
+      "floor": 1,
+      "id": "furniture:design-f1-bed-2:cabinetBed:0",
+      "modelId": "cabinetBed",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f1-bed-2",
+      "floor": 1,
+      "id": "furniture:design-f1-bed-2:bookcaseClosedWide:0",
+      "modelId": "bookcaseClosedWide",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f1-bath-1",
+      "floor": 1,
+      "id": "furniture:design-f1-bath-1:toilet:0",
+      "modelId": "toilet",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f1-bath-1",
+      "floor": 1,
+      "id": "furniture:design-f1-bath-1:shower:0",
+      "modelId": "shower",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    },
+    {
+      "roomId": "design-f1-bath-1",
+      "floor": 1,
+      "id": "furniture:design-f1-bath-1:bathroomSink:0",
+      "modelId": "bathroomSink",
+      "sku": null,
+      "materialBindings": [],
+      "supplierPhotoReviewed": false,
+      "commercialAccepted": false
+    }
+  ],
+  "products": [
+    {
+      "productId": "source-c616df3df9e574cd",
+      "category": "cement",
+      "brand": "Đồng Tâm",
+      "sku": null,
+      "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "theo quy cách",
+      "productSource": "https://dongtam.com.vn/san-pham/keo-dan-gach-dong-tam/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2026/01/Bai-1_01-1.png",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-e0560609bef3a144",
+      "category": "paint",
+      "brand": "Đồng Tâm",
+      "sku": null,
+      "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "theo quy cách",
+      "productSource": "https://dongtam.com.vn/san-pham/bot-tret-tuong-assure/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2020/11/asure_interior.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-e9db7521931006c6",
+      "category": "cement",
+      "brand": "Đồng Tâm",
+      "sku": null,
+      "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "theo quy cách",
+      "productSource": "https://dongtam.com.vn/san-pham/chat-chong-tham-aquaseal/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2020/09/aquaseal_v.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-8499111b0ddae268",
+      "category": "cement",
+      "brand": "Đồng Tâm",
+      "sku": null,
+      "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "theo quy cách",
+      "productSource": "https://dongtam.com.vn/san-pham/bot-cha-ron-groutex-pro/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2020/09/groutex_1kg.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-c321c57e97ac1d6c",
+      "category": "roof",
+      "brand": "Đồng Tâm",
+      "sku": null,
+      "specification": "viên · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "viên",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-ngoi-trang-men-titan/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2024/01/Banner-Ngoi-Titan-Dongtam-Group-1024x484.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-9ee9eff5c2991450",
+      "category": "roof",
+      "brand": "Đồng Tâm",
+      "sku": null,
+      "specification": "viên · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "viên",
+      "productSource": "https://dongtam.com.vn/san-pham/bo-suu-tap-ngoi-phang-trang-men-alpha/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2025/06/POST_NGOIALPHA_1080X1080-01-1024x1024.png",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "official-6060tamdao006",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060TAMDAO006",
+      "specification": "6060TAMDAO006 · m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-6060tamdao/6060tamdao006/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2021/06/6060TAMDAO006_CN-845x487.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "official-6060dongvan001",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060DONGVAN001",
+      "specification": "6060DONGVAN001 · m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-dong-van/6060dongvan001/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2023/07/6060DONGVAN0014-845x487.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "official-6060pharaon001",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060PHARAON001",
+      "specification": "6060PHARAON001 · m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-pharaon/6060pharaon001/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2023/08/6060PHARAON0013-845x487.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "official-6060moment010",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060MOMENT010",
+      "specification": "6060MOMENT010 · m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-moment/6060moment010/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2021/03/6060MOMENT010-845x487.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-9b9354c3349dd314",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060DB006",
+      "specification": "6060DB006 · m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-db-nano/6060db006-nano/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060-8080DB06-NANOa.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-517ddd688547c2e6",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "8080DB006",
+      "specification": "8080DB006 · m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-db-nano/8080db006-nano/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060-8080DB06-NANOa.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-27d48c0ea4ff91f3",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060DB014",
+      "specification": "6060DB014 · m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-db-nano/6060db014-nano/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060DB014-NANOa-1024x1024.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-e789f9302ed270c5",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060DB038",
+      "specification": "6060DB038 · m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-db-nano/6060db038-nano/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060-8080DB038-1024x1024.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-ad4479be887adb40",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "8080DB038",
+      "specification": "8080DB038 · m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-db-nano/8080db038-nano/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060-8080DB038-1024x1024.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-079259d2c67b1d92",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "8080DB032",
+      "specification": "8080DB032 · m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-db-nano/8080db032-nano/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060-8080DB032.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-c0ebd3534344b375",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060DB032",
+      "specification": "6060DB032 · m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-db-nano/6060db032-nano-2/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060-8080DB032.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-3f67cb4578980636",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060DB034",
+      "specification": "600 × 600 mm; Porcelain 2 da bóng; loại AA",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-db-nano/6060db034-nano/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060DB034-NANOa-1024x1024.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 333000,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-09"
+      }
+    },
+    {
+      "productId": "source-a358ed703fb1454a",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "8080DB100",
+      "specification": "8080DB100 · m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-db-nano/8080db100-nano/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2021/11/8080DB100-NANOa-1024x1024.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-d67e4139eddbee53",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060MARMOL002",
+      "specification": "600 × 600 mm; Porcelain 2 da bóng; loại AA",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-db-nano/6060marmol002-nano/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060-8080DB032.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 332000,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-09"
+      }
+    },
+    {
+      "productId": "source-e6975d525b225dc3",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060MARMOL005",
+      "specification": "6060MARMOL005 · m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-db-nano/6060marmol005-nano/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060marmol005-nano_2.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-0bfd1f9ca8775c9f",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "8080MARMOL005",
+      "specification": "8080MARMOL005 · m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://dongtam.com.vn/san-pham/bst-db-nano/8080marmol005-nano/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2021/11/8080marmol005-nano-1.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-5c96ef125766644c",
+      "category": "door",
+      "brand": "Eurowindow",
+      "sku": null,
+      "specification": "m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://eurowindow.biz/cua-vach-nhom/cua-so-nhom",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://storage.sudospaces.com/eurowindow/2024/05/cua-so-1-canh-mo-hat.png",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-39b75c10f8cf604f",
+      "category": "door",
+      "brand": "Eurowindow",
+      "sku": null,
+      "specification": "m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://eurowindow.biz/cua-vach-nhom/cua-di-nhom",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://storage.sudospaces.com/eurowindow/2022/05/cuadinhom.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-7c9a512a2f661120",
+      "category": "door",
+      "brand": "Eurowindow",
+      "sku": null,
+      "specification": "m² · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "m²",
+      "productSource": "https://eurowindow.biz/cua-vach-nhom/vach-kinh-nhom",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://storage.sudospaces.com/eurowindow/2021/12/rafael-garcin-isq3m9fpa0g-unsplash.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "official-a60",
+      "category": "lighting",
+      "brand": "Rạng Đông",
+      "sku": "A60",
+      "specification": "A60 · bóng · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "bóng",
+      "productSource": "https://rangdong.com.vn/den-led-bulb-cam-bien-9w-pr2109.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://rangdong.com.vn/uploads/products/den-led/led-bulb/a60-pir-9w/a60-pir-9w-1.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "official-a60n1",
+      "category": "lighting",
+      "brand": "Rạng Đông",
+      "sku": "A60N1",
+      "specification": "A60N1 · bóng · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "bóng",
+      "productSource": "https://rangdong.com.vn/bong-den-led-bulb-tron-9-w-12-vdc-pr2099.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://rangdong.com.vn/uploads/products/den-led/led-bulb/a60n1-9w-dcv2/a60n1-9w-dc-v2-1.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-0363a48156c9288b",
+      "category": "paint",
+      "brand": "Jotun",
+      "sku": null,
+      "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "theo quy cách",
+      "productSource": "https://www.jotun.com/vn-vi/decorative/products/interior/all-interior-products/majestic-pure-color",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://www.jotun.com/globalassetsjot03/200683-desktop.png",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-ab7e281bc8724535",
+      "category": "paint",
+      "brand": "Jotun",
+      "sku": null,
+      "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "theo quy cách",
+      "productSource": "https://www.jotun.com/vn-vi/decorative/products/exterior/all-exterior-products/jotashield-infinity",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://www.jotun.com/globalassetsjot03/129395-desktop.png",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-b72b3a0e4872ac61",
+      "category": "paint",
+      "brand": "Đồng Tâm",
+      "sku": null,
+      "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "theo quy cách",
+      "productSource": "https://dongtam.com.vn/san-pham/son-nuoc-standard/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2020/12/standard_ex_V_1000X1000.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-899a98168adc8bf8",
+      "category": "paint",
+      "brand": "Đồng Tâm",
+      "sku": null,
+      "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "theo quy cách",
+      "productSource": "https://dongtam.com.vn/san-pham/son-nuoc-extra-5-trong-1/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2020/12/extra_ex_V.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-d36418537df75a65",
+      "category": "paint",
+      "brand": "Đồng Tâm",
+      "sku": null,
+      "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "theo quy cách",
+      "productSource": "https://dongtam.com.vn/san-pham/son-nuoc-master-6-trong-1/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2020/12/master_ex_V.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "source-56d1a0821fa5f2f8",
+      "category": "paint",
+      "brand": "Đồng Tâm",
+      "sku": null,
+      "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "theo quy cách",
+      "productSource": "https://dongtam.com.vn/san-pham/son-ngoai-that-sunshine/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://dongtam.com.vn/wp-content/uploads/2020/10/sunshine_V.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "official-ac-959van",
+      "category": "sanitary",
+      "brand": "INAX",
+      "sku": "AC-959VAN",
+      "specification": "AC-959VAN · bộ · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "cái",
+      "productSource": "https://www.inax.com.vn/products/toilet/ac-959van/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://www.inax.com.vn/wp-content/uploads/2026/06/ac-959van-1.png",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 5929000,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-09"
+      }
+    },
+    {
+      "productId": "official-al-2216v",
+      "category": "sanitary",
+      "brand": "INAX",
+      "sku": "AL-2216V",
+      "specification": "AL-2216V · bộ · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "cái",
+      "productSource": "https://www.inax.com.vn/vi/products/basin/chau-rua-am-ban-al-2216v/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://www.inax.com.vn/wp-content/uploads/2025/12/chau-rua-am-ban-al-2216v-1.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 1578000,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-09"
+      }
+    },
+    {
+      "productId": "official-l-2216v",
+      "category": "sanitary",
+      "brand": "INAX",
+      "sku": "L-2216V",
+      "specification": "L-2216V · bộ · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "cái",
+      "productSource": "https://www.inax.com.vn/products/basin/l-2216v/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://www.inax.com.vn/wp-content/uploads/2025/12/chau-rua-am-ban-l-2216v-1.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 1308000,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-09"
+      }
+    },
+    {
+      "productId": "official-bf-1858v",
+      "category": "sanitary",
+      "brand": "INAX",
+      "sku": "BF-1858V",
+      "specification": "BF-1858V · bộ · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "bộ",
+      "productSource": "https://www.inax.com.vn/products/bathtub/bf-1858v/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://www.inax.com.vn/wp-content/uploads/2026/09/BF-1858V-1.png",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "official-bf-1760v",
+      "category": "sanitary",
+      "brand": "INAX",
+      "sku": "BF-1760V",
+      "specification": "BF-1760V · bộ · Xem quy cách tại nguồn chính hãng",
+      "quantityUnit": "bộ",
+      "productSource": "https://www.inax.com.vn/products/bathtub/bf-1760v/",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://www.inax.com.vn/wp-content/uploads/2026/09/BF-1760V-1.png",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "specification",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-849ccb64ced0b16b",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 101 T",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303000074.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300007400100085053.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-0cb882a11f614d0e",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 030 PL",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303000302.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300030200100035040.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-33f649b8f977fdad",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS D002 FR",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303003474.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300347400102272019.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-ecdb54ba1079ddc3",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 104 MM",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303000321.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300032100100088032.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-8a463cd5e996a339",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 083 T",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303000070.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300007000100081053.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-d9c762036272fb1c",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 120 PL",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303000305.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300030500100094040.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-c7f3933d34505ad3",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 205 PL",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303000304.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300030400100106040.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-454080ca365b9157",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 430 BT",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303000173.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300017300100194008.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-bfc5458a219e4930",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 105 G",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303000077.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300007700100089020.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-986f272734a44673",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 230 S",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303000097.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300009700100110045.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-9a0c7cb83853e33b",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 021 T",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303000055.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300005500100028053.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-b82e87d5f1acd8d6",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 426 SC",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303000169.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300016900100190046.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-ef82a2f9f36e4523",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS LUX024 MTD",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303003492.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300349200102284088.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-a9182b5db160be58",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 463 SC01",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303003309.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300330900101563062.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-56f303a963d3f2c7",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 495 EL",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303003448.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300344800101633015.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-16b2c4e4be4ca8b7",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 388 EV",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303000141.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300014100100161016.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-0da14196c0fa09ed",
+      "category": "cabinetry",
+      "brand": "An Cường",
+      "sku": "MFC - MS 101 FL",
+      "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+      "quantityUnit": "tấm",
+      "productSource": "https://ancuong.com/melamine/303000296.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://ancuong.com/products/products-thumb/30300029600100085018.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-1724516b11a1f613",
+      "category": "waterproof",
+      "brand": "Sika",
+      "sku": "SikaTop-107 Seal VN",
+      "specification": "Bộ A+B 25 kg; bảng nguồn ghi 810.000 đ/bộ",
+      "quantityUnit": "kg",
+      "productSource": "https://vnm.sika.com/vi/kenh-phan-ph-i-banl/chong-tham/v-a-ch-ng-th-m/sikatop-107-sealvn.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 32400,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-09"
+      }
+    },
+    {
+      "productId": "catalog-643e5858e405f4c6",
+      "category": "waterproof",
+      "brand": "Sika",
+      "sku": "SikaTop-109 Seal VN",
+      "specification": "Bộ A+B 15 kg; bảng nguồn ghi 960.000 đ/bộ",
+      "quantityUnit": "kg",
+      "productSource": "https://vnm.sika.com/vi/kenh-phan-ph-i-banl/chong-tham/v-a-ch-ng-th-m/sikatop-109-sealvn.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://sika.scene7.com/is/image/sikacs/vn-SikaTop-Seal-109--2024--07126070%3A1-1?fit=crop%2C1&hei=480&wid=480",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 64000,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-09"
+      }
+    },
+    {
+      "productId": "catalog-85a7199f5f49fa28",
+      "category": "waterproof",
+      "brand": "Sika",
+      "sku": "SikaTop-540 Seal VN",
+      "specification": "Đối chiếu bề mặt, định mức và quy trình thi công trong tài liệu Sika.",
+      "quantityUnit": "theo quy cách",
+      "productSource": "https://vnm.sika.com/vi/xay-d-ng/h-th-ng-ch-ng-thm/v-a-ch-ng-th-m/sikatop-540-sealvn.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-b6d5eb5df9995d4d",
+      "category": "waterproof",
+      "brand": "Sika",
+      "sku": "SikaTop-530 Seal",
+      "specification": "Đối chiếu bề mặt, định mức và quy trình thi công trong tài liệu Sika.",
+      "quantityUnit": "theo quy cách",
+      "productSource": "https://vnm.sika.com/vi/xay-d-ng/h-th-ng-ch-ng-thm/v-a-ch-ng-th-m/sikatop-530-seal.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-e3a8ff6651e33127",
+      "category": "waterproof",
+      "brand": "Sika",
+      "sku": "SikaLatex",
+      "specification": "Can 5 lít; bảng nguồn ghi 465.000 đ/can",
+      "quantityUnit": "lít",
+      "productSource": "https://vnm.sika.com/vi/xay-d-ng/s-a-ch-a-be-tong/l-p-lot-bam-dinh/sikalatex.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 93000,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-09"
+      }
+    },
+    {
+      "productId": "catalog-b85e1fedaa18bb3b",
+      "category": "waterproof",
+      "brand": "Sika",
+      "sku": "SikaLatex TH",
+      "specification": "Can 5 lít; bảng nguồn ghi 300.000 đ/can",
+      "quantityUnit": "lít",
+      "productSource": "https://vnm.sika.com/vi/kenh-phan-ph-i-banl/s-a-ch-a/sikalatex-th.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 60000,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-09"
+      }
+    },
+    {
+      "productId": "catalog-50e8b4cebeb4c425",
+      "category": "waterproof",
+      "brand": "Sika",
+      "sku": "Sikalastic-590",
+      "specification": "Đối chiếu bề mặt, định mức và quy trình thi công trong tài liệu Sika.",
+      "quantityUnit": "theo quy cách",
+      "productSource": "https://vnm.sika.com/vi/kenh-phan-ph-i-banl/san-mai/sikalastic-590.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-a6f828642d108ef0",
+      "category": "cement",
+      "brand": "Hà Tiên Kiên Giang",
+      "sku": "PCB30 đa dụng",
+      "specification": "Đối chiếu mác, cấp phối và khối lượng bao tại nguồn.",
+      "quantityUnit": "bao",
+      "productSource": "https://ximanghatienkiengiang.vn/product-detail/?slug=Xi-mng-a-dng-PCB30",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-b2a8e2c4e86a968f",
+      "category": "cement",
+      "brand": "Hà Tiên Kiên Giang",
+      "sku": "PCB30 cao cấp",
+      "specification": "Đối chiếu mác, cấp phối và khối lượng bao tại nguồn.",
+      "quantityUnit": "bao",
+      "productSource": "https://ximanghatienkiengiang.vn/product-detail/?slug=Xi-mng-cao-cp-PCB30",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-7595d01e7d5b57bd",
+      "category": "cement",
+      "brand": "Hà Tiên Kiên Giang",
+      "sku": "PCB40 cao cấp",
+      "specification": "Đối chiếu mác, cấp phối và khối lượng bao tại nguồn.",
+      "quantityUnit": "bao",
+      "productSource": "https://ximanghatienkiengiang.vn/product-detail/?slug=Xi-mng-PCB40-cao-cp-",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-3bcfd41194bf718e",
+      "category": "steel",
+      "brand": "Hòa Phát",
+      "sku": "CB240-T",
+      "specification": "Mác thép tham khảo; đường kính và số lượng do kỹ sư kết cấu xác định.",
+      "quantityUnit": "kg",
+      "productSource": "https://thep.hoaphat.com.vn/tin-cong-nghe/duong-kinh-thep-xay-dung.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-b9edb86df3e8ad93",
+      "category": "steel",
+      "brand": "Hòa Phát",
+      "sku": "CB300-V",
+      "specification": "Mác thép tham khảo; đường kính và số lượng do kỹ sư kết cấu xác định.",
+      "quantityUnit": "kg",
+      "productSource": "https://thep.hoaphat.com.vn/tin-cong-nghe/duong-kinh-thep-xay-dung.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-e8ea77d25ee6a3a5",
+      "category": "steel",
+      "brand": "Hòa Phát",
+      "sku": "CB400-V",
+      "specification": "Mác thép tham khảo; đường kính và số lượng do kỹ sư kết cấu xác định.",
+      "quantityUnit": "kg",
+      "productSource": "https://thep.hoaphat.com.vn/tin-cong-nghe/duong-kinh-thep-xay-dung.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-a404cc76286a1040",
+      "category": "steel",
+      "brand": "Hòa Phát",
+      "sku": "CB500-V",
+      "specification": "Mác thép tham khảo; đường kính và số lượng do kỹ sư kết cấu xác định.",
+      "quantityUnit": "kg",
+      "productSource": "https://thep.hoaphat.com.vn/tin-cong-nghe/duong-kinh-thep-xay-dung.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-ed28f0bd3c0e0135",
+      "category": "mep",
+      "brand": "CADIVI",
+      "sku": null,
+      "specification": "Tiết diện, số lõi và bảo vệ mạch theo thiết kế điện.",
+      "quantityUnit": "m",
+      "productSource": "https://cadivi.vn/vn/vcm/hr-lf-600v.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-40d6460c57778df0",
+      "category": "mep",
+      "brand": "CADIVI",
+      "sku": null,
+      "specification": "Tiết diện, số lõi và bảo vệ mạch theo thiết kế điện.",
+      "quantityUnit": "m",
+      "productSource": "https://cadivi.vn/vn/day-cap-dien-boc-nhua-pvc.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-9b2625c5b32fb679",
+      "category": "mep",
+      "brand": "CADIVI",
+      "sku": null,
+      "specification": "Tiết diện, số lõi và bảo vệ mạch theo thiết kế điện.",
+      "quantityUnit": "m",
+      "productSource": "https://cadivi.vn/vn/cv-0-6/1-kv.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-0ed3deee910e6942",
+      "category": "mep",
+      "brand": "CADIVI",
+      "sku": null,
+      "specification": "Tiết diện, số lõi và bảo vệ mạch theo thiết kế điện.",
+      "quantityUnit": "m",
+      "productSource": "https://cadivi.vn/vn/vcmo-lf-450/750v.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-74b64c66142497be",
+      "category": "mep",
+      "brand": "Nhựa Bình Minh",
+      "sku": null,
+      "specification": "Chọn đường kính và cấp áp lực theo thiết kế cấp thoát nước.",
+      "quantityUnit": "m",
+      "productSource": "https://binhminhplastic.com.vn/san-pham/pvc-u/ong-pvc-u/ong-pvc-u-he-inch/ong-pvc-u-pvc-u-pipe-6",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-f98f0373e0378406",
+      "category": "mep",
+      "brand": "Nhựa Bình Minh",
+      "sku": null,
+      "specification": "Chọn đường kính và cấp áp lực theo thiết kế cấp thoát nước.",
+      "quantityUnit": "m",
+      "productSource": "https://binhminhplastic.com.vn/san-pham/catalogue/pp-r-1/ong-phu-tung-ong-nhua-pp-r",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-1f111eb92e60fe60",
+      "category": "insulation",
+      "brand": "Vĩnh Tường",
+      "sku": null,
+      "specification": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
+      "quantityUnit": "tấm",
+      "productSource": "https://vinhtuong.com/tam-thach-cao-gyproc-tieu-chuan",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-6ab446b143827082",
+      "category": "insulation",
+      "brand": "Vĩnh Tường",
+      "sku": null,
+      "specification": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
+      "quantityUnit": "tấm",
+      "productSource": "https://vinhtuong.com/tam-thach-cao-vinh-tuong-sieu-ben-x",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-345cbbfd9c62cc36",
+      "category": "insulation",
+      "brand": "Vĩnh Tường",
+      "sku": null,
+      "specification": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
+      "quantityUnit": "tấm",
+      "productSource": "https://vinhtuong.com/tam-thach-cao-vinh-tuong-sieu-bao-ve",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-af40194d0e902983",
+      "category": "insulation",
+      "brand": "Vĩnh Tường",
+      "sku": null,
+      "specification": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
+      "quantityUnit": "tấm",
+      "productSource": "https://vinhtuong.com/tam-thach-cao-gyproc-chiu-am",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-c2ed589276a16403",
+      "category": "insulation",
+      "brand": "Vĩnh Tường",
+      "sku": null,
+      "specification": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
+      "quantityUnit": "tấm",
+      "productSource": "https://vinhtuong.com/tam-thach-cao-gyproc-chong-moc",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-50316d0c9442281e",
+      "category": "insulation",
+      "brand": "Vĩnh Tường",
+      "sku": null,
+      "specification": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
+      "quantityUnit": "tấm",
+      "productSource": "https://vinhtuong.com/tam-thach-cao-sieu-trang",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-f3eb34303c2ad49f",
+      "category": "insulation",
+      "brand": "Vĩnh Tường",
+      "sku": null,
+      "specification": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
+      "quantityUnit": "m²",
+      "productSource": "https://vinhtuong.com/gia-tam-cach-nhiet-tui-khi-vinh-tuong-p2",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-0b14d15994793c5b",
+      "category": "door",
+      "brand": "Eurowindow",
+      "sku": null,
+      "specification": "Chọn kích thước, phụ kiện và bề mặt; yêu cầu báo giá theo bộ cửa.",
+      "quantityUnit": "bộ",
+      "productSource": "https://eurowindow.biz/cua-go/cua-go-composite.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-e1faaa2ccb9bdc45",
+      "category": "door",
+      "brand": "Eurowindow",
+      "sku": null,
+      "specification": "Chọn kích thước, phụ kiện và bề mặt; yêu cầu báo giá theo bộ cửa.",
+      "quantityUnit": "bộ",
+      "productSource": "https://eurowindow.biz/cua-go/cua-go-chong-chay.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-2d49230b4873d78d",
+      "category": "door",
+      "brand": "Eurowindow",
+      "sku": null,
+      "specification": "Chọn kích thước, phụ kiện và bề mặt; yêu cầu báo giá theo bộ cửa.",
+      "quantityUnit": "bộ",
+      "productSource": "https://eurowindow.biz/cua-go/cua-go-tu-nhien.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-e5b6dd9afc601d20",
+      "category": "lighting",
+      "brand": "Rạng Đông",
+      "sku": "AT04 90/10W",
+      "specification": "AT04 90/10W; ánh sáng trắng 6500K trên trang giá",
+      "quantityUnit": "cái",
+      "productSource": "https://rangdong.com.vn/den-led-am-tran-downlight-10w-pr2986.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://rangdong.com.vn/uploads/products/den-led/downlight/at04/at04-90-10w/at04-90-10w-1.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 114200,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-09"
+      }
+    },
+    {
+      "productId": "catalog-684217896e11fbff",
+      "category": "lighting",
+      "brand": "Rạng Đông",
+      "sku": "AT04 90/8W",
+      "specification": "8W · chọn nhiệt độ màu tại nguồn.",
+      "quantityUnit": "đèn",
+      "productSource": "https://rangdong.com.vn/den-led-am-tran-downlight-8w-pr2985.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://rangdong.com.vn/uploads/products/den-led/downlight/at04/at04-90-8w/at04-90-8w-1.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-c33a862689ef6ed5",
+      "category": "lighting",
+      "brand": "Rạng Đông",
+      "sku": "AT06.V2 90/8W",
+      "specification": "8W · chọn nhiệt độ màu tại nguồn.",
+      "quantityUnit": "đèn",
+      "productSource": "https://rangdong.com.vn/den-led-am-tran-downlight-8w-pr3313.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://rangdong.com.vn/uploads/products/den-led/downlight/at06-v2/at06-v2-90-8w/at06-v2-90-8w-1.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-7331611a47391949",
+      "category": "lighting",
+      "brand": "Rạng Đông",
+      "sku": "AT28 90/8W",
+      "specification": "8W · chọn nhiệt độ màu tại nguồn.",
+      "quantityUnit": "đèn",
+      "productSource": "https://rangdong.com.vn/den-led-am-tran-downlight-8w-pr2639.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://rangdong.com.vn/uploads/products/den-led/downlight/at28/at28-90-8w/at28-90-8w-1.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-40c84d053740f15b",
+      "category": "lighting",
+      "brand": "Rạng Đông",
+      "sku": "AT41 86/12W",
+      "specification": "12W · chọn nhiệt độ màu tại nguồn.",
+      "quantityUnit": "đèn",
+      "productSource": "https://rangdong.com.vn/den-led-am-tran-downlight-86-12w-pr2682.html",
+      "imageKind": "product-source-reference",
+      "imageSource": "https://rangdong.com.vn/uploads/products/den-led/downlight/at41/at41-86-12w/at41-86-12w-1.jpg",
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-648b12aac21b01e2",
+      "category": "roof",
+      "brand": "Hoa Sen",
+      "sku": null,
+      "specification": "Dòng sản phẩm; chốt độ dày, khổ hữu dụng và màu trong báo giá.",
+      "quantityUnit": "m²",
+      "productSource": "https://hoasengroup.vn/vi/cham-soc-khach-hang/",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "catalog-edb49620c3217eba",
+      "category": "roof",
+      "brand": "Hoa Sen",
+      "sku": null,
+      "specification": "Dòng sản phẩm; chốt độ dày, khổ hữu dụng và màu trong báo giá.",
+      "quantityUnit": "m²",
+      "productSource": "https://hoasengroup.vn/vi/cham-soc-khach-hang/",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-01",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "sku",
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": null,
+        "status": "unknown",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-01"
+      }
+    },
+    {
+      "productId": "reference-dulux-e016m-1l",
+      "category": "paint",
+      "brand": "Dulux",
+      "sku": "E016M 1L",
+      "specification": "Sơn phủ nội thất mờ E016M; lon/thùng 1 lít",
+      "quantityUnit": "lon 1 lít",
+      "productSource": "https://sontavaco.com/son-noi-that/dulux/dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-09",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 168000,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-09"
+      }
+    },
+    {
+      "productId": "reference-dulux-e016m-5l",
+      "category": "paint",
+      "brand": "Dulux",
+      "sku": "E016M 5L",
+      "specification": "Sơn phủ nội thất mờ E016M; lon/thùng 5 lít",
+      "quantityUnit": "lon 5 lít",
+      "productSource": "https://sontavaco.com/son-noi-that/dulux/dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-09",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 644000,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-09"
+      }
+    },
+    {
+      "productId": "reference-dulux-e016m-15l",
+      "category": "paint",
+      "brand": "Dulux",
+      "sku": "E016M 15L",
+      "specification": "Sơn phủ nội thất mờ E016M; lon/thùng 15 lít",
+      "quantityUnit": "thùng 15 lít",
+      "productSource": "https://sontavaco.com/son-noi-that/dulux/dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-09",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 1793000,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-09"
+      }
+    },
+    {
+      "productId": "supplier-bighouse-6060classic007",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060CLASSIC007",
+      "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+      "quantityUnit": "m²",
+      "productSource": "https://dailydongtam.com/gia-gach-dong-tam.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-14",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 244200,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-14"
+      }
+    },
+    {
+      "productId": "supplier-bighouse-6060tamdao003",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060TAMDAO003",
+      "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+      "quantityUnit": "m²",
+      "productSource": "https://dailydongtam.com/gia-gach-dong-tam.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-14",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 244100,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-14"
+      }
+    },
+    {
+      "productId": "supplier-bighouse-6060tamdao004",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060TAMDAO004",
+      "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+      "quantityUnit": "m²",
+      "productSource": "https://dailydongtam.com/gia-gach-dong-tam.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-14",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 241600,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-14"
+      }
+    },
+    {
+      "productId": "supplier-bighouse-6060thachanh002",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060THACHANH002",
+      "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+      "quantityUnit": "m²",
+      "productSource": "https://dailydongtam.com/gia-gach-dong-tam.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-14",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 241600,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-14"
+      }
+    },
+    {
+      "productId": "supplier-bighouse-6060tamdao005",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060TAMDAO005",
+      "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+      "quantityUnit": "m²",
+      "productSource": "https://dailydongtam.com/gia-gach-dong-tam.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-14",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 258400,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-14"
+      }
+    },
+    {
+      "productId": "supplier-bighouse-6060truongson006",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060TRUONGSON006",
+      "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+      "quantityUnit": "m²",
+      "productSource": "https://dailydongtam.com/gia-gach-dong-tam.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-14",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 258400,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-14"
+      }
+    },
+    {
+      "productId": "supplier-bighouse-6060mekong003",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060MEKONG003",
+      "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+      "quantityUnit": "m²",
+      "productSource": "https://dailydongtam.com/gia-gach-dong-tam.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-14",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 255700,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-14"
+      }
+    },
+    {
+      "productId": "supplier-bighouse-6060haivan003-fp",
+      "category": "floor",
+      "brand": "Đồng Tâm",
+      "sku": "6060HAIVAN003-FP",
+      "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+      "quantityUnit": "m²",
+      "productSource": "https://dailydongtam.com/gia-gach-dong-tam.html",
+      "imageKind": "product-source-reference",
+      "imageSource": null,
+      "rights": {
+        "verified": false,
+        "commercialUse": false,
+        "source": null
+      },
+      "sourceCheckedAt": "2026-10-14",
+      "displayableSourcePhoto": false,
+      "missingPhotoEvidence": [
+        "image",
+        "image-rights"
+      ],
+      "exactSkuPhotoReviewed": false,
+      "reviewer": null,
+      "reviewedAt": null,
+      "commercialAccepted": false,
+      "price": {
+        "amountVnd": 269800,
+        "status": "reference",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-14"
+      }
+    }
+  ]
+}

@@ -71,3 +71,15 @@ Auto-review rejected replacement Chromium download after current binary was diag
 - A consumer patch in team-a-boq only; existing B finishPalette/catalogMaterials/materialBindingStatuses/facade resolver reused. commercialBoq invalidates saved applications whose current room/exterior SKU/spec or binding is stale, before allocating shared delivery. Null stays unknown; no schema/quote mutation or UI API required.
 - Dryfloor/wetarea/interior/exterior/room scopes remain distinct. Browsing catalog is not application. Standalone alternative quote proposals remain calculable without applying them. Unsupported/unbound manual roles retain existing behavior; real supplier/category coverage still depends on B manifest.
 -5registered regressions local PASS, affected suites covered with sparse-file recovery as recorded in evidence/A/U1-A02-20261021/HANDOFF-B.md. Exact source Node22CI remains the release check. No B files changed; PR75/current native403 and realphoto/service/professional gates remain pending.
+
+
+## 21/10/2026 — sequential merge of B724c5b4 into A4d5b93c
+- A integrates17unchanged B blobs from PR75 common8a03c90 to724c5b4; two-parent history preserves both streams. Manifest: evidence/A/integration-B-724c5b4/B-source-blobs.json. No conflict in owned source paths, no B branch update and no production promotion.
+- New B material guards/comparison use existing binding/schema/package contracts. A scoped BOQ and handover guards retained; all34A commercial checks pass with new B source locally. Combined local75pass/2missing-file failures require complete-checkout CI; not a full local pass.
+- B handoff inventory:52targets/27furniture/103candidates,0confirmed supplier applications/photos. Actual selection/source/rights/native/GPU acceptance remains open. A's native PDF/ZIP recovery/sample hash tests are code evidence only.
+- Require CI on merged SHA. Keep PR76 draft; this merge is an integration candidate for B review, not U1 completion or approval of all24styles. Existing authorization to publish remains subject to the user-defined evidence gates.
+
+
+## 22/10/2026 — pending integration refreshed to B4a901cb
+- Include B's active-scope sample zoom fix on top of724c5b4. Final18B blobs verified unchanged; latest manifest B-latest-source-blobs.json. A4d5b93c and B4a901cb are the merge parents.
+- Latest6targeted zoom/sample-package cases passed locally. Complete Node22 CI remains required on mergedSHA. No branch rewrite/main mutation; PR76 stays draft for native acceptance.

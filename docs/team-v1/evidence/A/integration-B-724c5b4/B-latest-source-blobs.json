@@ -1,0 +1,114 @@
+{
+  "B": "4a901cb810b7a41bfebb2a84a256d76f3f19e4fc",
+  "A": "4d5b93c258c4aefc434fe552d3de3c7d15603855",
+  "files": [
+    {
+      "path": "docs/team-v1/PROGRESS-B.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7c75d6b46755f0987a9c5e6c7b26bbc7c49986ae"
+    },
+    {
+      "path": "docs/team-v1/evidence/B/U1-B02-20261021/HANDOFF-A.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47b6adea38020231767ce2c0c0a62b231b2928a5"
+    },
+    {
+      "path": "docs/team-v1/evidence/B/U1-B02-20261021/SKU_IMAGE_REGISTER.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b930ad807794007a0a7490dc74d8c3563ef3d832"
+    },
+    {
+      "path": "docs/team-v1/evidence/B/U1-B02-20261021/TASK_STATUS.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7ce24856a4859c788cd4b376d350abf6f4a5824f"
+    },
+    {
+      "path": "docs/team-v1/evidence/B/U1-B02-20261021/VERIFICATION.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47998512afaa0781876859d495d23210b22d61dc"
+    },
+    {
+      "path": "docs/team-v1/evidence/B/U1-B03-20261021/CUSTOM-COLOUR-HANDOFF.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ddf2872d94195ccbc53595f60569ea8ba52e50e9"
+    },
+    {
+      "path": "docs/team-v1/evidence/B/U1-B03-20261021/HANDOFF-A.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19f195a0f55633ccee4ba2c6f35871bcb3945e16"
+    },
+    {
+      "path": "docs/team-v1/evidence/B/U1-B03-20261021/VERIFICATION.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "479f1708532257b6da8b595e9cef8b860ad9f03a"
+    },
+    {
+      "path": "docs/team-v1/evidence/B/U1-B03-20261021/result.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c352f8fc09871fa142ab2df64d4cde0b4d893890"
+    },
+    {
+      "path": "server/_material_catalog.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fc21b0a0a5ea479a53474e1e97e3d65a293c9ed0"
+    },
+    {
+      "path": "src/75_completion.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "92c9365d56149d1dd293955df02a3ac181a0e6da"
+    },
+    {
+      "path": "src/86_visual_materials.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10ab028f18e563502f8ceb354ec8d8ccb3ca618f"
+    },
+    {
+      "path": "src/90_product_polish.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8604eb23579df46e37a199a81fd1e19e40dbeb9c"
+    },
+    {
+      "path": "src/product-polish.css",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b633ef03676e7d8c1f1c8b22137f8ddea61c5e3d"
+    },
+    {
+      "path": "tests/material-source.test.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5ea2e54c3a3503652b3ddbc8baaaea77c7426d6b"
+    },
+    {
+      "path": "tests/team-b-sku-image-register.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dbc7994063fe82124d92c381600a27a4c2fc17b6"
+    },
+    {
+      "path": "tests/team-b-style-materials.test.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bb8b483396bc311559a326ea8d45b8060dbfe1b4"
+    },
+    {
+      "path": "docs/team-v1/evidence/B/U1-B03-20261021/ZOOM-SCOPE-HANDOFF.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "630b4d6c4c70ecd420cc3b9fa510e6d53fa1cd50"
+    }
+  ]
+}

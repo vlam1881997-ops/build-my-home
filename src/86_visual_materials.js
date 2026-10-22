@@ -95,16 +95,22 @@ BMH.applyCatalogSample=async(category,{roomId=null,scope='room',profileId,file,w
  if(!file||!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>20*1024*1024)return fail('Chọn ảnh JPG, PNG hoặc WebP tối đa 20 MB.');
  if(![widthM,depthM].every(n=>Number.isFinite(n)&&n>=.01&&n<=20)||!Number.isFinite(rotationDeg)||rotationDeg<0||rotationDeg>=360||typeof sourceReference!=='string'||!sourceReference.trim()||sourceReference.trim().length>240)return fail('Nhập kích thước mẫu từ 10 đến 20.000 mm, góc từ 0 đến dưới 360° và nguồn ảnh.');
  if(!BMH.styleReferenceStore)return fail('Kho ảnh chưa sẵn sàng.');
- const identity=x=>JSON.stringify([x?.id,x?.sku,x?.specification||x?.spec,x?.unit]),productIdentity=identity(product),operation={};
+ const identity=x=>JSON.stringify([x?.id,x?.sku,x?.specification||x?.spec,BMH.materialUnit?.(x?.priceEvidence?.quantityUnit??x?.unit)??x?.unit]),productIdentity=identity(product),operation={};
+ // Decode/storage can finish after the customer changes this surface. Preserve
+ // that newer intent, while allowing edits in other rooms or other surface roles.
+ const targetSignature=()=>{
+  const raw=scope==='exterior'?project.materials.finish?.exterior:project.materials.finish?.rooms?.[roomId],palette=scope==='exterior'?(BMH.facadeFinishPalette?.()||raw||{}):BMH.finishPalette(roomId),room=scope==='room'?project.plan.rooms.find(r=>r.id===roomId):null;
+  return JSON.stringify([room?.type,raw?.[role],raw?.visualMaterials?.[role],raw?.explicitRoles?.[role],raw?.styleRoles?.[role],scope==='exterior'?raw?.facadeMaterials?.[category]:raw?.catalogMaterials?.[category],palette?.[role],palette?.visualMaterials?.[role],palette?.catalogMaterials?.[category],role==='floor'?palette?.surface:null]);
+ },initialTarget=targetSignature();
  let operations=sampleOperations.get(project);if(!operations)sampleOperations.set(project,operations=new Map());const operationKey=category+':'+(scope==='exterior'?'exterior':roomId);operations.set(operationKey,operation);
  try{
   const bitmap=await createImageBitmap(file),ratio=Math.min(1,1024/Math.max(bitmap.width,bitmap.height)),canvas=document.createElement('canvas');
   canvas.width=Math.max(1,Math.round(bitmap.width*ratio));canvas.height=Math.max(1,Math.round(bitmap.height*ratio));canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();
   const data=canvas.toDataURL('image/jpeg',.9),image=new Image();image.src=data;await image.decode();
-  const stillCurrent=()=>BMH.state.project===project&&identity(BMH.catalogSelectedProduct(category))===productIdentity&&operations.get(operationKey)===operation&&(scope==='exterior'||project.plan.rooms.some(r=>r.id===roomId));
-  if(!stillCurrent())return fail('Dự án hoặc sản phẩm đã đổi; chọn lại trước khi gắn ảnh mẫu.');
+  const stillCurrent=()=>BMH.state.project===project&&identity(BMH.catalogSelectedProduct(category))===productIdentity&&operations.get(operationKey)===operation&&targetSignature()===initialTarget&&(scope==='exterior'||project.plan.rooms.some(r=>r.id===roomId&&!['stairs','elevator','balcony'].includes(r.type)));
+  if(!stillCurrent())return fail('Dự án, sản phẩm hoặc bề mặt đã đổi; chọn lại trước khi gắn ảnh mẫu.');
   const mediaId='material-sample-'+crypto.randomUUID();await BMH.styleReferenceStore.put(mediaId,data);
-  if(!stillCurrent())return fail('Dự án hoặc sản phẩm đã đổi; ảnh chưa được áp dụng.');
+  if(!stillCurrent())return fail('Dự án, sản phẩm hoặc bề mặt đã đổi; ảnh chưa được áp dụng.');
   if(!BMH.applyCatalogMaterial(category,profileId,{roomId,scope}))return fail('Không áp dụng được vật liệu cho vị trí đã chọn.');
   const binding=scope==='exterior'?project.materials.finish.exterior.facadeMaterials[category]:project.materials.finish.rooms[roomId].catalogMaterials[category];
   binding.sample={mediaId,productId:binding.productId,sku:binding.sku,specification:binding.specification,realWorldScale:[widthM,depthM],rotationDeg,sourceReference:sourceReference.trim(),basis:'customer-provided-colour-sample'};

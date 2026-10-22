@@ -3,12 +3,12 @@
 Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 21/10/2026.
 - role: A
 - status: in_progress
-- active_task: U1-A03 / U3-A03 export-integrity substep (upstream Modern/native gates remain open)
-- active_substep: sample HTML/JSON now receive SHA256 output records; late sample-key guard added;34commercial tests pass locally; exact CI/native gates pending.
+- active_task: U1-A04 integration candidate (native acceptance remains open)
+- active_substep: integrate B4a901cb (includes724c5b4) into A4d5b93c with both parents;18B blobs verified;latest6targeted integration checks pass; merged Node22 CI pending.
 - target_branch: codex/a-massing-20261013
 - actual_branch: codex/a-massing-20261013
 - source_baseline: 8a03c900459cb2b4df03fd11ed8846ed2c0d400b (PR75 common planning source; runtime e73e0af; production PR74 main ad575e57)
-- last_verified_commit: d21cc90dd293554f4d98f39d9de8c7c8539961c8 (exact Node22 CI39606919540 PASS; native acceptance open)
+- last_verified_commit: 4d5b93c258c4aefc434fe552d3de3c7d15603855 (A CI39610136168 PASS); B724c5b4 separately passed CI39606926202; merged candidate needs own CI.
 - last_native_verified_A: 43a66a9587bedf2dfb1fea756897fac840cc3edc (historical A outdoor handoff; later native acceptance must use the actual current candidate)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
@@ -201,3 +201,18 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Hashing happens before output registration; after asynchronous sample hashing, check materialSampleKey plus existing project/revision/price/finance guards. Changed sample source during this stage returns false and leaves no output records, while preserving the edit.
 - A-owned src/team-a-handover.js only; B sample-generation code/interfaces unchanged. Added two registered regressions. All34 commercial tests PASS local Node24.19.0. New orchestration cases still use explicit media/PDF doubles; no real supplier/native acceptance claim.
 - Prior SVG/DXF evidence retained. Next: exact checkpoint CI and native PDF/ZIP/sample validation after legitimate preview access is restored. U1-A03 remains awaiting native acceptance; remaining commercial gates are not waived.
+
+
+## U1-A04 — integrate new B handoff, 21/10/2026
+- Remote PR75 advanced from common8a03c90 through5commits to724c5b47a03dc41289221c7724792c273f383390. Read B progress/handoff and checked exact B CI39606926202 success. PR76/A at4d5b93c before integration.
+- Imports all17B changed/added blobs unchanged: SKU/photo inventory, source/spec/rights guard, refreshed photo rights reset, late-upload target protection, read-only comparison with custom colour/pattern, tests/progress/evidence. No A/B path conflict; merge retains ordered A and B parents. B branch/progress content not edited; no reset or main promotion.
+- All existing local B source hashes matched common base before recovery; all17new B blobs match remote Git hashes after recovery. Manifest evidence/A/integration-B-724c5b4/B-source-blobs.json. Large evidence files recovered in chunks after shell argument-size limit; no partial file accepted.
+- Local Node24.19.0 combined A-commercial/material-source/B-style-material suite:75PASS/2FAIL. Failures are absent readonly _material_search.mjs and photograph assets in sparse local snapshot. No test suppression or placeholder; full exact merged Node22 CI must resolve these using complete checkout. All34A commercial cases and41B cases passed; missing-file suites are not claimed passed locally.
+- B inventory has52review targets,27furniture,103catalog candidates,0confirmed supplier applications/eligible exactSKUphotos. Integration does not approve candidates or invent prices. U1-A02 consumer can use this manifest but final real-product gate stays open.
+- U1-A04 source integration candidate only; keep PR draft pending mergedCI/native product-photo/GPU acceptance. Further U2/U3 work inherits new B contracts. Legitimate preview access, selected licensedSKUassets, real devices, BMH service mapping/MoMo and owner/professional review remain required.
+
+
+## Resume integration — 22/10/2026
+- A remote still4d5b93c; previous create-tree call did not yield a commit/ref update. Recreated pending tree successfully without resetting source. B advanced once to4a901cb810b7a41bfebb2a84a256d76f3f19e4fc, fixing active-room/exterior sample zoom with shared media IDs. Read exact handoff; include this descendant in the same two-parent merge.
+- All18final B blobs match remote (B-latest-source-blobs.json); B content copied unchanged, no cross-owner edit. Additional6targeted tests PASS local Node24: sample zoom and A sample package/hash/race cases. Earlier75PASS/2sparse-missing-files result is retained as prior-stage evidence, not relabelled full pass.
+- Final candidate must pass complete-checkout Node22 CI before acceptance. Prior A and B CI do not substitute for mergedSHA. Browser/supplier/GPU/service/professional gates remain open; no production deployment.

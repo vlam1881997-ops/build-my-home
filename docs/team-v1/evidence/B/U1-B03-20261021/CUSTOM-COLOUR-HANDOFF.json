@@ -1,0 +1,18 @@
+{
+  "baseCommit": "d4562c3af708fffdfd93f13d0838e6a0220f52b4",
+  "task": "U1-B03",
+  "changedFiles": [
+    "src/90_product_polish.js",
+    "tests/team-b-style-materials.test.mjs"
+  ],
+  "regression": "Custom room colour must preserve the profile pattern/scale and appear on the selected palette without mutating state or the source profile",
+  "failedBeforeFix": true,
+  "tests": {
+    "passed": 73,
+    "node": "24.19.0",
+    "native": false
+  },
+  "status": "implementation-tested-awaiting-native-acceptance",
+  "integrationOwner": "A",
+  "productionChanged": false
+}
