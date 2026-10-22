@@ -975,3 +975,14 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Hosted rollback test PASS: owner save/read, exact replay, stale revision conflict, second-user read/write/delete denial. Post-rollback projects/tombstones/test-users all0. Both tables RLS enabled; anon SELECT and authenticated direct writes false. Advisors reviewed: private tombstone no-policy INFO and intended authenticated security-definer save/delete WARN documented with auth.uid/owner/revision checks, empty search_path and restricted grants.
 - Not website-ready: Auth URLs/email not yet configured/tested, Vercel known project metadata404 and team-scoped search=build returns empty. No keys retrieved or printed, no BMH_CLOUD_READY flip, no server/payment/AI flags enabled, no fake sign-in/cross-device success. Needs correct existing BMH Vercel project access to bind environment and deploy, then real Auth/two-context tests.
 - Evidence and exact rollback SQL under evidence/B/U4-B01-20261022/. This checkpoint only records provisioned resources and limits; no runtime edits or full runtime retest needed. Parent main preserves merged A+B histories. Further supplier photos/3D acceptance remain separate unfinished requirements.
+
+
+## 2026-10-22 — U4-B01: cloud on new account deployed; real-account sync pending
+
+- User requested new Supabase account project; created free Build My Home organization, user completed password/project creation. New project `tdcffbetywnhuvtoamqh`, org `wjeggdcqfzstgojqwjby`, Singapore, Healthy. Older other-account project left untouched, no longer production target.
+- Applied main `sql/BMH_CUSTOMER_CLOUD.sql` through SQL Editor (connector lacks access to this account). Hosted rollback tests PASS: owner save/read, exact replay, stale conflict, foreign read/write/delete denied.
+- Auth Site URL `https://nhanhocuatoi.com`, redirect exact root; email auth and confirmation enabled. Custom SMTP absent.
+- Updated production URL/publishable key and BMH_CLOUD_READY=true. Retained public URL; user updated Gemini key. No secret values recorded.
+- Redeployed d26e6aa: `dpl_7ZZxjwn4DcQkeytR9pM4sn17qusd`, Ready / Production / Current. Deployment API config confirms cloudConfigured=true, geminiConfigured=true. Real UI shows login under Dự án → Tài khoản & đồng bộ.
+- Remaining: real signup/signin and same-project cross-session sync, customer SMTP. Canonical domain upstream connection failure in cloud browser; deployment URL app/API work. Media cloud disabled; no photo sync/commercial acceptance claim.
+- Evidence: `docs/team-v1/evidence/B/U4-B01-20261022/NEW-ACCOUNT-DEPLOYMENT.json`. Next: secure first BMH account authentication, then cloud save/load in separate sessions. Last verified source: `d26e6aab17f4b35e2bec1ac41820a2e67f9e73ab`.
