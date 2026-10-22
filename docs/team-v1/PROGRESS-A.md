@@ -1,14 +1,14 @@
 # Tiến độ AI A — BMH commercial v1
 
-Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 21/10/2026.
+Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 22/10/2026.
 - role: A
 - status: in_progress
 - active_task: U1-A04 integration candidate (native acceptance remains open)
-- active_substep: merged98e8bc9 passed exact Node22 CI; GitHub Vercel status success, but Vercel metadata403 prevents authenticated deployment/native verification; release gate blocked.
+- active_substep: user paused upgrades and requested main release for inspection; PR75 and PR76 merged, main d26e6aa passed CI39708355707, GitHub Vercel status success; public-site bounded material/reload/3D observation completed, commercial acceptance remains open.
 - target_branch: codex/a-massing-20261013
 - actual_branch: codex/a-massing-20261013
 - source_baseline: 8a03c900459cb2b4df03fd11ed8846ed2c0d400b (PR75 common planning source; runtime e73e0af; production PR74 main ad575e57)
-- last_verified_commit: 98e8bc9cb142daf93733f17a3cae368c1d2144c0 (merged Node22 CI39705198053 PASS; native deployment not verified)
+- last_verified_commit: d26e6aab17f4b35e2bec1ac41820a2e67f9e73ab (main CI39708355707 PASS; GitHub Vercel success; public-site checks bounded below)
 - last_native_verified_A: 43a66a9587bedf2dfb1fea756897fac840cc3edc (historical A outdoor handoff; later native acceptance must use the actual current candidate)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
@@ -224,3 +224,17 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - GitHub status is deployment-provider metadata, not proof of environment/hostname/native/GPU acceptance. Need project owner/admin to verify the connected Vercel account/team has access to this existing project and restore an authorized preview observation path. No automatic fix or re-auth success is assumed; do not request tokens in chat.
 - Review candidate is concrete:98e8bc9 with both A/B parents, passedCI,18unchangedBblob manifest and A evidence. Main PR74 retained. After access is available, inspect exact deployment then native material selection/upload/zoom/save/reload/3D/package on desktop and phone, preserving currently open exactSKU/service/professional gates.
 - Evidence-only checkpoint; no runtime test repeat needed. U1-A04 remains blocked at native acceptance, not done; overall commercial acceptance remains incomplete.
+
+
+## Owner-requested main release and live inspection — 22/10/2026
+- Latest explicit instruction pauses further upgrade work and requests merging/releasing the current increment to inspect progress. This supersedes the earlier draft-only release restriction for this increment, not commercial acceptance criteria.
+- PR75 was already merged at dbb192dc0816934032469faee4120a20a25a6c07 (22/10,08:52 Asia/Saigon). B head daed4ae176dd7f188561c96e64ed2e0508aa5b40 retains the latest browser-scenario preparation; no claim those scenarios ran.
+- PR76 retargeted from B to main, marked ready and merged with expected head b1f4010223b80aa4f1b3cf3055dcb55d7e57893d using a normal merge. Main release: d26e6aab17f4b35e2bec1ac41820a2e67f9e73ab. Both histories preserved; latest B changes beyond4a901cb are tests/docs only.
+- Exact main CI39708355707 completed SUCCESS: https://github.com/vlam1881997-ops/build-my-home/actions/runs/39708355707 . Prior PR75 main CI39708220108 also SUCCESS. No optional full local rerun.
+- GitHub commit status Vercel SUCCESS, Deployment has completed: https://vercel.com/vlam1881997-9266/build_my_home_full_v1.2_github/Fs6oWGWLL5LM1HVMLhxmjrYYLpJF . Authenticated deployment inspection returned404 for dashboard identifier and public hostname in the known team; no READY/alias/gitSource metadata assertion or protection change.
+- Public browser URL https://www.huiminhbach.id.vn/ opened and reloaded successfully after status success. Using a dedicated default synthetic session (5x20m,2floors,1.5billionVND), entered Studio, opened Materials, selected light oak for T1 living room and stayed in Materials. UI reported saved on device. Reload retained selected oak and living-room palette. Explicit View palette in3D opened tab6 with living-room oak selected. No AI/Search/payment call, upload, account login or real customer project used.
+- This is bounded live-site observation, not cryptographic asset/commit attestation or full native scenario acceptance. Desktop/phone physical GPU not tested. This browser fell back to compatibility/lightweight3D. The default generated design reported9geometry issues and29/30valid surface choices. Do not call this a passed Modern technical/visual gate. The common11roomModern acceptance fixture was not run in this browser.
+- Product cards still explicitly show group illustrations requiring supplier verification, not confirmed exact-SKU photography.0/3selected price groups have unit-price data. The energy panel nevertheless displays a planning estimate; consistency/completeness must be reviewed before quoting any final total.
+- Commercial open gates unchanged: exactSKUphoto/spec/rights coverage; complete Modern10tabs with native PDF/package and recovery; actual desktop+phoneGPU and owner image approval; configured cloud/twodevice/privacy and MoMo sandbox/service operations;24individual style approvals and professional technical review.
+- Rollback references retained: pre-A main dbb192dc0816934032469faee4120a20a25a6c07, pre-PR75 production ad575e578eaeb2b0cb054760d408d07195ef0224. No rollback executed and authenticated platform rollback capability remains unverified.
+- Progress-only checkpoint remains on A branch after merge; no further source upgrades or production changes in this checkpoint. Await owner inspection of this released increment.
