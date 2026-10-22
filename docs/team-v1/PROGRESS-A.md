@@ -4,11 +4,11 @@ Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 21/10/2026.
 - role: A
 - status: in_progress
 - active_task: U1-A04 integration candidate (native acceptance remains open)
-- active_substep: integrate B4a901cb (includes724c5b4) into A4d5b93c with both parents;18B blobs verified;latest6targeted integration checks pass; merged Node22 CI pending.
+- active_substep: merged98e8bc9 passed exact Node22 CI; GitHub Vercel status success, but Vercel metadata403 prevents authenticated deployment/native verification; release gate blocked.
 - target_branch: codex/a-massing-20261013
 - actual_branch: codex/a-massing-20261013
 - source_baseline: 8a03c900459cb2b4df03fd11ed8846ed2c0d400b (PR75 common planning source; runtime e73e0af; production PR74 main ad575e57)
-- last_verified_commit: 4d5b93c258c4aefc434fe552d3de3c7d15603855 (A CI39610136168 PASS); B724c5b4 separately passed CI39606926202; merged candidate needs own CI.
+- last_verified_commit: 98e8bc9cb142daf93733f17a3cae368c1d2144c0 (merged Node22 CI39705198053 PASS; native deployment not verified)
 - last_native_verified_A: 43a66a9587bedf2dfb1fea756897fac840cc3edc (historical A outdoor handoff; later native acceptance must use the actual current candidate)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
@@ -216,3 +216,11 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - A remote still4d5b93c; previous create-tree call did not yield a commit/ref update. Recreated pending tree successfully without resetting source. B advanced once to4a901cb810b7a41bfebb2a84a256d76f3f19e4fc, fixing active-room/exterior sample zoom with shared media IDs. Read exact handoff; include this descendant in the same two-parent merge.
 - All18final B blobs match remote (B-latest-source-blobs.json); B content copied unchanged, no cross-owner edit. Additional6targeted tests PASS local Node24: sample zoom and A sample package/hash/race cases. Earlier75PASS/2sparse-missing-files result is retained as prior-stage evidence, not relabelled full pass.
 - Final candidate must pass complete-checkout Node22 CI before acceptance. Prior A and B CI do not substitute for mergedSHA. Browser/supplier/GPU/service/professional gates remain open; no production deployment.
+
+
+## Integrated preview access checkpoint — 22/10/2026
+- Exact merged98e8bc9 CI39705198053 success, resolving sparse-local missing module/photo checks in complete checkout. PR76 metadata updated. GitHub commit status Vercel=success, description Deployment has completed, dashboard https://vercel.com/vlam1881997-9266/build_my_home_full_v1.2_github/AFEbM9WpeczqmeXZbxxPE3Ng6ou7.
+- Read-only Vercel list_deployments for known team_vDX7I7zG36VBbi7444e5CCiw/project prj_PcB996IRamEZqWrKpA5qk9T290kh and exact SHA returned403 forbidden: no permission to list deployment. Request ID syd1:sfo1::b4sms-1792632640147-3fab14f75aba. No changed protection, account switch, secret access or alternate browser route attempted. CLI unavailable (command-v exit1).
+- GitHub status is deployment-provider metadata, not proof of environment/hostname/native/GPU acceptance. Need project owner/admin to verify the connected Vercel account/team has access to this existing project and restore an authorized preview observation path. No automatic fix or re-auth success is assumed; do not request tokens in chat.
+- Review candidate is concrete:98e8bc9 with both A/B parents, passedCI,18unchangedBblob manifest and A evidence. Main PR74 retained. After access is available, inspect exact deployment then native material selection/upload/zoom/save/reload/3D/package on desktop and phone, preserving currently open exactSKU/service/professional gates.
+- Evidence-only checkpoint; no runtime test repeat needed. U1-A04 remains blocked at native acceptance, not done; overall commercial acceptance remains incomplete.
