@@ -67,16 +67,36 @@
    ['technical-register.json',JSON.stringify(B.constructionReview(),null,2)],
    ['outdoor-register.json',JSON.stringify({revision,spaces:B.outdoorSpaceRegister()},null,2)]];
   const pdfName='bo-ban-ve-A3.pdf',outputRefs={plans:pdfName,roof:pdfName,elevations:pdfName,sections:pdfName,openings:'bang-cua.csv',areas:'bang-dien-tich.csv',materials:'bang-vat-lieu.csv',furniture:'bang-noi-that.csv',boq:'boq-co-nguon.csv','technical-register':'technical-register.json'},content=new Map([[pdfName,pdf],...tables]);
+  const pendingOutputs=[];
   for(const [outputType,fileReference]of Object.entries(outputRefs)){
    const raw=content.get(fileReference),bytes=typeof raw==='string'?new TextEncoder().encode(raw):raw,hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(n=>n.toString(16).padStart(2,'0')).join('');
-   const id='output-'+outputType+'-'+revision+'-'+hash.slice(0,12)+(outputType==='boq'?'-'+priceKey:'');if(!register().outputs.some(r=>r?.id===id))B.supervisionAdapter.append('outputs',{id,title:outputType,outputType,fileReference,fileHash:hash,priceKey:outputType==='boq'?priceKey:null,observedAt:new Date().toISOString().slice(0,10),sourceReference:'Generated from measured design '+revision,designRevision:revision});
+   const id='output-'+outputType+'-'+revision+'-'+hash.slice(0,12)+(outputType==='boq'?'-'+priceKey:'');pendingOutputs.push({id,title:outputType,outputType,fileReference,fileHash:hash,priceKey:outputType==='boq'?priceKey:null,observedAt:new Date().toISOString().slice(0,10),sourceReference:'Generated from measured design '+revision,designRevision:revision});
   }
   if(B.state.project!==project||B.drawingRevision()!==revision||B.commercialBoq().priceKey!==priceKey||includeFinance&&JSON.stringify(project.finance)!==financeKey)return false;
   const replacements=new Set([...tables.map(t=>t[0]),pdfName,'revision-va-ban-giao.json']),files=B.customerPackageFiles(snapshot,sheets,B.customerPresentationHtml(snapshot,sheets)).filter(([name])=>!replacements.has(name));
+  // B owns the sample payloads; A records hashes of exactly the returned bytes.
+  for(const [fileReference,raw] of files.filter(([name])=>['anh-mau-vat-lieu.json','anh-mau-vat-lieu.html'].includes(name))){
+   const outputType=fileReference.endsWith('.json')?'material-sample-index':'material-sample-images',bytes=typeof raw==='string'?new TextEncoder().encode(raw):raw;
+   const hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(n=>n.toString(16).padStart(2,'0')).join('');
+   pendingOutputs.push({id:'output-'+outputType+'-'+revision+'-'+hash.slice(0,12),title:outputType,outputType,fileReference,fileHash:hash,observedAt:new Date().toISOString().slice(0,10),sourceReference:'Generated from material sample snapshot '+snapshot.materialSampleKey,designRevision:revision});
+  }
+  if(snapshot.materialSampleKey!==undefined&&B.materialSamplesKey?.()!==snapshot.materialSampleKey)return false;
+  // Package generation may reject stale samples or throw. Commit output records only after it succeeds.
+  if(B.state.project!==project||B.drawingRevision()!==revision||B.commercialBoq().priceKey!==priceKey||includeFinance&&JSON.stringify(project.finance)!==financeKey)return false;
+  for(const output of pendingOutputs)if(!register().outputs.some(r=>r?.id===output.id))B.supervisionAdapter.append('outputs',output);
   files.push(...content.entries(),['revision-va-ban-giao.json',JSON.stringify({...B.designHandoverManifest(),financeIncluded:includeFinance===true},null,2)],...B.privateFinancePackageFiles({includeFinance}));
   return {revision,files,status:B.handoverStatus(),sheets};
  };
- B.exportDesignHandover=async()=>{const result=await B.prepareDesignHandover();if(!result){B.toast('Hình học/báo giá đang lỗi hoặc vừa thay đổi. Kiểm tra rồi xuất lại.');return false;}B.download('BMH-ban-giao-thiet-ke-2D-'+result.revision+'.zip',B.zipStored(result.files),'application/zip');return true;};
+ B.exportDesignHandover=async()=>{
+  if(B.designHandoverBusy){B.toast('Đang chuẩn bị hồ sơ. Vui lòng chờ lần xuất hiện tại.');return false;}
+  B.designHandoverBusy=true;
+  try{
+   const result=await B.prepareDesignHandover();
+   if(!result){B.toast('Hình học/báo giá đang lỗi hoặc vừa thay đổi. Kiểm tra rồi xuất lại.');return false;}
+   B.download('BMH-ban-giao-thiet-ke-2D-'+result.revision+'.zip',B.zipStored(result.files),'application/zip');return true;
+  }catch(error){B.toast('Chưa xuất được hồ sơ. Thiết kế đang mở được giữ nguyên. Kiểm tra kết nối và thử lại; bạn có thể tải bản sao dự án.');return false;}
+  finally{B.designHandoverBusy=false;}
+ };
  B.handoverStatusHtml=()=>{const s=B.handoverStatus();return '<section class="v6-card"><h3>Trạng thái bàn giao · Rev '+s.revision+'</h3><p>'+B.esc(s.notice)+'</p><p>'+B.esc(s.status)+' · '+s.missingDesign.length+' mục thiết kế chờ · '+s.missingConstruction.length+' đầu vào thi công chờ · '+s.unknownCostScopes+' dòng BOQ thiếu</p><button data-team-a-design-handover '+(s.preliminaryDownloadAllowed?'':'disabled')+'>Xuất gói bàn giao thiết kế 2D</button><button data-team-a-private-finance>Xuất riêng tài chính cá nhân</button><p>Chỉ nút tài chính xuất thông tin vốn và dòng tiền; gói bản vẽ mặc định không chứa tài chính gia đình.</p></section>';};
  const screen=B.screen10;if(screen){B.screen10=()=>screen()+B.handoverStatusHtml();for(let i=0;i<B.SCREENS.length;i++)if(B.SCREENS[i]===screen)B.SCREENS[i]=B.screen10;}
  const completeness=B.dossierCompleteness;

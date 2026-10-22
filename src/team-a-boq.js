@@ -29,8 +29,22 @@
   if(role==='floor')values.floor=selected.filter(r=>r.type!=='bath').reduce((n,r)=>n+r.floorFinish,0);
   const value=values[role];return {value:Number.isFinite(value)?value:null,unit:Object.hasOwn(values,role)?'m²':null,sourceReference:Number.isFinite(value)?'measured:'+revision+':'+role+(room?':'+room.id:''):null,status:Number.isFinite(value)?'model':'unknown',issues:Number.isFinite(value)?[]:['Chưa có khối lượng/chi tiết có nguồn cho vai trò này']};
  };
- B.costedApplication=(application,{transportCharged=new Set()}={})=>{
-  const c=state(),p=B.state.project,revision=B.drawingRevision(),quantity=B.applicationQuantity(application),q=publicQuote(c.quotes[application.quoteId]),issues=[...quantity.issues],row={code:application.id,roleId:application.roleId,category:application.roleId,name:application.name||application.roleId,revision,roomId:application.roomId||null,elementId:application.elementId||null,furnitureId:application.furnitureId||null,unit:quantity.unit,qty:quantity.value,quantitySource:quantity.status,quantityReference:quantity.sourceReference||null,sku:application.sku||null,specification:application.specification||null,quoteId:application.quoteId||null,amount:null,unitPrice:null,status:'missing',issues};
+ // Validate saved applications against the actual scoped visual binding, not a
+ // catalogue item being browsed. Standalone alternative quotes remain proposals.
+ const currentMaterialIssues=application=>{
+  const category={floor:'floor',wetArea:'floor',wall:'paint',facade:'paint',joinery:'cabinetry'}[application.roleId];
+  if(!category||application.furnitureId||application.elementId||!B.finishPalette)return [];
+  const rooms=B.state.project.plan.rooms.filter(r=>!['stairs','elevator','balcony'].includes(r.type)&&(!application.roomId||r.id===application.roomId)&&(application.roleId!=='floor'||r.type!=='bath')&&(application.roleId!=='wetArea'||r.type==='bath'));
+  const scopes=application.roleId==='facade'?[{name:'Ngoại thất',palette:B.resolveFacadeMaterialBindings?.(B.finishPalette(null))||B.finishPalette(null)}]:rooms.map(r=>({name:r.name||r.id,palette:B.finishPalette(r.id)})),issues=[];
+  for(const {name,palette}of scopes){
+   const status=palette?.materialBindingStatuses?.[category],binding=palette?.catalogMaterials?.[category];
+   if(status&&!status.valid){issues.push(name+': liên kết vật liệu cần chọn lại. '+status.reason);continue;}
+   if(binding&&(binding.sku!==application.sku||binding.specification!==application.specification))issues.push(name+': SKU/quy cách vật liệu đã chọn không khớp dòng báo giá; cập nhật ứng dụng theo đúng phòng.');
+  }
+  return issues;
+ };
+ B.costedApplication=(application,{transportCharged=new Set(),materialIssues=[]}={})=>{
+  const c=state(),p=B.state.project,revision=B.drawingRevision(),quantity=B.applicationQuantity(application),q=publicQuote(c.quotes[application.quoteId]),issues=[...quantity.issues,...materialIssues],row={code:application.id,roleId:application.roleId,category:application.roleId,name:application.name||application.roleId,revision,roomId:application.roomId||null,elementId:application.elementId||null,furnitureId:application.furnitureId||null,unit:quantity.unit,qty:quantity.value,quantitySource:quantity.status,quantityReference:quantity.sourceReference||null,sku:application.sku||null,specification:application.specification||null,quoteId:application.quoteId||null,amount:null,unitPrice:null,status:'missing',issues};
   if(['owned','bundled'].includes(application.costTreatment)){
    if(!text(application.costReference))issues.push('Cần nguồn xác nhận có sẵn/nằm trong gói');
    if(application.costTreatment==='bundled'&&(!text(application.bundleId)||!c.applications.some(a=>a?.id===application.bundleId&&a.id!==application.id&&a.costTreatment==='purchase')))issues.push('Chưa có dòng gói mua mới liên kết; không dùng gói vòng/trùng');
@@ -68,7 +82,7 @@
   const projectRoles=new Set(applications.filter(a=>!a.roomId&&!a.elementId&&!a.furnitureId).map(a=>a.roleId));
   const transportGroups=new Map(),conflictingTransport=new Set();
   for(const a of applications){const q=c.quotes[a.quoteId];if(a.costTreatment!=='purchase'||!record(q)||!text(q.transportGroup))continue;const basis=JSON.stringify([q.transportMode,q.transportAmount,q.vatMode,q.taxPct,q.vatBasis]);if(transportGroups.has(q.transportGroup)&&transportGroups.get(q.transportGroup)!==basis)conflictingTransport.add(q.transportGroup);else transportGroups.set(q.transportGroup,basis);}
-  for(const a of applications){const key=a.roleId+'|'+(a.furnitureId||a.elementId||a.roomId||'project'),collision=seen.has(key)||a.roomId&&!a.furnitureId&&!a.elementId&&projectRoles.has(a.roleId);seen.add(key);const row=B.costedApplication(a,{transportCharged});if(collision){row.amount=null;row.status='missing';row.issues.push('Trùng phạm vi vai trò/element/phòng; không cộng hai lần');}if(conflictingTransport.has(c.quotes[a.quoteId]?.transportGroup)){row.amount=null;row.status='missing';row.issues.push('Các báo giá của chuyến vận chuyển chung mâu thuẫn về tiền/thuế/phạm vi');}rows.push(row);}
+  for(const a of applications){const key=a.roleId+'|'+(a.furnitureId||a.elementId||a.roomId||'project'),collision=seen.has(key)||a.roomId&&!a.furnitureId&&!a.elementId&&projectRoles.has(a.roleId);seen.add(key);const row=B.costedApplication(a,{transportCharged,materialIssues:currentMaterialIssues(a)});if(collision){row.amount=null;row.status='missing';row.issues.push('Trùng phạm vi vai trò/element/phòng; không cộng hai lần');}if(conflictingTransport.has(c.quotes[a.quoteId]?.transportGroup)){row.amount=null;row.status='missing';row.issues.push('Các báo giá của chuyến vận chuyển chung mâu thuẫn về tiền/thuế/phạm vi');}rows.push(row);}
   // One missing row per applicable role; a category-selected product is not consent to apply it.
   const matrix=B.styleMaterialSchedule?.(p)?.rows||[];
   const scopes=[...matrix.map(m=>({id:m.id,name:m.name})),{id:'preparation',name:'Chuẩn bị / khảo sát / thủ tục'},{id:'structure',name:'Móng, khung, thép theo KS'},{id:'mep',name:'Điện, nước và MEP'},{id:'waterproof',name:'Chống thấm'},{id:'external',name:'Sân, cổng và công trình ngoài nhà'},...(B.elevatorShafts().length?[{id:'lift',name:'Thang máy theo model hãng'}]:[])];

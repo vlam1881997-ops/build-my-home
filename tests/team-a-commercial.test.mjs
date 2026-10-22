@@ -7,6 +7,46 @@ function fixture(){const B=designClient();B.state.project.site.floors=1;B.state.
 const chair=(id='chair')=>({id,roomId:'room',floor:0,modelId:'chair',origin:'customer-added',placementStatus:'present',locked:false,pose:{x:3,y:4,z:0,rotationDeg:37},size:{width:.4,depth:.4,height:.94},materialBindings:[{sku:'TEST-ONLY',specification:'Fixture chair',quoteId:'chair-quote'}],costTreatment:'purchase'});
 const terms=(overrides={})=>({principal:120000000,months:12,method:'annuity',graceMonths:0,ratePeriods:[{fromMonth:1,annualRatePct:12},{fromMonth:7,annualRatePct:15}],draws:[{month:1,amount:120000000}],fees:[],sourceReference:'TEST-ONLY user terms',...overrides});
 const quote=(extra={})=>({sku:'TEST-ONLY',specification:'Fixture chair',unit:'cái',unitPrice:100000,quotedAt:'2026-10-01',validUntil:'2027-01-01',sourceReference:'TEST-ONLY supplier Q1',region:'TP. Hồ Chí Minh',scope:'supply',labourPerQuantity:10000,wastePct:0,vatMode:'excluded',taxPct:8,vatBasis:'all',transportMode:'excluded',transportAmount:5000,...extra});
+function materialFixture(){
+ const B=fixture(),p=B.state.project;
+ const add=(id,category='floor')=>{const product={id,category,sku:'TEST-'+id,specification:'TEST-ONLY specification '+id,unit:'m²'};p.dataEngine.materialOverrides[id]={product};return product;};
+ const first=add('FLOOR-A'),second=add('FLOOR-B');
+ const apply=(product,roomId='room',scope='room')=>{p.materials.choices[product.category]=product.id;assert.equal(B.applyCatalogMaterial(product.category,product.category==='paint'?'ivory-paint':'ivory-tile',{roomId,scope}),true);};
+ const price=(product,{id='AP-floor-room',roleId='floor',roomId='room',quoteId='floor-q',...extra}={})=>{B.setSourcedQuote(quoteId,quote({sku:product.sku,specification:product.specification,unit:product.unit,scope:'installed',wastePct:0,vatMode:'included',transportMode:'included',...extra}));B.setBoqApplication({id,roleId,roomId,sku:product.sku,specification:product.specification,quoteId,costTreatment:'purchase'});return ()=>B.commercialBoq().rows.find(r=>r.code===id);};
+ return {B,p,add,first,second,apply,price};
+}
+test('saved room SKU replaces an old quote, while browsing another catalogue item does not apply it',()=>{
+ const {B,p,first,second,apply,price}=materialFixture();apply(first);const row=price(first),initial=row().amount;assert.ok(Number.isSafeInteger(initial)&&initial>0);
+ p.materials.choices.floor=second.id;assert.equal(row().amount,initial,'catalogue choice is not application to this room');
+ apply(second);const changed=row();assert.equal(changed.amount,null);assert.match(changed.issues.join(';'),/vật liệu|SKU|quy cách/);assert.equal(B.commercialBoq().completeTotal,null);
+ const replacement=price(second,{quoteId:'replacement-q',unitPrice:200000});assert.equal(replacement().amount,initial*2);p.costPlan.quotes['replacement-q'].unitPrice=null;assert.equal(replacement().amount,null);
+});
+test('a whole-house quote cannot cover mixed saved room SKUs, but a different room does not invalidate a scoped quote',()=>{
+ const {B,p,first,second,apply,price}=materialFixture();p.plan.rooms.push({id:'second-room',type:'custom',name:'Phòng hai',floor:0,x:1,y:7,w:6,h:4});apply(first,'room');apply(second,'second-room');
+ const scoped=price(first);assert.ok(scoped().amount>0);
+ p.costPlan.applications=[];const whole=price(first,{id:'AP-floor-whole',roomId:null});assert.equal(whole().amount,null);
+ p.plan.rooms[1].type='bath';assert.equal(whole().status,'quoted','wet-area selection does not replace the dry-floor scope');const wet=price(second,{id:'AP-wet',roleId:'wetArea',roomId:null,quoteId:'wet-q'});assert.equal(wet().status,'quoted');
+});
+test('stale product metadata and cross-room bindings are not priced as the formerly selected material',()=>{
+ for(const change of [(p,b)=>p.dataEngine.materialOverrides['FLOOR-A'].product.specification='CHANGED-SPEC',(p,b)=>b.roomId='foreign-room']){
+  const {p,first,apply,price}=materialFixture();apply(first);const row=price(first);assert.ok(row().amount>0);
+  change(p,p.materials.finish.rooms.room.catalogMaterials.floor);assert.equal(row().amount,null);
+ }
+});
+test('exterior paint uses exterior bindings, and alternate quote previews do not change or require applying the candidate',()=>{
+ const {B,p,add,first,second,apply,price}=materialFixture(),inside=add('PAINT-IN','paint'),outside=add('PAINT-OUT','paint');
+ apply(inside);apply(outside,null,'exterior');const interior=price(inside,{id:'AP-wall',roleId:'wall',roomId:null}),exterior=price(outside,{id:'AP-facade',roleId:'facade',roomId:null,quoteId:'exterior-q'});
+ assert.equal(interior().status,'quoted');assert.equal(exterior().status,'quoted');
+ apply(first);const current=price(first,{quoteId:'first-q'}),initial=current().amount;assert.ok(initial>0);B.setSourcedQuote('alternative-q',quote({sku:second.sku,specification:second.specification,unit:'m²',unitPrice:50000,scope:'installed',wastePct:0,vatMode:'included',transportMode:'included'}));
+ const before=JSON.stringify(p),application=p.costPlan.applications.find(a=>a.id==='AP-floor-room'),candidate=B.compareSourcedAlternatives(application,[{sku:second.sku,specification:second.specification,quoteId:'alternative-q',product:second,equivalence:{confirmed:true,sourceReference:'TEST-ONLY comparison'}}])[0];
+ assert.equal(candidate.amount,initial/2);assert.equal(JSON.stringify(p),before);
+ const outsideNext=add('PAINT-OUT-NEXT','paint');apply(outsideNext,null,'exterior');assert.equal(exterior().amount,null);assert.equal(interior().status,'quoted');
+});
+test('an outdated material quote does not consume a shared delivery charge needed by another valid room',()=>{
+ const {p,first,second,apply,price}=materialFixture();p.plan.rooms.push({id:'second-room',type:'custom',name:'Phòng hai',floor:0,x:1,y:7,w:6,h:4});apply(first);apply(first,'second-room');
+ const stale=price(first,{quoteId:'first-q',transportMode:'excluded',transportAmount:5000,transportGroup:'TEST-SHARED'}),valid=price(first,{id:'AP-second',roomId:'second-room',quoteId:'second-q',transportMode:'excluded',transportAmount:5000,transportGroup:'TEST-SHARED'});
+ apply(second);assert.equal(stale().amount,null);assert.equal(valid().transportAmount,5000);assert.equal(valid().amount,valid().supplyAmount+5000);
+});
 test('room rotation uses one atomic transform, preserving 37-degree pose, local size and history',()=>{
  const B=fixture();B.state.project.plan.furniture=[chair()];const before=plain(B.state.project.plan),revision=B.drawingRevision();
  assert.equal(B.rotateSelectedRoom(),true);let i=B.resolvedFurniture()[0];assert.equal(i.pose.rotationDeg,127);assert.equal(i.pose.x,4);assert.equal(i.pose.y,3);assert.deepEqual(plain(i.size),chair().size);assert.notEqual(B.drawingRevision(),revision);
@@ -91,4 +131,108 @@ test('A3 material pages consume the same complete BOQ rows and furniture tables 
 });
 test('public BOQ quote metadata excludes unrelated imported personal fields while retaining the saved original',()=>{
  const B=fixture();B.state.project.plan.furniture=[chair()];B.setSourcedQuote('chair-quote',quote({bankAccount:'PRIVATE-FIXTURE',income:987654321}));assert.equal(B.state.project.costPlan.quotes['chair-quote'].bankAccount,'PRIVATE-FIXTURE');assert.doesNotMatch(JSON.stringify(B.designHandoverManifest()),/PRIVATE-FIXTURE|987654321|bankAccount/);assert.equal(B.commercialBoq().knownSubtotal,124200);
+});
+
+// Exercise asynchronous export orchestration; PDF bytes are a test double, not a valid dossier.
+async function exportRaceFixture({digestHook,packageHook,materialSamples=false}={}){
+ const {default:fs}=await import('node:fs'),vm=await import('node:vm'),{webcrypto}=await import('node:crypto');
+ const B=fixture();let calls=0;
+ B.measuredDesignReview=()=>({geometryValid:true});B.architecturalSheets=()=>[];
+ B.architecturalPdfBytes=async()=>new Uint8Array([1,2,3]);
+ B.customerDesignSnapshot=()=>({revision:B.drawingRevision()});B.customerPresentationHtml=()=>'<p>TEST ONLY</p>';
+ B.customerPackageFiles=()=>{packageHook?.(B);return [['test-only.txt','synthetic package']];};
+ if(materialSamples)vm.runInNewContext(fs.readFileSync('src/97_project_dashboard.js','utf8'),{BMH:B,document:{addEventListener(){}},console});
+ vm.runInNewContext(fs.readFileSync('src/team-a-handover.js','utf8'),{BMH:B,structuredClone,TextEncoder,Uint8Array,Date,document:{addEventListener(){}},crypto:{subtle:{async digest(...args){calls++;await digestHook?.(B,calls);return webcrypto.subtle.digest(...args);}}}});
+ return B;
+}
+test('failed asynchronous handover leaves no generated output records',async()=>{
+ for(const failure of ['price-change','digest-failure','package-failure']){
+  const B=await exportRaceFixture({digestHook:async(b,n)=>{if(n===2){if(failure==='price-change')b.state.project.costPlan.contingencyPct=17;if(failure==='digest-failure')throw Error('TEST digest failure');}},packageHook:()=>{if(failure==='package-failure')throw Error('TEST package failure');}});
+  const original=plain(B.state.project.plan),before=plain(B.supervisionAdapter.list('outputs'));
+  if(failure==='price-change')assert.equal(await B.prepareDesignHandover(),false);
+  else await assert.rejects(B.prepareDesignHandover(),/TEST/);
+  assert.deepEqual(plain(B.supervisionAdapter.list('outputs')),before,failure);
+  assert.deepEqual(plain(B.state.project.plan),original);
+ }
+});
+test('successful handover records hashes of returned files and keeps private finance separate',async()=>{
+ const {createHash}=await import('node:crypto');const B=await exportRaceFixture();
+ B.state.project.finance.privateNote='PRIVATE-EXPORT-SENTINEL';
+ const result=await B.prepareDesignHandover();assert.ok(result);
+ const records=B.supervisionAdapter.list('outputs'),files=new Map(result.files);
+ assert.equal(records.length,10);
+ for(const row of records){assert.equal(row.designRevision,result.revision);assert.equal(row.fileHash,createHash('sha256').update(files.get(row.fileReference)).digest('hex'));}
+ const manifest=JSON.parse(files.get('revision-va-ban-giao.json'));
+ assert.equal(manifest.outputs.length,records.length);assert.equal(manifest.financeIncluded,false);
+ assert.doesNotMatch(JSON.stringify(result.files),/PRIVATE-EXPORT-SENTINEL/);
+ const ids=records.map(r=>r.id);await B.prepareDesignHandover();
+ assert.deepEqual(B.supervisionAdapter.list('outputs').map(r=>r.id),ids);
+});
+test('a synchronous design change during package assembly also rejects without output records',async()=>{
+ const B=await exportRaceFixture({packageHook:b=>{b.state.project.plan.rooms[0].name='TEST changed during assembly';}});
+ assert.equal(await B.prepareDesignHandover(),false);
+ assert.equal(B.supervisionAdapter.list('outputs').length,0);
+ assert.equal(B.state.project.plan.rooms[0].name,'TEST changed during assembly');
+});
+test('handover button reports failures, preserves design and permits retry',async()=>{
+ for(const stage of ['prepare','zip','download']){
+  const B=fixture(),messages=[];B.toast=s=>messages.push(s);const before=plain(B.state.project);let failing=true;
+  B.prepareDesignHandover=async()=>{if(stage==='prepare'&&failing)throw Error('TEST unavailable font');return {revision:'TEST',files:[['test.txt','test']]};};
+  B.zipStored=()=>{if(stage==='zip'&&failing)throw Error('TEST ZIP');return new Uint8Array([1]);};
+  let downloads=0;B.download=()=>{if(stage==='download'&&failing)throw Error('TEST download');downloads++;};
+  assert.equal(await B.exportDesignHandover(),false);assert.ok(messages.length);assert.equal(B.designHandoverBusy,false);assert.deepEqual(plain(B.state.project),before);
+  failing=false;assert.equal(await B.exportDesignHandover(),true);assert.equal(downloads,1);assert.equal(B.designHandoverBusy,false);
+ }
+});
+test('handover button starts one preparation while a prior export is pending',async()=>{
+ const B=fixture();let release,starts=0,downloads=0;
+ B.prepareDesignHandover=()=>{starts++;return new Promise(resolve=>{release=resolve;});};B.zipStored=()=>new Uint8Array([1]);B.download=()=>downloads++;
+ const first=B.exportDesignHandover();assert.equal(await B.exportDesignHandover(),false);assert.equal(starts,1);
+ release({revision:'TEST',files:[]});assert.equal(await first,true);assert.equal(downloads,1);assert.equal(B.designHandoverBusy,false);
+});
+
+function attachExportSample(B){
+ const p=B.state.project,product={id:'TEST-export-tile',category:'floor',sku:'TEST-EXPORT-600',specification:'600x600 mm',unit:'m²'};
+ p.materials.choices.floor=product.id;p.dataEngine.materialOverrides[product.id]={product};
+ assert.equal(B.applyCatalogMaterial('floor','ivory-tile',{scope:'room',roomId:'room'}),true);
+ const binding=p.materials.finish.rooms.room.catalogMaterials.floor;
+ binding.sample={mediaId:'material-sample-export-test',productId:binding.productId,sku:binding.sku,specification:binding.specification,realWorldScale:[.6,.6],rotationDeg:37,sourceReference:'TEST-ONLY surface sample, not supplier photo'};
+ // Media accessor is a test double; native IndexedDB/image decoding remains a separate gate.
+ B.materialSampleForBinding=b=>b?.sample?{image:{src:'data:image/jpeg;base64,/9j/AAAA'},mediaId:b.sample.mediaId}:null;
+ return binding;
+}
+test('A handover retains B sample metadata and HTML with matching room/SKU/revision',async()=>{
+ const B=await exportRaceFixture({materialSamples:true});attachExportSample(B);B.state.project.finance.privateNote='PRIVATE-SAMPLE-EXPORT';
+ const result=await B.prepareDesignHandover();assert.ok(result);const files=new Map(result.files);
+ const manifest=JSON.parse(files.get('anh-mau-vat-lieu.json'));
+ assert.equal(manifest.revision,result.revision);assert.equal(manifest.materialSampleKey,B.materialSamplesKey());
+ assert.equal(manifest.rows[0].roomId,'room');assert.equal(manifest.rows[0].sku,'TEST-EXPORT-600');assert.deepEqual(manifest.rows[0].realWorldScale,[.6,.6]);assert.equal(manifest.rows[0].rotationDeg,37);
+ assert.match(files.get('anh-mau-vat-lieu.html'),/TEST-EXPORT-600/);assert.equal(result.files.filter(([n])=>n==='boq-co-nguon.csv').length,1);
+ assert.doesNotMatch(JSON.stringify(result.files),/PRIVATE-SAMPLE-EXPORT/);
+});
+test('A handover refuses changed B sample metadata during hashing without output records',async()=>{
+ let binding;const B=await exportRaceFixture({materialSamples:true,digestHook:(b,n)=>{if(n===2)binding.sample.rotationDeg=19;}});binding=attachExportSample(B);
+ assert.equal(await B.prepareDesignHandover(),false);
+ assert.equal(B.supervisionAdapter.list('outputs').length,0);assert.equal(binding.sample.rotationDeg,19);
+});
+
+test('A handover discloses missing sample bytes instead of substituting a product photo',async()=>{
+ const B=await exportRaceFixture({materialSamples:true});attachExportSample(B);B.materialSampleForBinding=()=>null;
+ const result=await B.prepareDesignHandover();assert.ok(result);const files=new Map(result.files),manifest=JSON.parse(files.get('anh-mau-vat-lieu.json'));
+ assert.equal(manifest.rows[0].status,'sample-unavailable');assert.equal(manifest.rows[0].kind,'customer-surface-sample');
+ assert.doesNotMatch(files.get('anh-mau-vat-lieu.html'),/<img /);assert.match(files.get('anh-mau-vat-lieu.html'),/Không có ảnh mẫu/);
+ assert.equal(B.commercialBoq().completeTotal,null);
+});
+test('sample files have SHA256 records matching the returned package bytes',async()=>{
+ const {createHash}=await import('node:crypto'),B=await exportRaceFixture({materialSamples:true});attachExportSample(B);
+ const result=await B.prepareDesignHandover(),files=new Map(result.files),manifest=JSON.parse(files.get('revision-va-ban-giao.json'));
+ for(const name of ['anh-mau-vat-lieu.json','anh-mau-vat-lieu.html']){
+  const row=manifest.outputs.find(r=>r.fileReference===name);assert.ok(row,name);
+  assert.equal(row.designRevision,result.revision);assert.equal(row.fileHash,createHash('sha256').update(files.get(name)).digest('hex'));
+ }
+});
+test('sample change during sample file hashing rejects the package without output records',async()=>{
+ let binding;const B=await exportRaceFixture({materialSamples:true,digestHook:(b,n)=>{if(n===11)binding.sample.sourceReference='TEST changed during sample hash';}});binding=attachExportSample(B);
+ assert.equal(await B.prepareDesignHandover(),false);assert.equal(B.supervisionAdapter.list('outputs').length,0);
+ assert.equal(binding.sample.sourceReference,'TEST changed during sample hash');
 });

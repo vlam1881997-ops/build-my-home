@@ -1,0 +1,813 @@
+{
+  "schemaVersion": 1,
+  "task": "U1-A01",
+  "status": "ready_for_integration",
+  "capturedAt": "2026-10-21T03:08:49.399Z",
+  "timeZone": "Asia/Saigon",
+  "runtimeCommit": "e73e0afbc85d4596c806882d8af1d6af10f5ea75",
+  "commonBaselineCommit": "8a03c900459cb2b4df03fd11ed8846ed2c0d400b",
+  "previousAHead": "378847971c45f4cb5b570247fc171bb5b1b94c5a",
+  "previousAIsAncestor": true,
+  "fixture": {
+    "id": "modern-5x20-2f-v01",
+    "referencePath": "docs/team-v1/evidence/B/Modern-5x20-V01/project.json",
+    "referenceBlob": "f96c3065b332f6b31a353b6ba7c4090f3e9f97fd",
+    "projectDataIdentical": true,
+    "projectSha256": "863da24bbffc79c79ddbfd78e81eeade548995ee4bfcb8490260d0d05f55b7de",
+    "currentRevision": "7BADC039-9AD609B4-AI4-RH3",
+    "historicalArtifactRevision": "7BADC039-741638A5-AI4-RH3",
+    "historicalRevisionMayNotLabelCurrentExports": true,
+    "units": "m",
+    "cadUnits": "mm",
+    "source": "synthetic-review-fixture-not-surveyed-or-approved",
+    "assumptions": [
+      "Front/rear/side setbacks 2/1/0m are a design scenario, not verified planning.",
+      "Two 3.4m storeys, two bedrooms, two bathrooms; no elevator.",
+      "Proposed front upper terrace 3.58×1.89m; adjoining bedroom depth3.8m. Requires customer/architect approval.",
+      "Family data are synthetic; no personal feng-shui approval.",
+      "Furniture and CC0 surface profiles are generic; no verified manufacturer SKU."
+    ],
+    "missing": [
+      "Survey and planning confirmation",
+      "Customer room/budget/style approval",
+      "Structural and MEP engineering",
+      "Supplier SKU assets and complete quotes",
+      "Actual shaded exterior/interior visual approval"
+    ]
+  },
+  "geometry": {
+    "rooms": 11,
+    "floors": 2,
+    "engineIssues": [],
+    "stairs": [],
+    "circulation": [
+      {
+        "floor": 0,
+        "unreachable": []
+      },
+      {
+        "floor": 1,
+        "unreachable": []
+      }
+    ]
+  },
+  "rooms": [
+    {
+      "id": "design-f0-corridor-1",
+      "floor": 0,
+      "type": "corridor",
+      "name": "Sảnh / hành lang T1"
+    },
+    {
+      "id": "design-f0-living-1",
+      "floor": 0,
+      "type": "living",
+      "name": "Phòng khách"
+    },
+    {
+      "id": "design-f0-kitchen-1",
+      "floor": 0,
+      "type": "kitchen",
+      "name": "Bếp + ăn"
+    },
+    {
+      "id": "design-f0-bath-1",
+      "floor": 0,
+      "type": "bath",
+      "name": "WC T1"
+    },
+    {
+      "id": "design-f0-stairs-1",
+      "floor": 0,
+      "type": "stairs",
+      "name": "Cầu thang"
+    },
+    {
+      "id": "design-f1-corridor-1",
+      "floor": 1,
+      "type": "corridor",
+      "name": "Sảnh / hành lang T2"
+    },
+    {
+      "id": "design-f1-bed-1",
+      "floor": 1,
+      "type": "bed",
+      "name": "Phòng ngủ 1"
+    },
+    {
+      "id": "design-f1-bed-2",
+      "floor": 1,
+      "type": "bed",
+      "name": "Phòng ngủ 2"
+    },
+    {
+      "id": "design-f1-bath-1",
+      "floor": 1,
+      "type": "bath",
+      "name": "WC T2"
+    },
+    {
+      "id": "design-f1-stairs-1",
+      "floor": 1,
+      "type": "stairs",
+      "name": "Cầu thang"
+    },
+    {
+      "id": "design-f1-bed-1-released",
+      "floor": 1,
+      "type": "balcony",
+      "name": "Sân thượng"
+    }
+  ],
+  "furniture": {
+    "authoredCount": 0,
+    "resolved": [
+      {
+        "id": "furniture:design-f0-living-1:loungeDesignSofa:0",
+        "roomId": "design-f0-living-1",
+        "floor": 0,
+        "modelId": "loungeDesignSofa",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 1.9,
+          "y": 2.69,
+          "z": 0,
+          "rotationDeg": 180
+        },
+        "size": {
+          "width": 2.24,
+          "depth": 0.82,
+          "height": 0.8
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-living-1:tableCoffee:0",
+        "roomId": "design-f0-living-1",
+        "floor": 0,
+        "modelId": "tableCoffee",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 1.9,
+          "y": 3.91,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 1.322,
+          "depth": 0.8,
+          "height": 0.46
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-living-1:cabinetTelevision:0",
+        "roomId": "design-f0-living-1",
+        "floor": 0,
+        "modelId": "cabinetTelevision",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 1.9,
+          "y": 6.962,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 1.6,
+          "depth": 0.5,
+          "height": 0.62
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-living-1:televisionModern:0",
+        "roomId": "design-f0-living-1",
+        "floor": 0,
+        "modelId": "televisionModern",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 1.9,
+          "y": 6.962,
+          "z": 0.64,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 1.3696,
+          "depth": 0.2568,
+          "height": 0.9095
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-living-1:sideTable:0",
+        "roomId": "design-f0-living-1",
+        "floor": 0,
+        "modelId": "sideTable",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 0.4299999999999999,
+          "y": 2.69,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 0.4,
+          "depth": 0.4,
+          "height": 0.65
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-living-1:floorLamp:0",
+        "roomId": "design-f0-living-1",
+        "floor": 0,
+        "modelId": "floorLamp",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 3.37,
+          "y": 2.69,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 0.4,
+          "depth": 0.4,
+          "height": 1.62
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-living-1:loungeChair:0",
+        "roomId": "design-f0-living-1",
+        "floor": 0,
+        "modelId": "loungeChair",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 0.7599999999999999,
+          "y": 4.726,
+          "z": 0,
+          "rotationDeg": 90
+        },
+        "size": {
+          "width": 0.98,
+          "depth": 0.82,
+          "height": 0.92
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-living-1:pottedPlant:0",
+        "roomId": "design-f0-living-1",
+        "floor": 0,
+        "modelId": "pottedPlant",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 3.29,
+          "y": 3.59,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 0.4241,
+          "depth": 0.4829,
+          "height": 1.308
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-kitchen-1:kitchenSink:0",
+        "roomId": "design-f0-kitchen-1",
+        "floor": 0,
+        "modelId": "kitchenSink",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 0.6599999999999999,
+          "y": 7.962000000000001,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 0.86,
+          "depth": 0.9,
+          "height": 0.98
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-kitchen-1:kitchenStove:0",
+        "roomId": "design-f0-kitchen-1",
+        "floor": 0,
+        "modelId": "kitchenStove",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 1.66,
+          "y": 7.962000000000001,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 0.86,
+          "depth": 0.9,
+          "height": 0.9
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-kitchen-1:kitchenFridge:0",
+        "roomId": "design-f0-kitchen-1",
+        "floor": 0,
+        "modelId": "kitchenFridge",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 3.09,
+          "y": 7.8420000000000005,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 0.86,
+          "depth": 0.5839,
+          "height": 1.84
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-kitchen-1:table:0",
+        "roomId": "design-f0-kitchen-1",
+        "floor": 0,
+        "modelId": "table",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 1.9,
+          "y": 11.3382,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 1.683,
+          "depth": 0.8947,
+          "height": 0.6535
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-kitchen-1:chair:0",
+        "roomId": "design-f0-kitchen-1",
+        "floor": 0,
+        "modelId": "chair",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 0.7999999999999998,
+          "y": 11.3382,
+          "z": 0,
+          "rotationDeg": 90
+        },
+        "size": {
+          "width": 0.4,
+          "depth": 0.4,
+          "height": 0.94
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-kitchen-1:chair:1",
+        "roomId": "design-f0-kitchen-1",
+        "floor": 0,
+        "modelId": "chair",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 3,
+          "y": 11.3382,
+          "z": 0,
+          "rotationDeg": 270
+        },
+        "size": {
+          "width": 0.4,
+          "depth": 0.4,
+          "height": 0.94
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-kitchen-1:chair:2",
+        "roomId": "design-f0-kitchen-1",
+        "floor": 0,
+        "modelId": "chair",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 1.9,
+          "y": 12.138200000000001,
+          "z": 0,
+          "rotationDeg": 180
+        },
+        "size": {
+          "width": 0.4,
+          "depth": 0.4,
+          "height": 0.94
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-bath-1:toilet:0",
+        "roomId": "design-f0-bath-1",
+        "floor": 0,
+        "modelId": "toilet",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 0.59,
+          "y": 14.120000000000001,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 0.6251,
+          "depth": 0.9544,
+          "height": 0.9019
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-bath-1:shower:0",
+        "roomId": "design-f0-bath-1",
+        "floor": 0,
+        "modelId": "shower",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 1.9,
+          "y": 14.99,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 1.1236,
+          "depth": 1.1636,
+          "height": 2.1881
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f0-bath-1:bathroomSink:0",
+        "roomId": "design-f0-bath-1",
+        "floor": 0,
+        "modelId": "bathroomSink",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 3.21,
+          "y": 13.93,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 0.68,
+          "depth": 0.58,
+          "height": 1.12
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f1-bed-1:bedDouble:0",
+        "roomId": "design-f1-bed-1",
+        "floor": 1,
+        "modelId": "bedDouble",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 1.9,
+          "y": 5.260000000000001,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 1.912,
+          "depth": 2.25,
+          "height": 0.75
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f1-bed-1:cabinetBed:0",
+        "roomId": "design-f1-bed-1",
+        "floor": 1,
+        "modelId": "cabinetBed",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 0.5099999999999999,
+          "y": 4.400000000000001,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 0.532,
+          "depth": 0.43,
+          "height": 0.4664
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f1-bed-1:bookcaseClosedWide:0",
+        "roomId": "design-f1-bed-1",
+        "floor": 1,
+        "modelId": "bookcaseClosedWide",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 1.9,
+          "y": 7.380000000000001,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 1.6,
+          "depth": 0.5,
+          "height": 1.58
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f1-bed-2:bedDouble:0",
+        "roomId": "design-f1-bed-2",
+        "floor": 1,
+        "modelId": "bedDouble",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 1.9,
+          "y": 9.06,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 1.912,
+          "depth": 2.25,
+          "height": 0.75
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f1-bed-2:cabinetBed:0",
+        "roomId": "design-f1-bed-2",
+        "floor": 1,
+        "modelId": "cabinetBed",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 0.5099999999999999,
+          "y": 8.200000000000001,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 0.532,
+          "depth": 0.43,
+          "height": 0.4664
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f1-bed-2:bookcaseClosedWide:0",
+        "roomId": "design-f1-bed-2",
+        "floor": 1,
+        "modelId": "bookcaseClosedWide",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 1.9,
+          "y": 13.07,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 1.6,
+          "depth": 0.5,
+          "height": 1.58
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f1-bath-1:toilet:0",
+        "roomId": "design-f1-bath-1",
+        "floor": 1,
+        "modelId": "toilet",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 0.59,
+          "y": 14.120000000000001,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 0.6251,
+          "depth": 0.9544,
+          "height": 0.9019
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f1-bath-1:shower:0",
+        "roomId": "design-f1-bath-1",
+        "floor": 1,
+        "modelId": "shower",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 1.9,
+          "y": 14.99,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 1.1236,
+          "depth": 1.1636,
+          "height": 2.1881
+        },
+        "materialBindings": []
+      },
+      {
+        "id": "furniture:design-f1-bath-1:bathroomSink:0",
+        "roomId": "design-f1-bath-1",
+        "floor": 1,
+        "modelId": "bathroomSink",
+        "origin": "generated",
+        "placementStatus": "present",
+        "pose": {
+          "x": 3.21,
+          "y": 13.93,
+          "z": 0,
+          "rotationDeg": 0
+        },
+        "size": {
+          "width": 0.68,
+          "depth": 0.58,
+          "height": 1.12
+        },
+        "materialBindings": []
+      }
+    ]
+  },
+  "materials": {
+    "choices": {
+      "floor": "UNCONFIRMED-FLOOR",
+      "paint": "UNCONFIRMED-PAINT",
+      "door": "UNCONFIRMED-DOOR"
+    },
+    "verifiedManufacturerImages": 0,
+    "confirmedSkuSet": false
+  },
+  "boq": {
+    "revision": "7BADC039-9AD609B4-AI4-RH3",
+    "priceKey": "1df2c513",
+    "unpricedCount": 45,
+    "completeTotal": null
+  },
+  "apis": [
+    {
+      "area": "input",
+      "name": "projectInputRegister",
+      "source": "src/team-a-project-contract.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "input",
+      "name": "recordProjectInput",
+      "source": "src/team-a-project-contract.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "geometry",
+      "name": "previewRoomDepthChange",
+      "source": "src/team-a-project-contract.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "geometry",
+      "name": "applyRoomDepthChange",
+      "source": "src/team-a-project-contract.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "geometry",
+      "name": "measuredQuantities",
+      "source": "src/92_measured_design.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "geometry",
+      "name": "designDrawingSvg",
+      "source": "src/94_architectural_design.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "geometry",
+      "name": "planDxf",
+      "source": "src/40_exports.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "material",
+      "name": "applyCatalogMaterial",
+      "source": "src/86_visual_materials.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "material",
+      "name": "catalogBindingStatus",
+      "source": "src/86_visual_materials.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "material",
+      "name": "finishPalette",
+      "source": "src/86_visual_materials.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "furniture",
+      "name": "resolvedFurniture",
+      "source": "src/99_customer_design.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "boq",
+      "name": "commercialBoq",
+      "source": "src/team-a-boq.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "boq",
+      "name": "setBoqApplication",
+      "source": "src/team-a-boq.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "boq",
+      "name": "setSourcedQuote",
+      "source": "src/team-a-boq.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "boq",
+      "name": "compareSourcedAlternatives",
+      "source": "src/team-a-boq.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "finance",
+      "name": "financeScenarioSummary",
+      "source": "src/team-a-finance.js",
+      "availableInFixture": true
+    },
+    {
+      "area": "handover",
+      "name": "prepareDesignHandover",
+      "source": "src/team-a-handover.js",
+      "availableInFixture": true
+    }
+  ],
+  "productionLoadOrderEvidence": "scripts/build.cjs; this VM fixture is not a browser or full production-module boot",
+  "fixtureExcludedInterfaces": [
+    {
+      "name": "materialSampleHandoverFiles",
+      "source": "src/97_project_dashboard.js",
+      "reason": "Existing B97 wrapper is not loaded by this unit fixture; must use integrated package for U1-A03/native QA."
+    }
+  ],
+  "verification": {
+    "localNode": "v24.19.0",
+    "sourceHashesVerified": true,
+    "designMutated": false,
+    "reusedPriorNode22CI": {
+      "commit": "e73e0afbc85d4596c806882d8af1d6af10f5ea75",
+      "run": 39525474492,
+      "result": "success",
+      "scope": "existing complete repository tests; not this new baseline audit"
+    },
+    "native": false,
+    "professionalSignoff": false,
+    "commercialAccepted": false
+  },
+  "dependencies": {
+    "U1_A02": "B must provide actual Modern SKU/spec/unit/role/room and photo/source/rights manifest; synthetic contracts may be developed independently.",
+    "U1_A03": "B97 sample/package consumer needs integrated verification; no native proof from this fixture.",
+    "U2_A01": "Ready to reuse this project and existing input register without changing B fixture."
+  }
+}

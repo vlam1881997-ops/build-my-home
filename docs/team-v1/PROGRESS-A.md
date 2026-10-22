@@ -1,14 +1,15 @@
 # Tiến độ AI A — BMH commercial v1
 
-Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 14/10/2026.
+Chỉ AI A sửa file này khi thực thi. Ngày cập nhật: 21/10/2026.
 - role: A
 - status: in_progress
-- active_task: A-R1 / A-R2 (gói tiếp tục 13/10; A1/A2 trong manifest hiện hành)
-- active_substep: R2 chia công năng có cửa thực, R3 SVG/DXF/BOQ parity và R5 trả trước đã kiểm trên Node22; native/PDF đã kiểm; chỉ tiếp tục nhiệm vụ A, hoãn rà B và ghép A+B theo yêu cầu 14/10
+- active_task: U1-A04 integration candidate (native acceptance remains open)
+- active_substep: merged98e8bc9 passed exact Node22 CI; GitHub Vercel status success, but Vercel metadata403 prevents authenticated deployment/native verification; release gate blocked.
 - target_branch: codex/a-massing-20261013
 - actual_branch: codex/a-massing-20261013
-- source_baseline: ddf9dfe348263a28148cfbf8ca5132f1d492f8dc (main, PR #47 merged)
-- last_verified_commit: 8dbff47f6f35f61f7443b86a015917687e44b4ee (148 A checks Node22, native6 massing +2 finance và102 trang PDF; evidence/A/R3-R5-native-20261014)
+- source_baseline: 8a03c900459cb2b4df03fd11ed8846ed2c0d400b (PR75 common planning source; runtime e73e0af; production PR74 main ad575e57)
+- last_verified_commit: 98e8bc9cb142daf93733f17a3cae368c1d2144c0 (merged Node22 CI39705198053 PASS; native deployment not verified)
+- last_native_verified_A: 43a66a9587bedf2dfb1fea756897fac840cc3edc (historical A outdoor handoff; later native acceptance must use the actual current candidate)
 - checkpoint_commit: xem git log trên nhánh chứa checkpoint; không điền SHA tự tham chiếu
 - implementation_accepted: false
 
@@ -124,3 +125,102 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Security: pattern scan/manual scoped diff review performed; official Codex Security remains pending missing required preflight capability. Existing npm moderate dev esbuild advisory remains; no high/critical reported.
 - User explicitly deferred B review and A+B integration. Do not inspect B or claim integrated done/G1–G6 closure. A option-picker consumer, final2D–3D/live preview acceptance belong to later integration. Independent A implementation and test handoff in this continuation are complete within the stated scope.
 - next_action: use this A contract/fixtures when the user resumes integration; collect measured site/professional/quote/bank inputs for a real project. No fabricated sources or review. No main merge/deploy.
+
+
+## U1-A01 — explicit A assignment and shared baseline (21/10/2026 Asia/Saigon)
+- Owner now explicitly assigns this conversation to A under the five-upgrade/two-ChatGPT plan. Older14/10 instructions to defer B interface review/integration are historical; latest plan permits necessary read-only consumer review and sequential A integration, not editing B source/progress. Preserve all accepted work.
+- Remote inspection: A codex/a-massing-20261013 at3788479 is fully contained in common PR75 source8a03c90,106commits ahead/0behind; no unmerged A commits. Continue this A branch from common source using a separate recovered snapshot bmh-a-five-upgrades. Existing B workspace/branch/progress untouched; no actual git clone claimed for this API-recovered snapshot.
+- Reused existing Modern5x20fixture/project byte-verified from Git. Same project object,11rooms/2floors/27resolved furniture, source choices UNCONFIRMED, no confirmed inputs. Current derived revision7BADC039-9AD609B4-AI4-RH3 differs from historical B output label7BADC039-741638A5-AI4-RH3; preserve design and use current revision on new outputs.
+- Evidence: evidence/A/U1-A01-20261021/baseline.json, source-hashes.json, snapshot-review.json, HANDOFF-B.md.33loaded source/fixture/build inputs verified by Gitblob/SHA256; read-only inspection preserved project. Basic checker0errors/0warnings; enginegeometry/stairs0issues/circulation0unreachable. Local Node24.19.0, no browser/GPU/professional acceptance. Reuse prior Node22 runtime CI39525474492 only within its scope.
+- Existing17API contracts available; no schema/engine/UI rewrite. BOQ45unpriced and completeTotal:null. U1-A02 real data dependency is B's actual Modern SKU/spec/unit/role/room/image-source/rights manifest; contracts may be exercised with explicit TEST-ONLY records, never called supplier acceptance.
+- Changed only A progress/integration and new A-owned baseline evidence. No app source, dependencies, paid calls, B files or production changes in this checkpoint. Docs/evidence-only validation performed; no repeat of historical160A or native/PDF checks.
+- Next: inspect material binding→BOQ traceability, reproduce any consumer defect before fixing A source; prepare U2-A01 from the existing fixture while B supplies actual imagery/native evidence. Preview403/service/professional inputs remain open, not a reason to stop independent A work.
+
+
+## U1-A02 — saved material to BOQ reconciliation (21/10/2026)
+- U1-A01 baseline persisted at98c96e225775dedac50d78257c9ce8b4046b6ec9; no B/main change. Actual Modern supplier/photo manifest not yet seen on common8a03c90; developed explicit TEST-ONLY consumer regressions independently, not supplier acceptance.
+- Reproduced3defects: old quote remains priced after room SKU replacement; whole-house application prices mixed scoped SKUs; invalid specification/foreign-room binding remains priced. A-owned team-a-boq now reads existing B scoped bindings/status to keep conflicted row amount:null/missing before transport allocation. Merely browsing category, another room, wetarea versus dryfloor and facade versus interior remain distinct.
+- No new persisted fields, rates, UI or engine. Standalone alternative costedApplication comparisons stay proposals without silently applying candidate. Unbound/manual and roles not mapped by current B binding mechanism keep existing explicit-application behavior; full commercial category coverage is not claimed.
+-5new registered regressions pass locally, plus52/53 across affected A-commercial/B-workflow; sole failure was missing readonly B46file in sparse recovery. Exact8a03c90 B46source restored and only that case rerun1/1PASS. Node24.19.0; syntax PASS; exact Node22 remote CI pending for the subsequent source checkpoint.
+- Source/evidence: src/team-a-boq.js, tests/team-a-commercial.test.mjs, evidence/A/U1-A02-20261021/HANDOFF-B.md and source-hashes.json, plus A progress/integration. No B file/progress, dependency/build/schema/service/production mutation.
+- Next: exact CI; U1-A03 package consumer checks when B supplies actual sample/asset handoff; independent U2-A01 input audit/preparation. Actual imagery/native/GPU/service/professional gates remain open.
+
+
+## U2-A01 — nguồn hướng và đầu vào Hiện đại, 21/10/2026
+- Tiếp tục trên PR76/nhánh A từ fc3e652; CI39538092095 đã success, đã cập nhật PR. Không sửa B hay production.
+- Tái hiện sourceReference chỉ có khoảng trắng bị siteInputAssessment nhận là hướng có nguồn. Sửa guard trong src/team-a-project-contract.js: chỉ chuỗi có nội dung mới được dùng; object/boolean/number cũng bị từ chối, không sửa dữ liệu gốc hoặc tự xác nhận khảo sát.
+- tests/team-a-input-furniture.test.mjs: thêm kiểm malformed source + tư vấn phong thủy không mutate, và vòng lưu/load/normalize của chính modernReference hiện hữu. Chuẩn hóa bằng mergeState/defaults trước khi so canonical state; fixture gốc thiếu một số trường household mặc định, việc bổ sung default không được gọi là khách xác nhận.
+- Local Node24.19.0: 6/6 input tests PASS. Regression khoảng trắng FAIL trước sửa. Kiểm giữ site, household, finance, briefIdea, style, plan, designStudio, inputEvidence và drawingRevision; input confirmations vẫn false, legalBoundaryVerified/north.usable vẫn false trong mẫu.
+- Phạm vi: VM/local storage fixture, không phải browser/GPU/cloud hay review công trình. Không chạy lại bộ outdoor/export đã đạt. U2-A01 vẫn in_progress: ranh/unsupported, program/đồ có sẵn và AI apply cần audit tiếp theo phạm vi chưa có chứng cứ.
+- Bước tiếp: kiểm exact Node22 CI của checkpoint; tiếp tục đánh giá unsupported đất/công năng trên cùng mẫu và đối chiếu bằng chứng hiện có trước thêm test. U1-A03/A04 giữ chờ B supplier/native handoff. Main/Vercel không thay đổi.
+
+
+## U2-A01 — ranh đã áp dụng phải giữ trạng thái lỗi, 21/10/2026
+- Tái hiện hai lỗi bằng nativeParcel fixture dùng hàm ranh thực: nguồn survey đã mất nhưng siteInputAssessment trả diện tích khung 198m²; frontEdge=0.5 vẫn qua boundary review và có thể làm geometry truy cập đỉnh không tồn tại.
+- src/team-a-project-contract.js: polygon đã áp dụng không dựng được nay có area:null, status:invalid và lý do từ boundary review; không suy lại thành hình chữ nhật. Reference nguồn được giữ để sửa.
+- src/76_architecture.js: từ chối chỉ số cạnh mặt tiền không nguyên trước khi dựng hình; không sắp xếp/sửa tọa độ của khách. Chỉ số nguyên vẫn giữ semantics lựa chọn cạnh hiện hữu.
+- tests/team-a-input-furniture.test.mjs: hai regression FAIL trước sửa, toàn bộ 8/8 PASS sau sửa trên Node24.19.0. Case valid measured rectangle vẫn cho 100m²; project không bị mutate khi review.
+- Chưa đóng U2-A01: công năng theo tầng/unsupported bounds cần đối chiếu bằng chứng hiện có; native/customer/professional vẫn thiếu. Cần exact Node22 CI cho checkpoint mới. Không đổi B source, schema, dữ liệu thật hay production.
+
+- U2-A01 tiếp: kiểm cùng modernReference có tầng trệt 0 ngủ/1 WC/1 khách/1 bếp, tầng trên 2 ngủ/1 WC. Gọi proposal balanced giữ nguyên plan và requirements; số tầng 0/1.5/11 bị từ chối có lý do và không sửa project. Test mới 1/1 PASS local Node24.19.0; không thay engine công năng. Đây là contract test, chưa phải người dùng duyệt phương án.
+
+
+## U1-A03/U3-A03 — integrity of failed handover preparation, 21/10/2026
+- Resumed from f9e8009 after checking remote A ref. This is dependency-independent export hardening, not completion of the Modern dossier gate.
+- Reproduced prepareDesignHandover writing generated output records before async hashing and package assembly completed. A price change during hashing returned false but left ten records for an undelivered package; digest/package exceptions could also leave partial records.
+- src/team-a-handover.js now stages output metadata, checks revision/price/optional finance, constructs customer package (including B material hooks), rechecks after synchronous assembly, then records outputs. Existing supervision adapter, IDs, hashes and package interface preserved.
+- Added failure-injection tests: price changes during hashing, digest failure, package failure, synchronous room edit during assembly. Failed preparation leaves output records unchanged and retains customer edits. Successful case verifies ten SHA256 hashes against returned bytes, manifest outputs, private-finance exclusion and repeat export without duplicate output IDs.
+- Local Node24.19.0: all27 registered commercial cases PASS. PDF bytes/sheets and upstream package are explicit orchestration doubles in the new tests; these tests do not prove readable A3 PDF, supplier/sample image decoding, actual ZIP download, native GPU or storage failure recovery. No B source changed and no paid service used.
+- Remaining: actual integrated sample/PDF/SVG/DXF package and native preview acceptance; supplier photos/rights, complete quotes, cloud/payment and technical signoff. Prior export evidence is retained; new source needs exact Node22 CI before integration.
+
+
+## Modern dossier readback — 21/10/2026
+- Reused modernReference at817367b: 28SVG sheets share revision7BADC039-9AD609B4-AI4-RH3, A3/modelm/dimensionmm preflight passes. 2DXFs read with ezdxf: unitsmm,0errors/0fixes, PLOT5000×20000mm. Evidence: evidence/A/Modern-export-817367b.
+- All28SVGs rendered locally. Original renderer lost Arial Vietnamese glyphs; DejaVu inspection derivative restored accents. Source bytes unchanged. Contact-sheet review is bounded; native PDF/font/full-resolution acceptance remains open.
+- Restored missing96_vector_pdf.js read-only from pinned GitHub commit. No renderer/production source modified. CairoSVG installed only under scratch tooling; no repo dependency change.
+- PDF/browser ZIP/sample pixels not accepted; current browser gate remains. No repeat of prior passing runtime tests for this evidence-only checkpoint. Next: actual browser dossier and sample integration when access permits; carry open source/visual/service/professional gates forward.
+
+
+## U3-A03 — export button recovery, 21/10/2026
+- Continued from f5d9dd5 evidence checkpoint. Reproduced rejected prepareDesignHandover escaping the void click handler with no customer failure notice.
+- A-owned exportDesignHandover now catches preparation/ZIP/download exceptions, gives a retry/backup notice and clears its transient busy flag in finally. A second click while awaiting preparation returns false with a waiting notice. Does not claim OS download completion or persisted backup success.
+- Added failure-injection regression across prepare/ZIP/download: project unchanged, false result and notice, retry succeeds. Concurrent-click test holds preparation pending and verifies one preparation/download. All29 commercial tests pass on local Node24.19.0; no native browser/PDF/storage acceptance implied.
+- Source: src/team-a-handover.js; registered tests/team-a-commercial.test.mjs. No B source, schema, dependency or production changes. Exact Node22 checkpoint CI required; inherited28SVG/2DXF evidence stays bounded to prior runtime. Next native package/font/sample acceptance awaits legitimate browser access; other commercial gates remain open.
+
+
+## U1-A03 — A/B material sample package integration, 21/10/2026
+- Loaded existing B-owned97_project_dashboard before the final A handover wrapper in the export orchestration fixture. This closes the prior test coverage gap where A preparation had only a generic upstream package.
+- Three focused integration cases PASS locally Node24.19.0: A output retains B sample HTML/JSON with matching revision/sampleKey/room/SKU/scale0.6×0.6m/37°/source; only one canonical BOQ CSV, private finance excluded. Changing sample rotation while hashing returns false with no output records and retains the edit. Missing media yields sample-unavailable, no img tag, explicit notice, complete BOQ total still null.
+- The first race assertion expected an exception, but the real revision guard correctly returned false earlier. Corrected the test to the existing false-result contract; no runtime fix was needed or made.
+- Media accessor and PDF bytes remain explicit test doubles; this is code integration evidence only, not image decoding, IndexedDB, real product photo, browserZIP or PDF acceptance. No B files changed. New tests live in the registered A-commercial suite and need exact checkpoint CI.
+- U1-A03 is ready for native validation, not done. Native/sample supplier handoff and approved preview access remain needed before U1-A04 integration acceptance. Full commercial gates and current production remain unchanged.
+
+
+## U1-A03 — sample artifact hashes, 21/10/2026
+- Reproduced missing output records for anh-mau-vat-lieu.json/html despite their presence in A handover package. These two artifacts now receive SHA256 records from their exact returned bytes, with revision and B sample-snapshot reference.
+- Hashing happens before output registration; after asynchronous sample hashing, check materialSampleKey plus existing project/revision/price/finance guards. Changed sample source during this stage returns false and leaves no output records, while preserving the edit.
+- A-owned src/team-a-handover.js only; B sample-generation code/interfaces unchanged. Added two registered regressions. All34 commercial tests PASS local Node24.19.0. New orchestration cases still use explicit media/PDF doubles; no real supplier/native acceptance claim.
+- Prior SVG/DXF evidence retained. Next: exact checkpoint CI and native PDF/ZIP/sample validation after legitimate preview access is restored. U1-A03 remains awaiting native acceptance; remaining commercial gates are not waived.
+
+
+## U1-A04 — integrate new B handoff, 21/10/2026
+- Remote PR75 advanced from common8a03c90 through5commits to724c5b47a03dc41289221c7724792c273f383390. Read B progress/handoff and checked exact B CI39606926202 success. PR76/A at4d5b93c before integration.
+- Imports all17B changed/added blobs unchanged: SKU/photo inventory, source/spec/rights guard, refreshed photo rights reset, late-upload target protection, read-only comparison with custom colour/pattern, tests/progress/evidence. No A/B path conflict; merge retains ordered A and B parents. B branch/progress content not edited; no reset or main promotion.
+- All existing local B source hashes matched common base before recovery; all17new B blobs match remote Git hashes after recovery. Manifest evidence/A/integration-B-724c5b4/B-source-blobs.json. Large evidence files recovered in chunks after shell argument-size limit; no partial file accepted.
+- Local Node24.19.0 combined A-commercial/material-source/B-style-material suite:75PASS/2FAIL. Failures are absent readonly _material_search.mjs and photograph assets in sparse local snapshot. No test suppression or placeholder; full exact merged Node22 CI must resolve these using complete checkout. All34A commercial cases and41B cases passed; missing-file suites are not claimed passed locally.
+- B inventory has52review targets,27furniture,103catalog candidates,0confirmed supplier applications/eligible exactSKUphotos. Integration does not approve candidates or invent prices. U1-A02 consumer can use this manifest but final real-product gate stays open.
+- U1-A04 source integration candidate only; keep PR draft pending mergedCI/native product-photo/GPU acceptance. Further U2/U3 work inherits new B contracts. Legitimate preview access, selected licensedSKUassets, real devices, BMH service mapping/MoMo and owner/professional review remain required.
+
+
+## Resume integration — 22/10/2026
+- A remote still4d5b93c; previous create-tree call did not yield a commit/ref update. Recreated pending tree successfully without resetting source. B advanced once to4a901cb810b7a41bfebb2a84a256d76f3f19e4fc, fixing active-room/exterior sample zoom with shared media IDs. Read exact handoff; include this descendant in the same two-parent merge.
+- All18final B blobs match remote (B-latest-source-blobs.json); B content copied unchanged, no cross-owner edit. Additional6targeted tests PASS local Node24: sample zoom and A sample package/hash/race cases. Earlier75PASS/2sparse-missing-files result is retained as prior-stage evidence, not relabelled full pass.
+- Final candidate must pass complete-checkout Node22 CI before acceptance. Prior A and B CI do not substitute for mergedSHA. Browser/supplier/GPU/service/professional gates remain open; no production deployment.
+
+
+## Integrated preview access checkpoint — 22/10/2026
+- Exact merged98e8bc9 CI39705198053 success, resolving sparse-local missing module/photo checks in complete checkout. PR76 metadata updated. GitHub commit status Vercel=success, description Deployment has completed, dashboard https://vercel.com/vlam1881997-9266/build_my_home_full_v1.2_github/AFEbM9WpeczqmeXZbxxPE3Ng6ou7.
+- Read-only Vercel list_deployments for known team_vDX7I7zG36VBbi7444e5CCiw/project prj_PcB996IRamEZqWrKpA5qk9T290kh and exact SHA returned403 forbidden: no permission to list deployment. Request ID syd1:sfo1::b4sms-1792632640147-3fab14f75aba. No changed protection, account switch, secret access or alternate browser route attempted. CLI unavailable (command-v exit1).
+- GitHub status is deployment-provider metadata, not proof of environment/hostname/native/GPU acceptance. Need project owner/admin to verify the connected Vercel account/team has access to this existing project and restore an authorized preview observation path. No automatic fix or re-auth success is assumed; do not request tokens in chat.
+- Review candidate is concrete:98e8bc9 with both A/B parents, passedCI,18unchangedBblob manifest and A evidence. Main PR74 retained. After access is available, inspect exact deployment then native material selection/upload/zoom/save/reload/3D/package on desktop and phone, preserving currently open exactSKU/service/professional gates.
+- Evidence-only checkpoint; no runtime test repeat needed. U1-A04 remains blocked at native acceptance, not done; overall commercial acceptance remains incomplete.

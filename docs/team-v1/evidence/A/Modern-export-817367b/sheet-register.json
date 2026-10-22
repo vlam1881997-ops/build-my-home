@@ -1,0 +1,122 @@
+{
+  "commit": "817367bbbd90caef2703b879bc300ecb7ff65812",
+  "preflight": {
+    "revision": "7BADC039-9AD609B4-AI4-RH3",
+    "sheetCount": 28
+  },
+  "sheets": [
+    {
+      "file": "sheet-01.svg",
+      "name": "Bìa hồ sơ"
+    },
+    {
+      "file": "sheet-02.svg",
+      "name": "Ranh đất / khoảng lùi"
+    },
+    {
+      "file": "sheet-03.svg",
+      "name": "Kiến trúc tầng 1"
+    },
+    {
+      "file": "sheet-04.svg",
+      "name": "Nội thất tầng 1"
+    },
+    {
+      "file": "sheet-05.svg",
+      "name": "Bảng diện tích T1 / 1"
+    },
+    {
+      "file": "sheet-06.svg",
+      "name": "Thống kê nội thất T1 / 1"
+    },
+    {
+      "file": "sheet-07.svg",
+      "name": "Bảng cửa tầng 1 / 1"
+    },
+    {
+      "file": "sheet-08.svg",
+      "name": "Kiến trúc tầng 2"
+    },
+    {
+      "file": "sheet-09.svg",
+      "name": "Nội thất tầng 2"
+    },
+    {
+      "file": "sheet-10.svg",
+      "name": "Bảng diện tích T2 / 1"
+    },
+    {
+      "file": "sheet-11.svg",
+      "name": "Thống kê nội thất T2 / 1"
+    },
+    {
+      "file": "sheet-12.svg",
+      "name": "Bảng cửa tầng 2 / 1"
+    },
+    {
+      "file": "sheet-13.svg",
+      "name": "Mặt đứng trước"
+    },
+    {
+      "file": "sheet-14.svg",
+      "name": "Mặt đứng sau"
+    },
+    {
+      "file": "sheet-15.svg",
+      "name": "Mặt đứng phải"
+    },
+    {
+      "file": "sheet-16.svg",
+      "name": "Mặt đứng trái"
+    },
+    {
+      "file": "sheet-17.svg",
+      "name": "Mặt cắt A–A"
+    },
+    {
+      "file": "sheet-18.svg",
+      "name": "Mặt cắt B–B"
+    },
+    {
+      "file": "sheet-19.svg",
+      "name": "Chi tiết cầu thang tầng 1"
+    },
+    {
+      "file": "sheet-20.svg",
+      "name": "Mặt bằng mái"
+    },
+    {
+      "file": "sheet-21.svg",
+      "name": "Vật liệu / 1"
+    },
+    {
+      "file": "sheet-22.svg",
+      "name": "Vật liệu / 2"
+    },
+    {
+      "file": "sheet-23.svg",
+      "name": "Vật liệu / 3"
+    },
+    {
+      "file": "sheet-24.svg",
+      "name": "Vật liệu / 4"
+    },
+    {
+      "file": "sheet-25.svg",
+      "name": "Vật liệu / 5"
+    },
+    {
+      "file": "sheet-26.svg",
+      "name": "Vật liệu / 6"
+    },
+    {
+      "file": "sheet-27.svg",
+      "name": "Sổ đầu vào / 1"
+    },
+    {
+      "file": "sheet-28.svg",
+      "name": "Ngoài trời / Sân thượng"
+    }
+  ],
+  "pdf": "not-generated-native-browser-required"
+}

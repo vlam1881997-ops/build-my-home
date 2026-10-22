@@ -1,0 +1,200 @@
+[
+  {
+    "path": "docs/team-v1/evidence/B/Modern-5x20-V01/project.json",
+    "gitBlob": "f96c3065b332f6b31a353b6ba7c4090f3e9f97fd",
+    "sha256": "b7bce3dd9a2ff8aaba3a19111848b8734e4a1a1d074b2a6ab6c7361b1989980c",
+    "bytes": 18922
+  },
+  {
+    "path": "scripts/build.cjs",
+    "gitBlob": "ce06d095b489a096019bb07958fb18795676a7d2",
+    "sha256": "f285e71a97893b9661b00a4ae591198a622a2f0c82a289d1575c881ff87a7ffb",
+    "bytes": 7688
+  },
+  {
+    "path": "src/00_boot.js",
+    "gitBlob": "5e13d211208e230ce5de8dd44a54703f5518ce72",
+    "sha256": "cab90c6ae3ae85a518aa5225bb507549214ca755c069c7b5474e8845111b8efe",
+    "bytes": 38257
+  },
+  {
+    "path": "src/100_customer_experience.js",
+    "gitBlob": "9043fcfa2b94b3e08b9e9faaca9261764e440665",
+    "sha256": "96edb71da04756aa08e0610860faa8d96cf0ec213d5fadf7ee89c12bce1f706f",
+    "bytes": 14106
+  },
+  {
+    "path": "src/102_architectural_identity.js",
+    "gitBlob": "8f71216177b109af04ab8337453ab2dbbe3163e4",
+    "sha256": "94ea5129334a0dbed96b33b4b3d0b554a344a3d7a50faa11a5e3d961a6173453",
+    "bytes": 40092
+  },
+  {
+    "path": "src/103_real_house.js",
+    "gitBlob": "1a5b008551bee8c799d1587f7dad73d7497cc38d",
+    "sha256": "19a624ad207af3462e10edd821d4efcaee19b959e757f1a25d70868188e0b99a",
+    "bytes": 23673
+  },
+  {
+    "path": "src/10_state.js",
+    "gitBlob": "e408933931832ced4ddf8bfd39fbe5b0f83901b6",
+    "sha256": "fd32ebdb9fe7e2341735d6ac76121184a0bd1bd6a0133ca49c4777119b6ef060",
+    "bytes": 44320
+  },
+  {
+    "path": "src/20_calc.js",
+    "gitBlob": "32c99b68415ba09791d248e429a0b497b476000a",
+    "sha256": "0e42f2dbcbe49be6410c1b6345e158fda3c2715821ed8fdb3891da43221dd03a",
+    "bytes": 20311
+  },
+  {
+    "path": "src/30_planner.js",
+    "gitBlob": "20dcfedc83670a1148df09e7e13be6f58a424b4d",
+    "sha256": "e3f569d0a1b398c01990c83eb2c34ffbaf55b16741695f735b74ca9dcdec4153",
+    "bytes": 71771
+  },
+  {
+    "path": "src/35_dossier.js",
+    "gitBlob": "b9e9f012f7afb7301d6a1529f0793e15d9fdf5bf",
+    "sha256": "e1dde4b311cacafdc796f8ce504097fb26e34b670586ab975f8d63016aeb8f7b",
+    "bytes": 26173
+  },
+  {
+    "path": "src/40_exports.js",
+    "gitBlob": "457d4d167019e53ec119e612b43abaedc817f9c0",
+    "sha256": "b9aa2b38abf2f511e2c3988b05dc9c489615cd4c59491e37efdb699d203b9700",
+    "bytes": 48175
+  },
+  {
+    "path": "src/43_scene_assets.js",
+    "gitBlob": "3624363cc8ac48d9d9a069ef4efc25eb9fb1b6df",
+    "sha256": "61b1dca530524e21b4fb9ed3096e611b875bcbd8a0d003d9861c17ff622a5a33",
+    "bytes": 64404
+  },
+  {
+    "path": "src/44_house_styles.js",
+    "gitBlob": "8ed51a8f2ead41c1476fb352282b2884cc93f4e6",
+    "sha256": "3b6b597d137fa6abdd842138b062af332acc090e5e5f7b66f3d62d6ceb6f8775",
+    "bytes": 20481
+  },
+  {
+    "path": "src/45_studio3d.js",
+    "gitBlob": "9d0ca364aef0e2e511adeb07aa9595c198b45bae",
+    "sha256": "c3deb1d62382560488647d90a735b660a4de67e046bc40def7299360f73d27fc",
+    "bytes": 52666
+  },
+  {
+    "path": "src/75_completion.js",
+    "gitBlob": "caf735f14b1dc832c60faf2ed707c0beea7a4e55",
+    "sha256": "78a877b2713796cedbf87af3895e16440e1c1dc431133abc24b27b4fefbc73ac",
+    "bytes": 41981
+  },
+  {
+    "path": "src/76_architecture.js",
+    "gitBlob": "27bedf32ac97477b42e2ecc345f8b4538d45bc5a",
+    "sha256": "7c5e18dcb0ce9ba3737e838c107e2c4b0024e0bcee33bbe14622f426e8c6dee7",
+    "bytes": 26415
+  },
+  {
+    "path": "src/78_design_workflow.js",
+    "gitBlob": "87985e8e03732dc107161f509779d5bb7f526657",
+    "sha256": "17be676d63fb140c72bb1026a701739a5dba474ee5ecb4815c898ec443042ed0",
+    "bytes": 45420
+  },
+  {
+    "path": "src/79_stair_design.js",
+    "gitBlob": "01dc159654ecac159ac754a64049b5d4c4811291",
+    "sha256": "d9f01fa2215269667d4c63baf710ff9d3857e40a48b9f04f96f6a0303a16637a",
+    "bytes": 12720
+  },
+  {
+    "path": "src/81_design_studio.js",
+    "gitBlob": "39ed46d9186aae2a39d39b9d0f1a8f76d8b78ed1",
+    "sha256": "221a152733917c2f052aedf487fe6cbea6c62d6921929f49d8f5f192f6d256bf",
+    "bytes": 42035
+  },
+  {
+    "path": "src/85_interior_collections.js",
+    "gitBlob": "3a2f1d8c60b37133f0ab5ac700830ea5c84bab8b",
+    "sha256": "29a268975332f406c61111c53409b45bb6205d6a931a39a50f62e6c6437c3a5f",
+    "bytes": 15009
+  },
+  {
+    "path": "src/86_visual_materials.js",
+    "gitBlob": "aab67600875f12b51da6e0f7907fbdfb719b9181",
+    "sha256": "b09683e2bb2b3a7e1cb4eefa43b12bfedfab45142314f18c4d50ca32fb483c0a",
+    "bytes": 31089
+  },
+  {
+    "path": "src/87_elevator_design.js",
+    "gitBlob": "06ed945366c47232ea1d522afa3d6314327857ff",
+    "sha256": "1deba3866e4fba1fe2f48f6408d7f55336a370689b9ae71e47e1ceba1ea65d67",
+    "bytes": 23661
+  },
+  {
+    "path": "src/90_product_polish.js",
+    "gitBlob": "d5b7e09c734db1245a2c5ab726fdd91bec4238d3",
+    "sha256": "b7ef63813703385f171e98396c85996b3dfa391d72e091ffd3f9a4dc244d03c9",
+    "bytes": 37127
+  },
+  {
+    "path": "src/92_measured_design.js",
+    "gitBlob": "0a932ff694cf907e2bdd9c2a56c2327dc1b285e8",
+    "sha256": "be6d6ab80898e72cb9e2fc47b33f1c3fd686b74cc9f0f5eb77acd3cd51eee92a",
+    "bytes": 34269
+  },
+  {
+    "path": "src/94_architectural_design.js",
+    "gitBlob": "17c3a40f61b1fd78c76830e351f65a22c3e49a66",
+    "sha256": "e8a19636b3c94b003e0a8dec213c40b7c467e0f4a4d776a89435f17f72c956d9",
+    "bytes": 27801
+  },
+  {
+    "path": "src/95_architectural_documents.js",
+    "gitBlob": "25bf13013222209bafe2bd59fcd0c32731d725fb",
+    "sha256": "baf0053eedf48caabd2024b7b9efadd1d1d8b4b79e21de502cc52875a5b525b5",
+    "bytes": 51781
+  },
+  {
+    "path": "src/99_customer_design.js",
+    "gitBlob": "3fbe763b4cc77523b08f7da15b8bfb2bed0830a3",
+    "sha256": "d6054f7b950358a10c55d8a7dbf0e990823757fd5b3a068b4348d41bd2c80c6e",
+    "bytes": 125438
+  },
+  {
+    "path": "src/team-a-boq.js",
+    "gitBlob": "5616ab8ac04b079701f83d21ff456e3156d35907",
+    "sha256": "f874e1f719ea9ac6d1598f4d1dc0f9ef075bac421b2a5837e8308066fe1b56e2",
+    "bytes": 24520
+  },
+  {
+    "path": "src/team-a-finance.js",
+    "gitBlob": "1480656f7b5ffc26b5ed8f04e0ea9419641e2deb",
+    "sha256": "c09a93557b25e64d0464ca3115d2656be8b0fc6fdd216f8239f7c37a66026b45",
+    "bytes": 18914
+  },
+  {
+    "path": "src/team-a-handover.js",
+    "gitBlob": "3d02ed812cf1a728e34a98435712d233839bfad0",
+    "sha256": "7643781548012dc759a80c3add345ab362415c91c10e1c95f6723b633bf2ad6a",
+    "bytes": 16289
+  },
+  {
+    "path": "src/team-a-project-contract.js",
+    "gitBlob": "8f99236cb5dd148b27a91df59cf719ab71a299d1",
+    "sha256": "5a6b1d88bafebead3b17f516eadf828e83a98761be871e6c599d5652d4463b57",
+    "bytes": 22842
+  },
+  {
+    "path": "tests/fixtures/design-client.mjs",
+    "gitBlob": "b5a5ded4ca9db59c0422fe3b4072dff98b1019b0",
+    "sha256": "f23f78bac9b60b20b08dea9a189c4b10620ced575eeea8c3a5e7f98312f2eac9",
+    "bytes": 4797
+  },
+  {
+    "path": "tests/team-b-modern-reference.mjs",
+    "gitBlob": "9b7518a9215fe5fc00d086b22a70bc6841aa9a81",
+    "sha256": "761d17edbb7482ea6b3bb35615c30327df084fe35f48e0e09f5fd842d610df6a",
+    "bytes": 5548
+  }
+]
