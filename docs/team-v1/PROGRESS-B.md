@@ -960,3 +960,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Evidence fields now explicitly label viewport emulation, software SwiftShader and physicalDeviceAcceptance:false. No invented real-phone/GPU acceptance. No duplicate test engine or build registration changed.
 - node --check PASS for the updated scenario. Native execution NOT RUN because recorded browser observation denial/provider preview access remains unresolved. No alternate origin, process or screenshot upload attempted. The previous74logic tests for4a901cb are retained; this test-script-only update does not claim those tests verify browser interactions.
 - B04 remains preparation/in_progress, pending legitimate preview and physical device checks. Exact CI for new branch checkpoint also must be observed. A integration ownership/main production unchanged. Handoff in U1-B03-20261021/NATIVE-SCENARIO-HANDOFF.json.
+
+
+## U1-B04 — portable sample UI round-trip preparation (2026-10-22)
+- Continued from verified source52cc3edf43ebad79942074b24ba3120c18e8d00f; exact CI39705129916 and Vercel status success, PR/ref aligned. last_verified_commit52cc3edf43ebad79942074b24ba3120c18e8d00f. This CI includes the prior4a901cb zoom fix.
+- Extended the same B material-sample browser scenario with real project-library download, JSON byte inspection and visible import/file chooser. Assertions require sample metadata/pixels, same plan, new project scope, preserved original project and identical stored bytes in isolated scopes.
+- Existing Materials review/explicit3D and GLB/copy checks retained. node --check PASS. Native execution NOT RUN due recorded observation/access denial; no screenshots or physical GPU acceptance claimed. No redundant logic rerun for test-only preparation; no runtime/dependency/A source edits.
+- B04 task record now states the prepared flow and exact remaining gate. Source images/SKU-rights, authorized native access, physical-device and A-integration inputs remain open; no task marked done. Next execute prepared scenario only after access changes, then review real-device/pixel/output evidence and fix observed B failures.

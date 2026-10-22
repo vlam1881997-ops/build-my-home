@@ -25,7 +25,7 @@
     {
       "taskId": "U1-B04",
       "status": "blocked",
-      "reason": "Native preview access, exact-SKU asset rights/review and A integration gates remain open.",
+      "reason": "Existing native scenario prepared for Materials save/zoom/comparison/room isolation, explicit3D, reload, portable JSON UI export/import and scoped image bytes; syntax passed, browser execution blocked by recorded access denial. Physical-device, selected-SKU and integration gates remain open.",
       "done": false
     },
     {

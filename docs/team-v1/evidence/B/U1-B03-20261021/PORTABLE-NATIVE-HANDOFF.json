@@ -1,0 +1,17 @@
+{
+  "task": "U1-B04",
+  "baseCommit": "52cc3edf43ebad79942074b24ba3120c18e8d00f",
+  "scenario": "tests/team-b-material-samples.browser.cjs",
+  "prepared": [
+    "Download actual JSON using project dialog",
+    "Verify image bytes and cleared local project ID",
+    "Import via visible chooser",
+    "Compare rendered pixels/scale/angle/plan",
+    "Verify fresh storage scope and retained original"
+  ],
+  "syntax": "pass",
+  "native": "not-run",
+  "physicalDevice": "not-run",
+  "done": false,
+  "reason": "Recorded preview access and browser observation restriction remain unresolved"
+}
