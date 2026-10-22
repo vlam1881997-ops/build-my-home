@@ -986,3 +986,12 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Redeployed d26e6aa: `dpl_7ZZxjwn4DcQkeytR9pM4sn17qusd`, Ready / Production / Current. Deployment API config confirms cloudConfigured=true, geminiConfigured=true. Real UI shows login under Dự án → Tài khoản & đồng bộ.
 - Remaining: real signup/signin and same-project cross-session sync, customer SMTP. Canonical domain upstream connection failure in cloud browser; deployment URL app/API work. Media cloud disabled; no photo sync/commercial acceptance claim.
 - Evidence: `docs/team-v1/evidence/B/U4-B01-20261022/NEW-ACCOUNT-DEPLOYMENT.json`. Next: secure first BMH account authentication, then cloud save/load in separate sessions. Last verified source: `d26e6aab17f4b35e2bec1ac41820a2e67f9e73ab`.
+
+
+## 2026-10-22 — Room editing consistency hotfix
+- Active: owner-reported new/incognito projects interpret room drag as drawing an overlapping room.
+- Branch: codex/b-facade-depth; source matches main c092eae7 for edited module; preserve PR77 materials on integration.
+- Changed: src/99_customer_design.js; tests/team-b-workflow.test.mjs (B-owned interaction and workflow tests).
+- Populated personal plans open select mode; empty floors retain drawing. Existing room/edge/resize presses in idle drawing mode fall through to normal selection/drag. Project restore clears transient drawing state. Actual collision errors name the affected rooms or boundary.
+- Local verification Node 24.19.0: customer-design 37 tests + workflow 32 tests pass (69 total); syntax passes. New tests cover old/fresh projects, rotation/undo, empty-floor drawing, conflict identity, pointer routing. Node22 CI and native deployed UI acceptance pending; not commercially accepted.
+- Next: PR integration on latest main, Node22 CI, Vercel preview and native room move/rotate/reload checks. Cloud multi-session acceptance remains pending separately.

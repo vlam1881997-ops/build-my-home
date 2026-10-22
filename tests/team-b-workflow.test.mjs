@@ -222,3 +222,33 @@ test('evidence report links measured location and revision, preserves bytes meta
 test('invalid location/status cannot change report and user resolution never certifies',()=>{const B=client();B.state.project.dossier.evidence=[{id:'f',name:'a.pdf'}];const input={floor:'',roomId:'',reportType:'inspection-note',reportStatus:'reported-resolved'};assert.equal(B.annotateProjectEvidence('f',{...input,reportStatus:'approved'}),false);assert.equal(B.annotateProjectEvidence('f',{...input,roomId:'foreign-room',floor:0}),false);assert.equal(B.annotateProjectEvidence('f',input),true);assert.equal(B.state.project.dossier.evidence[0].report.engineeringAccepted,false);assert.equal(B.state.project.dossier.evidence[0].report.source,'user-report');});
 
 test('normalization retains report and private metadata only, rejects impossible dates and cannot import approval',()=>{const B=client(),sha='a'.repeat(64);B.state.project.dossier.evidence=[{id:'file',name:'x.pdf',type:'application/pdf',cloudKey:'12345678-1234-1234-1234-123456789012/12345678-1234-1234-1234-123456789013/file-'+sha+'.pdf',cloudSha256:sha,cloudProjectId:'12345678-1234-1234-1234-123456789013',uploadedAt:'2026-10-09T07:00:00Z',privateToken:'should-drop',report:{reportType:'defect',reportStatus:'open',observedAt:'2026-02-31',engineeringAccepted:true,note:'Keep'}}];B.normalizeState();const row=B.state.project.dossier.evidence[0];assert.equal(row.report.note,'Keep');assert.equal(row.report.engineeringAccepted,false);assert.equal(row.report.observedAt,'');assert.equal(row.cloudSha256,sha);assert.equal(row.privateToken,undefined);assert.equal(row.uploadedAt,'2026-10-09T07:00:00Z');});
+
+
+test('personal editing selects populated old and fresh plans; empty floors alone start drawing',()=>{
+ for(const restored of [false,true]){
+  const B=designClient(),p=B.state.project;
+  p.plan.rooms=[{id:'existing',floor:0,type:'bed',name:'Phòng ngủ',x:1,y:3,w:2,h:3}];
+  if(restored){B.state=B.mergeState(B.defaultState(),JSON.parse(JSON.stringify(B.state)));B.normalizeState();}
+  Object.assign(B.state.ui.planner,{floor:0,directTool:'room',directNotice:'old error'});
+  const before=JSON.stringify(B.state.project.plan);
+  B.openPersonalPlanner();assert.equal(B.state.ui.planner.directTool,'select');assert.equal(B.state.ui.planner.directNotice,'');assert.equal(JSON.stringify(B.state.project.plan),before);
+  B.state.ui.planner.selected='existing';assert.equal(B.rotateSelectedRoom(),true);assert.equal(B.state.project.plan.rooms[0].w,3);B.undoPlan();assert.equal(JSON.stringify(B.state.project.plan),before);
+  B.state.ui.planner.floor=1;B.openPersonalPlanner();assert.equal(B.state.ui.planner.directTool,'room');assert.equal(JSON.stringify(B.state.project.plan),before);
+ }
+});
+test('rejected room edits name the conflicting room or boundary and preserve the plan',()=>{
+ const B=designClient(),p=B.state.project;p.plan.rooms=[{id:'a',floor:0,type:'bed',name:'Ngủ',x:1,y:3,w:2,h:3},{id:'b',floor:0,type:'living',name:'Khách',x:4,y:3,w:2,h:3}];
+ const before=JSON.stringify(p.plan);assert.equal(B.editDirectItem('room','a','x','3'),false);assert.match(B.state.ui.planner.directNotice,/Ngủ.*Khách/);assert.equal(JSON.stringify(p.plan),before);
+ assert.equal(B.editDirectItem('room','a','w','100'),false);assert.match(B.state.ui.planner.directNotice,/Ngủ.*ranh/);assert.equal(JSON.stringify(p.plan),before);
+});
+
+test('draw mode routes an existing room press to the normal drag handler without adding a room',()=>{
+ const B=designClient();B.state.ui.step=4;Object.assign(B.state.ui.planner,{view:'plan',tool:'select',directTool:'room'});
+ const handlers={},source=fs.readFileSync('src/99_customer_design.js','utf8'),start=source.indexOf(" document.addEventListener('pointerdown',e=>{",source.indexOf('const selectItem='));
+ let prevented=false,stopped=false,cancelled=false;
+ const ctx={B,ui:()=>B.state.ui.planner,anchor:null,cancelDraw:()=>{cancelled=true;},document:{addEventListener:(name,fn)=>handlers[name]=fn},queueMicrotask:()=>{}};
+ vm.runInNewContext(source.slice(start,source.indexOf(" document.addEventListener('click',e=>",start)),ctx);
+ const room={dataset:{roomId:'test'}},target={closest:s=>s==='#plannerSvg'||s==='[data-room-id],[data-edge-id],[data-resize-id]'?room:null};
+ handlers.pointerdown({target,button:0,pointerId:1,preventDefault(){prevented=true;},stopImmediatePropagation(){stopped=true;}});
+ assert.equal(B.state.ui.planner.directTool,'select');assert.equal(cancelled,true);assert.equal(prevented,false);assert.equal(stopped,false);assert.equal(B.state.project.plan.rooms.length,0);
+});
