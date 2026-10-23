@@ -995,3 +995,12 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Populated personal plans open select mode; empty floors retain drawing. Existing room/edge/resize presses in idle drawing mode fall through to normal selection/drag. Project restore clears transient drawing state. Actual collision errors name the affected rooms or boundary.
 - Local verification Node 24.19.0: customer-design 37 tests + workflow 32 tests pass (69 total); syntax passes. New tests cover old/fresh projects, rotation/undo, empty-floor drawing, conflict identity, pointer routing. Node22 CI and native deployed UI acceptance pending; not commercially accepted.
 - Next: PR integration on latest main, Node22 CI, Vercel preview and native room move/rotate/reload checks. Cloud multi-session acceptance remains pending separately.
+
+
+## 2026-10-23 — PR78 release and remaining new-project defect
+- Released PR78 on main c66709c9228d285630b84cb88abcf1c2c3b63859; GitHub CI run39786648760 succeeded. Vercel deployment CrnbzUMwvaQqfe34XBkb96vqsAEK observed Ready / Production, domain nhanhocuatoi.com.
+- Native preview f2a5kq7em: fresh onboarding -> planner -> choose draw room -> click existing r1: tool becomes select; reload retains select. Full native move/rotate across old/new projects NOT accepted yet.
+- Canonical domain returned upstream connection failure in cloud browser. Subsequent production URL access denied by automatic approval review because usage limit was reached; no workaround attempted.
+- Additional reproduction: designClient({nativeParcel:true}), state=defaultState(), normalizeState(): all 9 seeded rooms fail customerBaseLayoutValid([room]) against default setbackFront=2,setbackRear=1,setbackSide=.2 plus wall clearance. Seed living room starts x=0,y=0,w=5 on 5m lot. This is independent of PR78 draw-tool fix and explains a remaining fresh-project editing trap.
+- Ownership request to A: src/10_state.js default plan and initial/new-project creation must stop seeding invalid geometry; preserve every saved/imported project's authored plan. Prefer empty new design until a measured proposal is accepted, with empty-floor drawing intact. Do not silently delete or resize legacy designs. Tests required: first load, create project, reopen/import legacy, empty plan persistence, actual room drag/rotation.
+- Next: resolve initial/new-project seed contract and atomic repair UI for existing invalid rooms; perform native old/new/incognito acceptance when browser review becomes available. Commercial acceptance remains false.
