@@ -1011,3 +1011,12 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - B-owned source: src/99_customer_design.js and tests/team-b-workflow.test.mjs. Invalid selected rooms now expose an explicit X/Y/width/depth form applied in one validated transaction. Errors retain entered draft values. Normal rooms keep existing controls; elevator uses its dedicated editor; stairs use shared stack editing.
 - Node24 local: 70 related tests passed, syntax passed. Regression proves invalid default r1 can be repaired atomically while remaining rooms are byte-preserved; undo/redo works; blank/overlap/bounds/lock cases reject without history mutation.
 - New-project seed defect remains open for state-owner scope. This repair does not silently delete or resize saved rooms. Native validation remains blocked by previously reported browser approval usage limit. Next: Node22 CI, integration and native repair UI acceptance.
+
+
+## 2026-10-23 — Owner assigns both A and B; repair fresh-project initialization
+- Owner explicitly assigned both packages in this conversation. Existing scope/acceptance remains; this authorizes state/project lifecycle changes without waiting for another role. Preserve concurrent branches.
+- src/10_state.js: newProjectState starts with empty geometry and drawing tool. loadState uses it only when no saved state is available. defaultState stays the migration baseline; old saved geometry is not silently modified.
+- src/82_customer_projects.js: new projects use newProjectState; copies still clone their saved source. Existing PR79 atomic bounds repair provides an explicit path to repair invalid legacy rooms.
+- Tests: actual create/copy/open functions using memory persistence, fresh state + empty reload, existing-plan preservation, native-parcel add/move/rotate/reload. Existing professional-review test now explicitly seeds its legacy geometry fixture.
+- Validation Node24.19.0: npm ci completed; npm test build + syntax +592/592 tests passed. One additional native-parcel workflow regression then passed in the 34/34 workflow suite. Node22 remote CI pending for this exact commit. No browser/Windows acceptance claimed.
+- Next: integrate PR79 after CI, verify deployment identity, then remaining approved A/B acceptance. Browser approval usage-limit block remains; do not bypass it. New-project seed reproduction is fixed in source; commercial acceptance remains open.

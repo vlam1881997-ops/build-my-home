@@ -15,3 +15,21 @@ test('saved snapshots cannot restore paid access and editing a copy does not mut
 test('queued writes preserve ordering and a failed write does not block the next transaction',async()=>{
  const B=client(),order=[];let release;const first=B.projectEnqueue(()=>new Promise(resolve=>{order.push('start');release=()=>{order.push('finish');resolve();};}));const second=B.projectEnqueue(()=>order.push('next'));await Promise.resolve();await Promise.resolve();assert.deepEqual(order,['start']);release();await Promise.all([first,second]);assert.deepEqual(order,['start','finish','next']);await assert.rejects(B.projectEnqueue(()=>{throw Error('disk');}));await B.projectEnqueue(()=>order.push('recovered'));assert.equal(order.at(-1),'recovered');
 });
+
+test('fresh sessions and new project state start empty without changing migration defaults',()=>{
+ const B=client();assert.equal(B.localStateLoaded,false);assert.equal(B.state.project.plan.rooms.length,0);assert.equal(B.newProjectState().project.plan.openings.length,0);
+ assert.equal(B.defaultState().project.plan.rooms.length,9);
+ const old=B.defaultState();old.project.plan.rooms[0].name='Saved customer room';const saved=JSON.stringify(old.project.plan);
+ const restored=B.mergeState(B.defaultState(),old);B.state=restored;B.normalizeState();assert.equal(JSON.stringify(B.state.project.plan.rooms),JSON.stringify(JSON.parse(saved).rooms));
+ const empty=B.newProjectState();B.state=B.mergeState(B.defaultState(),empty);B.normalizeState();assert.equal(B.state.project.plan.rooms.length,0);
+});
+
+test('actual create/copy/open paths preserve saved designs and keep new designs empty',async()=>{
+ const B=client(),records=new Map();
+ B.saveCustomerProject=async()=>{};B.projectPut=async(state,id)=>records.set(id,{id,state:structuredClone(state)});B.projectGet=async id=>records.get(id);B.projectActivate=async()=>{};B.saveBeforeProjects=()=>{};B.closeProjectLibrary=()=>{};B.projectSaveStatus=()=>{};
+ const legacy=B.defaultState();legacy.project.plan.rooms[0].name='My measured design';records.set('legacy',{id:'legacy',state:legacy});const before=JSON.stringify(legacy.project.plan);
+ await B.newCustomerProject();assert.equal(B.state.project.plan.rooms.length,0);await B.projects.activation;
+ const freshId=B.projects.activeId;await B.openCustomerProject('legacy');assert.equal(B.state.project.plan.rooms[0].name,'My measured design');
+ await B.newCustomerProject({copyId:'legacy'});assert.equal(JSON.stringify(B.state.project.plan.rooms),JSON.stringify(legacy.project.plan.rooms));assert.equal(JSON.stringify(legacy.project.plan),before);
+ await B.openCustomerProject(freshId);assert.equal(B.state.project.plan.rooms.length,0);
+});

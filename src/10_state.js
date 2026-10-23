@@ -70,6 +70,14 @@ BMH.mergeState = (base, incoming) => {
   };
   return merge(out,incoming);
 };
+// New designs start from the customer's site, not the legacy demonstration plan.
+// Keep defaultState as the migration baseline so saved designs retain their data.
+BMH.newProjectState = () => {
+  const state=BMH.defaultState();
+  for(const key of ['rooms','openings','outdoor','fixtures','furniture','lockedRoomIds','lockedFloors'])state.project.plan[key]=[];
+  Object.assign(state.ui.planner,{selected:'',selectedOpening:'',selectedFixture:'',directTool:'room'});
+  return state;
+};
 BMH.loadState = () => {
   BMH.localStateLoaded=false;
   const base=BMH.defaultState(), keys=[BMH.STORAGE_KEY,...(BMH.LEGACY_STORAGE_KEYS||[])];
@@ -82,7 +90,7 @@ BMH.loadState = () => {
       BMH.localStateLoaded=true;return merged;
     }catch(e){try{localStorage.removeItem(key);}catch(_){}}
   }
-  return base;
+  return BMH.newProjectState();
 };
 BMH.state = BMH.loadState();
 // Defaults and legacy values remain usable; they are not confirmed evidence.

@@ -69,7 +69,7 @@ BMH.useCustomerProject=(record,{close=true}={})=>{
 BMH.openCustomerProject=async id=>{await BMH.saveCustomerProject();const record=await BMH.projectGet(id);if(!record)throw new Error('Bản lưu này không còn trên thiết bị.');BMH.useCustomerProject(record);await BMH.projects.activation;BMH.toast('Đã mở '+record.state.project.name+'.');};
 BMH.newCustomerProject=async({copyId=''}={})=>{
  await BMH.saveCustomerProject();const source=copyId?await BMH.projectGet(copyId):null;if(copyId&&!source)throw new Error('Không tìm thấy thiết kế để tạo bản sao.');
- const state=source?BMH.projectSnapshot(source.state):BMH.defaultState(),id=globalThis.crypto?.randomUUID?.()||BMH.uid('home'),now=new Date().toISOString();
+ const state=source?BMH.projectSnapshot(source.state):BMH.newProjectState(),id=globalThis.crypto?.randomUUID?.()||BMH.uid('home'),now=new Date().toISOString();
  BMH.clearCloudLink?.(state);state.meta.localProjectId=id;state.meta.createdAt=state.meta.savedAt=now;state.project.name=source?String(source.state.project.name||'Ngôi nhà').slice(0,110)+' · bản sao':'Ngôi nhà mới';state.ui.renderMode='interactive';state.ui.onboardingComplete=BMH.state.ui.onboardingComplete;state.ui.step=source?state.ui.step:1;
  await BMH.projectEnqueue(()=>BMH.projectPut(state,id));BMH.useCustomerProject({id,state});BMH.toast(source?'Đã tạo thiết kế riêng từ bản sao.':'Đã tạo dự án mới; thiết kế trước vẫn được giữ.');return id;
 };

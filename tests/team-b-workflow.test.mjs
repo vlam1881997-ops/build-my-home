@@ -269,3 +269,11 @@ test('invalid legacy room can repair position and dimensions atomically without 
  assert.equal(JSON.stringify(p.plan),fixed);assert.equal(B.planHistory.undo.length,history);
  p.plan.lockedRoomIds=['r1'];assert.equal(B.editDirectRoomBounds('r1',{x:.4,y:2.2,w:4,h:1.5}),false);
 });
+
+test('new empty project supports measured add, move, rotate and reload within native setbacks',()=>{
+ const B=designClient({nativeParcel:true});B.state=B.newProjectState();B.normalizeState();B.openPersonalPlanner();assert.equal(B.state.ui.planner.directTool,'room');
+ const r=B.addDirectRoom({x:1,y:3},{x:3,y:5.5},'bed',{snap:false,dimensions:{width:2,depth:2.5}});assert.ok(r,B.state.ui.planner.directNotice);
+ const d={id:r.id,mode:'move',startPoint:{x:1,y:3},originalPlan:B.planSnapshot()};const result=B.directRoomDragCandidate(d,{x:1.4,y:3.4});assert.equal(result.reason,'');assert.equal(B.commitDirectPlan(result.plan,{selected:r.id},{translateFixtures:false}),true);
+ assert.equal(B.rotateSelectedRoom(),true,B.state.ui.planner.directNotice);assert.equal(B.customerBaseLayoutValid(B.state.project.plan.rooms),true);
+ const saved=JSON.stringify(B.state.project.plan);B.state=B.mergeState(B.defaultState(),JSON.parse(JSON.stringify(B.state)));B.normalizeState();assert.equal(JSON.stringify(B.state.project.plan),saved);
+});

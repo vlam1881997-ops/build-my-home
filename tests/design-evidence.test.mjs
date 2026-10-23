@@ -46,7 +46,7 @@ test('unstructured legacy technical records remain stored and pending instead of
  assert.deepEqual(json(client(json(restored.state)).state.project.constructionDesign),json(c));
 });
 test('professional review metadata and stale propagation never create a self-invalidating design revision',()=>{
- const B=client(),p=B.state.project,before=B.drawingRevision();p.constructionDesign.reviews=[professionalReview(B)];B.save();
+ const B=client(),p=B.state.project;p.plan=structuredClone(B.defaultState().project.plan);const before=B.drawingRevision();p.constructionDesign.reviews=[professionalReview(B)];B.save();
  assert.equal(B.constructionReview().reviewed,1);assert.equal(B.drawingRevision(),before);assert.equal(p.constructionDesign.reviews[0].reviewState,'reviewed');
  p.plan.rooms[0].w+=.1;const changed=B.drawingRevision();assert.notEqual(changed,before);B.save();assert.equal(p.constructionDesign.reviews[0].reviewState,'stale');assert.equal(p.constructionDesign.reviews[0].reviewedRevision,before);assert.equal(B.drawingRevision(),changed);
  B.save();assert.equal(B.drawingRevision(),changed);assert.equal(B.measuredDesignReview().technical.stale,1);assert.ok(B.measuredDesignReview().warnings.some(w=>/thuộc phiên bản cũ/.test(w)));
