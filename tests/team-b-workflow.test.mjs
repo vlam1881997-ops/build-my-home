@@ -252,3 +252,36 @@ test('draw mode routes an existing room press to the normal drag handler without
  handlers.pointerdown({target,button:0,pointerId:1,preventDefault(){prevented=true;},stopImmediatePropagation(){stopped=true;}});
  assert.equal(B.state.ui.planner.directTool,'select');assert.equal(cancelled,true);assert.equal(prevented,false);assert.equal(stopped,false);assert.equal(B.state.project.plan.rooms.length,0);
 });
+
+test('invalid legacy room can repair position and dimensions atomically without losing other rooms',()=>{
+ const B=designClient({nativeParcel:true});B.state=B.defaultState();B.normalizeState();
+ const p=B.state.project;p.plan.openings=[];p.plan.fixtures=[];p.plan.furniture=[];B.state.ui.planner.selected='r1';
+ const before=JSON.stringify(p.plan),others=JSON.stringify(p.plan.rooms.filter(r=>r.id!=='r1'));
+ const markup=B.directEditHtml();assert.match(markup,/data-room-bounds-form="r1"/);
+ // screen5 inserts only the first editor root; a sibling repair panel is lost.
+ let depth=0,firstRootEnd=-1;
+ for(const match of markup.matchAll(/<\/?section\b[^>]*>/g)){
+  depth+=match[0].startsWith('</')?-1:1;
+  if(depth===0){firstRootEnd=match.index;break;}
+ }
+ assert.ok(firstRootEnd>markup.indexOf('data-room-bounds-form="r1"'),'repair form must survive firstElementChild insertion');
+ assert.equal(B.editDirectItem('room','r1','x','.31'),false);
+ assert.equal(B.editDirectRoomBounds('r1',{x:.31,y:2.11,w:4.38,h:1.6}),true,B.state.ui.planner.directNotice);
+ assert.equal(B.customerBaseLayoutValid([p.plan.rooms.find(r=>r.id==='r1')]),true);
+ assert.equal(JSON.stringify(p.plan.rooms.filter(r=>r.id!=='r1')),others);
+ assert.doesNotMatch(B.directEditHtml(),/data-room-bounds-form/);
+ B.undoPlan();assert.equal(JSON.stringify(p.plan),before);B.redoPlan();assert.equal(p.plan.rooms.find(r=>r.id==='r1').x,.31);
+ const fixed=JSON.stringify(p.plan),history=B.planHistory.undo.length;
+ for(const raw of [{x:'',y:2.11,w:4,h:1.6},{x:.31,y:4.1,w:4,h:2},{x:.31,y:2.11,w:40,h:2}])assert.equal(B.editDirectRoomBounds('r1',raw),false);
+ assert.equal(JSON.stringify(p.plan),fixed);assert.equal(B.planHistory.undo.length,history);
+ p.plan.lockedRoomIds=['r1'];assert.equal(B.editDirectRoomBounds('r1',{x:.4,y:2.2,w:4,h:1.5}),false);
+});
+
+test('new empty project supports measured add, move, rotate and reload within native setbacks',()=>{
+ const B=designClient({nativeParcel:true});B.state=B.newProjectState();B.normalizeState();B.openPersonalPlanner();assert.equal(B.state.ui.planner.directTool,'room');
+ const r=B.addDirectRoom({x:1,y:3},{x:3,y:5.5},'bed',{snap:false,dimensions:{width:2,depth:2.5}});assert.ok(r,B.state.ui.planner.directNotice);
+ const d={id:r.id,mode:'move',startPoint:{x:1,y:3},originalPlan:B.planSnapshot()};const result=B.directRoomDragCandidate(d,{x:1.4,y:3.4});assert.equal(result.reason,'');assert.equal(B.commitDirectPlan(result.plan,{selected:r.id},{translateFixtures:false}),true);
+ assert.equal(B.rotateSelectedRoom(),true,B.state.ui.planner.directNotice);assert.equal(B.customerBaseLayoutValid(B.state.project.plan.rooms),true);
+ const saved=JSON.stringify(B.state.project.plan);B.state=B.mergeState(B.defaultState(),JSON.parse(JSON.stringify(B.state)));B.normalizeState();assert.equal(JSON.stringify(B.state.project.plan),saved);
+});
+

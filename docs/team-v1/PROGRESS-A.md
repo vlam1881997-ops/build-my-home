@@ -235,3 +235,12 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Photos appear first in catalog and stay visible after selection, with source/specification and an accessible native-dialog large view. Existing customer room sample overrides still take precedence. No generic collection image promoted to a verified product photo; no price/date/rights refresh inferred from this research.
 - Added A regression suite (registered in package test): 5/5 passed; existing A commercial suite34/34 passed locally Node24.19.0. Existing material-source suite cannot run in this sparse snapshot because _gemini.mjs and dependencies are absent; full Node22 CI must verify the complete checkout. No module stub or skipped test committed.
 - Changed paths: src/75_completion.js, src/90_product_polish.js, src/product-polish.css, assets/materials/official-catalog.json, tests/team-a-material-photos.test.mjs, package.json, this progress file. Material image proxy/export rights checks unchanged. Native image delivery and full CI remain pending.
+
+
+## 2026-10-23 — Owner assigns both A and B; repair fresh-project initialization
+- Owner explicitly assigned both packages in this conversation. Existing scope/acceptance remains; this authorizes state/project lifecycle changes without waiting for another role. Preserve concurrent branches.
+- src/10_state.js: newProjectState starts with empty geometry and drawing tool. loadState uses it only when no saved state is available. defaultState stays the migration baseline; old saved geometry is not silently modified.
+- src/82_customer_projects.js: new projects use newProjectState; copies still clone their saved source. Existing PR79 atomic bounds repair provides an explicit path to repair invalid legacy rooms.
+- Tests: actual create/copy/open functions using memory persistence, fresh state + empty reload, existing-plan preservation, native-parcel add/move/rotate/reload. Existing professional-review test now explicitly seeds its legacy geometry fixture.
+- Validation Node24.19.0: npm ci completed; npm test build + syntax +592/592 tests passed. One additional native-parcel workflow regression then passed in the 34/34 workflow suite. Node22 remote CI pending for this exact commit. No browser/Windows acceptance claimed.
+- Next: integrate PR79 after CI, verify deployment identity, then remaining approved A/B acceptance. Browser approval usage-limit block remains; do not bypass it. New-project seed reproduction is fixed in source; commercial acceptance remains open.
