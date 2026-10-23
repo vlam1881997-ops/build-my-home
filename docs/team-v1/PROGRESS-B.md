@@ -1004,3 +1004,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Additional reproduction: designClient({nativeParcel:true}), state=defaultState(), normalizeState(): all 9 seeded rooms fail customerBaseLayoutValid([room]) against default setbackFront=2,setbackRear=1,setbackSide=.2 plus wall clearance. Seed living room starts x=0,y=0,w=5 on 5m lot. This is independent of PR78 draw-tool fix and explains a remaining fresh-project editing trap.
 - Ownership request to A: src/10_state.js default plan and initial/new-project creation must stop seeding invalid geometry; preserve every saved/imported project's authored plan. Prefer empty new design until a measured proposal is accepted, with empty-floor drawing intact. Do not silently delete or resize legacy designs. Tests required: first load, create project, reopen/import legacy, empty plan persistence, actual room drag/rotation.
 - Next: resolve initial/new-project seed contract and atomic repair UI for existing invalid rooms; perform native old/new/incognito acceptance when browser review becomes available. Commercial acceptance remains false.
+
+
+## 2026-10-23 — Atomic bounds repair for invalid existing rooms
+- Applied project-continuity-orchestrator (saved in user Skills repository ad3ebe3).
+- B-owned source: src/99_customer_design.js and tests/team-b-workflow.test.mjs. Invalid selected rooms now expose an explicit X/Y/width/depth form applied in one validated transaction. Errors retain entered draft values. Normal rooms keep existing controls; elevator uses its dedicated editor; stairs use shared stack editing.
+- Node24 local: 70 related tests passed, syntax passed. Regression proves invalid default r1 can be repaired atomically while remaining rooms are byte-preserved; undo/redo works; blank/overlap/bounds/lock cases reject without history mutation.
+- New-project seed defect remains open for state-owner scope. This repair does not silently delete or resize saved rooms. Native validation remains blocked by previously reported browser approval usage limit. Next: Node22 CI, integration and native repair UI acceptance.

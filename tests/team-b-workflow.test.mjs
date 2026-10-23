@@ -252,3 +252,20 @@ test('draw mode routes an existing room press to the normal drag handler without
  handlers.pointerdown({target,button:0,pointerId:1,preventDefault(){prevented=true;},stopImmediatePropagation(){stopped=true;}});
  assert.equal(B.state.ui.planner.directTool,'select');assert.equal(cancelled,true);assert.equal(prevented,false);assert.equal(stopped,false);assert.equal(B.state.project.plan.rooms.length,0);
 });
+
+test('invalid legacy room can repair position and dimensions atomically without losing other rooms',()=>{
+ const B=designClient({nativeParcel:true});B.state=B.defaultState();B.normalizeState();
+ const p=B.state.project;p.plan.openings=[];p.plan.fixtures=[];p.plan.furniture=[];B.state.ui.planner.selected='r1';
+ const before=JSON.stringify(p.plan),others=JSON.stringify(p.plan.rooms.filter(r=>r.id!=='r1'));
+ assert.match(B.directEditHtml(),/data-room-bounds-form="r1"/);
+ assert.equal(B.editDirectItem('room','r1','x','.31'),false);
+ assert.equal(B.editDirectRoomBounds('r1',{x:.31,y:2.11,w:4.38,h:1.6}),true,B.state.ui.planner.directNotice);
+ assert.equal(B.customerBaseLayoutValid([p.plan.rooms.find(r=>r.id==='r1')]),true);
+ assert.equal(JSON.stringify(p.plan.rooms.filter(r=>r.id!=='r1')),others);
+ assert.doesNotMatch(B.directEditHtml(),/data-room-bounds-form/);
+ B.undoPlan();assert.equal(JSON.stringify(p.plan),before);B.redoPlan();assert.equal(p.plan.rooms.find(r=>r.id==='r1').x,.31);
+ const fixed=JSON.stringify(p.plan),history=B.planHistory.undo.length;
+ for(const raw of [{x:'',y:2.11,w:4,h:1.6},{x:.31,y:4.1,w:4,h:2},{x:.31,y:2.11,w:40,h:2}])assert.equal(B.editDirectRoomBounds('r1',raw),false);
+ assert.equal(JSON.stringify(p.plan),fixed);assert.equal(B.planHistory.undo.length,history);
+ p.plan.lockedRoomIds=['r1'];assert.equal(B.editDirectRoomBounds('r1',{x:.4,y:2.2,w:4,h:1.5}),false);
+});
