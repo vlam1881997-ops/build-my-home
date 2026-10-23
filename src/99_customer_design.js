@@ -318,7 +318,7 @@
  const directEditHtml=B.directEditHtml;B.directEditHtml=()=>{
   const html=directEditHtml(),r=B.selectedRoom();if(!r||ui().selectedOpening||ui().selectedFixture||r.type==='elevator'||validLayout([r]))return html;
   const disabled=B.isRoomLocked(r.id)?' disabled':'';
-  return html+'<section class="customer-direct-editor"><h3>Sửa vị trí và kích thước cùng lúc</h3><p>Phòng này đang vượt ranh hoặc khoảng lùi. Nhập cả bốn số rồi áp dụng để đưa phòng về vùng hợp lệ.</p><form data-room-bounds-form="'+esc(r.id)+'"><div class="customer-direct-fields">'+[['x','X / m',0],['y','Y / m',0],['w','Rộng / m',.6],['h','Dài / m',.6]].map(([k,label,min])=>'<label>'+label+'<input type="number" name="'+k+'" value="'+r[k]+'" min="'+min+'" step="any" required'+disabled+'></label>').join('')+'</div><button type="submit"'+disabled+'>Áp dụng cả vị trí và kích thước</button><p role="status" aria-live="polite"></p></form><small>Thay đổi chỉ được lưu khi hợp lệ. Có thể hoàn tác.</small></section>';
+  return html.replace(/<\/section>$/,()=>'<section class="customer-direct-editor"><h3>Sửa vị trí và kích thước cùng lúc</h3><p>Phòng này đang vượt ranh hoặc khoảng lùi. Nhập cả bốn số rồi áp dụng để đưa phòng về vùng hợp lệ.</p><form data-room-bounds-form="'+esc(r.id)+'"><div class="customer-direct-fields">'+[['x','X / m',0],['y','Y / m',0],['w','Rộng / m',.6],['h','Dài / m',.6]].map(([k,label,min])=>'<label>'+label+'<input type="number" name="'+k+'" value="'+r[k]+'" min="'+min+'" step="any" required'+disabled+'></label>').join('')+'</div><button type="submit"'+disabled+'>Áp dụng cả vị trí và kích thước</button><p role="status" aria-live="polite"></p></form><small>Thay đổi chỉ được lưu khi hợp lệ. Có thể hoàn tác.</small></section></section>');
  };
  const planSvg=B.planSvg;B.planSvg=options=>{
   const markup=planSvg(options);if(options?.interactive===false||typeof DOMParser==='undefined')return markup;
@@ -796,4 +796,5 @@
  document.addEventListener('pointerup',stop,true);document.addEventListener('pointercancel',stop,true);
  document.addEventListener('keydown',e=>{if(e.target.closest?.('[data-furniture-id]')&&['Enter',' '].includes(e.key)){e.preventDefault();select(e.target.closest('[data-furniture-id]').dataset.furnitureId);}});
 })();
+
 

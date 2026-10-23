@@ -1020,3 +1020,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Tests: actual create/copy/open functions using memory persistence, fresh state + empty reload, existing-plan preservation, native-parcel add/move/rotate/reload. Existing professional-review test now explicitly seeds its legacy geometry fixture.
 - Validation Node24.19.0: npm ci completed; npm test build + syntax +592/592 tests passed. One additional native-parcel workflow regression then passed in the 34/34 workflow suite. Node22 remote CI pending for this exact commit. No browser/Windows acceptance claimed.
 - Next: integrate PR79 after CI, verify deployment identity, then remaining approved A/B acceptance. Browser approval usage-limit block remains; do not bypass it. New-project seed reproduction is fixed in source; commercial acceptance remains open.
+
+
+## 2026-10-23 — PR79 review: retain the repair form in the rendered editor
+- Resumed both A+B. Integration head 677121c4a097ec39e43515cbc16df469155d54c4 passed GitHub CI run39926061941 and Vercel preview, but review found a real render-path defect: screen5 inserts only firstElementChild while the repair form was a second root.
+- Keep the repair panel inside the first editor root, preserving the existing inspector relocation. Added a structural regression at the first-root insertion boundary; it fails against the previous sibling panel and passes with the fix.
+- Local Node24.19.0: syntax pass; team-b-workflow 34/34 pass, including atomic repair, locks/undo, new/create/move/rotate/reload. Full Node22 CI pending for this fix. No native browser acceptance claimed.
+- Next: require exact-head CI before merging PR79 and check production deployment identity. Browser automatic approval previously denied navigation due usage limit; do not bypass. Native old/new/incognito, login/multi-device/media and visual commercial acceptance remain open.

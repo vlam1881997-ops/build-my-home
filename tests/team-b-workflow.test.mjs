@@ -257,7 +257,14 @@ test('invalid legacy room can repair position and dimensions atomically without 
  const B=designClient({nativeParcel:true});B.state=B.defaultState();B.normalizeState();
  const p=B.state.project;p.plan.openings=[];p.plan.fixtures=[];p.plan.furniture=[];B.state.ui.planner.selected='r1';
  const before=JSON.stringify(p.plan),others=JSON.stringify(p.plan.rooms.filter(r=>r.id!=='r1'));
- assert.match(B.directEditHtml(),/data-room-bounds-form="r1"/);
+ const markup=B.directEditHtml();assert.match(markup,/data-room-bounds-form="r1"/);
+ // screen5 inserts only the first editor root; a sibling repair panel is lost.
+ let depth=0,firstRootEnd=-1;
+ for(const match of markup.matchAll(/<\/?section\b[^>]*>/g)){
+  depth+=match[0].startsWith('</')?-1:1;
+  if(depth===0){firstRootEnd=match.index;break;}
+ }
+ assert.ok(firstRootEnd>markup.indexOf('data-room-bounds-form="r1"'),'repair form must survive firstElementChild insertion');
  assert.equal(B.editDirectItem('room','r1','x','.31'),false);
  assert.equal(B.editDirectRoomBounds('r1',{x:.31,y:2.11,w:4.38,h:1.6}),true,B.state.ui.planner.directNotice);
  assert.equal(B.customerBaseLayoutValid([p.plan.rooms.find(r=>r.id==='r1')]),true);
@@ -277,3 +284,4 @@ test('new empty project supports measured add, move, rotate and reload within na
  assert.equal(B.rotateSelectedRoom(),true,B.state.ui.planner.directNotice);assert.equal(B.customerBaseLayoutValid(B.state.project.plan.rooms),true);
  const saved=JSON.stringify(B.state.project.plan);B.state=B.mergeState(B.defaultState(),JSON.parse(JSON.stringify(B.state)));B.normalizeState();assert.equal(JSON.stringify(B.state.project.plan),saved);
 });
+
