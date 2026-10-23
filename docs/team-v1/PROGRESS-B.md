@@ -1035,3 +1035,11 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Fixed the review's missing repair UI before merge. New designs start empty; saved/copied plans are preserved, legacy invalid rooms have atomic bounds repair. PR77 material changes retained by integrating on released main.
 - Real blocker: previously denied automatic browser approval due usage limit remains. No browser/network workaround attempted. Native old/new/incognito editing, login/multi-device/image synchronization, GPU desktop/phone and owner visual approval remain unaccepted. Missing confirmed terrace/professional inputs remain as documented in W34; do not invent them or expand the Modern review into24 styles.
 - Next executable acceptance when the browser limit is resolved: exact released build, fresh/new/saved/copy project; draw/select/move/rotate/repair/save/reload, then authenticated second session and source-image/3D parity. Whole A+B commercial project is NOT complete. No background execution claimed.
+
+
+## 2026-10-23 — A+B / B5 media transfer project-switch race
+- Continue from main ed19db043c22c8085c7eb7578329cb6831cd229b and role checkpoint e02a65c38a7d1f509571bfcd9eb6c48505643561. Browser limit remains; execute independent media correctness work.
+- Reproduced stale project/account/removal during local read/FileReader and download cache. Three new regression cases fail against the released source. Guard asynchronous boundaries before upload and metadata/cache application.
+- Reference-image hydration now captures the original local scope and checks project/upload-list/account epoch after reads/encoding, so old image bytes cannot be written into the newly opened project.
+- tests/team-b-media-client.test.mjs:7/7 pass on Node24.19.0, upload/download success and interrupted operations. Syntax passes. Existing style-reference server test could not run in sparse local snapshot (missing api/gemini-render.mjs); complete Node22 CI required, no stubs/skips. Register new suite in package test under assigned A+B scope.
+- Does not enable media Storage or claim multi-device production acceptance. Native browser/GPU and service configuration gates remain; no change to real user data or secrets. Next: full CI, authorized merge/deployment, durable exact-SHA evidence.
