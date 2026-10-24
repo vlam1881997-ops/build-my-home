@@ -205,13 +205,13 @@ test('saving showroom product stays in materials and explicit preview does not r
  assert.equal(B.openShowroomProductPreview('floor','ivory-tile','room:sample-room'),true);
  assert.equal(B.state.ui.step,6);assert.equal(JSON.stringify(B.state.project),before);
  assert.equal(B.finishPalette('sample-room').catalogMaterials.floor.sample.mediaId,binding.sample.mediaId);
- for(const target of ['room:removed','exterior','all','unassigned'])assert.equal(B.openShowroomProductPreview('floor','ivory-tile',target),false);
+ for(const target of ['room:removed','exterior','unknown'])assert.equal(B.openShowroomProductPreview('floor','ivory-tile',target),false);
  assert.equal(B.openShowroomProductPreview('floor','grey-concrete','room:sample-room'),false);
 });
 
 test('showroom product defaults to focused room and exposes separate save, preview and sample inspection',()=>{
  const {B,binding}=sampleScopeFixture();B.materialSampleForBinding=b=>b?.sample?{image:{src:'data:image/jpeg;base64,AAAA'},mediaId:b.sample.mediaId}:null;
- const html=B.showroomPreviewHtml('floor');assert.match(html,/value="room:sample-room" selected/);assert.match(html,/data-showroom-apply="floor"/);assert.match(html,/data-showroom-3d="floor"/);assert.doesNotMatch(html,/Áp dụng & xem 3D/);
+ const html=B.showroomPreviewHtml('floor');assert.match(html,/value="room:sample-room" selected/);assert.match(html,/data-showroom-apply="floor"/);assert.match(html,/data-showroom-3d="floor"/);assert.match(html,/data-showroom-apply-view/);assert.match(html,/Lưu và xem 3D/);
  assert.match(html,/data-material-sample-open="material-sample-test-123"/);
  const details=B.materialSampleDetails(binding.sample.mediaId);assert.equal(details.binding.sample.sourceReference,'Synthetic test');assert.deepEqual(plain(details.binding.sample.realWorldScale),[.7,1.1]);
  B.state.project=structuredClone(B.state.project);B.state.project.materials.finish={exterior:null,rooms:{}};assert.equal(B.materialSampleDetails(binding.sample.mediaId),null);
@@ -381,4 +381,27 @@ test('sample zoom resolves only the active room or explicit exterior, including 
  B.state.ui.sceneFocus='all';assert.equal(B.materialSampleDetails(binding.sample.mediaId),null);
  B.state.ui.sceneFocus='room:removed';assert.equal(B.materialSampleDetails(binding.sample.mediaId),null);
  B.state.ui.sceneFocus='room:second-room';assert.equal(JSON.stringify(B.state),before);
+});
+
+test('whole-house save and preview uses the measured rooms and persists bindings without changing geometry',()=>{
+ const {B}=sampleScopeFixture(),p=B.state.project;p.plan.rooms.push({id:'second',name:'Second',type:'bed',floor:1,x:1,y:2,w:3,h:4});
+ const geometry=JSON.stringify(p.plan);B.state.ui.step=5;
+ const result=B.saveAndPreviewShowroomProduct('floor','ivory-tile','all');assert.equal(result.saved,true);assert.equal(result.opened,true);assert.equal(B.state.ui.step,6);
+ for(const r of p.plan.rooms){const palette=B.finishPalette(r.id),binding=palette.catalogMaterials.floor;assert.equal(binding.visualProfileId,'ivory-tile');assert.equal(binding.roomId,r.id);}
+ assert.equal(JSON.stringify(p.plan),geometry);
+ const saved=JSON.stringify(p.materials.finish);B.state=B.mergeState(B.defaultState(),JSON.parse(JSON.stringify(B.state)));B.normalizeState();assert.equal(JSON.stringify(B.state.project.materials.finish),saved);
+ assert.equal(B.openShowroomProductPreview('floor','ivory-tile','all'),true);
+ B.applyVisualMaterial('floor','oak-floor','second');const before=JSON.stringify(B.state);assert.equal(B.openShowroomProductPreview('floor','ivory-tile','all'),false);assert.equal(JSON.stringify(B.state),before);
+});
+
+test('unassigned save keeps a custom room and previews a matching room only',()=>{
+ const {B}=sampleScopeFixture(),p=B.state.project;p.plan.rooms.push({id:'unassigned',name:'New room',type:'bed',floor:0,x:6,y:1,w:3,h:4});
+ B.applyVisualMaterial('floor','oak-floor','sample-room');const kept=JSON.stringify(p.materials.finish.rooms['sample-room']);B.state.ui.sceneFocus='room:sample-room';
+ const result=B.saveAndPreviewShowroomProduct('floor','ivory-tile','unassigned');assert.equal(result.saved,true);assert.equal(result.opened,true);assert.equal(B.state.ui.sceneFocus,'room:unassigned');assert.equal(JSON.stringify(p.materials.finish.rooms['sample-room']),kept);
+ const before=JSON.stringify(B.state);assert.equal(B.saveAndPreviewShowroomProduct('floor','ivory-tile','room:removed').saved,false);assert.equal(JSON.stringify(B.state),before);
+});
+
+test('empty materials guide returns to the measured drawing without creating demo rooms',()=>{
+ const B=make();B.state.project.plan.rooms=[];const before=JSON.stringify(B.state.project),html=B.showroomChoiceBoardHtml();
+ assert.match(html,/data-nav="4" class="showroom-primary"/);assert.match(html,/Dựng phòng theo kích thước/);assert.equal(JSON.stringify(B.state.project),before);
 });
