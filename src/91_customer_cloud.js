@@ -278,6 +278,7 @@
   const result=await B.cloudApi('/api/projects?operation=media',{method:'POST',auth:true,body:{projectId,evidenceId:id,expectedRevision:B.state.meta.cloudRevision,type:blob.type,base64}});
   ensureCurrent();
   Object.assign(record,result.file);B.save();const saved=await B.cloudSaveProject({createIfMissing:false});
+  ensureCurrent();
   if(!saved)throw Error('Bytes đã tải; metadata chưa đồng bộ. Bản trên máy còn nguyên. Thử lưu dự án lại.');
   return result.file;
  };
@@ -292,7 +293,7 @@
   if(blob.size>2*1024*1024)throw Error('Tệp tải về vượt dung lượng cho phép.');
   if(result.sha256){const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer())),v=>v.toString(16).padStart(2,'0')).join('');if(hash!==result.sha256)throw Error('Tệp tải về không khớp bản đã lưu.');}
   if(!same(project,epoch,projectId)||!refs(project).includes(record))throw Error('Dự án / tệp đã đổi.');
-  await B.evidencePut(id,blob);return blob;
+  await B.evidencePut(id,blob);if(!same(project,epoch,projectId)||!refs(project).includes(record))throw Error('Dự án / tệp đã đổi.');return blob;
  };
  document.addEventListener('click',async e=>{const button=e.target.closest?.('[data-cloud-media-upload]');if(!button)return;button.disabled=true;
   try{await B.uploadProjectEvidence(button.dataset.cloudMediaUpload);B.toast('Đã đồng bộ tệp riêng của dự án.');}catch(error){B.toast(error.message);}finally{button.disabled=false;B.render({preserveScroll:true});}

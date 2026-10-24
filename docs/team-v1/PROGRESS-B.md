@@ -1043,3 +1043,8 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Reference-image hydration now captures the original local scope and checks project/upload-list/account epoch after reads/encoding, so old image bytes cannot be written into the newly opened project.
 - tests/team-b-media-client.test.mjs:7/7 pass on Node24.19.0, upload/download success and interrupted operations. Syntax passes. Existing style-reference server test could not run in sparse local snapshot (missing api/gemini-render.mjs); complete Node22 CI required, no stubs/skips. Register new suite in package test under assigned A+B scope.
 - Does not enable media Storage or claim multi-device production acceptance. Native browser/GPU and service configuration gates remain; no change to real user data or secrets. Next: full CI, authorized merge/deployment, durable exact-SHA evidence.
+
+
+## 2026-10-24 — Complete interrupted PR80 media race repair
+- Recovered published head5991ed537dd6b97098ee4b9a59160bca9c1c33cf after scratch maintenance. Reconstructed the two unsaved final-await checks from the prior task: a project switch during final metadata save or cache write cannot report stale success/return old bytes to the active project.
+- Focused client suite8/8 passes Node24.19.0; complete Node22 CI pending. No production media flag enabled, no real data modified. Browser approval usage-limit restriction remains; no workaround attempted. Next: exact-head CI and release; materials/3D native acceptance remains unverified.

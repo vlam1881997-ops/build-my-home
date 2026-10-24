@@ -56,3 +56,11 @@ test('reference-image hydration keeps its original project scope across encoding
   if(changed){assert.equal(row.dataUrl,undefined);assert.equal(B.v6.upload,undefined);}else{assert.equal(writes[0].options.scope,'local-a');assert.equal(B.v6.upload,row);assert.match(row.dataUrl,/^data:image/);}
  }
 });
+
+test('switch during final save/cache never reports a stale operation as current',async()=>{
+ const upload=client();let saves=0;upload.B.cloudSaveProject=async()=>{if(++saves===2)switchProject(upload.B);return true;};
+ await assert.rejects(upload.B.uploadProjectEvidence('image-1'),/đã đổi/);
+ const download=client({local:async()=>null});Object.assign(download.record,{cloudKey:'key',cloudProjectId:'project-a'});
+ download.B.evidencePut=async()=>switchProject(download.B);
+ await assert.rejects(download.B.evidenceGet('image-1'),/đã đổi/);
+});
