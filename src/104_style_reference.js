@@ -53,9 +53,16 @@
  };
  B.restoreStyleReferenceImages=async()=>{
   const project=B.state.project,rows=B.v6?.uploads||[],epoch=B.cloud?.epoch;
-  const current=()=>B.state.project===project&&B.v6?.uploads===rows&&B.cloud?.epoch===epoch;
+  const missing=rows.filter(x=>x.kind==='image'&&!x.dataUrl);if(!missing.length)return;
+  let restartQueued=false;
+  const current=()=>{
+   if(B.state.project!==project||B.cloud?.epoch!==epoch)return false;
+   if(B.v6?.uploads===rows)return true;
+   if(!restartQueued){restartQueued=true;queueMicrotask(()=>{if(B.state.project===project&&B.cloud?.epoch===epoch)B.restoreStyleReferenceImages();});}
+   return false;
+  };
   let scope;try{scope=await B.projectMediaScope();}catch(_){return;}if(!current())return;
-  for(const row of rows.filter(x=>x.kind==='image'&&!x.dataUrl)){
+  for(const row of missing){
    try{
     let data=await B.styleReferenceStore.get(row.id,{scope});if(!current()||!rows.includes(row))return;
     const metadata=(project.sourceRefs||[]).find(x=>x.id===row.id);

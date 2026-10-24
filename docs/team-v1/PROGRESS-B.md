@@ -1048,3 +1048,5 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 ## 2026-10-24 — Complete interrupted PR80 media race repair
 - Recovered published head5991ed537dd6b97098ee4b9a59160bca9c1c33cf after scratch maintenance. Reconstructed the two unsaved final-await checks from the prior task: a project switch during final metadata save or cache write cannot report stale success/return old bytes to the active project.
 - Focused client suite8/8 passes Node24.19.0; complete Node22 CI pending. No production media flag enabled, no real data modified. Browser approval usage-limit restriction remains; no workaround attempted. Next: exact-head CI and release; materials/3D native acceptance remains unverified.
+
+- Addressed PR80 review: empty reference hydration now exits before projectMediaScope, preventing unintended startup saves; changed upload lists schedule a guarded restoration pass so retained images recover. Targeted suite9/9 passes, including no scope creation on empty state and exactly one restart for a changed list. Full final-head CI required.

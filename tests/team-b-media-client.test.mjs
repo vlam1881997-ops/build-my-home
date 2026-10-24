@@ -64,3 +64,15 @@ test('switch during final save/cache never reports a stale operation as current'
  download.B.evidencePut=async()=>switchProject(download.B);
  await assert.rejects(download.B.evidenceGet('image-1'),/đã đổi/);
 });
+
+test('empty hydration never creates a local project; changed lists restore retained images',async()=>{
+ const source=fs.readFileSync('src/104_style_reference.js','utf8'),tasks=[];
+ const row={id:'retained',kind:'image'},B={state:{project:{sourceRefs:[]},ui:{step:0}},cloud:{epoch:1},v6:{uploads:[]},render(){}};
+ let scopes=0,reads=0;B.projectMediaScope=async()=>{scopes++;return 'local-a';};
+ B.styleReferenceStore={get:async()=>{if(++reads===1)B.v6.uploads=[row];return 'data:image/jpeg;base64,aW1hZ2U=';}};
+ vm.runInNewContext(source.slice(source.indexOf(' B.restoreStyleReferenceImages=async()=>{'),source.indexOf(' const restore=B.restoreProjectRuntime;')),{B,queueMicrotask:fn=>tasks.push(fn)});
+ await B.restoreStyleReferenceImages();assert.equal(scopes,0);
+ B.v6.uploads=[row];await B.restoreStyleReferenceImages();assert.equal(row.dataUrl,undefined);assert.equal(tasks.length,1);
+ tasks.shift()();await new Promise(resolve=>setImmediate(resolve));
+ assert.match(row.dataUrl,/^data:image/);assert.equal(B.v6.upload,row);assert.equal(reads,2);assert.equal(tasks.length,0);
+});
