@@ -168,3 +168,10 @@ html.bmh-v60 .showroom-compare-grid small{font-size:11px;line-height:1.6}
 .material-reference-dialog a{display:inline-block;padding:8px 0;text-decoration:underline}
 .material-reference-dialog .product-no-image{padding:32px;background:#f3f5f0}
 @media(max-width:600px){.material-reference-dialog{width:calc(100vw - 28px);max-height:calc(100dvh - 28px);padding:16px}.material-reference-dialog>img{max-height:52dvh}}
+
+/* One clear finish action, with a quieter save-only alternative. */
+.showroom-preview button[data-showroom-apply]{background:#fff;color:#374b2e;border:1px solid #bdcbb2;margin:4px 8px 4px 0}
+.showroom-preview button.showroom-primary,.showroom-choice-board button.showroom-primary{background:#355a42;color:#fff;border:1px solid #355a42;border-radius:10px;min-height:44px;padding:11px 18px;font:inherit;font-weight:600;cursor:pointer}
+.showroom-primary:focus-visible{outline:3px solid #b17c34;outline-offset:3px}
+.showroom-preview button.showroom-primary:disabled{opacity:.55;cursor:default}
+@media(max-width:600px){.showroom-preview button[data-showroom-apply],.showroom-preview button.showroom-primary{width:100%;margin:6px 0}.showroom-choice-board button.showroom-primary{max-width:100%;white-space:normal}}

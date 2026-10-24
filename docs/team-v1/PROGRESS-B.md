@@ -1050,3 +1050,19 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Focused client suite8/8 passes Node24.19.0; complete Node22 CI pending. No production media flag enabled, no real data modified. Browser approval usage-limit restriction remains; no workaround attempted. Next: exact-head CI and release; materials/3D native acceptance remains unverified.
 
 - Addressed PR80 review: empty reference hydration now exits before projectMediaScope, preventing unintended startup saves; changed upload lists schedule a guarded restoration pass so retained images recover. Targeted suite9/9 passes, including no scope creation on empty state and exactly one restart for a changed list. Full final-head CI required.
+
+
+## 2026-10-24 — PR80 release checkpoint
+- last_verified_commit: 418a983643bae6941a3a91343731e3ed3d63da99 (merged PR80); tested head54dfe71e481683862373630526232164d731e592, Node22 full CI627 application tests +57 coordinator tests passed. All three PR80 review findings addressed; focused client9/9 passed locally.
+- Vercel exact-main commit status success / Deployment has completed: https://vercel.com/vlam1881997-9266/build_my_home_full_v1.2_github/5iPJQZ6VpqNnXM8UWPVz885bhHpa. Provider metadata only; native domain/visual acceptance not claimed.
+- Source-material review:11 curated source-matched product/surface references are display links; verified commercial texture permissions are not established, and they are not automatically used as 3D textures. Do not relabel catalog presence as successful live image delivery or same-material3D acceptance.
+- Remaining blocker: automatic browser approval previously denied due usage limit; no changed authorization/limit evidence. Native images, saved/new/incognito interaction and authenticated multi-device/GPU acceptance remain unavailable. Production media readiness and confirmed material/technical inputs remain unverified. Whole A+B commercial project NOT complete; no background continuation claimed.
+- Resume exact deployed revision for the approved Modern house: source images visible/selectable, corresponding supported3D surfaces, save/reload/cross-session, exports and owner visual acceptance. Do not introduce unrelated features to substitute for these gates.
+
+
+## 2026-10-24 — Measured house → chosen finishes → 3D handoff
+- User explicitly requests A+B completion and simpler UI around the measured house/material flow. Reuse pinned Three0.160.1, existing CC0 surface assets, scene/finish contracts and ten routes; no new service or disconnected geometry store.
+- Fixed aggregate-target preview: all requires every applicable room to hold a valid current SKU/profile binding; unassigned previews an actually matched room, preserving manually authored other rooms. Missing/stale targets reject without changing the design.
+- Added explicit Save and view3D primary action, preserving save-only as the quiet alternative. Empty material workspace links to measured drawing rather than seeding demo geometry. Added scoped mobile button/focus styling; no global UI replacement.
+- Local Node24.19.0 syntax passed. Material suite43 passed,3 unavailable because sparse snapshot lacks shipped image assets/work-plan/Modern fixture; new measured-geometry persistence, aggregate mismatch, custom-room isolation and empty-state regressions pass. Complete Node22 CI remains required. No asset placeholder/stub committed.
+- Native UI/3D/material-image acceptance remains blocked by automatic browser approval usage limit; no bypass. Cannot claim visual polish or commercial completion without actual desktop/mobile inspection. Next: exact-head CI/review, authorized release, then native same-design/same-material verification when available.
