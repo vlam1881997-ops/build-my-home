@@ -264,31 +264,39 @@
   if(!record)throw Error('Tệp không còn trong dự án.');
   if(!c.verified||!c.config?.mediaConfigured||!projectId||B.state.meta.cloudOwnerId!==c.user?.id)throw Error('Lưu dự án lên tài khoản và mở kho tệp trước.');
   if(c.syncStatus==='conflict')throw Error('Xử lý xung đột thiết kế trước khi tải tệp.');
+  const ensureCurrent=()=>{if(!same(project,epoch,projectId)||!refs(project).includes(record))throw Error('Dự án / tệp đã đổi; kết quả cũ không áp dụng.');};
   if(!await B.cloudSaveProject({createIfMissing:false}))throw Error(c.error||'Chưa đồng bộ thiết kế.');
-  if(!same(project,epoch,projectId))throw Error('Dự án / tài khoản đã đổi.');
+  ensureCurrent();
   let blob=await B.evidenceGet(id);
-  if(!blob&&B.styleReferenceStore){const preview=await B.styleReferenceStore.get(id);if(preview)blob=await (await fetch(preview)).blob();}
+  ensureCurrent();
+  if(!blob&&B.styleReferenceStore){const preview=await B.styleReferenceStore.get(id);ensureCurrent();if(preview)blob=await (await fetch(preview)).blob();}
+  ensureCurrent();
   if(!blob)throw Error('Tệp gốc chưa có trên thiết bị này.');
   if(blob.size>2*1024*1024)throw Error('Tệp đồng bộ tối đa 2 MB. Giữ bản gốc trong ZIP; dùng ảnh thu nhỏ hoặc PDF nhỏ hơn.');
   const base64=String(await dataUrl(blob)).split(',')[1];
+  ensureCurrent();
   const result=await B.cloudApi('/api/projects?operation=media',{method:'POST',auth:true,body:{projectId,evidenceId:id,expectedRevision:B.state.meta.cloudRevision,type:blob.type,base64}});
-  if(!same(project,epoch,projectId)||!refs(project).includes(record))throw Error('Dự án / tệp đã đổi; kết quả cũ không áp dụng.');
+  ensureCurrent();
   Object.assign(record,result.file);B.save();const saved=await B.cloudSaveProject({createIfMissing:false});
+  ensureCurrent();
   if(!saved)throw Error('Bytes đã tải; metadata chưa đồng bộ. Bản trên máy còn nguyên. Thử lưu dự án lại.');
   return result.file;
  };
  const get=B.evidenceGet;B.evidenceGet=async id=>{
-  const local=await get(id);if(local)return local;
-  const project=B.state.project,epoch=c.epoch,projectId=B.state.meta.cloudProjectId,record=refs(project).find(r=>r.id===id);
+  const project=B.state.project,epoch=c.epoch,projectId=B.state.meta.cloudProjectId;
+  const local=await get(id);if(!same(project,epoch,projectId))throw Error('Dự án / tài khoản đã đổi.');if(local)return local;
+  const record=refs(project).find(r=>r.id===id);
   if(!record?.cloudKey||record.cloudProjectId!==projectId||!c.verified||!c.config?.mediaConfigured)return null;
   const result=await B.cloudApi('/api/projects?operation=media&projectId='+encodeURIComponent(projectId)+'&evidenceId='+encodeURIComponent(id),{auth:true});
+  if(!same(project,epoch,projectId)||!refs(project).includes(record))throw Error('Dự án / tệp đã đổi.');
   const response=await fetch(result.url);if(!response.ok)throw Error('Không tải được tệp từ tài khoản.');const blob=await response.blob();
   if(blob.size>2*1024*1024)throw Error('Tệp tải về vượt dung lượng cho phép.');
   if(result.sha256){const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer())),v=>v.toString(16).padStart(2,'0')).join('');if(hash!==result.sha256)throw Error('Tệp tải về không khớp bản đã lưu.');}
-  if(!same(project,epoch,projectId))throw Error('Dự án / tài khoản đã đổi.');
-  await B.evidencePut(id,blob);return blob;
+  if(!same(project,epoch,projectId)||!refs(project).includes(record))throw Error('Dự án / tệp đã đổi.');
+  await B.evidencePut(id,blob);if(!same(project,epoch,projectId)||!refs(project).includes(record))throw Error('Dự án / tệp đã đổi.');return blob;
  };
  document.addEventListener('click',async e=>{const button=e.target.closest?.('[data-cloud-media-upload]');if(!button)return;button.disabled=true;
   try{await B.uploadProjectEvidence(button.dataset.cloudMediaUpload);B.toast('Đã đồng bộ tệp riêng của dự án.');}catch(error){B.toast(error.message);}finally{button.disabled=false;B.render({preserveScroll:true});}
  });
 })();
+

@@ -1027,3 +1027,26 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Keep the repair panel inside the first editor root, preserving the existing inspector relocation. Added a structural regression at the first-root insertion boundary; it fails against the previous sibling panel and passes with the fix.
 - Local Node24.19.0: syntax pass; team-b-workflow 34/34 pass, including atomic repair, locks/undo, new/create/move/rotate/reload. Full Node22 CI pending for this fix. No native browser acceptance claimed.
 - Next: require exact-head CI before merging PR79 and check production deployment identity. Browser automatic approval previously denied navigation due usage limit; do not bypass. Native old/new/incognito, login/multi-device/media and visual commercial acceptance remain open.
+
+
+## 2026-10-23 — PR79 merged and deployed; acceptance boundaries retained
+- last_verified_commit: ed19db043c22c8085c7eb7578329cb6831cd229b (main, PR79). Exact-head PR CI39959532402 succeeded on Node22; main CI39959775285 also succeeded. Application618/618 and coordinator57/57 passed on the PR head; main full checks also passed.
+- Vercel commit status for this exact main SHA reports success / Deployment has completed; dashboard https://vercel.com/vlam1881997-9266/build_my_home_full_v1.2_github/6zbEn2VRxiLubZmUUAm9zLmXJEoT. This is provider metadata, not a native website acceptance claim. Vercel connector get_deployment returned404 for the known dashboard ID/team, so hostname/environment details were not independently recovered in this turn.
+- Fixed the review's missing repair UI before merge. New designs start empty; saved/copied plans are preserved, legacy invalid rooms have atomic bounds repair. PR77 material changes retained by integrating on released main.
+- Real blocker: previously denied automatic browser approval due usage limit remains. No browser/network workaround attempted. Native old/new/incognito editing, login/multi-device/image synchronization, GPU desktop/phone and owner visual approval remain unaccepted. Missing confirmed terrace/professional inputs remain as documented in W34; do not invent them or expand the Modern review into24 styles.
+- Next executable acceptance when the browser limit is resolved: exact released build, fresh/new/saved/copy project; draw/select/move/rotate/repair/save/reload, then authenticated second session and source-image/3D parity. Whole A+B commercial project is NOT complete. No background execution claimed.
+
+
+## 2026-10-23 — A+B / B5 media transfer project-switch race
+- Continue from main ed19db043c22c8085c7eb7578329cb6831cd229b and role checkpoint e02a65c38a7d1f509571bfcd9eb6c48505643561. Browser limit remains; execute independent media correctness work.
+- Reproduced stale project/account/removal during local read/FileReader and download cache. Three new regression cases fail against the released source. Guard asynchronous boundaries before upload and metadata/cache application.
+- Reference-image hydration now captures the original local scope and checks project/upload-list/account epoch after reads/encoding, so old image bytes cannot be written into the newly opened project.
+- tests/team-b-media-client.test.mjs:7/7 pass on Node24.19.0, upload/download success and interrupted operations. Syntax passes. Existing style-reference server test could not run in sparse local snapshot (missing api/gemini-render.mjs); complete Node22 CI required, no stubs/skips. Register new suite in package test under assigned A+B scope.
+- Does not enable media Storage or claim multi-device production acceptance. Native browser/GPU and service configuration gates remain; no change to real user data or secrets. Next: full CI, authorized merge/deployment, durable exact-SHA evidence.
+
+
+## 2026-10-24 — Complete interrupted PR80 media race repair
+- Recovered published head5991ed537dd6b97098ee4b9a59160bca9c1c33cf after scratch maintenance. Reconstructed the two unsaved final-await checks from the prior task: a project switch during final metadata save or cache write cannot report stale success/return old bytes to the active project.
+- Focused client suite8/8 passes Node24.19.0; complete Node22 CI pending. No production media flag enabled, no real data modified. Browser approval usage-limit restriction remains; no workaround attempted. Next: exact-head CI and release; materials/3D native acceptance remains unverified.
+
+- Addressed PR80 review: empty reference hydration now exits before projectMediaScope, preventing unintended startup saves; changed upload lists schedule a guarded restoration pass so retained images recover. Targeted suite9/9 passes, including no scope creation on empty state and exactly one restart for a changed list. Full final-head CI required.

@@ -52,13 +52,31 @@
   return item;
  };
  B.restoreStyleReferenceImages=async()=>{
-  const project=B.state.project,rows=B.v6?.uploads||[];
-  for(const row of rows.filter(x=>x.kind==='image'&&!x.dataUrl)){
-   try{let data=await B.styleReferenceStore.get(row.id);const metadata=(project.sourceRefs||[]).find(x=>x.id===row.id);if(!data&&metadata?.cloudKey&&B.cloud?.config?.mediaConfigured){const blob=await B.evidenceGet(row.id);if(blob?.type==='image/jpeg')data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob);});if(data)await B.styleReferenceStore.put(row.id,data);}if(B.state.project!==project||!rows.includes(row))return;
+  const project=B.state.project,rows=B.v6?.uploads||[],epoch=B.cloud?.epoch;
+  const missing=rows.filter(x=>x.kind==='image'&&!x.dataUrl);if(!missing.length)return;
+  let restartQueued=false;
+  const current=()=>{
+   if(B.state.project!==project||B.cloud?.epoch!==epoch)return false;
+   if(B.v6?.uploads===rows)return true;
+   if(!restartQueued){restartQueued=true;queueMicrotask(()=>{if(B.state.project===project&&B.cloud?.epoch===epoch)B.restoreStyleReferenceImages();});}
+   return false;
+  };
+  let scope;try{scope=await B.projectMediaScope();}catch(_){return;}if(!current())return;
+  for(const row of missing){
+   try{
+    let data=await B.styleReferenceStore.get(row.id,{scope});if(!current()||!rows.includes(row))return;
+    const metadata=(project.sourceRefs||[]).find(x=>x.id===row.id);
+    if(!data&&metadata?.cloudKey&&B.cloud?.config?.mediaConfigured){
+     const blob=await B.evidenceGet(row.id);if(!current()||!rows.includes(row))return;
+     if(blob?.type==='image/jpeg')data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob);});
+     if(!current()||!rows.includes(row))return;
+     if(data)await B.styleReferenceStore.put(row.id,data,{scope});
+    }
+    if(!current()||!rows.includes(row))return;
     if(/^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(data||''))row.dataUrl=data;
    }catch(_){return;}
   }
-  if(B.state.project!==project)return;
+  if(!current())return;
   B.v6.upload=rows.find(x=>x.id===project.styleReferenceId&&x.dataUrl)||rows.find(x=>x.dataUrl)||null;
   if([1,6].includes(B.state.ui.step))B.render({preserveScroll:true});
  };
@@ -197,4 +215,5 @@
   }
  });
 })();
+
 
