@@ -172,7 +172,7 @@ test('cinematic capture completes even when the loading view disposes WebGL',asy
     $:()=>({}),toast:()=>{},render:()=>{renderCount++;BMH.studio3d=null;}};
   const fetch=async(url,options)=>{posted={url,body:JSON.parse(options.body)};return {ok:true,json:async()=>({image:'B'.repeat(128),mimeType:'image/png',generatedAt:'2026-09-26T00:00:00Z'})};};
   vm.runInNewContext(fs.readFileSync(new URL('../src/45_studio3d.js',import.meta.url),'utf8'),{BMH,window:{},document:{createElement(){const canvas={toDataURL(){return canvas.reference.toDataURL();},getContext(){return {drawImage(reference){canvas.reference=reference;}};}};return canvas;}},fetch,JSON,Math,Number,Object,Date});
-  BMH.studio3d={renderer:{domElement:{width:2560,height:1600,toDataURL:()=> 'data:image/jpeg;base64,'+'A'.repeat(128)}}};
+  BMH.studio3d={project:BMH.state.project,renderer:{domElement:{width:2560,height:1600,toDataURL:()=> 'data:image/jpeg;base64,'+'A'.repeat(128)}}};
   await BMH.generateCinematicRender();
   assert.equal(posted.url,'/api/gemini-render');
   assert.equal(posted.body.project.materials.choices.floor,'Gạch nhám');

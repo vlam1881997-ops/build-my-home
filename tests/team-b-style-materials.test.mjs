@@ -425,3 +425,55 @@ test('exterior material preview assembles the house only after a valid binding i
  assert.equal(B.openShowroomProductPreview('paint','sand-plaster','exterior'),true);assert.equal(B.state.ui.sceneExploded,false);
  assert.equal(B.state.ui.sceneFocus,'all');assert.equal(B.state.ui.designView,'exterior');assert.equal(JSON.stringify(p),project);
 });
+
+test('finish camera capture rejects a retained renderer from another room, view or project',()=>{
+ const B=make(),p=B.state.project,rooms=p.plan.rooms.filter(r=>!['stairs','elevator','balcony'].includes(r.type));
+ Object.assign(B.state.ui,{sceneFocus:'room:'+rooms[0].id,roomCamera:'inside',sceneExploded:false});
+ const scene=B.studio3d={project:p,cameraScope:{focus:B.state.ui.sceneFocus,roomCamera:B.state.ui.roomCamera,exteriorCamera:B.state.ui.exteriorCamera,exploded:false},scene:{userData:{}},state:{yaw:.3,pitch:.2,dist:2,target:{toArray:()=>[1,2,3]}}};
+ const geometry=JSON.stringify(p.plan),finish=JSON.stringify(p.materials.finish);B.rememberFinishCamera();assert.equal(B.pendingFinishCamera.project,p);assert.deepEqual(plain(B.pendingFinishCamera.target),[1,2,3]);
+ for(const [key,value]of [['sceneFocus','room:'+rooms[1].id],['roomCamera','overview'],['exteriorCamera','overview'],['sceneExploded',true]]){
+  const previous=B.state.ui[key];B.state.ui[key]=value;B.rememberFinishCamera();assert.equal(B.pendingFinishCamera,null,'reject changed '+key);B.state.ui[key]=previous;
+ }
+ B.state.project=structuredClone(p);B.rememberFinishCamera();assert.equal(B.pendingFinishCamera,null,'same geometry in another project is not the same camera owner');B.state.project=p;
+ scene.scene.userData.disposed=true;B.rememberFinishCamera();assert.equal(B.pendingFinishCamera,null);scene.scene.userData.disposed=false;
+ scene.cameraScope=null;B.rememberFinishCamera();assert.equal(B.pendingFinishCamera,null);
+ assert.equal(JSON.stringify(p.plan),geometry);assert.equal(JSON.stringify(p.materials.finish),finish);
+});
+
+test('finish camera restore rejects a late mount from another project or view and retains a valid pose',async()=>{
+ const prefix=fs.readFileSync('src/86_visual_materials.js','utf8').split('BMH.VISUAL_MATERIALS=')[0];
+ for(const mode of ['valid','project','view','exploded']){
+  const project={},ui={sceneFocus:'room:r',roomCamera:'inside',exteriorCamera:'front',sceneExploded:false};let updates=0,reset=0;
+  const B={state:{project,ui},$:()=>null,mountStudio3D:async()=>{
+   B.studio3d={project:mode==='project'?{}:project,cameraScope:{...ui,focus:mode==='view'?'room:other':ui.sceneFocus,exploded:mode==='exploded'},scene:{userData:{}},state:{yaw:0,pitch:0,dist:5,target:{fromArray(v){this.value=v;}},resetCameraValidation(){reset++;},updateCamera(){updates++;}}};
+  }};
+  vm.runInNewContext(prefix,{BMH:B,JSON});
+  B.pendingFinishCamera={project,focus:ui.sceneFocus,preset:ui.roomCamera,exterior:ui.exteriorCamera,exploded:false,yaw:.3,pitch:.2,dist:2,target:[1,2,3]};
+  await B.mountStudio3D();assert.equal(updates,mode==='valid'?1:0,mode);assert.equal(reset,mode==='valid'?1:0,mode);
+  if(mode==='valid'){assert.equal(B.studio3d.state.dist,2);assert.deepEqual(B.studio3d.state.target.value,[1,2,3]);assert.equal(B.pendingFinishCamera,null);}
+ }
+});
+
+test('AI preview cannot publish into a different project with the same design signature',async()=>{
+ for(const switched of [false,true]){
+  const B=make(),project=B.state.project;let calls=0;
+  B.cinematicSignature=()=> 'identical-copy';B.cinematicCameraKey=()=> 'same-camera';B.capturePlanReference=async()=> 'data:image/jpeg;base64,REFERENCE';
+  B.aiFetch=async()=>{calls++;if(switched)B.state.project=structuredClone(project);return {ok:true,json:async()=>({image:'SYNTHETIC',mimeType:'image/png'})};};
+  await B.generateCinematicRender();assert.equal(calls,1);assert.equal(B.cinematicRender.loading,false);
+  if(switched){assert.equal(B.cinematicRender.views['identical-copy'],undefined);assert.ok(!B.cinematicRender.dataUrl);}
+  else assert.equal(B.cinematicRender.views['identical-copy'],'data:image/png;base64,SYNTHETIC');
+ }
+});
+
+test('AI preview rejects a retained renderer owned by another project before capturing or calling the service',async()=>{
+ const B=make();let captures=0,calls=0;B.studio3d={project:{},renderer:{domElement:{}},scene:{userData:{}},renderFrame(){}};
+ B.cinematicReferenceImage=()=>{captures++;return 'OLD-PROJECT';};B.aiFetch=async()=>{calls++;throw Error('must not call');};
+ await B.generateCinematicRender();assert.equal(captures,0);assert.equal(calls,0);assert.equal(B.cinematicRender.loading,false);
+});
+
+test('AI preview stops before the service if the project changes while preparing reference bytes',async()=>{
+ const B=make();let calls=0;B.cinematicSignature=()=> 'identical-copy';
+ B.capturePlanReference=async()=>{B.state.project=structuredClone(B.state.project);return 'data:image/jpeg;base64,REFERENCE';};
+ B.aiFetch=async()=>{calls++;throw Error('must not call');};
+ await B.generateCinematicRender();assert.equal(calls,0);assert.equal(B.cinematicRender.loading,false);assert.ok(!B.cinematicRender.dataUrl);
+});

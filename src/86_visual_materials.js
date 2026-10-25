@@ -1,8 +1,14 @@
 /* Visual finishes are independent of supplier SKUs, quotes and measured geometry. */
 // Keep the customer's chosen angle while the scene is rebuilt with new finishes.
+const finishCameraMatches=(s,ui)=>{
+ if(!s?.state||s.project!==BMH.state.project||s.scene?.userData?.disposed)return false;
+ // Compare the view that built the renderer, not the UI's later selection.
+ const view=s.cameraScope;
+ return !!view&&view.focus===ui.sceneFocus&&view.roomCamera===ui.roomCamera&&view.exteriorCamera===ui.exteriorCamera&&!!view.exploded===!!ui.sceneExploded;
+};
 BMH.rememberFinishCamera=()=>{
  const s=BMH.studio3d,ui=BMH.state.ui;
- BMH.pendingFinishCamera=s?.state?{project:BMH.state.project,focus:ui.sceneFocus,preset:ui.roomCamera,exterior:ui.exteriorCamera,yaw:s.state.yaw,pitch:s.state.pitch,dist:s.state.dist,target:s.state.target.toArray()}:null;
+ BMH.pendingFinishCamera=finishCameraMatches(s,ui)?{project:s.project,focus:ui.sceneFocus,preset:ui.roomCamera,exterior:ui.exteriorCamera,exploded:!!ui.sceneExploded,yaw:s.state.yaw,pitch:s.state.pitch,dist:s.state.dist,target:s.state.target.toArray()}:null;
 };
 const finishMount=BMH.mountStudio3D;
 BMH.mountStudio3D=async()=>{
@@ -13,7 +19,7 @@ BMH.mountStudio3D=async()=>{
  const pose=BMH.pendingFinishCamera;
  const task=(async()=>{
   await finishMount();const s=BMH.studio3d,ui=BMH.state.ui;
-  if(!pose||!s?.state||pose.project!==BMH.state.project||pose.focus!==ui.sceneFocus||pose.preset!==ui.roomCamera||pose.exterior!==ui.exteriorCamera)return;
+  if(!pose||!finishCameraMatches(s,ui)||pose.project!==BMH.state.project||pose.focus!==ui.sceneFocus||pose.preset!==ui.roomCamera||pose.exterior!==ui.exteriorCamera||!!pose.exploded!==!!ui.sceneExploded)return;
   s.state.resetCameraValidation?.();
   Object.assign(s.state,{yaw:pose.yaw,pitch:pose.pitch,dist:pose.dist,framed:true});s.state.target.fromArray(pose.target);s.state.updateCamera();
   if(BMH.pendingFinishCamera===pose)BMH.pendingFinishCamera=null;
@@ -203,4 +209,3 @@ const materialsScreen=BMH.screen7;
 BMH.screen7=()=>materialsScreen().replace('<section class="interior-collections">',BMH.visualMaterialsHtml()+'<section class="interior-collections">').replace('<details open><summary>Ngoại thất</summary>',BMH.visualMaterialsQuickHtml()+'<details open><summary>Ngoại thất</summary>');BMH.SCREENS[5]=BMH.screen7;
 document.addEventListener('click',event=>{const button=event.target.closest?.('[data-visual-material]');if(!button)return;const room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===BMH.state.ui.sceneFocus);if(BMH.applyVisualMaterial(button.dataset.visualRole,button.dataset.visualMaterial,room?.id)){if(!BMH.refreshStudioFinishes?.(button.dataset.visualRole,room?.id))BMH.render({preserveScroll:true});BMH.toast('Đã đổi bề mặt '+(room?room.name:'các phòng trong nhà')+'.');}});
 document.addEventListener('change',event=>{const select=event.target;if(!select.matches?.('[data-visual-material-select]'))return;const room=BMH.state.project.plan.rooms.find(r=>'room:'+r.id===BMH.state.ui.sceneFocus);if(BMH.applyVisualMaterial(select.dataset.visualMaterialSelect,select.value,room?.id)&&!BMH.refreshStudioFinishes?.(select.dataset.visualMaterialSelect,room?.id))BMH.render({preserveScroll:true});});
-
