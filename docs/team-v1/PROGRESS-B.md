@@ -1139,3 +1139,11 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Result78/104 references,26 unresolved. Source image fetches are independent manufacturer/supplier research; native browser still blocked. Preserve prices and closed texture rights gates. INAX alternate pages located but image bytes timed out/503; do not mark delivered. GECKO image inaccessible. No commercial completion claim.
 - Adapt source-picture filter tests to actual pinned floor count, preserving exact SKU filter regression. Full Node22 CI required before authorized release.
 - last_verified_commit:c3c1b8b5f744a0d102a03e2c33af7cd75275f0a8 (PR85 CI641+57).
+
+
+## 2026-10-25 — PR86 released source-image subset
+- Main41572d39ad6eb92aa2fd4a2b23984d35ab4c0d8d merges PR86. Last verified source fa9096a682f2e32321391d61e7738f8cd2c0fff3. Node22 CI40198229765/job121183632492 passed641 application and57 coordinator tests.
+- Current84/104 pinned image references,20 unresolved. Added25 since PR85, including supplier source labels; replaced mismatched MARMOL002 old DB032 picture. Existing prices preserved; images remain linked-only with no automatic texture rights.
+- Vercel exact-main status: success https://vercel.com/vlam1881997-9266/build_my_home_full_v1.2_github/FLK57bxvM87mWexPALGb15tNHp5X. Native user-domain inspection still blocked; not claimed.
+- Research: BigHouse source table https://dailydongtam.com/gia-gach-dong-tam.html links31-37 match7 exact tile rows. DongTam paint pages supply application images only. Shop homepage supplies Gecko/Alpha family images. Jotun gallery01 is range illustration. Supplier pages HaiLinh DongVan001, KhoiNguyen TamDao006 and LamNghiaLoi Marmol002 provide matching sample URLs.
+- Remaining20 not complete. INAX BF1858 alternate official Vietnamese product page located but image timeout; BF1760 main image is productholder.gif, reject placeholder; AC959 alternate review page image503. SikaLatex official dynamicmedia image InternalError. Remaining floor IDs, Sika families, MEP, roof and PCB30 require additional correct-source research. Do not report all20 blocked merely because some URLs fail. Do not claim104 coverage or24-style acceptance.
