@@ -1712,7 +1712,7 @@
       "phone": "1800 6633",
       "price": 5929000,
       "priceDate": null,
-      "imageUrl": "https://www.inax.com.vn/wp-content/uploads/2026/06/ac-959van-1.png",
+      "imageUrl": "https://inaxvietnam.vn/wp-content/uploads/bon-cau-inax-ac-959van.webp",
       "verifiedAt": "2026-10-01",
       "photoEvidence": "source-page",
       "priceStatus": "reference",
@@ -1740,6 +1740,18 @@
         "sourceType": "supplier",
         "publishedPeriod": null,
         "notes": "Giá khuyến mãi hiển thị tại nhà phân phối; chưa xác nhận lắp đặt và vận chuyển."
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "AC-959VAN",
+        "specification": "AC-959VAN · bộ · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://inaxvietnam.vn/wp-content/uploads/bon-cau-inax-ac-959van.webp",
+        "sourceUrl": "https://inaxvietnam.vn/ac-959van/",
+        "publisher": "inaxvietnam.vn",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh theo mã do nhà cung cấp công bố; xác nhận nhãn, phiên bản và hàng thực trước đặt mua; chưa cấp quyền tái sử dụng hoặc texture."
       }
     },
     {
@@ -1756,7 +1768,7 @@
       "phone": "1800 6633",
       "price": 1578000,
       "priceDate": null,
-      "imageUrl": "https://www.inax.com.vn/wp-content/uploads/2025/12/chau-rua-am-ban-al-2216v-1.jpg",
+      "imageUrl": "https://shopinax.com/images/products/2025/large/chau-rua-lavabo-inax-al-2216v_1762156090.jpg",
       "verifiedAt": "2026-10-01",
       "photoEvidence": "source-page",
       "priceStatus": "reference",
@@ -1784,6 +1796,18 @@
         "sourceType": "supplier",
         "publishedPeriod": null,
         "notes": "Giá chậu riêng; không tự bao gồm vòi, mặt đá, phụ kiện hoặc lắp đặt."
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "AL-2216V",
+        "specification": "AL-2216V · bộ · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://shopinax.com/images/products/2025/large/chau-rua-lavabo-inax-al-2216v_1762156090.jpg",
+        "sourceUrl": "https://shopinax.com/chau-rua-lavabo-am-ban-inax-al-2216v",
+        "publisher": "Shop INAX",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh theo mã do nhà cung cấp công bố; xác nhận nhãn, phiên bản và hàng thực trước đặt mua; chưa cấp quyền tái sử dụng hoặc texture."
       }
     },
     {
@@ -1844,7 +1868,7 @@
       "phone": "1800 6633",
       "price": null,
       "priceDate": null,
-      "imageUrl": "https://www.inax.com.vn/wp-content/uploads/2026/09/BF-1858V-1.png",
+      "imageUrl": "https://inaxvietnam.vn/wp-content/uploads/inax-bf-1858v-1.webp",
       "verifiedAt": "2026-10-01",
       "photoEvidence": "source-page",
       "priceStatus": "unknown",
@@ -1868,6 +1892,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "BF-1858V",
+        "specification": "BF-1858V · bộ · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://inaxvietnam.vn/wp-content/uploads/inax-bf-1858v-1.webp",
+        "sourceUrl": "https://inaxvietnam.vn/inax-bf-1858v/",
+        "publisher": "inaxvietnam.vn",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh theo mã do nhà cung cấp công bố; xác nhận nhãn, phiên bản và hàng thực trước đặt mua; chưa cấp quyền tái sử dụng hoặc texture."
       }
     },
     {
