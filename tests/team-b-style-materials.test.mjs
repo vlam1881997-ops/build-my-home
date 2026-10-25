@@ -405,3 +405,23 @@ test('empty materials guide returns to the measured drawing without creating dem
  const B=make();B.state.project.plan.rooms=[];const before=JSON.stringify(B.state.project),html=B.showroomChoiceBoardHtml();
  assert.match(html,/data-nav="4" class="showroom-primary"/);assert.match(html,/Dựng phòng theo kích thước/);assert.equal(JSON.stringify(B.state.project),before);
 });
+
+test('room material preview leaves exploded inspection mode and persists the assembled room without changing the design',()=>{
+ const B=make(),room=B.state.project.plan.rooms.find(r=>r.type==='living');
+ B.selectShowroomFinish('natural-linen',room.id);B.state.ui.sceneExploded=true;B.state.ui.sceneFocus='all';B.state.ui.modelWalls='full';
+ const project=JSON.stringify(B.state.project),before=JSON.stringify(B.state);
+ assert.equal(B.openShowroomFinishPreview('removed'),false);assert.equal(JSON.stringify(B.state),before);
+ assert.equal(B.openShowroomFinishPreview(room.id),true);assert.equal(B.state.ui.sceneExploded,false);
+ assert.equal(B.state.ui.sceneFocus,'room:'+room.id);assert.equal(B.state.ui.roomCamera,'inside');assert.equal(B.state.ui.modelWalls,'full');assert.equal(JSON.stringify(B.state.project),project);
+ const finish=JSON.stringify(B.state.project.materials.finish);B.state=B.loadState();assert.equal(B.state.ui.sceneExploded,false);assert.equal(B.state.ui.sceneFocus,'room:'+room.id);assert.equal(JSON.stringify(B.state.project.materials.finish),finish);
+});
+
+test('exterior material preview assembles the house only after a valid binding is found',()=>{
+ const {B}=sampleScopeFixture(),p=B.state.project,product={id:'outside-paint-preview',category:'paint',sku:'PAINT-PREVIEW',specification:'Exterior paint',unit:'m²'};
+ p.materials.choices.paint=product.id;p.dataEngine.materialOverrides[product.id]={product};
+ assert.equal(B.applyShowroomProduct('paint','sand-plaster','exterior'),true);B.state.ui.sceneExploded=true;
+ const project=JSON.stringify(p),before=JSON.stringify(B.state);
+ assert.equal(B.openShowroomProductPreview('paint','white-plaster','exterior'),false);assert.equal(JSON.stringify(B.state),before);
+ assert.equal(B.openShowroomProductPreview('paint','sand-plaster','exterior'),true);assert.equal(B.state.ui.sceneExploded,false);
+ assert.equal(B.state.ui.sceneFocus,'all');assert.equal(B.state.ui.designView,'exterior');assert.equal(JSON.stringify(p),project);
+});

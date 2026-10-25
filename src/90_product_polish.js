@@ -101,7 +101,7 @@
   if(!B.applyVisualMaterial(profile.role,profile.id,room.id))return false;
   B.state.ui.sceneFocus='room:'+room.id;B.save();return true;
  };
- B.openShowroomFinishPreview=roomId=>{if(!regularRooms().some(r=>r.id===roomId))return false;B.state.ui.sceneFocus='room:'+roomId;B.state.ui.designView='room';B.state.ui.roomCamera='inside';B.state.ui.modelLook='materials';B.save();B.navigateTo(6);return true;};
+ B.openShowroomFinishPreview=roomId=>{if(!regularRooms().some(r=>r.id===roomId))return false;B.state.ui.sceneFocus='room:'+roomId;B.state.ui.sceneExploded=false;B.state.ui.designView='room';B.state.ui.roomCamera='inside';B.state.ui.modelLook='materials';B.save();B.navigateTo(6);return true;};
  B.showroomRoomSample=(role,roomId)=>{
   if(!regularRooms().some(r=>r.id===roomId))return null;const category=Object.keys(categories).find(k=>categories[k].role===role);if(!category)return null;
   const palette=B.finishPalette(roomId),binding=palette.catalogMaterials?.[category],product=B.catalogBoundProduct?.(category,binding);
@@ -132,7 +132,7 @@
   const palette=exterior?B.facadeFinishPalette?.()||B.resolveFacadeMaterialBindings?.(B.state.project.materials.finish?.exterior||{}):B.finishPalette(roomId);
   if(!matches(palette))return false;
   if(!exterior)return B.openShowroomFinishPreview(roomId);
-  B.state.ui.sceneFocus='all';B.state.ui.designView='exterior';B.state.ui.modelLook='materials';B.save();B.navigateTo(6);return true;
+  B.state.ui.sceneFocus='all';B.state.ui.sceneExploded=false;B.state.ui.designView='exterior';B.state.ui.modelLook='materials';B.save();B.navigateTo(6);return true;
  };
  B.saveAndPreviewShowroomProduct=(category,profileId,target)=>{
   if(!B.applyShowroomProduct(category,profileId,target))return {saved:false,opened:false};
@@ -255,5 +255,3 @@
  document.addEventListener('change',e=>{const select=e.target;if(!select.matches?.('[data-showroom-choice-room]'))return;if(!regularRooms().some(r=>r.id===select.value))return;B.state.ui.sceneFocus='room:'+select.value;B.save();B.render({preserveScroll:true});});
  const status=B.projectSaveStatus;if(status)B.projectSaveStatus=()=>{status();const p=B.projects,node=document.querySelector('.guided-footer>span');if(node){node.textContent=p.error?'Chưa lưu được. Mở Dự án để tải bản sao.':p.busy?'Đang lưu thiết kế trên thiết bị…':p.dirty?'Có thay đổi · Đang chờ lưu…':'Thiết kế đã lưu trên thiết bị.';node.dataset.state=p.error?'error':p.busy||p.dirty?'pending':'saved';}};
 })();
-
-
