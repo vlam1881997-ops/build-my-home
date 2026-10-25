@@ -10,7 +10,7 @@
       "name": "KEO DÁN GẠCH GECKO",
       "spec": "theo quy cách · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/keo-dan-gach-dong-tam/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2026/01/Bai-1_01-1.png",
+      "imageUrl": "https://dongtamshop.com/wp-content/uploads/2026/02/Gecko_mang-Xa-hoi_1_Dongtamshop.png",
       "price": null,
       "unit": "theo quy cách",
       "phone": "",
@@ -41,6 +41,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://dongtamshop.com/wp-content/uploads/2026/02/Gecko_mang-Xa-hoi_1_Dongtamshop.png",
+        "sourceUrl": "https://dongtamshop.com/",
+        "publisher": "Đồng Tâm Shop",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh giới thiệu dòng sản phẩm hoặc phối cảnh từ nguồn; chưa chốt mã màu, quy cách hay cấu hình; không dùng tự động làm texture."
       }
     },
     {
@@ -261,7 +272,7 @@
       "name": "BỘ SƯU TẬP NGÓI PHẲNG TRÁNG MEN ALPHA",
       "spec": "viên · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/bo-suu-tap-ngoi-phang-trang-men-alpha/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2025/06/POST_NGOIALPHA_1080X1080-01-1024x1024.png",
+      "imageUrl": "https://dongtamshop.com/wp-content/uploads/2025/06/POST_NGOIALPHA_1080X1080-01.jpg",
       "price": null,
       "unit": "viên",
       "phone": "",
@@ -292,6 +303,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "viên · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://dongtamshop.com/wp-content/uploads/2025/06/POST_NGOIALPHA_1080X1080-01.jpg",
+        "sourceUrl": "https://dongtamshop.com/",
+        "publisher": "Đồng Tâm Shop",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh giới thiệu dòng sản phẩm hoặc phối cảnh từ nguồn; chưa chốt mã màu, quy cách hay cấu hình; không dùng tự động làm texture."
       }
     },
     {
@@ -1369,7 +1391,7 @@
       "name": "Sơn Jotun ngoài trời Jotashield | Bền màu toàn diện",
       "spec": "theo quy cách · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://www.jotun.com/vn-vi/decorative/products/exterior/all-exterior-products/jotashield-infinity",
-      "imageUrl": "https://www.jotun.com/globalassetsjot03/129395-desktop.png",
+      "imageUrl": "https://www.jotun.com/contentassetsjot03/3040122cdefe42d195844c0d254b042a/jotashield-infinity-gallery-01.jpg?format=webp&height=1280&quality=70&width=1024",
       "price": null,
       "unit": "theo quy cách",
       "phone": "",
@@ -1400,6 +1422,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://www.jotun.com/contentassetsjot03/3040122cdefe42d195844c0d254b042a/jotashield-infinity-gallery-01.jpg?format=webp&height=1280&quality=70&width=1024",
+        "sourceUrl": "https://www.jotun.com/vn-vi/decorative/products/exterior/all-exterior-products/jotashield-infinity",
+        "publisher": "Jotun",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh giới thiệu dòng sản phẩm hoặc phối cảnh từ nguồn; chưa chốt mã màu, quy cách hay cấu hình; không dùng tự động làm texture."
       }
     },
     {
