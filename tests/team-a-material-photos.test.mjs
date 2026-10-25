@@ -12,7 +12,7 @@ function client(){
  return {B,dialogs,focus,data};
 }
 test('curated references identify eleven distinct existing SKUs, with provenance and no rights or price fabrication',()=>{
- const rows=catalog.products.filter(p=>p.photoReference);assert.equal(rows.length,11);assert.equal(new Set(rows.map(p=>p.photoReference.imageUrl)).size,11);
+ const rows=catalog.products.filter(p=>p.photoReference?.checkedAt==='2026-10-22');assert.equal(rows.length,11);assert.equal(new Set(rows.map(p=>p.photoReference.imageUrl)).size,11);
  for(const p of rows){const r=p.photoReference;assert.equal(r.sku,p.sku);assert.equal(r.specification,p.specification||p.spec);assert.equal(r.imageUrl,p.imageUrl);assert.equal(r.status,'source-matched');assert.equal(r.checkedAt,'2026-10-22');assert.ok(['dongtamshop.com','rangdong.com.vn','ancuong.com'].includes(new URL(r.sourceUrl).hostname));assert.equal(p.photoLicense.verified,false);assert.equal(p.photoLicense.commercialUse,false);assert.ok(r.notes);assert.notEqual(p.priceEvidence.retrievedAt,'2026-10-22');}
 });
 test('only shipped exact identity can display a reference; project/search claims cannot self-approve',()=>{
@@ -33,6 +33,34 @@ test('manufacturer surfaces stay distinct from product photos, and imported labe
  p.name='<img src=x onerror=evil()>';assert.equal(B.materialPhotoReference(p).kind,'surface-sample');assert.match(B.webProductCard(p),/Ảnh mẫu bề mặt từ hãng/);assert.doesNotMatch(B.webProductCard(p),/<img src=x/);B.openMaterialReference(p.id);assert.doesNotMatch(dialogs[0].innerHTML,/<img src=x/);
 });
 test('photo-first catalog ranking preserves filters and missing-price products',()=>{
- const {B}=client();B.materialResearch.visible=12;const html=B.materialCatalogHtml('floor');const first=html.match(/data-product-id="([^"]+)"/)[1];assert.ok(B.materialPhotoReference(B.materialResearch.products.find(p=>p.id===first)));assert.match(html,/5 mã có ảnh đối chiếu từ hãng/);
+ const {B}=client();B.materialResearch.visible=12;const html=B.materialCatalogHtml('floor');const first=html.match(/data-product-id="([^"]+)"/)[1];assert.ok(B.materialPhotoReference(B.materialResearch.products.find(p=>p.id===first)));assert.match(html,/5 lựa chọn có ảnh đối chiếu từ hãng/);
  B.materialResearch.filter='6060DB038';const filtered=B.materialCatalogHtml('floor');assert.match(filtered,/1 lựa chọn/);assert.match(filtered,/Chưa có giá/);assert.doesNotMatch(filtered,/data-product-id="source-c0ebd3534344b375"/);
+});
+
+test('all twelve shipped material groups have a pinned manufacturer image reference without granting texture rights',()=>{
+ const {B}=client(),groups=[...new Set(catalog.products.map(p=>p.category))];assert.equal(groups.length,12);
+ for(const category of groups){const rows=B.materialResearch.products.filter(p=>p.category===category&&B.materialPhotoReference(p));assert.ok(rows.length>0,category);for(const p of rows){const ref=B.materialPhotoReference(p);assert.equal(ref.imageUrl,p.imageUrl);assert.equal(ref.specification,p.specification||p.spec);assert.equal(p.photoLicense.verified,false);assert.equal(p.photoLicense.commercialUse,false);assert.equal(B.materialProductPhotoStatus(p).displayable,false);}}
+});
+
+test('product range pictures state their limits and zoom uses the product name when no SKU is selected',()=>{
+ const {B,dialogs}=client(),p=B.materialResearch.products.find(p=>p.category==='paint'&&p.photoReference?.kind==='product-range');
+ assert.equal(p.sku,'');const html=B.webProductCard(p);assert.match(html,/Ảnh dòng sản phẩm từ hãng/);assert.match(html,/Cần chốt mã, màu và quy cách/);assert.match(html,/xem nguồn/);assert.doesNotMatch(html,/data-material-illustration/);
+ assert.equal(B.openMaterialReference(p.id),true);assert.match(dialogs[0].innerHTML,new RegExp('<h2>'+escape(p.name)+'</h2>'));assert.match(dialogs[0].innerHTML,/chưa xác nhận quyền tái sử dụng/);
+ assert.equal(B.materialPhotoReference({...p,imageUrl:'https://example.org/changed.jpg'}),null);
+});
+
+test('source-picture filter composes with brand, search and price filters without changing the project',()=>{
+ const {B}=client(),before=JSON.stringify(B.state.project);B.materialResearch.photoOnly=true;
+ let html=B.materialCatalogHtml('floor');assert.match(html,/data-material-photo checked/);assert.match(html,/5 lựa chọn/);assert.doesNotMatch(html,/data-material-illustration/);
+ B.materialResearch.filter='6060DB038';html=B.materialCatalogHtml('floor');assert.match(html,/1 lựa chọn/);assert.match(html,/6060DB038/);
+ B.materialResearch.priceFilter='known';assert.match(B.materialCatalogHtml('floor'),/Không có sản phẩm khớp/);
+ B.materialResearch.filter='';B.materialResearch.priceFilter='';B.materialResearch.brand='Hãng không tồn tại';assert.match(B.materialCatalogHtml('steel'),/Ảnh dòng sản phẩm từ hãng/);
+ assert.equal(JSON.stringify(B.state.project),before);
+});
+
+test('new INAX SKU retains its own manufacturer price and conflicting dimensions without changing the older SKU',()=>{
+ const {B}=client(),p=B.materialResearch.products.find(p=>p.sku==='AC-959VAN-2'),old=B.materialResearch.products.find(p=>p.sku==='AC-959VAN');
+ assert.notEqual(p.id,old.id);assert.equal(p.priceEvidence.amountVnd,8690000);assert.equal(p.priceEvidence.sourceType,'manufacturer');assert.equal(p.priceEvidence.quotedAt,null);assert.match(p.specification,/636 mm/);assert.match(p.specification,/629 mm/);assert.notEqual(old.priceEvidence.amountVnd,p.priceEvidence.amountVnd);
+ B.v6MatMeta.sanitary=['','Thiết bị vệ sinh'];B.MATERIALS.sanitary=[];assert.equal(B.adoptWebMaterial(p),true);const saved=JSON.parse(JSON.stringify(B.state.project));assert.equal(saved.materials.choices.sanitary,p.id);assert.equal(saved.dataEngine.materialOverrides[p.id].value,null);assert.equal(saved.dataEngine.materialOverrides[p.id].product.price,8690000);assert.equal(saved.dataEngine.materialOverrides[p.id].imageUrl,null);
+ const priced=B.materialResearch.products.filter(p=>p.photoReference?.checkedAt==='2026-10-25'&&p.priceEvidence.amountVnd!==null&&p.id!=='official-ac-959van-2');for(const row of priced)assert.notEqual(row.priceEvidence.retrievedAt,'2026-10-25','photo review cannot refresh price date');
 });

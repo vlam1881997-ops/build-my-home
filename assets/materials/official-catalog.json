@@ -174,7 +174,7 @@
       "name": "BST NGÓI TRÁNG MEN TITAN",
       "spec": "viên · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/bst-ngoi-trang-men-titan/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2024/01/Banner-Ngoi-Titan-Dongtam-Group-1024x484.jpg",
+      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2024/01/Banner-Ngoi-Titan-Dongtam-Group.jpg",
       "price": null,
       "unit": "viên",
       "phone": "",
@@ -205,6 +205,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "viên · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2024/01/Banner-Ngoi-Titan-Dongtam-Group.jpg",
+        "sourceUrl": "https://dongtam.com.vn/san-pham/bst-ngoi-trang-men-titan/",
+        "publisher": "Đồng Tâm",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh bộ sưu tập TITAN nhiều màu; cần chọn mã ngói và phụ kiện trước khi đặt hàng."
       }
     },
     {
@@ -977,7 +988,7 @@
       "name": "Cửa Sổ Nhôm Eurowindow Chính Hãng | Đa Dạng Hệ Mở, Cách Nhiệt",
       "spec": "m² · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://eurowindow.biz/cua-vach-nhom/cua-so-nhom",
-      "imageUrl": "https://storage.sudospaces.com/eurowindow/2024/05/cua-so-1-canh-mo-hat.png",
+      "imageUrl": "https://storage.sudospaces.com/eurowindow/2026/07/cua-so-nhom-eurowindow-ben-chac-khong-cong-venh-ben-mau-theo-thoi-gian.jpg.webp",
       "price": null,
       "unit": "m²",
       "phone": "",
@@ -1008,6 +1019,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "m² · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://storage.sudospaces.com/eurowindow/2026/07/cua-so-nhom-eurowindow-ben-chac-khong-cong-venh-ben-mau-theo-thoi-gian.jpg.webp",
+        "sourceUrl": "https://eurowindow.biz/cua-vach-nhom/cua-so-nhom",
+        "publisher": "Eurowindow",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh dòng cửa sổ nhôm; hệ nhôm, kiểu mở, kính, phụ kiện và kích thước cần được chốt riêng."
       }
     },
     {
@@ -1180,7 +1202,7 @@
       "name": "Sơn Jotun Majestic Đẹp Nguyên Bản | Sơn nội thất đẹp",
       "spec": "theo quy cách · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://www.jotun.com/vn-vi/decorative/products/interior/all-interior-products/majestic-pure-color",
-      "imageUrl": "https://www.jotun.com/globalassetsjot03/200683-desktop.png",
+      "imageUrl": "https://cdn-pim.jotun.com/images/ProductImages/200683/1300x1334/200683.png?format=webp&quality=70&width=1024",
       "price": null,
       "unit": "theo quy cách",
       "phone": "",
@@ -1211,6 +1233,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://cdn-pim.jotun.com/images/ProductImages/200683/1300x1334/200683.png?format=webp&quality=70&width=1024",
+        "sourceUrl": "https://www.jotun.com/vn-vi/decorative/products/interior/all-interior-products/majestic-pure-color",
+        "publisher": "Jotun",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh bao bì dòng Majestic Đẹp Nguyên Bản; chưa chọn mã màu hoặc dung tích và không mô tả màu sơn đang chọn."
       }
     },
     {
@@ -2453,7 +2486,18 @@
         "publishedPeriod": "2025",
         "notes": "Bảng nguồn ghi năm 2025; cần báo giá mới trước khi lập dự toán."
       },
-      "specification": "Bộ A+B 15 kg; bảng nguồn ghi 960.000 đ/bộ"
+      "specification": "Bộ A+B 15 kg; bảng nguồn ghi 960.000 đ/bộ",
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "SikaTop-109 Seal VN",
+        "specification": "Bộ A+B 15 kg; bảng nguồn ghi 960.000 đ/bộ",
+        "imageUrl": "https://sika.scene7.com/is/image/sikacs/vn-SikaTop-Seal-109--2024--07126070%3A1-1?fit=crop%2C1&hei=480&wid=480",
+        "sourceUrl": "https://vnm.sika.com/vi/kenh-phan-ph-i-banl/chong-tham/v-a-ch-ng-th-m/sikatop-109-sealvn.html",
+        "publisher": "Sika Việt Nam",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh bao bì dòng SikaTop-109; hãng công bố bộ 15 kg và 24 kg. Giá tham khảo đang lưu thuộc bộ 15 kg, không áp cho bộ 24 kg."
+      }
     },
     {
       "id": "catalog-85a7199f5f49fa28",
@@ -2761,7 +2805,7 @@
       "sku": "PCB40 cao cấp",
       "unit": "bao",
       "spec": "Đối chiếu mác, cấp phối và khối lượng bao tại nguồn.",
-      "imageUrl": "",
+      "imageUrl": "https://ximanghatienkiengiang.vn/wp-content/uploads/2025/08/HTKG-PP-PCB40-Cuu-Long-Xanh-Lech-Hong-50kg-630-500-100-26-10-2024-KH-Copy-%E2%80%93-Da-sua.png",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -2769,7 +2813,7 @@
       "address": "",
       "supplier": "Hà Tiên Kiên Giang",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "product",
       "photoLicense": {
         "commercialUse": false,
@@ -2791,6 +2835,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "PCB40 cao cấp",
+        "specification": "Đối chiếu mác, cấp phối và khối lượng bao tại nguồn.",
+        "imageUrl": "https://ximanghatienkiengiang.vn/wp-content/uploads/2025/08/HTKG-PP-PCB40-Cuu-Long-Xanh-Lech-Hong-50kg-630-500-100-26-10-2024-KH-Copy-%E2%80%93-Da-sua.png",
+        "sourceUrl": "https://ximanghatienkiengiang.vn/product-detail/?slug=Xi-mng-PCB40-cao-cp-",
+        "publisher": "Hà Tiên Kiên Giang",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh bao xi măng PCB40 từ trang sản phẩm; đối chiếu khối lượng bao và lô hàng trước đặt mua. Không suy cấp phối kết cấu từ ảnh."
       }
     },
     {
@@ -2802,7 +2857,7 @@
       "sku": "CB240-T",
       "unit": "kg",
       "spec": "Mác thép tham khảo; đường kính và số lượng do kỹ sư kết cấu xác định.",
-      "imageUrl": "",
+      "imageUrl": "https://file.hoaphat.com.vn/hoaphat-com-vn/2022/05/duong-kinh-thep-xay-dung-1.jpg",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -2810,7 +2865,7 @@
       "address": "",
       "supplier": "Hòa Phát",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -2832,6 +2887,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "CB240-T",
+        "specification": "Mác thép tham khảo; đường kính và số lượng do kỹ sư kết cấu xác định.",
+        "imageUrl": "https://file.hoaphat.com.vn/hoaphat-com-vn/2022/05/duong-kinh-thep-xay-dung-1.jpg",
+        "sourceUrl": "https://thep.hoaphat.com.vn/tin-cong-nghe/duong-kinh-thep-xay-dung.html",
+        "publisher": "Thép Hòa Phát",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh minh họa dòng thép cuộn/thanh trong bài quy cách của hãng; không xác nhận đường kính, mác hoặc lô thép chỉ qua ảnh. Chọn theo hồ sơ kết cấu."
       }
     },
     {
@@ -2843,7 +2909,7 @@
       "sku": "CB300-V",
       "unit": "kg",
       "spec": "Mác thép tham khảo; đường kính và số lượng do kỹ sư kết cấu xác định.",
-      "imageUrl": "",
+      "imageUrl": "https://file.hoaphat.com.vn/hoaphat-com-vn/2022/05/duong-kinh-thep-xay-dung-2.jpg",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -2851,7 +2917,7 @@
       "address": "",
       "supplier": "Hòa Phát",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -2873,6 +2939,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "CB300-V",
+        "specification": "Mác thép tham khảo; đường kính và số lượng do kỹ sư kết cấu xác định.",
+        "imageUrl": "https://file.hoaphat.com.vn/hoaphat-com-vn/2022/05/duong-kinh-thep-xay-dung-2.jpg",
+        "sourceUrl": "https://thep.hoaphat.com.vn/tin-cong-nghe/duong-kinh-thep-xay-dung.html",
+        "publisher": "Thép Hòa Phát",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh minh họa dòng thép cuộn/thanh trong bài quy cách của hãng; không xác nhận đường kính, mác hoặc lô thép chỉ qua ảnh. Chọn theo hồ sơ kết cấu."
       }
     },
     {
@@ -2884,7 +2961,7 @@
       "sku": "CB400-V",
       "unit": "kg",
       "spec": "Mác thép tham khảo; đường kính và số lượng do kỹ sư kết cấu xác định.",
-      "imageUrl": "",
+      "imageUrl": "https://file.hoaphat.com.vn/hoaphat-com-vn/2022/05/duong-kinh-thep-xay-dung-2.jpg",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -2892,7 +2969,7 @@
       "address": "",
       "supplier": "Hòa Phát",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -2914,6 +2991,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "CB400-V",
+        "specification": "Mác thép tham khảo; đường kính và số lượng do kỹ sư kết cấu xác định.",
+        "imageUrl": "https://file.hoaphat.com.vn/hoaphat-com-vn/2022/05/duong-kinh-thep-xay-dung-2.jpg",
+        "sourceUrl": "https://thep.hoaphat.com.vn/tin-cong-nghe/duong-kinh-thep-xay-dung.html",
+        "publisher": "Thép Hòa Phát",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh minh họa dòng thép cuộn/thanh trong bài quy cách của hãng; không xác nhận đường kính, mác hoặc lô thép chỉ qua ảnh. Chọn theo hồ sơ kết cấu."
       }
     },
     {
@@ -2925,7 +3013,7 @@
       "sku": "CB500-V",
       "unit": "kg",
       "spec": "Mác thép tham khảo; đường kính và số lượng do kỹ sư kết cấu xác định.",
-      "imageUrl": "",
+      "imageUrl": "https://file.hoaphat.com.vn/hoaphat-com-vn/2022/05/duong-kinh-thep-xay-dung-2.jpg",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -2933,7 +3021,7 @@
       "address": "",
       "supplier": "Hòa Phát",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -2955,6 +3043,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "CB500-V",
+        "specification": "Mác thép tham khảo; đường kính và số lượng do kỹ sư kết cấu xác định.",
+        "imageUrl": "https://file.hoaphat.com.vn/hoaphat-com-vn/2022/05/duong-kinh-thep-xay-dung-2.jpg",
+        "sourceUrl": "https://thep.hoaphat.com.vn/tin-cong-nghe/duong-kinh-thep-xay-dung.html",
+        "publisher": "Thép Hòa Phát",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh minh họa dòng thép cuộn/thanh trong bài quy cách của hãng; không xác nhận đường kính, mác hoặc lô thép chỉ qua ảnh. Chọn theo hồ sơ kết cấu."
       }
     },
     {
@@ -2966,7 +3065,7 @@
       "sku": "",
       "unit": "m",
       "spec": "Tiết diện, số lõi và bảo vệ mạch theo thiết kế điện.",
-      "imageUrl": "",
+      "imageUrl": "https://cadivi.vn/vnt_upload/product/05_2018/ezgifcom_video_to_gif_2.gif",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -2974,7 +3073,7 @@
       "address": "",
       "supplier": "CADIVI",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -2996,6 +3095,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Tiết diện, số lõi và bảo vệ mạch theo thiết kế điện.",
+        "imageUrl": "https://cadivi.vn/vnt_upload/product/05_2018/ezgifcom_video_to_gif_2.gif",
+        "sourceUrl": "https://cadivi.vn/vn/vcm/hr-lf-600v.html",
+        "publisher": "CADIVI",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh dòng VCm/HR-LF 600 V; tiết diện, màu dây và cấu hình mạch phải được xác nhận theo hồ sơ điện."
       }
     },
     {
@@ -3253,7 +3363,7 @@
       "sku": "",
       "unit": "tấm",
       "spec": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
-      "imageUrl": "",
+      "imageUrl": "https://vinhtuong.com/sites/default/files/2026-08/tam-thach-cao-sieu-ben-x-se-9mm-front-260825.png",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3261,7 +3371,7 @@
       "address": "",
       "supplier": "Vĩnh Tường",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -3283,6 +3393,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
+        "imageUrl": "https://vinhtuong.com/sites/default/files/2026-08/tam-thach-cao-sieu-ben-x-se-9mm-front-260825.png",
+        "sourceUrl": "https://vinhtuong.com/tam-thach-cao-vinh-tuong-sieu-ben-x",
+        "publisher": "Vĩnh Tường",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh nhận diện tấm Siêu Bền X SE 9 mm; không đại diện mọi độ dày hoặc cả hệ trần hoàn chỉnh."
       }
     },
     {
@@ -4399,8 +4520,65 @@
         "verified": false,
         "sourceUrl": null
       }
+    },
+    {
+      "id": "official-ac-959van-2",
+      "category": "sanitary",
+      "brand": "INAX",
+      "sku": "AC-959VAN-2",
+      "name": "Bồn cầu một khối AC-959VAN-2",
+      "spec": "Bồn cầu một khối, sứ trắng, nắp đóng êm; trang hãng ghi chiều cao 636 mm ở bảng đầu và 629 mm ở mô tả, cần đối chiếu bản vẽ trước lắp đặt.",
+      "specification": "Bồn cầu một khối, sứ trắng, nắp đóng êm; trang hãng ghi chiều cao 636 mm ở bảng đầu và 629 mm ở mô tả, cần đối chiếu bản vẽ trước lắp đặt.",
+      "unit": "cái",
+      "productUrl": "https://www.inax.com.vn/products/toilet/ac-959van-2/",
+      "supplier": "INAX",
+      "address": "",
+      "phone": "1800 6633",
+      "price": 8690000,
+      "priceDate": null,
+      "imageUrl": "https://www.inax.com.vn/wp-content/uploads/2025/10/AC-959VAN-2-1.png",
+      "verifiedAt": "2026-10-25",
+      "photoEvidence": "source-page",
+      "priceStatus": "reference",
+      "photoLicense": {
+        "commercialUse": false,
+        "verified": false,
+        "sourceUrl": null
+      },
+      "priceEvidence": {
+        "productId": "official-ac-959van-2",
+        "sku": "AC-959VAN-2",
+        "specification": "Bồn cầu một khối, sứ trắng, nắp đóng êm; trang hãng ghi chiều cao 636 mm ở bảng đầu và 629 mm ở mô tả, cần đối chiếu bản vẽ trước lắp đặt.",
+        "quantityUnit": "cái",
+        "amountVnd": 8690000,
+        "priceType": "reference",
+        "sourceUrl": "https://www.inax.com.vn/products/toilet/ac-959van-2/",
+        "quotedAt": null,
+        "retrievedAt": "2026-10-25",
+        "locationScope": "Việt Nam · trang hãng",
+        "includesVat": null,
+        "includesLabour": null,
+        "includesTransport": null,
+        "validUntil": null,
+        "publisher": "INAX Việt Nam",
+        "sourceType": "manufacturer",
+        "publishedPeriod": null,
+        "notes": "Giá niêm yết trên trang hãng khi đối chiếu; chưa xác nhận VAT, vận chuyển, phụ kiện và lắp đặt. Khác mã AC-959VAN."
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "AC-959VAN-2",
+        "specification": "Bồn cầu một khối, sứ trắng, nắp đóng êm; trang hãng ghi chiều cao 636 mm ở bảng đầu và 629 mm ở mô tả, cần đối chiếu bản vẽ trước lắp đặt.",
+        "imageUrl": "https://www.inax.com.vn/wp-content/uploads/2025/10/AC-959VAN-2-1.png",
+        "sourceUrl": "https://www.inax.com.vn/products/toilet/ac-959van-2/",
+        "publisher": "INAX Việt Nam",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đúng trang AC-959VAN-2; không thay cho AC-959VAN. Chưa gắn model 3D đúng mã; thông số chiều cao trong nguồn cần xác nhận lại."
+      }
     }
   ],
   "referencePricesCheckedAt": "2026-10-09",
-  "referencePricePolicy": "Giá công khai để tham khảo; ngày đối chiếu độc lập ngày công bố; giá cũ hoặc chưa rõ phạm vi phải cập nhật; không tự thay báo giá công trình."
+  "referencePricePolicy": "Giá công khai để tham khảo; ngày đối chiếu độc lập ngày công bố; giá cũ hoặc chưa rõ phạm vi phải cập nhật; không tự thay báo giá công trình.",
+  "imageReferencesCheckedAt": "2026-10-25"
 }
