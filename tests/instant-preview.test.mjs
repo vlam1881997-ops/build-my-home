@@ -79,7 +79,7 @@ test('AI image caching matches the captured view as well as the design',async()=
  const {b,context}=client();let reference='first-view',requests=0;
  b.MATERIALS={};b.cinematicSignature=()=> 'same-design';b.finishHash=value=>value;b.toast=()=>{};
  b.cinematicRender={loading:false,views:{'same-design':'old-image'},referenceHashes:{'same-design':'old-view'}};
- b.studio3d={scene:{userData:{}},renderFrame(){},renderer:{domElement:{width:2560,height:1600,toDataURL:()=>reference}}};
+ b.studio3d={project:b.state.project,scene:{userData:{}},renderFrame(){},renderer:{domElement:{width:2560,height:1600,toDataURL:()=>reference}}};
  context.fetch=async()=>{requests++;return {ok:true,json:async()=>({image:'new-image',mimeType:'image/png'})};};
  const source=fs.readFileSync('src/45_studio3d.js','utf8');vm.runInNewContext(source.slice(source.indexOf('BMH.cinematicReferenceImage=')),context);
  await b.generateCinematicRender();assert.equal(requests,1,'a different captured view requires a new image');
@@ -90,7 +90,7 @@ test('AI image caching matches the captured view as well as the design',async()=
 test('an AI reply from an earlier camera is rejected and its hero image becomes hidden',async()=>{
  const {b,context}=client();let reply;
  b.MATERIALS={};b.cinematicSignature=()=> 'same-design';b.finishHash=value=>value;b.toast=()=>{};b.cinematicRender={loading:false,views:{}};
- b.studio3d={state:{yaw:.2,pitch:.3,dist:5,target:new THREE.Vector3(1,2,3)},scene:{userData:{}},renderFrame(){},renderer:{domElement:{width:2560,height:1600,toDataURL:()=> 'camera-reference'}}};
+ b.studio3d={project:b.state.project,state:{yaw:.2,pitch:.3,dist:5,target:new THREE.Vector3(1,2,3)},scene:{userData:{}},renderFrame(){},renderer:{domElement:{width:2560,height:1600,toDataURL:()=> 'camera-reference'}}};
  const source=fs.readFileSync('src/45_studio3d.js','utf8');vm.runInNewContext(source.slice(source.indexOf('BMH.cinematicCameraKey=()=>'),source.indexOf('BMH.generateCinematicRender = async () => {')),context);
  vm.runInNewContext(source.slice(source.indexOf('BMH.cinematicReferenceImage=')),context);
  const key=b.cinematicCameraKey();b.cinematicRender.views['same-design']='old-image';b.cinematicRender.cameraKeys={'same-design':key};assert.equal(b.currentCinematicImage(),'old-image');
