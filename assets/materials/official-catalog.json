@@ -2820,7 +2820,7 @@
       "sku": "SikaTop-107 Seal VN",
       "unit": "kg",
       "spec": "Bộ A+B 25 kg; bảng nguồn ghi 810.000 đ/bộ",
-      "imageUrl": "",
+      "imageUrl": "https://sikavn.vn/wp-content/uploads/2023/06/sikatop-107-seal-vn.jpg",
       "price": 32400,
       "priceDate": null,
       "priceStatus": "reference",
@@ -2828,7 +2828,7 @@
       "address": "",
       "supplier": "Sika",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "product",
       "photoLicense": {
         "commercialUse": false,
@@ -2855,7 +2855,19 @@
         "publishedPeriod": "2025",
         "notes": "Bảng nguồn ghi năm 2025; cần báo giá mới trước khi lập dự toán."
       },
-      "specification": "Bộ A+B 25 kg; bảng nguồn ghi 810.000 đ/bộ"
+      "specification": "Bộ A+B 25 kg; bảng nguồn ghi 810.000 đ/bộ",
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "SikaTop-107 Seal VN",
+        "specification": "Bộ A+B 25 kg; bảng nguồn ghi 810.000 đ/bộ",
+        "imageUrl": "https://sikavn.vn/wp-content/uploads/2023/06/sikatop-107-seal-vn.jpg",
+        "sourceUrl": "https://sikavn.vn/sikatop-107-seal-vn/",
+        "publisher": "Minh Cương",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh dòng SikaTop107 từ nhà cung cấp; đối chiếu bộ đóng gói thực và nhãn trước đặt mua, không cấp quyền texture."
+      }
     },
     {
       "id": "catalog-643e5858e405f4c6",
