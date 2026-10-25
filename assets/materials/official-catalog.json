@@ -135,6 +135,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/09/aquaseal_v.jpg",
+        "sourceUrl": "https://dongtam.com.vn/san-pham/chat-chong-tham-aquaseal/",
+        "publisher": "Đồng Tâm",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đối chiếu từ nguồn; cần xác nhận màu, quy cách và biến thể trước đặt hàng. Không tự dùng làm texture 3D hoặc chứng nhận kỹ thuật."
       }
     },
     {
@@ -492,7 +503,7 @@
       "name": "8080DB006 - NANO",
       "spec": "8080DB006 · m² · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/bst-db-nano/8080db006-nano/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060-8080DB06-NANOa.jpg",
+      "imageUrl": "https://dongtamshop.com/wp-content/uploads/2024/09/8080DB06-NANO-550x550.jpg",
       "price": null,
       "unit": "m²",
       "phone": "",
@@ -523,6 +534,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "8080DB006",
+        "specification": "8080DB006 · m² · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://dongtamshop.com/wp-content/uploads/2024/09/8080DB06-NANO-550x550.jpg",
+        "sourceUrl": "https://dongtamshop.com/san-pham/gach-porcelain-2da-8080db006",
+        "publisher": "Đồng Tâm Shop",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đối chiếu từ nguồn; cần xác nhận màu, quy cách và biến thể trước đặt hàng. Không tự dùng làm texture 3D hoặc chứng nhận kỹ thuật."
       }
     },
     {
@@ -639,7 +661,7 @@
       "name": "8080DB038 - NANO",
       "spec": "8080DB038 · m² · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/bst-db-nano/8080db038-nano/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060-8080DB038-1024x1024.jpg",
+      "imageUrl": "https://dongtamshop.com/wp-content/uploads/2021/11/8080DB038-NANO-550x550.jpg",
       "price": null,
       "unit": "m²",
       "phone": "",
@@ -670,6 +692,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "8080DB038",
+        "specification": "8080DB038 · m² · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://dongtamshop.com/wp-content/uploads/2021/11/8080DB038-NANO-550x550.jpg",
+        "sourceUrl": "https://dongtamshop.com/san-pham/gach-porcelain-2da-8080db038",
+        "publisher": "Đồng Tâm Shop",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đối chiếu từ nguồn; cần xác nhận màu, quy cách và biến thể trước đặt hàng. Không tự dùng làm texture 3D hoặc chứng nhận kỹ thuật."
       }
     },
     {
@@ -680,7 +713,7 @@
       "name": "8080DB032 - NANO",
       "spec": "8080DB032 · m² · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/bst-db-nano/8080db032-nano/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060-8080DB032.jpg",
+      "imageUrl": "https://dongtamshop.com/wp-content/uploads/2021/11/8080DB032-NANO-550x550.jpg",
       "price": null,
       "unit": "m²",
       "phone": "",
@@ -711,6 +744,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "8080DB032",
+        "specification": "8080DB032 · m² · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://dongtamshop.com/wp-content/uploads/2021/11/8080DB032-NANO-550x550.jpg",
+        "sourceUrl": "https://dongtamshop.com/san-pham/gach-porcelain-2da-8080db032",
+        "publisher": "Đồng Tâm Shop",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đối chiếu từ nguồn; cần xác nhận màu, quy cách và biến thể trước đặt hàng. Không tự dùng làm texture 3D hoặc chứng nhận kỹ thuật."
       }
     },
     {
@@ -1064,7 +1108,7 @@
       "name": "CỬA ĐI NHÔM",
       "spec": "m² · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://eurowindow.biz/cua-vach-nhom/cua-di-nhom",
-      "imageUrl": "https://storage.sudospaces.com/eurowindow/2022/05/cuadinhom.jpg",
+      "imageUrl": "https://storage.sudospaces.com/eurowindow/2026/08/cua-di-nhom-mo-quay-cho-cua-chinh-va-ban-cong-dong-kin-tot.jpg.webp",
       "price": null,
       "unit": "m²",
       "phone": "",
@@ -1095,6 +1139,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "m² · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://storage.sudospaces.com/eurowindow/2026/08/cua-di-nhom-mo-quay-cho-cua-chinh-va-ban-cong-dong-kin-tot.jpg.webp",
+        "sourceUrl": "https://eurowindow.biz/cua-vach-nhom/cua-di-nhom",
+        "publisher": "Eurowindow",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đối chiếu từ nguồn; cần xác nhận màu, quy cách và biến thể trước đặt hàng. Không tự dùng làm texture 3D hoặc chứng nhận kỹ thuật."
       }
     },
     {
@@ -2748,7 +2803,7 @@
       "sku": "SikaTop-540 Seal VN",
       "unit": "theo quy cách",
       "spec": "Đối chiếu bề mặt, định mức và quy trình thi công trong tài liệu Sika.",
-      "imageUrl": "",
+      "imageUrl": "https://sika.scene7.com/is/image/sikacs/vn-SikaTop-540-Seal-07603606%3A1-1?fit=crop%2C1&hei=480&wid=480",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -2756,7 +2811,7 @@
       "address": "",
       "supplier": "Sika",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "product",
       "photoLicense": {
         "commercialUse": false,
@@ -2778,6 +2833,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "SikaTop-540 Seal VN",
+        "specification": "Đối chiếu bề mặt, định mức và quy trình thi công trong tài liệu Sika.",
+        "imageUrl": "https://sika.scene7.com/is/image/sikacs/vn-SikaTop-540-Seal-07603606%3A1-1?fit=crop%2C1&hei=480&wid=480",
+        "sourceUrl": "https://vnm.sika.com/vi/xay-d-ng/h-th-ng-ch-ng-thm/v-a-ch-ng-th-m/sikatop-540-sealvn.html",
+        "publisher": "Sika",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đối chiếu từ nguồn; cần xác nhận màu, quy cách và biến thể trước đặt hàng. Không tự dùng làm texture 3D hoặc chứng nhận kỹ thuật."
       }
     },
     {
@@ -3504,7 +3570,7 @@
       "sku": "",
       "unit": "m",
       "spec": "Chọn đường kính và cấp áp lực theo thiết kế cấp thoát nước.",
-      "imageUrl": "",
+      "imageUrl": "https://binhminhplastic.com.vn/Data/Sites/1/Product/8889/%E1%BB%91ng-pvc-2.png",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3512,7 +3578,7 @@
       "address": "",
       "supplier": "Nhựa Bình Minh",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -3534,6 +3600,17 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Chọn đường kính và cấp áp lực theo thiết kế cấp thoát nước.",
+        "imageUrl": "https://binhminhplastic.com.vn/Data/Sites/1/Product/8889/%E1%BB%91ng-pvc-2.png",
+        "sourceUrl": "https://binhminhplastic.com.vn/san-pham/pvc-u/ong-pvc-u/ong-pvc-u-he-inch/ong-pvc-u-pvc-u-pipe-6",
+        "publisher": "Nhựa Bình Minh",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đối chiếu từ nguồn; cần xác nhận màu, quy cách và biến thể trước đặt hàng. Không tự dùng làm texture 3D hoặc chứng nhận kỹ thuật."
       }
     },
     {
@@ -4922,7 +4999,7 @@
       "unit": "m²",
       "price": 269800,
       "productUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
-      "imageUrl": null,
+      "imageUrl": "https://dongtamshop.com/wp-content/uploads/2018/05/6060HAIVAN003-07-2-550x416.jpg",
       "supplier": "Big House (theo trang công bố)",
       "phone": "0869.559.495",
       "address": "",
@@ -4951,6 +5028,18 @@
         "commercialUse": false,
         "verified": false,
         "sourceUrl": null
+      },
+      "photoEvidence": "source-page",
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "6060HAIVAN003-FP",
+        "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+        "imageUrl": "https://dongtamshop.com/wp-content/uploads/2018/05/6060HAIVAN003-07-2-550x416.jpg",
+        "sourceUrl": "https://dongtamshop.com/san-pham/gach-porcelain-haivan003-fp",
+        "publisher": "Đồng Tâm Shop",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đối chiếu từ nguồn; cần xác nhận màu, quy cách và biến thể trước đặt hàng. Không tự dùng làm texture 3D hoặc chứng nhận kỹ thuật."
       }
     },
     {
