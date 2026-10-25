@@ -86,14 +86,25 @@ BMH.materialPhotoReference=x=>{
  if(r.sku!==x.sku||r.specification!==(x.specification||x.spec))return null;
  const origin=r.publisherType==='supplier'?'từ nhà cung cấp':'từ hãng';return {...r,label:(r.kind==='surface-sample'?'Ảnh mẫu bề mặt ':r.kind==='product-range'?'Ảnh dòng sản phẩm ':'Ảnh sản phẩm ')+origin};
 };
+const materialGeneratedIllustrations=new Map(BMH.officialCatalog.products.filter(x=>x.generatedIllustration).map(x=>[x.id,JSON.parse(JSON.stringify(x))]));
+BMH.materialGeneratedIllustration=x=>{
+ const original=materialGeneratedIllustrations.get(x?.id),r=original?.generatedIllustration;
+ if(!r||r.kind!=='ai-illustration'||!/^assets\/materials\/ai\/(tile|latex|cement)\.webp$/.test(r.imageUrl))return null;
+ if(x.category!==original.category||x.productUrl!==original.productUrl||JSON.stringify(BMH.materialProductIdentity(x))!==JSON.stringify(BMH.materialProductIdentity(original)))return null;
+ return {...r};
+};
+BMH.materialGeneratedIllustrationHtml=(x,figureClass)=>{
+ const r=BMH.materialGeneratedIllustration(x);if(!r)return '';const esc=BMH.v6Esc;
+ return '<figure class="'+esc(figureClass)+'"><button type="button" class="material-reference-zoom" data-material-reference-open="'+esc(x.id)+'" aria-label="Xem lớn ảnh minh họa AI"><img data-material-ai-illustration src="'+esc(r.imageUrl)+'" alt="'+esc(r.label)+'" loading="lazy" decoding="async"><span>Xem lớn ↗</span></button><figcaption>'+esc(r.label)+'<small>'+esc(r.notes)+'</small></figcaption></figure>';
+};
 BMH.materialPhotoReferenceHtml=(x,figureClass='material-product-visual')=>{
- const r=BMH.materialPhotoReference(x);if(!r)return '';const esc=BMH.v6Esc,title=x.sku||x.name;
+ const r=BMH.materialPhotoReference(x);if(!r)return BMH.materialGeneratedIllustrationHtml(x,figureClass);const esc=BMH.v6Esc,title=x.sku||x.name;
  return '<figure class="'+esc(figureClass)+'"><button type="button" class="material-reference-zoom" data-material-reference-open="'+esc(x.id)+'" aria-label="Xem lớn '+esc(r.label.toLowerCase())+' '+esc(title)+'"><img data-material-reference-image src="'+esc(r.imageUrl)+'" alt="'+esc(r.label+' · '+title)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span>Xem lớn ↗</span></button><figcaption>'+esc(r.label)+' · '+esc(title)+(r.kind==='product-range'?'<small>Cần chốt mã, màu và quy cách; ảnh không đại diện mọi biến thể.</small>':'')+'<a href="'+esc(r.sourceUrl)+'" target="_blank" rel="noopener noreferrer">'+esc(r.publisher)+' · xem nguồn ↗</a></figcaption></figure>';
 };
 BMH.openMaterialReference=id=>{
- const x=BMH.materialResearch.products.find(p=>p.id===id),r=BMH.materialPhotoReference(x);if(!r)return false;
- const esc=BMH.v6Esc,focus=document.activeElement,dialog=document.createElement('dialog');dialog.className='material-sample-dialog material-reference-dialog';dialog.setAttribute('aria-label',r.label+' '+(x.sku||x.name));
- dialog.innerHTML='<form method="dialog"><button aria-label="Đóng ảnh sản phẩm">Đóng ×</button></form><h2>'+esc(x.sku||x.name)+'</h2><p>'+esc(x.name)+'</p><img data-material-reference-image src="'+esc(r.imageUrl)+'" alt="'+esc(r.label+' · '+(x.sku||x.name))+'" referrerpolicy="no-referrer"><p>'+esc(r.specification)+'</p><p>'+esc(r.notes||'')+'</p><a href="'+esc(r.sourceUrl)+'" target="_blank" rel="noopener noreferrer">'+esc(r.publisher)+' · xem trang sản phẩm ↗</a><p><small>'+esc(r.label)+' · Đối chiếu '+esc(r.checkedAt)+'. Ảnh tham khảo liên kết từ nguồn; chưa xác nhận quyền tái sử dụng. Không dùng tự động làm texture 3D hoặc ảnh trong hồ sơ xuất. Đối chiếu mẫu thực trước khi đặt hàng.</small></p>';
+ const x=BMH.materialResearch.products.find(p=>p.id===id),r=BMH.materialPhotoReference(x),ai=BMH.materialGeneratedIllustration(x);if(!r&&!ai)return false;
+ const esc=BMH.v6Esc,focus=document.activeElement,dialog=document.createElement('dialog');dialog.className='material-sample-dialog material-reference-dialog';dialog.setAttribute('aria-label',(r||ai).label+' '+(x.sku||x.name));
+ dialog.innerHTML=ai?'<form method="dialog"><button aria-label="Đóng ảnh minh họa">Đóng ×</button></form><h2>'+esc(ai.label)+'</h2><img data-material-ai-illustration src="'+esc(ai.imageUrl)+'" alt="'+esc(ai.label)+'"><p>'+esc(ai.notes)+'</p>':'<form method="dialog"><button aria-label="Đóng ảnh sản phẩm">Đóng ×</button></form><h2>'+esc(x.sku||x.name)+'</h2><p>'+esc(x.name)+'</p><img data-material-reference-image src="'+esc(r.imageUrl)+'" alt="'+esc(r.label+' · '+(x.sku||x.name))+'" referrerpolicy="no-referrer"><p>'+esc(r.specification)+'</p><p>'+esc(r.notes||'')+'</p><a href="'+esc(r.sourceUrl)+'" target="_blank" rel="noopener noreferrer">'+esc(r.publisher)+' · xem trang sản phẩm ↗</a><p><small>'+esc(r.label)+' · Đối chiếu '+esc(r.checkedAt)+'. Ảnh tham khảo liên kết từ nguồn; chưa xác nhận quyền tái sử dụng. Không dùng tự động làm texture 3D hoặc ảnh trong hồ sơ xuất. Đối chiếu mẫu thực trước khi đặt hàng.</small></p>';
  dialog.addEventListener('close',()=>{dialog.remove();if(focus?.isConnected)focus.focus();},{once:true});document.body.appendChild(dialog);dialog.showModal();return true;
 };
 BMH.materialResearch={busy:false,products:BMH.officialCatalog.products.map(x=>({...x})),query:'',filter:'',brand:'',styleOnly:false,photoOnly:false,priceFilter:'',error:'',summary:'',visible:12,attempts:{}};
