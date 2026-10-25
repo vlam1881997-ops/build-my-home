@@ -1,0 +1,132 @@
+{
+  "checkedAt": "2026-10-25",
+  "basis": "Primary manufacturer pages and image links, not native application acceptance",
+  "limits": [
+    "Display references only; no supplier image copied into shipped assets.",
+    "Image linkage is not a commercial licence or an exact-SKU texture.",
+    "Do not refresh historic price dates merely because a photo was reviewed.",
+    "Jotun image MIME and CADIVI GIF require native browser delivery verification."
+  ],
+  "references": [
+    {
+      "productId": "source-c321c57e97ac1d6c",
+      "kind": "product-range",
+      "sourceUrl": "https://dongtam.com.vn/san-pham/bst-ngoi-trang-men-titan/",
+      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2024/01/Banner-Ngoi-Titan-Dongtam-Group.jpg",
+      "checkedAt": "2026-10-25",
+      "notes": "Ảnh bộ sưu tập TITAN nhiều màu; cần chọn mã ngói và phụ kiện trước khi đặt hàng.",
+      "nativeDeliveryVerified": false,
+      "textureRightsVerified": false
+    },
+    {
+      "productId": "source-5c96ef125766644c",
+      "kind": "product-range",
+      "sourceUrl": "https://eurowindow.biz/cua-vach-nhom/cua-so-nhom",
+      "imageUrl": "https://storage.sudospaces.com/eurowindow/2026/07/cua-so-nhom-eurowindow-ben-chac-khong-cong-venh-ben-mau-theo-thoi-gian.jpg.webp",
+      "checkedAt": "2026-10-25",
+      "notes": "Ảnh dòng cửa sổ nhôm; hệ nhôm, kiểu mở, kính, phụ kiện và kích thước cần được chốt riêng.",
+      "nativeDeliveryVerified": false,
+      "textureRightsVerified": false
+    },
+    {
+      "productId": "catalog-6ab446b143827082",
+      "kind": "product-range",
+      "sourceUrl": "https://vinhtuong.com/tam-thach-cao-vinh-tuong-sieu-ben-x",
+      "imageUrl": "https://vinhtuong.com/sites/default/files/2026-08/tam-thach-cao-sieu-ben-x-se-9mm-front-260825.png",
+      "checkedAt": "2026-10-25",
+      "notes": "Ảnh nhận diện tấm Siêu Bền X SE 9 mm; không đại diện mọi độ dày hoặc cả hệ trần hoàn chỉnh.",
+      "nativeDeliveryVerified": false,
+      "textureRightsVerified": false
+    },
+    {
+      "productId": "catalog-ed28f0bd3c0e0135",
+      "kind": "product-range",
+      "sourceUrl": "https://cadivi.vn/vn/vcm/hr-lf-600v.html",
+      "imageUrl": "https://cadivi.vn/vnt_upload/product/05_2018/ezgifcom_video_to_gif_2.gif",
+      "checkedAt": "2026-10-25",
+      "notes": "Ảnh dòng VCm/HR-LF 600 V; tiết diện, màu dây và cấu hình mạch phải được xác nhận theo hồ sơ điện.",
+      "nativeDeliveryVerified": false,
+      "textureRightsVerified": false
+    },
+    {
+      "productId": "source-0363a48156c9288b",
+      "kind": "product-range",
+      "sourceUrl": "https://www.jotun.com/vn-vi/decorative/products/interior/all-interior-products/majestic-pure-color",
+      "imageUrl": "https://cdn-pim.jotun.com/images/ProductImages/200683/1300x1334/200683.png?format=webp&quality=70&width=1024",
+      "checkedAt": "2026-10-25",
+      "notes": "Ảnh bao bì dòng Majestic Đẹp Nguyên Bản; chưa chọn mã màu hoặc dung tích. Nguồn ảnh trả application/octet-stream cho công cụ truy xuất; cần kiểm tra tải trên trình duyệt thực.",
+      "nativeDeliveryVerified": false,
+      "textureRightsVerified": false
+    },
+    {
+      "productId": "catalog-7595d01e7d5b57bd",
+      "kind": "product-photo",
+      "sourceUrl": "https://ximanghatienkiengiang.vn/product-detail/?slug=Xi-mng-PCB40-cao-cp-",
+      "imageUrl": "https://ximanghatienkiengiang.vn/wp-content/uploads/2025/08/HTKG-PP-PCB40-Cuu-Long-Xanh-Lech-Hong-50kg-630-500-100-26-10-2024-KH-Copy-%E2%80%93-Da-sua.png",
+      "checkedAt": "2026-10-25",
+      "notes": "Ảnh bao xi măng PCB40 từ trang sản phẩm; đối chiếu khối lượng bao và lô hàng trước đặt mua. Không suy cấp phối kết cấu từ ảnh.",
+      "nativeDeliveryVerified": false,
+      "textureRightsVerified": false
+    },
+    {
+      "productId": "catalog-643e5858e405f4c6",
+      "kind": "product-range",
+      "sourceUrl": "https://vnm.sika.com/vi/kenh-phan-ph-i-banl/chong-tham/v-a-ch-ng-th-m/sikatop-109-sealvn.html",
+      "imageUrl": "https://sika.scene7.com/is/image/sikacs/vn-SikaTop-Seal-109--2024--07126070%3A1-1?fit=crop%2C1&hei=480&wid=480",
+      "checkedAt": "2026-10-25",
+      "notes": "Ảnh bao bì dòng SikaTop-109; hãng công bố bộ 15 kg và 24 kg. Giá tham khảo đang lưu thuộc bộ 15 kg, không áp cho bộ 24 kg.",
+      "nativeDeliveryVerified": false,
+      "textureRightsVerified": false
+    },
+    {
+      "productId": "catalog-3bcfd41194bf718e",
+      "kind": "product-range",
+      "sourceUrl": "https://thep.hoaphat.com.vn/tin-cong-nghe/duong-kinh-thep-xay-dung.html",
+      "imageUrl": "https://file.hoaphat.com.vn/hoaphat-com-vn/2022/05/duong-kinh-thep-xay-dung-1.jpg",
+      "checkedAt": "2026-10-25",
+      "notes": "Ảnh minh họa dòng thép cuộn/thanh trong bài quy cách của hãng; không xác nhận đường kính, mác hoặc lô thép chỉ qua ảnh. Chọn theo hồ sơ kết cấu.",
+      "nativeDeliveryVerified": false,
+      "textureRightsVerified": false
+    },
+    {
+      "productId": "catalog-b9edb86df3e8ad93",
+      "kind": "product-range",
+      "sourceUrl": "https://thep.hoaphat.com.vn/tin-cong-nghe/duong-kinh-thep-xay-dung.html",
+      "imageUrl": "https://file.hoaphat.com.vn/hoaphat-com-vn/2022/05/duong-kinh-thep-xay-dung-2.jpg",
+      "checkedAt": "2026-10-25",
+      "notes": "Ảnh minh họa dòng thép cuộn/thanh trong bài quy cách của hãng; không xác nhận đường kính, mác hoặc lô thép chỉ qua ảnh. Chọn theo hồ sơ kết cấu.",
+      "nativeDeliveryVerified": false,
+      "textureRightsVerified": false
+    },
+    {
+      "productId": "catalog-e8ea77d25ee6a3a5",
+      "kind": "product-range",
+      "sourceUrl": "https://thep.hoaphat.com.vn/tin-cong-nghe/duong-kinh-thep-xay-dung.html",
+      "imageUrl": "https://file.hoaphat.com.vn/hoaphat-com-vn/2022/05/duong-kinh-thep-xay-dung-2.jpg",
+      "checkedAt": "2026-10-25",
+      "notes": "Ảnh minh họa dòng thép cuộn/thanh trong bài quy cách của hãng; không xác nhận đường kính, mác hoặc lô thép chỉ qua ảnh. Chọn theo hồ sơ kết cấu.",
+      "nativeDeliveryVerified": false,
+      "textureRightsVerified": false
+    },
+    {
+      "productId": "catalog-a404cc76286a1040",
+      "kind": "product-range",
+      "sourceUrl": "https://thep.hoaphat.com.vn/tin-cong-nghe/duong-kinh-thep-xay-dung.html",
+      "imageUrl": "https://file.hoaphat.com.vn/hoaphat-com-vn/2022/05/duong-kinh-thep-xay-dung-2.jpg",
+      "checkedAt": "2026-10-25",
+      "notes": "Ảnh minh họa dòng thép cuộn/thanh trong bài quy cách của hãng; không xác nhận đường kính, mác hoặc lô thép chỉ qua ảnh. Chọn theo hồ sơ kết cấu.",
+      "nativeDeliveryVerified": false,
+      "textureRightsVerified": false
+    },
+    {
+      "productId": "official-ac-959van-2",
+      "kind": "product-photo",
+      "sourceUrl": "https://www.inax.com.vn/products/toilet/ac-959van-2/",
+      "imageUrl": "https://www.inax.com.vn/wp-content/uploads/2025/10/AC-959VAN-2-1.png",
+      "checkedAt": "2026-10-25",
+      "notes": "Ảnh đúng trang AC-959VAN-2; không thay cho AC-959VAN. Chưa gắn model 3D đúng mã; thông số chiều cao trong nguồn cần xác nhận lại.",
+      "nativeDeliveryVerified": false,
+      "textureRightsVerified": false
+    }
+  ]
+}
