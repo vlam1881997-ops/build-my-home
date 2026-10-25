@@ -1015,7 +1015,7 @@
       "name": "8080MARMOL005 - NANO",
       "spec": "8080MARMOL005 · m² · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/bst-db-nano/8080marmol005-nano/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2021/11/8080marmol005-nano-1.jpg",
+      "imageUrl": "https://dongtamshop.com/wp-content/uploads/2021/11/8080MARMOL-005-NANO-550x550.jpg",
       "price": null,
       "unit": "m²",
       "phone": "",
@@ -1046,6 +1046,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "8080MARMOL005",
+        "specification": "8080MARMOL005 · m² · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://dongtamshop.com/wp-content/uploads/2021/11/8080MARMOL-005-NANO-550x550.jpg",
+        "sourceUrl": "https://dongtamshop.com/san-pham/gach-porcelain-2da-8080marmol005",
+        "publisher": "Đồng Tâm Shop",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh mặt gạch theo mã nguồn; đối chiếu sắc độ và lô hàng thực tế."
       }
     },
     {
@@ -1398,7 +1410,7 @@
       "name": "SƠN NƯỚC STANDARD",
       "spec": "theo quy cách · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/son-nuoc-standard/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/12/standard_ex_V_1000X1000.jpg",
+      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/12/phoi-phong-son-nuoc-dong-tam42-0.jpg",
       "price": null,
       "unit": "theo quy cách",
       "phone": "",
@@ -1429,6 +1441,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/12/phoi-phong-son-nuoc-dong-tam42-0.jpg",
+        "sourceUrl": "https://dongtam.com.vn/san-pham/son-nuoc-standard/",
+        "publisher": "Đồng Tâm",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh phối cảnh ứng dụng do hãng công bố, không xác nhận mã màu, dung tích hoặc bề mặt khách chọn."
       }
     },
     {
@@ -1439,7 +1463,7 @@
       "name": "SƠN NƯỚC EXTRA 5 TRONG 1",
       "spec": "theo quy cách · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/son-nuoc-extra-5-trong-1/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/12/extra_ex_V.jpg",
+      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/12/son-nuoc-noi-that-dong-tam31.jpg",
       "price": null,
       "unit": "theo quy cách",
       "phone": "",
@@ -1470,6 +1494,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/12/son-nuoc-noi-that-dong-tam31.jpg",
+        "sourceUrl": "https://dongtam.com.vn/san-pham/son-nuoc-extra-5-trong-1/",
+        "publisher": "Đồng Tâm",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh phối cảnh ứng dụng do hãng công bố, không xác nhận mã màu, dung tích hoặc bề mặt khách chọn."
       }
     },
     {
@@ -4712,7 +4748,7 @@
       "unit": "m²",
       "price": 244200,
       "productUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
-      "imageUrl": null,
+      "imageUrl": "https://dailydongtam.com/wp-content/uploads/2018/07/bao-gia-gach-lat-nen.jpg",
       "supplier": "Big House (theo trang công bố)",
       "phone": "0869.559.495",
       "address": "",
@@ -4741,6 +4777,19 @@
         "commercialUse": false,
         "verified": false,
         "sourceUrl": null
+      },
+      "photoEvidence": "source-page",
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "6060CLASSIC007",
+        "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+        "imageUrl": "https://dailydongtam.com/wp-content/uploads/2018/07/bao-gia-gach-lat-nen.jpg",
+        "sourceUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
+        "publisher": "Big House",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh gắn với dòng mã trong bảng nhà cung cấp; đối chiếu mẫu và lô gạch thực trước đặt hàng; không cấp quyền texture."
       }
     },
     {
@@ -4753,7 +4802,7 @@
       "unit": "m²",
       "price": 244100,
       "productUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
-      "imageUrl": null,
+      "imageUrl": "https://dailydongtam.com/wp-content/uploads/2018/07/bao-gia-gach-lat-nen-1.jpg",
       "supplier": "Big House (theo trang công bố)",
       "phone": "0869.559.495",
       "address": "",
@@ -4782,6 +4831,19 @@
         "commercialUse": false,
         "verified": false,
         "sourceUrl": null
+      },
+      "photoEvidence": "source-page",
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "6060TAMDAO003",
+        "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+        "imageUrl": "https://dailydongtam.com/wp-content/uploads/2018/07/bao-gia-gach-lat-nen-1.jpg",
+        "sourceUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
+        "publisher": "Big House",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh gắn với dòng mã trong bảng nhà cung cấp; đối chiếu mẫu và lô gạch thực trước đặt hàng; không cấp quyền texture."
       }
     },
     {
@@ -4794,7 +4856,7 @@
       "unit": "m²",
       "price": 241600,
       "productUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
-      "imageUrl": null,
+      "imageUrl": "https://dailydongtam.com/wp-content/uploads/2018/07/bao-gia-gach-lat-nen-3.jpg",
       "supplier": "Big House (theo trang công bố)",
       "phone": "0869.559.495",
       "address": "",
@@ -4823,6 +4885,19 @@
         "commercialUse": false,
         "verified": false,
         "sourceUrl": null
+      },
+      "photoEvidence": "source-page",
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "6060TAMDAO004",
+        "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+        "imageUrl": "https://dailydongtam.com/wp-content/uploads/2018/07/bao-gia-gach-lat-nen-3.jpg",
+        "sourceUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
+        "publisher": "Big House",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh gắn với dòng mã trong bảng nhà cung cấp; đối chiếu mẫu và lô gạch thực trước đặt hàng; không cấp quyền texture."
       }
     },
     {
@@ -4835,7 +4910,7 @@
       "unit": "m²",
       "price": 241600,
       "productUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
-      "imageUrl": null,
+      "imageUrl": "https://dailydongtam.com/wp-content/uploads/2018/07/bao-gia-gach-lat-nen-2.jpg",
       "supplier": "Big House (theo trang công bố)",
       "phone": "0869.559.495",
       "address": "",
@@ -4864,6 +4939,19 @@
         "commercialUse": false,
         "verified": false,
         "sourceUrl": null
+      },
+      "photoEvidence": "source-page",
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "6060THACHANH002",
+        "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+        "imageUrl": "https://dailydongtam.com/wp-content/uploads/2018/07/bao-gia-gach-lat-nen-2.jpg",
+        "sourceUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
+        "publisher": "Big House",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh gắn với dòng mã trong bảng nhà cung cấp; đối chiếu mẫu và lô gạch thực trước đặt hàng; không cấp quyền texture."
       }
     },
     {
@@ -4876,7 +4964,7 @@
       "unit": "m²",
       "price": 258400,
       "productUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
-      "imageUrl": null,
+      "imageUrl": "https://dailydongtam.com/wp-content/uploads/2018/07/bao-gia-gach-lat-nen-4.jpg",
       "supplier": "Big House (theo trang công bố)",
       "phone": "0869.559.495",
       "address": "",
@@ -4905,6 +4993,19 @@
         "commercialUse": false,
         "verified": false,
         "sourceUrl": null
+      },
+      "photoEvidence": "source-page",
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "6060TAMDAO005",
+        "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+        "imageUrl": "https://dailydongtam.com/wp-content/uploads/2018/07/bao-gia-gach-lat-nen-4.jpg",
+        "sourceUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
+        "publisher": "Big House",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh gắn với dòng mã trong bảng nhà cung cấp; đối chiếu mẫu và lô gạch thực trước đặt hàng; không cấp quyền texture."
       }
     },
     {
@@ -4917,7 +5018,7 @@
       "unit": "m²",
       "price": 258400,
       "productUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
-      "imageUrl": null,
+      "imageUrl": "https://dailydongtam.com/wp-content/uploads/2018/07/bao-gia-gach-lat-nen-5.jpg",
       "supplier": "Big House (theo trang công bố)",
       "phone": "0869.559.495",
       "address": "",
@@ -4946,6 +5047,19 @@
         "commercialUse": false,
         "verified": false,
         "sourceUrl": null
+      },
+      "photoEvidence": "source-page",
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "6060TRUONGSON006",
+        "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+        "imageUrl": "https://dailydongtam.com/wp-content/uploads/2018/07/bao-gia-gach-lat-nen-5.jpg",
+        "sourceUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
+        "publisher": "Big House",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh gắn với dòng mã trong bảng nhà cung cấp; đối chiếu mẫu và lô gạch thực trước đặt hàng; không cấp quyền texture."
       }
     },
     {
@@ -4958,7 +5072,7 @@
       "unit": "m²",
       "price": 255700,
       "productUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
-      "imageUrl": null,
+      "imageUrl": "https://dailydongtam.com/wp-content/uploads/2018/07/bao-gia-gach-lat-nen-6.jpg",
       "supplier": "Big House (theo trang công bố)",
       "phone": "0869.559.495",
       "address": "",
@@ -4987,6 +5101,19 @@
         "commercialUse": false,
         "verified": false,
         "sourceUrl": null
+      },
+      "photoEvidence": "source-page",
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "6060MEKONG003",
+        "specification": "Gạch lát nền 600 × 600 mm · giá chiết khấu bán lẻ công bố",
+        "imageUrl": "https://dailydongtam.com/wp-content/uploads/2018/07/bao-gia-gach-lat-nen-6.jpg",
+        "sourceUrl": "https://dailydongtam.com/gia-gach-dong-tam.html",
+        "publisher": "Big House",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh gắn với dòng mã trong bảng nhà cung cấp; đối chiếu mẫu và lô gạch thực trước đặt hàng; không cấp quyền texture."
       }
     },
     {

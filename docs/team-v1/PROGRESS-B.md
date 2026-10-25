@@ -1132,3 +1132,10 @@ Sau mỗi substep cập nhật phần active/next, ghi log ngắn kèm commit/PR
 - Inventory104 entries,59 pinned source-image reference applications,45 remaining. Added36 from manufacturer/supplier sources; supplier labels distinguish Tavaco from manufacturers. Product-range limits, immutable identity and closed unverified texture/export gates remain. Existing priceEvidence fields unchanged.
 - Production exact-main Vercel status success: https://vercel.com/vlam1881997-9266/build_my_home_full_v1.2_github/9jE9H14n6UPE4qwr3qS83HtbWQcF . Metadata verifies deployment completion; native huiminhbach.id.vn loading/selection/3D not inspected because browser usage block remains. No bypass.
 - Evidence material-image-expansion-20261025.json is research provenance, not native acceptance. Its in-progress marker refers to research; this release checkpoint records the deployed subset. Remaining45 need correct source-linked images and exact variant review. Shared catalog does not establish complete visual material sets or acceptance across24 styles. Continue remaining material coverage before claiming commercial completion.
+
+
+## 2026-10-25 — Remaining catalog image work
+- Continue104-entry target. Branch baseline3a879dcac7857f96b99ae65a9691ca62e227bf10 already contains67 source references; add11 more (seven supplier tile photos, two manufacturer paint application photos, one MARMOL005 face and PHARAON001 application).
+- Result78/104 references,26 unresolved. Source image fetches are independent manufacturer/supplier research; native browser still blocked. Preserve prices and closed texture rights gates. INAX alternate pages located but image bytes timed out/503; do not mark delivered. GECKO image inaccessible. No commercial completion claim.
+- Adapt source-picture filter tests to actual pinned floor count, preserving exact SKU filter regression. Full Node22 CI required before authorized release.
+- last_verified_commit:c3c1b8b5f744a0d102a03e2c33af7cd75275f0a8 (PR85 CI641+57).
