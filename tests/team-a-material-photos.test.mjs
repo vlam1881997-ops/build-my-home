@@ -33,7 +33,7 @@ test('manufacturer surfaces stay distinct from product photos, and imported labe
  p.name='<img src=x onerror=evil()>';assert.equal(B.materialPhotoReference(p).kind,'surface-sample');assert.match(B.webProductCard(p),/Ảnh mẫu bề mặt từ hãng/);assert.doesNotMatch(B.webProductCard(p),/<img src=x/);B.openMaterialReference(p.id);assert.doesNotMatch(dialogs[0].innerHTML,/<img src=x/);
 });
 test('photo-first catalog ranking preserves filters and missing-price products',()=>{
- const {B}=client();B.materialResearch.visible=12;const html=B.materialCatalogHtml('floor');const first=html.match(/data-product-id="([^"]+)"/)[1];assert.ok(B.materialPhotoReference(B.materialResearch.products.find(p=>p.id===first)));assert.match(html,/5 lựa chọn có ảnh đối chiếu từ nguồn/);
+ const {B}=client();B.materialResearch.visible=12;const html=B.materialCatalogHtml('floor');const first=html.match(/data-product-id="([^"]+)"/)[1];assert.ok(B.materialPhotoReference(B.materialResearch.products.find(p=>p.id===first)));assert.match(html,new RegExp(catalog.products.filter(p=>p.category==='floor'&&p.photoReference).length+' lựa chọn có ảnh đối chiếu từ nguồn'));
  B.materialResearch.filter='6060DB038';const filtered=B.materialCatalogHtml('floor');assert.match(filtered,/1 lựa chọn/);assert.match(filtered,/Chưa có giá/);assert.doesNotMatch(filtered,/data-product-id="source-c0ebd3534344b375"/);
 });
 
@@ -51,7 +51,7 @@ test('product range pictures state their limits and zoom uses the product name w
 
 test('source-picture filter composes with brand, search and price filters without changing the project',()=>{
  const {B}=client(),before=JSON.stringify(B.state.project);B.materialResearch.photoOnly=true;
- let html=B.materialCatalogHtml('floor');assert.match(html,/data-material-photo checked/);assert.match(html,/5 lựa chọn/);assert.doesNotMatch(html,/data-material-illustration/);
+ let html=B.materialCatalogHtml('floor');assert.match(html,/data-material-photo checked/);assert.match(html,new RegExp(catalog.products.filter(p=>p.category==='floor'&&p.photoReference).length+' lựa chọn'));assert.doesNotMatch(html,/data-material-illustration/);
  B.materialResearch.filter='6060DB038';html=B.materialCatalogHtml('floor');assert.match(html,/1 lựa chọn/);assert.match(html,/6060DB038/);
  B.materialResearch.priceFilter='known';assert.match(B.materialCatalogHtml('floor'),/Không có sản phẩm khớp/);
  B.materialResearch.filter='';B.materialResearch.priceFilter='';B.materialResearch.brand='Hãng không tồn tại';assert.match(B.materialCatalogHtml('steel'),/Ảnh dòng sản phẩm từ hãng/);
