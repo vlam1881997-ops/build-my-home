@@ -16,7 +16,7 @@ test('curated references identify eleven distinct existing SKUs, with provenance
  for(const p of rows){const r=p.photoReference;assert.equal(r.sku,p.sku);assert.equal(r.specification,p.specification||p.spec);assert.equal(r.imageUrl,p.imageUrl);assert.equal(r.status,'source-matched');assert.equal(r.checkedAt,'2026-10-22');assert.ok(['dongtamshop.com','rangdong.com.vn','ancuong.com'].includes(new URL(r.sourceUrl).hostname));assert.equal(p.photoLicense.verified,false);assert.equal(p.photoLicense.commercialUse,false);assert.ok(r.notes);assert.notEqual(p.priceEvidence.retrievedAt,'2026-10-22');}
 });
 test('only shipped exact identity can display a reference; project/search claims cannot self-approve',()=>{
- const {B}=client(),p=B.materialResearch.products.find(p=>p.photoReference);
+ const {B}=client(),p=B.materialResearch.products.find(p=>p.sku==='6060DB038');
  assert.ok(B.materialPhotoReference(p));
  for(const delta of [{id:'forged'},{sku:'OTHER'},{specification:'800 mm'},{category:'paint'},{productUrl:'https://example.org/other'},{imageUrl:'https://example.org/other.jpg'},{priceEvidence:{...p.priceEvidence,quantityUnit:'thùng'}}])assert.equal(B.materialPhotoReference({...p,...delta}),null,JSON.stringify(delta));
  assert.equal(B.materialPhotoReference({...p,id:'imported',photoReference:{...p.photoReference,status:'source-matched'}}),null);
@@ -33,7 +33,7 @@ test('manufacturer surfaces stay distinct from product photos, and imported labe
  p.name='<img src=x onerror=evil()>';assert.equal(B.materialPhotoReference(p).kind,'surface-sample');assert.match(B.webProductCard(p),/Ảnh mẫu bề mặt từ hãng/);assert.doesNotMatch(B.webProductCard(p),/<img src=x/);B.openMaterialReference(p.id);assert.doesNotMatch(dialogs[0].innerHTML,/<img src=x/);
 });
 test('photo-first catalog ranking preserves filters and missing-price products',()=>{
- const {B}=client();B.materialResearch.visible=12;const html=B.materialCatalogHtml('floor');const first=html.match(/data-product-id="([^"]+)"/)[1];assert.ok(B.materialPhotoReference(B.materialResearch.products.find(p=>p.id===first)));assert.match(html,/5 lựa chọn có ảnh đối chiếu từ hãng/);
+ const {B}=client();B.materialResearch.visible=12;const html=B.materialCatalogHtml('floor');const first=html.match(/data-product-id="([^"]+)"/)[1];assert.ok(B.materialPhotoReference(B.materialResearch.products.find(p=>p.id===first)));assert.match(html,/5 lựa chọn có ảnh đối chiếu từ nguồn/);
  B.materialResearch.filter='6060DB038';const filtered=B.materialCatalogHtml('floor');assert.match(filtered,/1 lựa chọn/);assert.match(filtered,/Chưa có giá/);assert.doesNotMatch(filtered,/data-product-id="source-c0ebd3534344b375"/);
 });
 
