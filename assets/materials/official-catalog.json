@@ -522,7 +522,7 @@
       "name": "6060DB006 - NANO",
       "spec": "6060DB006 · m² · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/bst-db-nano/6060db006-nano/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060-8080DB06-NANOa.jpg",
+      "imageUrl": "https://hungtin.vn/wp-content/uploads/2022/03/6060DB006-M-335x335.jpg",
       "price": null,
       "unit": "m²",
       "phone": "",
@@ -553,6 +553,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "6060DB006",
+        "specification": "6060DB006 · m² · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://hungtin.vn/wp-content/uploads/2022/03/6060DB006-M-335x335.jpg",
+        "sourceUrl": "https://hungtin.vn/san-pham/gach-granite-lat-nen-dong-tam-6060db006-nano/",
+        "publisher": "Hưng Tín",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh theo mã từ nguồn; đối chiếu phiên bản, nhãn và hàng thực trước đặt mua. Không dùng tự động làm texture hoặc chứng nhận quy cách."
       }
     },
     {
@@ -935,7 +947,7 @@
       "name": "8080DB100 - NANO",
       "spec": "8080DB100 · m² · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/bst-db-nano/8080db100-nano/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2021/11/8080DB100-NANOa-1024x1024.jpg",
+      "imageUrl": "https://images.hailinh.com.vn/uploads/shops/dongtam/gach-dong-tam-8080db100-nano_1638169602_1.jpg?cache=true&f=webp&q=80&w=2000",
       "price": null,
       "unit": "m²",
       "phone": "",
@@ -966,6 +978,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "8080DB100",
+        "specification": "8080DB100 · m² · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://images.hailinh.com.vn/uploads/shops/dongtam/gach-dong-tam-8080db100-nano_1638169602_1.jpg?cache=true&f=webp&q=80&w=2000",
+        "sourceUrl": "https://hailinh.com.vn/gach-op-lat-80x80/gach-dong-tam-8080db100-nano-2494.html",
+        "publisher": "Hải Linh",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh theo mã từ nhà cung cấp; đối chiếu sắc độ, biến thể và lô gạch thực trước mua; chưa cấp quyền texture."
       }
     },
     {
@@ -1327,6 +1351,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "A60",
+        "specification": "A60 · bóng · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://rangdong.com.vn/uploads/products/den-led/led-bulb/a60-pir-9w/a60-pir-9w-1.jpg",
+        "sourceUrl": "https://rangdong.com.vn/den-led-bulb-cam-bien-9w-pr2109.html",
+        "publisher": "Rạng Đông",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh theo mã từ nguồn; đối chiếu phiên bản, nhãn và hàng thực trước đặt mua. Không dùng tự động làm texture hoặc chứng nhận quy cách."
       }
     },
     {
@@ -1824,7 +1860,7 @@
       "phone": "1800 6633",
       "price": 1308000,
       "priceDate": null,
-      "imageUrl": "https://www.inax.com.vn/wp-content/uploads/2025/12/chau-rua-am-ban-l-2216v-1.jpg",
+      "imageUrl": "https://cdn.hita.com.vn/storage/products/inax/lavabo-am-ban/l-2216v-bw1-htt1.jpg",
       "verifiedAt": "2026-10-01",
       "photoEvidence": "source-page",
       "priceStatus": "reference",
@@ -1852,6 +1888,18 @@
         "sourceType": "supplier",
         "publishedPeriod": null,
         "notes": "Giá trong danh sách chậu âm bàn; không tự bao gồm vòi, mặt đá hoặc lắp đặt."
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "L-2216V",
+        "specification": "L-2216V · bộ · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://cdn.hita.com.vn/storage/products/inax/lavabo-am-ban/l-2216v-bw1-htt1.jpg",
+        "sourceUrl": "https://hita.com.vn/lavabo-inax-am-ban-l-2216v-2324.html",
+        "publisher": "HITA",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh theo mã từ nguồn; đối chiếu phiên bản, nhãn và hàng thực trước đặt mua. Không dùng tự động làm texture hoặc chứng nhận quy cách."
       }
     },
     {
@@ -1920,7 +1968,7 @@
       "phone": "1800 6633",
       "price": null,
       "priceDate": null,
-      "imageUrl": "https://www.inax.com.vn/wp-content/uploads/2026/09/BF-1760V-1.png",
+      "imageUrl": "https://cdn.hita.com.vn/storage/products/inax/bon-tam-dat-san/bf-1760v-avt.png",
       "verifiedAt": "2026-10-01",
       "photoEvidence": "source-page",
       "priceStatus": "unknown",
@@ -1944,6 +1992,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "BF-1760V",
+        "specification": "BF-1760V · bộ · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://cdn.hita.com.vn/storage/products/inax/bon-tam-dat-san/bf-1760v-avt.png",
+        "sourceUrl": "https://hita.com.vn/bon-tam-nhua-acrylic-inax-bf-1760v-4739.html",
+        "publisher": "HITA",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh theo mã từ nguồn; đối chiếu phiên bản, nhãn và hàng thực trước đặt mua. Không dùng tự động làm texture hoặc chứng nhận quy cách."
       }
     },
     {
@@ -3023,7 +3083,7 @@
       "sku": "SikaTop-530 Seal",
       "unit": "theo quy cách",
       "spec": "Đối chiếu bề mặt, định mức và quy trình thi công trong tài liệu Sika.",
-      "imageUrl": "",
+      "imageUrl": "https://cdn.hstatic.net/products/200001068675/sikatop_530_seal_895b6db511cd495099356562d4b54be9_medium.png",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3031,7 +3091,7 @@
       "address": "",
       "supplier": "Sika",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "product",
       "photoLicense": {
         "commercialUse": false,
@@ -3053,6 +3113,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "SikaTop-530 Seal",
+        "specification": "Đối chiếu bề mặt, định mức và quy trình thi công trong tài liệu Sika.",
+        "imageUrl": "https://cdn.hstatic.net/products/200001068675/sikatop_530_seal_895b6db511cd495099356562d4b54be9_medium.png",
+        "sourceUrl": "https://aquafix.com.vn/products/sikatop-530-seal",
+        "publisher": "AquaFix",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh nhận diện dòng từ nguồn; chưa xác nhận mọi tiết diện, kích thước, dung tích hay cấu hình. Đối chiếu nhãn và mẫu thực trước đặt hàng; không dùng tự động làm texture."
       }
     },
     {
@@ -3680,7 +3752,7 @@
       "sku": "",
       "unit": "m",
       "spec": "Tiết diện, số lõi và bảo vệ mạch theo thiết kế điện.",
-      "imageUrl": "",
+      "imageUrl": "https://cdn.hita.com.vn/storage/products/cadivi/cap-dien-luc-ha-the-cadivi-pvc-cv-06-1kv-avt.jpg",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3688,7 +3760,7 @@
       "address": "",
       "supplier": "CADIVI",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -3710,6 +3782,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Tiết diện, số lõi và bảo vệ mạch theo thiết kế điện.",
+        "imageUrl": "https://cdn.hita.com.vn/storage/products/cadivi/cap-dien-luc-ha-the-cadivi-pvc-cv-06-1kv-avt.jpg",
+        "sourceUrl": "https://hita.com.vn/cap-dien-luc-ha-the-cadivi-pvc-cv-0-61kv-22555.html",
+        "publisher": "HITA",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh dòng cáp CV từ nhà cung cấp; chưa chốt tiết diện, màu vỏ hoặc chiều dài; không dùng để thiết kế mạch điện."
       }
     },
     {
@@ -3721,7 +3805,7 @@
       "sku": "",
       "unit": "m",
       "spec": "Tiết diện, số lõi và bảo vệ mạch theo thiết kế điện.",
-      "imageUrl": "",
+      "imageUrl": "https://product.hstatic.net/200000334227/product/vcmo_sua_ec34bd40a4ae4f54a0b5adb52d6a662f_1024x1024.jpg",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3729,7 +3813,7 @@
       "address": "",
       "supplier": "CADIVI",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -3751,6 +3835,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Tiết diện, số lõi và bảo vệ mạch theo thiết kế điện.",
+        "imageUrl": "https://product.hstatic.net/200000334227/product/vcmo_sua_ec34bd40a4ae4f54a0b5adb52d6a662f_1024x1024.jpg",
+        "sourceUrl": "https://www.saigonsinco.com/products/cap-dan-dung-day-doi-mem-ovan-boc-nhua-pvc-vcmo-lf-450-750v",
+        "publisher": "Saigon Sinco",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh nhận diện dòng từ nguồn; chưa xác nhận mọi tiết diện, kích thước, dung tích hay cấu hình. Đối chiếu nhãn và mẫu thực trước đặt hàng; không dùng tự động làm texture."
       }
     },
     {
@@ -3814,7 +3910,7 @@
       "sku": "",
       "unit": "m",
       "spec": "Chọn đường kính và cấp áp lực theo thiết kế cấp thoát nước.",
-      "imageUrl": "",
+      "imageUrl": "https://binhminhplastic.com.vn/Data/Sites/1/Product/10517/%E1%BB%91ng-ppr.png",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3822,7 +3918,7 @@
       "address": "",
       "supplier": "Nhựa Bình Minh",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -3844,6 +3940,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Chọn đường kính và cấp áp lực theo thiết kế cấp thoát nước.",
+        "imageUrl": "https://binhminhplastic.com.vn/Data/Sites/1/Product/10517/%E1%BB%91ng-ppr.png",
+        "sourceUrl": "https://binhminhplastic.com.vn/san-pham/pp-r/ong-pp-r/ong-pp-r-pp-r-pipe-16",
+        "publisher": "Nhựa Bình Minh",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh nhận diện dòng từ nguồn; chưa xác nhận mọi tiết diện, kích thước, dung tích hay cấu hình. Đối chiếu nhãn và mẫu thực trước đặt hàng; không dùng tự động làm texture."
       }
     },
     {
@@ -4653,7 +4761,7 @@
       "sku": "",
       "unit": "m²",
       "spec": "Dòng sản phẩm; chốt độ dày, khổ hữu dụng và màu trong báo giá.",
-      "imageUrl": "",
+      "imageUrl": "https://info.hoasenhome.vn/wp-content/uploads/2025/12/Ton-ma.jpg",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -4661,7 +4769,7 @@
       "address": "",
       "supplier": "Hoa Sen",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -4683,6 +4791,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Dòng sản phẩm; chốt độ dày, khổ hữu dụng và màu trong báo giá.",
+        "imageUrl": "https://info.hoasenhome.vn/wp-content/uploads/2025/12/Ton-ma.jpg",
+        "sourceUrl": "https://info.hoasenhome.vn/san-pham-va-kenh-phan-phoi/san-pham/ton-ma/",
+        "publisher": "Hoa Sen Home",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh giới thiệu nhóm tôn mạ của Hoa Sen Home, dùng chung để nhận diện dòng; không phải mẫu đúng màu, lớp mạ, độ dày hay sóng đã chọn. Cần xác nhận mẫu thực trước mua."
       }
     },
     {
@@ -4694,7 +4814,7 @@
       "sku": "",
       "unit": "m²",
       "spec": "Dòng sản phẩm; chốt độ dày, khổ hữu dụng và màu trong báo giá.",
-      "imageUrl": "",
+      "imageUrl": "https://info.hoasenhome.vn/wp-content/uploads/2025/12/Ton-ma.jpg",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -4702,7 +4822,7 @@
       "address": "",
       "supplier": "Hoa Sen",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -4724,6 +4844,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Dòng sản phẩm; chốt độ dày, khổ hữu dụng và màu trong báo giá.",
+        "imageUrl": "https://info.hoasenhome.vn/wp-content/uploads/2025/12/Ton-ma.jpg",
+        "sourceUrl": "https://info.hoasenhome.vn/san-pham-va-kenh-phan-phoi/san-pham/ton-ma/",
+        "publisher": "Hoa Sen Home",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh giới thiệu nhóm tôn mạ của Hoa Sen Home, dùng chung để nhận diện dòng; không phải mẫu đúng màu, lớp mạ, độ dày hay sóng đã chọn. Cần xác nhận mẫu thực trước mua."
       }
     },
     {
