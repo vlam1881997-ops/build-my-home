@@ -2971,7 +2971,7 @@
       "address": "",
       "supplier": "Hà Tiên Kiên Giang",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "product",
       "photoLicense": {
         "commercialUse": false,
@@ -3377,7 +3377,7 @@
       "address": "",
       "supplier": "CADIVI",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -3594,7 +3594,7 @@
       "address": "",
       "supplier": "Vĩnh Tường",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -3699,7 +3699,7 @@
       "address": "",
       "supplier": "Vĩnh Tường",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -3752,7 +3752,7 @@
       "address": "",
       "supplier": "Vĩnh Tường",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -3805,7 +3805,7 @@
       "address": "",
       "supplier": "Vĩnh Tường",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -3858,7 +3858,7 @@
       "address": "",
       "supplier": "Vĩnh Tường",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -3911,7 +3911,7 @@
       "address": "",
       "supplier": "Vĩnh Tường",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -3964,7 +3964,7 @@
       "address": "",
       "supplier": "Eurowindow",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -4017,7 +4017,7 @@
       "address": "",
       "supplier": "Eurowindow",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -4070,7 +4070,7 @@
       "address": "",
       "supplier": "Eurowindow",
       "verifiedAt": "2026-10-01",
-      "photoEvidence": "missing",
+      "photoEvidence": "source-page",
       "productKind": "range",
       "photoLicense": {
         "commercialUse": false,
@@ -4475,7 +4475,7 @@
         "verified": false,
         "sourceUrl": null
       },
-      "photoEvidence": "generic-illustration",
+      "photoEvidence": "source-page",
       "price": 168000,
       "unit": "lon 1 lít",
       "priceDate": null,
@@ -4531,7 +4531,7 @@
         "verified": false,
         "sourceUrl": null
       },
-      "photoEvidence": "generic-illustration",
+      "photoEvidence": "source-page",
       "price": 644000,
       "unit": "lon 5 lít",
       "priceDate": null,
@@ -4587,7 +4587,7 @@
         "verified": false,
         "sourceUrl": null
       },
-      "photoEvidence": "generic-illustration",
+      "photoEvidence": "source-page",
       "price": 1793000,
       "unit": "thùng 15 lít",
       "priceDate": null,
