@@ -64,3 +64,18 @@ test('new INAX SKU retains its own manufacturer price and conflicting dimensions
  B.v6MatMeta.sanitary=['','Thiết bị vệ sinh'];B.MATERIALS.sanitary=[];assert.equal(B.adoptWebMaterial(p),true);const saved=JSON.parse(JSON.stringify(B.state.project));assert.equal(saved.materials.choices.sanitary,p.id);assert.equal(saved.dataEngine.materialOverrides[p.id].value,null);assert.equal(saved.dataEngine.materialOverrides[p.id].product.price,8690000);assert.equal(saved.dataEngine.materialOverrides[p.id].imageUrl,null);
  const priced=B.materialResearch.products.filter(p=>p.photoReference?.checkedAt==='2026-10-25'&&p.priceEvidence.amountVnd!==null&&p.id!=='official-ac-959van-2');for(const row of priced)assert.notEqual(row.priceEvidence.retrievedAt,'2026-10-25','photo review cannot refresh price date');
 });
+
+test('all104 entries have distinct source or labelled AI images; AI never becomes source evidence',()=>{
+ const {B,dialogs}=client();assert.equal(catalog.products.length,104);
+ const generated=catalog.products.filter(p=>p.generatedIllustration);assert.equal(generated.length,3);
+ assert.equal(catalog.products.filter(p=>p.photoReference).length,101);
+ for(const p of B.materialResearch.products){assert.ok(B.materialPhotoReference(p)||B.materialGeneratedIllustration(p),p.id);}
+ for(const p of generated){assert.ok(fs.existsSync(p.generatedIllustration.imageUrl));const row=B.materialResearch.products.find(x=>x.id===p.id);
+ assert.equal(B.materialPhotoReference(row),null);assert.equal(B.materialProductPhotoStatus(row).displayable,false);
+ assert.match(B.webProductCard(row),/Ảnh minh họa AI — không phải ảnh sản phẩm thực tế/);assert.match(B.webProductCard(row),/data-material-ai-illustration/);
+ assert.equal(B.openMaterialReference(row.id),true);assert.match(dialogs.at(-1).innerHTML,/không phải ảnh sản phẩm thực tế/);
+ assert.equal(B.materialGeneratedIllustration({...row,sku:'OTHER'}),null);
+ assert.equal(B.materialGeneratedIllustration({...row,id:'forged'}),null);
+ row.generatedIllustration.imageUrl='https://example.org/evil';assert.match(B.materialGeneratedIllustration(row).imageUrl,/^assets/);
+ }
+});

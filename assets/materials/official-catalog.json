@@ -512,6 +512,13 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "generatedIllustration": {
+        "kind": "ai-illustration",
+        "imageUrl": "assets/materials/ai/tile.webp",
+        "createdAt": "2026-10-25",
+        "label": "Ảnh minh họa AI — không phải ảnh sản phẩm thực tế",
+        "notes": "Minh họa loại vật liệu, không xác nhận đúng mã hãng, bao bì, màu, quy cách hoặc khả năng thi công. Cần mẫu thực trước đặt hàng."
       }
     },
     {
@@ -3171,7 +3178,14 @@
         "publishedPeriod": "2025",
         "notes": "Bảng nguồn ghi năm 2025; quy cách can 25 lít có đơn giá khác."
       },
-      "specification": "Can 5 lít; bảng nguồn ghi 465.000 đ/can"
+      "specification": "Can 5 lít; bảng nguồn ghi 465.000 đ/can",
+      "generatedIllustration": {
+        "kind": "ai-illustration",
+        "imageUrl": "assets/materials/ai/latex.webp",
+        "createdAt": "2026-10-25",
+        "label": "Ảnh minh họa AI — không phải ảnh sản phẩm thực tế",
+        "notes": "Minh họa loại vật liệu, không xác nhận đúng mã hãng, bao bì, màu, quy cách hoặc khả năng thi công. Cần mẫu thực trước đặt hàng."
+      }
     },
     {
       "id": "catalog-b85e1fedaa18bb3b",
@@ -3376,6 +3390,13 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "generatedIllustration": {
+        "kind": "ai-illustration",
+        "imageUrl": "assets/materials/ai/cement.webp",
+        "createdAt": "2026-10-25",
+        "label": "Ảnh minh họa AI — không phải ảnh sản phẩm thực tế",
+        "notes": "Minh họa loại vật liệu, không xác nhận đúng mã hãng, bao bì, màu, quy cách hoặc khả năng thi công. Cần mẫu thực trước đặt hàng."
       }
     },
     {

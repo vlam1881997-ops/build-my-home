@@ -1,0 +1,25 @@
+{
+  "generatedAt": "2026-10-25",
+  "method": "built-in image_gen",
+  "purpose": "Generic material illustrations, not manufacturer SKU photos or 3D textures",
+  "images": [
+    {
+      "path": "tile.webp",
+      "prompt": "Use case: product-mockup. Create a square premium material catalog illustration: a single pale cool-grey porcelain floor tile with subtle natural stone-like grain, matte finish, clean near-top-down view with one thin visible edge, neutral warm-white seamless studio background, soft diffuse daylight, highly detailed tactile ceramic surface, restrained architectural sample photography aesthetic. Generic material concept only, NOT an exact manufacturer SKU. No logos, branding, text, dimensions, certifications or packaging. Do not add marble gold veins or other objects.",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "path": "latex.webp",
+      "prompt": "Use case: product-mockup. Square premium construction material catalog illustration: one plain unbranded white plastic liquid construction-admixture jerrycan with a grey cap, next to a small clean patch of grey cement mortar on a neutral off-white seamless studio background. Subtle soft shadow, realistic polymer and mortar textures, professionally lit, centered with generous margins. A generic illustrative concept for liquid mortar bonding additive, NOT any actual branded product. No logos, letters, claims, numbers, technical diagrams, safety certifications or imitation branded yellow/red packaging.",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "path": "cement.webp",
+      "prompt": "Use case: product-mockup. Square premium construction material catalog illustration: one closed plain kraft-paper cement sack, unbranded, next to a modest mound of fine grey cement powder on neutral off-white studio background. Realistic paper creases, fine powder detail, elegant soft diffuse light, centered composition, ample margins. Generic cement concept, NOT a verified cement brand, strength class or commercial SKU. No logos, labels, text, numbers, strength ratings, certifications or construction engineering claims.",
+      "width": 1254,
+      "height": 1254
+    }
+  ]
+}
