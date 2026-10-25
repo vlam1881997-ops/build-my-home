@@ -51,7 +51,7 @@
       "name": "Bột Trét Tường - ASSURE",
       "spec": "theo quy cách · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/bot-tret-tuong-assure/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/11/asure_interior.jpg",
+      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2022/01/dongtam-bot-tret-tuong-assure-300x142.jpg",
       "price": null,
       "unit": "theo quy cách",
       "phone": "",
@@ -82,6 +82,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2022/01/dongtam-bot-tret-tuong-assure-300x142.jpg",
+        "sourceUrl": "https://dongtam.com.vn/san-pham/bot-tret-tuong-assure/",
+        "publisher": "Đồng Tâm",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -133,7 +145,7 @@
       "name": "BỘT CHÀ RON",
       "spec": "theo quy cách · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/bot-cha-ron-groutex-pro/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/09/groutex_1kg.jpg",
+      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/11/PG_charon-300x300.jpg",
       "price": null,
       "unit": "theo quy cách",
       "phone": "",
@@ -164,6 +176,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/11/PG_charon-300x300.jpg",
+        "sourceUrl": "https://dongtam.com.vn/san-pham/bot-cha-ron-groutex-pro/",
+        "publisher": "Đồng Tâm",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -1081,7 +1105,7 @@
       "name": "Vách Kính Nhôm Eurowindow - 5 Hệ Vách Cao Cấp Cho Công Trình",
       "spec": "m² · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://eurowindow.biz/cua-vach-nhom/vach-kinh-nhom",
-      "imageUrl": "https://storage.sudospaces.com/eurowindow/2021/12/rafael-garcin-isq3m9fpa0g-unsplash.jpg",
+      "imageUrl": "https://storage.sudospaces.com/eurowindow/2026/09/vach-nhom-kinh-lon-he-stick.jpg.webp",
       "price": null,
       "unit": "m²",
       "phone": "",
@@ -1112,6 +1136,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "m² · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://storage.sudospaces.com/eurowindow/2026/09/vach-nhom-kinh-lon-he-stick.jpg.webp",
+        "sourceUrl": "https://eurowindow.biz/cua-vach-nhom/vach-kinh-nhom",
+        "publisher": "Eurowindow",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -1192,6 +1228,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "A60N1",
+        "specification": "A60N1 · bóng · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://rangdong.com.vn/uploads/products/den-led/led-bulb/a60n1-9w-dcv2/a60n1-9w-dc-v2-1.jpg",
+        "sourceUrl": "https://rangdong.com.vn/bong-den-led-bulb-tron-9-w-12-vdc-pr2099.html",
+        "publisher": "Rạng Đông",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh từ trang của hãng theo mã ghi trên sản phẩm; chưa xác nhận quyền dùng làm texture 3D."
       }
     },
     {
@@ -1377,7 +1425,7 @@
       "name": "SƠN NƯỚC MASTER 6 TRONG 1",
       "spec": "theo quy cách · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/son-nuoc-master-6-trong-1/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/12/master_ex_V.jpg",
+      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/12/son-nuoc-noi-that-dong-tam1-1-1-300x180.jpg",
       "price": null,
       "unit": "theo quy cách",
       "phone": "",
@@ -1408,6 +1456,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/12/son-nuoc-noi-that-dong-tam1-1-1-300x180.jpg",
+        "sourceUrl": "https://dongtam.com.vn/san-pham/son-nuoc-master-6-trong-1/",
+        "publisher": "Đồng Tâm",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -1418,7 +1478,7 @@
       "name": "SƠN NGOẠI THẤT SUNSHINE",
       "spec": "theo quy cách · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/son-ngoai-that-sunshine/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/10/sunshine_V.jpg",
+      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/10/son-ngoai-that-sieu-bong-dong-tam.jpg",
       "price": null,
       "unit": "theo quy cách",
       "phone": "",
@@ -1449,6 +1509,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2020/10/son-ngoai-that-sieu-bong-dong-tam.jpg",
+        "sourceUrl": "https://dongtam.com.vn/san-pham/son-ngoai-that-sunshine/",
+        "publisher": "Đồng Tâm",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -1808,6 +1880,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "surface-sample",
+        "sku": "MFC - MS D002 FR",
+        "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+        "imageUrl": "https://ancuong.com/products/products-thumb/30300347400102272019.jpg",
+        "sourceUrl": "https://ancuong.com/melamine/303003474.html",
+        "publisher": "An Cường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Mẫu bề mặt theo mã của hãng; chưa xác nhận lõi, độ dày, khổ đặt hàng hoặc quyền dùng làm texture 3D."
       }
     },
     {
@@ -1849,6 +1933,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "surface-sample",
+        "sku": "MFC - MS 104 MM",
+        "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+        "imageUrl": "https://ancuong.com/products/products-thumb/30300032100100088032.jpg",
+        "sourceUrl": "https://ancuong.com/melamine/303000321.html",
+        "publisher": "An Cường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Mẫu bề mặt theo mã của hãng; chưa xác nhận lõi, độ dày, khổ đặt hàng hoặc quyền dùng làm texture 3D."
       }
     },
     {
@@ -1890,6 +1986,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "surface-sample",
+        "sku": "MFC - MS 083 T",
+        "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+        "imageUrl": "https://ancuong.com/products/products-thumb/30300007000100081053.jpg",
+        "sourceUrl": "https://ancuong.com/melamine/303000070.html",
+        "publisher": "An Cường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Mẫu bề mặt theo mã của hãng; chưa xác nhận lõi, độ dày, khổ đặt hàng hoặc quyền dùng làm texture 3D."
       }
     },
     {
@@ -1931,6 +2039,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "surface-sample",
+        "sku": "MFC - MS 120 PL",
+        "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+        "imageUrl": "https://ancuong.com/products/products-thumb/30300030500100094040.jpg",
+        "sourceUrl": "https://ancuong.com/melamine/303000305.html",
+        "publisher": "An Cường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Mẫu bề mặt theo mã của hãng; chưa xác nhận lõi, độ dày, khổ đặt hàng hoặc quyền dùng làm texture 3D."
       }
     },
     {
@@ -1972,6 +2092,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "surface-sample",
+        "sku": "MFC - MS 205 PL",
+        "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+        "imageUrl": "https://ancuong.com/products/products-thumb/30300030400100106040.jpg",
+        "sourceUrl": "https://ancuong.com/melamine/303000304.html",
+        "publisher": "An Cường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Mẫu bề mặt theo mã của hãng; chưa xác nhận lõi, độ dày, khổ đặt hàng hoặc quyền dùng làm texture 3D."
       }
     },
     {
@@ -2066,6 +2198,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "surface-sample",
+        "sku": "MFC - MS 105 G",
+        "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+        "imageUrl": "https://ancuong.com/products/products-thumb/30300007700100089020.jpg",
+        "sourceUrl": "https://ancuong.com/melamine/303000077.html",
+        "publisher": "An Cường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Mẫu bề mặt theo mã của hãng; chưa xác nhận lõi, độ dày, khổ đặt hàng hoặc quyền dùng làm texture 3D."
       }
     },
     {
@@ -2107,6 +2251,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "surface-sample",
+        "sku": "MFC - MS 230 S",
+        "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+        "imageUrl": "https://ancuong.com/products/products-thumb/30300009700100110045.jpg",
+        "sourceUrl": "https://ancuong.com/melamine/303000097.html",
+        "publisher": "An Cường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Mẫu bề mặt theo mã của hãng; chưa xác nhận lõi, độ dày, khổ đặt hàng hoặc quyền dùng làm texture 3D."
       }
     },
     {
@@ -2148,6 +2304,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "surface-sample",
+        "sku": "MFC - MS 021 T",
+        "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+        "imageUrl": "https://ancuong.com/products/products-thumb/30300005500100028053.jpg",
+        "sourceUrl": "https://ancuong.com/melamine/303000055.html",
+        "publisher": "An Cường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Mẫu bề mặt theo mã của hãng; chưa xác nhận lõi, độ dày, khổ đặt hàng hoặc quyền dùng làm texture 3D."
       }
     },
     {
@@ -2189,6 +2357,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "surface-sample",
+        "sku": "MFC - MS 426 SC",
+        "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+        "imageUrl": "https://ancuong.com/products/products-thumb/30300016900100190046.jpg",
+        "sourceUrl": "https://ancuong.com/melamine/303000169.html",
+        "publisher": "An Cường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Mẫu bề mặt theo mã của hãng; chưa xác nhận lõi, độ dày, khổ đặt hàng hoặc quyền dùng làm texture 3D."
       }
     },
     {
@@ -2230,6 +2410,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "surface-sample",
+        "sku": "MFC - MS LUX024 MTD",
+        "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+        "imageUrl": "https://ancuong.com/products/products-thumb/30300349200102284088.jpg",
+        "sourceUrl": "https://ancuong.com/melamine/303003492.html",
+        "publisher": "An Cường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Mẫu bề mặt theo mã của hãng; chưa xác nhận lõi, độ dày, khổ đặt hàng hoặc quyền dùng làm texture 3D."
       }
     },
     {
@@ -2271,6 +2463,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "surface-sample",
+        "sku": "MFC - MS 463 SC01",
+        "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+        "imageUrl": "https://ancuong.com/products/products-thumb/30300330900101563062.jpg",
+        "sourceUrl": "https://ancuong.com/melamine/303003309.html",
+        "publisher": "An Cường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Mẫu bề mặt theo mã của hãng; chưa xác nhận lõi, độ dày, khổ đặt hàng hoặc quyền dùng làm texture 3D."
       }
     },
     {
@@ -2312,6 +2516,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "surface-sample",
+        "sku": "MFC - MS 495 EL",
+        "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+        "imageUrl": "https://ancuong.com/products/products-thumb/30300344800101633015.jpg",
+        "sourceUrl": "https://ancuong.com/melamine/303003448.html",
+        "publisher": "An Cường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Mẫu bề mặt theo mã của hãng; chưa xác nhận lõi, độ dày, khổ đặt hàng hoặc quyền dùng làm texture 3D."
       }
     },
     {
@@ -2353,6 +2569,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "surface-sample",
+        "sku": "MFC - MS 388 EV",
+        "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+        "imageUrl": "https://ancuong.com/products/products-thumb/30300014100100161016.jpg",
+        "sourceUrl": "https://ancuong.com/melamine/303000141.html",
+        "publisher": "An Cường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Mẫu bề mặt theo mã của hãng; chưa xác nhận lõi, độ dày, khổ đặt hàng hoặc quyền dùng làm texture 3D."
       }
     },
     {
@@ -2394,6 +2622,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "surface-sample",
+        "sku": "MFC - MS 101 FL",
+        "specification": "Mã bề mặt Melamine; chọn lõi ván và độ dày tại nguồn.",
+        "imageUrl": "https://ancuong.com/products/products-thumb/30300029600100085018.jpg",
+        "sourceUrl": "https://ancuong.com/melamine/303000296.html",
+        "publisher": "An Cường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Mẫu bề mặt theo mã của hãng; chưa xác nhận lõi, độ dày, khổ đặt hàng hoặc quyền dùng làm texture 3D."
       }
     },
     {
@@ -2723,7 +2963,7 @@
       "sku": "PCB30 đa dụng",
       "unit": "bao",
       "spec": "Đối chiếu mác, cấp phối và khối lượng bao tại nguồn.",
-      "imageUrl": "",
+      "imageUrl": "https://ximanghatienkiengiang.vn/wp-content/uploads/2025/08/9e15e0b6-c1af-4caf-86b5-a5f071a9e070.png",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -2753,6 +2993,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "PCB30 đa dụng",
+        "specification": "Đối chiếu mác, cấp phối và khối lượng bao tại nguồn.",
+        "imageUrl": "https://ximanghatienkiengiang.vn/wp-content/uploads/2025/08/9e15e0b6-c1af-4caf-86b5-a5f071a9e070.png",
+        "sourceUrl": "https://ximanghatienkiengiang.vn/product-detail/?slug=Xi-mng-a-dng-PCB30",
+        "publisher": "Hà Tiên Kiên Giang",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -3117,7 +3369,7 @@
       "sku": "",
       "unit": "m",
       "spec": "Tiết diện, số lõi và bảo vệ mạch theo thiết kế điện.",
-      "imageUrl": "",
+      "imageUrl": "https://cadivi.vn/vnt_upload/product/10_2018/Day_dien_boc_nhua_PVC-1.jpg",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3147,6 +3399,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Tiết diện, số lõi và bảo vệ mạch theo thiết kế điện.",
+        "imageUrl": "https://cadivi.vn/vnt_upload/product/10_2018/Day_dien_boc_nhua_PVC-1.jpg",
+        "sourceUrl": "https://cadivi.vn/vn/day-cap-dien-boc-nhua-pvc.html",
+        "publisher": "CADIVI",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -3322,7 +3586,7 @@
       "sku": "",
       "unit": "tấm",
       "spec": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
-      "imageUrl": "",
+      "imageUrl": "https://vinhtuong.com/sites/default/files/2026-08/tam-tieu-chuan-hiep-phuoc-9mm-front-260825.png",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3352,6 +3616,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
+        "imageUrl": "https://vinhtuong.com/sites/default/files/2026-08/tam-tieu-chuan-hiep-phuoc-9mm-front-260825.png",
+        "sourceUrl": "https://vinhtuong.com/tam-thach-cao-gyproc-tieu-chuan",
+        "publisher": "Vĩnh Tường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -3415,7 +3691,7 @@
       "sku": "",
       "unit": "tấm",
       "spec": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
-      "imageUrl": "",
+      "imageUrl": "https://vinhtuong.com/sites/default/files/2026-08/tam-thach-cao-sieu-bao-ve-hiep-phuoc-9mm-front-260825.png",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3445,6 +3721,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
+        "imageUrl": "https://vinhtuong.com/sites/default/files/2026-08/tam-thach-cao-sieu-bao-ve-hiep-phuoc-9mm-front-260825.png",
+        "sourceUrl": "https://vinhtuong.com/tam-thach-cao-vinh-tuong-sieu-bao-ve",
+        "publisher": "Vĩnh Tường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -3456,7 +3744,7 @@
       "sku": "",
       "unit": "tấm",
       "spec": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
-      "imageUrl": "",
+      "imageUrl": "https://vinhtuong.com/sites/default/files/2026-08/tam-thach-cao-chiu-am-hiep-phuoc-9mm-front-260825.png",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3486,6 +3774,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
+        "imageUrl": "https://vinhtuong.com/sites/default/files/2026-08/tam-thach-cao-chiu-am-hiep-phuoc-9mm-front-260825.png",
+        "sourceUrl": "https://vinhtuong.com/tam-thach-cao-gyproc-chiu-am",
+        "publisher": "Vĩnh Tường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -3497,7 +3797,7 @@
       "sku": "",
       "unit": "tấm",
       "spec": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
-      "imageUrl": "",
+      "imageUrl": "https://vinhtuong.com/sites/default/files/2026-04/thumbnail.png",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3527,6 +3827,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
+        "imageUrl": "https://vinhtuong.com/sites/default/files/2026-04/thumbnail.png",
+        "sourceUrl": "https://vinhtuong.com/tam-thach-cao-gyproc-chong-moc",
+        "publisher": "Vĩnh Tường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -3538,7 +3850,7 @@
       "sku": "",
       "unit": "tấm",
       "spec": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
-      "imageUrl": "",
+      "imageUrl": "https://vinhtuong.com/sites/default/files/2023-06/sieu-trang-vt50-01-01-copy_0.jpg",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3568,6 +3880,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
+        "imageUrl": "https://vinhtuong.com/sites/default/files/2023-06/sieu-trang-vt50-01-01-copy_0.jpg",
+        "sourceUrl": "https://vinhtuong.com/tam-thach-cao-sieu-trang",
+        "publisher": "Vĩnh Tường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -3579,7 +3903,7 @@
       "sku": "",
       "unit": "m²",
       "spec": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
-      "imageUrl": "",
+      "imageUrl": "https://vinhtuong.com/sites/default/files/inline-images/tam-cach-nhiet-tui-khi-vinh-tuong-p2-1.jpg",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3609,6 +3933,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Đối chiếu độ dày, hệ khung và cấu tạo đồng bộ theo nhà sản xuất.",
+        "imageUrl": "https://vinhtuong.com/sites/default/files/inline-images/tam-cach-nhiet-tui-khi-vinh-tuong-p2-1.jpg",
+        "sourceUrl": "https://vinhtuong.com/gia-tam-cach-nhiet-tui-khi-vinh-tuong-p2",
+        "publisher": "Vĩnh Tường",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -3620,7 +3956,7 @@
       "sku": "",
       "unit": "bộ",
       "spec": "Chọn kích thước, phụ kiện và bề mặt; yêu cầu báo giá theo bộ cửa.",
-      "imageUrl": "",
+      "imageUrl": "https://storage.sudospaces.com/eurowindow/2026/07/cua-go-composite-eurowindow-dep-sang-tinh-te-thiet-ke-chiu-nuoc-toi-uu.jpg.webp",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3650,6 +3986,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Chọn kích thước, phụ kiện và bề mặt; yêu cầu báo giá theo bộ cửa.",
+        "imageUrl": "https://storage.sudospaces.com/eurowindow/2026/07/cua-go-composite-eurowindow-dep-sang-tinh-te-thiet-ke-chiu-nuoc-toi-uu.jpg.webp",
+        "sourceUrl": "https://eurowindow.biz/cua-go/cua-go-composite.html",
+        "publisher": "Eurowindow",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -3661,7 +4009,7 @@
       "sku": "",
       "unit": "bộ",
       "spec": "Chọn kích thước, phụ kiện và bề mặt; yêu cầu báo giá theo bộ cửa.",
-      "imageUrl": "",
+      "imageUrl": "https://storage.sudospaces.com/eurowindow/2026/07/cua-go-chong-chay-cau-tao-nhieu-lop-voi-tam-khoang-calcium-silicate.jpg.webp",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3691,6 +4039,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Chọn kích thước, phụ kiện và bề mặt; yêu cầu báo giá theo bộ cửa.",
+        "imageUrl": "https://storage.sudospaces.com/eurowindow/2026/07/cua-go-chong-chay-cau-tao-nhieu-lop-voi-tam-khoang-calcium-silicate.jpg.webp",
+        "sourceUrl": "https://eurowindow.biz/cua-go/cua-go-chong-chay.html",
+        "publisher": "Eurowindow",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -3702,7 +4062,7 @@
       "sku": "",
       "unit": "bộ",
       "spec": "Chọn kích thước, phụ kiện và bề mặt; yêu cầu báo giá theo bộ cửa.",
-      "imageUrl": "",
+      "imageUrl": "https://storage.sudospaces.com/eurowindow/2026/08/cua-go-tu-nhien-phong-cach-sang-trong-co-dien-tu-eurowindow.jpg.webp",
       "price": null,
       "priceDate": null,
       "priceStatus": "unknown",
@@ -3732,6 +4092,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "",
+        "specification": "Chọn kích thước, phụ kiện và bề mặt; yêu cầu báo giá theo bộ cửa.",
+        "imageUrl": "https://storage.sudospaces.com/eurowindow/2026/08/cua-go-tu-nhien-phong-cach-sang-trong-co-dien-tu-eurowindow.jpg.webp",
+        "sourceUrl": "https://eurowindow.biz/cua-go/cua-go-tu-nhien.html",
+        "publisher": "Eurowindow",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -3936,6 +4308,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "AT28 90/8W",
+        "specification": "8W · chọn nhiệt độ màu tại nguồn.",
+        "imageUrl": "https://rangdong.com.vn/uploads/products/den-led/downlight/at28/at28-90-8w/at28-90-8w-1.jpg",
+        "sourceUrl": "https://rangdong.com.vn/den-led-am-tran-downlight-8w-pr2639.html",
+        "publisher": "Rạng Đông",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh từ trang của hãng theo mã ghi trên sản phẩm; chưa xác nhận quyền dùng làm texture 3D."
       }
     },
     {
@@ -3977,6 +4361,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "AT41 86/12W",
+        "specification": "12W · chọn nhiệt độ màu tại nguồn.",
+        "imageUrl": "https://rangdong.com.vn/uploads/products/den-led/downlight/at41/at41-86-12w/at41-86-12w-1.jpg",
+        "sourceUrl": "https://rangdong.com.vn/den-led-am-tran-downlight-86-12w-pr2682.html",
+        "publisher": "Rạng Đông",
+        "publisherType": "manufacturer",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh từ trang của hãng theo mã ghi trên sản phẩm; chưa xác nhận quyền dùng làm texture 3D."
       }
     },
     {
@@ -4069,7 +4465,7 @@
       "name": "Dulux EasyClean E016M mờ · 1 lít",
       "spec": "Sơn phủ nội thất mờ E016M; lon/thùng 1 lít",
       "productUrl": "https://sontavaco.com/son-noi-that/dulux/dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.html",
-      "imageUrl": null,
+      "imageUrl": "https://sontavaco.com/uploads/san-pham/son-dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.jpg",
       "source": "https://sontavaco.com/son-noi-that/dulux/dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.html",
       "supplier": "Sơn Tavaco",
       "phone": "",
@@ -4103,6 +4499,18 @@
         "sourceType": "supplier",
         "publishedPeriod": "2026-06",
         "notes": "Bảng nguồn cập nhật tháng 6/2026; khác mức giá đầu trang, cần xác nhận lại đúng dung tích và màu. Chưa dùng làm báo giá công trình."
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "E016M 1L",
+        "specification": "Sơn phủ nội thất mờ E016M; lon/thùng 1 lít",
+        "imageUrl": "https://sontavaco.com/uploads/san-pham/son-dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.jpg",
+        "sourceUrl": "https://sontavaco.com/son-noi-that/dulux/dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.html",
+        "publisher": "Tavaco",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh đại diện dòng sản phẩm từ nguồn; chưa chốt màu, kích thước, cấu hình hoặc quy cách đặt hàng; không tự dùng làm texture 3D."
       }
     },
     {
@@ -4113,7 +4521,7 @@
       "name": "Dulux EasyClean E016M mờ · 5 lít",
       "spec": "Sơn phủ nội thất mờ E016M; lon/thùng 5 lít",
       "productUrl": "https://sontavaco.com/son-noi-that/dulux/dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.html",
-      "imageUrl": null,
+      "imageUrl": "https://sontavaco.com/uploads/san-pham/son-dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.jpg",
       "source": "https://sontavaco.com/son-noi-that/dulux/dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.html",
       "supplier": "Sơn Tavaco",
       "phone": "",
@@ -4147,6 +4555,18 @@
         "sourceType": "supplier",
         "publishedPeriod": "2026-06",
         "notes": "Bảng nguồn cập nhật tháng 6/2026; khác mức giá đầu trang, cần xác nhận lại đúng dung tích và màu. Chưa dùng làm báo giá công trình."
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "E016M 5L",
+        "specification": "Sơn phủ nội thất mờ E016M; lon/thùng 5 lít",
+        "imageUrl": "https://sontavaco.com/uploads/san-pham/son-dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.jpg",
+        "sourceUrl": "https://sontavaco.com/son-noi-that/dulux/dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.html",
+        "publisher": "Tavaco",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh dòng Dulux E016M do Tavaco công bố, không xác nhận riêng vỏ thùng dung tích lon 5 lít hoặc màu khách chọn; chưa xác nhận quyền tái sử dụng."
       }
     },
     {
@@ -4157,7 +4577,7 @@
       "name": "Dulux EasyClean E016M mờ · 15 lít",
       "spec": "Sơn phủ nội thất mờ E016M; lon/thùng 15 lít",
       "productUrl": "https://sontavaco.com/son-noi-that/dulux/dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.html",
-      "imageUrl": null,
+      "imageUrl": "https://sontavaco.com/uploads/san-pham/son-dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.jpg",
       "source": "https://sontavaco.com/son-noi-that/dulux/dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.html",
       "supplier": "Sơn Tavaco",
       "phone": "",
@@ -4191,6 +4611,18 @@
         "sourceType": "supplier",
         "publishedPeriod": "2026-06",
         "notes": "Bảng nguồn cập nhật tháng 6/2026; khác mức giá đầu trang, cần xác nhận lại đúng dung tích và màu. Chưa dùng làm báo giá công trình."
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-range",
+        "sku": "E016M 15L",
+        "specification": "Sơn phủ nội thất mờ E016M; lon/thùng 15 lít",
+        "imageUrl": "https://sontavaco.com/uploads/san-pham/son-dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.jpg",
+        "sourceUrl": "https://sontavaco.com/son-noi-that/dulux/dulux-easyclean-chong-bam-ban-khang-virus-mo-e016m.html",
+        "publisher": "Tavaco",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh dòng Dulux E016M do Tavaco công bố, không xác nhận riêng vỏ thùng dung tích thùng 15 lít hoặc màu khách chọn; chưa xác nhận quyền tái sử dụng."
       }
     },
     {
