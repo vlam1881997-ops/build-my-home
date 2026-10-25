@@ -10,7 +10,7 @@
       "name": "KEO DÁN GẠCH GECKO",
       "spec": "theo quy cách · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/keo-dan-gach-dong-tam/",
-      "imageUrl": "https://dongtamshop.com/wp-content/uploads/2026/02/Gecko_mang-Xa-hoi_1_Dongtamshop.png",
+      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2026/01/Bai-1_01-1.png",
       "price": null,
       "unit": "theo quy cách",
       "phone": "",
@@ -41,17 +41,6 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
-      },
-      "photoReference": {
-        "status": "source-matched",
-        "kind": "product-range",
-        "sku": "",
-        "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
-        "imageUrl": "https://dongtamshop.com/wp-content/uploads/2026/02/Gecko_mang-Xa-hoi_1_Dongtamshop.png",
-        "sourceUrl": "https://dongtamshop.com/",
-        "publisher": "Đồng Tâm Shop",
-        "checkedAt": "2026-10-25",
-        "notes": "Ảnh giới thiệu dòng sản phẩm hoặc phối cảnh từ nguồn; chưa chốt mã màu, quy cách hay cấu hình; không dùng tự động làm texture."
       }
     },
     {
@@ -272,7 +261,7 @@
       "name": "BỘ SƯU TẬP NGÓI PHẲNG TRÁNG MEN ALPHA",
       "spec": "viên · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://dongtam.com.vn/san-pham/bo-suu-tap-ngoi-phang-trang-men-alpha/",
-      "imageUrl": "https://dongtamshop.com/wp-content/uploads/2025/06/POST_NGOIALPHA_1080X1080-01.jpg",
+      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2025/06/POST_NGOIALPHA_1080X1080-01-1024x1024.png",
       "price": null,
       "unit": "viên",
       "phone": "",
@@ -303,17 +292,6 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
-      },
-      "photoReference": {
-        "status": "source-matched",
-        "kind": "product-range",
-        "sku": "",
-        "specification": "viên · Xem quy cách tại nguồn chính hãng",
-        "imageUrl": "https://dongtamshop.com/wp-content/uploads/2025/06/POST_NGOIALPHA_1080X1080-01.jpg",
-        "sourceUrl": "https://dongtamshop.com/",
-        "publisher": "Đồng Tâm Shop",
-        "checkedAt": "2026-10-25",
-        "notes": "Ảnh giới thiệu dòng sản phẩm hoặc phối cảnh từ nguồn; chưa chốt mã màu, quy cách hay cấu hình; không dùng tự động làm texture."
       }
     },
     {
@@ -330,7 +308,7 @@
       "phone": "",
       "price": null,
       "priceDate": null,
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2021/06/6060TAMDAO006_CN-845x487.jpg",
+      "imageUrl": "https://khoinguyen.net.vn/wp-content/uploads/2022/02/6060TAMDAO006.jpg",
       "verifiedAt": "2026-10-01",
       "photoEvidence": "source-page",
       "priceStatus": "unknown",
@@ -354,6 +332,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "6060TAMDAO006",
+        "specification": "6060TAMDAO006 · m² · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://khoinguyen.net.vn/wp-content/uploads/2022/02/6060TAMDAO006.jpg",
+        "sourceUrl": "https://khoinguyen.net.vn/gach-lat-nen-gia-da-dong-tam-60x60-6060tamdao006.html",
+        "publisher": "Khôi Nguyên",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh theo mã từ nhà cung cấp; cần đối chiếu mẫu, phiên bản và lô thực trước đặt hàng. Chưa xác nhận quyền tái sử dụng hoặc texture."
       }
     },
     {
@@ -370,7 +360,7 @@
       "phone": "",
       "price": null,
       "priceDate": null,
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2023/07/6060DONGVAN0014-845x487.jpg",
+      "imageUrl": "https://images.hailinh.com.vn/uploads/shops/6060dongvan001-map1_1.jpg?w=1400%2Cq%3D80%2Cf%3Dwebp%2Ccache%3Dtrue",
       "verifiedAt": "2026-10-01",
       "photoEvidence": "source-page",
       "priceStatus": "unknown",
@@ -394,6 +384,18 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
+      },
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "6060DONGVAN001",
+        "specification": "6060DONGVAN001 · m² · Xem quy cách tại nguồn chính hãng",
+        "imageUrl": "https://images.hailinh.com.vn/uploads/shops/6060dongvan001-map1_1.jpg?w=1400%2Cq%3D80%2Cf%3Dwebp%2Ccache%3Dtrue",
+        "sourceUrl": "https://hailinh.com.vn/gach-op-lat-60x60/gach-dong-tam-6060dongvan001-6672.html",
+        "publisher": "Hải Linh",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh theo mã từ nhà cung cấp; cần đối chiếu mẫu, phiên bản và lô thực trước đặt hàng. Chưa xác nhận quyền tái sử dụng hoặc texture."
       }
     },
     {
@@ -938,7 +940,7 @@
       "name": "6060MARMOL002 - NANO",
       "spec": "600 × 600 mm; Porcelain 2 da bóng; loại AA",
       "productUrl": "https://dongtam.com.vn/san-pham/bst-db-nano/6060marmol002-nano/",
-      "imageUrl": "https://dongtam.com.vn/wp-content/uploads/2021/11/6060-8080DB032.jpg",
+      "imageUrl": "https://product.hstatic.net/200000689637/product/6060marmol002-nano_1-550x550_b54251ce4b964cdeb1ce9880e6cf525d_1024x1024.jpg",
       "price": 332000,
       "unit": "m²",
       "phone": "",
@@ -974,7 +976,19 @@
         "publishedPeriod": null,
         "notes": "Vận chuyển miễn phí Hà Nội từ 40 m², cần xác nhận điều kiện đơn hàng."
       },
-      "specification": "600 × 600 mm; Porcelain 2 da bóng; loại AA"
+      "specification": "600 × 600 mm; Porcelain 2 da bóng; loại AA",
+      "photoReference": {
+        "status": "source-matched",
+        "kind": "product-photo",
+        "sku": "6060MARMOL002",
+        "specification": "600 × 600 mm; Porcelain 2 da bóng; loại AA",
+        "imageUrl": "https://product.hstatic.net/200000689637/product/6060marmol002-nano_1-550x550_b54251ce4b964cdeb1ce9880e6cf525d_1024x1024.jpg",
+        "sourceUrl": "https://lamnghialoi.com/products/gach-porcelain-2-da-6060marmol002-nano",
+        "publisher": "Lâm Nghĩa Lợi",
+        "publisherType": "supplier",
+        "checkedAt": "2026-10-25",
+        "notes": "Ảnh theo mã từ nhà cung cấp; cần đối chiếu mẫu, phiên bản và lô thực trước đặt hàng. Chưa xác nhận quyền tái sử dụng hoặc texture."
+      }
     },
     {
       "id": "source-e6975d525b225dc3",
@@ -1391,7 +1405,7 @@
       "name": "Sơn Jotun ngoài trời Jotashield | Bền màu toàn diện",
       "spec": "theo quy cách · Xem quy cách tại nguồn chính hãng",
       "productUrl": "https://www.jotun.com/vn-vi/decorative/products/exterior/all-exterior-products/jotashield-infinity",
-      "imageUrl": "https://www.jotun.com/contentassetsjot03/3040122cdefe42d195844c0d254b042a/jotashield-infinity-gallery-01.jpg?format=webp&height=1280&quality=70&width=1024",
+      "imageUrl": "https://www.jotun.com/globalassetsjot03/129395-desktop.png",
       "price": null,
       "unit": "theo quy cách",
       "phone": "",
@@ -1422,17 +1436,6 @@
         "includesLabour": null,
         "includesTransport": null,
         "validUntil": null
-      },
-      "photoReference": {
-        "status": "source-matched",
-        "kind": "product-range",
-        "sku": "",
-        "specification": "theo quy cách · Xem quy cách tại nguồn chính hãng",
-        "imageUrl": "https://www.jotun.com/contentassetsjot03/3040122cdefe42d195844c0d254b042a/jotashield-infinity-gallery-01.jpg?format=webp&height=1280&quality=70&width=1024",
-        "sourceUrl": "https://www.jotun.com/vn-vi/decorative/products/exterior/all-exterior-products/jotashield-infinity",
-        "publisher": "Jotun",
-        "checkedAt": "2026-10-25",
-        "notes": "Ảnh giới thiệu dòng sản phẩm hoặc phối cảnh từ nguồn; chưa chốt mã màu, quy cách hay cấu hình; không dùng tự động làm texture."
       }
     },
     {
