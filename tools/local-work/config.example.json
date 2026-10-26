@@ -1,0 +1,53 @@
+{
+  "server": { "host": "127.0.0.1", "port": 4317 },
+  "projects": [
+    {
+      "id": "bmh",
+      "name": "Build My Home",
+      "repoPath": "C:/path/to/build-my-home",
+      "githubRepo": "vlam1881997-ops/build-my-home",
+      "defaultBranch": "main",
+      "testScript": "test",
+      "buildScript": "build",
+      "githubProfileDir": ""
+    }
+  ],
+  "agents": [
+    {
+      "id": "planner",
+      "name": "Planner",
+      "role": "planner",
+      "provider": "openai",
+      "model": "",
+      "apiKeyEnv": "OPENAI_API_KEY",
+      "enabled": true
+    },
+    {
+      "id": "worker-1",
+      "name": "Worker 1",
+      "role": "worker",
+      "provider": "google",
+      "model": "",
+      "apiKeyEnv": "GEMINI_API_KEY",
+      "enabled": true
+    },
+    {
+      "id": "reviewer",
+      "name": "Reviewer",
+      "role": "reviewer",
+      "provider": "anthropic",
+      "model": "",
+      "apiKeyEnv": "ANTHROPIC_API_KEY",
+      "enabled": true
+    }
+  ],
+  "workflow": {
+    "maxAgentTurns": 18,
+    "maxFilesPerList": 120,
+    "maxReadBytes": 180000,
+    "autoPush": false,
+    "autoPr": false,
+    "autoMerge": false,
+    "requireTests": true
+  }
+}
