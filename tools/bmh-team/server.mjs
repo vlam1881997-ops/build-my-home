@@ -1,14 +1,17 @@
 import http from 'node:http';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {readFile,writeFile,mkdir,access} from 'node:fs/promises';
+import {readFile,access} from 'node:fs/promises';
 import {randomBytes,timingSafeEqual} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import {CodexWorker,privateStateRoot,findCodex,findGit,scrub} from './core.mjs';
 import {TeamJob} from './jobs.mjs';
+import {loadModelSettings,saveModelSettings,validateCatalogSettings,modelSettingsWarning} from './models.mjs';
+import {SOURCE_MODE_OPTIONS,validateSourceMode} from './git-source.mjs';
+import {createJobReportStore,jobId} from './job-reports.mjs';
 
 const toolRoot=path.dirname(fileURLToPath(import.meta.url));
-const terminalStates=new Set(['ready','failed','stopped']);
+const terminalStates=new Set(['ready','published','failed','stopped']);
 export function twoAccountsReady(workers) {
   const emails=workers.map(worker=>worker.account?.email?.trim().toLowerCase());
   if(emails.some(v=>!v))throw Error('Đăng nhập cả hai tài khoản ChatGPT và chờ email hiện trên hai thẻ.');
@@ -20,9 +23,29 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
   if(codex===undefined)codex=await findCodex();
   if(git===undefined)git=await findGit();
   workers ||= ['one','two'].map(id=>new CodexWorker({id,stateRoot,codex}));
-  const token=randomBytes(32).toString('hex');let job=null;let shuttingDown=false;let runPreparing=false;let runEpoch=0;
-  const isBusy=()=>runPreparing || Boolean(job && !terminalStates.has(job.publicState.status));
-  const state=()=>({workers:workers.map(w=>w.publicState),run:job?.publicState||null,repoDefault,capabilities:{git:Boolean(git),codex:Boolean(codex),windows:process.platform==='win32'},busy:isBusy()});
+  const loadedSettings=await loadModelSettings(stateRoot);
+  let modelSettings=loadedSettings.settings;let settingsWarning=loadedSettings.warning;let settingsSaving=false;let settingsRevision=0;
+  const reports=createJobReportStore(stateRoot);
+  let recovery=null;let reportWarning=null;
+  try {const loadedRecovery=await reports.latestRecoverable();recovery=loadedRecovery?.recovery || null;if(!repoDefault && loadedRecovery)repoDefault=loadedRecovery.snapshot.repo || '';}
+  catch {reportWarning='Không đọc được tiến độ đã lưu. Các file và nhánh công việc vẫn được giữ trên máy.';}
+  const token=randomBytes(32).toString('hex');let job=null;let shuttingDown=false;let runPreparing=false;let stopPending=null;let runEpoch=0;
+  const isBusy=()=>runPreparing || Boolean(stopPending) || Boolean(job && !terminalStates.has(job.publicState.status));
+  const sourceModeDefault=/(?:^|[\\/])GitHubDesktop(?:[\\/]|$)/i.test(String(git || ''))?'desktop':'fetch';
+  const state=()=>({version:'1.2.0',workers:workers.map(w=>({...w.publicState,modelSettings:{...modelSettings[w.id]},modelSettingsWarning:modelSettingsWarning(modelSettings[w.id],w.modelCatalog)})),sourceModeOptions:SOURCE_MODE_OPTIONS,sourceModeDefault,settingsWarning,settingsRevision,run:job?.publicState||null,recovery,reportWarning,repoDefault,capabilities:{git:Boolean(git),codex:Boolean(codex),windows:process.platform==='win32'},busy:isBusy()||settingsSaving});
+  const saveReport=async update=>{
+    try {
+      await reports.save(update);reportWarning=null;
+      if(terminalStates.has(update.status) && job?.publicState.id===update.id)recovery=(await reports.latestRecoverable())?.recovery || null;
+    } catch {reportWarning='Không lưu được tiến độ để tiếp tục sau khi mở lại. Các file và nhánh đang làm vẫn được giữ trên máy.';}
+  };
+  const stopJob=async()=>{
+    if(stopPending)return stopPending;
+    if(!job || terminalStates.has(job.publicState.status))return;
+    const activeJob=job;
+    stopPending=Promise.resolve().then(async()=>{await activeJob.stop();await saveReport(activeJob.publicState);});
+    try {await stopPending;}finally {stopPending=null;}
+  };
   const json=(res,status,data)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));};
   const server=http.createServer(async(req,res)=>{
     const address=server.address();const allowedHost=`127.0.0.1:${address.port}`;const origin=`http://${allowedHost}`;
@@ -38,6 +61,24 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
         const chunks=[];let bytes=0;for await(const chunk of req){bytes+=chunk.length;if(bytes>64000)throw Error('Nội dung yêu cầu quá dài.');chunks.push(chunk);}
         const body=JSON.parse(Buffer.concat(chunks).toString('utf8')||'{}');
         const worker=workers.find(w=>w.id===body.worker);
+        if(pathname==='/api/settings'){
+          if(isBusy() || settingsSaving || shuttingDown)throw Error('Chờ nhiệm vụ kết thúc trước khi đổi model.');
+          if(!worker)throw Error('Chọn thẻ tài khoản 1 hoặc 2.');
+          const selected=validateCatalogSettings(body,worker.modelCatalog);
+          settingsSaving=true;
+          try {
+            const updated={...modelSettings,[worker.id]:selected};
+            await saveModelSettings(stateRoot,updated);
+            modelSettings=updated;settingsWarning=null;settingsRevision++;
+            return json(res,200,{ok:true,modelSettings:selected,state:{...state(),busy:isBusy()}});
+          } finally {settingsSaving=false;}
+        }
+        if(pathname==='/api/models'){
+          if(isBusy() || settingsSaving || shuttingDown)throw Error('Chờ nhiệm vụ kết thúc trước khi lấy model.');
+          if(!worker)throw Error('Chọn thẻ tài khoản 1 hoặc 2.');
+          await worker.refreshModels({force:true});
+          return json(res,200,{ok:true,state:state()});
+        }
         if(pathname==='/api/login'){
           if(isBusy())throw Error('Dừng nhiệm vụ trước khi thay đổi tài khoản.');
           if(!worker)throw Error('Chọn thẻ tài khoản 1 hoặc 2.');
@@ -50,32 +91,47 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
           if(!worker)throw Error('Tài khoản không hợp lệ.');
           await worker.logout();return json(res,200,{ok:true});
         }
-        if(pathname==='/api/run'){
-          if(isBusy())throw Error('Đang có nhiệm vụ chạy. Dừng hoặc chờ hoàn tất trước.');
+        if(pathname==='/api/run' || pathname==='/api/resume'){
+          if(isBusy() || settingsSaving || shuttingDown)throw Error('Đang có nhiệm vụ chạy hoặc cấu hình đang lưu. Chờ hoàn tất trước.');
+          if(settingsWarning)throw Error(settingsWarning);
+          const resuming=pathname==='/api/resume';
+          const sourceMode=resuming?null:validateSourceMode(body.sourceMode);
           runPreparing=true;
           const ticket=++runEpoch;
+          const runModels=structuredClone(modelSettings);
           try {
           if(!git || !codex)throw Error('Cần Git và Codex trên máy. Mở lại start.ps1 để kiểm tra cài đặt.');
           for(const w of workers)await w.refreshAccount();
           if(ticket!==runEpoch || shuttingDown)throw Error('Nhiệm vụ đã dừng trước khi bắt đầu.');
           twoAccountsReady(workers);
-          const repo=String(body.repo||repoDefault).trim().replace(/^"|"$/g,'');const goal=String(body.goal||'').trim();
+          await Promise.all(workers.map(w=>w.refreshModels({force:true})));
+          if(ticket!==runEpoch || shuttingDown)throw Error('Nhiệm vụ đã dừng trước khi bắt đầu.');
+          for(const w of workers)validateCatalogSettings(runModels[w.id],w.modelCatalog);
+          let resumeSnapshot=null;
+          if(resuming) {
+            const savedId=jobId(body.jobId);
+            if(!recovery || recovery.id!==savedId)throw Error('Công việc đã lưu đã thay đổi. Tải lại trang để chọn đúng phần cần tiếp tục.');
+            await reports.flush();resumeSnapshot=await reports.read(savedId);
+            if(!await reports.candidate(resumeSnapshot))throw Error('Không còn đủ thư mục và kế hoạch để tiếp tục tự động. Các file đã làm vẫn được giữ để xem trên nhánh cũ.');
+          }
+          const repo=String(body.repo||repoDefault).trim().replace(/^"|"$/g,'');const goal=String(resumeSnapshot?.goal || body.goal || '').trim();
           if(!path.isAbsolute(repo))throw Error('Chọn đường dẫn đầy đủ tới thư mục BMH trên máy.');
           if(goal.length<5 || goal.length>12000)throw Error('Nhập mục tiêu từ 5 đến 12.000 ký tự.');
+          if(ticket!==runEpoch || shuttingDown)throw Error('Nhiệm vụ đã dừng trước khi bắt đầu.');
           repoDefault=repo;
-          job=jobFactory({workers,repo,goal,gitCommand:git,stateRoot,onEvent:async update=>{
-            // Save task summaries only; authentication remains in Codex-managed account storage.
-            try{await mkdir(path.join(stateRoot,'reports'),{recursive:true,mode:0o700});await writeFile(path.join(stateRoot,'reports',`${update.id}.json`),JSON.stringify(update,null,2),{mode:0o600});}catch{}
-          }});
+          job=jobFactory({workers,repo,goal,gitCommand:git,stateRoot,sourceMode:resuming?(resumeSnapshot.sourceMode || 'fetch'):sourceMode,modelSettings:runModels,...(resuming?{resumeSnapshot}:{}),onEvent:saveReport});
+          recovery=null;
           for(const w of workers)w.removeAllListeners('progress');
-          for(const w of workers)w.on('progress',message=>{job?.note?.(scrub(message),w.id);});
-          Promise.resolve(job.start()).catch(()=>{});
+          const activeJob=job;
+          for(const w of workers)w.on('progress',message=>{if(job===activeJob)activeJob.note?.(scrub(message),w.id);});
+          Promise.resolve(activeJob.start()).then(()=>saveReport(activeJob.publicState)).catch(()=>{});
           return json(res,202,{ok:true,run:job.publicState});
           } finally {runPreparing=false;}
         }
         if(pathname==='/api/stop'){
           runEpoch++;
-          if(job && isBusy())await job.stop();return json(res,200,{ok:true,run:job?.publicState||null});
+          await stopJob();
+          return json(res,200,{ok:true,run:job?.publicState||null});
         }
         return json(res,404,{ok:false,error:'Không có thao tác này.'});
       }
@@ -94,8 +150,8 @@ export async function createTeamServer({stateRoot,repoDefault='',codex,git,worke
   const close=async()=>{
     if(shuttingDown)return;shuttingDown=true;
     runEpoch++;
-    if(isBusy() && job)await job.stop().catch(()=>{});
-    await Promise.all(workers.map(w=>w.close()));await new Promise(resolve=>server.close(resolve));
+    await stopJob().catch(()=>{});
+    await Promise.all(workers.map(w=>w.close()));await reports.flush().catch(()=>{});await new Promise(resolve=>server.close(resolve));
   };
   return {server,state,workers,close,token};
 }
@@ -107,14 +163,14 @@ async function main() {
   const app=await createTeamServer({repoDefault});
   await new Promise((resolve,reject)=>{app.server.once('error',reject);app.server.listen(0,'127.0.0.1',resolve);});
   const url=`http://127.0.0.1:${app.server.address().port}/`;
-  process.stdout.write(`\nBMH Team v1.0.1: ${url}\nGiữ cửa sổ này mở. Đăng nhập hai tài khoản riêng trong trang vừa mở.\n`);
+  process.stdout.write(`\nBMH Team v1.2.0: ${url}\nGiữ cửa sổ này mở. Chọn model trong danh sách Codex của từng tài khoản rồi giao việc hoặc tiếp tục phần đã lưu.\n`);
   if(!args.includes('--no-browser')){
     const command=process.platform==='win32'?'rundll32.exe':process.platform==='darwin'?'open':'xdg-open';
     const openArgs=process.platform==='win32'?['url.dll,FileProtocolHandler',url]:[url];
     const browser=spawn(command,openArgs,{stdio:'ignore',windowsHide:true});browser.on('error',()=>{});
   }
   for(const worker of app.workers)worker.start().catch(e=>{worker.error=scrub(e.message);worker.changed();});
-  const refresh=setInterval(()=>{for(const w of app.workers)if(!w.current && !w.loginInfo)w.refreshAccount().catch(()=>{});},15000);
+  const refresh=setInterval(()=>{for(const w of app.workers)if(!w.current && !w.loginInfo)w.refreshAccount().then(()=>{if(w.account && w.modelCatalog.status==='idle')return w.refreshModels();}).catch(()=>{});},15000);
   refresh.unref();
   for(const signal of ['SIGINT','SIGTERM'])process.once(signal,()=>{clearInterval(refresh);app.close().finally(()=>process.exit(0));});
 }

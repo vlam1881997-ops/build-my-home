@@ -71,7 +71,7 @@ function Stop-WithMessage([string]$Message) {
 }
 
 Write-Host ""
-Write-Host "BMH Team v1.0.1 - Two ChatGPT accounts, one local project" -ForegroundColor Cyan
+Write-Host "BMH Team v1.2.0 - Two ChatGPT accounts, one local project" -ForegroundColor Cyan
 Write-Host "Keep this window open while using the dashboard."
 
 $bmhNode = Find-Executable "node"
@@ -91,7 +91,7 @@ if ($LASTEXITCODE -ne 0 -or @("x64", "arm64") -notcontains $bmhNodeArch) {
 }
 $bmhProbeScript = Join-Path $PSScriptRoot "runtime.mjs"
 if (-not (Test-Path -LiteralPath $bmhProbeScript)) {
-  Stop-WithMessage "runtime.mjs is missing. Extract the complete BMH Team v1.0.1 package before starting it."
+  Stop-WithMessage "runtime.mjs is missing. Extract the complete BMH Team v1.2.0 package before starting it."
 }
 
 $bmhGit = Find-Executable "git"
@@ -109,9 +109,10 @@ if (-not $bmhGit) {
   Stop-WithMessage "Install GitHub Desktop (https://desktop.github.com) or Git for Windows (https://git-scm.com), then run this launcher again."
 }
 $env:BMH_TEAM_GIT = $bmhGit
+Write-Host "Git: $bmhGit"
 $env:PATH = "$(Split-Path -Parent $bmhGit);$env:PATH"
 
-$bmhPinnedVersion = "0.158.0"
+$bmhPinnedVersion = "0.160.0"
 $bmhRuntimeRoot = if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA "BMHTeam\runtime" } else { Join-Path $PSScriptRoot ".runtime" }
 $bmhCodexPrefix = Join-Path $bmhRuntimeRoot "codex-$bmhPinnedVersion"
 $bmhPrivateCodex = Join-Path $bmhCodexPrefix "codex.cmd"

@@ -5,7 +5,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {isolatedEnvironment, killTree, scrub} from './core.mjs';
 
-const PINNED_VERSION = '0.158.0';
+const PINNED_VERSION = '0.160.0';
 const diagnostic = value => scrub(value).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '');
 
 // Only specs for the official package/version shipped with this release can
